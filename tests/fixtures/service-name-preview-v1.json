@@ -1,0 +1,983 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-service-client-targets",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Service names and transport",
+      "unit": "linux-service-names",
+      "title": "Connect the intended service, not just an open port",
+      "summary": "Compare name lookups with supplied listener facts and repair three virtual clients.",
+      "objective": "Configure lookup to reach the supplied resolver, report-client to reach reports, and admin to reach remote. Use the supplied transport and destination for each role; names, aliases or decimal ports are accepted. Keep the reference file unchanged and pass both available-listener and unavailable-listener cases.",
+      "retry_guidance": "Read the required destination and actual protocol/port beside the failing case. Check the saved name mapping, correct only the relevant field or record, then retry.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "steps": [
+        "Inspect the supplied name database and listener facts",
+        "Repair the client settings",
+        "Check destination, delivery and unavailable-listener behavior"
+      ],
+      "guide": [],
+      "explanation": "A service name resolves to a protocol-specific port; it does not choose a server or start a process. The supplied server accepts resolver requests only on UDP 53, reports on TCP 8080 and remote access on TCP 22. DNS can use TCP as well as UDP in real systems; this fixture deliberately supplies only the UDP listener. A successful lookup is different from reaching the intended listener, and an unavailable listener can coexist with a correct mapping.",
+      "hints": [
+        "Run getent services domain/tcp and getent services domain/udp. Both names exist, but this fixture supplies only one resolver listener.",
+        "A custom service can use a nondefault port: compare reports-demo with the supplied reports listener.",
+        "Choose TCP or UDP separately from the service field. Names are case-sensitive; a decimal port bypasses name lookup."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.sourceware.org/glibc/manual/latest/html_node/Services-Database.html",
+        "https://man7.org/linux/man-pages/man5/services.5.html",
+        "https://man7.org/linux/man-pages/man1/getent.1.html"
+      ],
+      "simplifications": "Supplied virtual /etc/services only, not the host NSS database. Bounded case-sensitive ASCII names, distinct per-protocol names/ports, TCP/UDP only; unsupported records and shell syntax are diagnosed. The read-only terminal supports cat /etc/services and literal getent services queries; help is a simulator helper. Source-held IPv4 listeners and finite opaque TCP/UDP payload delivery use the existing transport reducer. No real sockets, process lookup, network, application messages, DNS resolution, TLS, retransmission, timing or service lifecycle. A successful lookup or payload is not application interoperability. Port assignments shown are a limited subset, not complete LPIC-1 objective coverage.",
+      "initial": {
+        "kind": "ServiceClients",
+        "simulation": {
+          "version": 1,
+          "source": {
+            "initial": {
+              "version": 1,
+              "id": "lpic1-service-client-targets",
+              "mode": "clients",
+              "profile": {
+                "version": 1,
+                "client": "192.0.2.10",
+                "server": "192.0.2.20",
+                "listeners": [
+                  {
+                    "role": "resolver",
+                    "protocol": "udp",
+                    "port": 53
+                  },
+                  {
+                    "role": "reports",
+                    "protocol": "tcp",
+                    "port": 8080
+                  },
+                  {
+                    "role": "remote",
+                    "protocol": "tcp",
+                    "port": 22
+                  }
+                ]
+              },
+              "initial_database": "ssh 22/tcp secure-shell\nhttp 80/tcp www\nhttps 443/tcp\nreports-demo 8080/tcp reports\ndomain 53/tcp\ndomain 53/udp dns\n",
+              "required_database": "ssh 22/tcp secure-shell\nhttp 80/tcp www\nhttps 443/tcp\nreports-demo 8080/tcp reports\ndomain 53/tcp\ndomain 53/udp dns\n",
+              "initial_clients": [
+                {
+                  "id": "lookup",
+                  "protocol": "tcp",
+                  "service": "domain"
+                },
+                {
+                  "id": "report-client",
+                  "protocol": "tcp",
+                  "service": "http"
+                },
+                {
+                  "id": "admin",
+                  "protocol": "udp",
+                  "service": "ssh"
+                }
+              ],
+              "required_clients": [
+                {
+                  "id": "lookup",
+                  "protocol": "udp",
+                  "service": "domain"
+                },
+                {
+                  "id": "report-client",
+                  "protocol": "tcp",
+                  "service": "reports-demo"
+                },
+                {
+                  "id": "admin",
+                  "protocol": "tcp",
+                  "service": "ssh"
+                }
+              ],
+              "requests": [
+                {
+                  "id": "lookup-available",
+                  "label": "lookup · listener available",
+                  "client": "lookup",
+                  "required_role": "resolver",
+                  "payload": "assignment-lookup-A",
+                  "disabled_roles": []
+                },
+                {
+                  "id": "lookup-unavailable",
+                  "label": "lookup · supplied listener outage",
+                  "client": "lookup",
+                  "required_role": "resolver",
+                  "payload": "assignment-lookup-B",
+                  "disabled_roles": [
+                    "resolver"
+                  ]
+                },
+                {
+                  "id": "report-client-available",
+                  "label": "report-client · listener available",
+                  "client": "report-client",
+                  "required_role": "reports",
+                  "payload": "assignment-report-client-A",
+                  "disabled_roles": []
+                },
+                {
+                  "id": "report-client-unavailable",
+                  "label": "report-client · supplied listener outage",
+                  "client": "report-client",
+                  "required_role": "reports",
+                  "payload": "assignment-report-client-B",
+                  "disabled_roles": [
+                    "reports"
+                  ]
+                },
+                {
+                  "id": "admin-available",
+                  "label": "admin · listener available",
+                  "client": "admin",
+                  "required_role": "remote",
+                  "payload": "assignment-admin-A",
+                  "disabled_roles": []
+                },
+                {
+                  "id": "admin-unavailable",
+                  "label": "admin · supplied listener outage",
+                  "client": "admin",
+                  "required_role": "remote",
+                  "payload": "assignment-admin-B",
+                  "disabled_roles": [
+                    "remote"
+                  ]
+                }
+              ]
+            },
+            "example": {
+              "version": 1,
+              "id": "lpic1-service-client-targets-example",
+              "mode": "clients",
+              "profile": {
+                "version": 1,
+                "client": "198.51.100.10",
+                "server": "198.51.100.20",
+                "listeners": [
+                  {
+                    "role": "web",
+                    "protocol": "tcp",
+                    "port": 80
+                  },
+                  {
+                    "role": "clock",
+                    "protocol": "udp",
+                    "port": 123
+                  },
+                  {
+                    "role": "remote",
+                    "protocol": "tcp",
+                    "port": 22
+                  }
+                ]
+              },
+              "initial_database": "http 80/tcp www\nntp 123/udp time-sync\nssh 22/tcp\n",
+              "required_database": "http 80/tcp www\nntp 123/udp time-sync\nssh 22/tcp\n",
+              "initial_clients": [
+                {
+                  "id": "browser",
+                  "protocol": "tcp",
+                  "service": "ssh"
+                },
+                {
+                  "id": "time-client",
+                  "protocol": "tcp",
+                  "service": "ntp"
+                }
+              ],
+              "required_clients": [
+                {
+                  "id": "browser",
+                  "protocol": "tcp",
+                  "service": "www"
+                },
+                {
+                  "id": "time-client",
+                  "protocol": "udp",
+                  "service": "ntp"
+                }
+              ],
+              "requests": [
+                {
+                  "id": "browser-available",
+                  "label": "browser · listener available",
+                  "client": "browser",
+                  "required_role": "web",
+                  "payload": "sample-browser-A",
+                  "disabled_roles": []
+                },
+                {
+                  "id": "browser-unavailable",
+                  "label": "browser · supplied listener outage",
+                  "client": "browser",
+                  "required_role": "web",
+                  "payload": "sample-browser-B",
+                  "disabled_roles": [
+                    "web"
+                  ]
+                },
+                {
+                  "id": "time-client-available",
+                  "label": "time-client · listener available",
+                  "client": "time-client",
+                  "required_role": "clock",
+                  "payload": "sample-time-client-A",
+                  "disabled_roles": []
+                },
+                {
+                  "id": "time-client-unavailable",
+                  "label": "time-client · supplied listener outage",
+                  "client": "time-client",
+                  "required_role": "clock",
+                  "payload": "sample-time-client-B",
+                  "disabled_roles": [
+                    "clock"
+                  ]
+                }
+              ]
+            }
+          },
+          "view": "introduction",
+          "practice": {
+            "task_id": "lpic1-service-client-targets-example",
+            "editor": "http 80/tcp www\nntp 123/udp time-sync\nssh 22/tcp\n",
+            "saved_database": "http 80/tcp www\nntp 123/udp time-sync\nssh 22/tcp\n",
+            "clients": [
+              {
+                "id": "browser",
+                "protocol": "tcp",
+                "service": "ssh"
+              },
+              {
+                "id": "time-client",
+                "protocol": "tcp",
+                "service": "ntp"
+              }
+            ],
+            "checked_stamp": null,
+            "terminal_input": "",
+            "transcript": ""
+          },
+          "assignment": {
+            "task_id": "lpic1-service-client-targets",
+            "editor": "ssh 22/tcp secure-shell\nhttp 80/tcp www\nhttps 443/tcp\nreports-demo 8080/tcp reports\ndomain 53/tcp\ndomain 53/udp dns\n",
+            "saved_database": "ssh 22/tcp secure-shell\nhttp 80/tcp www\nhttps 443/tcp\nreports-demo 8080/tcp reports\ndomain 53/tcp\ndomain 53/udp dns\n",
+            "clients": [
+              {
+                "id": "lookup",
+                "protocol": "tcp",
+                "service": "domain"
+              },
+              {
+                "id": "report-client",
+                "protocol": "tcp",
+                "service": "http"
+              },
+              {
+                "id": "admin",
+                "protocol": "udp",
+                "service": "ssh"
+              }
+            ],
+            "checked_stamp": null,
+            "terminal_input": "",
+            "transcript": ""
+          }
+        }
+      },
+      "goal": {
+        "kind": "ServiceClients",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "id": "lpic1-service-client-targets",
+            "mode": "clients",
+            "profile": {
+              "version": 1,
+              "client": "192.0.2.10",
+              "server": "192.0.2.20",
+              "listeners": [
+                {
+                  "role": "resolver",
+                  "protocol": "udp",
+                  "port": 53
+                },
+                {
+                  "role": "reports",
+                  "protocol": "tcp",
+                  "port": 8080
+                },
+                {
+                  "role": "remote",
+                  "protocol": "tcp",
+                  "port": 22
+                }
+              ]
+            },
+            "initial_database": "ssh 22/tcp secure-shell\nhttp 80/tcp www\nhttps 443/tcp\nreports-demo 8080/tcp reports\ndomain 53/tcp\ndomain 53/udp dns\n",
+            "required_database": "ssh 22/tcp secure-shell\nhttp 80/tcp www\nhttps 443/tcp\nreports-demo 8080/tcp reports\ndomain 53/tcp\ndomain 53/udp dns\n",
+            "initial_clients": [
+              {
+                "id": "lookup",
+                "protocol": "tcp",
+                "service": "domain"
+              },
+              {
+                "id": "report-client",
+                "protocol": "tcp",
+                "service": "http"
+              },
+              {
+                "id": "admin",
+                "protocol": "udp",
+                "service": "ssh"
+              }
+            ],
+            "required_clients": [
+              {
+                "id": "lookup",
+                "protocol": "udp",
+                "service": "domain"
+              },
+              {
+                "id": "report-client",
+                "protocol": "tcp",
+                "service": "reports-demo"
+              },
+              {
+                "id": "admin",
+                "protocol": "tcp",
+                "service": "ssh"
+              }
+            ],
+            "requests": [
+              {
+                "id": "lookup-available",
+                "label": "lookup · listener available",
+                "client": "lookup",
+                "required_role": "resolver",
+                "payload": "assignment-lookup-A",
+                "disabled_roles": []
+              },
+              {
+                "id": "lookup-unavailable",
+                "label": "lookup · supplied listener outage",
+                "client": "lookup",
+                "required_role": "resolver",
+                "payload": "assignment-lookup-B",
+                "disabled_roles": [
+                  "resolver"
+                ]
+              },
+              {
+                "id": "report-client-available",
+                "label": "report-client · listener available",
+                "client": "report-client",
+                "required_role": "reports",
+                "payload": "assignment-report-client-A",
+                "disabled_roles": []
+              },
+              {
+                "id": "report-client-unavailable",
+                "label": "report-client · supplied listener outage",
+                "client": "report-client",
+                "required_role": "reports",
+                "payload": "assignment-report-client-B",
+                "disabled_roles": [
+                  "reports"
+                ]
+              },
+              {
+                "id": "admin-available",
+                "label": "admin · listener available",
+                "client": "admin",
+                "required_role": "remote",
+                "payload": "assignment-admin-A",
+                "disabled_roles": []
+              },
+              {
+                "id": "admin-unavailable",
+                "label": "admin · supplied listener outage",
+                "client": "admin",
+                "required_role": "remote",
+                "payload": "assignment-admin-B",
+                "disabled_roles": [
+                  "remote"
+                ]
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "id": "lpic1-service-client-targets-example",
+            "mode": "clients",
+            "profile": {
+              "version": 1,
+              "client": "198.51.100.10",
+              "server": "198.51.100.20",
+              "listeners": [
+                {
+                  "role": "web",
+                  "protocol": "tcp",
+                  "port": 80
+                },
+                {
+                  "role": "clock",
+                  "protocol": "udp",
+                  "port": 123
+                },
+                {
+                  "role": "remote",
+                  "protocol": "tcp",
+                  "port": 22
+                }
+              ]
+            },
+            "initial_database": "http 80/tcp www\nntp 123/udp time-sync\nssh 22/tcp\n",
+            "required_database": "http 80/tcp www\nntp 123/udp time-sync\nssh 22/tcp\n",
+            "initial_clients": [
+              {
+                "id": "browser",
+                "protocol": "tcp",
+                "service": "ssh"
+              },
+              {
+                "id": "time-client",
+                "protocol": "tcp",
+                "service": "ntp"
+              }
+            ],
+            "required_clients": [
+              {
+                "id": "browser",
+                "protocol": "tcp",
+                "service": "www"
+              },
+              {
+                "id": "time-client",
+                "protocol": "udp",
+                "service": "ntp"
+              }
+            ],
+            "requests": [
+              {
+                "id": "browser-available",
+                "label": "browser · listener available",
+                "client": "browser",
+                "required_role": "web",
+                "payload": "sample-browser-A",
+                "disabled_roles": []
+              },
+              {
+                "id": "browser-unavailable",
+                "label": "browser · supplied listener outage",
+                "client": "browser",
+                "required_role": "web",
+                "payload": "sample-browser-B",
+                "disabled_roles": [
+                  "web"
+                ]
+              },
+              {
+                "id": "time-client-available",
+                "label": "time-client · listener available",
+                "client": "time-client",
+                "required_role": "clock",
+                "payload": "sample-time-client-A",
+                "disabled_roles": []
+              },
+              {
+                "id": "time-client-unavailable",
+                "label": "time-client · supplied listener outage",
+                "client": "time-client",
+                "required_role": "clock",
+                "payload": "sample-time-client-B",
+                "disabled_roles": [
+                  "clock"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "@service-clients {\"action\":\"configure\",\"client\":\"lookup\",\"protocol\":\"udp\",\"service\":\"domain\"}",
+        "@service-clients {\"action\":\"configure\",\"client\":\"report-client\",\"protocol\":\"tcp\",\"service\":\"reports-demo\"}",
+        "@service-clients {\"action\":\"configure\",\"client\":\"admin\",\"protocol\":\"tcp\",\"service\":\"ssh\"}",
+        "@service-clients {\"action\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic1-host-handover"
+      ]
+    },
+    {
+      "id": "lpic1-services-file-repair",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Service names and transport",
+      "unit": "linux-service-names",
+      "title": "Repair service names without moving the server",
+      "summary": "Correct a misleading name database while preserving unrelated service meanings.",
+      "objective": "Repair the virtual /etc/services mappings so admin reaches remote and report-client reaches reports. Keep all other supplied canonical names and aliases resolving to their original protocol and port. Save the file and verify both available-listener and unavailable-listener cases; leave client settings unchanged.",
+      "retry_guidance": "Read the required destination and actual protocol/port beside the failing case. Check the saved name mapping, correct only the relevant field or record, then retry.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Inspect the supplied name database and listener facts",
+        "Repair and save the virtual services file",
+        "Check destination, delivery and unavailable-listener behavior"
+      ],
+      "guide": [],
+      "explanation": "Both wrong mappings point at other open TCP ports. A payload can therefore arrive at the wrong destination. Repairing ssh/secure-shell to 22 and reports-demo/reports to 8080 fixes name resolution while preserving unrelated entries. Saving the virtual file changes the next lookup; it does not move, start or restart a server. Formatting, comments and record order need not match one sample solution.",
+      "hints": [
+        "Run getent services ssh/tcp and getent services reports/tcp; compare each with the supplied destination role.",
+        "Correct the port/protocol fields in the virtual editor, preserving names and aliases. Save before running a new lookup.",
+        "Reaching any open port is insufficient. Check that each client selects its required role and that unrelated names retain their meanings."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.sourceware.org/glibc/manual/latest/html_node/Services-Database.html",
+        "https://man7.org/linux/man-pages/man5/services.5.html",
+        "https://man7.org/linux/man-pages/man1/getent.1.html"
+      ],
+      "simplifications": "Supplied virtual /etc/services only, not the host NSS database. Bounded case-sensitive ASCII names, distinct per-protocol names/ports, TCP/UDP only; unsupported records and shell syntax are diagnosed. The read-only terminal supports cat /etc/services and literal getent services queries; help is a simulator helper. Source-held IPv4 listeners and finite opaque TCP/UDP payload delivery use the existing transport reducer. No real sockets, process lookup, network, application messages, DNS resolution, TLS, retransmission, timing or service lifecycle. A successful lookup or payload is not application interoperability. Port assignments shown are a limited subset, not complete LPIC-1 objective coverage.",
+      "initial": {
+        "kind": "ServiceClients",
+        "simulation": {
+          "version": 1,
+          "source": {
+            "initial": {
+              "version": 1,
+              "id": "lpic1-services-file-repair",
+              "mode": "database",
+              "profile": {
+                "version": 1,
+                "client": "192.0.2.10",
+                "server": "192.0.2.20",
+                "listeners": [
+                  {
+                    "role": "resolver",
+                    "protocol": "udp",
+                    "port": 53
+                  },
+                  {
+                    "role": "reports",
+                    "protocol": "tcp",
+                    "port": 8080
+                  },
+                  {
+                    "role": "remote",
+                    "protocol": "tcp",
+                    "port": 22
+                  }
+                ]
+              },
+              "initial_database": "ssh 8080/tcp secure-shell\nhttp 80/tcp www\nhttps 443/tcp\nreports-demo 22/tcp reports\ndomain 53/tcp\ndomain 53/udp dns\n",
+              "required_database": "ssh 22/tcp secure-shell\nhttp 80/tcp www\nhttps 443/tcp\nreports-demo 8080/tcp reports\ndomain 53/tcp\ndomain 53/udp dns\n",
+              "initial_clients": [
+                {
+                  "id": "admin",
+                  "protocol": "tcp",
+                  "service": "ssh"
+                },
+                {
+                  "id": "report-client",
+                  "protocol": "tcp",
+                  "service": "reports"
+                }
+              ],
+              "required_clients": [
+                {
+                  "id": "admin",
+                  "protocol": "tcp",
+                  "service": "ssh"
+                },
+                {
+                  "id": "report-client",
+                  "protocol": "tcp",
+                  "service": "reports"
+                }
+              ],
+              "requests": [
+                {
+                  "id": "admin-available",
+                  "label": "admin · listener available",
+                  "client": "admin",
+                  "required_role": "remote",
+                  "payload": "assignment-admin-A",
+                  "disabled_roles": []
+                },
+                {
+                  "id": "admin-unavailable",
+                  "label": "admin · supplied listener outage",
+                  "client": "admin",
+                  "required_role": "remote",
+                  "payload": "assignment-admin-B",
+                  "disabled_roles": [
+                    "remote"
+                  ]
+                },
+                {
+                  "id": "report-client-available",
+                  "label": "report-client · listener available",
+                  "client": "report-client",
+                  "required_role": "reports",
+                  "payload": "assignment-report-client-A",
+                  "disabled_roles": []
+                },
+                {
+                  "id": "report-client-unavailable",
+                  "label": "report-client · supplied listener outage",
+                  "client": "report-client",
+                  "required_role": "reports",
+                  "payload": "assignment-report-client-B",
+                  "disabled_roles": [
+                    "reports"
+                  ]
+                }
+              ]
+            },
+            "example": {
+              "version": 1,
+              "id": "lpic1-services-file-repair-example",
+              "mode": "database",
+              "profile": {
+                "version": 1,
+                "client": "198.51.100.10",
+                "server": "198.51.100.20",
+                "listeners": [
+                  {
+                    "role": "web",
+                    "protocol": "tcp",
+                    "port": 80
+                  },
+                  {
+                    "role": "clock",
+                    "protocol": "udp",
+                    "port": 123
+                  },
+                  {
+                    "role": "remote",
+                    "protocol": "tcp",
+                    "port": 22
+                  }
+                ]
+              },
+              "initial_database": "http 22/tcp www\nntp 123/udp time-sync\nssh 80/tcp\n",
+              "required_database": "http 80/tcp www\nntp 123/udp time-sync\nssh 22/tcp\n",
+              "initial_clients": [
+                {
+                  "id": "browser",
+                  "protocol": "tcp",
+                  "service": "www"
+                },
+                {
+                  "id": "time-client",
+                  "protocol": "udp",
+                  "service": "ntp"
+                }
+              ],
+              "required_clients": [
+                {
+                  "id": "browser",
+                  "protocol": "tcp",
+                  "service": "www"
+                },
+                {
+                  "id": "time-client",
+                  "protocol": "udp",
+                  "service": "ntp"
+                }
+              ],
+              "requests": [
+                {
+                  "id": "browser-available",
+                  "label": "browser · listener available",
+                  "client": "browser",
+                  "required_role": "web",
+                  "payload": "sample-browser-A",
+                  "disabled_roles": []
+                },
+                {
+                  "id": "browser-unavailable",
+                  "label": "browser · supplied listener outage",
+                  "client": "browser",
+                  "required_role": "web",
+                  "payload": "sample-browser-B",
+                  "disabled_roles": [
+                    "web"
+                  ]
+                },
+                {
+                  "id": "time-client-available",
+                  "label": "time-client · listener available",
+                  "client": "time-client",
+                  "required_role": "clock",
+                  "payload": "sample-time-client-A",
+                  "disabled_roles": []
+                },
+                {
+                  "id": "time-client-unavailable",
+                  "label": "time-client · supplied listener outage",
+                  "client": "time-client",
+                  "required_role": "clock",
+                  "payload": "sample-time-client-B",
+                  "disabled_roles": [
+                    "clock"
+                  ]
+                }
+              ]
+            }
+          },
+          "view": "introduction",
+          "practice": {
+            "task_id": "lpic1-services-file-repair-example",
+            "editor": "http 22/tcp www\nntp 123/udp time-sync\nssh 80/tcp\n",
+            "saved_database": "http 22/tcp www\nntp 123/udp time-sync\nssh 80/tcp\n",
+            "clients": [
+              {
+                "id": "browser",
+                "protocol": "tcp",
+                "service": "www"
+              },
+              {
+                "id": "time-client",
+                "protocol": "udp",
+                "service": "ntp"
+              }
+            ],
+            "checked_stamp": null,
+            "terminal_input": "",
+            "transcript": ""
+          },
+          "assignment": {
+            "task_id": "lpic1-services-file-repair",
+            "editor": "ssh 8080/tcp secure-shell\nhttp 80/tcp www\nhttps 443/tcp\nreports-demo 22/tcp reports\ndomain 53/tcp\ndomain 53/udp dns\n",
+            "saved_database": "ssh 8080/tcp secure-shell\nhttp 80/tcp www\nhttps 443/tcp\nreports-demo 22/tcp reports\ndomain 53/tcp\ndomain 53/udp dns\n",
+            "clients": [
+              {
+                "id": "admin",
+                "protocol": "tcp",
+                "service": "ssh"
+              },
+              {
+                "id": "report-client",
+                "protocol": "tcp",
+                "service": "reports"
+              }
+            ],
+            "checked_stamp": null,
+            "terminal_input": "",
+            "transcript": ""
+          }
+        }
+      },
+      "goal": {
+        "kind": "ServiceClients",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "id": "lpic1-services-file-repair",
+            "mode": "database",
+            "profile": {
+              "version": 1,
+              "client": "192.0.2.10",
+              "server": "192.0.2.20",
+              "listeners": [
+                {
+                  "role": "resolver",
+                  "protocol": "udp",
+                  "port": 53
+                },
+                {
+                  "role": "reports",
+                  "protocol": "tcp",
+                  "port": 8080
+                },
+                {
+                  "role": "remote",
+                  "protocol": "tcp",
+                  "port": 22
+                }
+              ]
+            },
+            "initial_database": "ssh 8080/tcp secure-shell\nhttp 80/tcp www\nhttps 443/tcp\nreports-demo 22/tcp reports\ndomain 53/tcp\ndomain 53/udp dns\n",
+            "required_database": "ssh 22/tcp secure-shell\nhttp 80/tcp www\nhttps 443/tcp\nreports-demo 8080/tcp reports\ndomain 53/tcp\ndomain 53/udp dns\n",
+            "initial_clients": [
+              {
+                "id": "admin",
+                "protocol": "tcp",
+                "service": "ssh"
+              },
+              {
+                "id": "report-client",
+                "protocol": "tcp",
+                "service": "reports"
+              }
+            ],
+            "required_clients": [
+              {
+                "id": "admin",
+                "protocol": "tcp",
+                "service": "ssh"
+              },
+              {
+                "id": "report-client",
+                "protocol": "tcp",
+                "service": "reports"
+              }
+            ],
+            "requests": [
+              {
+                "id": "admin-available",
+                "label": "admin · listener available",
+                "client": "admin",
+                "required_role": "remote",
+                "payload": "assignment-admin-A",
+                "disabled_roles": []
+              },
+              {
+                "id": "admin-unavailable",
+                "label": "admin · supplied listener outage",
+                "client": "admin",
+                "required_role": "remote",
+                "payload": "assignment-admin-B",
+                "disabled_roles": [
+                  "remote"
+                ]
+              },
+              {
+                "id": "report-client-available",
+                "label": "report-client · listener available",
+                "client": "report-client",
+                "required_role": "reports",
+                "payload": "assignment-report-client-A",
+                "disabled_roles": []
+              },
+              {
+                "id": "report-client-unavailable",
+                "label": "report-client · supplied listener outage",
+                "client": "report-client",
+                "required_role": "reports",
+                "payload": "assignment-report-client-B",
+                "disabled_roles": [
+                  "reports"
+                ]
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "id": "lpic1-services-file-repair-example",
+            "mode": "database",
+            "profile": {
+              "version": 1,
+              "client": "198.51.100.10",
+              "server": "198.51.100.20",
+              "listeners": [
+                {
+                  "role": "web",
+                  "protocol": "tcp",
+                  "port": 80
+                },
+                {
+                  "role": "clock",
+                  "protocol": "udp",
+                  "port": 123
+                },
+                {
+                  "role": "remote",
+                  "protocol": "tcp",
+                  "port": 22
+                }
+              ]
+            },
+            "initial_database": "http 22/tcp www\nntp 123/udp time-sync\nssh 80/tcp\n",
+            "required_database": "http 80/tcp www\nntp 123/udp time-sync\nssh 22/tcp\n",
+            "initial_clients": [
+              {
+                "id": "browser",
+                "protocol": "tcp",
+                "service": "www"
+              },
+              {
+                "id": "time-client",
+                "protocol": "udp",
+                "service": "ntp"
+              }
+            ],
+            "required_clients": [
+              {
+                "id": "browser",
+                "protocol": "tcp",
+                "service": "www"
+              },
+              {
+                "id": "time-client",
+                "protocol": "udp",
+                "service": "ntp"
+              }
+            ],
+            "requests": [
+              {
+                "id": "browser-available",
+                "label": "browser · listener available",
+                "client": "browser",
+                "required_role": "web",
+                "payload": "sample-browser-A",
+                "disabled_roles": []
+              },
+              {
+                "id": "browser-unavailable",
+                "label": "browser · supplied listener outage",
+                "client": "browser",
+                "required_role": "web",
+                "payload": "sample-browser-B",
+                "disabled_roles": [
+                  "web"
+                ]
+              },
+              {
+                "id": "time-client-available",
+                "label": "time-client · listener available",
+                "client": "time-client",
+                "required_role": "clock",
+                "payload": "sample-time-client-A",
+                "disabled_roles": []
+              },
+              {
+                "id": "time-client-unavailable",
+                "label": "time-client · supplied listener outage",
+                "client": "time-client",
+                "required_role": "clock",
+                "payload": "sample-time-client-B",
+                "disabled_roles": [
+                  "clock"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "@service-clients {\"action\":\"edit\",\"database\":\"ssh 22/tcp secure-shell\\nhttp 80/tcp www\\nhttps 443/tcp\\nreports-demo 8080/tcp reports\\ndomain 53/tcp\\ndomain 53/udp dns\\n\"}",
+        "@service-clients {\"action\":\"save\"}",
+        "@service-clients {\"action\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic1-service-client-targets"
+      ]
+    }
+  ]
+}

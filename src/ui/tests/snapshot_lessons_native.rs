@@ -19,7 +19,11 @@ fn tick(
     a: &mut LabApp,
     window: &mut Window,
     time: f64,
-) -> (Option<String>, egui::FullOutput) {
+) -> (
+    Option<String>,
+    egui::FullOutput,
+    Option<lesson_presentation::paint::Rows>,
+) {
     let events = std::mem::take(&mut a.pending_events);
     let modifiers = events
         .iter()
@@ -52,8 +56,18 @@ fn tick(
         .unwrap()
         .fullscreen = Some(window.fullscreen);
     let mut capture = None;
+    let mut assignment_layout = None;
     let output = ctx.run(input, |ctx| {
         a.render(ctx);
+        if let Some(i) = a.selected
+            && let Some(viewport) = a.metrics.main_viewport
+        {
+            assignment_layout = lesson_presentation::paint::collect(
+                ctx,
+                &a.scenarios[i],
+                viewport.intersect(ctx.content_rect()),
+            );
+        }
         a.save();
         let (advance, shot) = a.snapshot_lessons_native(ctx, a.smoke_stage);
         if advance {
@@ -77,7 +91,7 @@ fn tick(
             }
         }
     }
-    (capture, output)
+    (capture, output, assignment_layout)
 }
 fn full_progress(p: &Progress) -> serde_json::Value {
     let mut v = serde_json::to_value(p).unwrap();
@@ -148,8 +162,19 @@ fn focused_snapshot_native_route_uses_real_edit_run_stop_reset_continue_and_ever
     let mut ended = false;
     let mut settings = std::collections::BTreeSet::new();
     for frame in 0..30_000 {
-        let goal_before = route::goal_stage(a.smoke_stage).then(|| full_progress(&a.progress));
-        let (shot, output) = tick(&ctx, &mut a, &mut window, frame as f64 * 0.05);
+        let goal_step = route::goal_stage(a.smoke_stage);
+        let goal_before = goal_step.then(|| full_progress(&a.progress));
+        let (shot, output, assignment_layout) =
+            tick(&ctx, &mut a, &mut window, frame as f64 * 0.05);
+        if goal_step && let Some(rows) = assignment_layout.as_ref() {
+            let source = &a.scenarios[a.selected.unwrap()];
+            let actual = lesson_presentation::paint::output_evidence(&ctx, source, rows, &output);
+            lesson_presentation::paint::observe(
+                &ctx,
+                lesson_presentation::paint::output_proof_key(&ctx, source),
+                &actual,
+            );
+        }
         if let Some(before) = goal_before {
             assert_eq!(
                 full_progress(&a.progress),
@@ -172,39 +197,29 @@ fn focused_snapshot_native_route_uses_real_edit_run_stop_reset_continue_and_ever
             let id = a.scenarios[i].id.clone();
             assert!(route::IDS.contains(&id.as_str()));
             if name.contains("whole-assignment") || name.contains("goal200") {
-                let task = &a.scenarios[i].objective;
-                let viewport = a
-                    .metrics
-                    .main_viewport
-                    .unwrap()
-                    .intersect(ctx.content_rect());
-                let found = output
-                    .shapes
-                    .iter()
-                    .find_map(|s| {
-                        painted_rows(&s.shape, task)
-                            .map(|rows| (rows, s.clip_rect.intersect(viewport)))
-                    })
-                    .expect("Actual capture must paint the full nonelided task galley");
-                let tolerance = 1. / ctx.pixels_per_point();
-                assert!(
-                    found
-                        .0
-                        .iter()
-                        .all(|r| r.left() >= found.1.left() - tolerance
-                            && r.right() <= found.1.right() + tolerance),
-                    "All task galley rows fit horizontally; vertical edge rows are separate captures"
+                let rows = assignment_layout
+                    .as_ref()
+                    .expect("Actual capture retains complete current-pass assignment layout");
+                let last = name.ends_with("bottom");
+                let actual = lesson_presentation::paint::assert_output_edge(
+                    &ctx,
+                    &a.scenarios[i],
+                    rows,
+                    &output,
+                    last,
+                    false,
                 );
-                let row = if name.ends_with("bottom") {
-                    *found.0.last().unwrap()
-                } else {
-                    found.0[0]
-                };
-                assert!(smoke::smoke_control_visible(
-                    row,
-                    found.1,
-                    ctx.pixels_per_point()
-                ));
+                let proof = lesson_presentation::paint::observe(
+                    &ctx,
+                    lesson_presentation::paint::output_proof_key(&ctx, &a.scenarios[i]),
+                    &actual,
+                );
+                if last {
+                    assert!(
+                        proof.complete(),
+                        "All requirement glyph rows were independently witnessed in final FullOutput across real wheel frames"
+                    );
+                }
             }
             if name.ends_with("-wrong-feedback") || name.ends_with("-partial-feedback") {
                 let engine::State::Script {

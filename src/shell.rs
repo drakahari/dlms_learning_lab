@@ -3,7 +3,12 @@ mod arithmetic;
 mod capture;
 mod case;
 pub mod cron;
+mod environment;
 mod execution;
+mod file_lifecycle;
+pub mod startup;
+pub use environment::{EnvironmentSnapshot, EnvironmentVariable};
+mod associative;
 mod getopts;
 mod globbing;
 mod grep;
@@ -14,6 +19,7 @@ mod parameters;
 mod preparation;
 mod substitution;
 mod text_tools;
+mod tracing;
 mod values;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -26,7 +32,7 @@ use std::{
 use values::{ArrayRef, Value};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
 pub const MAX_CASES: usize = 12;
-pub const EVALUATOR_REVISION: u32 = 15;
+pub const EVALUATOR_REVISION: u32 = 19;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -1164,7 +1170,11 @@ impl Parser<'_> {
             match self.tokens.get(self.pos) {
                 Some(Token::Word(w)) => {
                     let word = w.clone();
-                    self.note_word(&word)?;
+                    if words.is_empty() && associative::assignment(&word)?.is_some() {
+                        self.note_scalar(&word)?;
+                    } else {
+                        self.note_word(&word)?;
+                    }
                     words.push(word);
                     self.pos += 1;
                 }
@@ -1210,6 +1220,12 @@ impl Parser<'_> {
         }
         if words.len() > 128 || redirects.len() > 64 {
             return Err("Command exceeds argument/redirection limit".into());
+        }
+        if let Some(word) = words.first()
+            && associative::assignment(word)?.is_some()
+            && (words.len() != 1 || !redirects.is_empty())
+        {
+            return Err("Unsupported map assignment with a command or redirection; use a separate assignment".into());
         }
         Ok(Command { words, redirects })
     }
@@ -1366,8 +1382,13 @@ pub struct Vm {
     expansion_work: Cell<usize>,
     regex_work: Cell<usize>,
     env: BTreeMap<String, Value>,
+    exported: BTreeSet<String>,
+    environment_active: bool,
+    environment_trace_seen: bool,
     scanner: getopts::Scanner,
     pipefail: bool,
+    xtrace: bool,
+    tracing_checked: bool,
     args: Vec<String>,
     input: String,
     input_pos: usize,
@@ -1391,6 +1412,7 @@ pub struct Vm {
     buffers: Vec<Option<String>>,
     scope_exit: Option<i32>,
     capture_request: Cell<Option<BodyId>>,
+    temporary_sequence: u32,
 }
 impl Vm {
     #[cfg(test)]
@@ -1430,8 +1452,18 @@ impl Vm {
                     ("OPTERR".into(), Value::Scalar("1".into())),
                 ])
                 .collect(),
+            exported: case
+                .env
+                .keys()
+                .filter(|n| ordinary_variable_name(n))
+                .cloned()
+                .collect(),
+            environment_active: false,
+            environment_trace_seen: false,
             scanner: getopts::Scanner::default(),
             pipefail: false,
+            xtrace: false,
+            tracing_checked: false,
             args: case.args.clone(),
             input: case.stdin.clone(),
             input_pos: 0,
@@ -1461,6 +1493,7 @@ impl Vm {
             buffers: Vec::new(),
             scope_exit: None,
             capture_request: Cell::new(None),
+            temporary_sequence: 0,
         })
     }
     pub fn done(&self) -> bool {
@@ -1481,6 +1514,8 @@ impl Vm {
         self.inputs.clear();
         self.functions.clear();
         self.env.clear();
+        self.exported.clear();
+        self.environment_active = false;
         self.scanner = getopts::Scanner::default();
         self.args.clear();
         self.input.clear();
@@ -1560,11 +1595,16 @@ impl Vm {
         self.rebase_pending(bytes, 0)
     }
     fn variable_view(&self, key: &str) -> Result<Cow<'_, str>, String> {
+        if let Some(value) = self.map_reference(key)? {
+            bounded_expansion_bytes(0, value.len())?;
+            self.charge_expansion(value.len())?;
+            return Ok(Cow::Borrowed(value));
+        }
         if let Some(parameter) = values::array_ref(key)? {
             let value: Cow<'_, str> = match parameter {
-                ArrayRef::Element(base,index) => Cow::Borrowed(self.env.get(base).and_then(|v|v.elements().get(index as usize)).map_or("",String::as_str)),
+                ArrayRef::Element(base,index) => Cow::Borrowed(self.env.get(base).and_then(|v|v.elements().and_then(|v|v.get(index as usize))).map_or("",String::as_str)),
                 ArrayRef::Count(base) => {
-                    let count = self.env.get(base).map_or(0, |v| v.elements().len());
+                    let count = self.env.get(base).map_or(0, Value::count);
                     self.reserve_memory(decimal_bytes(count as i64))?;
                     Cow::Owned(count.to_string())
                 },
@@ -1669,6 +1709,7 @@ impl Vm {
                 let current = match expression.target {
                     parameters::Target::Named(name) => match self.env.get(name) {
                         Some(Value::Scalar(value)) => Some(value.as_str()),
+                        Some(Value::Associative(_)) => return Err("Unsupported default/alternate operator on a map; look up a key first".into()),
                         Some(Value::Indexed(_)) => return Err("Unsupported default/alternate operator on an indexed array; use an ordinary scalar or positional argument".into()),
                         None => None,
                     },
@@ -1684,6 +1725,7 @@ impl Vm {
                 let current = match expression.target {
                     parameters::Target::Named(name) => match self.env.get(name) {
                         Some(Value::Scalar(value)) => Some(value.as_str()),
+                        Some(Value::Associative(_)) => return Err("Unsupported literal removal on a map; look up a key first".into()),
                         Some(Value::Indexed(_)) => return Err("Unsupported literal removal on an indexed array; use an ordinary scalar or positional argument".into()),
                         None => None,
                     },
@@ -1710,6 +1752,15 @@ impl Vm {
     }
     fn sole_fields(&self, part: &Part) -> Result<Option<Vec<String>>, String> {
         if part.quote == Quote::Double
+            && part
+                .text()
+                .and_then(|s| s.strip_prefix("${"))
+                .and_then(|s| s.strip_suffix('}'))
+                .is_some_and(|key| self.map_base(key))
+        {
+            return Ok(None);
+        }
+        if part.quote == Quote::Double
             && let Some(key) = part
                 .text()
                 .and_then(|s| s.strip_prefix("${"))
@@ -1717,7 +1768,7 @@ impl Vm {
             && !key.contains(['{', '}'])
             && let Some(ArrayRef::All(base)) = values::array_ref(key)?
         {
-            let elements = self.env.get(base).map_or(&[][..], Value::elements);
+            let elements = self.env.get(base).and_then(Value::elements).unwrap_or(&[]);
             let bytes = expansion_fields_size(elements)?;
             bounded_expansion_bytes(bytes, std::mem::size_of_val(elements))?;
             self.charge_expansion(bytes + std::mem::size_of_val(elements))?;
@@ -1916,6 +1967,9 @@ impl Vm {
             let r = (|| -> Result<(), String> {
                 match code {
                     Code::ArrayAssign(key, words) => {
+                        if matches!(self.env.get(&key), Some(Value::Associative(_))) {
+                            return Err("Unsupported whole-array replacement of an associative map; update named entries instead".into());
+                        }
                         self.pending = Some(execution::Pending::Array(
                             key,
                             preparation::Words::new(words.into_iter().map(|w| (w, true)).collect()),
@@ -2108,7 +2162,12 @@ impl Vm {
             &self.inputs,
             &self.functions,
             &self.calls,
-        ) + self.scanner.bytes()
+        ) + self
+            .exported
+            .iter()
+            .map(|key| key.len() + std::mem::size_of::<String>())
+            .sum::<usize>()
+            + self.scanner.bytes()
             + self.input.len()
             + self.outcome.stdout.len()
             + self.outcome.stderr.len()
@@ -2178,6 +2237,7 @@ impl Vm {
         self.env
             .keys()
             .map(String::as_str)
+            .chain(self.exported.iter().map(String::as_str))
             .chain(
                 self.calls
                     .iter()
@@ -2208,8 +2268,13 @@ impl Vm {
             .collect()
     }
     fn store_value(&mut self, key: String, value: Value) -> Result<(), String> {
+        if matches!(self.env.get(&key), Some(Value::Associative(_)))
+            && !matches!(value, Value::Associative(_))
+        {
+            return Err("Unsupported whole-array replacement of an associative map; update named entries instead".into());
+        }
         variable_target(&key)?;
-        if value.elements().len() > 128 {
+        if value.count() > 128 {
             return Err("Array element limit exceeded (128)".into());
         }
         self.preflight_value(&key, value.bytes())?;
@@ -2218,6 +2283,9 @@ impl Vm {
     }
     fn assign_scalar(&mut self, key: String, value: String) -> Result<(), String> {
         scalar_assignment_target(&key)?;
+        if matches!(self.env.get(&key), Some(Value::Associative(_))) {
+            return self.assign_map(&key, "0".into(), value);
+        }
         if key == "OPTIND" {
             if value != "1" {
                 return Err("Unsupported OPTIND write; only scalar value1 resets getopts".into());
@@ -2316,6 +2384,15 @@ impl Vm {
         &mut self,
         declarations: Vec<LocalDeclaration>,
     ) -> Result<(), String> {
+        if declarations
+            .iter()
+            .any(|(key, _)| matches!(self.env.get(key), Some(Value::Associative(_))))
+        {
+            return Err(
+                "Unsupported local shadowing of an associative map; use a separate scalar name"
+                    .into(),
+            );
+        }
         for (key, new_value) in declarations {
             self.release_pending(std::mem::size_of::<LocalDeclaration>())?;
             if !self.calls.last().unwrap().locals.contains_key(&key) {
@@ -2362,11 +2439,25 @@ impl Vm {
         let ok = |s: String| (s, String::new(), 0);
         let usage = || Err(format!("Unsupported {cmd} arguments; see the shell subset"));
         match cmd {
+            "declare" => Err("Unsupported computed declaration head; use literal declare -A NAME".into()),
             "getopts" => self.getopts_builtin(args),
+            "set" if args.len()==1 && matches!(args[0].as_str(),"-x"|"+x") => {
+                if args[0]=="-x" && (self.environment_active || self.env.values().any(|v|matches!(v,Value::Associative(_)))) { return Err("Unsupported xtrace after export; environment declarations and tracing cannot be combined yet".into()); }
+                self.set_xtrace(args[0]=="-x")?;
+                self.environment_trace_seen |= args[0]=="-x";
+                Ok((empty.clone(),empty,0))
+            }
+            "set" if args.len()==2 && args[1]=="xtrace" && matches!(args[0].as_str(),"-o"|"+o") => {
+                if args[0]=="-o" && (self.environment_active || self.env.values().any(|v|matches!(v,Value::Associative(_)))) { return Err("Unsupported xtrace after export; environment declarations and tracing cannot be combined yet".into()); }
+                self.set_xtrace(args[0]=="-o")?;
+                self.environment_trace_seen |= args[0]=="-o";
+                Ok((empty.clone(),empty,0))
+            }
             "set" if args.len() == 2 && args[1] == "pipefail" && matches!(args[0].as_str(), "-o" | "+o") => {
                 self.pipefail = args[0] == "-o";
                 Ok((empty.clone(), empty, 0))
             }
+            "export" => Err("Unsupported computed/quoted declaration head: use literal unquoted export NAME or NAME=value".into()),
             "local" => Err("Unsupported declaration command name: use literal unquoted local inside a function".into()),
             // Arguments have already passed ordinary expansion and redirects.
             // Colon ignores their resulting values, not their evaluation effects.

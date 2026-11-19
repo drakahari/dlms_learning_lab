@@ -1,0 +1,467 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-procmail-sieve-migration",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-procmail-migration",
+      "topic": "Procmail awareness and Sieve migration",
+      "title": "Migrate a legacy mail-copy policy",
+      "summary": "Read a legacy recipe and preserve its copy, priority and default delivery behavior in Sieve.",
+      "objective": "Translate the supplied read-only procmail policy into a Sieve filter. Match whole X-Team values equal to operations and whole X-Priority values equal to urgent, ignoring letter case and surrounding whitespace; body mentions and substring lookalikes must not match. The team rule makes an Archive copy and continues. The priority rule delivers to Urgent and finishes. Messages matching both need Archive and Urgent only; team-only messages need Archive and INBOX; priority-only messages need Urgent alone; unmatched messages need INBOX alone. Preserve every incoming message in its required virtual mailboxes. Use Run filter to check all ten samples. Equivalent supported Sieve solutions are accepted; the legacy recipe itself is never executed.",
+      "retry_guidance": "Compare a failed sample’s expected and actual mailbox sets. Check whether the original should continue, finish or reach INBOX, then edit and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 28,
+      "steps": [
+        "Understand the task",
+        "Translate and test the policy",
+        "Verify overlaps and default delivery"
+      ],
+      "guide": [
+        {
+          "title": "Compare the legacy policy and replacement",
+          "why": "Procmail is a traditional mail-delivery/filtering tool. A recipe begins with :0 and flags, followed by * condition lines and a destination. In this lesson, conditions search message headers, not the body. The leading ^ and trailing $ anchor a whole header line; [space or tab]* allows whitespace around the value. Matching ignores letter case unless the D flag is used. These simple recipes are supplied as read-only source policy, not a language this simulator runs.",
+          "action": "Read the legacy recipe above Filter. Select Fill worked example, then Run filter. Select Copy and priority in Sample message.",
+          "commands": []
+        },
+        {
+          "title": "Follow the default delivery path",
+          "why": "In the worked recipe, :0 c: makes a copy for Sketches when X-Group is design. The c means copy and continue; it does not stop later recipes. A normal successful delivery, such as the Review recipe, finishes processing. If nothing finishes delivery, the site default is INBOX. The final colon requests a local lock in real procmail; this exercise uses virtual destinations and no lockfiles.",
+          "action": "Select Copy only, then Unmatched. Compare their results with the final keep; in Filter.",
+          "commands": []
+        },
+        {
+          "title": "Investigate a missing original",
+          "why": "Sieve uses require \"fileinto\"; before fileinto actions. header :is compares a complete header value, ignoring case with the default comparator; leading/trailing whitespace is removed. A fileinto cancels Sieve’s implicit INBOX copy, and does not itself stop later rules. To preserve the legacy copy behavior, explicitly keep the original when it reaches default delivery. To preserve the normal delivery rule, stop after filing to Review.",
+          "action": "Remove the final keep; from the worked filter and select Run filter. Inspect Copy only, then restore the worked example.",
+          "commands": []
+        }
+      ],
+      "explanation": "A migration is correct when it preserves all delivery outcomes: the copied message can still match a later final rule, and unmatched originals reach the default mailbox. Sieve needs explicit keep where a prior fileinto cancelled implicit keep.",
+      "hints": [
+        "Use Copy only to distinguish a copied message from a completed delivery.",
+        "Sieve fileinto does not stop later rules, but does cancel implicit INBOX delivery.",
+        "A stop after the final priority delivery prevents an extra INBOX copy. Default delivery still needs an explicit keep after an earlier fileinto."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://manpages.debian.org/trixie/procmail/procmailrc.5.en.html",
+        "https://www.rfc-editor.org/rfc/rfc5228.html"
+      ],
+      "simplifications": "Procmail awareness through a supplied inert recipe and a real bounded Sieve migration, not a procmail interpreter or actual mail transport. Simple header-value rules only; case and surrounding whitespace behavior is explicit. No host paths, lockfiles, programs, pipes or environment expansion. Destinations are simulated mailbox labels. Existing Sieve source, sample, action and time limits apply; unsupported syntax diagnoses honestly. See PROCMAIL_MIGRATION_LESSON.md.",
+      "initial": {
+        "kind": "SieveFiltering",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-procmail-sieve-migration",
+          "view": "introduction",
+          "assignment": {
+            "draft": "# Replace the legacy delivery policy with Sieve.\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          },
+          "practice": {
+            "draft": "# Replace the legacy delivery policy with Sieve.\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SieveFiltering",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-procmail-sieve-migration",
+          "assignment": {
+            "legacy_recipe": "# Site default: INBOX. Destinations below name virtual mailboxes.\n:0 c:\n* ^X-Team:[ \t]*operations[ \t]*$\nArchive\n\n:0:\n* ^X-Priority:[ \t]*urgent[ \t]*$\nUrgent\n",
+            "starter": "# Replace the legacy delivery policy with Sieve.\nkeep;\n",
+            "reference": "require \"fileinto\";\nif header :is \"X-Team\" \"operations\" {\n    fileinto \"Archive\";\n}\nif header :is \"X-Priority\" \"urgent\" {\n    fileinto \"Urgent\";\n    stop;\n}\nkeep;\n",
+            "mailboxes": [
+              "Archive",
+              "INBOX",
+              "Urgent"
+            ],
+            "cases": [
+              {
+                "id": "copy-and-priority",
+                "label": "Copy and priority",
+                "headers": [
+                  [
+                    "X-Team",
+                    "operations"
+                  ],
+                  [
+                    "X-Priority",
+                    "urgent"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "Archive",
+                  "Urgent"
+                ]
+              },
+              {
+                "id": "copy-only",
+                "label": "Copy only",
+                "headers": [
+                  [
+                    "X-Team",
+                    "operations"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "Archive",
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "priority-only",
+                "label": "Priority only",
+                "headers": [
+                  [
+                    "X-Priority",
+                    "urgent"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "Urgent"
+                ]
+              },
+              {
+                "id": "unmatched",
+                "label": "Unmatched",
+                "headers": [
+                  [
+                    "Subject",
+                    "Ordinary mail"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "case-insensitive",
+                "label": "Case insensitive",
+                "headers": [
+                  [
+                    "x-team",
+                    "OPERATIONS"
+                  ],
+                  [
+                    "x-priority",
+                    "URGENT"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "Archive",
+                  "Urgent"
+                ]
+              },
+              {
+                "id": "outer-whitespace",
+                "label": "Outer whitespace",
+                "headers": [
+                  [
+                    "X-Team",
+                    " \toperations\t "
+                  ],
+                  [
+                    "X-Priority",
+                    "urgent"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "Archive",
+                  "Urgent"
+                ]
+              },
+              {
+                "id": "substring-decoy",
+                "label": "Substring decoy",
+                "headers": [
+                  [
+                    "X-Team",
+                    "not-operations"
+                  ],
+                  [
+                    "X-Priority",
+                    "not-urgent"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "body-is-not-header",
+                "label": "Body is not header",
+                "headers": [
+                  [
+                    "Subject",
+                    "Body mention"
+                  ]
+                ],
+                "body": "X-Team: operations\nX-Priority: urgent\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "empty-values",
+                "label": "Empty values",
+                "headers": [
+                  [
+                    "X-Team",
+                    ""
+                  ],
+                  [
+                    "X-Priority",
+                    ""
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "repeated-header",
+                "label": "Repeated header",
+                "headers": [
+                  [
+                    "X-Team",
+                    "other"
+                  ],
+                  [
+                    "X-Team",
+                    "operations"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "Archive",
+                  "INBOX"
+                ]
+              }
+            ]
+          },
+          "example": {
+            "legacy_recipe": "# Site default: INBOX. Destinations below name virtual mailboxes.\n:0 c:\n* ^X-Group:[ \t]*design[ \t]*$\nSketches\n\n:0:\n* ^X-Attention:[ \t]*review[ \t]*$\nReview\n",
+            "starter": "# Replace the legacy delivery policy with Sieve.\nkeep;\n",
+            "reference": "require \"fileinto\";\nif header :is \"X-Group\" \"design\" {\n    fileinto \"Sketches\";\n}\nif header :is \"X-Attention\" \"review\" {\n    fileinto \"Review\";\n    stop;\n}\nkeep;\n",
+            "mailboxes": [
+              "INBOX",
+              "Review",
+              "Sketches"
+            ],
+            "cases": [
+              {
+                "id": "copy-and-priority",
+                "label": "Copy and priority",
+                "headers": [
+                  [
+                    "X-Group",
+                    "design"
+                  ],
+                  [
+                    "X-Attention",
+                    "review"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "Review",
+                  "Sketches"
+                ]
+              },
+              {
+                "id": "copy-only",
+                "label": "Copy only",
+                "headers": [
+                  [
+                    "X-Group",
+                    "design"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "INBOX",
+                  "Sketches"
+                ]
+              },
+              {
+                "id": "priority-only",
+                "label": "Priority only",
+                "headers": [
+                  [
+                    "X-Attention",
+                    "review"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "Review"
+                ]
+              },
+              {
+                "id": "unmatched",
+                "label": "Unmatched",
+                "headers": [
+                  [
+                    "Subject",
+                    "Ordinary mail"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "case-insensitive",
+                "label": "Case insensitive",
+                "headers": [
+                  [
+                    "x-group",
+                    "DESIGN"
+                  ],
+                  [
+                    "x-attention",
+                    "REVIEW"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "Review",
+                  "Sketches"
+                ]
+              },
+              {
+                "id": "outer-whitespace",
+                "label": "Outer whitespace",
+                "headers": [
+                  [
+                    "X-Group",
+                    " \tdesign\t "
+                  ],
+                  [
+                    "X-Attention",
+                    "review"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "Review",
+                  "Sketches"
+                ]
+              },
+              {
+                "id": "substring-decoy",
+                "label": "Substring decoy",
+                "headers": [
+                  [
+                    "X-Group",
+                    "not-design"
+                  ],
+                  [
+                    "X-Attention",
+                    "not-review"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "body-is-not-header",
+                "label": "Body is not header",
+                "headers": [
+                  [
+                    "Subject",
+                    "Body mention"
+                  ]
+                ],
+                "body": "X-Group: design\nX-Attention: review\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "empty-values",
+                "label": "Empty values",
+                "headers": [
+                  [
+                    "X-Group",
+                    ""
+                  ],
+                  [
+                    "X-Attention",
+                    ""
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "repeated-header",
+                "label": "Repeated header",
+                "headers": [
+                  [
+                    "X-Group",
+                    "other"
+                  ],
+                  [
+                    "X-Group",
+                    "design"
+                  ]
+                ],
+                "body": "A simulated incoming message.\n",
+                "expected": [
+                  "INBOX",
+                  "Sketches"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "sieve-workspace {\"kind\":\"edit\",\"script\":\"require \\\"fileinto\\\";\\nif header :is \\\"X-Team\\\" \\\"operations\\\" {\\n    fileinto \\\"Archive\\\";\\n}\\nif header :is \\\"X-Priority\\\" \\\"urgent\\\" {\\n    fileinto \\\"Urgent\\\";\\n    stop;\\n}\\nkeep;\\n\"}",
+        "sieve-workspace {\"kind\":\"run\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}"
+      ],
+      "prerequisites": [
+        "lpic2-sieve-rule-order"
+      ]
+    }
+  ]
+}

@@ -45,7 +45,9 @@ enum CommandPhase {
     Begin,
     Arguments(Words),
     Locals(Words),
+    Exports(environment::ExportPlan, Words),
     Assignment(String, Words),
+    MapAssignment(String, String, Words),
     Redirect,
     Target(String, Words),
     Execute,
@@ -56,6 +58,7 @@ struct CommandTask {
     phase: CommandPhase,
     args: Vec<String>,
     declarations: Option<Vec<LocalDeclaration>>,
+    export_remove: Option<bool>,
     assignment: usize,
     redirect: usize,
     stdout: Dest,
@@ -85,7 +88,11 @@ impl CommandTask {
                 .map_or(0, |(input, _, _, _)| input.len())
             + match &self.phase {
                 CommandPhase::Arguments(words) | CommandPhase::Locals(words) => words.bytes(),
+                CommandPhase::Exports(plan, words) => plan.bytes() + words.bytes(),
                 CommandPhase::Grep(task) => task.bytes(),
+                CommandPhase::MapAssignment(base, key, words) => {
+                    base.len() + key.len() + words.bytes()
+                }
                 CommandPhase::Assignment(key, words) | CommandPhase::Target(key, words) => {
                     key.len() + words.bytes()
                 }
@@ -108,6 +115,7 @@ impl CommandTask {
             phase: CommandPhase::Begin,
             args: Vec::new(),
             declarations: None,
+            export_remove: None,
             assignment: 0,
             redirect: 0,
             stdout,
@@ -153,7 +161,26 @@ impl CommandTask {
     fn advance(&mut self, vm: &mut Vm, pipeline: bool) -> Result<Option<String>, String> {
         match std::mem::replace(&mut self.phase, CommandPhase::Begin) {
             CommandPhase::Begin => {
-                if self.command.words.first().and_then(Word::literal) == Some("local") {
+                if self.command.words.first().and_then(Word::literal) == Some("declare") {
+                    vm.declare_map(&self.command)?;
+                    self.phase = CommandPhase::Redirect;
+                } else if let Some(word) = self.command.words.first()
+                    && associative::looks_like_assignment(word)
+                {
+                    vm.reserve_memory(word_bytes(word) * 2)?;
+                    let assignment =
+                        associative::assignment(word)?.ok_or("Invalid map assignment")?;
+                    let key = vm.map_key(&assignment.base, &assignment.key)?;
+                    self.phase = CommandPhase::MapAssignment(
+                        assignment.base,
+                        key,
+                        Words::new(vec![(assignment.value, false)]),
+                    );
+                } else if self.command.words.first().and_then(Word::literal) == Some("export") {
+                    vm.begin_export()?;
+                    let (plan, words) = environment::ExportPlan::new(&self.command.words[1..], vm)?;
+                    self.phase = CommandPhase::Exports(plan, Words::new(words));
+                } else if self.command.words.first().and_then(Word::literal) == Some("local") {
                     if pipeline {
                         return Err(pipeline_context_error());
                     }
@@ -240,12 +267,36 @@ impl CommandTask {
                     self.phase = CommandPhase::Locals(words);
                 }
             }
+            CommandPhase::Exports(plan, mut words) => {
+                if let Some(values) = words.advance(vm)? {
+                    self.declarations = Some(plan.declarations(values, vm)?);
+                    self.export_remove = Some(plan.remove);
+                    self.phase = CommandPhase::Redirect;
+                } else {
+                    self.phase = CommandPhase::Exports(plan, words);
+                }
+            }
+            CommandPhase::MapAssignment(base, key, mut words) => {
+                if let Some(mut values) = words.advance(vm)? {
+                    let owned = strings_bytes(&values) + key.len();
+                    let value = values.pop().unwrap_or_default();
+                    debug_assert!(values.is_empty());
+                    vm.release_pending(owned)?;
+                    vm.assign_map(&base, key, value)?;
+                    vm.release_pending(base.len())?;
+                    vm.limits()?;
+                    self.phase = CommandPhase::Redirect;
+                } else {
+                    self.phase = CommandPhase::MapAssignment(base, key, words);
+                }
+            }
             CommandPhase::Assignment(key, mut words) => {
                 if let Some(mut values) = words.advance(vm)? {
                     self.last_status = words.last_status().or(self.last_status);
                     let owned = strings_bytes(&values) + key.len();
                     let value = values.pop().unwrap_or_default();
                     debug_assert!(values.is_empty());
+                    vm.trace_assignment(&key, &value)?;
                     vm.release_pending(owned)?;
                     vm.assign_scalar(key, value)?;
                     vm.limits()?;
@@ -364,12 +415,17 @@ impl CommandTask {
                 self.phase = CommandPhase::Grep(task);
             }
             CommandPhase::Execute => {
+                vm.trace_args(&self.args)?;
                 let control = self
                     .args
                     .first()
                     .is_some_and(|head| matches!(head.as_str(), "break" | "continue"));
                 let (out, err, status) = if let Some(declarations) = self.declarations.take() {
-                    vm.apply_local_declarations(declarations)?;
+                    if let Some(remove) = self.export_remove.take() {
+                        vm.apply_exports(declarations, remove)?;
+                    } else {
+                        vm.apply_local_declarations(declarations)?;
+                    }
                     (String::new(), String::new(), 0)
                 } else if self.command.words.iter().all(Word::assignment) || self.args.is_empty() {
                     (String::new(), String::new(), self.last_status.unwrap_or(0))
@@ -396,6 +452,17 @@ impl CommandTask {
                         // Real transfer waits until this command's temporary input
                         // binding is restored; deeper loop bindings may then unwind.
                         (String::new(), String::new(), 0)
+                    } else if self
+                        .args
+                        .first()
+                        .is_some_and(|cmd| matches!(cmd.as_str(), "mktemp" | "mv" | "rm"))
+                    {
+                        vm.file_lifecycle(
+                            &self.args[0],
+                            &self.args[1..],
+                            &self.stdout,
+                            &self.stderr,
+                        )?
                     } else if self.args.first().is_some_and(|cmd| cmd == "grep")
                         && grep::extended(&self.args[1..])
                     {
@@ -671,6 +738,18 @@ pub(super) enum Pending {
     While(usize, Words),
 }
 impl Pending {
+    pub(super) fn output_aliases(&self, file: &str) -> bool {
+        let is_file = |d: &Dest| matches!(d,Dest::File(name)if name==file);
+        if let Self::Pipeline(pipeline) = self {
+            pipeline.destination.as_ref().is_some_and(is_file)
+                || pipeline
+                    .active
+                    .as_ref()
+                    .is_some_and(|task| is_file(&task.stdout) || is_file(&task.stderr))
+        } else {
+            false
+        }
+    }
     pub(super) fn capture_stderr(&self, vm: &Vm) -> Result<Dest, String> {
         let dest = if let Self::Pipeline(pipeline) = self {
             &pipeline

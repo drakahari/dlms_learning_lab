@@ -138,10 +138,28 @@ fn paint(ctx: &egui::Context, a: &LabApp, out: &egui::FullOutput, name: &str) {
             simulation.view,
             dlms_learning_lab::script_teaching::View::Introduction
         );
-        painted(&items, root, tol, &definition.lesson.prerequisite_note);
+        let entry = lesson_presentation::entry(source);
+        let objective = entry.map_or(source.summary.as_str(), |e| e.goal.as_str());
+        let context = entry
+            .filter(|e| !e.context.is_empty())
+            .map_or(definition.lesson.prerequisite_note.as_str(), |e| {
+                e.context.as_str()
+            });
+        let objective_bounds = painted(&items, root, tol, objective);
+        painted(&items, root, tol, context);
+        let (recorded, clip) = a
+            .metrics
+            .partition_fs
+            .introduction
+            .expect("Real introduction objective response recorded");
+        assert!(recorded.expand(tol).contains_rect(objective_bounds));
+        assert!(clip.expand(tol).contains_rect(objective_bounds));
+        assert!(root.expand(tol).contains_rect(objective_bounds));
     }
     if name.ends_with("-whole-assignment") {
-        painted(&items, root, tol, &source.objective);
+        for text in lesson_presentation::assignment_texts(source) {
+            painted(&items, root, tol, text);
+        }
     }
     if name.ends_with("-separate-practice") {
         painted(&items, root, tol, &definition.lesson.description);

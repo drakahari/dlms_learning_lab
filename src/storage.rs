@@ -1,5 +1,6 @@
 //! Bounded virtual volume identity, saved mount policy and live mount state.
 //! No host paths are opened, and no kernel, subprocess or device API is used.
+pub mod swap;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -147,6 +148,8 @@ pub struct Inventory {
     volumes: BTreeMap<String, Volume>,
     devices: BTreeMap<String, String>,
     mountpoints: BTreeSet<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    swap: Option<swap::Inventory>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -157,6 +160,8 @@ struct InventoryData {
     devices: BTreeMap<String, String>,
     #[serde(deserialize_with = "points")]
     mountpoints: Vec<String>,
+    #[serde(default)]
+    swap: Option<swap::Inventory>,
 }
 fn points<'de, D: serde::Deserializer<'de>>(d: D) -> std::result::Result<Vec<String>, D::Error> {
     use serde::de::{Error as _, SeqAccess, Visitor};
@@ -187,7 +192,11 @@ fn points<'de, D: serde::Deserializer<'de>>(d: D) -> std::result::Result<Vec<Str
 impl TryFrom<InventoryData> for Inventory {
     type Error = Error;
     fn try_from(raw: InventoryData) -> Result<Self> {
-        Self::new(raw.volumes, raw.devices, raw.mountpoints)
+        let inventory = Self::new(raw.volumes, raw.devices, raw.mountpoints)?;
+        match raw.swap {
+            Some(facts) => inventory.with_swap(facts),
+            None => Ok(inventory),
+        }
     }
 }
 impl Inventory {
@@ -237,7 +246,16 @@ impl Inventory {
             volumes,
             devices,
             mountpoints: points,
+            swap: None,
         })
+    }
+    pub fn with_swap(mut self, facts: swap::Inventory) -> Result<Self> {
+        facts.validate_against(&self)?;
+        self.swap = Some(facts);
+        Ok(self)
+    }
+    pub fn swap(&self) -> Option<&swap::Inventory> {
+        self.swap.as_ref()
     }
     pub fn volumes(&self) -> &BTreeMap<String, Volume> {
         &self.volumes
@@ -261,7 +279,8 @@ impl Inventory {
         }.ok_or_else(|| error(ErrorKind::UnknownSource, "No exact source match in this simulator. Copy the device or UUID spelling shown by blkid's inventory; filesystem UUIDs here are lowercase."))
     }
     pub fn blkid(&self) -> String {
-        self.devices
+        let mut output = self
+            .devices
             .iter()
             .map(|(dev, id)| {
                 let v = &self.volumes[id];
@@ -272,7 +291,16 @@ impl Inventory {
                 )
             })
             .collect::<Vec<_>>()
-            .join("\n")
+            .join("\n");
+        if let Some(facts) = &self.swap {
+            for area in facts.areas.iter().filter(|a| a.available && a.prepared) {
+                output.push_str(&format!(
+                    "\n{}: UUID=\"{}\" TYPE=\"swap\"",
+                    area.device, area.uuid
+                ));
+            }
+        }
+        output
     }
 }
 
@@ -435,6 +463,8 @@ pub struct State {
     inventory: Inventory,
     configuration: String,
     live: BTreeMap<String, Mount>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    active_swap: BTreeMap<String, u16>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -443,11 +473,13 @@ struct StateData {
     configuration: String,
     #[serde(deserialize_with = "map")]
     live: BTreeMap<String, Mount>,
+    #[serde(default, deserialize_with = "map")]
+    active_swap: BTreeMap<String, u16>,
 }
 impl TryFrom<StateData> for State {
     type Error = Error;
     fn try_from(raw: StateData) -> Result<Self> {
-        Self::new(raw.inventory, raw.configuration, raw.live)
+        Self::new(raw.inventory, raw.configuration, raw.live)?.with_active_swap(raw.active_swap)
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -473,6 +505,7 @@ pub enum SessionOutcome {
 pub struct FreshSession {
     pub state: State,
     pub outcomes: Vec<SessionOutcome>,
+    pub swap_outcomes: Vec<swap::Outcome>,
 }
 impl State {
     pub fn new(
@@ -502,7 +535,68 @@ impl State {
             inventory,
             configuration,
             live,
+            active_swap: BTreeMap::new(),
         })
+    }
+    pub fn with_active_swap(mut self, active: BTreeMap<String, u16>) -> Result<Self> {
+        match &self.inventory.swap {
+            Some(facts) => facts.validate_active(&active)?,
+            None if !active.is_empty() => {
+                return Err(error(
+                    ErrorKind::Unsupported,
+                    "This lesson does not enable swap; imported active areas cannot add that capability",
+                ));
+            }
+            None => {}
+        }
+        self.active_swap = active;
+        Ok(self)
+    }
+    pub fn active_swap(&self) -> &BTreeMap<String, u16> {
+        &self.active_swap
+    }
+    fn swap_facts(&self) -> Result<&swap::Inventory> {
+        self.inventory.swap.as_ref().ok_or_else(||error(ErrorKind::Unsupported,"Swap activation is not enabled by this lesson; the existing mount-only command subset is unchanged"))
+    }
+    pub fn swap_on(&mut self, source: &Source, priority: u16) -> Result<bool> {
+        self.swap_facts()?;
+        swap::activate(
+            self.inventory.swap.as_ref().unwrap(),
+            &mut self.active_swap,
+            source,
+            priority,
+            false,
+        )
+    }
+    pub fn swap_off(&mut self, source: &Source) -> Result<()> {
+        self.swap_facts()?;
+        swap::deactivate(
+            self.inventory.swap.as_ref().unwrap(),
+            &mut self.active_swap,
+            source,
+        )
+    }
+    pub fn swap_on_all(&mut self) -> Result<Vec<swap::Outcome>> {
+        self.swap_facts()?;
+        swap::activate_all(
+            self.inventory.swap.as_ref().unwrap(),
+            &mut self.active_swap,
+            &self.configuration,
+        )
+    }
+    pub fn swap_listing(&self) -> Result<String> {
+        swap::listing(self.swap_facts()?, &self.active_swap)
+    }
+    pub fn entries(&self) -> Result<Vec<Entry>> {
+        if self.inventory.swap.is_some() {
+            swap::table(&self.configuration).map(|t| t.mounts)
+        } else {
+            parse(&self.configuration)
+        }
+    }
+    pub fn swap_entries(&self) -> Result<Vec<swap::Entry>> {
+        self.swap_facts()?;
+        swap::table(&self.configuration).map(|t| t.swaps)
     }
     pub fn from_json(text: &str) -> Result<Self> {
         if text.len() > MAX_STATE_BYTES {
@@ -527,6 +621,7 @@ impl State {
             self.configuration.clone(),
             self.live.clone(),
         )
+        .and_then(|state| state.with_active_swap(self.active_swap.clone()))
         .map(|_| ())
     }
     pub fn configuration(&self) -> &str {
@@ -571,7 +666,7 @@ impl State {
     }
     /// Simulator validation, not mount -a, fsck, findmnt or a systemd boot check.
     pub fn validate_configuration(&self) -> Vec<Error> {
-        let entries = match parse(&self.configuration) {
+        let entries = match self.entries() {
             Ok(v) => v,
             Err(e) => return vec![e],
         };
@@ -584,10 +679,16 @@ impl State {
                 _ => {},
             }
         }
+        if let Some(facts) = &self.inventory.swap {
+            match self.swap_entries() {
+                Ok(entries) => errors.extend(swap::configuration_errors(facts, &entries)),
+                Err(e) => errors.push(e),
+            }
+        }
         errors
     }
     pub fn mount(&mut self, target: &str) -> Result<MountOutcome> {
-        let entries = parse(&self.configuration)?;
+        let entries = self.entries()?;
         let entry = entries.iter().find(|e| e.target == target).ok_or_else(|| {
             error(
                 ErrorKind::Invalid,
@@ -635,12 +736,15 @@ impl State {
                 "The fresh-session test must permute the existing device aliases without adding or removing them.",
             ));
         }
-        let inventory = Inventory::new(
+        let mut inventory = Inventory::new(
             self.inventory.volumes.clone(),
             devices,
             self.inventory.mountpoints.iter().cloned().collect(),
         )?;
-        let entries = parse(&self.configuration)?;
+        if let Some(facts) = &self.inventory.swap {
+            inventory = inventory.with_swap(facts.clone())?;
+        }
+        let entries = self.entries()?;
         let mut state = Self::new(inventory, self.configuration.clone(), BTreeMap::new())?;
         let mut outcomes = Vec::new();
         for entry in entries {
@@ -660,7 +764,16 @@ impl State {
                 });
             }
         }
-        Ok(FreshSession { state, outcomes })
+        let swap_outcomes = if state.inventory.swap.is_some() {
+            state.swap_on_all()?
+        } else {
+            vec![]
+        };
+        Ok(FreshSession {
+            state,
+            outcomes,
+            swap_outcomes,
+        })
     }
     pub fn mount_listing(&self) -> String {
         self.live

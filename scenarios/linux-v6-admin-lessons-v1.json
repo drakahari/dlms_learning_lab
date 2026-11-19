@@ -1,0 +1,3767 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-router-ipv6-scope-recovery",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-ipv6-router-configuration",
+      "topic": "Linux IPv6 router configuration",
+      "title": "Repair IPv6 scope and the next-hop interface",
+      "summary": "Repair an address and a scoped next hop without masking the failure with a broad default.",
+      "objective": "Choose an unused primary address in fd62:70:80::/64 on lan0; avoid supplied peers and the all-zero interface ID. Keep wan0 and all IPv4 settings unchanged. Route the entire 2001:db8:99::/64 through fe80::1 on wan0. Outside connected networks and that remote prefix, retain no IPv6 route. Preserve enabled forwarding. Verify both supplied remote hosts, client transit and the link-local scope boundary; Check work must pass the complete route plan.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Inspect the wrong scope",
+        "Repair in dependency order",
+        "Verify and try a misleading shortcut"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the wrong scope",
+          "why": "A /64 identifies the network in these supplied links. fd35:40:50::10/64 belongs to fd35:40:50::/64, a unique-local network used here for the client LAN. 2001:db8::/32 addresses are documentation examples. Neither prefix sends traffic to the real Internet. IPv6 has no broadcast address; this task excludes the all-zero interface ID and known peer addresses.",
+          "action": "Run ip -6 address show, ip -6 route show and sysctl net.ipv6.conf.all.forwarding. Compare edge0 with its supplied fd35:40:50::/64 LAN.",
+          "commands": [
+            {
+              "command": "ip -6 address show",
+              "explanation": "Display current addresses and scoped interface names.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip -6 route show",
+              "explanation": "Display actual current connected, manual and learned routes.",
+              "simulator_only": false
+            },
+            {
+              "command": "sysctl net.ipv6.conf.all.forwarding",
+              "explanation": "Read the current value; no configuration changes.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Repair in dependency order",
+          "why": "fe80::1 can name different routers on different links. The worked upstream router is fe80::1 on uplink0; the same number on edge0 is a different neighbor with a different onward path. Always read both via and dev. A route alone does not establish neighbor availability or the remote host.",
+          "action": "Delete the obsolete default before deleting edge0\u2019s bad address. Add an unused /64 address in its supplied LAN, then add the remote /64 through uplink0. Use the command picker for separate examples.",
+          "commands": [
+            {
+              "command": "ip -6 route del ::/0 via fe80::1 dev edge0 metric 10",
+              "explanation": "Delete the route through the client link before removing its primary address. Unrelated destinations must not keep using that next hop.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip -6 address del 2001:db8:dead::10/64 dev edge0",
+              "explanation": "Remove the address from the wrong network after deleting dependent gateway routes. This model gives each interface one primary address.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip -6 address add fd35:40:50::10/64 dev edge0",
+              "explanation": "Install an unused address in fd35:40:50::/64 on edge0. Another unused interface ID in that same /64 is also valid.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip -6 route add 2001:db8:45::/64 via fe80::1 dev uplink0 metric 10",
+              "explanation": "Reach all of 2001:db8:45::/64 through fe80::1 on uplink0. A host route for only one displayed server does not meet the network requirement.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify and try a misleading shortcut",
+          "why": "The worked router needs only 2001:db8:45::/64 through uplink0, plus its directly connected networks. An obsolete default sends unrelated destinations to the wrong link. Delete that route before removing its interface address, add an unused address in the supplied LAN, then add the required remote prefix. Forwarding is already enabled in this lesson.",
+          "action": "Run the supplied transit cases, then Check example. Try replacing the remote /64 with a /128 for just one server and check again.",
+          "commands": [
+            {
+              "command": "ip -6 route show",
+              "explanation": "Display actual current connected, manual and learned routes.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "A /64 identifies the network in these supplied links. fd35:40:50::10/64 belongs to fd35:40:50::/64, a unique-local network used here for the client LAN. 2001:db8::/32 addresses are documentation examples. Neither prefix sends traffic to the real Internet. IPv6 has no broadcast address; this task excludes the all-zero interface ID and known peer addresses. fe80::1 can name different routers on different links. The worked upstream router is fe80::1 on uplink0; the same number on edge0 is a different neighbor with a different onward path. Always read both via and dev. A route alone does not establish neighbor availability or the remote host. The worked router needs only 2001:db8:45::/64 through uplink0, plus its directly connected networks. An obsolete default sends unrelated destinations to the wrong link. Delete that route before removing its interface address, add an unused address in the supplied LAN, then add the required remote prefix. Forwarding is already enabled in this lesson. Check example compares every destination region, supplied reachable hosts and separate transit headers. Equivalent split prefixes and different unused LAN addresses can work. A /128 for one displayed server is insufficient when the assignment requires its whole /64.",
+      "hints": [
+        "A /64 identifies the network in these supplied links. fd35:40:50::10/64 belongs to fd35:40:50::/64, a unique-local network used here for the client LAN. 2001:db8::/32 addresses are documentation examples. Neither prefix sends traffic to the real Internet. IPv6 has no broadcast address; this task excludes the all-zero interface ID and known peer addresses.",
+        "fe80::1 can name different routers on different links. The worked upstream router is fe80::1 on uplink0; the same number on edge0 is a different neighbor with a different onward path. Always read both via and dev. A route alone does not establish neighbor availability or the remote host.",
+        "The worked router needs only 2001:db8:45::/64 through uplink0, plus its directly connected networks. An obsolete default sends unrelated destinations to the wrong link. Delete that route before removing its interface address, add an unused address in the supplied LAN, then add the required remote prefix. Forwarding is already enabled in this lesson."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.kernel.org/doc/html/v6.17/networking/ip-sysctl.html",
+        "https://man7.org/linux/man-pages/man8/ip-address.8.html",
+        "https://man7.org/linux/man-pages/man8/ip-route.8.html"
+      ],
+      "simplifications": "Linux 6.17 flags, one primary /48\u2013/126 per supplied interface, finite route plan and supplied physical facts. RA observations are native simulator actions, not host commands or generated packets. Fixed metric 1024/medium and positive/zero lifetimes; no clock, SLAAC, NDP, ECMP, learned-route editing or full kernel. Transit headers are independent supplied cases, not application-generated replies or connection tracking. Saved-settings tests assume the supplied addresses/network already persist; no full reboot or firewall startup coverage. All commands, files and observations stay in memory; unsupported syntax is diagnosed.",
+      "initial": {
+        "kind": "LinuxV6Administration",
+        "simulation": {
+          "source_id": "lpic2-router-ipv6-scope-recovery",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "version": 1,
+              "host": {
+                "version": 1,
+                "profile": {
+                  "id": "ipv6-admin-1-assignment",
+                  "links": [
+                    {
+                      "name": "lan0",
+                      "network": {
+                        "address": "192.0.2.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    },
+                    {
+                      "name": "wan0",
+                      "network": {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "address": "198.51.100.1",
+                      "device": "wan0",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "203.0.113.0",
+                          "length": 24
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "192.0.2.20",
+                      "available": true
+                    },
+                    {
+                      "address": "203.0.113.80",
+                      "available": true
+                    }
+                  ],
+                  "resolvers": [],
+                  "ipv6": {
+                    "lans": [
+                      {
+                        "device": "lan0",
+                        "network": {
+                          "address": "fd62:70:80::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      },
+                      {
+                        "device": "wan0",
+                        "network": {
+                          "address": "2001:db8:7a::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "fe80::1",
+                        "device": "lan0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:bad::",
+                            "length": 64
+                          }
+                        ]
+                      },
+                      {
+                        "address": "fe80::1",
+                        "device": "wan0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:99::",
+                            "length": 64
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "fd62:70:80::20",
+                        "available": true
+                      },
+                      {
+                        "address": "fd62:70:80::30",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:7a::20",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:99::80",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:99::81",
+                        "available": true
+                      }
+                    ]
+                  }
+                },
+                "configuration": {
+                  "interfaces": [
+                    {
+                      "name": "lan0",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    },
+                    {
+                      "name": "wan0",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.10",
+                        "prefix": 24
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      },
+                      "via": "198.51.100.1",
+                      "device": "wan0",
+                      "metric": 10
+                    }
+                  ],
+                  "nameservers": [],
+                  "ipv6": {
+                    "interfaces": [
+                      {
+                        "device": "lan0",
+                        "address": {
+                          "address": "2001:db8:dead::10",
+                          "prefix": 64
+                        }
+                      },
+                      {
+                        "device": "wan0",
+                        "address": {
+                          "address": "2001:db8:7a::10",
+                          "prefix": 64
+                        }
+                      }
+                    ],
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "::",
+                          "length": 0
+                        },
+                        "via": "fe80::1",
+                        "device": "lan0",
+                        "metric": 10
+                      }
+                    ]
+                  }
+                },
+                "generation": 0
+              },
+              "settings": {
+                "version": 1,
+                "global_forwarding": true,
+                "interfaces": [
+                  {
+                    "name": "lan0",
+                    "forwarding": true,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  },
+                  {
+                    "name": "wan0",
+                    "forwarding": true,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  }
+                ]
+              },
+              "learned": []
+            },
+            "history": [],
+            "input": "",
+            "output": "",
+            "selected_message": 0,
+            "selected_frame": 0,
+            "last_trial": null,
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "host": {
+                "version": 1,
+                "profile": {
+                  "id": "ipv6-admin-1-example",
+                  "links": [
+                    {
+                      "name": "edge0",
+                      "network": {
+                        "address": "192.0.2.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    },
+                    {
+                      "name": "uplink0",
+                      "network": {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "address": "198.51.100.1",
+                      "device": "uplink0",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "203.0.113.0",
+                          "length": 24
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "192.0.2.20",
+                      "available": true
+                    },
+                    {
+                      "address": "203.0.113.80",
+                      "available": true
+                    }
+                  ],
+                  "resolvers": [],
+                  "ipv6": {
+                    "lans": [
+                      {
+                        "device": "edge0",
+                        "network": {
+                          "address": "fd35:40:50::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      },
+                      {
+                        "device": "uplink0",
+                        "network": {
+                          "address": "2001:db8:35::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "fe80::1",
+                        "device": "edge0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:bad::",
+                            "length": 64
+                          }
+                        ]
+                      },
+                      {
+                        "address": "fe80::1",
+                        "device": "uplink0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:45::",
+                            "length": 64
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "fd35:40:50::20",
+                        "available": true
+                      },
+                      {
+                        "address": "fd35:40:50::30",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:35::20",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:45::80",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:45::81",
+                        "available": true
+                      }
+                    ]
+                  }
+                },
+                "configuration": {
+                  "interfaces": [
+                    {
+                      "name": "edge0",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    },
+                    {
+                      "name": "uplink0",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.10",
+                        "prefix": 24
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      },
+                      "via": "198.51.100.1",
+                      "device": "uplink0",
+                      "metric": 10
+                    }
+                  ],
+                  "nameservers": [],
+                  "ipv6": {
+                    "interfaces": [
+                      {
+                        "device": "edge0",
+                        "address": {
+                          "address": "2001:db8:dead::10",
+                          "prefix": 64
+                        }
+                      },
+                      {
+                        "device": "uplink0",
+                        "address": {
+                          "address": "2001:db8:35::10",
+                          "prefix": 64
+                        }
+                      }
+                    ],
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "::",
+                          "length": 0
+                        },
+                        "via": "fe80::1",
+                        "device": "edge0",
+                        "metric": 10
+                      }
+                    ]
+                  }
+                },
+                "generation": 0
+              },
+              "settings": {
+                "version": 1,
+                "global_forwarding": true,
+                "interfaces": [
+                  {
+                    "name": "edge0",
+                    "forwarding": true,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  },
+                  {
+                    "name": "uplink0",
+                    "forwarding": true,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  }
+                ]
+              },
+              "learned": []
+            },
+            "history": [],
+            "input": "",
+            "output": "",
+            "selected_message": 0,
+            "selected_frame": 0,
+            "last_trial": null,
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "LinuxV6Administration",
+        "definition": {
+          "source_id": "lpic2-router-ipv6-scope-recovery",
+          "assignment": {
+            "id": "ipv6-1-assignment",
+            "initial": {
+              "version": 1,
+              "host": {
+                "version": 1,
+                "profile": {
+                  "id": "ipv6-admin-1-assignment",
+                  "links": [
+                    {
+                      "name": "lan0",
+                      "network": {
+                        "address": "192.0.2.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    },
+                    {
+                      "name": "wan0",
+                      "network": {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "address": "198.51.100.1",
+                      "device": "wan0",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "203.0.113.0",
+                          "length": 24
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "192.0.2.20",
+                      "available": true
+                    },
+                    {
+                      "address": "203.0.113.80",
+                      "available": true
+                    }
+                  ],
+                  "resolvers": [],
+                  "ipv6": {
+                    "lans": [
+                      {
+                        "device": "lan0",
+                        "network": {
+                          "address": "fd62:70:80::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      },
+                      {
+                        "device": "wan0",
+                        "network": {
+                          "address": "2001:db8:7a::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "fe80::1",
+                        "device": "lan0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:bad::",
+                            "length": 64
+                          }
+                        ]
+                      },
+                      {
+                        "address": "fe80::1",
+                        "device": "wan0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:99::",
+                            "length": 64
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "fd62:70:80::20",
+                        "available": true
+                      },
+                      {
+                        "address": "fd62:70:80::30",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:7a::20",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:99::80",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:99::81",
+                        "available": true
+                      }
+                    ]
+                  }
+                },
+                "configuration": {
+                  "interfaces": [
+                    {
+                      "name": "lan0",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    },
+                    {
+                      "name": "wan0",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.10",
+                        "prefix": 24
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      },
+                      "via": "198.51.100.1",
+                      "device": "wan0",
+                      "metric": 10
+                    }
+                  ],
+                  "nameservers": [],
+                  "ipv6": {
+                    "interfaces": [
+                      {
+                        "device": "lan0",
+                        "address": {
+                          "address": "2001:db8:dead::10",
+                          "prefix": 64
+                        }
+                      },
+                      {
+                        "device": "wan0",
+                        "address": {
+                          "address": "2001:db8:7a::10",
+                          "prefix": 64
+                        }
+                      }
+                    ],
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "::",
+                          "length": 0
+                        },
+                        "via": "fe80::1",
+                        "device": "lan0",
+                        "metric": 10
+                      }
+                    ]
+                  }
+                },
+                "generation": 0
+              },
+              "settings": {
+                "version": 1,
+                "global_forwarding": true,
+                "interfaces": [
+                  {
+                    "name": "lan0",
+                    "forwarding": true,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  },
+                  {
+                    "name": "wan0",
+                    "forwarding": true,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  }
+                ]
+              },
+              "learned": []
+            },
+            "requirements": [
+              {
+                "kind": "PreserveIpv4"
+              },
+              {
+                "kind": "Ipv6Address",
+                "device": "lan0",
+                "network": {
+                  "address": "fd62:70:80::",
+                  "length": 64
+                }
+              },
+              {
+                "kind": "PreserveIpv6Interface",
+                "device": "wan0"
+              }
+            ],
+            "expected_routes": {
+              "links": [
+                {
+                  "name": "lan0",
+                  "address": "fd62:70:80::10",
+                  "link_local": "fe80::a",
+                  "prefix": 64,
+                  "up": true
+                },
+                {
+                  "name": "wan0",
+                  "address": "2001:db8:7a::10",
+                  "link_local": "fe80::a",
+                  "prefix": 64,
+                  "up": true
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "network": "2001:db8:99::",
+                    "prefix": 64
+                  },
+                  "device": "wan0",
+                  "via": "fe80::1",
+                  "metric": 10
+                }
+              ]
+            },
+            "settings": [
+              {
+                "key": "net.ipv6.conf.all.forwarding",
+                "value": 1,
+                "label": "IPv6 transit enabled",
+                "why": "A route chooses the next hop; forwarding separately permits transit between interfaces."
+              }
+            ],
+            "paths": [
+              {
+                "target": "2001:db8:99::80",
+                "device": "wan0"
+              },
+              {
+                "target": "2001:db8:99::81",
+                "device": "wan0"
+              },
+              {
+                "target": "fd62:70:80::20",
+                "device": "lan0"
+              }
+            ],
+            "messages": [],
+            "frames": [
+              {
+                "id": "outgoing-client",
+                "label": "Client to supplied remote host",
+                "ingress": "lan0",
+                "header": {
+                  "source": "fd62:70:80::20",
+                  "destination": "2001:db8:99::80",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "second-client",
+                "label": "Another client and remote host",
+                "ingress": "lan0",
+                "header": {
+                  "source": "fd62:70:80::30",
+                  "destination": "2001:db8:99::81",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "incoming-header",
+                "label": "Supplied remote-to-client header",
+                "ingress": "wan0",
+                "header": {
+                  "source": "2001:db8:99::80",
+                  "destination": "fd62:70:80::20",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "scope-bound",
+                "label": "Link-local source cannot leave its link",
+                "ingress": "lan0",
+                "header": {
+                  "source": "fe80::20",
+                  "destination": "2001:db8:99::80",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "ScopeBound"
+              }
+            ],
+            "active_learned": null
+          },
+          "example": {
+            "id": "ipv6-1-worked",
+            "initial": {
+              "version": 1,
+              "host": {
+                "version": 1,
+                "profile": {
+                  "id": "ipv6-admin-1-example",
+                  "links": [
+                    {
+                      "name": "edge0",
+                      "network": {
+                        "address": "192.0.2.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    },
+                    {
+                      "name": "uplink0",
+                      "network": {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "address": "198.51.100.1",
+                      "device": "uplink0",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "203.0.113.0",
+                          "length": 24
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "192.0.2.20",
+                      "available": true
+                    },
+                    {
+                      "address": "203.0.113.80",
+                      "available": true
+                    }
+                  ],
+                  "resolvers": [],
+                  "ipv6": {
+                    "lans": [
+                      {
+                        "device": "edge0",
+                        "network": {
+                          "address": "fd35:40:50::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      },
+                      {
+                        "device": "uplink0",
+                        "network": {
+                          "address": "2001:db8:35::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "fe80::1",
+                        "device": "edge0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:bad::",
+                            "length": 64
+                          }
+                        ]
+                      },
+                      {
+                        "address": "fe80::1",
+                        "device": "uplink0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:45::",
+                            "length": 64
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "fd35:40:50::20",
+                        "available": true
+                      },
+                      {
+                        "address": "fd35:40:50::30",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:35::20",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:45::80",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:45::81",
+                        "available": true
+                      }
+                    ]
+                  }
+                },
+                "configuration": {
+                  "interfaces": [
+                    {
+                      "name": "edge0",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    },
+                    {
+                      "name": "uplink0",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.10",
+                        "prefix": 24
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      },
+                      "via": "198.51.100.1",
+                      "device": "uplink0",
+                      "metric": 10
+                    }
+                  ],
+                  "nameservers": [],
+                  "ipv6": {
+                    "interfaces": [
+                      {
+                        "device": "edge0",
+                        "address": {
+                          "address": "2001:db8:dead::10",
+                          "prefix": 64
+                        }
+                      },
+                      {
+                        "device": "uplink0",
+                        "address": {
+                          "address": "2001:db8:35::10",
+                          "prefix": 64
+                        }
+                      }
+                    ],
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "::",
+                          "length": 0
+                        },
+                        "via": "fe80::1",
+                        "device": "edge0",
+                        "metric": 10
+                      }
+                    ]
+                  }
+                },
+                "generation": 0
+              },
+              "settings": {
+                "version": 1,
+                "global_forwarding": true,
+                "interfaces": [
+                  {
+                    "name": "edge0",
+                    "forwarding": true,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  },
+                  {
+                    "name": "uplink0",
+                    "forwarding": true,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  }
+                ]
+              },
+              "learned": []
+            },
+            "requirements": [
+              {
+                "kind": "PreserveIpv4"
+              },
+              {
+                "kind": "Ipv6Address",
+                "device": "edge0",
+                "network": {
+                  "address": "fd35:40:50::",
+                  "length": 64
+                }
+              },
+              {
+                "kind": "PreserveIpv6Interface",
+                "device": "uplink0"
+              }
+            ],
+            "expected_routes": {
+              "links": [
+                {
+                  "name": "edge0",
+                  "address": "fd35:40:50::10",
+                  "link_local": "fe80::a",
+                  "prefix": 64,
+                  "up": true
+                },
+                {
+                  "name": "uplink0",
+                  "address": "2001:db8:35::10",
+                  "link_local": "fe80::a",
+                  "prefix": 64,
+                  "up": true
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "network": "2001:db8:45::",
+                    "prefix": 64
+                  },
+                  "device": "uplink0",
+                  "via": "fe80::1",
+                  "metric": 10
+                }
+              ]
+            },
+            "settings": [
+              {
+                "key": "net.ipv6.conf.all.forwarding",
+                "value": 1,
+                "label": "IPv6 transit enabled",
+                "why": "A route chooses the next hop; forwarding separately permits transit between interfaces."
+              }
+            ],
+            "paths": [
+              {
+                "target": "2001:db8:45::80",
+                "device": "uplink0"
+              },
+              {
+                "target": "2001:db8:45::81",
+                "device": "uplink0"
+              },
+              {
+                "target": "fd35:40:50::20",
+                "device": "edge0"
+              }
+            ],
+            "messages": [],
+            "frames": [
+              {
+                "id": "outgoing-client",
+                "label": "Client to supplied remote host",
+                "ingress": "edge0",
+                "header": {
+                  "source": "fd35:40:50::20",
+                  "destination": "2001:db8:45::80",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "second-client",
+                "label": "Another client and remote host",
+                "ingress": "edge0",
+                "header": {
+                  "source": "fd35:40:50::30",
+                  "destination": "2001:db8:45::81",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "incoming-header",
+                "label": "Supplied remote-to-client header",
+                "ingress": "uplink0",
+                "header": {
+                  "source": "2001:db8:45::80",
+                  "destination": "fd35:40:50::20",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "scope-bound",
+                "label": "Link-local source cannot leave its link",
+                "ingress": "edge0",
+                "header": {
+                  "source": "fe80::20",
+                  "destination": "2001:db8:45::80",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "ScopeBound"
+              }
+            ],
+            "active_learned": null
+          },
+          "worked": [
+            {
+              "kind": "command",
+              "input": "ip -6 route del ::/0 via fe80::1 dev edge0 metric 10"
+            },
+            {
+              "kind": "command",
+              "input": "ip -6 address del 2001:db8:dead::10/64 dev edge0"
+            },
+            {
+              "kind": "command",
+              "input": "ip -6 address add fd35:40:50::10/64 dev edge0"
+            },
+            {
+              "kind": "command",
+              "input": "ip -6 route add 2001:db8:45::/64 via fe80::1 dev uplink0 metric 10"
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "v6-admin-workspace {\"kind\":\"command\",\"input\":\"ip -6 route del ::/0 via fe80::1 dev lan0 metric 10\"}",
+        "v6-admin-workspace {\"kind\":\"command\",\"input\":\"ip -6 address del 2001:db8:dead::10/64 dev lan0\"}",
+        "v6-admin-workspace {\"kind\":\"command\",\"input\":\"ip -6 address add fd62:70:80::10/64 dev lan0\"}",
+        "v6-admin-workspace {\"kind\":\"command\",\"input\":\"ip -6 route add 2001:db8:99::/64 via fe80::1 dev wan0 metric 10\"}",
+        "v6-admin-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "lpic2-router-ipv6-ra-recovery",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-ipv6-router-configuration",
+      "topic": "Linux IPv6 router configuration",
+      "title": "Keep router advertisements working on an IPv6 router",
+      "summary": "Separate transit permission, router role and actually learned upstream routes.",
+      "objective": "Preserve both supplied IPv6 addresses and all IPv4 configuration; enable global IPv6 forwarding. Accept upstream advertisements on wan0 while it is a router; ignore advertisements on lan0. Observe the supplied upstream message to create the active learned default. Keep the default selected through fe80::1 on wan0. Verify the supplied paths and message acceptance, rejection and withdrawal cases.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Compare role and advertisement policy",
+        "Configure, then observe",
+        "Exercise rejection and recovery"
+      ],
+      "guide": [
+        {
+          "title": "Compare role and advertisement policy",
+          "why": "A host can know a route without being allowed to carry another computer\u2019s traffic. net.ipv6.conf.all.forwarding=1 sets the supplied interfaces to router mode. In the worked example, traffic enters edge0 and leaves uplink0; both the route and forwarding must work.",
+          "action": "Read global forwarding and each example interface\u2019s accept_ra setting using the command picker. Observe the upstream message before changing the role.",
+          "commands": [
+            {
+              "command": "ip -6 address show",
+              "explanation": "Display current addresses and scoped interface names.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip -6 route show",
+              "explanation": "Display actual current connected, manual and learned routes.",
+              "simulator_only": false
+            },
+            {
+              "command": "sysctl net.ipv6.conf.all.forwarding",
+              "explanation": "Read the current value; no configuration changes.",
+              "simulator_only": false
+            },
+            {
+              "command": "sysctl net.ipv6.conf.uplink0.accept_ra",
+              "explanation": "Read the current value; no configuration changes.",
+              "simulator_only": false
+            },
+            {
+              "command": "sysctl net.ipv6.conf.edge0.accept_ra",
+              "explanation": "Read the current value; no configuration changes.",
+              "simulator_only": false
+            },
+            {
+              "command": "cat /proc/sys/net/ipv6/conf/uplink0/accept_ra",
+              "explanation": "Read the same virtual setting by its proc path. sysctl uses dots; the matching proc file uses slashes.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Configure, then observe",
+          "why": "A router advertisement is a message received from a local router. accept_ra=1 accepts it only while that interface is a host; accept_ra=2 explicitly permits it in router mode. Set uplink0 to 2 and the client-facing edge0 to 0 so only the upstream message can supply a default.",
+          "action": "Enable global forwarding; set uplink0.accept_ra to 2 and edge0.accept_ra to 0. Choose the positive upstream message and Observe supplied message.",
+          "commands": [
+            {
+              "command": "sysctl -w net.ipv6.conf.all.forwarding=1",
+              "explanation": "Set the supplied interfaces to router mode. With accept_ra=1, a forwarding write can remove an earlier learned default; configure upstream acceptance and observe a new message afterward.",
+              "simulator_only": false
+            },
+            {
+              "command": "sysctl -w net.ipv6.conf.uplink0.accept_ra=2",
+              "explanation": "Value 2 explicitly keeps advertisement acceptance enabled while uplink0 acts as a router. This changes policy; it does not create a received message.",
+              "simulator_only": false
+            },
+            {
+              "command": "sysctl -w net.ipv6.conf.edge0.accept_ra=0",
+              "explanation": "Value 0 prevents the client-facing link from supplying a default. The same fe80::1 on that link is a different scoped neighbor.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Exercise rejection and recovery",
+          "why": "Choose the supplied upstream advertisement and Observe supplied message after configuring the flags. This native simulator action represents an already-received message, not a Linux command or a packet sent to a real network. ip -6 route show then displays the actual learned default via fe80::1 on uplink0 at metric 1024.",
+          "action": "Observe the client-link message and the zero-lifetime upstream withdrawal. Run a transit test, then observe the positive upstream message again and Check example.",
+          "commands": [
+            {
+              "command": "ip -6 route show",
+              "explanation": "Display actual current connected, manual and learned routes.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "A host can know a route without being allowed to carry another computer\u2019s traffic. net.ipv6.conf.all.forwarding=1 sets the supplied interfaces to router mode. In the worked example, traffic enters edge0 and leaves uplink0; both the route and forwarding must work. A router advertisement is a message received from a local router. accept_ra=1 accepts it only while that interface is a host; accept_ra=2 explicitly permits it in router mode. Set uplink0 to 2 and the client-facing edge0 to 0 so only the upstream message can supply a default. Choose the supplied upstream advertisement and Observe supplied message after configuring the flags. This native simulator action represents an already-received message, not a Linux command or a packet sent to a real network. ip -6 route show then displays the actual learned default via fe80::1 on uplink0 at metric 1024. Observe the client-link message: it must be ignored. An accepted zero-lifetime upstream message withdraws the default; observe the positive upstream message again to recover. Check example independently tests all three cases using their own sample messages, and requires an actual active upstream default. No clocks, expiry, SLAAC or full neighbor discovery are modeled.",
+      "hints": [
+        "A host can know a route without being allowed to carry another computer\u2019s traffic. net.ipv6.conf.all.forwarding=1 sets the supplied interfaces to router mode. In the worked example, traffic enters edge0 and leaves uplink0; both the route and forwarding must work.",
+        "A router advertisement is a message received from a local router. accept_ra=1 accepts it only while that interface is a host; accept_ra=2 explicitly permits it in router mode. Set uplink0 to 2 and the client-facing edge0 to 0 so only the upstream message can supply a default.",
+        "Choose the supplied upstream advertisement and Observe supplied message after configuring the flags. This native simulator action represents an already-received message, not a Linux command or a packet sent to a real network. ip -6 route show then displays the actual learned default via fe80::1 on uplink0 at metric 1024."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.kernel.org/doc/html/v6.17/networking/ip-sysctl.html",
+        "https://man7.org/linux/man-pages/man8/ip-address.8.html",
+        "https://man7.org/linux/man-pages/man8/ip-route.8.html"
+      ],
+      "simplifications": "Linux 6.17 flags, one primary /48\u2013/126 per supplied interface, finite route plan and supplied physical facts. RA observations are native simulator actions, not host commands or generated packets. Fixed metric 1024/medium and positive/zero lifetimes; no clock, SLAAC, NDP, ECMP, learned-route editing or full kernel. Transit headers are independent supplied cases, not application-generated replies or connection tracking. Saved-settings tests assume the supplied addresses/network already persist; no full reboot or firewall startup coverage. All commands, files and observations stay in memory; unsupported syntax is diagnosed.",
+      "initial": {
+        "kind": "LinuxV6Administration",
+        "simulation": {
+          "source_id": "lpic2-router-ipv6-ra-recovery",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "version": 1,
+              "host": {
+                "version": 1,
+                "profile": {
+                  "id": "ipv6-admin-2-assignment",
+                  "links": [
+                    {
+                      "name": "lan0",
+                      "network": {
+                        "address": "192.0.2.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    },
+                    {
+                      "name": "wan0",
+                      "network": {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "address": "198.51.100.1",
+                      "device": "wan0",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "203.0.113.0",
+                          "length": 24
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "192.0.2.20",
+                      "available": true
+                    },
+                    {
+                      "address": "203.0.113.80",
+                      "available": true
+                    }
+                  ],
+                  "resolvers": [],
+                  "ipv6": {
+                    "lans": [
+                      {
+                        "device": "lan0",
+                        "network": {
+                          "address": "fd62:70:80::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      },
+                      {
+                        "device": "wan0",
+                        "network": {
+                          "address": "2001:db8:7a::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "fe80::1",
+                        "device": "lan0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:bad::",
+                            "length": 64
+                          }
+                        ]
+                      },
+                      {
+                        "address": "fe80::1",
+                        "device": "wan0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:99::",
+                            "length": 64
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "fd62:70:80::20",
+                        "available": true
+                      },
+                      {
+                        "address": "fd62:70:80::30",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:7a::20",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:99::80",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:99::81",
+                        "available": true
+                      }
+                    ]
+                  }
+                },
+                "configuration": {
+                  "interfaces": [
+                    {
+                      "name": "lan0",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    },
+                    {
+                      "name": "wan0",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.10",
+                        "prefix": 24
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      },
+                      "via": "198.51.100.1",
+                      "device": "wan0",
+                      "metric": 10
+                    }
+                  ],
+                  "nameservers": [],
+                  "ipv6": {
+                    "interfaces": [
+                      {
+                        "device": "lan0",
+                        "address": {
+                          "address": "fd62:70:80::10",
+                          "prefix": 64
+                        }
+                      },
+                      {
+                        "device": "wan0",
+                        "address": {
+                          "address": "2001:db8:7a::10",
+                          "prefix": 64
+                        }
+                      }
+                    ],
+                    "routes": []
+                  }
+                },
+                "generation": 0
+              },
+              "settings": {
+                "version": 1,
+                "global_forwarding": false,
+                "interfaces": [
+                  {
+                    "name": "lan0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  },
+                  {
+                    "name": "wan0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  }
+                ]
+              },
+              "learned": []
+            },
+            "history": [],
+            "input": "",
+            "output": "",
+            "selected_message": 0,
+            "selected_frame": 0,
+            "last_trial": null,
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "host": {
+                "version": 1,
+                "profile": {
+                  "id": "ipv6-admin-2-example",
+                  "links": [
+                    {
+                      "name": "edge0",
+                      "network": {
+                        "address": "192.0.2.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    },
+                    {
+                      "name": "uplink0",
+                      "network": {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "address": "198.51.100.1",
+                      "device": "uplink0",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "203.0.113.0",
+                          "length": 24
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "192.0.2.20",
+                      "available": true
+                    },
+                    {
+                      "address": "203.0.113.80",
+                      "available": true
+                    }
+                  ],
+                  "resolvers": [],
+                  "ipv6": {
+                    "lans": [
+                      {
+                        "device": "edge0",
+                        "network": {
+                          "address": "fd35:40:50::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      },
+                      {
+                        "device": "uplink0",
+                        "network": {
+                          "address": "2001:db8:35::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "fe80::1",
+                        "device": "edge0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:bad::",
+                            "length": 64
+                          }
+                        ]
+                      },
+                      {
+                        "address": "fe80::1",
+                        "device": "uplink0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:45::",
+                            "length": 64
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "fd35:40:50::20",
+                        "available": true
+                      },
+                      {
+                        "address": "fd35:40:50::30",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:35::20",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:45::80",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:45::81",
+                        "available": true
+                      }
+                    ]
+                  }
+                },
+                "configuration": {
+                  "interfaces": [
+                    {
+                      "name": "edge0",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    },
+                    {
+                      "name": "uplink0",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.10",
+                        "prefix": 24
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      },
+                      "via": "198.51.100.1",
+                      "device": "uplink0",
+                      "metric": 10
+                    }
+                  ],
+                  "nameservers": [],
+                  "ipv6": {
+                    "interfaces": [
+                      {
+                        "device": "edge0",
+                        "address": {
+                          "address": "fd35:40:50::10",
+                          "prefix": 64
+                        }
+                      },
+                      {
+                        "device": "uplink0",
+                        "address": {
+                          "address": "2001:db8:35::10",
+                          "prefix": 64
+                        }
+                      }
+                    ],
+                    "routes": []
+                  }
+                },
+                "generation": 0
+              },
+              "settings": {
+                "version": 1,
+                "global_forwarding": false,
+                "interfaces": [
+                  {
+                    "name": "edge0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  },
+                  {
+                    "name": "uplink0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  }
+                ]
+              },
+              "learned": []
+            },
+            "history": [],
+            "input": "",
+            "output": "",
+            "selected_message": 0,
+            "selected_frame": 0,
+            "last_trial": null,
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "LinuxV6Administration",
+        "definition": {
+          "source_id": "lpic2-router-ipv6-ra-recovery",
+          "assignment": {
+            "id": "ipv6-2-assignment",
+            "initial": {
+              "version": 1,
+              "host": {
+                "version": 1,
+                "profile": {
+                  "id": "ipv6-admin-2-assignment",
+                  "links": [
+                    {
+                      "name": "lan0",
+                      "network": {
+                        "address": "192.0.2.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    },
+                    {
+                      "name": "wan0",
+                      "network": {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "address": "198.51.100.1",
+                      "device": "wan0",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "203.0.113.0",
+                          "length": 24
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "192.0.2.20",
+                      "available": true
+                    },
+                    {
+                      "address": "203.0.113.80",
+                      "available": true
+                    }
+                  ],
+                  "resolvers": [],
+                  "ipv6": {
+                    "lans": [
+                      {
+                        "device": "lan0",
+                        "network": {
+                          "address": "fd62:70:80::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      },
+                      {
+                        "device": "wan0",
+                        "network": {
+                          "address": "2001:db8:7a::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "fe80::1",
+                        "device": "lan0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:bad::",
+                            "length": 64
+                          }
+                        ]
+                      },
+                      {
+                        "address": "fe80::1",
+                        "device": "wan0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:99::",
+                            "length": 64
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "fd62:70:80::20",
+                        "available": true
+                      },
+                      {
+                        "address": "fd62:70:80::30",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:7a::20",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:99::80",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:99::81",
+                        "available": true
+                      }
+                    ]
+                  }
+                },
+                "configuration": {
+                  "interfaces": [
+                    {
+                      "name": "lan0",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    },
+                    {
+                      "name": "wan0",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.10",
+                        "prefix": 24
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      },
+                      "via": "198.51.100.1",
+                      "device": "wan0",
+                      "metric": 10
+                    }
+                  ],
+                  "nameservers": [],
+                  "ipv6": {
+                    "interfaces": [
+                      {
+                        "device": "lan0",
+                        "address": {
+                          "address": "fd62:70:80::10",
+                          "prefix": 64
+                        }
+                      },
+                      {
+                        "device": "wan0",
+                        "address": {
+                          "address": "2001:db8:7a::10",
+                          "prefix": 64
+                        }
+                      }
+                    ],
+                    "routes": []
+                  }
+                },
+                "generation": 0
+              },
+              "settings": {
+                "version": 1,
+                "global_forwarding": false,
+                "interfaces": [
+                  {
+                    "name": "lan0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  },
+                  {
+                    "name": "wan0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  }
+                ]
+              },
+              "learned": []
+            },
+            "requirements": [
+              {
+                "kind": "PreserveIpv4"
+              },
+              {
+                "kind": "PreserveIpv6Interface",
+                "device": "lan0"
+              },
+              {
+                "kind": "PreserveIpv6Interface",
+                "device": "wan0"
+              }
+            ],
+            "expected_routes": {
+              "links": [
+                {
+                  "name": "lan0",
+                  "address": "fd62:70:80::10",
+                  "link_local": "fe80::a",
+                  "prefix": 64,
+                  "up": true
+                },
+                {
+                  "name": "wan0",
+                  "address": "2001:db8:7a::10",
+                  "link_local": "fe80::a",
+                  "prefix": 64,
+                  "up": true
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "network": "::",
+                    "prefix": 0
+                  },
+                  "device": "wan0",
+                  "via": "fe80::1",
+                  "metric": 1024
+                }
+              ]
+            },
+            "settings": [
+              {
+                "key": "net.ipv6.conf.all.forwarding",
+                "value": 1,
+                "label": "IPv6 transit enabled",
+                "why": "A route chooses the next hop; forwarding separately permits transit between interfaces."
+              },
+              {
+                "key": "net.ipv6.conf.wan0.accept_ra",
+                "value": 2,
+                "label": "Upstream advertisements accepted as a router",
+                "why": "Value 2 explicitly accepts a supplied advertisement even in router mode."
+              },
+              {
+                "key": "net.ipv6.conf.lan0.accept_ra",
+                "value": 0,
+                "label": "Client-link advertisements ignored",
+                "why": "Client-facing messages must not install a default router."
+              }
+            ],
+            "paths": [
+              {
+                "target": "2001:db8:99::80",
+                "device": "wan0"
+              },
+              {
+                "target": "2001:db8:99::81",
+                "device": "wan0"
+              },
+              {
+                "target": "fd62:70:80::20",
+                "device": "lan0"
+              }
+            ],
+            "messages": [
+              {
+                "id": "upstream-advertisement",
+                "label": "Upstream advertisement: accept and learn",
+                "advertisement": {
+                  "device": "wan0",
+                  "gateway": "fe80::1",
+                  "router_lifetime": 600
+                },
+                "accepted": true,
+                "learns_default": true
+              },
+              {
+                "id": "client-link-advertisement",
+                "label": "Client-link advertisement: ignore",
+                "advertisement": {
+                  "device": "lan0",
+                  "gateway": "fe80::1",
+                  "router_lifetime": 600
+                },
+                "accepted": false,
+                "learns_default": false
+              },
+              {
+                "id": "upstream-withdrawal",
+                "label": "Upstream zero lifetime: withdraw",
+                "advertisement": {
+                  "device": "wan0",
+                  "gateway": "fe80::1",
+                  "router_lifetime": 0
+                },
+                "accepted": true,
+                "learns_default": false
+              }
+            ],
+            "frames": [
+              {
+                "id": "outgoing-client",
+                "label": "Client to supplied remote host",
+                "ingress": "lan0",
+                "header": {
+                  "source": "fd62:70:80::20",
+                  "destination": "2001:db8:99::80",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "second-client",
+                "label": "Another client and remote host",
+                "ingress": "lan0",
+                "header": {
+                  "source": "fd62:70:80::30",
+                  "destination": "2001:db8:99::81",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "incoming-header",
+                "label": "Supplied remote-to-client header",
+                "ingress": "wan0",
+                "header": {
+                  "source": "2001:db8:99::80",
+                  "destination": "fd62:70:80::20",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "scope-bound",
+                "label": "Link-local source cannot leave its link",
+                "ingress": "lan0",
+                "header": {
+                  "source": "fe80::20",
+                  "destination": "2001:db8:99::80",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "ScopeBound"
+              }
+            ],
+            "active_learned": "wan0"
+          },
+          "example": {
+            "id": "ipv6-2-worked",
+            "initial": {
+              "version": 1,
+              "host": {
+                "version": 1,
+                "profile": {
+                  "id": "ipv6-admin-2-example",
+                  "links": [
+                    {
+                      "name": "edge0",
+                      "network": {
+                        "address": "192.0.2.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    },
+                    {
+                      "name": "uplink0",
+                      "network": {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "address": "198.51.100.1",
+                      "device": "uplink0",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "203.0.113.0",
+                          "length": 24
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "192.0.2.20",
+                      "available": true
+                    },
+                    {
+                      "address": "203.0.113.80",
+                      "available": true
+                    }
+                  ],
+                  "resolvers": [],
+                  "ipv6": {
+                    "lans": [
+                      {
+                        "device": "edge0",
+                        "network": {
+                          "address": "fd35:40:50::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      },
+                      {
+                        "device": "uplink0",
+                        "network": {
+                          "address": "2001:db8:35::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "fe80::1",
+                        "device": "edge0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:bad::",
+                            "length": 64
+                          }
+                        ]
+                      },
+                      {
+                        "address": "fe80::1",
+                        "device": "uplink0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:45::",
+                            "length": 64
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "fd35:40:50::20",
+                        "available": true
+                      },
+                      {
+                        "address": "fd35:40:50::30",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:35::20",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:45::80",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:45::81",
+                        "available": true
+                      }
+                    ]
+                  }
+                },
+                "configuration": {
+                  "interfaces": [
+                    {
+                      "name": "edge0",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    },
+                    {
+                      "name": "uplink0",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.10",
+                        "prefix": 24
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      },
+                      "via": "198.51.100.1",
+                      "device": "uplink0",
+                      "metric": 10
+                    }
+                  ],
+                  "nameservers": [],
+                  "ipv6": {
+                    "interfaces": [
+                      {
+                        "device": "edge0",
+                        "address": {
+                          "address": "fd35:40:50::10",
+                          "prefix": 64
+                        }
+                      },
+                      {
+                        "device": "uplink0",
+                        "address": {
+                          "address": "2001:db8:35::10",
+                          "prefix": 64
+                        }
+                      }
+                    ],
+                    "routes": []
+                  }
+                },
+                "generation": 0
+              },
+              "settings": {
+                "version": 1,
+                "global_forwarding": false,
+                "interfaces": [
+                  {
+                    "name": "edge0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  },
+                  {
+                    "name": "uplink0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  }
+                ]
+              },
+              "learned": []
+            },
+            "requirements": [
+              {
+                "kind": "PreserveIpv4"
+              },
+              {
+                "kind": "PreserveIpv6Interface",
+                "device": "edge0"
+              },
+              {
+                "kind": "PreserveIpv6Interface",
+                "device": "uplink0"
+              }
+            ],
+            "expected_routes": {
+              "links": [
+                {
+                  "name": "edge0",
+                  "address": "fd35:40:50::10",
+                  "link_local": "fe80::a",
+                  "prefix": 64,
+                  "up": true
+                },
+                {
+                  "name": "uplink0",
+                  "address": "2001:db8:35::10",
+                  "link_local": "fe80::a",
+                  "prefix": 64,
+                  "up": true
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "network": "::",
+                    "prefix": 0
+                  },
+                  "device": "uplink0",
+                  "via": "fe80::1",
+                  "metric": 1024
+                }
+              ]
+            },
+            "settings": [
+              {
+                "key": "net.ipv6.conf.all.forwarding",
+                "value": 1,
+                "label": "IPv6 transit enabled",
+                "why": "A route chooses the next hop; forwarding separately permits transit between interfaces."
+              },
+              {
+                "key": "net.ipv6.conf.uplink0.accept_ra",
+                "value": 2,
+                "label": "Upstream advertisements accepted as a router",
+                "why": "Value 2 explicitly accepts a supplied advertisement even in router mode."
+              },
+              {
+                "key": "net.ipv6.conf.edge0.accept_ra",
+                "value": 0,
+                "label": "Client-link advertisements ignored",
+                "why": "Client-facing messages must not install a default router."
+              }
+            ],
+            "paths": [
+              {
+                "target": "2001:db8:45::80",
+                "device": "uplink0"
+              },
+              {
+                "target": "2001:db8:45::81",
+                "device": "uplink0"
+              },
+              {
+                "target": "fd35:40:50::20",
+                "device": "edge0"
+              }
+            ],
+            "messages": [
+              {
+                "id": "upstream-advertisement",
+                "label": "Upstream advertisement: accept and learn",
+                "advertisement": {
+                  "device": "uplink0",
+                  "gateway": "fe80::1",
+                  "router_lifetime": 600
+                },
+                "accepted": true,
+                "learns_default": true
+              },
+              {
+                "id": "client-link-advertisement",
+                "label": "Client-link advertisement: ignore",
+                "advertisement": {
+                  "device": "edge0",
+                  "gateway": "fe80::1",
+                  "router_lifetime": 600
+                },
+                "accepted": false,
+                "learns_default": false
+              },
+              {
+                "id": "upstream-withdrawal",
+                "label": "Upstream zero lifetime: withdraw",
+                "advertisement": {
+                  "device": "uplink0",
+                  "gateway": "fe80::1",
+                  "router_lifetime": 0
+                },
+                "accepted": true,
+                "learns_default": false
+              }
+            ],
+            "frames": [
+              {
+                "id": "outgoing-client",
+                "label": "Client to supplied remote host",
+                "ingress": "edge0",
+                "header": {
+                  "source": "fd35:40:50::20",
+                  "destination": "2001:db8:45::80",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "second-client",
+                "label": "Another client and remote host",
+                "ingress": "edge0",
+                "header": {
+                  "source": "fd35:40:50::30",
+                  "destination": "2001:db8:45::81",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "incoming-header",
+                "label": "Supplied remote-to-client header",
+                "ingress": "uplink0",
+                "header": {
+                  "source": "2001:db8:45::80",
+                  "destination": "fd35:40:50::20",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "scope-bound",
+                "label": "Link-local source cannot leave its link",
+                "ingress": "edge0",
+                "header": {
+                  "source": "fe80::20",
+                  "destination": "2001:db8:45::80",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "ScopeBound"
+              }
+            ],
+            "active_learned": "uplink0"
+          },
+          "worked": [
+            {
+              "kind": "command",
+              "input": "sysctl -w net.ipv6.conf.all.forwarding=1"
+            },
+            {
+              "kind": "command",
+              "input": "sysctl -w net.ipv6.conf.uplink0.accept_ra=2"
+            },
+            {
+              "kind": "command",
+              "input": "sysctl -w net.ipv6.conf.edge0.accept_ra=0"
+            },
+            {
+              "kind": "observe",
+              "message": 0
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "v6-admin-workspace {\"kind\":\"command\",\"input\":\"sysctl -w net.ipv6.conf.all.forwarding=1\"}",
+        "v6-admin-workspace {\"kind\":\"command\",\"input\":\"sysctl -w net.ipv6.conf.wan0.accept_ra=2\"}",
+        "v6-admin-workspace {\"kind\":\"command\",\"input\":\"sysctl -w net.ipv6.conf.lan0.accept_ra=0\"}",
+        "v6-admin-workspace {\"kind\":\"observe\",\"message\":0}",
+        "v6-admin-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-router-ipv6-scope-recovery"
+      ]
+    },
+    {
+      "id": "lpic2-router-ipv6-saved-settings",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-ipv6-router-configuration",
+      "topic": "Linux IPv6 router configuration",
+      "title": "Save IPv6 router settings and test their restart behavior",
+      "summary": "Repair saved startup flags, load them and verify current and fresh-settings behavior.",
+      "objective": "Preserve the supplied addresses and IPv4 configuration. Save the virtual IPv6 settings file with global forwarding enabled, upstream router advertisements accepted on wan0 and client-link advertisements ignored on lan0. Load the saved file into the current router and observe the supplied upstream message. An unsaved draft, live-only changes or flags without a learned default are insufficient. Run the saved-settings test and Check work. Both the current router and fresh settings loaded from the saved file must satisfy the path, scope and advertisement requirements.",
+      "difficulty": "Advanced",
+      "minutes": 28,
+      "steps": [
+        "Edit and save deliberately",
+        "Load and observe",
+        "Test restart and a forgotten save"
+      ],
+      "guide": [
+        {
+          "title": "Edit and save deliberately",
+          "why": "sysctl -w changes current virtual settings. The editor holds a draft of one simulated settings file. Save virtual file validates and stores that draft; it does not load the settings into the current router. cat reads the saved file, not unsaved text.",
+          "action": "Use the example editor to set the three required keys. Choose Save virtual file, then read the file with cat from the command picker.",
+          "commands": [
+            {
+              "command": "ip -6 address show",
+              "explanation": "Display current addresses and scoped interface names.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip -6 route show",
+              "explanation": "Display actual current connected, manual and learned routes.",
+              "simulator_only": false
+            },
+            {
+              "command": "sysctl net.ipv6.conf.all.forwarding",
+              "explanation": "Read the current value; no configuration changes.",
+              "simulator_only": false
+            },
+            {
+              "command": "sysctl net.ipv6.conf.uplink0.accept_ra",
+              "explanation": "Read the current value; no configuration changes.",
+              "simulator_only": false
+            },
+            {
+              "command": "sysctl net.ipv6.conf.edge0.accept_ra",
+              "explanation": "Read the current value; no configuration changes.",
+              "simulator_only": false
+            },
+            {
+              "command": "cat /etc/sysctl.d/70-learning-lab-ipv6.conf",
+              "explanation": "Read the saved virtual settings file. Unsaved editor changes are separate and do not appear in this output.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Load and observe",
+          "why": "For the worked example, put forwarding=1, uplink0.accept_ra=2 and edge0.accept_ra=0 under their full net.ipv6.conf keys. sysctl -p /etc/sysctl.d/70-learning-lab-ipv6.conf loads this saved file. Then observe the supplied upstream message: loading flags alone does not produce a new learned route.",
+          "action": "Run sysctl -p for the supplied file, then Observe supplied message for the upstream advertisement. Inspect settings and ip -6 route show.",
+          "commands": [
+            {
+              "command": "sysctl -p /etc/sysctl.d/70-learning-lab-ipv6.conf",
+              "explanation": "Apply saved key/value assignments to current flags. The editor draft must be saved first; a new supplied advertisement is still needed to learn a default.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Test restart and a forgotten save",
+          "why": "Run saved-settings test resets only modeled IPv6 flags and learned routes, loads the saved file and supplies the new upstream message. The addresses and network configuration are already persistent in this exercise. This is a simulated settings restart test, not a complete Linux reboot, interface activation or firewall boot test.",
+          "action": "Choose Run saved-settings test. Change only the editor\u2019s forwarding value to 0 without saving, then Check example; read the unsaved-draft feedback. Restore, save, reload and check.",
+          "commands": [
+            {
+              "command": "ip -6 route show",
+              "explanation": "Display actual current connected, manual and learned routes.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "sysctl -w changes current virtual settings. The editor holds a draft of one simulated settings file. Save virtual file validates and stores that draft; it does not load the settings into the current router. cat reads the saved file, not unsaved text. For the worked example, put forwarding=1, uplink0.accept_ra=2 and edge0.accept_ra=0 under their full net.ipv6.conf keys. sysctl -p /etc/sysctl.d/70-learning-lab-ipv6.conf loads this saved file. Then observe the supplied upstream message: loading flags alone does not produce a new learned route. Run saved-settings test resets only modeled IPv6 flags and learned routes, loads the saved file and supplies the new upstream message. The addresses and network configuration are already persistent in this exercise. This is a simulated settings restart test, not a complete Linux reboot, interface activation or firewall boot test. Use one supported decimal assignment per line. Whole-line # or ; comments and surrounding whitespace are supported. Duplicate keys apply in order, so the last value wins. The grade checks resulting behavior, not exact text. Unsupported keys, includes, wildcards and shell syntax are diagnosed rather than executed.",
+      "hints": [
+        "sysctl -w changes current virtual settings. The editor holds a draft of one simulated settings file. Save virtual file validates and stores that draft; it does not load the settings into the current router. cat reads the saved file, not unsaved text.",
+        "For the worked example, put forwarding=1, uplink0.accept_ra=2 and edge0.accept_ra=0 under their full net.ipv6.conf keys. sysctl -p /etc/sysctl.d/70-learning-lab-ipv6.conf loads this saved file. Then observe the supplied upstream message: loading flags alone does not produce a new learned route.",
+        "Run saved-settings test resets only modeled IPv6 flags and learned routes, loads the saved file and supplies the new upstream message. The addresses and network configuration are already persistent in this exercise. This is a simulated settings restart test, not a complete Linux reboot, interface activation or firewall boot test."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.kernel.org/doc/html/v6.17/networking/ip-sysctl.html",
+        "https://man7.org/linux/man-pages/man8/ip-address.8.html",
+        "https://man7.org/linux/man-pages/man8/ip-route.8.html",
+        "https://man7.org/linux/man-pages/man5/sysctl.conf.5.html",
+        "https://man7.org/linux/man-pages/man8/sysctl.8.html"
+      ],
+      "simplifications": "Linux 6.17 flags, one primary /48\u2013/126 per supplied interface, finite route plan and supplied physical facts. RA observations are native simulator actions, not host commands or generated packets. Fixed metric 1024/medium and positive/zero lifetimes; no clock, SLAAC, NDP, ECMP, learned-route editing or full kernel. Transit headers are independent supplied cases, not application-generated replies or connection tracking. Saved-settings tests assume the supplied addresses/network already persist; no full reboot or firewall startup coverage. All commands, files and observations stay in memory; unsupported syntax is diagnosed.",
+      "initial": {
+        "kind": "LinuxV6Administration",
+        "simulation": {
+          "source_id": "lpic2-router-ipv6-saved-settings",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "version": 1,
+              "host": {
+                "version": 1,
+                "profile": {
+                  "id": "ipv6-admin-3-assignment",
+                  "links": [
+                    {
+                      "name": "lan0",
+                      "network": {
+                        "address": "192.0.2.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    },
+                    {
+                      "name": "wan0",
+                      "network": {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "address": "198.51.100.1",
+                      "device": "wan0",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "203.0.113.0",
+                          "length": 24
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "192.0.2.20",
+                      "available": true
+                    },
+                    {
+                      "address": "203.0.113.80",
+                      "available": true
+                    }
+                  ],
+                  "resolvers": [],
+                  "ipv6": {
+                    "lans": [
+                      {
+                        "device": "lan0",
+                        "network": {
+                          "address": "fd62:70:80::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      },
+                      {
+                        "device": "wan0",
+                        "network": {
+                          "address": "2001:db8:7a::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "fe80::1",
+                        "device": "lan0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:bad::",
+                            "length": 64
+                          }
+                        ]
+                      },
+                      {
+                        "address": "fe80::1",
+                        "device": "wan0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:99::",
+                            "length": 64
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "fd62:70:80::20",
+                        "available": true
+                      },
+                      {
+                        "address": "fd62:70:80::30",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:7a::20",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:99::80",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:99::81",
+                        "available": true
+                      }
+                    ]
+                  }
+                },
+                "configuration": {
+                  "interfaces": [
+                    {
+                      "name": "lan0",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    },
+                    {
+                      "name": "wan0",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.10",
+                        "prefix": 24
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      },
+                      "via": "198.51.100.1",
+                      "device": "wan0",
+                      "metric": 10
+                    }
+                  ],
+                  "nameservers": [],
+                  "ipv6": {
+                    "interfaces": [
+                      {
+                        "device": "lan0",
+                        "address": {
+                          "address": "fd62:70:80::10",
+                          "prefix": 64
+                        }
+                      },
+                      {
+                        "device": "wan0",
+                        "address": {
+                          "address": "2001:db8:7a::10",
+                          "prefix": 64
+                        }
+                      }
+                    ],
+                    "routes": []
+                  }
+                },
+                "generation": 0
+              },
+              "settings": {
+                "version": 1,
+                "global_forwarding": false,
+                "interfaces": [
+                  {
+                    "name": "lan0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  },
+                  {
+                    "name": "wan0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  }
+                ]
+              },
+              "learned": []
+            },
+            "history": [],
+            "input": "",
+            "output": "",
+            "selected_message": 0,
+            "selected_frame": 0,
+            "last_trial": null,
+            "checked": false,
+            "file_editor": "# Supplied network addresses/routes persist; these flags do not yet\nnet.ipv6.conf.all.forwarding = 0\nnet.ipv6.conf.wan0.accept_ra = 1\nnet.ipv6.conf.lan0.accept_ra = 1\n",
+            "saved_file": "# Supplied network addresses/routes persist; these flags do not yet\nnet.ipv6.conf.all.forwarding = 0\nnet.ipv6.conf.wan0.accept_ra = 1\nnet.ipv6.conf.lan0.accept_ra = 1\n"
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "host": {
+                "version": 1,
+                "profile": {
+                  "id": "ipv6-admin-3-example",
+                  "links": [
+                    {
+                      "name": "edge0",
+                      "network": {
+                        "address": "192.0.2.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    },
+                    {
+                      "name": "uplink0",
+                      "network": {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "address": "198.51.100.1",
+                      "device": "uplink0",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "203.0.113.0",
+                          "length": 24
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "192.0.2.20",
+                      "available": true
+                    },
+                    {
+                      "address": "203.0.113.80",
+                      "available": true
+                    }
+                  ],
+                  "resolvers": [],
+                  "ipv6": {
+                    "lans": [
+                      {
+                        "device": "edge0",
+                        "network": {
+                          "address": "fd35:40:50::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      },
+                      {
+                        "device": "uplink0",
+                        "network": {
+                          "address": "2001:db8:35::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "fe80::1",
+                        "device": "edge0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:bad::",
+                            "length": 64
+                          }
+                        ]
+                      },
+                      {
+                        "address": "fe80::1",
+                        "device": "uplink0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:45::",
+                            "length": 64
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "fd35:40:50::20",
+                        "available": true
+                      },
+                      {
+                        "address": "fd35:40:50::30",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:35::20",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:45::80",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:45::81",
+                        "available": true
+                      }
+                    ]
+                  }
+                },
+                "configuration": {
+                  "interfaces": [
+                    {
+                      "name": "edge0",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    },
+                    {
+                      "name": "uplink0",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.10",
+                        "prefix": 24
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      },
+                      "via": "198.51.100.1",
+                      "device": "uplink0",
+                      "metric": 10
+                    }
+                  ],
+                  "nameservers": [],
+                  "ipv6": {
+                    "interfaces": [
+                      {
+                        "device": "edge0",
+                        "address": {
+                          "address": "fd35:40:50::10",
+                          "prefix": 64
+                        }
+                      },
+                      {
+                        "device": "uplink0",
+                        "address": {
+                          "address": "2001:db8:35::10",
+                          "prefix": 64
+                        }
+                      }
+                    ],
+                    "routes": []
+                  }
+                },
+                "generation": 0
+              },
+              "settings": {
+                "version": 1,
+                "global_forwarding": false,
+                "interfaces": [
+                  {
+                    "name": "edge0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  },
+                  {
+                    "name": "uplink0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  }
+                ]
+              },
+              "learned": []
+            },
+            "history": [],
+            "input": "",
+            "output": "",
+            "selected_message": 0,
+            "selected_frame": 0,
+            "last_trial": null,
+            "checked": false,
+            "file_editor": "# Supplied network addresses/routes persist; these flags do not yet\nnet.ipv6.conf.all.forwarding = 0\nnet.ipv6.conf.uplink0.accept_ra = 1\nnet.ipv6.conf.edge0.accept_ra = 1\n",
+            "saved_file": "# Supplied network addresses/routes persist; these flags do not yet\nnet.ipv6.conf.all.forwarding = 0\nnet.ipv6.conf.uplink0.accept_ra = 1\nnet.ipv6.conf.edge0.accept_ra = 1\n"
+          }
+        }
+      },
+      "goal": {
+        "kind": "LinuxV6Administration",
+        "definition": {
+          "source_id": "lpic2-router-ipv6-saved-settings",
+          "assignment": {
+            "id": "ipv6-3-assignment",
+            "initial": {
+              "version": 1,
+              "host": {
+                "version": 1,
+                "profile": {
+                  "id": "ipv6-admin-3-assignment",
+                  "links": [
+                    {
+                      "name": "lan0",
+                      "network": {
+                        "address": "192.0.2.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    },
+                    {
+                      "name": "wan0",
+                      "network": {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "address": "198.51.100.1",
+                      "device": "wan0",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "203.0.113.0",
+                          "length": 24
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "192.0.2.20",
+                      "available": true
+                    },
+                    {
+                      "address": "203.0.113.80",
+                      "available": true
+                    }
+                  ],
+                  "resolvers": [],
+                  "ipv6": {
+                    "lans": [
+                      {
+                        "device": "lan0",
+                        "network": {
+                          "address": "fd62:70:80::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      },
+                      {
+                        "device": "wan0",
+                        "network": {
+                          "address": "2001:db8:7a::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "fe80::1",
+                        "device": "lan0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:bad::",
+                            "length": 64
+                          }
+                        ]
+                      },
+                      {
+                        "address": "fe80::1",
+                        "device": "wan0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:99::",
+                            "length": 64
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "fd62:70:80::20",
+                        "available": true
+                      },
+                      {
+                        "address": "fd62:70:80::30",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:7a::20",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:99::80",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:99::81",
+                        "available": true
+                      }
+                    ]
+                  }
+                },
+                "configuration": {
+                  "interfaces": [
+                    {
+                      "name": "lan0",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    },
+                    {
+                      "name": "wan0",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.10",
+                        "prefix": 24
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      },
+                      "via": "198.51.100.1",
+                      "device": "wan0",
+                      "metric": 10
+                    }
+                  ],
+                  "nameservers": [],
+                  "ipv6": {
+                    "interfaces": [
+                      {
+                        "device": "lan0",
+                        "address": {
+                          "address": "fd62:70:80::10",
+                          "prefix": 64
+                        }
+                      },
+                      {
+                        "device": "wan0",
+                        "address": {
+                          "address": "2001:db8:7a::10",
+                          "prefix": 64
+                        }
+                      }
+                    ],
+                    "routes": []
+                  }
+                },
+                "generation": 0
+              },
+              "settings": {
+                "version": 1,
+                "global_forwarding": false,
+                "interfaces": [
+                  {
+                    "name": "lan0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  },
+                  {
+                    "name": "wan0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  }
+                ]
+              },
+              "learned": []
+            },
+            "requirements": [
+              {
+                "kind": "PreserveIpv4"
+              },
+              {
+                "kind": "PreserveIpv6Interface",
+                "device": "lan0"
+              },
+              {
+                "kind": "PreserveIpv6Interface",
+                "device": "wan0"
+              }
+            ],
+            "expected_routes": {
+              "links": [
+                {
+                  "name": "lan0",
+                  "address": "fd62:70:80::10",
+                  "link_local": "fe80::a",
+                  "prefix": 64,
+                  "up": true
+                },
+                {
+                  "name": "wan0",
+                  "address": "2001:db8:7a::10",
+                  "link_local": "fe80::a",
+                  "prefix": 64,
+                  "up": true
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "network": "::",
+                    "prefix": 0
+                  },
+                  "device": "wan0",
+                  "via": "fe80::1",
+                  "metric": 1024
+                }
+              ]
+            },
+            "settings": [
+              {
+                "key": "net.ipv6.conf.all.forwarding",
+                "value": 1,
+                "label": "IPv6 transit enabled",
+                "why": "A route chooses the next hop; forwarding separately permits transit between interfaces."
+              },
+              {
+                "key": "net.ipv6.conf.wan0.accept_ra",
+                "value": 2,
+                "label": "Upstream advertisements accepted as a router",
+                "why": "Value 2 explicitly accepts a supplied advertisement even in router mode."
+              },
+              {
+                "key": "net.ipv6.conf.lan0.accept_ra",
+                "value": 0,
+                "label": "Client-link advertisements ignored",
+                "why": "Client-facing messages must not install a default router."
+              }
+            ],
+            "paths": [
+              {
+                "target": "2001:db8:99::80",
+                "device": "wan0"
+              },
+              {
+                "target": "2001:db8:99::81",
+                "device": "wan0"
+              },
+              {
+                "target": "fd62:70:80::20",
+                "device": "lan0"
+              }
+            ],
+            "messages": [
+              {
+                "id": "upstream-advertisement",
+                "label": "Upstream advertisement: accept and learn",
+                "advertisement": {
+                  "device": "wan0",
+                  "gateway": "fe80::1",
+                  "router_lifetime": 600
+                },
+                "accepted": true,
+                "learns_default": true
+              },
+              {
+                "id": "client-link-advertisement",
+                "label": "Client-link advertisement: ignore",
+                "advertisement": {
+                  "device": "lan0",
+                  "gateway": "fe80::1",
+                  "router_lifetime": 600
+                },
+                "accepted": false,
+                "learns_default": false
+              },
+              {
+                "id": "upstream-withdrawal",
+                "label": "Upstream zero lifetime: withdraw",
+                "advertisement": {
+                  "device": "wan0",
+                  "gateway": "fe80::1",
+                  "router_lifetime": 0
+                },
+                "accepted": true,
+                "learns_default": false
+              }
+            ],
+            "frames": [
+              {
+                "id": "outgoing-client",
+                "label": "Client to supplied remote host",
+                "ingress": "lan0",
+                "header": {
+                  "source": "fd62:70:80::20",
+                  "destination": "2001:db8:99::80",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "second-client",
+                "label": "Another client and remote host",
+                "ingress": "lan0",
+                "header": {
+                  "source": "fd62:70:80::30",
+                  "destination": "2001:db8:99::81",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "incoming-header",
+                "label": "Supplied remote-to-client header",
+                "ingress": "wan0",
+                "header": {
+                  "source": "2001:db8:99::80",
+                  "destination": "fd62:70:80::20",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "scope-bound",
+                "label": "Link-local source cannot leave its link",
+                "ingress": "lan0",
+                "header": {
+                  "source": "fe80::20",
+                  "destination": "2001:db8:99::80",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "ScopeBound"
+              }
+            ],
+            "active_learned": "wan0",
+            "file": {
+              "initial_text": "# Supplied network addresses/routes persist; these flags do not yet\nnet.ipv6.conf.all.forwarding = 0\nnet.ipv6.conf.wan0.accept_ra = 1\nnet.ipv6.conf.lan0.accept_ra = 1\n"
+            }
+          },
+          "example": {
+            "id": "ipv6-3-worked",
+            "initial": {
+              "version": 1,
+              "host": {
+                "version": 1,
+                "profile": {
+                  "id": "ipv6-admin-3-example",
+                  "links": [
+                    {
+                      "name": "edge0",
+                      "network": {
+                        "address": "192.0.2.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    },
+                    {
+                      "name": "uplink0",
+                      "network": {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      },
+                      "carrier": true
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "address": "198.51.100.1",
+                      "device": "uplink0",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "203.0.113.0",
+                          "length": 24
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "192.0.2.20",
+                      "available": true
+                    },
+                    {
+                      "address": "203.0.113.80",
+                      "available": true
+                    }
+                  ],
+                  "resolvers": [],
+                  "ipv6": {
+                    "lans": [
+                      {
+                        "device": "edge0",
+                        "network": {
+                          "address": "fd35:40:50::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      },
+                      {
+                        "device": "uplink0",
+                        "network": {
+                          "address": "2001:db8:35::",
+                          "length": 64
+                        },
+                        "link_local": "fe80::a"
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "fe80::1",
+                        "device": "edge0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:bad::",
+                            "length": 64
+                          }
+                        ]
+                      },
+                      {
+                        "address": "fe80::1",
+                        "device": "uplink0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "2001:db8:45::",
+                            "length": 64
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "fd35:40:50::20",
+                        "available": true
+                      },
+                      {
+                        "address": "fd35:40:50::30",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:35::20",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:45::80",
+                        "available": true
+                      },
+                      {
+                        "address": "2001:db8:45::81",
+                        "available": true
+                      }
+                    ]
+                  }
+                },
+                "configuration": {
+                  "interfaces": [
+                    {
+                      "name": "edge0",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    },
+                    {
+                      "name": "uplink0",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.10",
+                        "prefix": 24
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      },
+                      "via": "198.51.100.1",
+                      "device": "uplink0",
+                      "metric": 10
+                    }
+                  ],
+                  "nameservers": [],
+                  "ipv6": {
+                    "interfaces": [
+                      {
+                        "device": "edge0",
+                        "address": {
+                          "address": "fd35:40:50::10",
+                          "prefix": 64
+                        }
+                      },
+                      {
+                        "device": "uplink0",
+                        "address": {
+                          "address": "2001:db8:35::10",
+                          "prefix": 64
+                        }
+                      }
+                    ],
+                    "routes": []
+                  }
+                },
+                "generation": 0
+              },
+              "settings": {
+                "version": 1,
+                "global_forwarding": false,
+                "interfaces": [
+                  {
+                    "name": "edge0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  },
+                  {
+                    "name": "uplink0",
+                    "forwarding": false,
+                    "force_forwarding": false,
+                    "accept_ra": 1
+                  }
+                ]
+              },
+              "learned": []
+            },
+            "requirements": [
+              {
+                "kind": "PreserveIpv4"
+              },
+              {
+                "kind": "PreserveIpv6Interface",
+                "device": "edge0"
+              },
+              {
+                "kind": "PreserveIpv6Interface",
+                "device": "uplink0"
+              }
+            ],
+            "expected_routes": {
+              "links": [
+                {
+                  "name": "edge0",
+                  "address": "fd35:40:50::10",
+                  "link_local": "fe80::a",
+                  "prefix": 64,
+                  "up": true
+                },
+                {
+                  "name": "uplink0",
+                  "address": "2001:db8:35::10",
+                  "link_local": "fe80::a",
+                  "prefix": 64,
+                  "up": true
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "network": "::",
+                    "prefix": 0
+                  },
+                  "device": "uplink0",
+                  "via": "fe80::1",
+                  "metric": 1024
+                }
+              ]
+            },
+            "settings": [
+              {
+                "key": "net.ipv6.conf.all.forwarding",
+                "value": 1,
+                "label": "IPv6 transit enabled",
+                "why": "A route chooses the next hop; forwarding separately permits transit between interfaces."
+              },
+              {
+                "key": "net.ipv6.conf.uplink0.accept_ra",
+                "value": 2,
+                "label": "Upstream advertisements accepted as a router",
+                "why": "Value 2 explicitly accepts a supplied advertisement even in router mode."
+              },
+              {
+                "key": "net.ipv6.conf.edge0.accept_ra",
+                "value": 0,
+                "label": "Client-link advertisements ignored",
+                "why": "Client-facing messages must not install a default router."
+              }
+            ],
+            "paths": [
+              {
+                "target": "2001:db8:45::80",
+                "device": "uplink0"
+              },
+              {
+                "target": "2001:db8:45::81",
+                "device": "uplink0"
+              },
+              {
+                "target": "fd35:40:50::20",
+                "device": "edge0"
+              }
+            ],
+            "messages": [
+              {
+                "id": "upstream-advertisement",
+                "label": "Upstream advertisement: accept and learn",
+                "advertisement": {
+                  "device": "uplink0",
+                  "gateway": "fe80::1",
+                  "router_lifetime": 600
+                },
+                "accepted": true,
+                "learns_default": true
+              },
+              {
+                "id": "client-link-advertisement",
+                "label": "Client-link advertisement: ignore",
+                "advertisement": {
+                  "device": "edge0",
+                  "gateway": "fe80::1",
+                  "router_lifetime": 600
+                },
+                "accepted": false,
+                "learns_default": false
+              },
+              {
+                "id": "upstream-withdrawal",
+                "label": "Upstream zero lifetime: withdraw",
+                "advertisement": {
+                  "device": "uplink0",
+                  "gateway": "fe80::1",
+                  "router_lifetime": 0
+                },
+                "accepted": true,
+                "learns_default": false
+              }
+            ],
+            "frames": [
+              {
+                "id": "outgoing-client",
+                "label": "Client to supplied remote host",
+                "ingress": "edge0",
+                "header": {
+                  "source": "fd35:40:50::20",
+                  "destination": "2001:db8:45::80",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "second-client",
+                "label": "Another client and remote host",
+                "ingress": "edge0",
+                "header": {
+                  "source": "fd35:40:50::30",
+                  "destination": "2001:db8:45::81",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "incoming-header",
+                "label": "Supplied remote-to-client header",
+                "ingress": "uplink0",
+                "header": {
+                  "source": "2001:db8:45::80",
+                  "destination": "fd35:40:50::20",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "Allowed"
+              },
+              {
+                "id": "scope-bound",
+                "label": "Link-local source cannot leave its link",
+                "ingress": "edge0",
+                "header": {
+                  "source": "fe80::20",
+                  "destination": "2001:db8:45::80",
+                  "protocol": "Tcp",
+                  "source_port": 41000,
+                  "destination_port": 443,
+                  "icmp_type": null,
+                  "icmp_code": null
+                },
+                "expected": "ScopeBound"
+              }
+            ],
+            "active_learned": "uplink0",
+            "file": {
+              "initial_text": "# Supplied network addresses/routes persist; these flags do not yet\nnet.ipv6.conf.all.forwarding = 0\nnet.ipv6.conf.uplink0.accept_ra = 1\nnet.ipv6.conf.edge0.accept_ra = 1\n"
+            }
+          },
+          "worked": [
+            {
+              "kind": "edit_file",
+              "text": "# Forward transit and accept upstream messages only\nnet.ipv6.conf.all.forwarding = 1\nnet.ipv6.conf.uplink0.accept_ra = 2\nnet.ipv6.conf.edge0.accept_ra = 0\n"
+            },
+            {
+              "kind": "save_file"
+            },
+            {
+              "kind": "command",
+              "input": "sysctl -p /etc/sysctl.d/70-learning-lab-ipv6.conf"
+            },
+            {
+              "kind": "observe",
+              "message": 0
+            },
+            {
+              "kind": "run_restart"
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "v6-admin-workspace {\"kind\":\"edit_file\",\"text\":\"# Forward transit and accept upstream messages only\\nnet.ipv6.conf.all.forwarding = 1\\nnet.ipv6.conf.wan0.accept_ra = 2\\nnet.ipv6.conf.lan0.accept_ra = 0\\n\"}",
+        "v6-admin-workspace {\"kind\":\"save_file\"}",
+        "v6-admin-workspace {\"kind\":\"command\",\"input\":\"sysctl -p /etc/sysctl.d/70-learning-lab-ipv6.conf\"}",
+        "v6-admin-workspace {\"kind\":\"observe\",\"message\":0}",
+        "v6-admin-workspace {\"kind\":\"run_restart\"}",
+        "v6-admin-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-router-ipv6-ra-recovery"
+      ]
+    }
+  ]
+}

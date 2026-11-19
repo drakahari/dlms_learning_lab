@@ -1,0 +1,1787 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-nm-dhcp-startup",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Automatic Ethernet profiles",
+      "unit": "linux-automatic-ethernet",
+      "title": "Make a saved Ethernet profile follow supplied DHCP settings",
+      "summary": "Automatic profile selection and automatic IPv4 addressing are different choices. The worked profile remains eligible on enp1s0, but its IPv4 method obtains each test's address and router instead of storing one manual address.",
+      "objective": "At the next startup, configure Lab Ethernet on enp1s0 from each supplied DHCP address, prefix and router. Reach 172.16.5.10 through enp1s0 as the preferred default uplink. Preserve the current management connection and all protected management profile settings. Keep the supplied filenames and UUIDs; test every supplied case.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Edit the saved virtual profile, test its next-startup behavior against all supplied leases and repair the specific failed requirement."
+      ],
+      "guide": [],
+      "explanation": "Automatic profile selection and automatic IPv4 addressing are different choices. The worked profile remains eligible on enp1s0, but its IPv4 method obtains each test's address and router instead of storing one manual address.",
+      "hints": [
+        "Compare autoconnect in [connection] with method in [ipv4]: they control different decisions.",
+        "This exercise's automatic IPv4 subset uses only the supplied lease. Remove old address1 and gateway properties rather than copying one test's values."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://networkmanager.dev/docs/api/latest/nm-settings-keyfile.html",
+        "https://networkmanager.dev/docs/api/latest/settings-ipv4.html",
+        "https://networkmanager.dev/docs/api/latest/settings-connection.html"
+      ],
+      "simplifications": "Bounded in-process saved Ethernet settings and settled supplied DHCP outcomes. No real NetworkManager, host profiles, commands, network packets, lease server, renewal, timeouts, retries, profile fallback, DNS merging, extra static addresses with auto, gateway overrides or actual restart. Current selections are owned snapshots; re-reading does not reacquire them. Supplied route metrics are explicit inputs. Interface /31 and /32 remain special cases outside this conventional exercise.",
+      "initial": {
+        "kind": "NmProfiles",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-nm-dhcp-startup",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000140\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.140.0.99/24\ngateway=10.140.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000141\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.141.0.20/24\ngateway=10.141.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "app.nmconnection"
+          },
+          "practice": {
+            "draft": {
+              "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000150\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.150.0.99/24\ngateway=10.150.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000151\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.151.0.20/24\ngateway=10.151.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "app.nmconnection"
+          }
+        }
+      },
+      "goal": {
+        "kind": "NmProfiles",
+        "definition": {
+          "initial": {
+            "id": "lpic1-nm-dhcp-startup",
+            "instructions": "At the next startup, configure Lab Ethernet on enp1s0 from each supplied DHCP address, prefix and router. Reach 172.16.5.10 through enp1s0 as the preferred default uplink. Preserve the current management connection and all protected management profile settings. Keep the supplied filenames and UUIDs; test every supplied case.",
+            "starter": {
+              "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000140\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.140.0.99/24\ngateway=10.140.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000141\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.141.0.20/24\ngateway=10.141.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "protected_profiles": [
+              "management.nmconnection"
+            ],
+            "cases": [
+              {
+                "id": "lpic1-nm-dhcp-startup-case-0",
+                "label": "First supplied lease",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-dhcp-startup-physical-0",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.140.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.141.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.140.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.140.0.254",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.141.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.140.0.10",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  },
+                  "dhcp": {
+                    "enp1s0": {
+                      "kind": "Bound",
+                      "address": {
+                        "address": "10.140.0.60",
+                        "prefix": 24
+                      },
+                      "router": "10.140.0.1"
+                    }
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000140\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.140.0.99/24\ngateway=10.140.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000141\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.141.0.20/24\ngateway=10.141.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000141"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureDhcp",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.140.0.60",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000140"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.140.0.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-nm-dhcp-startup-case-1",
+                "label": "Different address and router",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-dhcp-startup-physical-1",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.140.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.141.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.140.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.140.0.254",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.141.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.140.0.10",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  },
+                  "dhcp": {
+                    "enp1s0": {
+                      "kind": "Bound",
+                      "address": {
+                        "address": "10.140.0.97",
+                        "prefix": 24
+                      },
+                      "router": "10.140.0.254"
+                    }
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000140\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.140.0.99/24\ngateway=10.140.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000141\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.141.0.20/24\ngateway=10.141.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000141"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureDhcp",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.140.0.97",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000140"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.140.0.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-nm-dhcp-startup-case-2",
+                "label": "Another supplied address",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-dhcp-startup-physical-2",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.140.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.141.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.140.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.140.0.254",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.141.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.140.0.10",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  },
+                  "dhcp": {
+                    "enp1s0": {
+                      "kind": "Bound",
+                      "address": {
+                        "address": "10.140.0.126",
+                        "prefix": 24
+                      },
+                      "router": "10.140.0.1"
+                    }
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000140\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.140.0.99/24\ngateway=10.140.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000141\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.141.0.20/24\ngateway=10.141.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000141"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureDhcp",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.140.0.126",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000140"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.140.0.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic1-nm-dhcp-startup-practice",
+            "instructions": "Prepare Lab Ethernet on enp1s0 to obtain its address and router from each supplied DHCP result at the next startup. Reach 172.16.5.10 through enp1s0 as the preferred default uplink. Preserve current management settings, the protected management profile and both supplied filenames/UUIDs.",
+            "starter": {
+              "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000150\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.150.0.99/24\ngateway=10.150.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000151\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.151.0.20/24\ngateway=10.151.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "protected_profiles": [
+              "management.nmconnection"
+            ],
+            "cases": [
+              {
+                "id": "lpic1-nm-dhcp-startup-practice-case-0",
+                "label": "First supplied lease",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-dhcp-startup-practice-physical-0",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.150.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.151.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.150.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.150.0.254",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.151.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.150.0.10",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  },
+                  "dhcp": {
+                    "enp1s0": {
+                      "kind": "Bound",
+                      "address": {
+                        "address": "10.150.0.60",
+                        "prefix": 24
+                      },
+                      "router": "10.150.0.1"
+                    }
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000150\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.150.0.99/24\ngateway=10.150.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000151\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.151.0.20/24\ngateway=10.151.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000151"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureDhcp",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.150.0.60",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000150"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.150.0.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-nm-dhcp-startup-practice-case-1",
+                "label": "Different address and router",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-dhcp-startup-practice-physical-1",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.150.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.151.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.150.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.150.0.254",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.151.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.150.0.10",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  },
+                  "dhcp": {
+                    "enp1s0": {
+                      "kind": "Bound",
+                      "address": {
+                        "address": "10.150.0.97",
+                        "prefix": 24
+                      },
+                      "router": "10.150.0.254"
+                    }
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000150\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.150.0.99/24\ngateway=10.150.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000151\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.151.0.20/24\ngateway=10.151.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000151"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureDhcp",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.150.0.97",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000150"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.150.0.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-nm-dhcp-startup-practice-case-2",
+                "label": "Another supplied address",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-dhcp-startup-practice-physical-2",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.150.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.151.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.150.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.150.0.254",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.151.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.150.0.10",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  },
+                  "dhcp": {
+                    "enp1s0": {
+                      "kind": "Bound",
+                      "address": {
+                        "address": "10.150.0.126",
+                        "prefix": 24
+                      },
+                      "router": "10.150.0.1"
+                    }
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000150\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.150.0.99/24\ngateway=10.150.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000151\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.151.0.20/24\ngateway=10.151.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000151"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureDhcp",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.150.0.126",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000150"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.150.0.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000150\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=auto\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+            "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000151\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.151.0.20/24\ngateway=10.151.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+          }
+        }
+      },
+      "solution": [
+        "NM PROFILES\n{\"app.nmconnection\": \"[connection]\\nid=Lab Ethernet\\nuuid=00000000-0000-4000-8000-000000000140\\ntype=ethernet\\ninterface-name=enp1s0\\nautoconnect=true\\nautoconnect-priority=10\\n\\n[ipv4]\\nmethod=auto\\nroute-metric=100\\n\\n[ipv6]\\nmethod=disabled\\n\", \"management.nmconnection\": \"[connection]\\nid=Management\\nuuid=00000000-0000-4000-8000-000000000141\\ntype=ethernet\\ninterface-name=enp2s0\\nautoconnect=true\\nautoconnect-priority=10\\n\\n[ipv4]\\nmethod=manual\\naddress1=10.141.0.20/24\\ngateway=10.141.0.1\\nroute-metric=200\\n\\n[ipv6]\\nmethod=disabled\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic1-nm-uplink-handover"
+      ]
+    },
+    {
+      "id": "lpic1-nm-dhcp-local-only",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Automatic Ethernet profiles",
+      "unit": "linux-automatic-ethernet",
+      "title": "Keep a DHCP address without taking over the default route",
+      "summary": "never-default=true leaves the received address and local route in place while suppressing that adapter's received default. A larger route metric still leaves a default route present; disabling autoconnect loses the local connection as well.",
+      "objective": "At the next startup, keep Lab Ethernet on enp1s0 configured from each supplied DHCP address and prefix. Keep a usable path to the supplied local peer through enp1s0, with no default route on that adapter. Reach 172.16.5.10 through management on enp2s0 as the preferred default uplink. Preserve the current management connection and all protected management profile settings. Keep the supplied filenames and UUIDs; test every supplied case.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Edit the saved virtual profile, test its next-startup behavior against all supplied leases and repair the specific failed requirement."
+      ],
+      "guide": [],
+      "explanation": "never-default=true leaves the received address and local route in place while suppressing that adapter's received default. A larger route metric still leaves a default route present; disabling autoconnect loses the local connection as well.",
+      "hints": [
+        "The task needs the DHCP address and local path, so disabling the connection removes too much.",
+        "Inspect the per-profile IPv4 default-route policy. Changing route-metric alone does not remove a default route."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://networkmanager.dev/docs/api/latest/nm-settings-keyfile.html",
+        "https://networkmanager.dev/docs/api/latest/settings-ipv4.html",
+        "https://networkmanager.dev/docs/api/latest/settings-connection.html"
+      ],
+      "simplifications": "Bounded in-process saved Ethernet settings and settled supplied DHCP outcomes. No real NetworkManager, host profiles, commands, network packets, lease server, renewal, timeouts, retries, profile fallback, DNS merging, extra static addresses with auto, gateway overrides or actual restart. Current selections are owned snapshots; re-reading does not reacquire them. Supplied route metrics are explicit inputs. Interface /31 and /32 remain special cases outside this conventional exercise.",
+      "initial": {
+        "kind": "NmProfiles",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-nm-dhcp-local-only",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000142\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=auto\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000143\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.143.0.20/24\ngateway=10.143.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "app.nmconnection"
+          },
+          "practice": {
+            "draft": {
+              "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000152\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=auto\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000153\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.153.0.20/24\ngateway=10.153.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "app.nmconnection"
+          }
+        }
+      },
+      "goal": {
+        "kind": "NmProfiles",
+        "definition": {
+          "initial": {
+            "id": "lpic1-nm-dhcp-local-only",
+            "instructions": "At the next startup, keep Lab Ethernet on enp1s0 configured from each supplied DHCP address and prefix. Keep a usable path to the supplied local peer through enp1s0, with no default route on that adapter. Reach 172.16.5.10 through management on enp2s0 as the preferred default uplink. Preserve the current management connection and all protected management profile settings. Keep the supplied filenames and UUIDs; test every supplied case.",
+            "starter": {
+              "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000142\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=auto\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000143\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.143.0.20/24\ngateway=10.143.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "protected_profiles": [
+              "management.nmconnection"
+            ],
+            "cases": [
+              {
+                "id": "lpic1-nm-dhcp-local-only-case-0",
+                "label": "First supplied lease",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-dhcp-local-only-physical-0",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.142.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.143.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.142.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.142.0.254",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.143.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.142.0.10",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  },
+                  "dhcp": {
+                    "enp1s0": {
+                      "kind": "Bound",
+                      "address": {
+                        "address": "10.142.0.60",
+                        "prefix": 24
+                      },
+                      "router": "10.142.0.1"
+                    }
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000142\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=auto\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000143\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.143.0.20/24\ngateway=10.143.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000143"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureDhcp",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.142.0.60",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000142"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.142.0.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "enp1s0"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-nm-dhcp-local-only-case-1",
+                "label": "Different address and router",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-dhcp-local-only-physical-1",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.142.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.143.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.142.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.142.0.254",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.143.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.142.0.10",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  },
+                  "dhcp": {
+                    "enp1s0": {
+                      "kind": "Bound",
+                      "address": {
+                        "address": "10.142.0.97",
+                        "prefix": 24
+                      },
+                      "router": "10.142.0.254"
+                    }
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000142\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=auto\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000143\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.143.0.20/24\ngateway=10.143.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000143"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureDhcp",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.142.0.97",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000142"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.142.0.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "enp1s0"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-nm-dhcp-local-only-case-2",
+                "label": "Another supplied address",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-dhcp-local-only-physical-2",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.142.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.143.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.142.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.142.0.254",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.143.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.142.0.10",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  },
+                  "dhcp": {
+                    "enp1s0": {
+                      "kind": "Bound",
+                      "address": {
+                        "address": "10.142.0.126",
+                        "prefix": 24
+                      },
+                      "router": "10.142.0.1"
+                    }
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000142\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=auto\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000143\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.143.0.20/24\ngateway=10.143.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000143"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureDhcp",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.142.0.126",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000142"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.142.0.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "enp1s0"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic1-nm-dhcp-local-only-practice",
+            "instructions": "Keep Lab Ethernet on enp1s0 configured from each supplied DHCP result at the next startup. Keep its usable local address but add no default route through enp1s0; reach 172.16.5.10 through the management adapter enp2s0. Preserve current management settings, the protected management profile and both supplied filenames/UUIDs.",
+            "starter": {
+              "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000152\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=auto\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000153\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.153.0.20/24\ngateway=10.153.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "protected_profiles": [
+              "management.nmconnection"
+            ],
+            "cases": [
+              {
+                "id": "lpic1-nm-dhcp-local-only-practice-case-0",
+                "label": "First supplied lease",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-dhcp-local-only-practice-physical-0",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.152.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.153.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.152.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.152.0.254",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.153.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.152.0.10",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  },
+                  "dhcp": {
+                    "enp1s0": {
+                      "kind": "Bound",
+                      "address": {
+                        "address": "10.152.0.60",
+                        "prefix": 24
+                      },
+                      "router": "10.152.0.1"
+                    }
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000152\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=auto\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000153\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.153.0.20/24\ngateway=10.153.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000153"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureDhcp",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.152.0.60",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000152"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.152.0.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "enp1s0"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-nm-dhcp-local-only-practice-case-1",
+                "label": "Different address and router",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-dhcp-local-only-practice-physical-1",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.152.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.153.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.152.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.152.0.254",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.153.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.152.0.10",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  },
+                  "dhcp": {
+                    "enp1s0": {
+                      "kind": "Bound",
+                      "address": {
+                        "address": "10.152.0.97",
+                        "prefix": 24
+                      },
+                      "router": "10.152.0.254"
+                    }
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000152\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=auto\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000153\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.153.0.20/24\ngateway=10.153.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000153"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureDhcp",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.152.0.97",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000152"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.152.0.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "enp1s0"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-nm-dhcp-local-only-practice-case-2",
+                "label": "Another supplied address",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-dhcp-local-only-practice-physical-2",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.152.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.153.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.152.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.152.0.254",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.153.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.152.0.10",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  },
+                  "dhcp": {
+                    "enp1s0": {
+                      "kind": "Bound",
+                      "address": {
+                        "address": "10.152.0.126",
+                        "prefix": 24
+                      },
+                      "router": "10.152.0.1"
+                    }
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000152\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=auto\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000153\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.153.0.20/24\ngateway=10.153.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000153"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureDhcp",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.152.0.126",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000152"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.152.0.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "enp1s0"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "app.nmconnection": "[connection]\nid=Lab Ethernet\nuuid=00000000-0000-4000-8000-000000000152\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=auto\nroute-metric=100\nnever-default=true\n\n[ipv6]\nmethod=disabled\n",
+            "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000153\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.153.0.20/24\ngateway=10.153.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+          }
+        }
+      },
+      "solution": [
+        "NM PROFILES\n{\"app.nmconnection\": \"[connection]\\nid=Lab Ethernet\\nuuid=00000000-0000-4000-8000-000000000142\\ntype=ethernet\\ninterface-name=enp1s0\\nautoconnect=true\\nautoconnect-priority=10\\n\\n[ipv4]\\nmethod=auto\\nroute-metric=100\\nnever-default=true\\n\\n[ipv6]\\nmethod=disabled\\n\", \"management.nmconnection\": \"[connection]\\nid=Management\\nuuid=00000000-0000-4000-8000-000000000143\\ntype=ethernet\\ninterface-name=enp2s0\\nautoconnect=true\\nautoconnect-priority=10\\n\\n[ipv4]\\nmethod=manual\\naddress1=10.143.0.20/24\\ngateway=10.143.0.1\\nroute-metric=200\\n\\n[ipv6]\\nmethod=disabled\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic1-nm-dhcp-startup"
+      ]
+    }
+  ]
+}

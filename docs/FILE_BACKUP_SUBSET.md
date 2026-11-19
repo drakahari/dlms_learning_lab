@@ -205,3 +205,14 @@ implied. Directory selection/products/media, shell backup automation, dd, tape/m
 and rsync remain Open. Final composed inclusive suite passes2279 checks with no
 failures or ignored tests. Final81 development-native screenshots and scoped render review pass. Exact installed
 candidate/NFS cold reopening remain separately pending.
+
+## Review242 selection extension
+
+The normal four-task snapshot remains intact. The separate review library adds
+one application-directory selection capstone, with an `ArtifactSet` outcome for
+exact delivered archive/snapshot filenames. This immediate bounded comparison
+is separate from contents, metadata and independent recovery checks; matching
+names alone never proves recovery. It permits explicit empty requested sets,
+rejects duplicate/cross-kind/noncanonical destinations and preserves all prior
+variant serialization and limits. No new command or archive format is introduced.
+See BACKUP_SELECTION_LESSON.md for current evidence and the remaining206.2 gaps.

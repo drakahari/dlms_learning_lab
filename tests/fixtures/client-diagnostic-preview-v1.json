@@ -1,0 +1,372 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-client-name-investigation",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Client DNS diagnosis",
+      "unit": "linux-client-name-investigation",
+      "title": "Find why an application gets the wrong address",
+      "summary": "Investigate local aliases, DNS search and stopped fallback, then repair the client without copying changing DNS records.",
+      "objective": "Remove the stale report and retired old-rescue aliases from the local rescue.office.lab.test record. Keep rescue.office.lab.test and rescue at 192.0.2.55, localhost at 127.0.0.1, and printer.office.lab.test at 192.0.2.60 through files. Let report resolve through the supplied DNS search settings in both samples, including when its address changes. Let assets fall through to the second DNS search site; keep missing.office.lab.test. unresolved.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "prerequisites": [],
+      "steps": [
+        "Inspect a lookup, repair the local aliases and source actions, then verify both DNS samples."
+      ],
+      "guide": [],
+      "hints": [
+        "A successful answer can still be stale. Run getent ahostsv4 report and compare its source trace with the local row.",
+        "Keep the rescue names on the local row. Remove only aliases whose ownership or lifetime has changed.",
+        "A missing files entry must be allowed to continue to DNS. DNS then applies the fixed search list; it does not search the local file again."
+      ],
+      "explanation": "Keep the rescue canonical name and rescue alias at the supplied local address, but remove report and old-rescue. Use files before dns with continuation after a local miss. This keeps the required local override while allowing report and assets to follow the supplied search order. The two DNS samples change report\u2019s address, so copying one answer into hosts cannot satisfy the task. Comments, equivalent explicit default actions and a different row order also work.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man1/getent.1.html",
+        "https://man7.org/linux/man-pages/man5/nsswitch.conf.5.html",
+        "https://man7.org/linux/man-pages/man5/resolv.conf.5.html",
+        "https://man7.org/linux/man-pages/man5/hosts.5.html"
+      ],
+      "simplifications": "In-process IPv4 files/DNS source order with search only inside the DNS backend. Fixed supplied resolver excerpt; positive/missing DNS snapshots, one address per name, no CNAME, IPv6, retries, caches or packets. getent ahostsv4 supports one ordinary name or canonical dotted-decimal IPv4 key; stream/datagram/raw result rows and status0/2 are modeled. Other databases, flags, enumeration, multiple keys, legacy numeric forms and systemd-resolved execution refuse. The trace is simulator inspection, not additional getent output. No host filesystem, network or subprocess; not full glibc conformance or full109.4 coverage.",
+      "initial": {
+        "kind": "ClientNames",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-client-name-investigation",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "hosts": "127.0.0.1 localhost\n192.0.2.55 rescue.office.lab.test rescue report old-rescue\n192.0.2.60 printer.office.lab.test\n",
+              "nsswitch.conf": "hosts: files [NOTFOUND=return] dns\n"
+            },
+            "tested": null,
+            "selected": "hosts",
+            "diagnostic": {
+              "input": "",
+              "sample": 0
+            }
+          },
+          "practice": {
+            "draft": {
+              "hosts": "127.0.0.1 localhost\n198.51.100.40 studio.workshop.lab.test studio preview old-studio\n198.51.100.60 camera.workshop.lab.test\n",
+              "nsswitch.conf": "hosts: files [NOTFOUND=return] dns\n"
+            },
+            "tested": null,
+            "selected": "hosts",
+            "diagnostic": {
+              "input": "",
+              "sample": 0
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "ClientNames",
+        "definition": {
+          "initial": {
+            "mode": "sources_with_search",
+            "resolver": "search north.office.lab.test south.office.lab.test\noptions ndots:1\n",
+            "id": "lpic1-client-name-investigation",
+            "instructions": "Remove the stale report and retired old-rescue aliases from the local rescue.office.lab.test record. Keep rescue.office.lab.test and rescue at 192.0.2.55, localhost at 127.0.0.1, and printer.office.lab.test at 192.0.2.60 through files. Let report resolve through the supplied DNS search settings in both samples, including when its address changes. Let assets fall through to the second DNS search site; keep missing.office.lab.test. unresolved.",
+            "starter": {
+              "hosts": "127.0.0.1 localhost\n192.0.2.55 rescue.office.lab.test rescue report old-rescue\n192.0.2.60 printer.office.lab.test\n",
+              "nsswitch.conf": "hosts: files [NOTFOUND=return] dns\n"
+            },
+            "cases": [
+              {
+                "id": "snapshot-0",
+                "label": "DNS sample 1: service address 192.0.2.80",
+                "hostname": "client.office.lab.test",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "report.north.office.lab.test": "192.0.2.80",
+                      "report.south.office.lab.test": "203.0.113.99",
+                      "assets.south.office.lab.test": "203.0.113.81",
+                      "rescue.office.lab.test": "203.0.113.200"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "rescue.office.lab.test",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "rescue",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "localhost",
+                    "address": "127.0.0.1",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "printer.office.lab.test",
+                    "address": "192.0.2.60",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "report",
+                    "address": "192.0.2.80",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "assets",
+                    "address": "203.0.113.81",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "old-rescue",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "missing.office.lab.test.",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              },
+              {
+                "id": "snapshot-1",
+                "label": "DNS sample 2: service address 192.0.2.82",
+                "hostname": "client.office.lab.test",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "report.north.office.lab.test": "192.0.2.82",
+                      "report.south.office.lab.test": "203.0.113.99",
+                      "assets.south.office.lab.test": "203.0.113.81",
+                      "rescue.office.lab.test": "203.0.113.200"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "rescue.office.lab.test",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "rescue",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "localhost",
+                    "address": "127.0.0.1",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "printer.office.lab.test",
+                    "address": "192.0.2.60",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "report",
+                    "address": "192.0.2.82",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "assets",
+                    "address": "203.0.113.81",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "old-rescue",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "missing.office.lab.test.",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "mode": "sources_with_search",
+            "resolver": "search north.workshop.lab.test south.workshop.lab.test\noptions ndots:1\n",
+            "id": "practice-lpic1-client-name-investigation",
+            "instructions": "Remove the stale preview and retired old-studio aliases from the local studio.workshop.lab.test record.\nKeep studio.workshop.lab.test and studio at 198.51.100.40, localhost at 127.0.0.1, and camera.workshop.lab.test at 198.51.100.60 through files.\nLet preview resolve through the supplied DNS search settings in both samples, including when its address changes.\nLet images fall through to the second DNS search site; keep missing.workshop.lab.test. unresolved.",
+            "starter": {
+              "hosts": "127.0.0.1 localhost\n198.51.100.40 studio.workshop.lab.test studio preview old-studio\n198.51.100.60 camera.workshop.lab.test\n",
+              "nsswitch.conf": "hosts: files [NOTFOUND=return] dns\n"
+            },
+            "cases": [
+              {
+                "id": "snapshot-0",
+                "label": "DNS sample 1: service address 198.51.100.80",
+                "hostname": "client.workshop.lab.test",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "preview.north.workshop.lab.test": "198.51.100.80",
+                      "preview.south.workshop.lab.test": "203.0.113.99",
+                      "images.south.workshop.lab.test": "203.0.113.81",
+                      "studio.workshop.lab.test": "203.0.113.200"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "studio.workshop.lab.test",
+                    "address": "198.51.100.40",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "studio",
+                    "address": "198.51.100.40",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "localhost",
+                    "address": "127.0.0.1",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "camera.workshop.lab.test",
+                    "address": "198.51.100.60",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "preview",
+                    "address": "198.51.100.80",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "images",
+                    "address": "203.0.113.81",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "old-studio",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "missing.workshop.lab.test.",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              },
+              {
+                "id": "snapshot-1",
+                "label": "DNS sample 2: service address 198.51.100.82",
+                "hostname": "client.workshop.lab.test",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "preview.north.workshop.lab.test": "198.51.100.82",
+                      "preview.south.workshop.lab.test": "203.0.113.99",
+                      "images.south.workshop.lab.test": "203.0.113.81",
+                      "studio.workshop.lab.test": "203.0.113.200"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "studio.workshop.lab.test",
+                    "address": "198.51.100.40",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "studio",
+                    "address": "198.51.100.40",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "localhost",
+                    "address": "127.0.0.1",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "camera.workshop.lab.test",
+                    "address": "198.51.100.60",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "preview",
+                    "address": "198.51.100.82",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "images",
+                    "address": "203.0.113.81",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "old-studio",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "missing.workshop.lab.test.",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "hosts": "127.0.0.1 localhost\n198.51.100.40 studio.workshop.lab.test studio\n198.51.100.60 camera.workshop.lab.test\n",
+            "nsswitch.conf": "hosts: files dns\n"
+          }
+        }
+      },
+      "solution": [
+        "NAME SOURCES\n{\"hosts\":\"127.0.0.1 localhost\\n192.0.2.55 rescue.office.lab.test rescue\\n192.0.2.60 printer.office.lab.test\\n\",\"nsswitch.conf\":\"hosts: files dns\\n\"}"
+      ]
+    }
+  ]
+}

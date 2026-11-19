@@ -1,0 +1,378 @@
+{
+  "schema_version": 1,
+  "purpose": "Fixed disposable global ordinary export observations; not learner source or complete Bash coverage",
+  "cases": [
+    {
+      "id": "script-only",
+      "source": "ROOM='West Court'\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "inherited",
+      "source": "true\n",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "ROOM": "East Hall"
+      },
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "update-inherited",
+      "source": "ROOM='West Court'\n",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "ROOM": "East Hall"
+      },
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "export-existing",
+      "source": "ROOM='West Court'\nexport ROOM\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "export-assignment",
+      "source": "export ROOM='West Court'\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "declaration-no-splitting",
+      "source": "export ROOM=$SEED\n",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "SEED": "West Court"
+      },
+      "files": {},
+      "observe": [
+        "SEED",
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "argument-value",
+      "source": "export ROOM=$1\n",
+      "args": [
+        "Garden Hall"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "empty-versus-unset",
+      "source": "export EMPTY='' UNSET\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "EMPTY",
+        "UNSET"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "unset-then-assignment",
+      "source": "export ROOM\nROOM='West Court'\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "unexport-inherited",
+      "source": "export -n ROOM\n",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "ROOM": "West Court"
+      },
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "unexport-missing",
+      "source": "export -n ROOM\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "unexport-unset",
+      "source": "export ROOM\nexport -n ROOM\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "reexport",
+      "source": "export -n ROOM\nROOM='West Court'\nexport ROOM\n",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "ROOM": "East Hall"
+      },
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "declarations-share-original-values",
+      "source": "A=old\nexport A=new B=$A\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "A",
+        "B"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "mixed-quotes",
+      "source": "export ROOM='West 'Court\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "control-characters",
+      "source": "export ROOM=\"$SEED\"\n",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "SEED": "West\tCourt\nUpper"
+      },
+      "files": {},
+      "observe": [
+        "ROOM",
+        "SEED"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "literal-wildcard",
+      "source": "export ROOM='*.txt'\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.txt": "ordinary marker",
+        "/work/ROOM=a.txt": "matches an incorrectly globbed assignment argument"
+      },
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "declaration-no-globbing",
+      "source": "export ROOM=$SEED\n",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "SEED": "*.txt"
+      },
+      "files": {
+        "/work/a.txt": "ordinary marker",
+        "/work/ROOM=a.txt": "matches an incorrectly globbed assignment argument"
+      },
+      "observe": [
+        "ROOM",
+        "SEED"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "read-preserves-export",
+      "source": "read -r ROOM\n",
+      "args": [],
+      "stdin": "West Court\n",
+      "env": {
+        "ROOM": "Old"
+      },
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "read-does-not-export",
+      "source": "read -r ROOM\n",
+      "args": [],
+      "stdin": "West Court\n",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "if-export",
+      "source": "if true; then export ROOM='West Court'; else ROOM=unused; fi\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "else-export",
+      "source": "if false; then ROOM=unused; else export ROOM='West Court'; fi\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "and-export",
+      "source": "true && export ROOM='West Court'\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "or-export",
+      "source": "false || export ROOM='West Court'\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "multiple-existing",
+      "source": "A=one\nB=two\nexport A B\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "A",
+        "B"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "assignment-after-unexport",
+      "source": "export -n ROOM\nROOM='West Court'\n",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "ROOM": "Old"
+      },
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "multiple-unexport",
+      "source": "export -n A B\n",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "A": "one",
+        "B": "two"
+      },
+      "files": {},
+      "observe": [
+        "A",
+        "B"
+      ],
+      "host_observation": null
+    },
+    {
+      "id": "apostrophe-and-backslash",
+      "source": "export ROOM=\"River's \\\\ Walk\"\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "observe": [
+        "ROOM"
+      ],
+      "host_observation": null
+    }
+  ]
+}

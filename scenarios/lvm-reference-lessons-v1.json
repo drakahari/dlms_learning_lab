@@ -1,0 +1,1765 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-lvm-reference-repair",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM application device references",
+      "unit": "lvm-application-references",
+      "title": "Repair applications that read the wrong storage",
+      "summary": "Diagnose observed device references and save each application\u2019s own original data source.",
+      "objective": "Save a recommended name-based device reference for Report reader to original north-data/daily-report. Save a recommended name-based device reference for Audit reader to original north-data/audit-copy. Keep the unrelated watch reference unchanged. Keep every original storage name, allocation, filesystem, file, PV membership and availability unchanged; create no extra storage. Verify both applications read their own original data and leave no unsaved reference edits.",
+      "retry_guidance": "Read each application reader and failed check separately. A readable path can still point to the wrong volume. Edit and Save the affected reference, then check again; renames do not update application fields automatically.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/teama": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "north-data"
+              },
+              "/dev/reservea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "north-data": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "daily-report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "north-data/daily-report: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "audit-copy": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "north-data/audit-copy: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "north-data/daily-report": true,
+                "north-data/audit-copy": true,
+                "reserve/spare": false
+              },
+              "open": [
+                "north-data/audit-copy"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "reserve": 1,
+                "north-data": 2
+              },
+              "volumes": {
+                "reserve/spare": 3,
+                "north-data/daily-report": 4,
+                "north-data/audit-copy": 5
+              },
+              "next": 6
+            }
+          },
+          "current": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/teama": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "north-data"
+              },
+              "/dev/reservea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "north-data": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "daily-report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "north-data/daily-report: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "audit-copy": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "north-data/audit-copy: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "north-data/daily-report": true,
+                "north-data/audit-copy": true,
+                "reserve/spare": false
+              },
+              "open": [
+                "north-data/audit-copy"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "reserve": 1,
+                "north-data": 2
+              },
+              "volumes": {
+                "reserve/spare": 3,
+                "north-data/daily-report": 4,
+                "north-data/audit-copy": 5
+              },
+              "next": 6
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/studioa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "sample-store"
+              },
+              "/dev/bencha": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "bench"
+              }
+            },
+            "groups": {
+              "sample-store": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "notes-v1": {
+                    "extents": [
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "sample-store/notes-v1: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "review-copy": {
+                    "extents": [
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "sample-store/review-copy: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "bench": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bencha",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "sample-store/notes-v1": true,
+                "sample-store/review-copy": true,
+                "bench/spare": false
+              },
+              "open": [
+                "sample-store/review-copy"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "bench": 1,
+                "sample-store": 2
+              },
+              "volumes": {
+                "bench/spare": 3,
+                "sample-store/notes-v1": 4,
+                "sample-store/review-copy": 5
+              },
+              "next": 6
+            }
+          },
+          "example": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/studioa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "sample-store"
+              },
+              "/dev/bencha": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "bench"
+              }
+            },
+            "groups": {
+              "sample-store": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "notes-v1": {
+                    "extents": [
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "sample-store/notes-v1: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "review-copy": {
+                    "extents": [
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "sample-store/review-copy: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "bench": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bencha",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "sample-store/notes-v1": true,
+                "sample-store/review-copy": true,
+                "bench/spare": false
+              },
+              "open": [
+                "sample-store/review-copy"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "bench": 1,
+                "sample-store": 2
+              },
+              "volumes": {
+                "bench/spare": 3,
+                "sample-store/notes-v1": 4,
+                "sample-store/review-copy": 5
+              },
+              "next": 6
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0,
+          "reference_runtime": {
+            "assignment": {
+              "configuration": {
+                "callers": {
+                  "reporting": {
+                    "label": "Report reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/mapper/north--data-daily--report"
+                  },
+                  "audit": {
+                    "label": "Audit reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/mapper/north--data-daily--report"
+                  },
+                  "watch": {
+                    "label": "Unrelated watch reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/mapper/north--data-audit--copy"
+                  }
+                }
+              },
+              "drafts": {
+                "reporting": "/dev/mapper/north--data-daily--report",
+                "audit": "/dev/mapper/north--data-daily--report",
+                "watch": "/dev/mapper/north--data-audit--copy"
+              }
+            },
+            "example": {
+              "configuration": {
+                "callers": {
+                  "reporting": {
+                    "label": "Report reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/mapper/sample--store-notes--v1"
+                  },
+                  "audit": {
+                    "label": "Audit reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/mapper/sample--store-notes--v1"
+                  },
+                  "watch": {
+                    "label": "Unrelated watch reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/mapper/sample--store-review--copy"
+                  }
+                }
+              },
+              "drafts": {
+                "reporting": "/dev/mapper/sample--store-notes--v1",
+                "audit": "/dev/mapper/sample--store-notes--v1",
+                "watch": "/dev/mapper/sample--store-review--copy"
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/teama": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "north-data"
+              },
+              "/dev/reservea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "north-data": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "daily-report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "north-data/daily-report: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "audit-copy": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "north-data/audit-copy: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "north-data/daily-report": true,
+                "north-data/audit-copy": true,
+                "reserve/spare": false
+              },
+              "open": [
+                "north-data/audit-copy"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "reserve": 1,
+                "north-data": 2
+              },
+              "volumes": {
+                "reserve/spare": 3,
+                "north-data/daily-report": 4,
+                "north-data/audit-copy": 5
+              },
+              "next": 6
+            }
+          },
+          "targets": [],
+          "lesson": {
+            "prerequisite_note": "You have inspected pvs/vgs/lvs, renamed original LVM objects and used the virtual file reader. Here you also edit the supplied application references; Save changes configuration and Check work grades its actual target.",
+            "concepts": [
+              {
+                "title": "A saved reference tells an application where to read",
+                "text": "A device reference is text in application configuration. In this simulator the reader follows that saved path to one supplied LV and its /keep.txt record. Typing a draft changes nothing until Save. Check work verifies the actual original object and data, not just a readable path."
+              },
+              {
+                "title": "Group and volume are separate names",
+                "text": "The recommended application form is /dev/VG/LV: /dev/sample-store/notes-v1 names notes-v1 inside sample-store. Hyphens stay single inside these two components. Use lvs to identify the current group and LV before editing."
+              },
+              {
+                "title": "Recognize an observed mapper name",
+                "text": "An existing /dev/mapper/sample--store-notes--v1 uses doubled hyphens within each component and a single separator between group and LV. This is current internal encoding, not a stable application interface. Diagnose supplied old names, then prefer /dev/VG/LV; real dmsetup splitname can inspect current encoding but is not simulated here."
+              },
+              {
+                "title": "Readable is not necessarily correct",
+                "text": "Report reader needs notes-v1; Audit reader needs review-copy. Both can read a real record even when Audit points to the report by mistake. Compare the application purpose and actual record before checking."
+              }
+            ],
+            "description": "Worked example: sample-store has notes-v1 for Report reader and review-copy for Audit reader. Both initial mapper references read notes-v1. Inspect lvs, save each recommended canonical reference, then verify two different original records. Keep the unrelated watch reference unchanged.",
+            "fixture": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/studioa": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "group": "sample-store"
+                },
+                "/dev/bencha": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "bench"
+                }
+              },
+              "groups": {
+                "sample-store": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "notes-v1": {
+                      "extents": [
+                        {
+                          "pv": "/dev/studioa",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/studioa",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "sample-store/notes-v1: retain this original record.\n"
+                          }
+                        }
+                      }
+                    },
+                    "review-copy": {
+                      "extents": [
+                        {
+                          "pv": "/dev/studioa",
+                          "index": 2
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "sample-store/review-copy: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "bench": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "spare": {
+                      "extents": [
+                        {
+                          "pv": "/dev/bencha",
+                          "index": 0
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              },
+              "activation": {
+                "active": {
+                  "sample-store/notes-v1": true,
+                  "sample-store/review-copy": true,
+                  "bench/spare": false
+                },
+                "open": [
+                  "sample-store/review-copy"
+                ]
+              },
+              "identity": {
+                "groups": {
+                  "bench": 1,
+                  "sample-store": 2
+                },
+                "volumes": {
+                  "bench/spare": 3,
+                  "sample-store/notes-v1": 4,
+                  "sample-store/review-copy": 5
+                },
+                "next": 6
+              }
+            },
+            "targets": [],
+            "worked": [],
+            "try_change": "After the worked example, change Audit reader to /dev/sample-store/notes-v1 and Save. It remains readable but Check separate example identifies the wrong original object. Restore review-copy and check again.",
+            "experiment": "",
+            "repair": "",
+            "device_reference_practice": {
+              "context": {
+                "initial": {
+                  "callers": {
+                    "reporting": {
+                      "label": "Report reader",
+                      "file": "/keep.txt",
+                      "path": "/dev/mapper/sample--store-notes--v1"
+                    },
+                    "audit": {
+                      "label": "Audit reader",
+                      "file": "/keep.txt",
+                      "path": "/dev/mapper/sample--store-notes--v1"
+                    },
+                    "watch": {
+                      "label": "Unrelated watch reader",
+                      "file": "/keep.txt",
+                      "path": "/dev/mapper/sample--store-review--copy"
+                    }
+                  }
+                },
+                "plan": {
+                  "targets": [
+                    {
+                      "caller": "reporting",
+                      "original_volume": "sample-store/notes-v1",
+                      "canonical_required": true
+                    },
+                    {
+                      "caller": "audit",
+                      "original_volume": "sample-store/review-copy",
+                      "canonical_required": true
+                    }
+                  ]
+                }
+              },
+              "worked": [
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "lvs"
+                  },
+                  "explanation": "Inspect sample-store and distinguish notes-v1 from review-copy. The readers below use their own saved paths, not the selected LV in the storage inspector."
+                },
+                {
+                  "operation": {
+                    "kind": "save_reference",
+                    "caller": "reporting",
+                    "path": "/dev/sample-store/notes-v1"
+                  },
+                  "explanation": "Use the recommended /dev/VG/LV form for Report reader, Save, and compare the actual original record."
+                },
+                {
+                  "operation": {
+                    "kind": "save_reference",
+                    "caller": "audit",
+                    "path": "/dev/sample-store/review-copy"
+                  },
+                  "explanation": "Audit reader initially reads the wrong original record. Save its own correct reference; readable alone is not enough."
+                }
+              ],
+              "experiment": {
+                "kind": "save_reference",
+                "caller": "audit",
+                "path": "/dev/sample-store/notes-v1"
+              },
+              "repair": [
+                {
+                  "kind": "save_reference",
+                  "caller": "audit",
+                  "path": "/dev/sample-store/review-copy"
+                }
+              ]
+            }
+          },
+          "device_reference_task": {
+            "context": {
+              "initial": {
+                "callers": {
+                  "reporting": {
+                    "label": "Report reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/mapper/north--data-daily--report"
+                  },
+                  "audit": {
+                    "label": "Audit reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/mapper/north--data-daily--report"
+                  },
+                  "watch": {
+                    "label": "Unrelated watch reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/mapper/north--data-audit--copy"
+                  }
+                }
+              },
+              "plan": {
+                "targets": [
+                  {
+                    "caller": "reporting",
+                    "original_volume": "north-data/daily-report",
+                    "canonical_required": true
+                  },
+                  {
+                    "caller": "audit",
+                    "original_volume": "north-data/audit-copy",
+                    "canonical_required": true
+                  }
+                ]
+              }
+            },
+            "reference": [
+              {
+                "kind": "save_reference",
+                "caller": "reporting",
+                "path": "/dev/north-data/daily-report"
+              },
+              {
+                "kind": "save_reference",
+                "caller": "audit",
+                "path": "/dev/north-data/audit-copy"
+              }
+            ]
+          }
+        }
+      },
+      "guide": [
+        {
+          "title": "Inspect storage names and actual application readers",
+          "why": "Match saved application references to the requested original storage and verify actual retained data.",
+          "action": "Inspect storage names and actual application readers",
+          "commands": []
+        },
+        {
+          "title": "Edit and Save each intended application reference",
+          "why": "Match saved application references to the requested original storage and verify actual retained data.",
+          "action": "Edit and Save each intended application reference",
+          "commands": []
+        },
+        {
+          "title": "Check data identity and protected storage",
+          "why": "Match saved application references to the requested original storage and verify actual retained data.",
+          "action": "Check data identity and protected storage",
+          "commands": []
+        }
+      ],
+      "steps": [
+        "Inspect storage names and actual application readers",
+        "Edit and Save each intended application reference",
+        "Check data identity and protected storage"
+      ],
+      "hints": [
+        "A readable reader may still use the wrong LV. Compare each application purpose with the original names in the task.",
+        "The recommended application form has three components: /dev, group and volume. Do not copy internal doubled hyphens into the canonical form.",
+        "Typing leaves saved configuration unchanged. Save each changed reference, then read its actual result and check all requirements."
+      ],
+      "explanation": "Two name-based references now resolve to their distinct original objects and retained data. The watch configuration and all storage remain unchanged. Internal mapper encoding helped diagnose the initial state; recommended application references use /dev/VG/LV.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/lvm.8.html",
+        "https://man7.org/linux/man-pages/man8/dmsetup.8.html",
+        "https://man7.org/linux/man-pages/man8/lvrename.8.html",
+        "https://man7.org/linux/man-pages/man8/vgrename.8.html"
+      ],
+      "simplifications": "Bounded virtual LVM objects, application configuration fields and flat virtual file readers only. /dev/VG/LV is the recommended name-based application interface; the modeled simple /dev/mapper encoding is current internal syntax, not a stable ABI. Internal object identifiers are simulator identity, not LVM UUIDs. At most four applications and one supplied open consumer. No host files/devices, kernel, udev, symlinks, mounts, fstab, boot updates, dmsetup command, UUID/LABEL references or shell execution. Renames preserve data but do not rewrite application references. Reports remain explicitly fixed simulator tables with byte counts and ModelActive.",
+      "solution": [
+        "simulated-lvm-reference {\"kind\":\"save_reference\",\"caller\":\"reporting\",\"path\":\"/dev/north-data/daily-report\"}",
+        "simulated-lvm-reference {\"kind\":\"save_reference\",\"caller\":\"audit\",\"path\":\"/dev/north-data/audit-copy\"}"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-rename-handover"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-reference-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM application device references",
+      "unit": "lvm-application-references",
+      "title": "Restore application access after a storage handover",
+      "summary": "Rename existing storage, repair stale application references and verify retained data.",
+      "objective": "Rename original store-main to records-main and its original ledger-old LV to ledger-live. Save recommended name-based references so Report reader follows the original ledger data and Audit reader follows the original audit-copy data at their current names. Keep all original allocations, filesystem data, PV memberships and availability, including the live peer and inactive reserve, unchanged. Do not create, remove, grow or format storage. Verify both actual reader results and leave no unsaved reference edits.",
+      "retry_guidance": "Read each application reader and failed check separately. A readable path can still point to the wrong volume. Edit and Save the affected reference, then check again; renames do not update application fields automatically.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/teama": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "store-main"
+              },
+              "/dev/reservea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "store-main": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger-old": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "store-main/ledger-old: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "audit-copy": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "store-main/audit-copy: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "store-main/ledger-old": true,
+                "store-main/audit-copy": true,
+                "reserve/spare": false
+              },
+              "open": [
+                "store-main/audit-copy"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "reserve": 1,
+                "store-main": 2
+              },
+              "volumes": {
+                "reserve/spare": 3,
+                "store-main/ledger-old": 4,
+                "store-main/audit-copy": 5
+              },
+              "next": 6
+            }
+          },
+          "current": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/teama": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "store-main"
+              },
+              "/dev/reservea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "store-main": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger-old": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "store-main/ledger-old: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "audit-copy": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "store-main/audit-copy: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "store-main/ledger-old": true,
+                "store-main/audit-copy": true,
+                "reserve/spare": false
+              },
+              "open": [
+                "store-main/audit-copy"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "reserve": 1,
+                "store-main": 2
+              },
+              "volumes": {
+                "reserve/spare": 3,
+                "store-main/ledger-old": 4,
+                "store-main/audit-copy": 5
+              },
+              "next": 6
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/studioa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "demo-box"
+              },
+              "/dev/bencha": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "bench"
+              }
+            },
+            "groups": {
+              "demo-box": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "notes-old": {
+                    "extents": [
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "demo-box/notes-old: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "review-copy": {
+                    "extents": [
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "demo-box/review-copy: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "bench": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bencha",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "demo-box/notes-old": true,
+                "demo-box/review-copy": true,
+                "bench/spare": false
+              },
+              "open": [
+                "demo-box/review-copy"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "bench": 1,
+                "demo-box": 2
+              },
+              "volumes": {
+                "bench/spare": 3,
+                "demo-box/notes-old": 4,
+                "demo-box/review-copy": 5
+              },
+              "next": 6
+            }
+          },
+          "example": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/studioa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "demo-box"
+              },
+              "/dev/bencha": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "bench"
+              }
+            },
+            "groups": {
+              "demo-box": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "notes-old": {
+                    "extents": [
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "demo-box/notes-old: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "review-copy": {
+                    "extents": [
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "demo-box/review-copy: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "bench": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bencha",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "demo-box/notes-old": true,
+                "demo-box/review-copy": true,
+                "bench/spare": false
+              },
+              "open": [
+                "demo-box/review-copy"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "bench": 1,
+                "demo-box": 2
+              },
+              "volumes": {
+                "bench/spare": 3,
+                "demo-box/notes-old": 4,
+                "demo-box/review-copy": 5
+              },
+              "next": 6
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0,
+          "reference_runtime": {
+            "assignment": {
+              "configuration": {
+                "callers": {
+                  "reporting": {
+                    "label": "Report reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/store-main/ledger-old"
+                  },
+                  "audit": {
+                    "label": "Audit reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/store-main/audit-copy"
+                  }
+                }
+              },
+              "drafts": {
+                "reporting": "/dev/store-main/ledger-old",
+                "audit": "/dev/store-main/audit-copy"
+              }
+            },
+            "example": {
+              "configuration": {
+                "callers": {
+                  "reporting": {
+                    "label": "Report reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/demo-box/notes-old"
+                  },
+                  "audit": {
+                    "label": "Audit reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/demo-box/review-copy"
+                  }
+                }
+              },
+              "drafts": {
+                "reporting": "/dev/demo-box/notes-old",
+                "audit": "/dev/demo-box/review-copy"
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/teama": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "store-main"
+              },
+              "/dev/reservea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "store-main": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger-old": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "store-main/ledger-old: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "audit-copy": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "store-main/audit-copy: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "store-main/ledger-old": true,
+                "store-main/audit-copy": true,
+                "reserve/spare": false
+              },
+              "open": [
+                "store-main/audit-copy"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "reserve": 1,
+                "store-main": 2
+              },
+              "volumes": {
+                "reserve/spare": 3,
+                "store-main/ledger-old": 4,
+                "store-main/audit-copy": 5
+              },
+              "next": 6
+            }
+          },
+          "targets": [],
+          "lesson": {
+            "prerequisite_note": "You have inspected pvs/vgs/lvs, renamed original LVM objects and used the virtual file reader. Here you also edit the supplied application references; Save changes configuration and Check work grades its actual target.",
+            "concepts": [
+              {
+                "title": "Storage identity survives a rename",
+                "text": "A rename changes the original object\u2019s name, not its extents or file data. A replacement LV with the same spelling is not the same object. Use the existing supported lvrename and vgrename commands, not create/copy/delete."
+              },
+              {
+                "title": "Application text does not rename itself",
+                "text": "The canonical /dev/VG/LV interface is recommended, but it still contains names. Renaming a group or LV makes an old saved name stale. The simulated reader will show unavailable until you edit and Save the corresponding application reference."
+              },
+              {
+                "title": "Repair every affected caller",
+                "text": "Renaming demo-box changes references for both notes-old and review-copy. Renaming only notes-old affects that LV alone. Inspect each reader separately; do not assume the neighbor follows the new group automatically."
+              },
+              {
+                "title": "Verify the handover, not just the spelling",
+                "text": "After the renames, save the new Report and Audit paths and read the original records. Their text still describes the original data; that is evidence of retention, not a reason to rewrite it. Real UUID, mount, boot and udev workflows are outside this simulation."
+              }
+            ],
+            "description": "Worked example: rename demo-box to lesson-box and its original notes-old LV to notes-live. First inspect lvs and both readers. Rename the existing objects, observe stale saved application references, then Save Report reader and Audit reader at the new names. Verify the same original records and unchanged peer allocation.",
+            "fixture": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/studioa": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "group": "demo-box"
+                },
+                "/dev/bencha": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "bench"
+                }
+              },
+              "groups": {
+                "demo-box": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "notes-old": {
+                      "extents": [
+                        {
+                          "pv": "/dev/studioa",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/studioa",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "demo-box/notes-old: retain this original record.\n"
+                          }
+                        }
+                      }
+                    },
+                    "review-copy": {
+                      "extents": [
+                        {
+                          "pv": "/dev/studioa",
+                          "index": 2
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "demo-box/review-copy: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "bench": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "spare": {
+                      "extents": [
+                        {
+                          "pv": "/dev/bencha",
+                          "index": 0
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              },
+              "activation": {
+                "active": {
+                  "demo-box/notes-old": true,
+                  "demo-box/review-copy": true,
+                  "bench/spare": false
+                },
+                "open": [
+                  "demo-box/review-copy"
+                ]
+              },
+              "identity": {
+                "groups": {
+                  "bench": 1,
+                  "demo-box": 2
+                },
+                "volumes": {
+                  "bench/spare": 3,
+                  "demo-box/notes-old": 4,
+                  "demo-box/review-copy": 5
+                },
+                "next": 6
+              }
+            },
+            "targets": [],
+            "worked": [],
+            "try_change": "After the worked example, save Report reader\u2019s original /dev/demo-box/notes-old path. Read the unavailable error and check the example. Restore its current reference without undoing the correct storage handover.",
+            "experiment": "",
+            "repair": "",
+            "device_reference_practice": {
+              "context": {
+                "initial": {
+                  "callers": {
+                    "reporting": {
+                      "label": "Report reader",
+                      "file": "/keep.txt",
+                      "path": "/dev/demo-box/notes-old"
+                    },
+                    "audit": {
+                      "label": "Audit reader",
+                      "file": "/keep.txt",
+                      "path": "/dev/demo-box/review-copy"
+                    }
+                  }
+                },
+                "plan": {
+                  "targets": [
+                    {
+                      "caller": "reporting",
+                      "original_volume": "demo-box/notes-old",
+                      "canonical_required": true
+                    },
+                    {
+                      "caller": "audit",
+                      "original_volume": "demo-box/review-copy",
+                      "canonical_required": true
+                    }
+                  ],
+                  "renaming": {
+                    "groups": [
+                      {
+                        "source": "demo-box",
+                        "name": "lesson-box"
+                      }
+                    ],
+                    "volumes": [
+                      {
+                        "source": "demo-box/notes-old",
+                        "name": "notes-live"
+                      }
+                    ]
+                  }
+                }
+              },
+              "worked": [
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "lvs"
+                  },
+                  "explanation": "Inspect both current original LVs and their reader data before the handover."
+                },
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "lvrename demo-box notes-old notes-live"
+                  },
+                  "explanation": "Rename the same notes-old allocation to notes-live. Its old application reference now fails; no data was copied."
+                },
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "vgrename demo-box lesson-box"
+                  },
+                  "explanation": "Rename the whole original group. Both old group references are now stale, including the unchanged peer LV name."
+                },
+                {
+                  "operation": {
+                    "kind": "save_reference",
+                    "caller": "reporting",
+                    "path": "/dev/lesson-box/notes-live"
+                  },
+                  "explanation": "Save Report reader at the new group and LV names; inspect the retained original record."
+                },
+                {
+                  "operation": {
+                    "kind": "save_reference",
+                    "caller": "audit",
+                    "path": "/dev/lesson-box/review-copy"
+                  },
+                  "explanation": "Save Audit reader at the new group and unchanged review-copy name; check all outcomes."
+                }
+              ],
+              "experiment": {
+                "kind": "save_reference",
+                "caller": "reporting",
+                "path": "/dev/demo-box/notes-old"
+              },
+              "repair": [
+                {
+                  "kind": "save_reference",
+                  "caller": "reporting",
+                  "path": "/dev/lesson-box/notes-live"
+                }
+              ]
+            }
+          },
+          "device_reference_task": {
+            "context": {
+              "initial": {
+                "callers": {
+                  "reporting": {
+                    "label": "Report reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/store-main/ledger-old"
+                  },
+                  "audit": {
+                    "label": "Audit reader",
+                    "file": "/keep.txt",
+                    "path": "/dev/store-main/audit-copy"
+                  }
+                }
+              },
+              "plan": {
+                "targets": [
+                  {
+                    "caller": "reporting",
+                    "original_volume": "store-main/ledger-old",
+                    "canonical_required": true
+                  },
+                  {
+                    "caller": "audit",
+                    "original_volume": "store-main/audit-copy",
+                    "canonical_required": true
+                  }
+                ],
+                "renaming": {
+                  "groups": [
+                    {
+                      "source": "store-main",
+                      "name": "records-main"
+                    }
+                  ],
+                  "volumes": [
+                    {
+                      "source": "store-main/ledger-old",
+                      "name": "ledger-live"
+                    }
+                  ]
+                }
+              }
+            },
+            "reference": [
+              {
+                "kind": "command",
+                "text": "lvrename store-main ledger-old ledger-live"
+              },
+              {
+                "kind": "command",
+                "text": "vgrename store-main records-main"
+              },
+              {
+                "kind": "save_reference",
+                "caller": "reporting",
+                "path": "/dev/records-main/ledger-live"
+              },
+              {
+                "kind": "save_reference",
+                "caller": "audit",
+                "path": "/dev/records-main/audit-copy"
+              }
+            ]
+          }
+        }
+      },
+      "guide": [
+        {
+          "title": "Inspect original objects and saved references",
+          "why": "Match saved application references to the requested original storage and verify actual retained data.",
+          "action": "Inspect original objects and saved references",
+          "commands": []
+        },
+        {
+          "title": "Rename existing storage and diagnose affected readers",
+          "why": "Match saved application references to the requested original storage and verify actual retained data.",
+          "action": "Rename existing storage and diagnose affected readers",
+          "commands": []
+        },
+        {
+          "title": "Save current references and verify retained data",
+          "why": "Match saved application references to the requested original storage and verify actual retained data.",
+          "action": "Save current references and verify retained data",
+          "commands": []
+        }
+      ],
+      "steps": [
+        "Inspect original objects and saved references",
+        "Rename existing storage and diagnose affected readers",
+        "Save current references and verify retained data"
+      ],
+      "hints": [
+        "A group rename changes the name component for every member LV. Read both saved application references after the rename.",
+        "Both LV-then-group and group-then-LV orders are supported. Always address the original object at its current path.",
+        "A new spelling alone cannot pass. Each saved application path must resolve to its intended original object and unchanged virtual file."
+      ],
+      "explanation": "The original group and ledger have their requested new names. Both saved application references now resolve to the same original data and peer. Names changed without replacing allocations, and applications required a separate configuration update. Name-based canonical references are not persistent UUIDs.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/lvm.8.html",
+        "https://man7.org/linux/man-pages/man8/dmsetup.8.html",
+        "https://man7.org/linux/man-pages/man8/lvrename.8.html",
+        "https://man7.org/linux/man-pages/man8/vgrename.8.html"
+      ],
+      "simplifications": "Bounded virtual LVM objects, application configuration fields and flat virtual file readers only. /dev/VG/LV is the recommended name-based application interface; the modeled simple /dev/mapper encoding is current internal syntax, not a stable ABI. Internal object identifiers are simulator identity, not LVM UUIDs. At most four applications and one supplied open consumer. No host files/devices, kernel, udev, symlinks, mounts, fstab, boot updates, dmsetup command, UUID/LABEL references or shell execution. Renames preserve data but do not rewrite application references. Reports remain explicitly fixed simulator tables with byte counts and ModelActive.",
+      "solution": [
+        "lvrename store-main ledger-old ledger-live",
+        "vgrename store-main records-main",
+        "simulated-lvm-reference {\"kind\":\"save_reference\",\"caller\":\"reporting\",\"path\":\"/dev/records-main/ledger-live\"}",
+        "simulated-lvm-reference {\"kind\":\"save_reference\",\"caller\":\"audit\",\"path\":\"/dev/records-main/audit-copy\"}"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-reference-repair"
+      ]
+    }
+  ]
+}

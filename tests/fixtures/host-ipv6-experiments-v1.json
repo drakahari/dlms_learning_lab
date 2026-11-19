@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "experiments": [
+    {
+      "id": "lpic2-host-ipv6-addition",
+      "commands": [
+        "ip -6 address del 2001:db8:310::77/64 dev ens3",
+        "ip -6 address add 2001:db8:310::77/60 dev ens3"
+      ],
+      "repair": [
+        "ip -6 address del 2001:db8:310::77/60 dev ens3",
+        "ip -6 address add 2001:db8:310::77/64 dev ens3"
+      ],
+      "expected": [
+        true,
+        false,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "lpic2-host-ipv6-gateway-scope",
+      "commands": [
+        "ip -6 route add 2001:db8:590::80/128 via fe80::1 dev ens4 metric 10"
+      ],
+      "repair": [
+        "ip -6 route del 2001:db8:590::80/128 via fe80::1 dev ens4 metric 10"
+      ],
+      "expected": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "lpic2-host-dual-stack-handover",
+      "commands": [
+        "ip -6 route del 2001:db8:740::/64 via fe80::1 dev ens4 metric 50"
+      ],
+      "repair": [
+        "ip -6 route add 2001:db8:740::/64 via fe80::1 dev ens4 metric 50"
+      ],
+      "expected": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false
+      ]
+    }
+  ]
+}

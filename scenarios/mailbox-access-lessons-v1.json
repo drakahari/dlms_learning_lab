@@ -1,0 +1,2402 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-dovecot-secure-access",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-mailbox-access",
+      "topic": "IMAP and POP mail access",
+      "title": "Restore secure access to two mailboxes",
+      "summary": "Restore remote IMAP and POP access for both supplied accounts, require TLS before passwords, and enable the service at boot.",
+      "objective": "Enable both IMAP and POP3 for the supplied endpoint and both accounts. Use a matching supplied certificate/key pair whose name and validity work for mail.example.test and the exercise day. Resolve each account’s own /srv/mail/ACCOUNT/Maildir; do not point both accounts at one fixed path. Allow verified TLS clients, including upgrades on the plain listeners; reject remote passwords before TLS. Save and restart the configuration, enable at boot, and preserve all supplied mail.",
+      "retry_guidance": "Read the failed outcome, compare the saved/running settings or actual message state, then change only the relevant configuration or protocol operation and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Investigate and change the virtual workspace",
+        "Verify current outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Apply the worked configuration",
+          "why": "protocols = imap pop3 enables both services. IMAP commonly uses 143 with STARTTLS or 993 with TLS from the start; POP uses 110 with STLS or 995 with TLS from the start. A port number alone does not make a connection secure. The selected client profile states its mode. Each TLS client must trust the issuing CA and request a name present on the certificate.",
+          "action": "Choose Fill worked configuration, Save configuration, Restart service, then Enable at boot.",
+          "commands": []
+        },
+        {
+          "title": "Open the first example mailbox",
+          "why": "ssl = required rejects remote password login before TLS. The worked accounts have separate /srv/practice/ACCOUNT/Maildir directories; the assignment supplies different locations. mail_path = /srv/practice/%{user}/Maildir substitutes the signed-in username; ~/Maildir is another supported per-user form. A fixed path to one account cannot locate the other account’s supplied mail.",
+          "action": "Choose imap-tls in Next connection, then Connect. Insert and Send LOGIN for mira, followed by EXAMINE INBOX.",
+          "commands": [
+            {
+              "command": "a1 LOGIN mira sample-mira",
+              "explanation": "Sign in using the supplied worked account over the already protected connection.",
+              "simulator_only": false
+            },
+            {
+              "command": "a2 EXAMINE INBOX",
+              "explanation": "Open this account’s INBOX read-only; EXISTS shows the stored message count.",
+              "simulator_only": false
+            },
+            {
+              "command": "a3 FETCH 1 (UID BODY.PEEK[])",
+              "explanation": "Read the first supplied message without changing its Seen flag.",
+              "simulator_only": false
+            },
+            {
+              "command": "a4 LOGOUT",
+              "explanation": "Close the IMAP session without deleting any stored mail.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Catch a one-account repair",
+          "why": "Save configuration changes the simulated file. Restart service applies it and ends older connections; a failed restart leaves the service stopped but does not erase mail. Enable at boot is a separate setting. In the client, Connect opens the chosen profile; Send transmits one protocol command. Check work tests fresh clients for both accounts and rejects an inaccessible port as proof of a secure policy.",
+          "action": "Change only mail_path to /srv/practice/mira/Maildir, save and restart, then Check example. Restore the worked file and reapply it.",
+          "commands": []
+        }
+      ],
+      "explanation": "The repair must work for both users and both protected protocol paths. A reachable listener alone does not prove usable mail access, and disabling a plain listener does not demonstrate enforcing its login policy. Saved and running configurations must agree.",
+      "hints": [
+        "protocols = imap pop3 enables both services. IMAP commonly uses 143 with STARTTLS or 993 with TLS from the start; POP uses 110 with STLS or 995 with TLS from the start. A port number alone does not make a connection secure. The selected client profile states its mode. Each TLS client must trust the issuing CA and request a name present on the certificate.",
+        "ssl = required rejects remote password login before TLS. The worked accounts have separate /srv/practice/ACCOUNT/Maildir directories; the assignment supplies different locations. mail_path = /srv/practice/%{user}/Maildir substitutes the signed-in username; ~/Maildir is another supported per-user form. A fixed path to one account cannot locate the other account’s supplied mail.",
+        "Save configuration changes the simulated file. Restart service applies it and ends older connections; a failed restart leaves the service stopped but does not erase mail. Enable at boot is a separate setting. In the client, Connect opens the chosen profile; Send transmits one protocol command. Check work tests fresh clients for both accounts and rejects an inaccessible port as proof of a secure policy."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://doc.dovecot.org/2.4.1/core/config/quick.html",
+        "https://doc.dovecot.org/2.4.1/core/config/ssl.html",
+        "https://doc.dovecot.org/2.4.1/core/config/pop3.html",
+        "https://www.rfc-editor.org/rfc/rfc3501.html",
+        "https://www.rfc-editor.org/rfc/rfc1939.html"
+      ],
+      "simplifications": "Dovecot CE2.4.1-inspired explicit configuration profile and bounded IMAP4rev1/POP subset; no full daemon or protocol conformance. TLS uses supplied logical trust/name/day/key facts, not cryptography. Authentication and Maildir contents are supplied virtual fixtures. One client at a time, flat mailboxes, plain ASCII messages, Seen/Deleted only; no MIME, APPEND, SEARCH, concurrent delivery, external authentication, real network or host paths. X-SIMULATOR capability marks the partial IMAP profile. See MAILBOX_ACCESS_SUBSET.md for commands, limits and exclusions.",
+      "initial": {
+        "kind": "MailboxAccess",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-dovecot-secure-access",
+          "view": "introduction",
+          "assignment": {
+            "runtime": {
+              "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/old.pem\nssl_server_key_file = /etc/dovecot/old.key\nmail_driver = maildir\nmail_path = /srv/mail/alex/Maildir\npop3_no_flag_updates = no\n",
+              "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/old.pem\nssl_server_key_file = /etc/dovecot/old.key\nmail_driver = maildir\nmail_path = /srv/mail/alex/Maildir\npop3_no_flag_updates = no\n",
+              "running": true,
+              "enabled": false,
+              "generation": 0,
+              "store": {
+                "alex": {
+                  "INBOX": {
+                    "uid_validity": 77,
+                    "uid_next": 112,
+                    "messages": [
+                      {
+                        "uid": 101,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 107,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 109,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                },
+                "sam": {
+                  "INBOX": {
+                    "uid_validity": 77,
+                    "uid_next": 112,
+                    "messages": [
+                      {
+                        "uid": 101,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 107,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 109,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "logs": [],
+              "error": null,
+              "pop_committed": {}
+            },
+            "connection": null,
+            "draft": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/old.pem\nssl_server_key_file = /etc/dovecot/old.key\nmail_driver = maildir\nmail_path = /srv/mail/alex/Maildir\npop3_no_flag_updates = no\n",
+            "input": "",
+            "client": "imap-plain",
+            "output": "",
+            "checked": false
+          },
+          "practice": {
+            "runtime": {
+              "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/old.pem\nssl_server_key_file = /etc/dovecot/old.key\nmail_driver = maildir\nmail_path = /srv/practice/mira/Maildir\npop3_no_flag_updates = no\n",
+              "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/old.pem\nssl_server_key_file = /etc/dovecot/old.key\nmail_driver = maildir\nmail_path = /srv/practice/mira/Maildir\npop3_no_flag_updates = no\n",
+              "running": true,
+              "enabled": false,
+              "generation": 0,
+              "store": {
+                "mira": {
+                  "INBOX": {
+                    "uid_validity": 88,
+                    "uid_next": 220,
+                    "messages": [
+                      {
+                        "uid": 201,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 209,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 213,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                },
+                "noah": {
+                  "INBOX": {
+                    "uid_validity": 88,
+                    "uid_next": 220,
+                    "messages": [
+                      {
+                        "uid": 201,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 209,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 213,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "logs": [],
+              "error": null,
+              "pop_committed": {}
+            },
+            "connection": null,
+            "draft": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/old.pem\nssl_server_key_file = /etc/dovecot/old.key\nmail_driver = maildir\nmail_path = /srv/practice/mira/Maildir\npop3_no_flag_updates = no\n",
+            "input": "",
+            "client": "imap-plain",
+            "output": "",
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "MailboxAccess",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-dovecot-secure-access",
+          "assignment": {
+            "editable_config": true,
+            "facts": {
+              "server_name": "mail.example.test",
+              "day": 100,
+              "accounts": {
+                "alex": {
+                  "sample_password": "sample-alex",
+                  "enabled": true,
+                  "home": "/srv/mail/alex",
+                  "maildir_path": "/srv/mail/alex/Maildir"
+                },
+                "sam": {
+                  "sample_password": "sample-sam",
+                  "enabled": true,
+                  "home": "/srv/mail/sam",
+                  "maildir_path": "/srv/mail/sam/Maildir"
+                }
+              },
+              "mailboxes": {
+                "alex": {
+                  "INBOX": {
+                    "uid_validity": 77,
+                    "uid_next": 112,
+                    "messages": [
+                      {
+                        "uid": 101,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 107,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 109,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                },
+                "sam": {
+                  "INBOX": {
+                    "uid_validity": 77,
+                    "uid_next": 112,
+                    "messages": [
+                      {
+                        "uid": 101,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 107,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 109,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "certificates": {
+                "/etc/dovecot/site.pem": {
+                  "key_id": "site-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "mail.example.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                },
+                "/etc/dovecot/old.pem": {
+                  "key_id": "old-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "retired.example.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                }
+              },
+              "keys": {
+                "/etc/dovecot/site.key": {
+                  "key_id": "site-key",
+                  "owner": "root",
+                  "mode": 384
+                },
+                "/etc/dovecot/old.key": {
+                  "key_id": "old-key",
+                  "owner": "root",
+                  "mode": 384
+                }
+              }
+            },
+            "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/old.pem\nssl_server_key_file = /etc/dovecot/old.key\nmail_driver = maildir\nmail_path = /srv/mail/alex/Maildir\npop3_no_flag_updates = no\n",
+            "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/old.pem\nssl_server_key_file = /etc/dovecot/old.key\nmail_driver = maildir\nmail_path = /srv/mail/alex/Maildir\npop3_no_flag_updates = no\n",
+            "enabled": false,
+            "clients": {
+              "imap-plain": {
+                "protocol": "imap",
+                "port": 143,
+                "implicit_tls": false,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "imap-tls": {
+                "protocol": "imap",
+                "port": 993,
+                "implicit_tls": true,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-plain": {
+                "protocol": "pop3",
+                "port": 110,
+                "implicit_tls": false,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-tls": {
+                "protocol": "pop3",
+                "port": 995,
+                "implicit_tls": true,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              }
+            },
+            "requirements": [
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "alex",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "sam",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-tls",
+                "user": "alex",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-tls",
+                "user": "sam",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-plain",
+                "user": "alex",
+                "upgrade": true,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-plain",
+                "user": "sam",
+                "upgrade": true,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-plain",
+                "user": "alex",
+                "upgrade": false,
+                "allow": false
+              },
+              {
+                "kind": "access",
+                "profile": "pop-plain",
+                "user": "sam",
+                "upgrade": false,
+                "allow": false
+              },
+              {
+                "kind": "enabled"
+              }
+            ]
+          },
+          "example": {
+            "editable_config": true,
+            "facts": {
+              "server_name": "practice.mail.test",
+              "day": 100,
+              "accounts": {
+                "mira": {
+                  "sample_password": "sample-mira",
+                  "enabled": true,
+                  "home": "/srv/practice/mira",
+                  "maildir_path": "/srv/practice/mira/Maildir"
+                },
+                "noah": {
+                  "sample_password": "sample-noah",
+                  "enabled": true,
+                  "home": "/srv/practice/noah",
+                  "maildir_path": "/srv/practice/noah/Maildir"
+                }
+              },
+              "mailboxes": {
+                "mira": {
+                  "INBOX": {
+                    "uid_validity": 88,
+                    "uid_next": 220,
+                    "messages": [
+                      {
+                        "uid": 201,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 209,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 213,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                },
+                "noah": {
+                  "INBOX": {
+                    "uid_validity": 88,
+                    "uid_next": 220,
+                    "messages": [
+                      {
+                        "uid": 201,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 209,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 213,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "certificates": {
+                "/etc/dovecot/practice.pem": {
+                  "key_id": "practice-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "practice.mail.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                },
+                "/etc/dovecot/old.pem": {
+                  "key_id": "old-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "retired.example.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                }
+              },
+              "keys": {
+                "/etc/dovecot/practice.key": {
+                  "key_id": "practice-key",
+                  "owner": "root",
+                  "mode": 384
+                },
+                "/etc/dovecot/old.key": {
+                  "key_id": "old-key",
+                  "owner": "root",
+                  "mode": 384
+                }
+              }
+            },
+            "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/old.pem\nssl_server_key_file = /etc/dovecot/old.key\nmail_driver = maildir\nmail_path = /srv/practice/mira/Maildir\npop3_no_flag_updates = no\n",
+            "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/old.pem\nssl_server_key_file = /etc/dovecot/old.key\nmail_driver = maildir\nmail_path = /srv/practice/mira/Maildir\npop3_no_flag_updates = no\n",
+            "enabled": false,
+            "clients": {
+              "imap-plain": {
+                "protocol": "imap",
+                "port": 143,
+                "implicit_tls": false,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "imap-tls": {
+                "protocol": "imap",
+                "port": 993,
+                "implicit_tls": true,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-plain": {
+                "protocol": "pop3",
+                "port": 110,
+                "implicit_tls": false,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-tls": {
+                "protocol": "pop3",
+                "port": 995,
+                "implicit_tls": true,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              }
+            },
+            "requirements": [
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "mira",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "noah",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-tls",
+                "user": "mira",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-tls",
+                "user": "noah",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-plain",
+                "user": "mira",
+                "upgrade": true,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-plain",
+                "user": "noah",
+                "upgrade": true,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-plain",
+                "user": "mira",
+                "upgrade": false,
+                "allow": false
+              },
+              {
+                "kind": "access",
+                "profile": "pop-plain",
+                "user": "noah",
+                "upgrade": false,
+                "allow": false
+              },
+              {
+                "kind": "enabled"
+              }
+            ]
+          },
+          "worked_config": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n"
+        }
+      },
+      "solution": [
+        "mailbox-workspace {\"kind\":\"edit\",\"text\":\"dovecot_config_version = 2.4.0\\ndovecot_storage_version = 2.4.0\\nprotocols = imap pop3\\nssl = required\\nauth_allow_cleartext = no\\nauth_mechanisms = plain login\\nssl_server_cert_file = /etc/dovecot/site.pem\\nssl_server_key_file = /etc/dovecot/site.key\\nmail_driver = maildir\\nmail_path = /srv/mail/%{user}/Maildir\\npop3_no_flag_updates = no\\n\"}",
+        "mailbox-workspace {\"kind\":\"save\"}",
+        "mailbox-workspace {\"kind\":\"restart\"}",
+        "mailbox-workspace {\"kind\":\"enable\"}",
+        "mailbox-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-smtp-queue-recovery"
+      ]
+    },
+    {
+      "id": "lpic2-imap-mailbox-recovery",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-mailbox-access",
+      "topic": "IMAP and POP mail access",
+      "title": "Inspect and repair an IMAP mailbox safely",
+      "summary": "Mark the support request as read, permanently remove only the expired probe, and preserve the unread report and the other account’s mail.",
+      "objective": "Use the supplied IMAP server; its configuration is read-only in this activity. For lee/INBOX: UID 101 (Support request) must remain and be Seen, without Deleted. For lee/INBOX: remove UID 107 (Expired test probe) permanently; a Deleted flag alone is insufficient. For lee/INBOX: UID 109 (Keep this report) must remain unread and unmarked for deletion. Preserve every other supplied message, including all of jo’s mail. Supported equivalent operations are accepted.",
+      "retry_guidance": "Read the failed outcome, compare the saved/running settings or actual message state, then change only the relevant configuration or protocol operation and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Investigate and change the virtual workspace",
+        "Verify current outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Connect and inspect safely",
+          "why": "EXAMINE INBOX selects the mailbox read-only. SELECT INBOX selects it for reading and writing. The reply reports EXISTS (message count), UIDVALIDITY (the mailbox’s UID identity) and UIDNEXT (the next unused UID). Sequence numbers count the current positions; UIDs identify existing messages even after positions change. A failed SELECT deselects the old mailbox.",
+          "action": "Choose imap-tls, Connect, then Insert and Send LOGIN for jules, EXAMINE INBOX and the PEEK command.",
+          "commands": []
+        },
+        {
+          "title": "Make precise changes",
+          "why": "FETCH 1:* (UID FLAGS BODY.PEEK[]) inspects every supplied message without setting its Seen flag. BODY[] normally marks the message read in a read/write selection. UID STORE 201 +FLAGS (\\Seen) can also mark a supplied UID read. EXAMINE stays read-only, even when BODY[] is requested. A minus sign removes a flag; FLAGS without a sign replaces the supported flag set.",
+          "action": "SELECT INBOX for editing. Mark UID 201 Seen and UID 209 Deleted using the command picker; inspect FLAGS before EXPUNGE.",
+          "commands": [
+            {
+              "command": "a1 LOGIN jules sample-jules",
+              "explanation": "Authenticate the worked account on the protected connection.",
+              "simulator_only": false
+            },
+            {
+              "command": "a2 EXAMINE INBOX",
+              "explanation": "Select read-only before an exploratory fetch.",
+              "simulator_only": false
+            },
+            {
+              "command": "a3 FETCH 1:* (UID FLAGS BODY.PEEK[])",
+              "explanation": "Inspect all three sample messages without setting Seen.",
+              "simulator_only": false
+            },
+            {
+              "command": "a4 SELECT INBOX",
+              "explanation": "Switch to a read/write selection for the requested changes.",
+              "simulator_only": false
+            },
+            {
+              "command": "a5 UID STORE 201 +FLAGS (\\Seen)",
+              "explanation": "Add Seen only to the support request; UID identifies the message, not its current position.",
+              "simulator_only": false
+            },
+            {
+              "command": "a6 UID STORE 209 +FLAGS (\\Deleted)",
+              "explanation": "Mark the expired probe; the stored copy remains until expunged.",
+              "simulator_only": false
+            },
+            {
+              "command": "a7 EXPUNGE",
+              "explanation": "Remove marked messages. Sequence positions close up, but remaining UIDs do not change.",
+              "simulator_only": false
+            },
+            {
+              "command": "a8 UID FETCH 213 BODY[]",
+              "explanation": "Deliberately mark the report read to see a useful failure.",
+              "simulator_only": false
+            },
+            {
+              "command": "a9 UID STORE 213 -FLAGS (\\Seen)",
+              "explanation": "Remove only Seen from the report, preserving other supported flags.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify and experiment",
+          "why": "UID STORE 209 +FLAGS (\\Deleted) marks a message; EXPUNGE permanently removes all messages currently marked Deleted in the selected read/write mailbox. CLOSE also expunges in read/write mode, without individual EXPUNGE replies. EXAMINE followed by CLOSE does not expunge. LOGOUT, reconnecting and selecting another mailbox do not commit IMAP deletion flags automatically.",
+          "action": "Send EXPUNGE, then Check example. Try fetching UID 213 with BODY[] and check again; remove its Seen flag to repair that mistake.",
+          "commands": []
+        }
+      ],
+      "explanation": "Inspect with EXAMINE and PEEK, switch to SELECT for edits, then target stable UIDs. Seen and Deleted are separate flags; only the required probe should be expunged. A read/write BODY[] fetch can also satisfy the support request’s Seen requirement.",
+      "hints": [
+        "EXAMINE INBOX selects the mailbox read-only. SELECT INBOX selects it for reading and writing. The reply reports EXISTS (message count), UIDVALIDITY (the mailbox’s UID identity) and UIDNEXT (the next unused UID). Sequence numbers count the current positions; UIDs identify existing messages even after positions change. A failed SELECT deselects the old mailbox.",
+        "FETCH 1:* (UID FLAGS BODY.PEEK[]) inspects every supplied message without setting its Seen flag. BODY[] normally marks the message read in a read/write selection. UID STORE 201 +FLAGS (\\Seen) can also mark a supplied UID read. EXAMINE stays read-only, even when BODY[] is requested. A minus sign removes a flag; FLAGS without a sign replaces the supported flag set.",
+        "UID STORE 209 +FLAGS (\\Deleted) marks a message; EXPUNGE permanently removes all messages currently marked Deleted in the selected read/write mailbox. CLOSE also expunges in read/write mode, without individual EXPUNGE replies. EXAMINE followed by CLOSE does not expunge. LOGOUT, reconnecting and selecting another mailbox do not commit IMAP deletion flags automatically."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://doc.dovecot.org/2.4.1/core/config/quick.html",
+        "https://doc.dovecot.org/2.4.1/core/config/ssl.html",
+        "https://doc.dovecot.org/2.4.1/core/config/pop3.html",
+        "https://www.rfc-editor.org/rfc/rfc3501.html",
+        "https://www.rfc-editor.org/rfc/rfc1939.html"
+      ],
+      "simplifications": "Dovecot CE2.4.1-inspired explicit configuration profile and bounded IMAP4rev1/POP subset; no full daemon or protocol conformance. TLS uses supplied logical trust/name/day/key facts, not cryptography. Authentication and Maildir contents are supplied virtual fixtures. One client at a time, flat mailboxes, plain ASCII messages, Seen/Deleted only; no MIME, APPEND, SEARCH, concurrent delivery, external authentication, real network or host paths. X-SIMULATOR capability marks the partial IMAP profile. See MAILBOX_ACCESS_SUBSET.md for commands, limits and exclusions.",
+      "initial": {
+        "kind": "MailboxAccess",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-imap-mailbox-recovery",
+          "view": "introduction",
+          "assignment": {
+            "runtime": {
+              "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/%{user}/Maildir\npop3_no_flag_updates = no\n",
+              "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/%{user}/Maildir\npop3_no_flag_updates = no\n",
+              "running": true,
+              "enabled": true,
+              "generation": 0,
+              "store": {
+                "lee": {
+                  "INBOX": {
+                    "uid_validity": 77,
+                    "uid_next": 112,
+                    "messages": [
+                      {
+                        "uid": 101,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 107,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 109,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                },
+                "jo": {
+                  "INBOX": {
+                    "uid_validity": 77,
+                    "uid_next": 112,
+                    "messages": [
+                      {
+                        "uid": 101,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 107,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 109,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "logs": [],
+              "error": null,
+              "pop_committed": {}
+            },
+            "connection": null,
+            "draft": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "input": "",
+            "client": "imap-plain",
+            "output": "",
+            "checked": false
+          },
+          "practice": {
+            "runtime": {
+              "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n",
+              "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n",
+              "running": true,
+              "enabled": true,
+              "generation": 0,
+              "store": {
+                "jules": {
+                  "INBOX": {
+                    "uid_validity": 88,
+                    "uid_next": 220,
+                    "messages": [
+                      {
+                        "uid": 201,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 209,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 213,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                },
+                "ren": {
+                  "INBOX": {
+                    "uid_validity": 88,
+                    "uid_next": 220,
+                    "messages": [
+                      {
+                        "uid": 201,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 209,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 213,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "logs": [],
+              "error": null,
+              "pop_committed": {}
+            },
+            "connection": null,
+            "draft": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "input": "",
+            "client": "imap-plain",
+            "output": "",
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "MailboxAccess",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-imap-mailbox-recovery",
+          "assignment": {
+            "editable_config": false,
+            "facts": {
+              "server_name": "mail.example.test",
+              "day": 100,
+              "accounts": {
+                "lee": {
+                  "sample_password": "sample-lee",
+                  "enabled": true,
+                  "home": "/srv/mail/lee",
+                  "maildir_path": "/srv/mail/lee/Maildir"
+                },
+                "jo": {
+                  "sample_password": "sample-jo",
+                  "enabled": true,
+                  "home": "/srv/mail/jo",
+                  "maildir_path": "/srv/mail/jo/Maildir"
+                }
+              },
+              "mailboxes": {
+                "lee": {
+                  "INBOX": {
+                    "uid_validity": 77,
+                    "uid_next": 112,
+                    "messages": [
+                      {
+                        "uid": 101,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 107,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 109,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                },
+                "jo": {
+                  "INBOX": {
+                    "uid_validity": 77,
+                    "uid_next": 112,
+                    "messages": [
+                      {
+                        "uid": 101,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 107,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 109,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "certificates": {
+                "/etc/dovecot/site.pem": {
+                  "key_id": "site-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "mail.example.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                },
+                "/etc/dovecot/old.pem": {
+                  "key_id": "old-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "retired.example.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                }
+              },
+              "keys": {
+                "/etc/dovecot/site.key": {
+                  "key_id": "site-key",
+                  "owner": "root",
+                  "mode": 384
+                },
+                "/etc/dovecot/old.key": {
+                  "key_id": "old-key",
+                  "owner": "root",
+                  "mode": 384
+                }
+              }
+            },
+            "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "enabled": true,
+            "clients": {
+              "imap-plain": {
+                "protocol": "imap",
+                "port": 143,
+                "implicit_tls": false,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "imap-tls": {
+                "protocol": "imap",
+                "port": 993,
+                "implicit_tls": true,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-plain": {
+                "protocol": "pop3",
+                "port": 110,
+                "implicit_tls": false,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-tls": {
+                "protocol": "pop3",
+                "port": 995,
+                "implicit_tls": true,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              }
+            },
+            "requirements": [
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "lee",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "jo",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "message",
+                "user": "lee",
+                "mailbox": "INBOX",
+                "uid": 101,
+                "present": true,
+                "seen": true,
+                "deleted": false
+              },
+              {
+                "kind": "message",
+                "user": "lee",
+                "mailbox": "INBOX",
+                "uid": 107,
+                "present": false,
+                "seen": null,
+                "deleted": null
+              },
+              {
+                "kind": "message",
+                "user": "lee",
+                "mailbox": "INBOX",
+                "uid": 109,
+                "present": true,
+                "seen": false,
+                "deleted": false
+              }
+            ]
+          },
+          "example": {
+            "editable_config": false,
+            "facts": {
+              "server_name": "practice.mail.test",
+              "day": 100,
+              "accounts": {
+                "jules": {
+                  "sample_password": "sample-jules",
+                  "enabled": true,
+                  "home": "/srv/practice/jules",
+                  "maildir_path": "/srv/practice/jules/Maildir"
+                },
+                "ren": {
+                  "sample_password": "sample-ren",
+                  "enabled": true,
+                  "home": "/srv/practice/ren",
+                  "maildir_path": "/srv/practice/ren/Maildir"
+                }
+              },
+              "mailboxes": {
+                "jules": {
+                  "INBOX": {
+                    "uid_validity": 88,
+                    "uid_next": 220,
+                    "messages": [
+                      {
+                        "uid": 201,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 209,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 213,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                },
+                "ren": {
+                  "INBOX": {
+                    "uid_validity": 88,
+                    "uid_next": 220,
+                    "messages": [
+                      {
+                        "uid": 201,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 209,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 213,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "certificates": {
+                "/etc/dovecot/practice.pem": {
+                  "key_id": "practice-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "practice.mail.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                },
+                "/etc/dovecot/old.pem": {
+                  "key_id": "old-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "retired.example.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                }
+              },
+              "keys": {
+                "/etc/dovecot/practice.key": {
+                  "key_id": "practice-key",
+                  "owner": "root",
+                  "mode": 384
+                },
+                "/etc/dovecot/old.key": {
+                  "key_id": "old-key",
+                  "owner": "root",
+                  "mode": 384
+                }
+              }
+            },
+            "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "enabled": true,
+            "clients": {
+              "imap-plain": {
+                "protocol": "imap",
+                "port": 143,
+                "implicit_tls": false,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "imap-tls": {
+                "protocol": "imap",
+                "port": 993,
+                "implicit_tls": true,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-plain": {
+                "protocol": "pop3",
+                "port": 110,
+                "implicit_tls": false,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-tls": {
+                "protocol": "pop3",
+                "port": 995,
+                "implicit_tls": true,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              }
+            },
+            "requirements": [
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "jules",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "ren",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "message",
+                "user": "jules",
+                "mailbox": "INBOX",
+                "uid": 201,
+                "present": true,
+                "seen": true,
+                "deleted": false
+              },
+              {
+                "kind": "message",
+                "user": "jules",
+                "mailbox": "INBOX",
+                "uid": 209,
+                "present": false,
+                "seen": null,
+                "deleted": null
+              },
+              {
+                "kind": "message",
+                "user": "jules",
+                "mailbox": "INBOX",
+                "uid": 213,
+                "present": true,
+                "seen": false,
+                "deleted": false
+              }
+            ]
+          },
+          "worked_config": null
+        }
+      },
+      "solution": [
+        "mailbox-workspace {\"kind\":\"client\",\"id\":\"imap-tls\"}",
+        "mailbox-workspace {\"kind\":\"connect\"}",
+        "mailbox-workspace {\"kind\":\"command\",\"line\":\"a1 LOGIN lee sample-lee\"}",
+        "mailbox-workspace {\"kind\":\"command\",\"line\":\"a2 SELECT INBOX\"}",
+        "mailbox-workspace {\"kind\":\"command\",\"line\":\"a3 UID STORE 101 +FLAGS (\\\\Seen)\"}",
+        "mailbox-workspace {\"kind\":\"command\",\"line\":\"a4 UID STORE 107 +FLAGS (\\\\Deleted)\"}",
+        "mailbox-workspace {\"kind\":\"command\",\"line\":\"a5 EXPUNGE\"}",
+        "mailbox-workspace {\"kind\":\"command\",\"line\":\"a6 LOGOUT\"}",
+        "mailbox-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-dovecot-secure-access"
+      ]
+    },
+    {
+      "id": "lpic2-pop-transaction-recovery",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-mailbox-access",
+      "topic": "IMAP and POP mail access",
+      "title": "Recover POP access and commit a precise cleanup",
+      "summary": "Restore secure POP access without breaking IMAP, then remove only the expired probe from the first account and preserve every other message.",
+      "objective": "Restore POP3 alongside the working IMAP service, using the existing protected per-user configuration. Both kai and nia must open their own mail over implicit TLS and the supported TLS-upgrade listeners. Unprotected remote passwords must still fail. Remove only kai/INBOX’s Expired test probe (initial POP position 2, IMAP UID 107), committing the POP transaction. Preserve kai’s Support request and Keep this report, and every message belonging to nia. Save/restart your configuration, enable it at boot, then verify the current stored result.",
+      "retry_guidance": "Read the failed outcome, compare the saved/running settings or actual message state, then change only the relevant configuration or protocol operation and retry.",
+      "difficulty": "Advanced",
+      "minutes": 35,
+      "steps": [
+        "Understand the task",
+        "Investigate and change the virtual workspace",
+        "Verify current outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Restore the missing protocol",
+          "why": "Use LIST and RETR to identify the expired probe before DELE. The number in DELE is the message’s current POP transaction position, not an IMAP UID. Numbering does not close up after DELE during this transaction. RETR adds Seen by default in this Dovecot profile; pop3_no_flag_updates = yes can suppress that side effect. It does not delete the message.",
+          "action": "Fill worked configuration, save, restart and enable. Choose pop-tls, then Connect.",
+          "commands": []
+        },
+        {
+          "title": "Try a reversible removal",
+          "why": "DELE only marks. RSET clears all pending deletion marks; a disconnect or lost server session also leaves the stored messages intact. QUIT after successful login commits the pending deletions. QUIT before login commits nothing. After reconnecting, LIST and UIDL reflect the remaining messages and new positions. The remaining messages’ opaque IDs stay stable.",
+          "action": "Send USER ada, PASS sample-ada, LIST, RETR 1, then DELE 1. Choose Disconnect and reconnect/login before listing again.",
+          "commands": [
+            {
+              "command": "USER ada",
+              "explanation": "Name the worked account; with this policy USER must follow verified TLS.",
+              "simulator_only": false
+            },
+            {
+              "command": "PASS sample-ada",
+              "explanation": "Authenticate and begin a POP transaction with stable message numbers.",
+              "simulator_only": false
+            },
+            {
+              "command": "LIST",
+              "explanation": "List current transaction positions and canonical wire sizes.",
+              "simulator_only": false
+            },
+            {
+              "command": "UIDL",
+              "explanation": "Observe opaque stable IDs; do not assume their text is a message number.",
+              "simulator_only": false
+            },
+            {
+              "command": "RETR 1",
+              "explanation": "Read the probe at position 1 before deciding to remove it.",
+              "simulator_only": false
+            },
+            {
+              "command": "DELE 1",
+              "explanation": "Mark position 1 for deletion without removing its stored copy yet.",
+              "simulator_only": false
+            },
+            {
+              "command": "RSET",
+              "explanation": "Cancel all pending deletion marks while keeping the session open.",
+              "simulator_only": false
+            },
+            {
+              "command": "QUIT",
+              "explanation": "After login, commit pending deletions and close the session.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Commit only the intended cleanup",
+          "why": "The service can run while POP is unavailable because only IMAP is enabled. Preserve TLS/password protection, the other protocol and both per-user stores when correcting the configuration. Save and restart before reconnecting. Check work compares fresh secure access, rejection of unprotected login, the precise committed removal and every message that must remain.",
+          "action": "Inspect the probe again, DELE 1, then QUIT. Check example and reconnect to LIST or UIDL.",
+          "commands": []
+        }
+      ],
+      "explanation": "Restore both protocol families, identify the probe before marking its POP number, and use QUIT from the authenticated transaction to commit. A disconnect or RSET leaves the stored probe intact; emptying the whole mailbox fails preservation checks.",
+      "hints": [
+        "Use LIST and RETR to identify the expired probe before DELE. The number in DELE is the message’s current POP transaction position, not an IMAP UID. Numbering does not close up after DELE during this transaction. RETR adds Seen by default in this Dovecot profile; pop3_no_flag_updates = yes can suppress that side effect. It does not delete the message.",
+        "DELE only marks. RSET clears all pending deletion marks; a disconnect or lost server session also leaves the stored messages intact. QUIT after successful login commits the pending deletions. QUIT before login commits nothing. After reconnecting, LIST and UIDL reflect the remaining messages and new positions. The remaining messages’ opaque IDs stay stable.",
+        "The service can run while POP is unavailable because only IMAP is enabled. Preserve TLS/password protection, the other protocol and both per-user stores when correcting the configuration. Save and restart before reconnecting. Check work compares fresh secure access, rejection of unprotected login, the precise committed removal and every message that must remain."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://doc.dovecot.org/2.4.1/core/config/quick.html",
+        "https://doc.dovecot.org/2.4.1/core/config/ssl.html",
+        "https://doc.dovecot.org/2.4.1/core/config/pop3.html",
+        "https://www.rfc-editor.org/rfc/rfc3501.html",
+        "https://www.rfc-editor.org/rfc/rfc1939.html"
+      ],
+      "simplifications": "Dovecot CE2.4.1-inspired explicit configuration profile and bounded IMAP4rev1/POP subset; no full daemon or protocol conformance. TLS uses supplied logical trust/name/day/key facts, not cryptography. Authentication and Maildir contents are supplied virtual fixtures. One client at a time, flat mailboxes, plain ASCII messages, Seen/Deleted only; no MIME, APPEND, SEARCH, concurrent delivery, external authentication, real network or host paths. X-SIMULATOR capability marks the partial IMAP profile. See MAILBOX_ACCESS_SUBSET.md for commands, limits and exclusions.",
+      "initial": {
+        "kind": "MailboxAccess",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-pop-transaction-recovery",
+          "view": "introduction",
+          "assignment": {
+            "runtime": {
+              "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/%{user}/Maildir\npop3_no_flag_updates = no\n",
+              "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/%{user}/Maildir\npop3_no_flag_updates = no\n",
+              "running": true,
+              "enabled": false,
+              "generation": 0,
+              "store": {
+                "kai": {
+                  "INBOX": {
+                    "uid_validity": 77,
+                    "uid_next": 112,
+                    "messages": [
+                      {
+                        "uid": 101,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 107,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 109,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                },
+                "nia": {
+                  "INBOX": {
+                    "uid_validity": 77,
+                    "uid_next": 112,
+                    "messages": [
+                      {
+                        "uid": 101,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 107,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 109,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "logs": [],
+              "error": null,
+              "pop_committed": {}
+            },
+            "connection": null,
+            "draft": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "input": "",
+            "client": "imap-plain",
+            "output": "",
+            "checked": false
+          },
+          "practice": {
+            "runtime": {
+              "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n",
+              "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n",
+              "running": true,
+              "enabled": false,
+              "generation": 0,
+              "store": {
+                "ada": {
+                  "INBOX": {
+                    "uid_validity": 88,
+                    "uid_next": 220,
+                    "messages": [
+                      {
+                        "uid": 201,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 209,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 213,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                },
+                "ben": {
+                  "INBOX": {
+                    "uid_validity": 88,
+                    "uid_next": 220,
+                    "messages": [
+                      {
+                        "uid": 201,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 209,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 213,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "logs": [],
+              "error": null,
+              "pop_committed": {}
+            },
+            "connection": null,
+            "draft": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "input": "",
+            "client": "imap-plain",
+            "output": "",
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "MailboxAccess",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-pop-transaction-recovery",
+          "assignment": {
+            "editable_config": true,
+            "facts": {
+              "server_name": "mail.example.test",
+              "day": 100,
+              "accounts": {
+                "kai": {
+                  "sample_password": "sample-kai",
+                  "enabled": true,
+                  "home": "/srv/mail/kai",
+                  "maildir_path": "/srv/mail/kai/Maildir"
+                },
+                "nia": {
+                  "sample_password": "sample-nia",
+                  "enabled": true,
+                  "home": "/srv/mail/nia",
+                  "maildir_path": "/srv/mail/nia/Maildir"
+                }
+              },
+              "mailboxes": {
+                "kai": {
+                  "INBOX": {
+                    "uid_validity": 77,
+                    "uid_next": 112,
+                    "messages": [
+                      {
+                        "uid": 101,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 107,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 109,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                },
+                "nia": {
+                  "INBOX": {
+                    "uid_validity": 77,
+                    "uid_next": 112,
+                    "messages": [
+                      {
+                        "uid": 101,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 107,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 109,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "certificates": {
+                "/etc/dovecot/site.pem": {
+                  "key_id": "site-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "mail.example.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                },
+                "/etc/dovecot/old.pem": {
+                  "key_id": "old-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "retired.example.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                }
+              },
+              "keys": {
+                "/etc/dovecot/site.key": {
+                  "key_id": "site-key",
+                  "owner": "root",
+                  "mode": 384
+                },
+                "/etc/dovecot/old.key": {
+                  "key_id": "old-key",
+                  "owner": "root",
+                  "mode": 384
+                }
+              }
+            },
+            "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "enabled": false,
+            "clients": {
+              "imap-plain": {
+                "protocol": "imap",
+                "port": 143,
+                "implicit_tls": false,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "imap-tls": {
+                "protocol": "imap",
+                "port": 993,
+                "implicit_tls": true,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-plain": {
+                "protocol": "pop3",
+                "port": 110,
+                "implicit_tls": false,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-tls": {
+                "protocol": "pop3",
+                "port": 995,
+                "implicit_tls": true,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              }
+            },
+            "requirements": [
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "kai",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "nia",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-tls",
+                "user": "kai",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-tls",
+                "user": "nia",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-plain",
+                "user": "kai",
+                "upgrade": true,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-plain",
+                "user": "nia",
+                "upgrade": true,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-plain",
+                "user": "kai",
+                "upgrade": false,
+                "allow": false
+              },
+              {
+                "kind": "access",
+                "profile": "pop-plain",
+                "user": "nia",
+                "upgrade": false,
+                "allow": false
+              },
+              {
+                "kind": "enabled"
+              },
+              {
+                "kind": "message",
+                "user": "kai",
+                "mailbox": "INBOX",
+                "uid": 107,
+                "present": false,
+                "seen": null,
+                "deleted": null
+              },
+              {
+                "kind": "pop_committed",
+                "user": "kai",
+                "uids": [
+                  107
+                ]
+              }
+            ]
+          },
+          "example": {
+            "editable_config": true,
+            "facts": {
+              "server_name": "practice.mail.test",
+              "day": 100,
+              "accounts": {
+                "ada": {
+                  "sample_password": "sample-ada",
+                  "enabled": true,
+                  "home": "/srv/practice/ada",
+                  "maildir_path": "/srv/practice/ada/Maildir"
+                },
+                "ben": {
+                  "sample_password": "sample-ben",
+                  "enabled": true,
+                  "home": "/srv/practice/ben",
+                  "maildir_path": "/srv/practice/ben/Maildir"
+                }
+              },
+              "mailboxes": {
+                "ada": {
+                  "INBOX": {
+                    "uid_validity": 88,
+                    "uid_next": 220,
+                    "messages": [
+                      {
+                        "uid": 201,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 209,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 213,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                },
+                "ben": {
+                  "INBOX": {
+                    "uid_validity": 88,
+                    "uid_next": 220,
+                    "messages": [
+                      {
+                        "uid": 201,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Expired test probe"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 209,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Support request"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 213,
+                        "headers": [
+                          [
+                            "Subject",
+                            "Keep this report"
+                          ]
+                        ],
+                        "body": "This is supplied sample mail.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "certificates": {
+                "/etc/dovecot/practice.pem": {
+                  "key_id": "practice-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "practice.mail.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                },
+                "/etc/dovecot/old.pem": {
+                  "key_id": "old-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "retired.example.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                }
+              },
+              "keys": {
+                "/etc/dovecot/practice.key": {
+                  "key_id": "practice-key",
+                  "owner": "root",
+                  "mode": 384
+                },
+                "/etc/dovecot/old.key": {
+                  "key_id": "old-key",
+                  "owner": "root",
+                  "mode": 384
+                }
+              }
+            },
+            "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "enabled": false,
+            "clients": {
+              "imap-plain": {
+                "protocol": "imap",
+                "port": 143,
+                "implicit_tls": false,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "imap-tls": {
+                "protocol": "imap",
+                "port": 993,
+                "implicit_tls": true,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-plain": {
+                "protocol": "pop3",
+                "port": 110,
+                "implicit_tls": false,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-tls": {
+                "protocol": "pop3",
+                "port": 995,
+                "implicit_tls": true,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              }
+            },
+            "requirements": [
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "ada",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "ben",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-tls",
+                "user": "ada",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-tls",
+                "user": "ben",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-plain",
+                "user": "ada",
+                "upgrade": true,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-plain",
+                "user": "ben",
+                "upgrade": true,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-plain",
+                "user": "ada",
+                "upgrade": false,
+                "allow": false
+              },
+              {
+                "kind": "access",
+                "profile": "pop-plain",
+                "user": "ben",
+                "upgrade": false,
+                "allow": false
+              },
+              {
+                "kind": "enabled"
+              },
+              {
+                "kind": "message",
+                "user": "ada",
+                "mailbox": "INBOX",
+                "uid": 201,
+                "present": false,
+                "seen": null,
+                "deleted": null
+              },
+              {
+                "kind": "pop_committed",
+                "user": "ada",
+                "uids": [
+                  201
+                ]
+              }
+            ]
+          },
+          "worked_config": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n"
+        }
+      },
+      "solution": [
+        "mailbox-workspace {\"kind\":\"edit\",\"text\":\"dovecot_config_version = 2.4.0\\ndovecot_storage_version = 2.4.0\\nprotocols = imap pop3\\nssl = required\\nauth_allow_cleartext = no\\nauth_mechanisms = plain login\\nssl_server_cert_file = /etc/dovecot/site.pem\\nssl_server_key_file = /etc/dovecot/site.key\\nmail_driver = maildir\\nmail_path = /srv/mail/%{user}/Maildir\\npop3_no_flag_updates = no\\n\"}",
+        "mailbox-workspace {\"kind\":\"save\"}",
+        "mailbox-workspace {\"kind\":\"restart\"}",
+        "mailbox-workspace {\"kind\":\"enable\"}",
+        "mailbox-workspace {\"kind\":\"client\",\"id\":\"pop-tls\"}",
+        "mailbox-workspace {\"kind\":\"connect\"}",
+        "mailbox-workspace {\"kind\":\"command\",\"line\":\"USER kai\"}",
+        "mailbox-workspace {\"kind\":\"command\",\"line\":\"PASS sample-kai\"}",
+        "mailbox-workspace {\"kind\":\"command\",\"line\":\"DELE 2\"}",
+        "mailbox-workspace {\"kind\":\"command\",\"line\":\"QUIT\"}",
+        "mailbox-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-imap-mailbox-recovery"
+      ]
+    }
+  ]
+}

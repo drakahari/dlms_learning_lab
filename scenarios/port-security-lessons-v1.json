@@ -1,0 +1,4315 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-security-identity",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Port security",
+      "unit": "secure-access-ports",
+      "title": "Bind an approved source before the first arrival",
+      "summary": "Distinguish an address limit from an explicit approved source, then prove the desk remains useful.",
+      "objective": "On assigned-switch/desk, enable security with maximum one and explicitly configure the approved desk source 02:00:00:00:00:01. Reject unexpected sources even when they arrive first, while approved traffic still reaches the file server after each rejection. Keep the operations and server ports unchanged and working in both directions.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "initial": {
+        "kind": "PortSecurity",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-security-identity",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "assigned-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "assigned-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-desk": "02:00:00:00:00:01",
+                  "assigned-ops": "02:00:00:00:00:02",
+                  "assigned-server": "02:00:00:00:00:03"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "assigned-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "assigned-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-desk": "02:00:00:00:00:01",
+                  "assigned-ops": "02:00:00:00:00:02",
+                  "assigned-server": "02:00:00:00:00:03"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "switch": "assigned-switch",
+              "ports": [
+                {
+                  "name": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "ops",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:02"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "server",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:03"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                }
+              ]
+            },
+            "drafts": [
+              {
+                "port": "desk",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": ""
+              },
+              {
+                "port": "ops",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:02"
+              },
+              {
+                "port": "server",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:03"
+              }
+            ],
+            "host": "assigned-desk",
+            "source": "02:00:00:00:00:09",
+            "destination": "02:00:00:00:00:03",
+            "output": [],
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "sample-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "sample-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-desk": "02:00:00:00:00:15",
+                  "sample-ops": "02:00:00:00:00:16",
+                  "sample-server": "02:00:00:00:00:17"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "sample-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "sample-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-desk": "02:00:00:00:00:15",
+                  "sample-ops": "02:00:00:00:00:16",
+                  "sample-server": "02:00:00:00:00:17"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "switch": "sample-switch",
+              "ports": [
+                {
+                  "name": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "ops",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:16"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "server",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:17"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                }
+              ]
+            },
+            "drafts": [
+              {
+                "port": "desk",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": ""
+              },
+              {
+                "port": "ops",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:16"
+              },
+              {
+                "port": "server",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:17"
+              }
+            ],
+            "host": "sample-desk",
+            "source": "02:00:00:00:00:1d",
+            "destination": "02:00:00:00:00:17",
+            "output": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "PortSecurity",
+        "definition": {
+          "initial": {
+            "id": "ccna-security-identity",
+            "instructions": "On assigned-switch/desk, enable security with maximum one and explicitly configure the approved desk source 02:00:00:00:00:01. Reject unexpected sources even when they arrive first, while approved traffic still reaches the file server after each rejection. Keep the operations and server ports unchanged and working in both directions.",
+            "initial": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "assigned-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "assigned-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-desk": "02:00:00:00:00:01",
+                  "assigned-ops": "02:00:00:00:00:02",
+                  "assigned-server": "02:00:00:00:00:03"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "assigned-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "assigned-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-desk": "02:00:00:00:00:01",
+                  "assigned-ops": "02:00:00:00:00:02",
+                  "assigned-server": "02:00:00:00:00:03"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "switch": "assigned-switch",
+              "ports": [
+                {
+                  "name": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "ops",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:02"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "server",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:03"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                }
+              ]
+            },
+            "required": [
+              {
+                "settings": {
+                  "port": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "protect",
+                  "configured": [
+                    "02:00:00:00:00:01"
+                  ]
+                },
+                "modes": [
+                  "protect",
+                  "restrict"
+                ]
+              }
+            ],
+            "cases": [
+              {
+                "label": "Unexpected sender arrives first",
+                "frames": [
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:09",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": null,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:01",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Approved traffic continues after a rejection",
+                "frames": [
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:01",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:09",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": null,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:01",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Both directions and the neighbor still work",
+                "frames": [
+                  {
+                    "host": "assigned-ops",
+                    "source": "02:00:00:00:00:02",
+                    "destination": "02:00:00:00:00:01",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-desk"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:01",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "assigned-server",
+                    "source": "02:00:00:00:00:03",
+                    "destination": "02:00:00:00:00:02",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-ops"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "A neighbor's secured address cannot move here",
+                "frames": [
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:02",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": null,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "assigned-ops",
+                    "source": "02:00:00:00:00:02",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "kind": "configure",
+                "settings": {
+                  "port": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "protect",
+                  "configured": [
+                    "02:00:00:00:00:01"
+                  ]
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "ccna-security-identity-practice",
+            "instructions": "Bind sample-switch/desk to its supplied source 02:00:00:00:00:15 with maximum one. Reject the unexpected 02:00:00:00:00:1d without interrupting approved traffic; preserve sample-ops and sample-server.",
+            "initial": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "sample-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "sample-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-desk": "02:00:00:00:00:15",
+                  "sample-ops": "02:00:00:00:00:16",
+                  "sample-server": "02:00:00:00:00:17"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "sample-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "sample-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-desk": "02:00:00:00:00:15",
+                  "sample-ops": "02:00:00:00:00:16",
+                  "sample-server": "02:00:00:00:00:17"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "switch": "sample-switch",
+              "ports": [
+                {
+                  "name": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "ops",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:16"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "server",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:17"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                }
+              ]
+            },
+            "required": [
+              {
+                "settings": {
+                  "port": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "protect",
+                  "configured": [
+                    "02:00:00:00:00:15"
+                  ]
+                },
+                "modes": [
+                  "protect",
+                  "restrict"
+                ]
+              }
+            ],
+            "cases": [
+              {
+                "label": "Unexpected sender arrives first",
+                "frames": [
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:1d",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": null,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:15",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Approved traffic continues after a rejection",
+                "frames": [
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:15",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:1d",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": null,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:15",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Both directions and the neighbor still work",
+                "frames": [
+                  {
+                    "host": "sample-ops",
+                    "source": "02:00:00:00:00:16",
+                    "destination": "02:00:00:00:00:15",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-desk"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:15",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "sample-server",
+                    "source": "02:00:00:00:00:17",
+                    "destination": "02:00:00:00:00:16",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-ops"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "A neighbor's secured address cannot move here",
+                "frames": [
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:16",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": null,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "sample-ops",
+                    "source": "02:00:00:00:00:16",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "kind": "configure",
+                "settings": {
+                  "port": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "protect",
+                  "configured": [
+                    "02:00:00:00:00:15"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "steps": [
+        "Inspect the supplied secure-port state, apply the requested repair, replay traffic and check the ordered outcomes."
+      ],
+      "guide": [],
+      "explanation": "Use maximum one and configure the approved desk address before testing. Protect or restrict can meet the continuity requirement. Check work tries the unwanted source first on a cloned current configuration, then verifies actual approved delivery and protected neighbors.",
+      "hints": [
+        "Compare the approved identity in the task with the Configured MAC addresses field. Maximum limits the number; it does not choose the right first sender.",
+        "Read the current port status as well as the counter. Protect, restrict and shutdown differ in observability and whether approved traffic continues.",
+        "An error-disabled port needs policy repair and a deliberate Shut down / Bring up sequence. Keep the neighboring settings intact."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/port_security.html"
+      ],
+      "simplifications": "Source checked 2026-11-08: CCNA 200-301 v1.1/5.7; Catalyst 9300 IOS XE Dublin 17.12 chapter dated 2023-07-28. Static access-port security on one supplied switch and actual bounded acyclic virtual Ethernet forwarding. Source MAC is one replay frame; it does not change the endpoint NIC or authenticate identity. Maximum 16 per port / 64 total are simulator limits, not hardware claims. No real frames, IOS, host interfaces, sticky learning, voice VLAN, secure aging, automatic recovery, save/restart, DHCP snooping or DAI. Restrict notification is a typed fact, not SNMP/syslog transport; contradictory shutdown notification statements in the source are excluded. Shutdown learned-address retention is a modeled diagnostic state until manual Down, not a device-conformance claim.",
+      "prerequisites": [
+        "ccna-mac-handover"
+      ],
+      "solution": [
+        "SECURE PORT PLAN\n[{\"kind\": \"configure\", \"settings\": {\"port\": \"desk\", \"enabled\": true, \"maximum\": 1, \"mode\": \"protect\", \"configured\": [\"02:00:00:00:00:01\"]}}]"
+      ]
+    },
+    {
+      "id": "ccna-security-observe",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Port security",
+      "unit": "secure-access-ports",
+      "title": "Count rejected sources without disconnecting the desk",
+      "summary": "Choose a violation response that gives evidence while preserving authorized traffic.",
+      "objective": "On assigned-switch/desk, retain the two configured approved sources 02:00:00:00:00:01 and 02:00:00:00:00:08, with maximum two and security enabled. Reject and count an unexpected third source while the port and both approved sources remain working. Keep the operations and server ports unchanged; check the ordered traffic cases.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "initial": {
+        "kind": "PortSecurity",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-security-observe",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "assigned-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "assigned-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-desk": "02:00:00:00:00:01",
+                  "assigned-ops": "02:00:00:00:00:02",
+                  "assigned-server": "02:00:00:00:00:03"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "assigned-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "assigned-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-desk": "02:00:00:00:00:01",
+                  "assigned-ops": "02:00:00:00:00:02",
+                  "assigned-server": "02:00:00:00:00:03"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "switch": "assigned-switch",
+              "ports": [
+                {
+                  "name": "desk",
+                  "enabled": true,
+                  "maximum": 2,
+                  "mode": "protect",
+                  "configured": [
+                    "02:00:00:00:00:01",
+                    "02:00:00:00:00:08"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "ops",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:02"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "server",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:03"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                }
+              ]
+            },
+            "drafts": [
+              {
+                "port": "desk",
+                "enabled": true,
+                "mode": "protect",
+                "maximum": "2",
+                "configured": "02:00:00:00:00:01, 02:00:00:00:00:08"
+              },
+              {
+                "port": "ops",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:02"
+              },
+              {
+                "port": "server",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:03"
+              }
+            ],
+            "host": "assigned-desk",
+            "source": "02:00:00:00:00:09",
+            "destination": "02:00:00:00:00:03",
+            "output": [],
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "sample-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "sample-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-desk": "02:00:00:00:00:15",
+                  "sample-ops": "02:00:00:00:00:16",
+                  "sample-server": "02:00:00:00:00:17"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "sample-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "sample-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-desk": "02:00:00:00:00:15",
+                  "sample-ops": "02:00:00:00:00:16",
+                  "sample-server": "02:00:00:00:00:17"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "switch": "sample-switch",
+              "ports": [
+                {
+                  "name": "desk",
+                  "enabled": true,
+                  "maximum": 2,
+                  "mode": "protect",
+                  "configured": [
+                    "02:00:00:00:00:15",
+                    "02:00:00:00:00:1c"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "ops",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:16"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "server",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:17"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                }
+              ]
+            },
+            "drafts": [
+              {
+                "port": "desk",
+                "enabled": true,
+                "mode": "protect",
+                "maximum": "2",
+                "configured": "02:00:00:00:00:15, 02:00:00:00:00:1c"
+              },
+              {
+                "port": "ops",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:16"
+              },
+              {
+                "port": "server",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:17"
+              }
+            ],
+            "host": "sample-desk",
+            "source": "02:00:00:00:00:1d",
+            "destination": "02:00:00:00:00:17",
+            "output": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "PortSecurity",
+        "definition": {
+          "initial": {
+            "id": "ccna-security-observe",
+            "instructions": "On assigned-switch/desk, retain the two configured approved sources 02:00:00:00:00:01 and 02:00:00:00:00:08, with maximum two and security enabled. Reject and count an unexpected third source while the port and both approved sources remain working. Keep the operations and server ports unchanged; check the ordered traffic cases.",
+            "initial": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "assigned-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "assigned-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-desk": "02:00:00:00:00:01",
+                  "assigned-ops": "02:00:00:00:00:02",
+                  "assigned-server": "02:00:00:00:00:03"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "assigned-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "assigned-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-desk": "02:00:00:00:00:01",
+                  "assigned-ops": "02:00:00:00:00:02",
+                  "assigned-server": "02:00:00:00:00:03"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "switch": "assigned-switch",
+              "ports": [
+                {
+                  "name": "desk",
+                  "enabled": true,
+                  "maximum": 2,
+                  "mode": "protect",
+                  "configured": [
+                    "02:00:00:00:00:01",
+                    "02:00:00:00:00:08"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "ops",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:02"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "server",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:03"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                }
+              ]
+            },
+            "required": [
+              {
+                "settings": {
+                  "port": "desk",
+                  "enabled": true,
+                  "maximum": 2,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:01",
+                    "02:00:00:00:00:08"
+                  ]
+                },
+                "modes": [
+                  "restrict"
+                ]
+              }
+            ],
+            "cases": [
+              {
+                "label": "Unexpected sender arrives first",
+                "frames": [
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:09",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": true,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:01",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Approved traffic continues after a rejection",
+                "frames": [
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:01",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:09",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": true,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:01",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Both directions and the neighbor still work",
+                "frames": [
+                  {
+                    "host": "assigned-ops",
+                    "source": "02:00:00:00:00:02",
+                    "destination": "02:00:00:00:00:01",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-desk"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:01",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "assigned-server",
+                    "source": "02:00:00:00:00:03",
+                    "destination": "02:00:00:00:00:02",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-ops"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "A neighbor's secured address cannot move here",
+                "frames": [
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:02",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": true,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "assigned-ops",
+                    "source": "02:00:00:00:00:02",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Second approved source also works",
+                "frames": [
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:08",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:09",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": true,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:01",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "kind": "configure",
+                "settings": {
+                  "port": "desk",
+                  "enabled": true,
+                  "maximum": 2,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:01",
+                    "02:00:00:00:00:08"
+                  ]
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "ccna-security-observe-practice",
+            "instructions": "Keep the two sample desk sources 02:00:00:00:00:15 and 02:00:00:00:00:1c with maximum two. Reject and count an unexpected third source while both approved sources and neighboring ports keep working.",
+            "initial": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "sample-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "sample-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-desk": "02:00:00:00:00:15",
+                  "sample-ops": "02:00:00:00:00:16",
+                  "sample-server": "02:00:00:00:00:17"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "sample-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "sample-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-desk": "02:00:00:00:00:15",
+                  "sample-ops": "02:00:00:00:00:16",
+                  "sample-server": "02:00:00:00:00:17"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "switch": "sample-switch",
+              "ports": [
+                {
+                  "name": "desk",
+                  "enabled": true,
+                  "maximum": 2,
+                  "mode": "protect",
+                  "configured": [
+                    "02:00:00:00:00:15",
+                    "02:00:00:00:00:1c"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "ops",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:16"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "server",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:17"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                }
+              ]
+            },
+            "required": [
+              {
+                "settings": {
+                  "port": "desk",
+                  "enabled": true,
+                  "maximum": 2,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:15",
+                    "02:00:00:00:00:1c"
+                  ]
+                },
+                "modes": [
+                  "restrict"
+                ]
+              }
+            ],
+            "cases": [
+              {
+                "label": "Unexpected sender arrives first",
+                "frames": [
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:1d",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": true,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:15",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Approved traffic continues after a rejection",
+                "frames": [
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:15",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:1d",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": true,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:15",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Both directions and the neighbor still work",
+                "frames": [
+                  {
+                    "host": "sample-ops",
+                    "source": "02:00:00:00:00:16",
+                    "destination": "02:00:00:00:00:15",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-desk"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:15",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "sample-server",
+                    "source": "02:00:00:00:00:17",
+                    "destination": "02:00:00:00:00:16",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-ops"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "A neighbor's secured address cannot move here",
+                "frames": [
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:16",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": true,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "sample-ops",
+                    "source": "02:00:00:00:00:16",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Second approved source also works",
+                "frames": [
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:1c",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:1d",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": true,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:15",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "kind": "configure",
+                "settings": {
+                  "port": "desk",
+                  "enabled": true,
+                  "maximum": 2,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:15",
+                    "02:00:00:00:00:1c"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "steps": [
+        "Inspect the supplied secure-port state, apply the requested repair, replay traffic and check the ordered outcomes."
+      ],
+      "guide": [],
+      "explanation": "Keep both supplied identities and maximum two, and use restrict. Protect fails the counted-rejection tests; shutdown fails the continued-delivery tests. Entry order is immaterial. A third learning slot or disabled policy does not satisfy this task.",
+      "hints": [
+        "Compare the approved identity in the task with the Configured MAC addresses field. Maximum limits the number; it does not choose the right first sender.",
+        "Read the current port status as well as the counter. Protect, restrict and shutdown differ in observability and whether approved traffic continues.",
+        "An error-disabled port needs policy repair and a deliberate Shut down / Bring up sequence. Keep the neighboring settings intact."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/port_security.html"
+      ],
+      "simplifications": "Source checked 2026-11-08: CCNA 200-301 v1.1/5.7; Catalyst 9300 IOS XE Dublin 17.12 chapter dated 2023-07-28. Static access-port security on one supplied switch and actual bounded acyclic virtual Ethernet forwarding. Source MAC is one replay frame; it does not change the endpoint NIC or authenticate identity. Maximum 16 per port / 64 total are simulator limits, not hardware claims. No real frames, IOS, host interfaces, sticky learning, voice VLAN, secure aging, automatic recovery, save/restart, DHCP snooping or DAI. Restrict notification is a typed fact, not SNMP/syslog transport; contradictory shutdown notification statements in the source are excluded. Shutdown learned-address retention is a modeled diagnostic state until manual Down, not a device-conformance claim.",
+      "prerequisites": [
+        "ccna-security-identity"
+      ],
+      "solution": [
+        "SECURE PORT PLAN\n[{\"kind\": \"configure\", \"settings\": {\"port\": \"desk\", \"enabled\": true, \"maximum\": 2, \"mode\": \"restrict\", \"configured\": [\"02:00:00:00:00:01\", \"02:00:00:00:00:08\"]}}]"
+      ]
+    },
+    {
+      "id": "ccna-security-recover",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Port security",
+      "unit": "secure-access-ports",
+      "title": "Replace a retired identity and recover the desk",
+      "summary": "Repair the policy and the actual disabled state without weakening neighboring ports.",
+      "objective": "Replace the retired configured identity on assigned-switch/desk with the current approved source 02:00:00:00:00:01; retain maximum one and security enabled. Recover the error-disabled desk manually after repairing its policy, and keep it working when an unexpected source is rejected again. Preserve the operations and server port settings and verify actual traffic in both directions.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "initial": {
+        "kind": "PortSecurity",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-security-recover",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "assigned-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "assigned-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-desk": "02:00:00:00:00:01",
+                  "assigned-ops": "02:00:00:00:00:02",
+                  "assigned-server": "02:00:00:00:00:03"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": false,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "assigned-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "assigned-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-desk": "02:00:00:00:00:01",
+                  "assigned-ops": "02:00:00:00:00:02",
+                  "assigned-server": "02:00:00:00:00:03"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "switch": "assigned-switch",
+              "ports": [
+                {
+                  "name": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "shutdown",
+                  "configured": [
+                    "02:00:00:00:00:07"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": true,
+                  "violations": 1
+                },
+                {
+                  "name": "ops",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:02"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "server",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:03"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                }
+              ]
+            },
+            "drafts": [
+              {
+                "port": "desk",
+                "enabled": true,
+                "mode": "shutdown",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:07"
+              },
+              {
+                "port": "ops",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:02"
+              },
+              {
+                "port": "server",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:03"
+              }
+            ],
+            "host": "assigned-desk",
+            "source": "02:00:00:00:00:09",
+            "destination": "02:00:00:00:00:03",
+            "output": [],
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "sample-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "sample-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-desk": "02:00:00:00:00:15",
+                  "sample-ops": "02:00:00:00:00:16",
+                  "sample-server": "02:00:00:00:00:17"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": false,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "sample-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "sample-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-desk": "02:00:00:00:00:15",
+                  "sample-ops": "02:00:00:00:00:16",
+                  "sample-server": "02:00:00:00:00:17"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "switch": "sample-switch",
+              "ports": [
+                {
+                  "name": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "shutdown",
+                  "configured": [
+                    "02:00:00:00:00:1b"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": true,
+                  "violations": 1
+                },
+                {
+                  "name": "ops",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:16"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "server",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:17"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                }
+              ]
+            },
+            "drafts": [
+              {
+                "port": "desk",
+                "enabled": true,
+                "mode": "shutdown",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:1b"
+              },
+              {
+                "port": "ops",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:16"
+              },
+              {
+                "port": "server",
+                "enabled": true,
+                "mode": "restrict",
+                "maximum": "1",
+                "configured": "02:00:00:00:00:17"
+              }
+            ],
+            "host": "sample-desk",
+            "source": "02:00:00:00:00:1d",
+            "destination": "02:00:00:00:00:17",
+            "output": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "PortSecurity",
+        "definition": {
+          "initial": {
+            "id": "ccna-security-recover",
+            "instructions": "Replace the retired configured identity on assigned-switch/desk with the current approved source 02:00:00:00:00:01; retain maximum one and security enabled. Recover the error-disabled desk manually after repairing its policy, and keep it working when an unexpected source is rejected again. Preserve the operations and server port settings and verify actual traffic in both directions.",
+            "initial": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "assigned-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "assigned-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-desk": "02:00:00:00:00:01",
+                  "assigned-ops": "02:00:00:00:00:02",
+                  "assigned-server": "02:00:00:00:00:03"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": false,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "assigned-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "assigned-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-desk": "02:00:00:00:00:01",
+                  "assigned-ops": "02:00:00:00:00:02",
+                  "assigned-server": "02:00:00:00:00:03"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "switch": "assigned-switch",
+              "ports": [
+                {
+                  "name": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "shutdown",
+                  "configured": [
+                    "02:00:00:00:00:07"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": true,
+                  "violations": 1
+                },
+                {
+                  "name": "ops",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:02"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "server",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:03"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                }
+              ]
+            },
+            "required": [
+              {
+                "settings": {
+                  "port": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "protect",
+                  "configured": [
+                    "02:00:00:00:00:01"
+                  ]
+                },
+                "modes": [
+                  "protect",
+                  "restrict"
+                ]
+              }
+            ],
+            "cases": [
+              {
+                "label": "Unexpected sender arrives first",
+                "frames": [
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:09",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": null,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:01",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Approved traffic continues after a rejection",
+                "frames": [
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:01",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:09",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": null,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:01",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Both directions and the neighbor still work",
+                "frames": [
+                  {
+                    "host": "assigned-ops",
+                    "source": "02:00:00:00:00:02",
+                    "destination": "02:00:00:00:00:01",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-desk"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:01",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "assigned-server",
+                    "source": "02:00:00:00:00:03",
+                    "destination": "02:00:00:00:00:02",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-ops"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "A neighbor's secured address cannot move here",
+                "frames": [
+                  {
+                    "host": "assigned-desk",
+                    "source": "02:00:00:00:00:02",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": null,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "assigned-ops",
+                    "source": "02:00:00:00:00:02",
+                    "destination": "02:00:00:00:00:03",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "assigned-server"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "kind": "configure",
+                "settings": {
+                  "port": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "protect",
+                  "configured": [
+                    "02:00:00:00:00:01"
+                  ]
+                }
+              },
+              {
+                "kind": "admin",
+                "port": "desk",
+                "up": false
+              },
+              {
+                "kind": "admin",
+                "port": "desk",
+                "up": true
+              }
+            ]
+          },
+          "example": {
+            "id": "ccna-security-recover-practice",
+            "instructions": "Replace the retired sample desk identity 02:00:00:00:00:1b with the current source 02:00:00:00:00:15. Retain maximum one, repair the disabled state manually, and keep approved traffic working after rejecting an unexpected source. Preserve neighboring settings.",
+            "initial": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "sample-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "sample-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-desk": "02:00:00:00:00:15",
+                  "sample-ops": "02:00:00:00:00:16",
+                  "sample-server": "02:00:00:00:00:17"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "desk": {
+                          "up": false,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "ops": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-desk": {
+                      "label": "Desk workstation",
+                      "up": true
+                    },
+                    "sample-ops": {
+                      "label": "Operations workstation",
+                      "up": true
+                    },
+                    "sample-server": {
+                      "label": "File server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "wire-desk",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-desk"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "desk"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-ops",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-ops"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "ops"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-desk": "02:00:00:00:00:15",
+                  "sample-ops": "02:00:00:00:00:16",
+                  "sample-server": "02:00:00:00:00:17"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "switch": "sample-switch",
+              "ports": [
+                {
+                  "name": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "shutdown",
+                  "configured": [
+                    "02:00:00:00:00:1b"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": true,
+                  "violations": 1
+                },
+                {
+                  "name": "ops",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:16"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                },
+                {
+                  "name": "server",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "restrict",
+                  "configured": [
+                    "02:00:00:00:00:17"
+                  ],
+                  "dynamic": [],
+                  "admin_up": true,
+                  "error_disabled": false,
+                  "violations": 0
+                }
+              ]
+            },
+            "required": [
+              {
+                "settings": {
+                  "port": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "protect",
+                  "configured": [
+                    "02:00:00:00:00:15"
+                  ]
+                },
+                "modes": [
+                  "protect",
+                  "restrict"
+                ]
+              }
+            ],
+            "cases": [
+              {
+                "label": "Unexpected sender arrives first",
+                "frames": [
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:1d",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": null,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:15",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Approved traffic continues after a rejection",
+                "frames": [
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:15",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:1d",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": null,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:15",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Both directions and the neighbor still work",
+                "frames": [
+                  {
+                    "host": "sample-ops",
+                    "source": "02:00:00:00:00:16",
+                    "destination": "02:00:00:00:00:15",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-desk"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:15",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  },
+                  {
+                    "host": "sample-server",
+                    "source": "02:00:00:00:00:17",
+                    "destination": "02:00:00:00:00:16",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-ops"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "A neighbor's secured address cannot move here",
+                "frames": [
+                  {
+                    "host": "sample-desk",
+                    "source": "02:00:00:00:00:16",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "violation",
+                      "counted": null,
+                      "operational": true
+                    }
+                  },
+                  {
+                    "host": "sample-ops",
+                    "source": "02:00:00:00:00:16",
+                    "destination": "02:00:00:00:00:17",
+                    "expected": {
+                      "kind": "admitted",
+                      "accepted_by": [
+                        "sample-server"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "kind": "configure",
+                "settings": {
+                  "port": "desk",
+                  "enabled": true,
+                  "maximum": 1,
+                  "mode": "protect",
+                  "configured": [
+                    "02:00:00:00:00:15"
+                  ]
+                }
+              },
+              {
+                "kind": "admin",
+                "port": "desk",
+                "up": false
+              },
+              {
+                "kind": "admin",
+                "port": "desk",
+                "up": true
+              }
+            ]
+          }
+        }
+      },
+      "steps": [
+        "Inspect the supplied secure-port state, apply the requested repair, replay traffic and check the ordered outcomes."
+      ],
+      "guide": [],
+      "explanation": "Replace the retired address with the current desk address and retain maximum one. Use protect or restrict to meet the continued-traffic requirement. Apply settings, choose Shut down then Bring up, and check every ordered case. Editing the policy alone leaves the error-disabled latch set.",
+      "hints": [
+        "Compare the approved identity in the task with the Configured MAC addresses field. Maximum limits the number; it does not choose the right first sender.",
+        "Read the current port status as well as the counter. Protect, restrict and shutdown differ in observability and whether approved traffic continues.",
+        "An error-disabled port needs policy repair and a deliberate Shut down / Bring up sequence. Keep the neighboring settings intact."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/port_security.html"
+      ],
+      "simplifications": "Source checked 2026-11-08: CCNA 200-301 v1.1/5.7; Catalyst 9300 IOS XE Dublin 17.12 chapter dated 2023-07-28. Static access-port security on one supplied switch and actual bounded acyclic virtual Ethernet forwarding. Source MAC is one replay frame; it does not change the endpoint NIC or authenticate identity. Maximum 16 per port / 64 total are simulator limits, not hardware claims. No real frames, IOS, host interfaces, sticky learning, voice VLAN, secure aging, automatic recovery, save/restart, DHCP snooping or DAI. Restrict notification is a typed fact, not SNMP/syslog transport; contradictory shutdown notification statements in the source are excluded. Shutdown learned-address retention is a modeled diagnostic state until manual Down, not a device-conformance claim.",
+      "prerequisites": [
+        "ccna-security-observe"
+      ],
+      "solution": [
+        "SECURE PORT PLAN\n[{\"kind\": \"configure\", \"settings\": {\"port\": \"desk\", \"enabled\": true, \"maximum\": 1, \"mode\": \"protect\", \"configured\": [\"02:00:00:00:00:01\"]}}, {\"kind\": \"admin\", \"port\": \"desk\", \"up\": false}, {\"kind\": \"admin\", \"port\": \"desk\", \"up\": true}]"
+      ]
+    }
+  ]
+}

@@ -769,6 +769,298 @@ pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
     rows
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if crate::wireless_channel_workspace::relevant(a,s){return crate::wireless_channel_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if crate::wlan_workspace::relevant(a,s){return crate::wlan_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if crate::proxy_workspace::relevant(a,s){return crate::proxy_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if crate::snmp_workspace::relevant(a,s){return crate::snmp_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if crate::wlan_paths_workspace::relevant(a,s){return crate::wlan_paths_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if crate::file_index_source::relevant(a,s){return crate::file_index_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal)}
+    if crate::command_location_workspace::relevant(a,s)
+        && !crate::command_location_workspace::ready(a,s){return false;}
+    if crate::accounts_template_workspace::relevant(a,s)
+        && !crate::accounts_template_workspace::ready(a,s){return false;}
+
+    if matches!(a.state,State::SharedLibraries{..})||matches!(s.initial,State::SharedLibraries{..})||matches!(s.goal,crate::engine::Goal::SharedLibraries{..}){
+        return crate::shared_libraries_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);
+    }
+
+    if matches!(a.state,State::Raid1{..})||matches!(s.initial,State::Raid1{..})||matches!(s.goal,crate::engine::Goal::Raid1{..}){
+        return crate::raid1_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);
+    }
+
+    if matches!(a.state, State::StartupFiles { .. })
+        || matches!(s.initial, State::StartupFiles { .. })
+        || matches!(s.goal, crate::engine::Goal::StartupFiles { .. })
+    {
+        return crate::startup_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::FsIntegrity { .. })
+        || matches!(s.initial, State::FsIntegrity { .. })
+        || matches!(s.goal, crate::engine::Goal::FsIntegrity { .. })
+    {
+        return crate::fs_integrity_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::UserMounts { .. })
+        || matches!(s.initial, State::UserMounts { .. })
+        || matches!(s.goal, crate::engine::Goal::UserMounts { .. })
+    {
+        return crate::user_mounts_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::Environment { .. })
+        || matches!(s.initial, State::Environment { .. })
+        || matches!(s.goal, crate::engine::Goal::Environment { .. })
+    {
+        return crate::environment_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::DebianSources { .. })
+        || matches!(s.initial, State::DebianSources { .. })
+        || matches!(s.goal, crate::engine::Goal::DebianSources { .. })
+    {
+        return crate::debian_sources_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::ClientNames { .. })
+        || matches!(s.initial, State::ClientNames { .. })
+        || matches!(s.goal, crate::engine::Goal::ClientNames { .. })
+    {
+        return crate::client_names_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::RemovableMounts { .. })
+        || matches!(s.initial, State::RemovableMounts { .. })
+        || matches!(s.goal, crate::engine::Goal::RemovableMounts { .. })
+    {
+        return crate::removable_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::NmProfiles { .. })
+        || matches!(s.initial, State::NmProfiles { .. })
+        || matches!(s.goal, crate::engine::Goal::NmProfiles { .. })
+    {
+        return crate::nm_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::PamStack { .. })
+        || matches!(s.initial, State::PamStack { .. })
+        || matches!(s.goal, crate::engine::Goal::PamStack { .. })
+    {
+        return crate::pam_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::Aging { .. })
+        || matches!(s.initial, State::Aging { .. })
+        || matches!(s.goal, crate::engine::Goal::Aging { .. })
+    {
+        return crate::aging_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::PortSecurity { .. })
+        || matches!(s.initial, State::PortSecurity { .. })
+        || matches!(s.goal, crate::engine::Goal::PortSecurity { .. })
+    {
+        return crate::port_security_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::DhcpSnooping { .. })
+        || matches!(s.initial, State::DhcpSnooping { .. })
+        || matches!(s.goal, crate::engine::Goal::DhcpSnooping { .. })
+    {
+        return crate::dhcp_snooping_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::ArpInspection { .. })
+        || matches!(s.initial, State::ArpInspection { .. })
+        || matches!(s.goal, crate::engine::Goal::ArpInspection { .. })
+    {
+        return crate::arp_inspection_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::ManagementPolicy { .. })
+        || matches!(s.initial, State::ManagementPolicy { .. })
+        || matches!(s.goal, crate::engine::Goal::ManagementPolicy { .. })
+    {
+        return crate::management_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::LocalAccess { .. })
+        || matches!(s.initial, State::LocalAccess { .. })
+        || matches!(s.goal, crate::engine::Goal::LocalAccess { .. })
+    {
+        return crate::local_access_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::AaaAccess { .. })
+        || matches!(s.initial, State::AaaAccess { .. })
+        || matches!(s.goal, crate::engine::Goal::AaaAccess { .. })
+    {
+        return crate::aaa_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::LdapClient { .. })
+        || matches!(s.initial, State::LdapClient { .. })
+        || matches!(s.goal, crate::engine::Goal::LdapClient { .. })
+    {
+        return crate::ldap_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::LdapAccess { .. })
+        || matches!(s.initial, State::LdapAccess { .. })
+        || matches!(s.goal, crate::engine::Goal::LdapAccess { .. })
+    {
+        return crate::ldap_access_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::LdapSchema { .. })
+        || matches!(s.initial, State::LdapSchema { .. })
+        || matches!(s.goal, crate::engine::Goal::LdapSchema { .. })
+    {
+        return crate::ldap_schema_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state,State::CopiedJournal{..}) || matches!(s.initial,State::CopiedJournal{..}) || matches!(s.goal,crate::engine::Goal::CopiedJournal{..}) {return crate::journal_archive_workspace::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::JsonInventory{..}) || matches!(s.initial,State::JsonInventory{..}) || matches!(s.goal,crate::engine::Goal::JsonInventory{..}) {return crate::json_inventory_workspace::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::RestController{..}) || matches!(s.initial,State::RestController{..}) || matches!(s.goal,crate::engine::Goal::RestController{..}) {return crate::rest_workspace::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::DevicePath{..}) || matches!(s.initial,State::DevicePath{..}) || matches!(s.goal,crate::engine::Goal::DevicePath{..}) {return crate::device_path_workspace::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::LocalMail{..}) || matches!(s.initial,State::LocalMail{..}) || matches!(s.goal,crate::engine::Goal::LocalMail{..}) {return crate::local_mail_workspace::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::Chrony{..}) || matches!(s.initial,State::Chrony{..}) || matches!(s.goal,crate::engine::Goal::Chrony{..}) {return crate::chrony_workspace::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::GrubOnce{..}) || matches!(s.initial,State::GrubOnce{..}) || matches!(s.goal,crate::engine::Goal::GrubOnce{..}) {return crate::grub_once_workspace::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::EfiLoader{..}) || matches!(s.initial,State::EfiLoader{..}) || matches!(s.goal,crate::engine::Goal::EfiLoader{..}) {return crate::efi_loader_workspace::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::BiosLoader{..}) || matches!(s.initial,State::BiosLoader{..}) || matches!(s.goal,crate::engine::Goal::BiosLoader{..}) {return crate::bios_loader_workspace::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::BootEntry{..}) || matches!(s.initial,State::BootEntry{..}) || matches!(s.goal,crate::engine::Goal::BootEntry{..}) {return crate::boot_entry_workspace::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state, State::LdapSchemaQuery { .. })
+        || matches!(s.initial, State::LdapSchemaQuery { .. })
+        || matches!(s.goal, crate::engine::Goal::LdapSchemaQuery { .. })
+    {
+        return crate::ldap_schema_query_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::LdapPassword { .. })
+        || matches!(s.initial, State::LdapPassword { .. })
+        || matches!(s.goal, crate::engine::Goal::LdapPassword { .. })
+    {
+        return crate::ldap_password_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::LdapChanges { .. })
+        || matches!(s.initial, State::LdapChanges { .. })
+        || matches!(s.goal, crate::engine::Goal::LdapChanges { .. })
+    {
+        return crate::ldap_change_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::DhcpConfig { .. })
+        || matches!(s.initial, State::DhcpConfig { .. })
+        || matches!(s.goal, crate::engine::Goal::DhcpConfig { .. })
+    {
+        return crate::dhcp_server_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::Qos { .. })
+        || matches!(s.initial, State::Qos { .. })
+        || matches!(s.goal, crate::engine::Goal::Qos { .. })
+    {
+        return crate::qos_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::LinuxLogging { .. })
+        || matches!(s.initial, State::LinuxLogging { .. })
+        || matches!(s.goal, crate::engine::Goal::LinuxLogging { .. })
+    {
+        return crate::linux_logging_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state,State::VirtualIsolation{..})||matches!(s.initial,State::VirtualIsolation{..})||matches!(s.goal,crate::engine::Goal::VirtualIsolation{..}){return crate::virtual_isolation_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::SieveFiltering{..})||matches!(s.initial,State::SieveFiltering{..})||matches!(s.goal,crate::engine::Goal::SieveFiltering{..}){return crate::sieve_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::LinuxRouter{..})||matches!(s.initial,State::LinuxRouter{..})||matches!(s.goal,crate::engine::Goal::LinuxRouter{..}){return crate::linux_router_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::LinuxV6{..})||matches!(s.initial,State::LinuxV6{..})||matches!(s.goal,crate::engine::Goal::LinuxV6{..}){return crate::linux_v6_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::LinuxServiceRouter{..})||matches!(s.initial,State::LinuxServiceRouter{..})||matches!(s.goal,crate::engine::Goal::LinuxServiceRouter{..}){return crate::linux_service_router_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::LinuxV6Administration{..})||matches!(s.initial,State::LinuxV6Administration{..})||matches!(s.goal,crate::engine::Goal::LinuxV6Administration{..}){return crate::linux_v6_admin_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::LinuxV6Startup{..})||matches!(s.initial,State::LinuxV6Startup{..})||matches!(s.goal,crate::engine::Goal::LinuxV6Startup{..}){return crate::linux_v6_startup_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::IdsRule{..})||matches!(s.initial,State::IdsRule{..})||matches!(s.goal,crate::engine::Goal::IdsRule{..}){return crate::ids_rule_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::AuthFilter{..})||matches!(s.initial,State::AuthFilter{..})||matches!(s.goal,crate::engine::Goal::AuthFilter{..}){return crate::auth_filter_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::VpnPoint{..})||matches!(s.initial,State::VpnPoint{..})||matches!(s.goal,crate::engine::Goal::VpnPoint{..}){return crate::vpn_point_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::Poe{..})||matches!(s.initial,State::Poe{..})||matches!(s.goal,crate::engine::Goal::Poe{..}){return crate::poe_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::KernelBuild{..})||matches!(s.initial,State::KernelBuild{..})||matches!(s.goal,crate::engine::Goal::KernelBuild{..}){return crate::kernel_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::Dkms{..})||matches!(s.initial,State::Dkms{..})||matches!(s.goal,crate::engine::Goal::Dkms{..}){return crate::dkms_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::Initramfs{..})||matches!(s.initial,State::Initramfs{..})||matches!(s.goal,crate::engine::Goal::Initramfs{..}){return crate::initramfs_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::Pxe{..})||matches!(s.initial,State::Pxe{..})||matches!(s.goal,crate::engine::Goal::Pxe{..}){return crate::pxe::source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::Iscsi{..})||matches!(s.initial,State::Iscsi{..})||matches!(s.goal,crate::engine::Goal::Iscsi{..}){return crate::iscsi::source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::AtaSmart{..})||matches!(s.initial,State::AtaSmart{..})||matches!(s.goal,crate::engine::Goal::AtaSmart{..}){return crate::ata_smart::source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::ApacheHttps{..})||matches!(s.initial,State::ApacheHttps{..})||matches!(s.goal,crate::engine::Goal::ApacheHttps{..}){return crate::apache_https::source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::Desktop{..})||matches!(s.initial,State::Desktop{..})||matches!(s.goal,crate::engine::Goal::Desktop{..}){return crate::desktop::source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::SecurityInvestigation{..})||matches!(s.initial,State::SecurityInvestigation{..})||matches!(s.goal,crate::engine::Goal::SecurityInvestigation{..}){return crate::security_investigation::source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::AutomationWorkshop{..})||matches!(s.initial,State::AutomationWorkshop{..})||matches!(s.goal,crate::engine::Goal::AutomationWorkshop{..}){return crate::automation_workshop::source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::ServiceExposure{..})||matches!(s.initial,State::ServiceExposure{..})||matches!(s.goal,crate::engine::Goal::ServiceExposure{..}){return crate::service_exposure_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::FtpIdentity{..})||matches!(s.initial,State::FtpIdentity{..})||matches!(s.goal,crate::engine::Goal::FtpIdentity{..}){return crate::ftp_identity_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::LinuxFlow{..})||matches!(s.initial,State::LinuxFlow{..})||matches!(s.goal,crate::engine::Goal::LinuxFlow{..}){return crate::linux_flow_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::MailboxAccess{..}|State::MailboxAdministration{..})||matches!(s.initial,State::MailboxAccess{..}|State::MailboxAdministration{..})||matches!(s.goal,crate::engine::Goal::MailboxAccess{..}|crate::engine::Goal::MailboxAdministration{..}){return crate::mailbox_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::SmtpRouting{..})||matches!(s.initial,State::SmtpRouting{..})||matches!(s.goal,crate::engine::Goal::SmtpRouting{..}){return crate::smtp_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::GuestDrivers{..})||matches!(s.initial,State::GuestDrivers{..})||matches!(s.goal,crate::engine::Goal::GuestDrivers{..}){return crate::guest_driver_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::SambaShare{..})||matches!(s.initial,State::SambaShare{..})||matches!(s.goal,crate::engine::Goal::SambaShare{..}){return crate::samba_share_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::CampusArchitecture{..})||matches!(s.initial,State::CampusArchitecture{..})||matches!(s.goal,crate::engine::Goal::CampusArchitecture{..}){return crate::network_architecture_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::NetworkTransfer{..})||matches!(s.initial,State::NetworkTransfer{..})||matches!(s.goal,crate::engine::Goal::NetworkTransfer{..}){return crate::network_transfer_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::EditorHandover{..})||matches!(s.initial,State::EditorHandover{..})||matches!(s.goal,crate::engine::Goal::EditorHandover{..}){return crate::editor_handover_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::ModalEditing{..})||matches!(s.initial,State::ModalEditing{..})||matches!(s.goal,crate::engine::Goal::ModalEditing{..}){return crate::modal_source::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::SshAccess{..})||matches!(s.initial,State::SshAccess{..})||matches!(s.goal,crate::engine::Goal::SshAccess{..}){return crate::ssh_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state, State::HostNetwork { .. })
+        || matches!(s.initial, State::HostNetwork { .. })
+        || matches!(s.goal, crate::engine::Goal::HostNetwork { .. })
+    {
+        return crate::host_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::Repositories { .. })
+        || matches!(s.initial, State::Repositories { .. })
+        || matches!(s.goal, crate::engine::Goal::Repositories { .. })
+    {
+        return crate::repository_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if crate::maintenance_notice_workspace::relevant(a,s) {return crate::maintenance_notice_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if crate::dns_access_workspace::relevant(a,s) {return crate::dns_access_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if crate::print_queue_workspace::relevant(a,s) {return crate::print_queue_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if crate::localization_workspace::relevant(a,s) {return crate::localization_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if crate::source_install_workspace::relevant(a,s) {return crate::source_install_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if crate::capacity_planning_workspace::relevant(a,s) {return crate::capacity_planning_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if crate::resource_observation_workspace::relevant(a,s) {return crate::resource_observation_workspace::context(a,s).is_ok()&&crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state, State::Capacity { .. })
+        || matches!(s.initial, State::Capacity { .. })
+        || matches!(s.goal, crate::engine::Goal::Capacity { .. })
+    {
+        return crate::capacity_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state,State::KernelModules{..}) || matches!(s.initial,State::KernelModules{..}) || matches!(s.goal,crate::engine::Goal::KernelModules{..}) {return crate::kernel_module_source::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::RecursiveTree{..}) || matches!(s.initial,State::RecursiveTree{..}) || matches!(s.goal,crate::engine::Goal::RecursiveTree{..}) {
+        return crate::recursive_tree_source::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);
+    }
+    if matches!(a.state,State::Transport{..}) || matches!(s.initial,State::Transport{..}) || matches!(s.goal,crate::engine::Goal::Transport{..}) {
+        return crate::transport_workspace::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);
+    }
+    if matches!(a.state,State::RaidAssembly{..}) || matches!(s.initial,State::RaidAssembly{..}) || matches!(s.goal,crate::engine::Goal::RaidAssembly{..}) {return crate::raid_assembly_source::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state,State::Autofs{..}) || matches!(s.initial,State::Autofs{..}) || matches!(s.goal,crate::engine::Goal::Autofs{..}) {return crate::autofs_source::context(a,s).is_ok() && crate::engine::solved(&a.state,&s.goal);}
+    if matches!(a.state, State::DirectoryPolicy { .. })
+        || matches!(s.initial, State::DirectoryPolicy { .. })
+        || matches!(s.goal, crate::engine::Goal::DirectoryPolicy { .. })
+    {
+        return crate::directory_policy_source::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::Links { .. })
+        || matches!(s.initial, State::Links { .. })
+        || matches!(s.goal, crate::engine::Goal::Links { .. })
+    {
+        return crate::links_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if let State::MagicSubnet { session } = &a.state {
+        return session.checked.as_ref() == Some(&session.answers)
+            && crate::engine::solved(&a.state, &s.goal);
+    }
     if matches!(a.state, State::PartitionFs { .. })
         || matches!(s.initial, State::PartitionFs { .. })
         || matches!(s.goal, crate::engine::Goal::PartitionFs { .. })
@@ -778,6 +1070,13 @@ pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
     }
     if matches!(a.state, State::Hsrp { .. }) || matches!(s.initial, State::Hsrp { .. }) {
         return crate::hsrp_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
+    if matches!(a.state, State::Syslog { .. })
+        || matches!(s.initial, State::Syslog { .. })
+        || matches!(s.goal, crate::engine::Goal::Syslog { .. })
+    {
+        return crate::syslog_workspace::context(a, s).is_ok()
             && crate::engine::solved(&a.state, &s.goal);
     }
     if matches!(a.state, State::Ntp { .. }) || matches!(s.initial, State::Ntp { .. }) {
@@ -1160,7 +1459,244 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             .iter()
             .find(|s| &s.id == id)
             .ok_or("Unknown saved scenario; original retained")?;
+        if crate::accounts_template_workspace::relevant(a,s){crate::accounts_template_workspace::context(a,s)?;}
+        if crate::command_location_workspace::relevant(a,s){crate::command_location_workspace::context(a,s)?;}
+
+        if matches!(a.state, State::Syslog { .. })
+            || matches!(s.initial, State::Syslog { .. })
+            || matches!(s.goal, crate::engine::Goal::Syslog { .. })
+        {
+            crate::syslog_workspace::context(a, s)?;
+        }
+        if crate::maintenance_notice_workspace::relevant(a,s){crate::maintenance_notice_workspace::context(a,s)?;}
+        if crate::dns_access_workspace::relevant(a,s){crate::dns_access_workspace::context(a,s)?;}
+        if crate::print_queue_workspace::relevant(a,s){crate::print_queue_workspace::context(a,s)?;}
+        if crate::localization_workspace::relevant(a,s){crate::localization_workspace::context(a,s)?;}
+        if crate::source_install_workspace::relevant(a,s){crate::source_install_workspace::context(a,s)?;}
+        if crate::capacity_planning_workspace::relevant(a,s){crate::capacity_planning_workspace::context(a,s)?;}
+        if crate::resource_observation_workspace::relevant(a,s){crate::resource_observation_workspace::context(a,s)?;}
+        if matches!(a.state, State::Capacity { .. })
+            || matches!(s.initial, State::Capacity { .. })
+            || matches!(s.goal, crate::engine::Goal::Capacity { .. })
+        {
+            crate::capacity_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::Repositories { .. })
+            || matches!(s.initial, State::Repositories { .. })
+            || matches!(s.goal, crate::engine::Goal::Repositories { .. })
+        {
+            crate::repository_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::StartupFiles { .. })
+            || matches!(s.initial, State::StartupFiles { .. })
+            || matches!(s.goal, crate::engine::Goal::StartupFiles { .. })
+        {
+            crate::startup_workspace::context(a, s)?;
+        }
+        if matches!(a.state,State::Raid1{..})||matches!(s.initial,State::Raid1{..})||matches!(s.goal,crate::engine::Goal::Raid1{..}){crate::raid1_workspace::context(a,s)?;}
+        if crate::file_index_source::relevant(a,s){crate::file_index_source::context(a,s)?;}
+        if matches!(a.state,State::SharedLibraries{..})||matches!(s.initial,State::SharedLibraries{..})||matches!(s.goal,crate::engine::Goal::SharedLibraries{..}){crate::shared_libraries_workspace::context(a,s)?;}
+        if matches!(a.state, State::FsIntegrity { .. })
+            || matches!(s.initial, State::FsIntegrity { .. })
+            || matches!(s.goal, crate::engine::Goal::FsIntegrity { .. })
+        {
+            crate::fs_integrity_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::UserMounts { .. })
+            || matches!(s.initial, State::UserMounts { .. })
+            || matches!(s.goal, crate::engine::Goal::UserMounts { .. })
+        {
+            crate::user_mounts_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::Environment { .. })
+            || matches!(s.initial, State::Environment { .. })
+            || matches!(s.goal, crate::engine::Goal::Environment { .. })
+        {
+            crate::environment_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::DebianSources { .. })
+            || matches!(s.initial, State::DebianSources { .. })
+            || matches!(s.goal, crate::engine::Goal::DebianSources { .. })
+        {
+            crate::debian_sources_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::ClientNames { .. })
+            || matches!(s.initial, State::ClientNames { .. })
+            || matches!(s.goal, crate::engine::Goal::ClientNames { .. })
+        {
+            crate::client_names_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::RemovableMounts { .. })
+            || matches!(s.initial, State::RemovableMounts { .. })
+            || matches!(s.goal, crate::engine::Goal::RemovableMounts { .. })
+        {
+            crate::removable_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::NmProfiles { .. })
+            || matches!(s.initial, State::NmProfiles { .. })
+            || matches!(s.goal, crate::engine::Goal::NmProfiles { .. })
+        {
+            crate::nm_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::PamStack { .. })
+            || matches!(s.initial, State::PamStack { .. })
+            || matches!(s.goal, crate::engine::Goal::PamStack { .. })
+        {
+            crate::pam_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::Aging { .. })
+            || matches!(s.initial, State::Aging { .. })
+            || matches!(s.goal, crate::engine::Goal::Aging { .. })
+        {
+            crate::aging_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::PortSecurity { .. })
+            || matches!(s.initial, State::PortSecurity { .. })
+            || matches!(s.goal, crate::engine::Goal::PortSecurity { .. })
+        {
+            crate::port_security_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::DhcpSnooping { .. })
+            || matches!(s.initial, State::DhcpSnooping { .. })
+            || matches!(s.goal, crate::engine::Goal::DhcpSnooping { .. })
+        {
+            crate::dhcp_snooping_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::ArpInspection { .. })
+            || matches!(s.initial, State::ArpInspection { .. })
+            || matches!(s.goal, crate::engine::Goal::ArpInspection { .. })
+        {
+            crate::arp_inspection_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::ManagementPolicy { .. })
+            || matches!(s.initial, State::ManagementPolicy { .. })
+            || matches!(s.goal, crate::engine::Goal::ManagementPolicy { .. })
+        {
+            crate::management_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::LocalAccess { .. })
+            || matches!(s.initial, State::LocalAccess { .. })
+            || matches!(s.goal, crate::engine::Goal::LocalAccess { .. })
+        {
+            crate::local_access_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::AaaAccess { .. })
+            || matches!(s.initial, State::AaaAccess { .. })
+            || matches!(s.goal, crate::engine::Goal::AaaAccess { .. })
+        {
+            crate::aaa_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::LdapClient { .. })
+            || matches!(s.initial, State::LdapClient { .. })
+            || matches!(s.goal, crate::engine::Goal::LdapClient { .. })
+        {
+            crate::ldap_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::LdapAccess { .. })
+            || matches!(s.initial, State::LdapAccess { .. })
+            || matches!(s.goal, crate::engine::Goal::LdapAccess { .. })
+        {
+            crate::ldap_access_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::LdapPassword { .. })
+            || matches!(s.initial, State::LdapPassword { .. })
+            || matches!(s.goal, crate::engine::Goal::LdapPassword { .. })
+        {
+            crate::ldap_password_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::LdapChanges { .. })
+            || matches!(s.initial, State::LdapChanges { .. })
+            || matches!(s.goal, crate::engine::Goal::LdapChanges { .. })
+        {
+            crate::ldap_change_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::DhcpConfig { .. })
+            || matches!(s.initial, State::DhcpConfig { .. })
+            || matches!(s.goal, crate::engine::Goal::DhcpConfig { .. })
+        {
+            crate::dhcp_server_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::Qos { .. })
+            || matches!(s.initial, State::Qos { .. })
+            || matches!(s.goal, crate::engine::Goal::Qos { .. })
+        {
+            crate::qos_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::LinuxLogging { .. })
+            || matches!(s.initial, State::LinuxLogging { .. })
+            || matches!(s.goal, crate::engine::Goal::LinuxLogging { .. })
+        {
+            crate::linux_logging_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::HostNetwork { .. })
+            || matches!(s.initial, State::HostNetwork { .. })
+            || matches!(s.goal, crate::engine::Goal::HostNetwork { .. })
+        {
+            crate::host_workspace::context(a, s)?;
+        }
+        if matches!(a.state,State::VirtualIsolation{..})||matches!(s.initial,State::VirtualIsolation{..})||matches!(s.goal,crate::engine::Goal::VirtualIsolation{..}){crate::virtual_isolation_source::context(a,s)?;}
+        if matches!(a.state,State::SieveFiltering{..})||matches!(s.initial,State::SieveFiltering{..})||matches!(s.goal,crate::engine::Goal::SieveFiltering{..}){crate::sieve_source::context(a,s)?;}
+        if matches!(a.state,State::LinuxRouter{..})||matches!(s.initial,State::LinuxRouter{..})||matches!(s.goal,crate::engine::Goal::LinuxRouter{..}){crate::linux_router_source::context(a,s)?;}
+        if matches!(a.state,State::LinuxV6{..})||matches!(s.initial,State::LinuxV6{..})||matches!(s.goal,crate::engine::Goal::LinuxV6{..}){crate::linux_v6_source::context(a,s)?;}
+        if matches!(a.state,State::LinuxServiceRouter{..})||matches!(s.initial,State::LinuxServiceRouter{..})||matches!(s.goal,crate::engine::Goal::LinuxServiceRouter{..}){crate::linux_service_router_source::context(a,s)?;}
+        if matches!(a.state,State::LinuxV6Administration{..})||matches!(s.initial,State::LinuxV6Administration{..})||matches!(s.goal,crate::engine::Goal::LinuxV6Administration{..}){crate::linux_v6_admin_source::context(a,s)?;}
+        if matches!(a.state,State::LinuxV6Startup{..})||matches!(s.initial,State::LinuxV6Startup{..})||matches!(s.goal,crate::engine::Goal::LinuxV6Startup{..}){crate::linux_v6_startup_source::context(a,s)?;}
+        if matches!(a.state,State::IdsRule{..})||matches!(s.initial,State::IdsRule{..})||matches!(s.goal,crate::engine::Goal::IdsRule{..}){crate::ids_rule_source::context(a,s)?;}
+        if matches!(a.state,State::AuthFilter{..})||matches!(s.initial,State::AuthFilter{..})||matches!(s.goal,crate::engine::Goal::AuthFilter{..}){crate::auth_filter_source::context(a,s)?;}
+        if matches!(a.state,State::VpnPoint{..})||matches!(s.initial,State::VpnPoint{..})||matches!(s.goal,crate::engine::Goal::VpnPoint{..}){crate::vpn_point_source::context(a,s)?;}
+        if matches!(a.state,State::Poe{..})||matches!(s.initial,State::Poe{..})||matches!(s.goal,crate::engine::Goal::Poe{..}){crate::poe_source::context(a,s)?;}
+        if matches!(a.state,State::KernelBuild{..})||matches!(s.initial,State::KernelBuild{..})||matches!(s.goal,crate::engine::Goal::KernelBuild{..}){crate::kernel_source::context(a,s)?;}
+        if matches!(a.state,State::Dkms{..})||matches!(s.initial,State::Dkms{..})||matches!(s.goal,crate::engine::Goal::Dkms{..}){crate::dkms_source::context(a,s)?;}
+        if matches!(a.state,State::Initramfs{..})||matches!(s.initial,State::Initramfs{..})||matches!(s.goal,crate::engine::Goal::Initramfs{..}){crate::initramfs_source::context(a,s)?;}
+        if matches!(a.state,State::Pxe{..})||matches!(s.initial,State::Pxe{..})||matches!(s.goal,crate::engine::Goal::Pxe{..}){crate::pxe::source::context(a,s)?;}
+        if matches!(a.state,State::Iscsi{..})||matches!(s.initial,State::Iscsi{..})||matches!(s.goal,crate::engine::Goal::Iscsi{..}){crate::iscsi::source::context(a,s)?;}
+        if matches!(a.state,State::AtaSmart{..})||matches!(s.initial,State::AtaSmart{..})||matches!(s.goal,crate::engine::Goal::AtaSmart{..}){crate::ata_smart::source::context(a,s)?;}
+        if matches!(a.state,State::ApacheHttps{..})||matches!(s.initial,State::ApacheHttps{..})||matches!(s.goal,crate::engine::Goal::ApacheHttps{..}){crate::apache_https::source::context(a,s)?;}
+        if matches!(a.state,State::Desktop{..})||matches!(s.initial,State::Desktop{..})||matches!(s.goal,crate::engine::Goal::Desktop{..}){crate::desktop::source::context(a,s)?;}
+        if matches!(a.state,State::SecurityInvestigation{..})||matches!(s.initial,State::SecurityInvestigation{..})||matches!(s.goal,crate::engine::Goal::SecurityInvestigation{..}){crate::security_investigation::source::context(a,s)?;}
+        if matches!(a.state,State::AutomationWorkshop{..})||matches!(s.initial,State::AutomationWorkshop{..})||matches!(s.goal,crate::engine::Goal::AutomationWorkshop{..}){crate::automation_workshop::source::context(a,s)?;}
+        if matches!(a.state,State::ServiceExposure{..})||matches!(s.initial,State::ServiceExposure{..})||matches!(s.goal,crate::engine::Goal::ServiceExposure{..}){crate::service_exposure_source::context(a,s)?;}
+        if matches!(a.state,State::FtpIdentity{..})||matches!(s.initial,State::FtpIdentity{..})||matches!(s.goal,crate::engine::Goal::FtpIdentity{..}){crate::ftp_identity_source::context(a,s)?;}
+        if matches!(a.state,State::LinuxFlow{..})||matches!(s.initial,State::LinuxFlow{..})||matches!(s.goal,crate::engine::Goal::LinuxFlow{..}){crate::linux_flow_source::context(a,s)?;}
+        if matches!(a.state,State::MailboxAccess{..}|State::MailboxAdministration{..})||matches!(s.initial,State::MailboxAccess{..}|State::MailboxAdministration{..})||matches!(s.goal,crate::engine::Goal::MailboxAccess{..}|crate::engine::Goal::MailboxAdministration{..}){crate::mailbox_source::context(a,s)?;}
+        if matches!(a.state,State::SmtpRouting{..})||matches!(s.initial,State::SmtpRouting{..})||matches!(s.goal,crate::engine::Goal::SmtpRouting{..}){crate::smtp_source::context(a,s)?;}
+        if matches!(a.state,State::GuestDrivers{..})||matches!(s.initial,State::GuestDrivers{..})||matches!(s.goal,crate::engine::Goal::GuestDrivers{..}){crate::guest_driver_source::context(a,s)?;}
+        if matches!(a.state,State::SambaShare{..})||matches!(s.initial,State::SambaShare{..})||matches!(s.goal,crate::engine::Goal::SambaShare{..}){crate::samba_share_source::context(a,s)?;}
+        if matches!(a.state,State::CampusArchitecture{..})||matches!(s.initial,State::CampusArchitecture{..})||matches!(s.goal,crate::engine::Goal::CampusArchitecture{..}){crate::network_architecture_source::context(a,s)?;}
+        if matches!(a.state,State::NetworkTransfer{..})||matches!(s.initial,State::NetworkTransfer{..})||matches!(s.goal,crate::engine::Goal::NetworkTransfer{..}){crate::network_transfer_source::context(a,s)?;}
+        if matches!(a.state,State::EditorHandover{..})||matches!(s.initial,State::EditorHandover{..})||matches!(s.goal,crate::engine::Goal::EditorHandover{..}){crate::editor_handover_source::context(a,s)?;}
+        if matches!(a.state,State::ModalEditing{..})||matches!(s.initial,State::ModalEditing{..})||matches!(s.goal,crate::engine::Goal::ModalEditing{..}){crate::modal_source::context(a,s)?;}
+        if matches!(a.state,State::SshAccess{..})||matches!(s.initial,State::SshAccess{..})||matches!(s.goal,crate::engine::Goal::SshAccess{..}){
+            crate::ssh_workspace::context(a,s)?;
+        }
         crate::physical_link_workspace::reject_foreign_source(s)?;
+        if matches!(a.state,State::KernelModules{..}) || matches!(s.initial,State::KernelModules{..}) || matches!(s.goal,crate::engine::Goal::KernelModules{..}) {crate::kernel_module_source::context(a,s)?;}
+        if matches!(a.state,State::RecursiveTree{..}) || matches!(s.initial,State::RecursiveTree{..}) || matches!(s.goal,crate::engine::Goal::RecursiveTree{..}) {crate::recursive_tree_source::context(a,s)?;}
+        if matches!(a.state,State::Transport{..}) || matches!(s.initial,State::Transport{..}) || matches!(s.goal,crate::engine::Goal::Transport{..}) {crate::transport_workspace::context(a,s)?;}
+        if matches!(a.state,State::RaidAssembly{..}) || matches!(s.initial,State::RaidAssembly{..}) || matches!(s.goal,crate::engine::Goal::RaidAssembly{..}) {crate::raid_assembly_source::context(a,s)?;}
+        if matches!(a.state,State::CopiedJournal{..}) || matches!(s.initial,State::CopiedJournal{..}) || matches!(s.goal,crate::engine::Goal::CopiedJournal{..}) {crate::journal_archive_workspace::context(a,s)?;}
+        if matches!(a.state,State::JsonInventory{..}) || matches!(s.initial,State::JsonInventory{..}) || matches!(s.goal,crate::engine::Goal::JsonInventory{..}) {crate::json_inventory_workspace::context(a,s)?;}
+        if matches!(a.state,State::RestController{..}) || matches!(s.initial,State::RestController{..}) || matches!(s.goal,crate::engine::Goal::RestController{..}) {crate::rest_workspace::context(a,s)?;}
+        if matches!(a.state,State::DevicePath{..}) || matches!(s.initial,State::DevicePath{..}) || matches!(s.goal,crate::engine::Goal::DevicePath{..}) {crate::device_path_workspace::context(a,s)?;}
+        if matches!(a.state,State::LocalMail{..}) || matches!(s.initial,State::LocalMail{..}) || matches!(s.goal,crate::engine::Goal::LocalMail{..}) {crate::local_mail_workspace::context(a,s)?;}
+        if matches!(a.state,State::Chrony{..}) || matches!(s.initial,State::Chrony{..}) || matches!(s.goal,crate::engine::Goal::Chrony{..}) {crate::chrony_workspace::context(a,s)?;}
+        if matches!(a.state,State::GrubOnce{..}) || matches!(s.initial,State::GrubOnce{..}) || matches!(s.goal,crate::engine::Goal::GrubOnce{..}) {crate::grub_once_workspace::context(a,s)?;}
+        if matches!(a.state,State::EfiLoader{..}) || matches!(s.initial,State::EfiLoader{..}) || matches!(s.goal,crate::engine::Goal::EfiLoader{..}) {crate::efi_loader_workspace::context(a,s)?;}
+        if matches!(a.state,State::BiosLoader{..}) || matches!(s.initial,State::BiosLoader{..}) || matches!(s.goal,crate::engine::Goal::BiosLoader{..}) {crate::bios_loader_workspace::context(a,s)?;}
+        if matches!(a.state,State::BootEntry{..}) || matches!(s.initial,State::BootEntry{..}) || matches!(s.goal,crate::engine::Goal::BootEntry{..}) {crate::boot_entry_workspace::context(a,s)?;}
+        if matches!(a.state,State::Autofs{..}) || matches!(s.initial,State::Autofs{..}) || matches!(s.goal,crate::engine::Goal::Autofs{..}) {crate::autofs_source::context(a,s)?;}
+        if matches!(a.state, State::DirectoryPolicy { .. })
+            || matches!(s.initial, State::DirectoryPolicy { .. })
+            || matches!(s.goal, crate::engine::Goal::DirectoryPolicy { .. })
+        {
+            crate::directory_policy_source::context(a, s)?;
+        }
+        if matches!(a.state, State::Links { .. })
+            || matches!(s.initial, State::Links { .. })
+            || matches!(s.goal, crate::engine::Goal::Links { .. })
+        {
+            crate::links_workspace::context(a, s)?;
+        }
         if a.scenario_version != s.version
             || std::mem::discriminant(&a.state) != std::mem::discriminant(&s.initial)
             || a.step >= s.steps.len()
@@ -1168,6 +1704,18 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             || a.transcript.len() > 120
         {
             return Err("Incompatible saved attempt; original retained".into());
+        }
+        if let State::MagicSubnet { session } = &a.state {
+            let crate::engine::Goal::MagicSubnet { problem, stage } = &s.goal else {
+                return Err(
+                    "Subnet worksheet belongs to another assignment; original retained".into(),
+                );
+            };
+            if session.problem != *problem || session.stage != *stage {
+                return Err(
+                    "Saved subnet problem differs from the assignment; original retained".into(),
+                );
+            }
         }
         crate::partition_fs_workspace::binding::metadata(a)?;
         if matches!(a.state, State::PartitionFs { .. })
@@ -1177,6 +1725,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             crate::partition_fs_workspace::binding::context(a, s)?;
         }
         crate::hsrp_workspace::metadata(a)?;
+        crate::syslog_workspace::metadata(a)?;
         crate::ntp_workspace::metadata(a)?;
         crate::lvm_workspace::metadata(a)?;
         crate::physical_link_workspace::metadata(a)?;
@@ -2008,6 +2557,11 @@ fn validate_storage_workspace(a: &Attempt) -> Result<(), String> {
     Ok(())
 }
 fn validate_accounts_workspace(a: &Attempt) -> Result<(), String> {
+    if a.workspace.as_ref().is_some_and(|w|w.accounts_template_drafts.is_some())
+        && !matches!(a.state,State::Accounts{..}){
+        return Err("Native template metadata on another activity; original retained".into());
+    }
+
     if let Some(l) = a
         .workspace
         .as_ref()
@@ -2246,6 +2800,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
     for a in p.attempts.values() {
         crate::partition_fs_workspace::binding::metadata(a)?;
         crate::hsrp_workspace::metadata(a)?;
+        crate::syslog_workspace::metadata(a)?;
         crate::ntp_workspace::metadata(a)?;
         crate::lvm_workspace::metadata(a)?;
         crate::physical_link_workspace::metadata(a)?;
@@ -2310,16 +2865,258 @@ enum WriteMode<'a> {
     Restore(&'a [Scenario]),
 }
 pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
+    if p.attempts.values().any(|a|matches!(a.state,State::KernelModules{..})){return Err("Module progress needs its authored catalog; use save_with_catalog. Original retained.".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::RecursiveTree{..})){return Err("Recursive file progress needs its authored catalog; use save_with_catalog. Original retained.".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::Transport{..})){return Err("Transport progress needs its authored catalog; use save_with_catalog. Original retained.".into());}
+    if p.attempts.values().any(crate::command_location_workspace::has_metadata){
+        return Err("Command-location work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts.values().any(crate::accounts_template_workspace::has_metadata){
+        return Err("Template work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+
+    if p.attempts.values().any(|a| {
+        matches!(&a.state, State::Processes { table } if !table.listeners.is_empty())
+            || a.workspace.as_ref().and_then(|w| w.process_learning.as_ref())
+                .is_some_and(|learning| !learning.table.listeners.is_empty())
+    }) {
+        return Err("Listener work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts.values().any(|a|matches!(a.state,State::FileIndex{..})){return Err("Private-index work needs its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::SharedLibraries{..})){return Err("Library work needs its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::Raid1{..})){return Err("Mirror work needs its authored catalog; use save_with_catalog. Original retained".into());}
+
+    if p.attempts.values().any(|a| matches!(a.state, State::StartupFiles { .. })) {
+        return Err("Integrity work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts.values().any(|a| matches!(a.state, State::FsIntegrity { .. })) {
+        return Err("Integrity work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::UserMounts { .. }))
+    {
+        return Err("Caller-aware mount work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::Environment { .. }))
+    {
+        return Err("Environment work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::DebianSources { .. }))
+    {
+        return Err("Source-selection work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::ClientNames { .. }))
+    {
+        return Err("Name-source work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::RemovableMounts { .. }))
+    {
+        return Err("Mount-policy work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::NmProfiles { .. }))
+    {
+        return Err("Saved-profile work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::PamStack { .. }))
+    {
+        return Err("Authentication-stack work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::Aging { .. }))
+    {
+        return Err("Aging-record work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::PortSecurity { .. }))
+    {
+        return Err("Secure-port work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::DhcpSnooping { .. }))
+    {
+        return Err("DHCP observer work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::ArpInspection { .. }))
+    {
+        return Err("ARP inspection work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::ManagementPolicy { .. }))
+    {
+        return Err("Management policy work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::LocalAccess { .. }))
+    {
+        return Err("Local account access work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::AaaAccess { .. }))
+    {
+        return Err("AAA access work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::LdapClient { .. }))
+    {
+        return Err("Directory client work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::LdapAccess { .. }))
+    {
+        return Err("ACL work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::LdapPassword { .. }))
+    {
+        return Err("Password work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::LdapChanges { .. }))
+    {
+        return Err("Directory-change work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::DhcpConfig { .. }))
+    {
+        return Err("DHCP configuration work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::Qos { .. }))
+    {
+        return Err("Traffic policy work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::LinuxLogging { .. }))
+    {
+        return Err("Linux logging work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts.values().any(|a|matches!(a.state,State::VirtualIsolation{..})){return Err("Represented-network progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::SieveFiltering{..})){return Err("Mail-filter progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::LinuxRouter{..})){return Err("Router progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::LinuxV6{..})){return Err("Flow progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::LinuxServiceRouter{..})){return Err("Flow progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::LinuxV6Administration{..})){return Err("IPv6 configuration progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::LinuxV6Startup{..})){return Err("IPv6 firewall startup progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::IdsRule{..})){return Err("Offline rule progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::AuthFilter{..})){return Err("Offline filter progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::VpnPoint{..})){return Err("VPN peer progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::Poe{..})){return Err("Power-plan progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::KernelBuild{..})){return Err("Kernel-build progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::Dkms{..})){return Err("DKMS progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::Initramfs{..})){return Err("Early-userspace progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::Pxe{..})){return Err("network boot progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::Iscsi{..})){return Err("iSCSI progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::AtaSmart{..})){return Err("ATA SMART progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::ApacheHttps{..})){return Err("Apache HTTPS progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::Desktop{..})){return Err("virtual desktop progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::SecurityInvestigation{..})){return Err("virtual security investigation progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::AutomationWorkshop{..})){return Err("virtual staged network changes progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::ServiceExposure{..})){return Err("Service exposure progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::FtpIdentity{..})){return Err("FTP identity progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::LinuxFlow{..})){return Err("Flow progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::MailboxAccess{..}|State::MailboxAdministration{..})){return Err("Mail-access progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::SmtpRouting{..})){return Err("Mail-routing progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::GuestDrivers{..})){return Err("Guest-image progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::SambaShare{..})){return Err("Sharing progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::CampusArchitecture{..})){return Err("Campus-layout progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::NetworkTransfer{..})){return Err("File-transfer progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::EditorHandover{..})){return Err("Editor-handover progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::ModalEditing{..})){return Err("Modal progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::SshAccess{..})){return Err("SSH progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::HostNetwork { .. }))
+    {
+        return Err("Host-network work needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::Repositories { .. }))
+    {
+        return Err("Repository evidence progress needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts.values().any(|a|matches!(a.state,State::MaintenanceNotice{..})){return Err("Notice progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::DnsAccess{..})){return Err("DNS-policy progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::PrintQueues{..})){return Err("Print-queue progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::Localization{..})){return Err("Locale/encoding progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::WirelessChannels{..})){return Err("Channel-plan progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::WlanProfiles{..})){return Err("WLAN profile progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::HttpCache{..})){return Err("Cache progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::ServiceClients{..})){return Err("Service-client progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::ReverseProxy{..})){return Err("Routing progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::ProxyPolicy{..})){return Err("Proxy progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::SnmpMonitor{..})){return Err("Monitoring progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::WlanPaths{..})){return Err("AP-path progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::Timezone{..})){return Err("Time-zone progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::SourceInstall{..})){return Err("Source-install progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::CapacityPlanning{..})){return Err("Capacity-planning progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::ResourceObservations{..})){return Err("Observation progress requires its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::Capacity { .. }))
+    {
+        return Err("Capacity progress needs its authored catalog; use save_with_catalog. Original retained".into());
+    }
     if p.attempts
         .values()
         .any(|a| matches!(a.state, State::PartitionFs { .. }))
     {
         return Err("Disk preparation progress needs its held authored catalog; use save_with_catalog. Original retained".into());
     }
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::Syslog { .. }))
+    {
+        return Err(
+            "Syslog progress needs its authored catalog; use save_with_catalog. Original retained"
+                .into(),
+        );
+    }
+    if p.attempts.values().any(|a|matches!(a.state,State::RaidAssembly{..})){return Err("RAID assembly progress needs its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::CopiedJournal{..})){return Err("Copied-journal work needs its authored catalog; use save_with_catalog. Original retained.".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::JsonInventory{..})){return Err("JSON-inventory work needs its authored catalog; use save_with_catalog. Original retained.".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::RestController{..})){return Err("REST-controller work needs its authored catalog; use save_with_catalog. Original retained.".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::DevicePath{..})){return Err("Device-path work needs its authored catalog; use save_with_catalog. Original retained.".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::LocalMail{..})){return Err("Local-mail work needs its authored catalog; use save_with_catalog. Original retained.".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::Chrony{..})){return Err("Time-source work needs its authored catalog; use save_with_catalog. Original retained.".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::GrubOnce{..})){return Err("Temporary GRUB work needs its authored catalog; use save_with_catalog. Original retained.".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::EfiLoader{..})){return Err("EFI-loader work needs its authored catalog; use save_with_catalog. Original retained.".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::BiosLoader{..})){return Err("BIOS-loader work needs its authored catalog; use save_with_catalog. Original retained.".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::BootEntry{..})){return Err("Boot-entry work needs its authored catalog; use save_with_catalog. Original retained.".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::Autofs{..})){return Err("AutoFS progress needs its authored catalog; use save_with_catalog. Original retained".into());}
+    if p.attempts.values().any(|a|matches!(a.state,State::DirectoryPolicy{..})) {return Err("Directory-policy progress needs its authored catalog; use save_with_catalog. Original retained".into());}
     if p.attempts.values().any(|a| {
         matches!(
             a.state,
-            State::Lvm { .. } | State::Ntp { .. } | State::Hsrp { .. }
+            State::Links { .. } | State::Lvm { .. } | State::Ntp { .. } | State::Hsrp { .. }
         )
     }) {
         return Err(
@@ -2338,6 +3135,441 @@ pub fn save_with_catalog(
 ) -> Result<Saved, String> {
     for (id, a) in &p.attempts {
         let source = scenarios.iter().find(|s| &s.id == id);
+        if crate::command_location_workspace::has_metadata(a)
+            || source.is_some_and(crate::command_location_workspace::has_source){
+            crate::command_location_workspace::context(a,source.ok_or("Unknown command-location source; original retained")?)?;
+        }
+        if crate::accounts_template_workspace::has_metadata(a)
+            || source.is_some_and(crate::accounts_template_workspace::has_source){
+            crate::accounts_template_workspace::context(a,source.ok_or("Unknown authored template source; original retained")?)?;
+        }
+
+        // Old process tables retain their existing save path. Endpoint-bearing
+        // work needs its immutable authored roster before any bytes are replaced,
+        // including a forged attempt which erased every current endpoint.
+        let listener_source = source.is_some_and(|s| {
+            matches!(&s.initial, State::Processes { table } if !table.listeners.is_empty())
+                || s.process_teaching.as_ref().is_some_and(|l| !l.fixture.listeners.is_empty())
+        });
+        let listener_attempt = matches!(&a.state, State::Processes { table } if !table.listeners.is_empty())
+            || a.workspace.as_ref().and_then(|w| w.process_learning.as_ref())
+                .is_some_and(|l| !l.table.listeners.is_empty());
+        if listener_source || listener_attempt {
+            let s = source.ok_or("Unknown authored listener source; original retained")?;
+            let (State::Processes { table }, State::Processes { table: initial }, crate::engine::Goal::Processes { .. }) =
+                (&a.state, &s.initial, &s.goal) else {
+                    return Err("Listener work belongs to another activity; original retained".into());
+                };
+            if a.scenario_version != s.version || !table.same_problem(initial) {
+                return Err("Listener process identities or endpoint roster differ; original retained".into());
+            }
+            if a.workspace.as_ref().and_then(|w| w.process_learning.as_ref()).is_some_and(|l| {
+                s.process_teaching.as_ref().is_none_or(|lesson| {
+                    !l.table.same_problem(&lesson.fixture) || l.example_command >= lesson.example.len()
+                })
+            }) {
+                return Err("Listener practice differs from its authored example; original retained".into());
+            }
+        }
+        if matches!(a.state,State::KernelModules{..}) || source.is_some_and(|s|matches!(s.initial,State::KernelModules{..}) || matches!(s.goal,crate::engine::Goal::KernelModules{..})) {crate::kernel_module_source::context(a,source.ok_or("Module progress needs its authored source; original retained.")?)?;}
+        if matches!(a.state,State::RecursiveTree{..}) || source.is_some_and(|s|matches!(s.initial,State::RecursiveTree{..}) || matches!(s.goal,crate::engine::Goal::RecursiveTree{..})) {
+            crate::recursive_tree_source::context(a, source.ok_or("Recursive progress needs its authored source; original retained.")?)?;
+        }
+        if matches!(a.state,State::Transport{..}) || source.is_some_and(|s|matches!(s.initial,State::Transport{..}) || matches!(s.goal,crate::engine::Goal::Transport{..})) {
+            crate::transport_workspace::context(a,source.ok_or("Unknown authored transport source; original retained")?)?;
+        }
+        if matches!(a.state,State::RaidAssembly{..}) || source.is_some_and(|s|matches!(s.initial,State::RaidAssembly{..}) || matches!(s.goal,crate::engine::Goal::RaidAssembly{..})) {crate::raid_assembly_source::context(a,source.ok_or("Unknown authored RAID assembly source; original retained")?)?;}
+        if matches!(a.state,State::CopiedJournal{..}) || source.is_some_and(|s|matches!(s.initial,State::CopiedJournal{..}) || matches!(s.goal,crate::engine::Goal::CopiedJournal{..})) {crate::journal_archive_workspace::context(a,source.ok_or("Unknown Copied-journal source; original retained.")?)?;}
+        if matches!(a.state,State::JsonInventory{..}) || source.is_some_and(|s|matches!(s.initial,State::JsonInventory{..}) || matches!(s.goal,crate::engine::Goal::JsonInventory{..})) {crate::json_inventory_workspace::context(a,source.ok_or("Unknown JSON-inventory source; original retained.")?)?;}
+        if matches!(a.state,State::RestController{..}) || source.is_some_and(|s|matches!(s.initial,State::RestController{..}) || matches!(s.goal,crate::engine::Goal::RestController{..})) {crate::rest_workspace::context(a,source.ok_or("Unknown REST-controller source; original retained.")?)?;}
+        if matches!(a.state,State::DevicePath{..}) || source.is_some_and(|s|matches!(s.initial,State::DevicePath{..}) || matches!(s.goal,crate::engine::Goal::DevicePath{..})) {crate::device_path_workspace::context(a,source.ok_or("Unknown Device-path source; original retained.")?)?;}
+        if matches!(a.state,State::LocalMail{..}) || source.is_some_and(|s|matches!(s.initial,State::LocalMail{..}) || matches!(s.goal,crate::engine::Goal::LocalMail{..})) {crate::local_mail_workspace::context(a,source.ok_or("Unknown Local-mail source; original retained.")?)?;}
+        if matches!(a.state,State::Chrony{..}) || source.is_some_and(|s|matches!(s.initial,State::Chrony{..}) || matches!(s.goal,crate::engine::Goal::Chrony{..})) {crate::chrony_workspace::context(a,source.ok_or("Unknown Time-source source; original retained.")?)?;}
+        if matches!(a.state,State::GrubOnce{..}) || source.is_some_and(|s|matches!(s.initial,State::GrubOnce{..}) || matches!(s.goal,crate::engine::Goal::GrubOnce{..})) {crate::grub_once_workspace::context(a,source.ok_or("Unknown Temporary GRUB source; original retained.")?)?;}
+        if matches!(a.state,State::EfiLoader{..}) || source.is_some_and(|s|matches!(s.initial,State::EfiLoader{..}) || matches!(s.goal,crate::engine::Goal::EfiLoader{..})) {crate::efi_loader_workspace::context(a,source.ok_or("Unknown EFI-loader source; original retained.")?)?;}
+        if matches!(a.state,State::BiosLoader{..}) || source.is_some_and(|s|matches!(s.initial,State::BiosLoader{..}) || matches!(s.goal,crate::engine::Goal::BiosLoader{..})) {crate::bios_loader_workspace::context(a,source.ok_or("Unknown BIOS-loader source; original retained.")?)?;}
+        if matches!(a.state,State::BootEntry{..}) || source.is_some_and(|s|matches!(s.initial,State::BootEntry{..}) || matches!(s.goal,crate::engine::Goal::BootEntry{..})) {crate::boot_entry_workspace::context(a,source.ok_or("Unknown boot-entry source; original retained.")?)?;}
+        if matches!(a.state,State::Autofs{..}) || source.is_some_and(|s|matches!(s.initial,State::Autofs{..}) || matches!(s.goal,crate::engine::Goal::Autofs{..})) {crate::autofs_source::context(a,source.ok_or("Unknown authored AutoFS source; original retained")?)?;}
+        if matches!(a.state, State::DirectoryPolicy { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::DirectoryPolicy { .. })
+                    || matches!(s.goal, crate::engine::Goal::DirectoryPolicy { .. })
+            })
+        {
+            crate::directory_policy_source::context(
+                a,
+                source.ok_or("Unknown authored directory-policy source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::Links { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::Links { .. })
+                    || matches!(s.goal, crate::engine::Goal::Links { .. })
+            })
+        {
+            crate::links_workspace::context(
+                a,
+                source.ok_or("Unknown authored link source; original retained")?,
+            )?;
+        }
+        if matches!(a.state,State::DnsAccess{..})||source.is_some_and(|s|matches!(s.initial,State::DnsAccess{..})||matches!(s.goal,crate::engine::Goal::DnsAccess{..})){
+          crate::dns_access_workspace::context(a,source.ok_or("Unknown authored DNS-policy task; original retained")?)?;
+        }
+        if matches!(a.state,State::PrintQueues{..})||source.is_some_and(|s|matches!(s.initial,State::PrintQueues{..})||matches!(s.goal,crate::engine::Goal::PrintQueues{..})){
+          crate::print_queue_workspace::context(a,source.ok_or("Unknown authored print-queue task; original retained")?)?;
+        }
+        if matches!(a.state,State::Localization{..})||source.is_some_and(|s|matches!(s.initial,State::Localization{..})||matches!(s.goal,crate::engine::Goal::Localization{..})){
+          crate::localization_workspace::context(a,source.ok_or("Unknown authored locale/encoding task; original retained")?)?;
+        }
+        if matches!(a.state,State::WirelessChannels{..})||source.is_some_and(|s|matches!(s.initial,State::WirelessChannels{..})||matches!(s.goal,crate::engine::Goal::WirelessChannels{..})){crate::wireless_channel_workspace::context(a,source.ok_or("Unknown authored channel-plan task; original retained")?)?;}
+        if matches!(a.state,State::WlanProfiles{..})||source.is_some_and(|s|matches!(s.initial,State::WlanProfiles{..})||matches!(s.goal,crate::engine::Goal::WlanProfiles{..})){crate::wlan_workspace::context(a,source.ok_or("Unknown authored WLAN task; original retained")?)?;}
+        if matches!(a.state,State::HttpCache{..})||source.is_some_and(|s|matches!(s.initial,State::HttpCache{..})||matches!(s.goal,crate::engine::Goal::HttpCache{..})){crate::http_cache_workspace::context(a,source.ok_or("Unknown authored cache task; original retained")?)?;}
+        if matches!(a.state,State::ServiceClients{..})||source.is_some_and(|s|matches!(s.initial,State::ServiceClients{..})||matches!(s.goal,crate::engine::Goal::ServiceClients{..})){crate::service_workspace::context(a,source.ok_or("Unknown authored service-client task; original retained")?)?;}
+        if matches!(a.state,State::ReverseProxy{..})||source.is_some_and(|s|matches!(s.initial,State::ReverseProxy{..})||matches!(s.goal,crate::engine::Goal::ReverseProxy{..})){crate::reverse_proxy_workspace::context(a,source.ok_or("Unknown authored routing task; original retained")?)?;}
+        if matches!(a.state,State::ProxyPolicy{..})||source.is_some_and(|s|matches!(s.initial,State::ProxyPolicy{..})||matches!(s.goal,crate::engine::Goal::ProxyPolicy{..})){crate::proxy_workspace::context(a,source.ok_or("Unknown authored proxy task; original retained")?)?;}
+        if matches!(a.state,State::SnmpMonitor{..})||source.is_some_and(|s|matches!(s.initial,State::SnmpMonitor{..})||matches!(s.goal,crate::engine::Goal::SnmpMonitor{..})){crate::snmp_workspace::context(a,source.ok_or("Unknown authored monitoring task; original retained")?)?;}
+        if matches!(a.state,State::WlanPaths{..})||source.is_some_and(|s|matches!(s.initial,State::WlanPaths{..})||matches!(s.goal,crate::engine::Goal::WlanPaths{..})){crate::wlan_paths_workspace::context(a,source.ok_or("Unknown authored AP-path task; original retained")?)?;}
+        if matches!(a.state,State::Timezone{..})||source.is_some_and(|s|matches!(s.initial,State::Timezone{..})||matches!(s.goal,crate::engine::Goal::Timezone{..})){
+          crate::timezone_workspace::context(a,source.ok_or("Unknown authored time-zone task; original retained")?)?;
+        }
+        if matches!(a.state,State::SourceInstall{..})||source.is_some_and(|s|matches!(s.initial,State::SourceInstall{..})||matches!(s.goal,crate::engine::Goal::SourceInstall{..})){
+          crate::source_install_workspace::context(a,source.ok_or("Unknown authored source-install task; original retained")?)?;
+        }
+        if matches!(a.state,State::MaintenanceNotice{..})||source.is_some_and(|s|matches!(s.initial,State::MaintenanceNotice{..})||matches!(s.goal,crate::engine::Goal::MaintenanceNotice{..})){
+          crate::maintenance_notice_workspace::context(a,source.ok_or("Unknown authored notice task; original retained")?)?;
+        }
+        if matches!(a.state,State::CapacityPlanning{..})||source.is_some_and(|s|matches!(s.initial,State::CapacityPlanning{..})||matches!(s.goal,crate::engine::Goal::CapacityPlanning{..})){
+          crate::capacity_planning_workspace::context(a,source.ok_or("Unknown authored plan; original retained")?)?;
+        }
+        if matches!(a.state,State::ResourceObservations{..})||source.is_some_and(|s|matches!(s.initial,State::ResourceObservations{..})||matches!(s.goal,crate::engine::Goal::ResourceObservations{..})){
+          crate::resource_observation_workspace::context(a,source.ok_or("Unknown authored investigation; original retained")?)?;
+        }
+        if matches!(a.state, State::Capacity { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::Capacity { .. })
+                    || matches!(s.goal, crate::engine::Goal::Capacity { .. })
+            })
+        {
+            crate::capacity_workspace::context(
+                a,
+                source.ok_or("Unknown authored capacity source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::Repositories { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::Repositories { .. })
+                    || matches!(s.goal, crate::engine::Goal::Repositories { .. })
+            })
+        {
+            crate::repository_workspace::context(
+                a,
+                source.ok_or("Unknown authored repository source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::StartupFiles { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::StartupFiles { .. })
+                    || matches!(s.goal, crate::engine::Goal::StartupFiles { .. })
+            })
+        {
+            crate::startup_workspace::context(
+                a,
+                source.ok_or("Unknown authored Bash startup source; original retained")?,
+            )?;
+        }
+        if matches!(a.state,State::FileIndex{..})||source.is_some_and(|s|matches!(s.initial,State::FileIndex{..})||matches!(s.goal,crate::engine::Goal::FileIndex{..})){crate::file_index_source::context(a,source.ok_or("Unknown private-index source; original retained")?)?;}
+        if matches!(a.state,State::SharedLibraries{..})||source.is_some_and(|s|matches!(s.initial,State::SharedLibraries{..})||matches!(s.goal,crate::engine::Goal::SharedLibraries{..})){
+            crate::shared_libraries_workspace::context(a,source.ok_or("Unknown authored library source; original retained")?)?;
+        }
+        if matches!(a.state,State::Raid1{..})||source.is_some_and(|s|matches!(s.initial,State::Raid1{..})||matches!(s.goal,crate::engine::Goal::Raid1{..})){
+            crate::raid1_workspace::context(a,source.ok_or("Unknown authored mirror source; original retained")?)?;
+        }
+        if matches!(a.state, State::FsIntegrity { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::FsIntegrity { .. })
+                    || matches!(s.goal, crate::engine::Goal::FsIntegrity { .. })
+            })
+        {
+            crate::fs_integrity_workspace::context(
+                a,
+                source.ok_or("Unknown authored filesystem integrity source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::UserMounts { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::UserMounts { .. })
+                    || matches!(s.goal, crate::engine::Goal::UserMounts { .. })
+            })
+        {
+            crate::user_mounts_workspace::context(
+                a,
+                source.ok_or("Unknown authored caller-aware mount source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::Environment { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::Environment { .. })
+                    || matches!(s.goal, crate::engine::Goal::Environment { .. })
+            })
+        {
+            crate::environment_workspace::context(
+                a,
+                source.ok_or("Unknown authored environment source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::DebianSources { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::DebianSources { .. })
+                    || matches!(s.goal, crate::engine::Goal::DebianSources { .. })
+            })
+        {
+            crate::debian_sources_workspace::context(
+                a,
+                source.ok_or("Unknown authored source-selection source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::ClientNames { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::ClientNames { .. })
+                    || matches!(s.goal, crate::engine::Goal::ClientNames { .. })
+            })
+        {
+            crate::client_names_workspace::context(
+                a,
+                source.ok_or("Unknown authored name-source source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::RemovableMounts { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::RemovableMounts { .. })
+                    || matches!(s.goal, crate::engine::Goal::RemovableMounts { .. })
+            })
+        {
+            crate::removable_workspace::context(
+                a,
+                source.ok_or("Unknown authored mount-policy source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::NmProfiles { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::NmProfiles { .. })
+                    || matches!(s.goal, crate::engine::Goal::NmProfiles { .. })
+            })
+        {
+            crate::nm_workspace::context(
+                a,
+                source.ok_or("Unknown authored saved-profile source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::PamStack { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::PamStack { .. })
+                    || matches!(s.goal, crate::engine::Goal::PamStack { .. })
+            })
+        {
+            crate::pam_workspace::context(
+                a,
+                source.ok_or("Unknown authored authentication-stack source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::Aging { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::Aging { .. })
+                    || matches!(s.goal, crate::engine::Goal::Aging { .. })
+            })
+        {
+            crate::aging_workspace::context(
+                a,
+                source.ok_or("Unknown authored aging-record source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::PortSecurity { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::PortSecurity { .. })
+                    || matches!(s.goal, crate::engine::Goal::PortSecurity { .. })
+            })
+        {
+            crate::port_security_workspace::context(
+                a,
+                source.ok_or("Unknown authored secure-port source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::DhcpSnooping { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::DhcpSnooping { .. })
+                    || matches!(s.goal, crate::engine::Goal::DhcpSnooping { .. })
+            })
+        {
+            crate::dhcp_snooping_workspace::context(
+                a,
+                source.ok_or("Unknown authored DHCP observer source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::ArpInspection { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::ArpInspection { .. })
+                    || matches!(s.goal, crate::engine::Goal::ArpInspection { .. })
+            })
+        {
+            crate::arp_inspection_workspace::context(
+                a,
+                source.ok_or("Unknown authored ARP inspection source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::ManagementPolicy { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::ManagementPolicy { .. })
+                    || matches!(s.goal, crate::engine::Goal::ManagementPolicy { .. })
+            })
+        {
+            crate::management_workspace::context(
+                a,
+                source.ok_or("Unknown authored Management policy source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::LocalAccess { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::LocalAccess { .. })
+                    || matches!(s.goal, crate::engine::Goal::LocalAccess { .. })
+            })
+        {
+            crate::local_access_workspace::context(
+                a,
+                source.ok_or("Unknown authored Local account access source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::AaaAccess { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::AaaAccess { .. })
+                    || matches!(s.goal, crate::engine::Goal::AaaAccess { .. })
+            })
+        {
+            crate::aaa_workspace::context(
+                a,
+                source.ok_or("Unknown authored AAA access source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::LdapClient { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::LdapClient { .. })
+                    || matches!(s.goal, crate::engine::Goal::LdapClient { .. })
+            })
+        {
+            crate::ldap_workspace::context(
+                a,
+                source.ok_or("Unknown authored Directory client source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::LdapAccess { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::LdapAccess { .. })
+                    || matches!(s.goal, crate::engine::Goal::LdapAccess { .. })
+            })
+        {
+            crate::ldap_access_workspace::context(
+                a,
+                source.ok_or("Unknown authored ACL source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::LdapPassword { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::LdapPassword { .. })
+                    || matches!(s.goal, crate::engine::Goal::LdapPassword { .. })
+            })
+        {
+            crate::ldap_password_workspace::context(
+                a,
+                source.ok_or("Unknown authored Password source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::LdapChanges { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::LdapChanges { .. })
+                    || matches!(s.goal, crate::engine::Goal::LdapChanges { .. })
+            })
+        {
+            crate::ldap_change_workspace::context(
+                a,
+                source.ok_or("Unknown authored Directory-change source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::DhcpConfig { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::DhcpConfig { .. })
+                    || matches!(s.goal, crate::engine::Goal::DhcpConfig { .. })
+            })
+        {
+            crate::dhcp_server_workspace::context(
+                a,
+                source.ok_or("Unknown authored DHCP configuration source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::Qos { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::Qos { .. })
+                    || matches!(s.goal, crate::engine::Goal::Qos { .. })
+            })
+        {
+            crate::qos_workspace::context(
+                a,
+                source.ok_or("Unknown authored traffic-policy source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::LinuxLogging { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::LinuxLogging { .. })
+                    || matches!(s.goal, crate::engine::Goal::LinuxLogging { .. })
+            })
+        {
+            crate::linux_logging_workspace::context(
+                a,
+                source.ok_or("Unknown authored logging source; original retained")?,
+            )?;
+        }
+        if matches!(a.state, State::HostNetwork { .. })
+            || source.is_some_and(|s| {
+                matches!(s.initial, State::HostNetwork { .. })
+                    || matches!(s.goal, crate::engine::Goal::HostNetwork { .. })
+            })
+        {
+            crate::host_workspace::context(
+                a,
+                source.ok_or("Unknown authored host source; original retained")?,
+            )?;
+        }
+        if matches!(a.state,State::VirtualIsolation{..})||source.is_some_and(|s|matches!(s.initial,State::VirtualIsolation{..})||matches!(s.goal,crate::engine::Goal::VirtualIsolation{..})){crate::virtual_isolation_source::context(a,source.ok_or("Unknown authored represented-network source; original retained")?)?;}
+        if matches!(a.state,State::SieveFiltering{..})||source.is_some_and(|s|matches!(s.initial,State::SieveFiltering{..})||matches!(s.goal,crate::engine::Goal::SieveFiltering{..})){crate::sieve_source::context(a,source.ok_or("Unknown authored mail-filter source; original retained")?)?;}
+        if matches!(a.state,State::LinuxRouter{..})||source.is_some_and(|s|matches!(s.initial,State::LinuxRouter{..})||matches!(s.goal,crate::engine::Goal::LinuxRouter{..})){crate::linux_router_source::context(a,source.ok_or("Unknown authored router source; original retained")?)?;}
+        if matches!(a.state,State::LinuxV6{..})||source.is_some_and(|s|matches!(s.initial,State::LinuxV6{..})||matches!(s.goal,crate::engine::Goal::LinuxV6{..})){crate::linux_v6_source::context(a,source.ok_or("Unknown authored flow source; original retained")?)?;}
+        if matches!(a.state,State::LinuxServiceRouter{..})||source.is_some_and(|s|matches!(s.initial,State::LinuxServiceRouter{..})||matches!(s.goal,crate::engine::Goal::LinuxServiceRouter{..})){crate::linux_service_router_source::context(a,source.ok_or("Unknown authored flow source; original retained")?)?;}
+        if matches!(a.state,State::LinuxV6Administration{..})||source.is_some_and(|s|matches!(s.initial,State::LinuxV6Administration{..})||matches!(s.goal,crate::engine::Goal::LinuxV6Administration{..})){crate::linux_v6_admin_source::context(a,source.ok_or("Unknown authored IPv6 configuration source; original retained")?)?;}
+        if matches!(a.state,State::LinuxV6Startup{..})||source.is_some_and(|s|matches!(s.initial,State::LinuxV6Startup{..})||matches!(s.goal,crate::engine::Goal::LinuxV6Startup{..})){crate::linux_v6_startup_source::context(a,source.ok_or("Unknown authored IPv6 firewall startup source; original retained")?)?;}
+        if matches!(a.state,State::IdsRule{..})||source.is_some_and(|s|matches!(s.initial,State::IdsRule{..})||matches!(s.goal,crate::engine::Goal::IdsRule{..})){crate::ids_rule_source::context(a,source.ok_or("Unknown authored IDS-rule source; original retained")?)?;}
+        if matches!(a.state,State::AuthFilter{..})||source.is_some_and(|s|matches!(s.initial,State::AuthFilter{..})||matches!(s.goal,crate::engine::Goal::AuthFilter{..})){crate::auth_filter_source::context(a,source.ok_or("Unknown authored authentication-filter source; original retained")?)?;}
+        if matches!(a.state,State::VpnPoint{..})||source.is_some_and(|s|matches!(s.initial,State::VpnPoint{..})||matches!(s.goal,crate::engine::Goal::VpnPoint{..})){crate::vpn_point_source::context(a,source.ok_or("Unknown authored VPN peer source; original retained")?)?;}
+        if matches!(a.state,State::Poe{..})||source.is_some_and(|s|matches!(s.initial,State::Poe{..})||matches!(s.goal,crate::engine::Goal::Poe{..})){crate::poe_source::context(a,source.ok_or("Unknown authored Power-plan source; original retained")?)?;}
+        if matches!(a.state,State::KernelBuild{..})||source.is_some_and(|s|matches!(s.initial,State::KernelBuild{..})||matches!(s.goal,crate::engine::Goal::KernelBuild{..})){crate::kernel_source::context(a,source.ok_or("Unknown authored Kernel-build source; original retained")?)?;}
+        if matches!(a.state,State::Dkms{..})||source.is_some_and(|s|matches!(s.initial,State::Dkms{..})||matches!(s.goal,crate::engine::Goal::Dkms{..})){crate::dkms_source::context(a,source.ok_or("Unknown authored DKMS source; original retained")?)?;}
+        if matches!(a.state,State::Initramfs{..})||source.is_some_and(|s|matches!(s.initial,State::Initramfs{..})||matches!(s.goal,crate::engine::Goal::Initramfs{..})){crate::initramfs_source::context(a,source.ok_or("Unknown authored Early-userspace source; original retained")?)?;}
+        if matches!(a.state,State::Pxe{..})||source.is_some_and(|s|matches!(s.initial,State::Pxe{..})||matches!(s.goal,crate::engine::Goal::Pxe{..})){crate::pxe::source::context(a,source.ok_or("Unknown authored network boot source; original retained")?)?;}
+        if matches!(a.state,State::Iscsi{..})||source.is_some_and(|s|matches!(s.initial,State::Iscsi{..})||matches!(s.goal,crate::engine::Goal::Iscsi{..})){crate::iscsi::source::context(a,source.ok_or("Unknown authored iSCSI source; original retained")?)?;}
+        if matches!(a.state,State::AtaSmart{..})||source.is_some_and(|s|matches!(s.initial,State::AtaSmart{..})||matches!(s.goal,crate::engine::Goal::AtaSmart{..})){crate::ata_smart::source::context(a,source.ok_or("Unknown authored ATA SMART source; original retained")?)?;}
+        if matches!(a.state,State::ApacheHttps{..})||source.is_some_and(|s|matches!(s.initial,State::ApacheHttps{..})||matches!(s.goal,crate::engine::Goal::ApacheHttps{..})){crate::apache_https::source::context(a,source.ok_or("Unknown authored Apache HTTPS source; original retained")?)?;}
+        if matches!(a.state,State::Desktop{..})||source.is_some_and(|s|matches!(s.initial,State::Desktop{..})||matches!(s.goal,crate::engine::Goal::Desktop{..})){crate::desktop::source::context(a,source.ok_or("Unknown authored virtual desktop source; original retained")?)?;}
+        if matches!(a.state,State::SecurityInvestigation{..})||source.is_some_and(|s|matches!(s.initial,State::SecurityInvestigation{..})||matches!(s.goal,crate::engine::Goal::SecurityInvestigation{..})){crate::security_investigation::source::context(a,source.ok_or("Unknown authored virtual security investigation source; original retained")?)?;}
+        if matches!(a.state,State::AutomationWorkshop{..})||source.is_some_and(|s|matches!(s.initial,State::AutomationWorkshop{..})||matches!(s.goal,crate::engine::Goal::AutomationWorkshop{..})){crate::automation_workshop::source::context(a,source.ok_or("Unknown authored virtual staged network changes source; original retained")?)?;}
+        if matches!(a.state,State::ServiceExposure{..})||source.is_some_and(|s|matches!(s.initial,State::ServiceExposure{..})||matches!(s.goal,crate::engine::Goal::ServiceExposure{..})){crate::service_exposure_source::context(a,source.ok_or("Unknown authored Service exposure source; original retained")?)?;}
+        if matches!(a.state,State::FtpIdentity{..})||source.is_some_and(|s|matches!(s.initial,State::FtpIdentity{..})||matches!(s.goal,crate::engine::Goal::FtpIdentity{..})){crate::ftp_identity_source::context(a,source.ok_or("Unknown authored FTP identity source; original retained")?)?;}
+        if matches!(a.state,State::LinuxFlow{..})||source.is_some_and(|s|matches!(s.initial,State::LinuxFlow{..})||matches!(s.goal,crate::engine::Goal::LinuxFlow{..})){crate::linux_flow_source::context(a,source.ok_or("Unknown authored flow source; original retained")?)?;}
+        if matches!(a.state,State::MailboxAccess{..}|State::MailboxAdministration{..})||source.is_some_and(|s|matches!(s.initial,State::MailboxAccess{..}|State::MailboxAdministration{..})||matches!(s.goal,crate::engine::Goal::MailboxAccess{..}|crate::engine::Goal::MailboxAdministration{..})){crate::mailbox_source::context(a,source.ok_or("Unknown authored mail-access source; original retained")?)?;}
+        if matches!(a.state,State::SmtpRouting{..})||source.is_some_and(|s|matches!(s.initial,State::SmtpRouting{..})||matches!(s.goal,crate::engine::Goal::SmtpRouting{..})){crate::smtp_source::context(a,source.ok_or("Unknown authored mail-routing source; original retained")?)?;}
+        if matches!(a.state,State::GuestDrivers{..})||source.is_some_and(|s|matches!(s.initial,State::GuestDrivers{..})||matches!(s.goal,crate::engine::Goal::GuestDrivers{..})){crate::guest_driver_source::context(a,source.ok_or("Unknown authored guest-image source; original retained")?)?;}
+        if matches!(a.state,State::SambaShare{..})||source.is_some_and(|s|matches!(s.initial,State::SambaShare{..})||matches!(s.goal,crate::engine::Goal::SambaShare{..})){crate::samba_share_source::context(a,source.ok_or("Unknown authored sharing source; original retained")?)?;}
+        if matches!(a.state,State::CampusArchitecture{..})||source.is_some_and(|s|matches!(s.initial,State::CampusArchitecture{..})||matches!(s.goal,crate::engine::Goal::CampusArchitecture{..})){crate::network_architecture_source::context(a,source.ok_or("Unknown authored campus-layout source; original retained")?)?;}
+        if matches!(a.state,State::NetworkTransfer{..})||source.is_some_and(|s|matches!(s.initial,State::NetworkTransfer{..})||matches!(s.goal,crate::engine::Goal::NetworkTransfer{..})){crate::network_transfer_source::context(a,source.ok_or("Unknown authored file-transfer source; original retained")?)?;}
+        if matches!(a.state,State::EditorHandover{..})||source.is_some_and(|s|matches!(s.initial,State::EditorHandover{..})||matches!(s.goal,crate::engine::Goal::EditorHandover{..})){crate::editor_handover_source::context(a,source.ok_or("Unknown authored editor-handover source; original retained")?)?;}
+        if matches!(a.state,State::ModalEditing{..})||source.is_some_and(|s|matches!(s.initial,State::ModalEditing{..})||matches!(s.goal,crate::engine::Goal::ModalEditing{..})){crate::modal_source::context(a,source.ok_or("Unknown authored editing source; original retained")?)?;}
+        if matches!(a.state,State::SshAccess{..})||source.is_some_and(|s|matches!(s.initial,State::SshAccess{..})||matches!(s.goal,crate::engine::Goal::SshAccess{..})){crate::ssh_workspace::context(a,source.ok_or("Unknown authored SSH source; original retained")?)?;}
         let script_source = source.is_some_and(|s| {
             matches!(s.initial, State::Script { .. })
                 || matches!(s.goal, crate::engine::Goal::Script { .. })
@@ -2374,6 +3606,14 @@ pub fn save_with_catalog(
         if matches!(a.state, State::Hsrp { .. }) || hsrp_source {
             let source = source.ok_or("Unknown authored HSRP source; original retained")?;
             crate::hsrp_workspace::context(a, source)?;
+        }
+        let syslog_source = source.is_some_and(|s| {
+            matches!(s.initial, State::Syslog { .. })
+                || matches!(s.goal, crate::engine::Goal::Syslog { .. })
+        });
+        if matches!(a.state, State::Syslog { .. }) || syslog_source {
+            let source = source.ok_or("Unknown authored Syslog source; original retained")?;
+            crate::syslog_workspace::context(a, source)?;
         }
         let lvm_source = source.is_some_and(|s| {
             matches!(s.initial, State::Lvm { .. })
@@ -2993,7 +4233,7 @@ mod actual9_before10_writer_acceptance {
     #[test]
     #[ignore = "Requires fixed private actual9 COMPLETE; explicit guarded replay only"]
     fn actual9_copy_races_do_not_overwrite_and_compare_exact_raw_bytes() {
-        assert_eq!(crate::shell::EVALUATOR_REVISION, 15);
+        assert_eq!(crate::shell::EVALUATOR_REVISION, 19);
         let raw = evidence::original9();
         for same in [false, true] {
             let dir = tempfile::tempdir().unwrap();
@@ -3105,4 +4345,56 @@ pub fn current_one_off_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> 
         )];
     };
     crate::one_off_workspace::checks_with_session(d, simulation, session)
+}
+
+/// A one-time private copy for the review candidate. Never writes the installed profile.
+pub fn pilot_profile(original: &std::path::Path) -> Result<std::path::PathBuf, String> {
+    use std::{fs, io::Write};
+    let parent = original.parent().ok_or("Missing profile directory")?;
+    let dir = parent.join("ccna-presentation-pilot");
+    if dir.is_symlink() {
+        return Err("Pilot profile directory cannot be a symbolic link".into());
+    }
+    fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(&dir, fs::Permissions::from_mode(0o700)).map_err(|e| e.to_string())?;
+    }
+    for name in [
+        original.file_name().ok_or("Missing profile name")?,
+        std::ffi::OsStr::new("preferences-v1.json"),
+    ] {
+        let source = parent.join(name);
+        let destination = dir.join(name);
+        if destination.is_symlink() {
+            return Err("Pilot profile files cannot be symbolic links".into());
+        }
+        if let Ok(meta) = destination.symlink_metadata() {
+            if !meta.is_file() {
+                return Err("Pilot profile must be an ordinary file".into());
+            }
+            continue;
+        }
+        let Ok(meta) = source.symlink_metadata() else {
+            continue;
+        };
+        if !meta.is_file() || meta.len() > 16_000_000 {
+            return Err("Existing profile is not a bounded ordinary file".into());
+        }
+        let bytes = crate::local_file::read_bounded(&source, 16_000_000)?;
+        let mut pending = tempfile::NamedTempFile::new_in(&dir).map_err(|e| e.to_string())?;
+        pending
+            .write_all(&bytes)
+            .and_then(|_| pending.as_file().sync_all())
+            .map_err(|e| e.to_string())?;
+        pending
+            .persist_noclobber(destination)
+            .map_err(|e| e.to_string())?;
+        #[cfg(unix)]
+        fs::File::open(&dir)
+            .and_then(|f| f.sync_all())
+            .map_err(|e| e.to_string())?;
+    }
+    Ok(dir.join(original.file_name().unwrap()))
 }

@@ -1,0 +1,1218 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-lvm-activate-data",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM availability",
+      "unit": "lvm-availability",
+      "title": "Make intact data available without rebuilding storage",
+      "summary": "Make every LV in reports active so the simulated application reader can read reports/ledger and its original /keep.txt contents.",
+      "objective": "Make every LV in reports active so the simulated application reader can read reports/ledger and its original /keep.txt contents. Keep reserve/spare inactive and preserve all group membership, allocations, files and device sizes. Do not create, remove, grow, format or mount storage. Activation changes availability, not the stored data or boot policy.",
+      "retry_guidance": "Read the failing group or reader check. Inactive does not mean missing or corrupt. Change only the intended group\u2019s availability; preserve open live data and all allocations. A refused command retains previous state.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/reporta": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "reports"
+              },
+              "/dev/reservea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "reports": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reporta",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/reporta",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "reports/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "reports/ledger": false,
+                "reserve/spare": false
+              },
+              "open": []
+            }
+          },
+          "current": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/reporta": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "reports"
+              },
+              "/dev/reservea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "reports": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reporta",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/reporta",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "reports/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "reports/ledger": false,
+                "reserve/spare": false
+              },
+              "open": []
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/workshopa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "workshop"
+              },
+              "/dev/bencha": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "bench"
+              }
+            },
+            "groups": {
+              "workshop": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "notes": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "workshop/notes: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "bench": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bencha",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "workshop/notes": false,
+                "bench/spare": false
+              },
+              "open": []
+            }
+          },
+          "example": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/workshopa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "workshop"
+              },
+              "/dev/bencha": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "bench"
+              }
+            },
+            "groups": {
+              "workshop": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "notes": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "workshop/notes: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "bench": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bencha",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "workshop/notes": false,
+                "bench/spare": false
+              },
+              "open": []
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/reporta": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "reports"
+              },
+              "/dev/reservea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "reports": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reporta",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/reporta",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "reports/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "reports/ledger": false,
+                "reserve/spare": false
+              },
+              "open": []
+            }
+          },
+          "targets": [],
+          "availability": {
+            "groups": [
+              {
+                "name": "reports",
+                "active": true
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Builds on LVM allocation and raw retirement. This unit adds LV availability and supplied open-consumer facts. It teaches the supported activation commands before the full assignment; mounting, boot policy and real kernel behavior remain separate.",
+            "concepts": [
+              {
+                "title": "Stored data can exist while its LV is unavailable",
+                "text": "An inactive logical volume still has its allocation, filesystem metadata and saved contents. It is not currently available as an LV device for use. Recreating or growing the storage does not fix that availability problem and can damage data. Inspect the current state before choosing a change."
+              },
+              {
+                "title": "Activate the intended group, not every pool",
+                "text": "vgchange -a y NAME makes all LVs in that named group available; -a n makes them inactive. --activate y|n and the common -ay/-an forms are supported alternatives. This lab requires one explicit supplied group name. Read the simulator\u2019s ModelActive column in lvs: it reports each LV, so a group may initially contain a mixture."
+              },
+              {
+                "title": "Availability is separate from mounting and boot policy",
+                "text": "Making an LV active does not create a filesystem, mount it or configure automatic startup. The file inspection here is a simulated application reader over the supplied filesystem; it is not cat on a raw device and does not model a Linux mount. After activation, it can read the retained sample contents."
+              },
+              {
+                "title": "Keep the supplied consumer facts in view",
+                "text": "Some supplied LVs may be marked open by an application. This bounded subset refuses group deactivation when any of its LVs is marked open, before changing anything. Real LVM can have partial effects and requires broader use/mount checks. No consumer discovery, force, process stop or host kernel operation is simulated."
+              }
+            ],
+            "description": "Workshop/notes has an intact 8 MiB filesystem but starts inactive. Bench/spare is a separate deliberately inactive raw LV. Activate only workshop, then inspect lvs and use the simulated reader to verify that notes has become readable without changing its contents or allocation.",
+            "fixture": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/workshopa": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "group": "workshop"
+                },
+                "/dev/bencha": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "bench"
+                }
+              },
+              "groups": {
+                "workshop": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "notes": {
+                      "extents": [
+                        {
+                          "pv": "/dev/workshopa",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/workshopa",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "workshop/notes: preserve this record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "bench": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "spare": {
+                      "extents": [
+                        {
+                          "pv": "/dev/bencha",
+                          "index": 0
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              },
+              "activation": {
+                "active": {
+                  "workshop/notes": false,
+                  "bench/spare": false
+                },
+                "open": []
+              }
+            },
+            "targets": [],
+            "availability": {
+              "groups": [
+                {
+                  "name": "workshop",
+                  "active": true
+                }
+              ]
+            },
+            "worked": [
+              {
+                "text": "lvs",
+                "explanation": "The supplied ModelActive column distinguishes existing but inactive storage from available LVs."
+              },
+              {
+                "text": "vgchange -a y workshop",
+                "explanation": "Make workshop/notes available. Bench/spare remains deliberately inactive."
+              },
+              {
+                "text": "lvs",
+                "explanation": "Confirm notes is active; the retained-file inspection can now read its supplied contents."
+              }
+            ],
+            "try_change": "After the example passes, run vgchange -an workshop and Check separate example. The notes allocation still exists, but its simulated reader is unavailable. Reactivate only workshop with vgchange -ay workshop and check again.",
+            "experiment": "vgchange -an workshop",
+            "repair": "vgchange -ay workshop"
+          }
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect allocation, availability and supplied consumer facts",
+        "Change only the intended group availability",
+        "Verify the simulated reader and all requested states",
+        "Preserve live data and unrelated availability"
+      ],
+      "hints": [
+        "Existing allocation and filesystem capacity do not prove availability. Inspect ModelActive and the current LV state.",
+        "Change availability of the named reports group; do not allocate replacement data or activate reserve.",
+        "After activation, use Inspect retained files and exact byte capacities to view the simulated reader. Original contents and every unrelated state must remain."
+      ],
+      "explanation": "Activation makes existing LVs available; it does not rebuild data, mount a filesystem or set boot policy. A group command applies to all its LVs. The complete current availability plan, original data and unrelated states determine success; terminal text alone does not.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/vgchange.8.html"
+      ],
+      "simplifications": "Optional bounded per-LV availability over supplied virtual storage and immutable authored open-consumer facts. One explicit VG per vgchange; y/n only, with disclosed short/long/combined forms. No host/kernel/device-mapper/udev, automatic activation, degraded/missing-PV/partial activation, lvchange, real process/mount discovery, force or boot persistence. Busy deactivation is refused before effects; real LVM can have partial effects. The labeled ModelActive report and application reader are simulator facilities, not exact lvs formatting or a Linux mount. All prior linear/retirement command boundaries still apply.",
+      "solution": [
+        "lvs",
+        "vgchange -ay reports",
+        "lvs"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-retire-pool"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-availability-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM availability",
+      "unit": "lvm-availability",
+      "title": "Hand over access without taking live storage offline",
+      "summary": "Make all cold LVs active so the simulated application reader can read cold/archive and its original /keep.txt contents.",
+      "objective": "Make all cold LVs active so the simulated application reader can read cold/archive and its original /keep.txt contents. Make all staging LVs inactive; its supplied raw buffer is unused and has no open consumer in this exercise. Keep live/ledger active with its supplied open-consumer fact, and preserve every allocation, file, group membership and device size. Do not create, remove, resize, format or mount storage; automatic activation at boot is outside this handover.",
+      "retry_guidance": "Read the failing group or reader check. Inactive does not mean missing or corrupt. Change only the intended group\u2019s availability; preserve open live data and all allocations. A refused command retains previous state.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/livea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "live"
+              },
+              "/dev/colda": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "cold"
+              },
+              "/dev/stagea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "staging"
+              }
+            },
+            "groups": {
+              "live": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/livea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/livea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "live/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cold": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "archive": {
+                    "extents": [
+                      {
+                        "pv": "/dev/colda",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/colda",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "cold/archive: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "staging": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "buffer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/stagea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "live/ledger": true,
+                "cold/archive": false,
+                "staging/buffer": true
+              },
+              "open": [
+                "live/ledger"
+              ]
+            }
+          },
+          "current": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/livea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "live"
+              },
+              "/dev/colda": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "cold"
+              },
+              "/dev/stagea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "staging"
+              }
+            },
+            "groups": {
+              "live": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/livea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/livea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "live/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cold": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "archive": {
+                    "extents": [
+                      {
+                        "pv": "/dev/colda",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/colda",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "cold/archive: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "staging": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "buffer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/stagea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "live/ledger": true,
+                "cold/archive": false,
+                "staging/buffer": true
+              },
+              "open": [
+                "live/ledger"
+              ]
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/librarya": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "library"
+              },
+              "/dev/workshopb": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "workshop"
+              },
+              "/dev/preparationa": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "preparation"
+              }
+            },
+            "groups": {
+              "library": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "catalog": {
+                    "extents": [
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "library/catalog: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "workshop": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "notes": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopb",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/workshopb",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "workshop/notes: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "preparation": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "batch": {
+                    "extents": [
+                      {
+                        "pv": "/dev/preparationa",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "library/catalog": true,
+                "workshop/notes": false,
+                "preparation/batch": true
+              },
+              "open": [
+                "library/catalog"
+              ]
+            }
+          },
+          "example": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/librarya": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "library"
+              },
+              "/dev/workshopb": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "workshop"
+              },
+              "/dev/preparationa": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "preparation"
+              }
+            },
+            "groups": {
+              "library": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "catalog": {
+                    "extents": [
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "library/catalog: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "workshop": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "notes": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopb",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/workshopb",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "workshop/notes: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "preparation": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "batch": {
+                    "extents": [
+                      {
+                        "pv": "/dev/preparationa",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "library/catalog": true,
+                "workshop/notes": false,
+                "preparation/batch": true
+              },
+              "open": [
+                "library/catalog"
+              ]
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/livea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "live"
+              },
+              "/dev/colda": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "cold"
+              },
+              "/dev/stagea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "staging"
+              }
+            },
+            "groups": {
+              "live": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/livea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/livea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "live/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cold": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "archive": {
+                    "extents": [
+                      {
+                        "pv": "/dev/colda",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/colda",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "cold/archive: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "staging": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "buffer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/stagea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "live/ledger": true,
+                "cold/archive": false,
+                "staging/buffer": true
+              },
+              "open": [
+                "live/ledger"
+              ]
+            }
+          },
+          "targets": [],
+          "availability": {
+            "groups": [
+              {
+                "name": "cold",
+                "active": true
+              },
+              {
+                "name": "staging",
+                "active": false
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Builds on LVM allocation and raw retirement. This unit adds LV availability and supplied open-consumer facts. It teaches the supported activation commands before the full assignment; mounting, boot policy and real kernel behavior remain separate.",
+            "concepts": [
+              {
+                "title": "Plan the two availability changes independently",
+                "text": "One pool needs to become available; an unused raw pool needs to become inactive. Neither action returns extents or removes a PV label. Preserve the already-live application and every allocation while changing only the requested availability states."
+              },
+              {
+                "title": "Stored data can exist while its LV is unavailable",
+                "text": "An inactive logical volume still has its allocation, filesystem metadata and saved contents. It is not currently available as an LV device for use. Recreating or growing the storage does not fix that availability problem and can damage data. Inspect the current state before choosing a change."
+              },
+              {
+                "title": "Activate the intended group, not every pool",
+                "text": "vgchange -a y NAME makes all LVs in that named group available; -a n makes them inactive. --activate y|n and the common -ay/-an forms are supported alternatives. This lab requires one explicit supplied group name. Read the simulator\u2019s ModelActive column in lvs: it reports each LV, so a group may initially contain a mixture."
+              },
+              {
+                "title": "Availability is separate from mounting and boot policy",
+                "text": "Making an LV active does not create a filesystem, mount it or configure automatic startup. The file inspection here is a simulated application reader over the supplied filesystem; it is not cat on a raw device and does not model a Linux mount. After activation, it can read the retained sample contents."
+              },
+              {
+                "title": "Keep the supplied consumer facts in view",
+                "text": "Some supplied LVs may be marked open by an application. This bounded subset refuses group deactivation when any of its LVs is marked open, before changing anything. Real LVM can have partial effects and requires broader use/mount checks. No consumer discovery, force, process stop or host kernel operation is simulated."
+              }
+            ],
+            "description": "Library/catalog is already active and marked open by the supplied application; keep it live. Workshop/notes is intact but inactive. Preparation/batch is an unused active raw allocation. Activate workshop and deactivate preparation, then verify readable notes and unchanged library data. Storage sizes do not change.",
+            "fixture": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/librarya": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "group": "library"
+                },
+                "/dev/workshopb": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "group": "workshop"
+                },
+                "/dev/preparationa": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "preparation"
+                }
+              },
+              "groups": {
+                "library": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "catalog": {
+                      "extents": [
+                        {
+                          "pv": "/dev/librarya",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/librarya",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "library/catalog: preserve this record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "workshop": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "notes": {
+                      "extents": [
+                        {
+                          "pv": "/dev/workshopb",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/workshopb",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "workshop/notes: preserve this record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "preparation": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "batch": {
+                      "extents": [
+                        {
+                          "pv": "/dev/preparationa",
+                          "index": 0
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              },
+              "activation": {
+                "active": {
+                  "library/catalog": true,
+                  "workshop/notes": false,
+                  "preparation/batch": true
+                },
+                "open": [
+                  "library/catalog"
+                ]
+              }
+            },
+            "targets": [],
+            "availability": {
+              "groups": [
+                {
+                  "name": "workshop",
+                  "active": true
+                },
+                {
+                  "name": "preparation",
+                  "active": false
+                }
+              ]
+            },
+            "worked": [
+              {
+                "text": "lvs",
+                "explanation": "Identify the inactive notes and active batch; the supplied state also marks catalog open."
+              },
+              {
+                "text": "vgchange --activate y workshop",
+                "explanation": "Make only the requested data available without taking library offline."
+              },
+              {
+                "text": "vgchange -an preparation",
+                "explanation": "Take only the declared unused raw pool offline; its extents and name remain."
+              },
+              {
+                "text": "lvs",
+                "explanation": "Verify both requested states separately and retain the active live catalog."
+              }
+            ],
+            "try_change": "After the example passes, reactivate preparation with vgchange -ay preparation and check. Notes remains readable, but the unused pool is wrongly active. Restore only its required inactive state with vgchange --activate n preparation and check again.",
+            "experiment": "vgchange -ay preparation",
+            "repair": "vgchange --activate n preparation"
+          }
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect allocation, availability and supplied consumer facts",
+        "Change only the intended group availability",
+        "Verify the simulated reader and all requested states",
+        "Preserve live data and unrelated availability"
+      ],
+      "hints": [
+        "Cold and staging have different requested end states. Inspect each LV and the supplied open-consumer fact before changing a group.",
+        "A refusal to deactivate live is useful feedback: preserve the open application and target only the unused staging group. No force or consumer-stop commands are modeled.",
+        "A correct first change should remain while you repair the other pool. Verify the simulated reader as well as both availability results; do not remove the raw buffer."
+      ],
+      "explanation": "Activation makes existing LVs available; it does not rebuild data, mount a filesystem or set boot policy. A group command applies to all its LVs. The complete current availability plan, original data and unrelated states determine success; terminal text alone does not.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/vgchange.8.html"
+      ],
+      "simplifications": "Optional bounded per-LV availability over supplied virtual storage and immutable authored open-consumer facts. One explicit VG per vgchange; y/n only, with disclosed short/long/combined forms. No host/kernel/device-mapper/udev, automatic activation, degraded/missing-PV/partial activation, lvchange, real process/mount discovery, force or boot persistence. Busy deactivation is refused before effects; real LVM can have partial effects. The labeled ModelActive report and application reader are simulator facilities, not exact lvs formatting or a Linux mount. All prior linear/retirement command boundaries still apply.",
+      "solution": [
+        "lvs",
+        "vgchange -ay cold",
+        "vgchange -a n staging",
+        "lvs"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-activate-data"
+      ]
+    }
+  ]
+}

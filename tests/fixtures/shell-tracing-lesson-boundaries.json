@@ -1,0 +1,141 @@
+{
+  "shell-trace-delivery": [
+    {
+      "name": "Empty mode with a destination",
+      "args": [
+        "",
+        "East"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n"
+      },
+      "stdout": "",
+      "stderr": "Unsupported mode: \n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n"
+      }
+    }
+  ],
+  "shell-trace-fallback": [
+    {
+      "name": "Empty backup filename is rejected before selection",
+      "args": [
+        "strict",
+        "current.log",
+        ""
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n",
+        "/work/current.log": "KEEP\n"
+      },
+      "stdout": "",
+      "stderr": "Usage: snapshot strict-or-fallback PRIMARY BACKUP\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n",
+        "/work/current.log": "KEEP\n"
+      }
+    },
+    {
+      "name": "Leading dash is a filename",
+      "args": [
+        "strict",
+        "-current",
+        "spare.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n",
+        "/work/-current": "DASH\n"
+      },
+      "stdout": "Source: -current\nDASH\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n",
+        "/work/-current": "DASH\n"
+      }
+    },
+    {
+      "name": "No arguments",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n"
+      },
+      "stdout": "",
+      "stderr": "Usage: snapshot strict-or-fallback PRIMARY BACKUP\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n"
+      }
+    },
+    {
+      "name": "A missing backup argument",
+      "args": [
+        "strict",
+        "current.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n"
+      },
+      "stdout": "",
+      "stderr": "Usage: snapshot strict-or-fallback PRIMARY BACKUP\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n"
+      }
+    },
+    {
+      "name": "Same file has one preferred name",
+      "args": [
+        "fallback",
+        "same.log",
+        "same.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n",
+        "/work/same.log": "SAME"
+      },
+      "stdout": "Source: same.log\nSAME",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n",
+        "/work/same.log": "SAME"
+      }
+    },
+    {
+      "name": "Empty backup remains a real snapshot",
+      "args": [
+        "fallback",
+        "missing.log",
+        "empty.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n",
+        "/work/empty.log": ""
+      },
+      "stdout": "Source: empty.log\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Unrelated work stays unchanged.\n",
+        "/work/empty.log": ""
+      }
+    }
+  ]
+}

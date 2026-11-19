@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "purpose": "Fixed development-only simple scalar tracing predictions; not learner input or historical VM evidence",
+  "cases": [
+    {
+      "id": "toggle",
+      "source": "set -x\nprintf '%s\\n' hello\nset +x\nprintf '%s\\n' done\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "spaces",
+      "source": "label='North Annex'\nset -x\nprintf '<%s>\\n' \"$label\"\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "split",
+      "source": "label='North Annex'\nset -x\nprintf '<%s>\\n' $label\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "empty",
+      "source": "label=''\nset -x\nprintf '<%s>\\n' \"$label\"\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "apostrophe",
+      "source": "label=\"can't\"\nset -x\nprintf '%s\\n' \"$label\"\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "backslash",
+      "source": "label='a\\b'\nset -x\nprintf '%s\\n' \"$label\"\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "newline",
+      "source": "label='first\nsecond'\nset -x\nprintf '%s\\n' \"$label\"\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "tab",
+      "source": "label='a\tb'\nset -x\nprintf '%s\\n' \"$label\"\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "unicode",
+      "source": "label='café'\nset -x\nprintf '%s\\n' \"$label\"\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "assign",
+      "source": "set -x\nlabel='North Annex'\nprintf '%s\\n' \"$label\"\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "multi-assign",
+      "source": "set -x\na=one b='two words'\nprintf '%s|%s\\n' \"$a\" \"$b\"\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "status",
+      "source": "set -x\nfalse\nresult=$?\nprintf '%s\\n' \"$result\"\nset +x\nexit \"$result\"\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "if-yes",
+      "source": "set -x\nif test yes = yes; then printf '%s\\n' chosen; else printf '%s\\n' other; fi\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "if-no",
+      "source": "set -x\nif test no = yes; then printf '%s\\n' chosen; else printf '%s\\n' other; fi\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "short-circuit",
+      "source": "set -x\nfalse && printf '%s\\n' skipped\ntrue || printf '%s\\n' skipped\nfalse || printf '%s\\n' fallback\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "stderr",
+      "source": "set -x\nprintf '%s\\n' diagnosis >&2\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "stdout-file",
+      "source": "set -x\nprintf '%s\\n' saved > out.txt\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "stderr-file",
+      "source": "set -x\nprintf '%s\\n' visible 2> trace.txt\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "merged-file",
+      "source": "set -x\nprintf '%s\\n' saved > merged.txt 2>&1\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "redirect-order",
+      "source": "set -x\nprintf '%s\\n' saved 2>&1 > ordered.txt\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "assignment-file",
+      "source": "set -x\nlabel='two words' 2> assign.txt\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "empty-redirect",
+      "source": "set -x\n> empty.txt\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "long-option",
+      "source": "set -o xtrace\nprintf '%s\\n' long\nset +o xtrace\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "already-off",
+      "source": "set +x\nprintf '%s\\n' quiet\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "repeated-on",
+      "source": "set -x\nset -x\nprintf '%s\\n' twice\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "literal-command",
+      "source": "cmd=printf\nset -x\n\"$cmd\" '%s\\n' computed\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "metacharacters",
+      "source": "label='a;$*?[]<>|&!{}()~#='\nset -x\nprintf '%s\\n' \"$label\"\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "double-quote",
+      "source": "label='a\"b'\nset -x\nprintf '%s\\n' \"$label\"\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "assignment-status",
+      "source": "set -x\nfalse\na=\"$?\" b=\"$a\"\nprintf '%s|%s\\n' \"$a\" \"$b\"\nset +x\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    },
+    {
+      "id": "if-no-match",
+      "source": "set -x\nif false; then printf '%s\\n' skipped; fi\nresult=$?\nset +x\nexit \"$result\"\n",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "host_observation": null
+    }
+  ]
+}

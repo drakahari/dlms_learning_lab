@@ -1,0 +1,1024 @@
+{
+  "example": {
+    "review": {
+      "topology": {
+        "transport": {
+          "devices": {
+            "training-core": {
+              "forwarding": true,
+              "interfaces": {
+                "port-1": {
+                  "link": "carrier-1",
+                  "up": true,
+                  "address": {
+                    "address": "10.42.1.1",
+                    "prefix": 30
+                  }
+                },
+                "port-2": {
+                  "link": "carrier-2",
+                  "up": true,
+                  "address": {
+                    "address": "10.42.2.1",
+                    "prefix": 30
+                  }
+                },
+                "port-3": {
+                  "link": "carrier-3",
+                  "up": true,
+                  "address": {
+                    "address": "10.42.3.1",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": []
+            },
+            "lab-client": {
+              "forwarding": false,
+              "interfaces": {
+                "uplink": {
+                  "link": "carrier-1",
+                  "up": true,
+                  "address": {
+                    "address": "10.42.1.2",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "uplink",
+                  "via": "10.42.1.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "sample-service": {
+              "forwarding": false,
+              "interfaces": {
+                "uplink": {
+                  "link": "carrier-2",
+                  "up": true,
+                  "address": {
+                    "address": "10.42.2.2",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "uplink",
+                  "via": "10.42.2.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "lab-admin": {
+              "forwarding": false,
+              "interfaces": {
+                "uplink": {
+                  "link": "carrier-3",
+                  "up": true,
+                  "address": {
+                    "address": "10.42.3.2",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "uplink",
+                  "via": "10.42.3.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "edges": [
+          {
+            "name": "lab-client",
+            "carrier_device": "lab-client",
+            "carrier_port": "uplink"
+          },
+          {
+            "name": "sample-service",
+            "carrier_device": "sample-service",
+            "carrier_port": "uplink"
+          },
+          {
+            "name": "lab-admin",
+            "carrier_device": "lab-admin",
+            "carrier_port": "uplink"
+          }
+        ],
+        "repairable": {
+          "device": "training-core",
+          "port": "port-2"
+        }
+      },
+      "starter": {
+        "controller": [
+          [
+            false,
+            true,
+            false
+          ],
+          [
+            true,
+            false,
+            false
+          ],
+          [
+            true,
+            false,
+            false
+          ]
+        ],
+        "installed": [
+          [
+            false,
+            false,
+            false
+          ],
+          [
+            true,
+            false,
+            false
+          ],
+          [
+            true,
+            false,
+            false
+          ]
+        ],
+        "uplink_up": true
+      },
+      "incident": {
+        "from": 0,
+        "to": 1
+      },
+      "controls": [
+        {
+          "exchange": {
+            "from": 2,
+            "to": 0
+          },
+          "should_forward": true
+        },
+        {
+          "exchange": {
+            "from": 2,
+            "to": 1
+          },
+          "should_forward": false
+        }
+      ],
+      "generated_claim": "installed_rule_stale",
+      "forecast": {
+        "threshold_percent": 80,
+        "predicted_percent": 84,
+        "prior_samples": [
+          48,
+          56,
+          55,
+          59
+        ],
+        "next_sample": 82
+      }
+    },
+    "config": {
+      "task": {
+        "topology": {
+          "inventory": {
+            "fabric": {
+              "switches": {
+                "loading-floor": {
+                  "label": "Loading Floor",
+                  "vlans": [
+                    120,
+                    130,
+                    140
+                  ],
+                  "ports": {
+                    "port-a": {
+                      "up": false,
+                      "mode": {
+                        "kind": "access",
+                        "vlan": 120
+                      }
+                    },
+                    "port-b": {
+                      "up": false,
+                      "mode": {
+                        "kind": "access",
+                        "vlan": 120
+                      }
+                    },
+                    "port-c": {
+                      "up": false,
+                      "mode": {
+                        "kind": "access",
+                        "vlan": 120
+                      }
+                    },
+                    "uplink": {
+                      "up": true,
+                      "mode": {
+                        "kind": "trunk",
+                        "native": 120,
+                        "allowed": [
+                          120,
+                          130,
+                          140
+                        ]
+                      }
+                    }
+                  }
+                },
+                "stores-room": {
+                  "label": "Stores Room",
+                  "vlans": [
+                    120,
+                    130,
+                    140
+                  ],
+                  "ports": {
+                    "port-d": {
+                      "up": true,
+                      "mode": {
+                        "kind": "access",
+                        "vlan": 130
+                      }
+                    },
+                    "port-e": {
+                      "up": true,
+                      "mode": {
+                        "kind": "access",
+                        "vlan": 140
+                      }
+                    },
+                    "uplink": {
+                      "up": true,
+                      "mode": {
+                        "kind": "trunk",
+                        "native": 120,
+                        "allowed": [
+                          120,
+                          130,
+                          140
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "hosts": {
+                "bench-a": {
+                  "label": "Bench A",
+                  "up": true
+                },
+                "bench-b": {
+                  "label": "Bench B",
+                  "up": true
+                },
+                "reserve-scanner": {
+                  "label": "Reserve Scanner",
+                  "up": true
+                },
+                "stores": {
+                  "label": "Stores",
+                  "up": true
+                },
+                "office-lab": {
+                  "label": "Office Lab",
+                  "up": true
+                }
+              },
+              "cables": [
+                {
+                  "id": "backbone",
+                  "a": {
+                    "kind": "switch",
+                    "switch": "loading-floor",
+                    "port": "uplink"
+                  },
+                  "b": {
+                    "kind": "switch",
+                    "switch": "stores-room",
+                    "port": "uplink"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "edge-1",
+                  "a": {
+                    "kind": "host",
+                    "host": "bench-a"
+                  },
+                  "b": {
+                    "kind": "switch",
+                    "switch": "loading-floor",
+                    "port": "port-a"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "edge-2",
+                  "a": {
+                    "kind": "host",
+                    "host": "bench-b"
+                  },
+                  "b": {
+                    "kind": "switch",
+                    "switch": "loading-floor",
+                    "port": "port-b"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "edge-3",
+                  "a": {
+                    "kind": "host",
+                    "host": "reserve-scanner"
+                  },
+                  "b": {
+                    "kind": "switch",
+                    "switch": "loading-floor",
+                    "port": "port-c"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "edge-4",
+                  "a": {
+                    "kind": "host",
+                    "host": "stores"
+                  },
+                  "b": {
+                    "kind": "switch",
+                    "switch": "stores-room",
+                    "port": "port-d"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "edge-5",
+                  "a": {
+                    "kind": "host",
+                    "host": "office-lab"
+                  },
+                  "b": {
+                    "kind": "switch",
+                    "switch": "stores-room",
+                    "port": "port-e"
+                  },
+                  "up": true
+                }
+              ]
+            },
+            "editable": {
+              "loading-floor": [
+                "port-a",
+                "port-b",
+                "port-c"
+              ],
+              "stores-room": [
+                "port-d",
+                "port-e"
+              ]
+            }
+          },
+          "ports": {
+            "bench-a": {
+              "switch": "loading-floor",
+              "port": "port-a"
+            },
+            "bench-b": {
+              "switch": "loading-floor",
+              "port": "port-b"
+            },
+            "reserve-scanner": {
+              "switch": "loading-floor",
+              "port": "port-c"
+            },
+            "stores": {
+              "switch": "stores-room",
+              "port": "port-d"
+            },
+            "office-lab": {
+              "switch": "stores-room",
+              "port": "port-e"
+            }
+          }
+        },
+        "initial": {
+          "profiles": {
+            "intake": {
+              "up": false,
+              "vlan": 120,
+              "description": "Uncommissioned intake"
+            },
+            "approved-service": {
+              "up": true,
+              "vlan": 130,
+              "description": "Approved service access"
+            },
+            "isolated": {
+              "up": true,
+              "vlan": 140,
+              "description": "Other workgroup"
+            },
+            "spare-lab-service": {
+              "up": true,
+              "vlan": 130,
+              "description": "Required for a separate recovery work order"
+            },
+            "old-trial-only": {
+              "up": false,
+              "vlan": 120,
+              "description": "Unused after decommission"
+            }
+          },
+          "bindings": {
+            "bench-a": {
+              "profile": "intake"
+            },
+            "bench-b": {
+              "profile": "intake"
+            },
+            "reserve-scanner": {
+              "profile": "intake"
+            },
+            "stores": {
+              "profile": "approved-service"
+            },
+            "office-lab": {
+              "profile": "isolated"
+            }
+          }
+        },
+        "starter_document": "{\n  \"bindings\": {\n    \"bench-a\": {\n      \"profile\": \"approved-service\"\n    },\n    \"bench-b\": {\n      \"profile\": \"approved-service\"\n    },\n    \"office-lab\": {\n      \"profile\": \"isolated\"\n    },\n    \"reserve-scanner\": {\n      \"profile\": \"intake\"\n    },\n    \"stores\": {\n      \"profile\": \"approved-service\"\n    }\n  },\n  \"profiles\": {\n    \"approved-service\": {\n      \"description\": \"Approved service access\",\n      \"up\": true,\n      \"vlan\": 130\n    },\n    \"intake\": {\n      \"description\": \"Uncommissioned intake\",\n      \"up\": false,\n      \"vlan\": 120\n    },\n    \"isolated\": {\n      \"description\": \"Other workgroup\",\n      \"up\": true,\n      \"vlan\": 140\n    }\n  }\n}\n",
+        "retained_profile": "spare-lab-service",
+        "incidental_removal": "old-trial-only",
+        "excluded_slot": "reserve-scanner",
+        "approved_slots": [
+          "bench-a",
+          "bench-b"
+        ],
+        "paths": [
+          {
+            "from": "bench-a",
+            "to": "stores",
+            "permitted": true
+          },
+          {
+            "from": "bench-b",
+            "to": "stores",
+            "permitted": true
+          },
+          {
+            "from": "reserve-scanner",
+            "to": "stores",
+            "permitted": false
+          },
+          {
+            "from": "bench-a",
+            "to": "office-lab",
+            "permitted": false
+          },
+          {
+            "from": "bench-b",
+            "to": "office-lab",
+            "permitted": false
+          }
+        ]
+      },
+      "valid_document": "{\n  \"bindings\": {\n    \"bench-a\": {\n      \"profile\": \"approved-service\"\n    },\n    \"bench-b\": {\n      \"profile\": \"approved-service\"\n    },\n    \"office-lab\": {\n      \"profile\": \"isolated\"\n    },\n    \"reserve-scanner\": {\n      \"profile\": \"intake\"\n    },\n    \"stores\": {\n      \"profile\": \"approved-service\"\n    }\n  },\n  \"profiles\": {\n    \"approved-service\": {\n      \"description\": \"Approved service access\",\n      \"up\": true,\n      \"vlan\": 130\n    },\n    \"intake\": {\n      \"description\": \"Uncommissioned intake\",\n      \"up\": false,\n      \"vlan\": 120\n    },\n    \"isolated\": {\n      \"description\": \"Other workgroup\",\n      \"up\": true,\n      \"vlan\": 140\n    },\n    \"spare-lab-service\": {\n      \"description\": \"Required for a separate recovery work order\",\n      \"up\": true,\n      \"vlan\": 130\n    }\n  }\n}\n"
+    }
+  },
+  "assignment": {
+    "review": {
+      "topology": {
+        "transport": {
+          "devices": {
+            "carrier-core": {
+              "forwarding": true,
+              "interfaces": {
+                "port-1": {
+                  "link": "carrier-1",
+                  "up": true,
+                  "address": {
+                    "address": "10.58.1.1",
+                    "prefix": 30
+                  }
+                },
+                "port-2": {
+                  "link": "carrier-2",
+                  "up": true,
+                  "address": {
+                    "address": "10.58.2.1",
+                    "prefix": 30
+                  }
+                },
+                "port-3": {
+                  "link": "carrier-3",
+                  "up": true,
+                  "address": {
+                    "address": "10.58.3.1",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": []
+            },
+            "branch-edge": {
+              "forwarding": false,
+              "interfaces": {
+                "uplink": {
+                  "link": "carrier-1",
+                  "up": true,
+                  "address": {
+                    "address": "10.58.1.2",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "uplink",
+                  "via": "10.58.1.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "office-edge": {
+              "forwarding": false,
+              "interfaces": {
+                "uplink": {
+                  "link": "carrier-2",
+                  "up": true,
+                  "address": {
+                    "address": "10.58.2.2",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "uplink",
+                  "via": "10.58.2.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "monitor-edge": {
+              "forwarding": false,
+              "interfaces": {
+                "uplink": {
+                  "link": "carrier-3",
+                  "up": true,
+                  "address": {
+                    "address": "10.58.3.2",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "uplink",
+                  "via": "10.58.3.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "edges": [
+          {
+            "name": "branch-edge",
+            "carrier_device": "branch-edge",
+            "carrier_port": "uplink"
+          },
+          {
+            "name": "office-edge",
+            "carrier_device": "office-edge",
+            "carrier_port": "uplink"
+          },
+          {
+            "name": "monitor-edge",
+            "carrier_device": "monitor-edge",
+            "carrier_port": "uplink"
+          }
+        ],
+        "repairable": {
+          "device": "carrier-core",
+          "port": "port-2"
+        }
+      },
+      "starter": {
+        "controller": [
+          [
+            false,
+            true,
+            false
+          ],
+          [
+            true,
+            false,
+            false
+          ],
+          [
+            true,
+            false,
+            false
+          ]
+        ],
+        "installed": [
+          [
+            false,
+            false,
+            false
+          ],
+          [
+            true,
+            false,
+            false
+          ],
+          [
+            true,
+            false,
+            false
+          ]
+        ],
+        "uplink_up": true
+      },
+      "incident": {
+        "from": 0,
+        "to": 1
+      },
+      "controls": [
+        {
+          "exchange": {
+            "from": 2,
+            "to": 0
+          },
+          "should_forward": true
+        },
+        {
+          "exchange": {
+            "from": 2,
+            "to": 1
+          },
+          "should_forward": false
+        }
+      ],
+      "generated_claim": "carrier_down",
+      "forecast": {
+        "threshold_percent": 80,
+        "predicted_percent": 85,
+        "prior_samples": [
+          35,
+          42,
+          56,
+          57
+        ],
+        "next_sample": 63
+      }
+    },
+    "config": {
+      "task": {
+        "topology": {
+          "inventory": {
+            "fabric": {
+              "switches": {
+                "dispatch-floor": {
+                  "label": "Dispatch Floor",
+                  "vlans": [
+                    20,
+                    30,
+                    40
+                  ],
+                  "ports": {
+                    "port-a": {
+                      "up": false,
+                      "mode": {
+                        "kind": "access",
+                        "vlan": 20
+                      }
+                    },
+                    "port-b": {
+                      "up": false,
+                      "mode": {
+                        "kind": "access",
+                        "vlan": 20
+                      }
+                    },
+                    "port-c": {
+                      "up": false,
+                      "mode": {
+                        "kind": "access",
+                        "vlan": 20
+                      }
+                    },
+                    "uplink": {
+                      "up": true,
+                      "mode": {
+                        "kind": "trunk",
+                        "native": 20,
+                        "allowed": [
+                          20,
+                          30,
+                          40
+                        ]
+                      }
+                    }
+                  }
+                },
+                "main-office": {
+                  "label": "Main Office",
+                  "vlans": [
+                    20,
+                    30,
+                    40
+                  ],
+                  "ports": {
+                    "port-d": {
+                      "up": true,
+                      "mode": {
+                        "kind": "access",
+                        "vlan": 30
+                      }
+                    },
+                    "port-e": {
+                      "up": true,
+                      "mode": {
+                        "kind": "access",
+                        "vlan": 40
+                      }
+                    },
+                    "uplink": {
+                      "up": true,
+                      "mode": {
+                        "kind": "trunk",
+                        "native": 20,
+                        "allowed": [
+                          20,
+                          30,
+                          40
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "hosts": {
+                "desk-a": {
+                  "label": "Desk A",
+                  "up": true
+                },
+                "desk-b": {
+                  "label": "Desk B",
+                  "up": true
+                },
+                "intake-scanner": {
+                  "label": "Intake Scanner",
+                  "up": true
+                },
+                "dispatch": {
+                  "label": "Dispatch",
+                  "up": true
+                },
+                "visitor-services": {
+                  "label": "Visitor Services",
+                  "up": true
+                }
+              },
+              "cables": [
+                {
+                  "id": "backbone",
+                  "a": {
+                    "kind": "switch",
+                    "switch": "dispatch-floor",
+                    "port": "uplink"
+                  },
+                  "b": {
+                    "kind": "switch",
+                    "switch": "main-office",
+                    "port": "uplink"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "edge-1",
+                  "a": {
+                    "kind": "host",
+                    "host": "desk-a"
+                  },
+                  "b": {
+                    "kind": "switch",
+                    "switch": "dispatch-floor",
+                    "port": "port-a"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "edge-2",
+                  "a": {
+                    "kind": "host",
+                    "host": "desk-b"
+                  },
+                  "b": {
+                    "kind": "switch",
+                    "switch": "dispatch-floor",
+                    "port": "port-b"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "edge-3",
+                  "a": {
+                    "kind": "host",
+                    "host": "intake-scanner"
+                  },
+                  "b": {
+                    "kind": "switch",
+                    "switch": "dispatch-floor",
+                    "port": "port-c"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "edge-4",
+                  "a": {
+                    "kind": "host",
+                    "host": "dispatch"
+                  },
+                  "b": {
+                    "kind": "switch",
+                    "switch": "main-office",
+                    "port": "port-d"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "edge-5",
+                  "a": {
+                    "kind": "host",
+                    "host": "visitor-services"
+                  },
+                  "b": {
+                    "kind": "switch",
+                    "switch": "main-office",
+                    "port": "port-e"
+                  },
+                  "up": true
+                }
+              ]
+            },
+            "editable": {
+              "dispatch-floor": [
+                "port-a",
+                "port-b",
+                "port-c"
+              ],
+              "main-office": [
+                "port-d",
+                "port-e"
+              ]
+            }
+          },
+          "ports": {
+            "desk-a": {
+              "switch": "dispatch-floor",
+              "port": "port-a"
+            },
+            "desk-b": {
+              "switch": "dispatch-floor",
+              "port": "port-b"
+            },
+            "intake-scanner": {
+              "switch": "dispatch-floor",
+              "port": "port-c"
+            },
+            "dispatch": {
+              "switch": "main-office",
+              "port": "port-d"
+            },
+            "visitor-services": {
+              "switch": "main-office",
+              "port": "port-e"
+            }
+          }
+        },
+        "initial": {
+          "profiles": {
+            "intake": {
+              "up": false,
+              "vlan": 20,
+              "description": "Uncommissioned intake"
+            },
+            "approved-service": {
+              "up": true,
+              "vlan": 30,
+              "description": "Approved service access"
+            },
+            "isolated": {
+              "up": true,
+              "vlan": 40,
+              "description": "Other workgroup"
+            },
+            "recovery-access": {
+              "up": true,
+              "vlan": 30,
+              "description": "Required for a separate recovery work order"
+            },
+            "retired-intake": {
+              "up": false,
+              "vlan": 20,
+              "description": "Unused after decommission"
+            }
+          },
+          "bindings": {
+            "desk-a": {
+              "profile": "intake"
+            },
+            "desk-b": {
+              "profile": "intake"
+            },
+            "intake-scanner": {
+              "profile": "intake"
+            },
+            "dispatch": {
+              "profile": "approved-service"
+            },
+            "visitor-services": {
+              "profile": "isolated"
+            }
+          }
+        },
+        "starter_document": "{\n  \"bindings\": {\n    \"desk-a\": {\n      \"profile\": \"approved-service\"\n    },\n    \"desk-b\": {\n      \"profile\": \"approved-service\"\n    },\n    \"dispatch\": {\n      \"profile\": \"approved-service\"\n    },\n    \"intake-scanner\": {\n      \"profile\": \"intake\"\n    },\n    \"visitor-services\": {\n      \"profile\": \"isolated\"\n    }\n  },\n  \"profiles\": {\n    \"approved-service\": {\n      \"description\": \"Approved service access\",\n      \"up\": true,\n      \"vlan\": 30\n    },\n    \"intake\": {\n      \"description\": \"Uncommissioned intake\",\n      \"up\": false,\n      \"vlan\": 20\n    },\n    \"isolated\": {\n      \"description\": \"Other workgroup\",\n      \"up\": true,\n      \"vlan\": 40\n    }\n  }\n}\n",
+        "retained_profile": "recovery-access",
+        "incidental_removal": "retired-intake",
+        "excluded_slot": "intake-scanner",
+        "approved_slots": [
+          "desk-a",
+          "desk-b"
+        ],
+        "paths": [
+          {
+            "from": "desk-a",
+            "to": "dispatch",
+            "permitted": true
+          },
+          {
+            "from": "desk-b",
+            "to": "dispatch",
+            "permitted": true
+          },
+          {
+            "from": "intake-scanner",
+            "to": "dispatch",
+            "permitted": false
+          },
+          {
+            "from": "desk-a",
+            "to": "visitor-services",
+            "permitted": false
+          },
+          {
+            "from": "desk-b",
+            "to": "visitor-services",
+            "permitted": false
+          }
+        ]
+      },
+      "valid_document": "{\n  \"bindings\": {\n    \"desk-a\": {\n      \"profile\": \"approved-service\"\n    },\n    \"desk-b\": {\n      \"profile\": \"approved-service\"\n    },\n    \"dispatch\": {\n      \"profile\": \"approved-service\"\n    },\n    \"intake-scanner\": {\n      \"profile\": \"intake\"\n    },\n    \"visitor-services\": {\n      \"profile\": \"isolated\"\n    }\n  },\n  \"profiles\": {\n    \"approved-service\": {\n      \"description\": \"Approved service access\",\n      \"up\": true,\n      \"vlan\": 30\n    },\n    \"intake\": {\n      \"description\": \"Uncommissioned intake\",\n      \"up\": false,\n      \"vlan\": 20\n    },\n    \"isolated\": {\n      \"description\": \"Other workgroup\",\n      \"up\": true,\n      \"vlan\": 40\n    },\n    \"recovery-access\": {\n      \"description\": \"Required for a separate recovery work order\",\n      \"up\": true,\n      \"vlan\": 30\n    }\n  }\n}\n"
+    }
+  }
+}

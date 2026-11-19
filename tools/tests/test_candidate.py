@@ -13,6 +13,28 @@ spec.loader.exec_module(candidate)
 
 
 class CandidateResources(unittest.TestCase):
+    def test_ftp_subset_is_explicitly_reviewed_for_bundling(self):
+        import ast
+        tree = ast.parse((ROOT / 'tools/build_candidate.py').read_text())
+        tables = [tuple(e.value for e in n.iter.elts if isinstance(e, ast.Constant))
+                  for n in ast.walk(tree) if isinstance(n, ast.For) and isinstance(n.iter, ast.Tuple)]
+        reviewed = [row for row in tables if 'TEACHING_PRESENTATION.md' in row]
+        self.assertEqual(len(reviewed), 1)
+        self.assertEqual(reviewed[0].count('FTP_IDENTITY_SUBSET.md'), 1)
+        self.assertNotIn('CHECKPOINT.md', reviewed[0])
+        self.assertTrue((ROOT / 'docs/FTP_IDENTITY_SUBSET.md').is_file())
+
+    def test_exposure_subset_is_explicitly_reviewed_for_bundling(self):
+        import ast
+        tree=ast.parse((ROOT/'tools/build_candidate.py').read_text())
+        tables=[tuple(e.value for e in n.iter.elts if isinstance(e,ast.Constant))
+                for n in ast.walk(tree)if isinstance(n,ast.For)and isinstance(n.iter,ast.Tuple)]
+        reviewed=[row for row in tables if 'TEACHING_PRESENTATION.md'in row]
+        self.assertEqual(len(reviewed),1)
+        self.assertEqual(reviewed[0].count('SERVICE_EXPOSURE_SUBSET.md'),1)
+        self.assertNotIn('CHECKPOINT.md',reviewed[0])
+        self.assertTrue((ROOT/'docs/SERVICE_EXPOSURE_SUBSET.md').is_file())
+
     def test_only_tracked_documentation_is_bundled(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()
@@ -41,6 +63,24 @@ if __name__ == '__main__':
     unittest.main()
 
 class NativeProvenance(unittest.TestCase):
+    def test_native_compiler_enforces_one_job_on_request(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            expected = root / 'target/candidate-build/test-native-target/release/app'
+            expected.parent.mkdir(parents=True)
+            with patch.object(candidate, 'ROOT', root), patch.object(candidate, 'project_root', return_value=root), patch.object(candidate, 'safe_run') as run:
+                for jobs in (0, 3, True):
+                    with self.assertRaisesRegex(ValueError, 'one or two jobs'):
+                        candidate.compile_native('cargo', 'test-native-target', 'app', {}, jobs=jobs)
+                run.assert_not_called()
+                expected.write_text('native binary fixture')
+                self.assertEqual(candidate.compile_native('cargo', 'test-native-target', 'app',
+                                                         {'CARGO_BUILD_JOBS': '99'}, jobs=1), expected)
+                args = run.call_args.args[0]
+                self.assertEqual(args[args.index('--jobs') + 1], '1')
+                self.assertEqual(run.call_args.kwargs['env']['CARGO_BUILD_JOBS'], '1')
+                self.assertEqual(run.call_args.kwargs['env']['RUST_TEST_THREADS'], '2')
+
     def test_worktree_cannot_reuse_main_candidate_target(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()

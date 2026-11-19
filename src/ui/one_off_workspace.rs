@@ -825,13 +825,32 @@ fn introduction(
     let Some(l) = &s.one_off_teaching else {
         return false;
     };
-    ui.heading(&s.title);
-    ui.strong("Introduction");
-    label(ui, m, &l.prerequisite_note);
-    for c in &l.concepts {
-        ui.strong(&c.title);
-        label(ui, m, &c.text);
-    }
+    let intro = lesson_presentation::concepts(
+        ui,
+        s,
+        &l.prerequisite_note,
+        l.concepts.iter().map(|c| (c.title.clone(), c.text.clone())),
+    );
+    m.labels.push((
+        lesson_presentation::entry(s)
+            .map_or(s.summary.as_str(), |e| e.goal.as_str())
+            .into(),
+        intro.objective.rect,
+    ));
+    m.labels.push((
+        lesson_presentation::entry(s)
+            .filter(|e| !e.context.is_empty())
+            .map_or(l.prerequisite_note.as_str(), |e| e.context.as_str())
+            .into(),
+        intro.context.rect,
+    ));
+    lesson_presentation::worked(ui, &l.example_description);
+    lesson_presentation::worked_rows(ui, s);
+    controls::collapsing_header(ui, "Full worked action sequence").show(ui, |ui| {
+        for (n, step) in l.example_actions.iter().enumerate() {
+            lesson_presentation::section(ui, n + 1, &step.title, &step.explanation);
+        }
+    });
     let mut target = None;
     ui.add_enabled_ui(active, |ui| {
         ui.horizontal_wrapped(|ui| {
@@ -902,14 +921,9 @@ fn page(
     p.bind(scope, session);
     ui.heading(&s.title);
     if practice {
-        ui.strong("Separate example · Ungraded");
-        label(
-            ui,
-            &mut m.one_off,
-            &s.one_off_teaching.as_ref().unwrap().example_description,
-        );
+        lesson_presentation::practice_step(ui, s, 0);
     } else {
-        let r = ui.add(egui::Label::new(&s.objective).wrap());
+        let r = lesson_presentation::assignment(ui, s);
         m.one_off.goal = Some(r.rect);
     }
     let edit_enabled = active && !p.running();
@@ -977,6 +991,9 @@ fn page(
             e.example_choice = Some(choice);
         }
     }
+    if practice {
+        lesson_presentation::practice_step(ui, s, 1);
+    }
     let d = definition(s, practice).unwrap();
     let (simulation, session) = selected(a, practice).unwrap();
     let split = ui.available_width()
@@ -1024,6 +1041,9 @@ fn page(
         }
     });
     ui.add_enabled_ui(active, |ui| {
+        if practice {
+            lesson_presentation::practice_step(ui, s, 2);
+        }
         ui.horizontal_wrapped(|ui| {
             e.queue(
                 action_enabled(

@@ -1,0 +1,4461 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-ftp-local-jail",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-ftp-identity",
+      "topic": "FTP identity and confinement",
+      "title": "Give a file-transfer account its own root",
+      "summary": "Allow Mira to list and download the files supplied in her own FTP root, while refusing other login identities and preventing access outside that root.",
+      "objective": "Allow the supplied valid Mira identity to log in; refuse Noah, anonymous, unknown and invalid-credential logins. Mira\u2019s home /srv/mira must appear as / to her FTP client. Listing and downloading /brief.txt must work for changing sample contents. Absolute paths and repeated .. must not expose /srv/records/notice.txt outside Mira\u2019s root. /private.txt must remain unreadable. Save the required configuration/account-list edits and apply them to the running simulated service. Preserve all supplied identities and outside files.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "In the editor, set local_enable=YES, anonymous_enable=NO, chroot_local_user=YES, userlist_enable=YES and userlist_deny=NO. Save virtual file. Select /etc/vsftpd.user_list, replace sara with ravi and save.",
+        "In Server terminal run cat /etc/vsftpd.conf, then systemctl restart vsftpd.",
+        "Choose Ravi\u2019s valid identity and Connect. Run pwd, ls and get brief.txt. Then run cd ../../ and get /srv/records/notice.txt. Try connecting as Sara."
+      ],
+      "guide": [
+        {
+          "title": "Configure Ravi\u2019s identity and root",
+          "why": "Saving does not apply the new service settings yet. The login list and Unix file permissions are separate.",
+          "action": "In the editor, set local_enable=YES, anonymous_enable=NO, chroot_local_user=YES, userlist_enable=YES and userlist_deny=NO. Save virtual file. Select /etc/vsftpd.user_list, replace sara with ravi and save.",
+          "commands": []
+        },
+        {
+          "title": "Apply the saved policy",
+          "why": "The service now uses the saved policy. Restart ends this simulation\u2019s earlier client connection.",
+          "action": "In Server terminal run cat /etc/vsftpd.conf, then systemctl restart vsftpd.",
+          "commands": [
+            {
+              "command": "cat /etc/vsftpd.conf",
+              "explanation": "Read saved configuration in the administrative context.",
+              "simulator_only": false
+            },
+            {
+              "command": "systemctl restart vsftpd",
+              "explanation": "Apply saved service settings and reconnect the simulated client afterward.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Explore through the FTP client",
+          "why": "Ravi starts at / and downloads real sample text. Parent traversal stays at /. The outside file and Sara login are refused. Client files shows the download.",
+          "action": "Choose Ravi\u2019s valid identity and Connect. Run pwd, ls and get brief.txt. Then run cd ../../ and get /srv/records/notice.txt. Try connecting as Sara.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Separate login permission, root selection and Unix file rights. Inspect the failing layer before editing.",
+        "Save every edited file. Apply service configuration with restart, then connect again.",
+        "Use the worked example to reason about the assignment\u2019s different identity names and server paths."
+      ],
+      "explanation": "The login list chooses permitted identities; the root policy chooses their namespace, and Unix mode bits still control actual file access. Non-writable roots can contain writable children. Save/apply/reconnect and verify useful transfers alongside refusals; equivalent supported configurations are accepted.",
+      "retry_guidance": "Read the specific failed behavior. Repair that policy or permission layer, save/apply as needed and retry.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://security.appspot.com/vsftpd/vsftpd_conf.html",
+        "https://sources.debian.org/src/vsftpd/3.0.5-1/parseconf.c/",
+        "https://sources.debian.org/src/vsftpd/3.0.5-0.2/secutil.c/"
+      ],
+      "simplifications": "In-process regular virtual files, ordinary mode bits and supplied credential proofs only. No real passwords/PAM, FTP daemon, sockets, TLS, symlinks or host commands. Administrative chmod/chgrp is owner-only. FTP configuration is saved/applied separately; this fixed restart model ends simulated connections. Each test starts with its own sample transfer files while retaining configuration/account-list/permission changes. Client files are virtual buffers. This vsftpd identity slice is not full LPIC-2 212.2 coverage; other server families and active/passive behavior remain separate limitations.",
+      "initial": {
+        "kind": "FtpIdentity",
+        "simulation": {
+          "source_id": "lpic2-ftp-local-jail",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "version": 1,
+              "server": "ftp-assignment-1",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "uploads"
+                  },
+                  "/srv/mira/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "review"
+                  },
+                  "/srv/noah/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public/public.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.user_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.chroot_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/srv/mira/brief.txt": "Partner briefing\n",
+                  "/srv/noah/brief.txt": "Maintenance briefing\n",
+                  "/srv/mira/private.txt": "Administrator-only fixture\n",
+                  "/srv/noah/private.txt": "Other private fixture\n",
+                  "/srv/records/notice.txt": "Maintenance status: ready\n",
+                  "/srv/public/public.txt": "Public fixture\n",
+                  "/etc/vsftpd.user_list": "noah\n",
+                  "/etc/vsftpd.chroot_list": "mira\n"
+                },
+                "users": {
+                  "admin": [
+                    "staff",
+                    "uploads",
+                    "review",
+                    "public"
+                  ],
+                  "mira": [
+                    "uploads"
+                  ],
+                  "noah": [
+                    "review"
+                  ],
+                  "ftp": [
+                    "public"
+                  ]
+                },
+                "user": "admin",
+                "home": "/",
+                "cwd": "/",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "mira",
+                  "home": "/srv/mira",
+                  "enabled": true
+                },
+                {
+                  "user": "noah",
+                  "home": "/srv/noah",
+                  "enabled": true
+                }
+              ],
+              "anonymous_home": "/srv/public",
+              "saved": "local_enable=NO\nanonymous_enable=YES\nwrite_enable=NO\nchroot_local_user=NO\nuserlist_enable=YES\nuserlist_deny=NO\n",
+              "published": "local_enable=NO\nanonymous_enable=YES\nwrite_enable=NO\nchroot_local_user=NO\nuserlist_enable=YES\nuserlist_deny=NO\n",
+              "generation": 1
+            },
+            "history": [],
+            "local_files": {
+              "report.txt": "Assignment client report\n",
+              "revised.txt": "Assignment revision\n"
+            },
+            "admin_output": "",
+            "client_output": "",
+            "admin_input": "",
+            "client_input": "",
+            "editor_path": "",
+            "editor": "local_enable=NO\nanonymous_enable=YES\nwrite_enable=NO\nchroot_local_user=NO\nuserlist_enable=YES\nuserlist_deny=NO\n",
+            "selected_client": 0,
+            "selected_case": 0,
+            "checked": false,
+            "last_trial": null
+          },
+          "example": {
+            "world": {
+              "version": 1,
+              "server": "ftp-example-1",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "uploads"
+                  },
+                  "/srv/practice/ravi/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "review"
+                  },
+                  "/srv/practice/sara/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public/public.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.user_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.chroot_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/srv/practice/ravi/brief.txt": "Partner briefing\n",
+                  "/srv/practice/sara/brief.txt": "Maintenance briefing\n",
+                  "/srv/practice/ravi/private.txt": "Administrator-only fixture\n",
+                  "/srv/practice/sara/private.txt": "Other private fixture\n",
+                  "/srv/records/notice.txt": "Maintenance status: ready\n",
+                  "/srv/public/public.txt": "Public fixture\n",
+                  "/etc/vsftpd.user_list": "sara\n",
+                  "/etc/vsftpd.chroot_list": "ravi\n"
+                },
+                "users": {
+                  "admin": [
+                    "staff",
+                    "uploads",
+                    "review",
+                    "public"
+                  ],
+                  "ravi": [
+                    "uploads"
+                  ],
+                  "sara": [
+                    "review"
+                  ],
+                  "ftp": [
+                    "public"
+                  ]
+                },
+                "user": "admin",
+                "home": "/",
+                "cwd": "/",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "ravi",
+                  "home": "/srv/practice/ravi",
+                  "enabled": true
+                },
+                {
+                  "user": "sara",
+                  "home": "/srv/practice/sara",
+                  "enabled": true
+                }
+              ],
+              "anonymous_home": "/srv/public",
+              "saved": "local_enable=NO\nanonymous_enable=YES\nwrite_enable=NO\nchroot_local_user=NO\nuserlist_enable=YES\nuserlist_deny=NO\n",
+              "published": "local_enable=NO\nanonymous_enable=YES\nwrite_enable=NO\nchroot_local_user=NO\nuserlist_enable=YES\nuserlist_deny=NO\n",
+              "generation": 1
+            },
+            "history": [],
+            "local_files": {
+              "sample.txt": "Practice client report\n",
+              "amended.txt": "Practice revision\n"
+            },
+            "admin_output": "",
+            "client_output": "",
+            "admin_input": "",
+            "client_input": "",
+            "editor_path": "",
+            "editor": "local_enable=NO\nanonymous_enable=YES\nwrite_enable=NO\nchroot_local_user=NO\nuserlist_enable=YES\nuserlist_deny=NO\n",
+            "selected_client": 0,
+            "selected_case": 0,
+            "checked": false,
+            "last_trial": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "FtpIdentity",
+        "definition": {
+          "source_id": "lpic2-ftp-local-jail",
+          "assignment": {
+            "id": "lpic2-ftp-local-jail-assignment",
+            "initial": {
+              "version": 1,
+              "server": "ftp-assignment-1",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "uploads"
+                  },
+                  "/srv/mira/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "review"
+                  },
+                  "/srv/noah/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public/public.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.user_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.chroot_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/srv/mira/brief.txt": "Partner briefing\n",
+                  "/srv/noah/brief.txt": "Maintenance briefing\n",
+                  "/srv/mira/private.txt": "Administrator-only fixture\n",
+                  "/srv/noah/private.txt": "Other private fixture\n",
+                  "/srv/records/notice.txt": "Maintenance status: ready\n",
+                  "/srv/public/public.txt": "Public fixture\n",
+                  "/etc/vsftpd.user_list": "noah\n",
+                  "/etc/vsftpd.chroot_list": "mira\n"
+                },
+                "users": {
+                  "admin": [
+                    "staff",
+                    "uploads",
+                    "review",
+                    "public"
+                  ],
+                  "mira": [
+                    "uploads"
+                  ],
+                  "noah": [
+                    "review"
+                  ],
+                  "ftp": [
+                    "public"
+                  ]
+                },
+                "user": "admin",
+                "home": "/",
+                "cwd": "/",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "mira",
+                  "home": "/srv/mira",
+                  "enabled": true
+                },
+                {
+                  "user": "noah",
+                  "home": "/srv/noah",
+                  "enabled": true
+                }
+              ],
+              "anonymous_home": "/srv/public",
+              "saved": "local_enable=NO\nanonymous_enable=YES\nwrite_enable=NO\nchroot_local_user=NO\nuserlist_enable=YES\nuserlist_deny=NO\n",
+              "published": "local_enable=NO\nanonymous_enable=YES\nwrite_enable=NO\nchroot_local_user=NO\nuserlist_enable=YES\nuserlist_deny=NO\n",
+              "generation": 1
+            },
+            "editable_files": [
+              "/etc/vsftpd.user_list",
+              "/etc/vsftpd.chroot_list"
+            ],
+            "cases": [
+              {
+                "id": "download-morning",
+                "label": "Download morning",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [
+                  {
+                    "path": "/srv/mira/brief.txt",
+                    "text": "Morning source data\n"
+                  }
+                ],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/brief.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Morning source data\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "download-evening",
+                "label": "Download evening",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [
+                  {
+                    "path": "/srv/mira/brief.txt",
+                    "text": "Evening source data has changed\n"
+                  }
+                ],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/brief.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Evening source data has changed\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "directory-names",
+                "label": "Directory names",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "list",
+                      "path": "/"
+                    },
+                    "expected": {
+                      "kind": "names",
+                      "names": [
+                        "brief.txt",
+                        "inbox",
+                        "private.txt"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "outside-absolute-path",
+                "label": "Outside absolute path",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "missing"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "parent-root-boundary",
+                "label": "Parent root boundary",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "../../../"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "missing"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "private-file-permissions",
+                "label": "Private file permissions",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/private.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "permission"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "other-local-identity",
+                "label": "Other local identity",
+                "credential": {
+                  "kind": "valid",
+                  "user": "noah"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "wrong-credentials",
+                "label": "Wrong credentials",
+                "credential": {
+                  "kind": "invalid",
+                  "user": "mira"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "unknown-account",
+                "label": "Unknown account",
+                "credential": {
+                  "kind": "valid",
+                  "user": "unknown"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "anonymous",
+                "label": "Anonymous",
+                "credential": {
+                  "kind": "anonymous"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-ftp-local-jail-example",
+            "initial": {
+              "version": 1,
+              "server": "ftp-example-1",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "uploads"
+                  },
+                  "/srv/practice/ravi/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "review"
+                  },
+                  "/srv/practice/sara/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public/public.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.user_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.chroot_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/srv/practice/ravi/brief.txt": "Partner briefing\n",
+                  "/srv/practice/sara/brief.txt": "Maintenance briefing\n",
+                  "/srv/practice/ravi/private.txt": "Administrator-only fixture\n",
+                  "/srv/practice/sara/private.txt": "Other private fixture\n",
+                  "/srv/records/notice.txt": "Maintenance status: ready\n",
+                  "/srv/public/public.txt": "Public fixture\n",
+                  "/etc/vsftpd.user_list": "sara\n",
+                  "/etc/vsftpd.chroot_list": "ravi\n"
+                },
+                "users": {
+                  "admin": [
+                    "staff",
+                    "uploads",
+                    "review",
+                    "public"
+                  ],
+                  "ravi": [
+                    "uploads"
+                  ],
+                  "sara": [
+                    "review"
+                  ],
+                  "ftp": [
+                    "public"
+                  ]
+                },
+                "user": "admin",
+                "home": "/",
+                "cwd": "/",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "ravi",
+                  "home": "/srv/practice/ravi",
+                  "enabled": true
+                },
+                {
+                  "user": "sara",
+                  "home": "/srv/practice/sara",
+                  "enabled": true
+                }
+              ],
+              "anonymous_home": "/srv/public",
+              "saved": "local_enable=NO\nanonymous_enable=YES\nwrite_enable=NO\nchroot_local_user=NO\nuserlist_enable=YES\nuserlist_deny=NO\n",
+              "published": "local_enable=NO\nanonymous_enable=YES\nwrite_enable=NO\nchroot_local_user=NO\nuserlist_enable=YES\nuserlist_deny=NO\n",
+              "generation": 1
+            },
+            "editable_files": [
+              "/etc/vsftpd.user_list",
+              "/etc/vsftpd.chroot_list"
+            ],
+            "cases": [
+              {
+                "id": "download-morning",
+                "label": "Download morning",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [
+                  {
+                    "path": "/srv/practice/ravi/brief.txt",
+                    "text": "Morning source data\n"
+                  }
+                ],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/brief.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Morning source data\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "download-evening",
+                "label": "Download evening",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [
+                  {
+                    "path": "/srv/practice/ravi/brief.txt",
+                    "text": "Evening source data has changed\n"
+                  }
+                ],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/brief.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Evening source data has changed\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "directory-names",
+                "label": "Directory names",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "list",
+                      "path": "/"
+                    },
+                    "expected": {
+                      "kind": "names",
+                      "names": [
+                        "brief.txt",
+                        "inbox",
+                        "private.txt"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "outside-absolute-path",
+                "label": "Outside absolute path",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "missing"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "parent-root-boundary",
+                "label": "Parent root boundary",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "../../../"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "missing"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "private-file-permissions",
+                "label": "Private file permissions",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/private.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "permission"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "other-local-identity",
+                "label": "Other local identity",
+                "credential": {
+                  "kind": "valid",
+                  "user": "sara"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "wrong-credentials",
+                "label": "Wrong credentials",
+                "credential": {
+                  "kind": "invalid",
+                  "user": "ravi"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "unknown-account",
+                "label": "Unknown account",
+                "credential": {
+                  "kind": "valid",
+                  "user": "unknown"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "anonymous",
+                "label": "Anonymous",
+                "credential": {
+                  "kind": "anonymous"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              }
+            ]
+          },
+          "assignment_inputs": {
+            "report.txt": "Assignment client report\n",
+            "revised.txt": "Assignment revision\n"
+          },
+          "example_inputs": {
+            "sample.txt": "Practice client report\n",
+            "amended.txt": "Practice revision\n"
+          },
+          "worked": [
+            {
+              "kind": "edit",
+              "text": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=NO\nchroot_local_user=YES\nuserlist_enable=YES\nuserlist_deny=NO\n"
+            },
+            {
+              "kind": "save"
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "save_file",
+                "path": "/etc/vsftpd.user_list",
+                "text": "ravi\n"
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "admin",
+                "input": "systemctl restart vsftpd"
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "connect",
+                "client": 0
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "client",
+                "input": "get brief.txt preview.txt"
+              }
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "ftp-identity-workspace {\"kind\":\"edit\",\"text\":\"local_enable=YES\\nanonymous_enable=NO\\nwrite_enable=NO\\nchroot_local_user=YES\\nuserlist_enable=YES\\nuserlist_deny=NO\\n\"}",
+        "ftp-identity-workspace {\"kind\":\"save\"}",
+        "ftp-identity-workspace {\"kind\":\"event\",\"event\":{\"kind\":\"save_file\",\"path\":\"/etc/vsftpd.user_list\",\"text\":\"mira\\n\"}}",
+        "ftp-identity-workspace {\"kind\":\"event\",\"event\":{\"kind\":\"admin\",\"input\":\"systemctl restart vsftpd\"}}",
+        "ftp-identity-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic1-traversal",
+        "lpic2-service"
+      ]
+    },
+    {
+      "id": "lpic2-ftp-upload-rights",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-ftp-identity",
+      "topic": "FTP identity and confinement",
+      "title": "Repair useful uploads without opening the jail root",
+      "summary": "Restore Mira\u2019s useful uploads into her inbox while keeping the jail root non-writable, private files unreadable and newly uploaded files private.",
+      "objective": "Allow the supplied valid Mira identity; refuse Noah, anonymous, unknown and invalid credentials. Mira remains confined to /srv/mira. Make the jail root non-writable by Mira. Permit useful uploads into /inbox through both the service write policy and the directory\u2019s Unix permissions. New uploaded files must be owned by Mira with mode 600, and their actual contents must download correctly across distinct test inputs. Uploading directly into the root, reading /private.txt or reaching outside the jail must fail. Save and apply configuration; preserve outside files.",
+      "difficulty": "Intermediate",
+      "minutes": 28,
+      "steps": [
+        "Select /etc/vsftpd.conf. Keep the correct identity/root settings; change write_enable to YES and local_umask to 077. Save virtual file.",
+        "In Server terminal inspect ls -ld /srv/practice/ravi and ls -ld /srv/practice/ravi/inbox. Run chmod 755 /srv/practice/ravi and chmod 770 /srv/practice/ravi/inbox, then systemctl restart vsftpd.",
+        "Connect as Ravi. Run put sample.txt inbox/report.txt, then get inbox/report.txt received.txt. In Server terminal run ls -l /srv/practice/ravi/inbox/report.txt. Try put sample.txt /bad.txt."
+      ],
+      "guide": [
+        {
+          "title": "Open the upload gate and choose a mask",
+          "why": "This only saves the upload policy; directory permissions and the running service still need repair.",
+          "action": "Select /etc/vsftpd.conf. Keep the correct identity/root settings; change write_enable to YES and local_umask to 077. Save virtual file.",
+          "commands": []
+        },
+        {
+          "title": "Repair only the example directories",
+          "why": "The root is non-writable to Ravi; its uploads-group child has write/search permission. No chmod 777 is needed.",
+          "action": "In Server terminal inspect ls -ld /srv/practice/ravi and ls -ld /srv/practice/ravi/inbox. Run chmod 755 /srv/practice/ravi and chmod 770 /srv/practice/ravi/inbox, then systemctl restart vsftpd.",
+          "commands": [
+            {
+              "command": "cat /etc/vsftpd.conf",
+              "explanation": "Read saved configuration in the administrative context.",
+              "simulator_only": false
+            },
+            {
+              "command": "systemctl restart vsftpd",
+              "explanation": "Apply saved service settings and reconnect the simulated client afterward.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Transfer, inspect and retry",
+          "why": "The inbox file contains the supplied text with mode 600. Client files shows the download. Uploading into / fails with a directory-permission explanation.",
+          "action": "Connect as Ravi. Run put sample.txt inbox/report.txt, then get inbox/report.txt received.txt. In Server terminal run ls -l /srv/practice/ravi/inbox/report.txt. Try put sample.txt /bad.txt.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Separate login permission, root selection and Unix file rights. Inspect the failing layer before editing.",
+        "Save every edited file. Apply service configuration with restart, then connect again.",
+        "Use the worked example to reason about the assignment\u2019s different identity names and server paths."
+      ],
+      "explanation": "The login list chooses permitted identities; the root policy chooses their namespace, and Unix mode bits still control actual file access. Non-writable roots can contain writable children. Save/apply/reconnect and verify useful transfers alongside refusals; equivalent supported configurations are accepted.",
+      "retry_guidance": "Read the specific failed behavior. Repair that policy or permission layer, save/apply as needed and retry.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://security.appspot.com/vsftpd/vsftpd_conf.html",
+        "https://sources.debian.org/src/vsftpd/3.0.5-1/parseconf.c/",
+        "https://sources.debian.org/src/vsftpd/3.0.5-0.2/secutil.c/"
+      ],
+      "simplifications": "In-process regular virtual files, ordinary mode bits and supplied credential proofs only. No real passwords/PAM, FTP daemon, sockets, TLS, symlinks or host commands. Administrative chmod/chgrp is owner-only. FTP configuration is saved/applied separately; this fixed restart model ends simulated connections. Each test starts with its own sample transfer files while retaining configuration/account-list/permission changes. Client files are virtual buffers. This vsftpd identity slice is not full LPIC-2 212.2 coverage; other server families and active/passive behavior remain separate limitations.",
+      "initial": {
+        "kind": "FtpIdentity",
+        "simulation": {
+          "source_id": "lpic2-ftp-upload-rights",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "version": 1,
+              "server": "ftp-assignment-2",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira": {
+                    "directory": true,
+                    "mode": 511,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira/inbox": {
+                    "directory": true,
+                    "mode": 360,
+                    "owner": "admin",
+                    "group": "uploads"
+                  },
+                  "/srv/mira/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "review"
+                  },
+                  "/srv/noah/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public/public.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.user_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.chroot_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/srv/mira/brief.txt": "Partner briefing\n",
+                  "/srv/noah/brief.txt": "Maintenance briefing\n",
+                  "/srv/mira/private.txt": "Administrator-only fixture\n",
+                  "/srv/noah/private.txt": "Other private fixture\n",
+                  "/srv/records/notice.txt": "Maintenance status: ready\n",
+                  "/srv/public/public.txt": "Public fixture\n",
+                  "/etc/vsftpd.user_list": "mira\n",
+                  "/etc/vsftpd.chroot_list": "mira\n"
+                },
+                "users": {
+                  "admin": [
+                    "staff",
+                    "uploads",
+                    "review",
+                    "public"
+                  ],
+                  "mira": [
+                    "uploads"
+                  ],
+                  "noah": [
+                    "review"
+                  ],
+                  "ftp": [
+                    "public"
+                  ]
+                },
+                "user": "admin",
+                "home": "/",
+                "cwd": "/",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "mira",
+                  "home": "/srv/mira",
+                  "enabled": true
+                },
+                {
+                  "user": "noah",
+                  "home": "/srv/noah",
+                  "enabled": true
+                }
+              ],
+              "anonymous_home": "/srv/public",
+              "saved": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=NO\nchroot_local_user=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=022\n",
+              "published": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=NO\nchroot_local_user=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=022\n",
+              "generation": 1
+            },
+            "history": [],
+            "local_files": {
+              "report.txt": "Assignment client report\n",
+              "revised.txt": "Assignment revision\n"
+            },
+            "admin_output": "",
+            "client_output": "",
+            "admin_input": "",
+            "client_input": "",
+            "editor_path": "",
+            "editor": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=NO\nchroot_local_user=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=022\n",
+            "selected_client": 0,
+            "selected_case": 0,
+            "checked": false,
+            "last_trial": null
+          },
+          "example": {
+            "world": {
+              "version": 1,
+              "server": "ftp-example-2",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi": {
+                    "directory": true,
+                    "mode": 511,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi/inbox": {
+                    "directory": true,
+                    "mode": 360,
+                    "owner": "admin",
+                    "group": "uploads"
+                  },
+                  "/srv/practice/ravi/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "review"
+                  },
+                  "/srv/practice/sara/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public/public.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.user_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.chroot_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/srv/practice/ravi/brief.txt": "Partner briefing\n",
+                  "/srv/practice/sara/brief.txt": "Maintenance briefing\n",
+                  "/srv/practice/ravi/private.txt": "Administrator-only fixture\n",
+                  "/srv/practice/sara/private.txt": "Other private fixture\n",
+                  "/srv/records/notice.txt": "Maintenance status: ready\n",
+                  "/srv/public/public.txt": "Public fixture\n",
+                  "/etc/vsftpd.user_list": "ravi\n",
+                  "/etc/vsftpd.chroot_list": "ravi\n"
+                },
+                "users": {
+                  "admin": [
+                    "staff",
+                    "uploads",
+                    "review",
+                    "public"
+                  ],
+                  "ravi": [
+                    "uploads"
+                  ],
+                  "sara": [
+                    "review"
+                  ],
+                  "ftp": [
+                    "public"
+                  ]
+                },
+                "user": "admin",
+                "home": "/",
+                "cwd": "/",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "ravi",
+                  "home": "/srv/practice/ravi",
+                  "enabled": true
+                },
+                {
+                  "user": "sara",
+                  "home": "/srv/practice/sara",
+                  "enabled": true
+                }
+              ],
+              "anonymous_home": "/srv/public",
+              "saved": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=NO\nchroot_local_user=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=022\n",
+              "published": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=NO\nchroot_local_user=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=022\n",
+              "generation": 1
+            },
+            "history": [],
+            "local_files": {
+              "sample.txt": "Practice client report\n",
+              "amended.txt": "Practice revision\n"
+            },
+            "admin_output": "",
+            "client_output": "",
+            "admin_input": "",
+            "client_input": "",
+            "editor_path": "",
+            "editor": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=NO\nchroot_local_user=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=022\n",
+            "selected_client": 0,
+            "selected_case": 0,
+            "checked": false,
+            "last_trial": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "FtpIdentity",
+        "definition": {
+          "source_id": "lpic2-ftp-upload-rights",
+          "assignment": {
+            "id": "lpic2-ftp-upload-rights-assignment",
+            "initial": {
+              "version": 1,
+              "server": "ftp-assignment-2",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira": {
+                    "directory": true,
+                    "mode": 511,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira/inbox": {
+                    "directory": true,
+                    "mode": 360,
+                    "owner": "admin",
+                    "group": "uploads"
+                  },
+                  "/srv/mira/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "review"
+                  },
+                  "/srv/noah/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public/public.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.user_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.chroot_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/srv/mira/brief.txt": "Partner briefing\n",
+                  "/srv/noah/brief.txt": "Maintenance briefing\n",
+                  "/srv/mira/private.txt": "Administrator-only fixture\n",
+                  "/srv/noah/private.txt": "Other private fixture\n",
+                  "/srv/records/notice.txt": "Maintenance status: ready\n",
+                  "/srv/public/public.txt": "Public fixture\n",
+                  "/etc/vsftpd.user_list": "mira\n",
+                  "/etc/vsftpd.chroot_list": "mira\n"
+                },
+                "users": {
+                  "admin": [
+                    "staff",
+                    "uploads",
+                    "review",
+                    "public"
+                  ],
+                  "mira": [
+                    "uploads"
+                  ],
+                  "noah": [
+                    "review"
+                  ],
+                  "ftp": [
+                    "public"
+                  ]
+                },
+                "user": "admin",
+                "home": "/",
+                "cwd": "/",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "mira",
+                  "home": "/srv/mira",
+                  "enabled": true
+                },
+                {
+                  "user": "noah",
+                  "home": "/srv/noah",
+                  "enabled": true
+                }
+              ],
+              "anonymous_home": "/srv/public",
+              "saved": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=NO\nchroot_local_user=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=022\n",
+              "published": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=NO\nchroot_local_user=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=022\n",
+              "generation": 1
+            },
+            "editable_files": [
+              "/etc/vsftpd.user_list",
+              "/etc/vsftpd.chroot_list"
+            ],
+            "cases": [
+              {
+                "id": "download-morning",
+                "label": "Download morning",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [
+                  {
+                    "path": "/srv/mira/brief.txt",
+                    "text": "Morning source data\n"
+                  }
+                ],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/brief.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Morning source data\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "download-evening",
+                "label": "Download evening",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [
+                  {
+                    "path": "/srv/mira/brief.txt",
+                    "text": "Evening source data has changed\n"
+                  }
+                ],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/brief.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Evening source data has changed\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "directory-names",
+                "label": "Directory names",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "list",
+                      "path": "/"
+                    },
+                    "expected": {
+                      "kind": "names",
+                      "names": [
+                        "brief.txt",
+                        "inbox",
+                        "private.txt"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "outside-absolute-path",
+                "label": "Outside absolute path",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "missing"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "parent-root-boundary",
+                "label": "Parent root boundary",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "../../../"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "missing"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "private-file-permissions",
+                "label": "Private file permissions",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/private.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "permission"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "upload-report",
+                "label": "Upload report",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "inbox"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/inbox"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "put",
+                      "path": "sample-report.txt",
+                      "text": "Daily report\n"
+                    },
+                    "expected": {
+                      "kind": "uploaded",
+                      "server_path": "/srv/mira/inbox/sample-report.txt",
+                      "text": "Daily report\n",
+                      "mode": 384
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "sample-report.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Daily report\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "upload-correction",
+                "label": "Upload correction",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "inbox"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/inbox"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "put",
+                      "path": "sample-correction.txt",
+                      "text": "Corrected report: checked\n"
+                    },
+                    "expected": {
+                      "kind": "uploaded",
+                      "server_path": "/srv/mira/inbox/sample-correction.txt",
+                      "text": "Corrected report: checked\n",
+                      "mode": 384
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "sample-correction.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Corrected report: checked\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "root-cannot-be-upload-directory",
+                "label": "Root cannot be upload directory",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "put",
+                      "path": "/unexpected.txt",
+                      "text": "not allowed\n"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "permission"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "other-local-identity",
+                "label": "Other local identity",
+                "credential": {
+                  "kind": "valid",
+                  "user": "noah"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "wrong-credentials",
+                "label": "Wrong credentials",
+                "credential": {
+                  "kind": "invalid",
+                  "user": "mira"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "unknown-account",
+                "label": "Unknown account",
+                "credential": {
+                  "kind": "valid",
+                  "user": "unknown"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "anonymous",
+                "label": "Anonymous",
+                "credential": {
+                  "kind": "anonymous"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-ftp-upload-rights-example",
+            "initial": {
+              "version": 1,
+              "server": "ftp-example-2",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi": {
+                    "directory": true,
+                    "mode": 511,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi/inbox": {
+                    "directory": true,
+                    "mode": 360,
+                    "owner": "admin",
+                    "group": "uploads"
+                  },
+                  "/srv/practice/ravi/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "review"
+                  },
+                  "/srv/practice/sara/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public/public.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.user_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.chroot_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/srv/practice/ravi/brief.txt": "Partner briefing\n",
+                  "/srv/practice/sara/brief.txt": "Maintenance briefing\n",
+                  "/srv/practice/ravi/private.txt": "Administrator-only fixture\n",
+                  "/srv/practice/sara/private.txt": "Other private fixture\n",
+                  "/srv/records/notice.txt": "Maintenance status: ready\n",
+                  "/srv/public/public.txt": "Public fixture\n",
+                  "/etc/vsftpd.user_list": "ravi\n",
+                  "/etc/vsftpd.chroot_list": "ravi\n"
+                },
+                "users": {
+                  "admin": [
+                    "staff",
+                    "uploads",
+                    "review",
+                    "public"
+                  ],
+                  "ravi": [
+                    "uploads"
+                  ],
+                  "sara": [
+                    "review"
+                  ],
+                  "ftp": [
+                    "public"
+                  ]
+                },
+                "user": "admin",
+                "home": "/",
+                "cwd": "/",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "ravi",
+                  "home": "/srv/practice/ravi",
+                  "enabled": true
+                },
+                {
+                  "user": "sara",
+                  "home": "/srv/practice/sara",
+                  "enabled": true
+                }
+              ],
+              "anonymous_home": "/srv/public",
+              "saved": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=NO\nchroot_local_user=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=022\n",
+              "published": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=NO\nchroot_local_user=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=022\n",
+              "generation": 1
+            },
+            "editable_files": [
+              "/etc/vsftpd.user_list",
+              "/etc/vsftpd.chroot_list"
+            ],
+            "cases": [
+              {
+                "id": "download-morning",
+                "label": "Download morning",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [
+                  {
+                    "path": "/srv/practice/ravi/brief.txt",
+                    "text": "Morning source data\n"
+                  }
+                ],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/brief.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Morning source data\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "download-evening",
+                "label": "Download evening",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [
+                  {
+                    "path": "/srv/practice/ravi/brief.txt",
+                    "text": "Evening source data has changed\n"
+                  }
+                ],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/brief.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Evening source data has changed\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "directory-names",
+                "label": "Directory names",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "list",
+                      "path": "/"
+                    },
+                    "expected": {
+                      "kind": "names",
+                      "names": [
+                        "brief.txt",
+                        "inbox",
+                        "private.txt"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "outside-absolute-path",
+                "label": "Outside absolute path",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "missing"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "parent-root-boundary",
+                "label": "Parent root boundary",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "../../../"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "missing"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "private-file-permissions",
+                "label": "Private file permissions",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/private.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "permission"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "upload-report",
+                "label": "Upload report",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "inbox"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/inbox"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "put",
+                      "path": "sample-report.txt",
+                      "text": "Daily report\n"
+                    },
+                    "expected": {
+                      "kind": "uploaded",
+                      "server_path": "/srv/practice/ravi/inbox/sample-report.txt",
+                      "text": "Daily report\n",
+                      "mode": 384
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "sample-report.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Daily report\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "upload-correction",
+                "label": "Upload correction",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "inbox"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/inbox"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "put",
+                      "path": "sample-correction.txt",
+                      "text": "Corrected report: checked\n"
+                    },
+                    "expected": {
+                      "kind": "uploaded",
+                      "server_path": "/srv/practice/ravi/inbox/sample-correction.txt",
+                      "text": "Corrected report: checked\n",
+                      "mode": 384
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "sample-correction.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Corrected report: checked\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "root-cannot-be-upload-directory",
+                "label": "Root cannot be upload directory",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "put",
+                      "path": "/unexpected.txt",
+                      "text": "not allowed\n"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "permission"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "other-local-identity",
+                "label": "Other local identity",
+                "credential": {
+                  "kind": "valid",
+                  "user": "sara"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "wrong-credentials",
+                "label": "Wrong credentials",
+                "credential": {
+                  "kind": "invalid",
+                  "user": "ravi"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "unknown-account",
+                "label": "Unknown account",
+                "credential": {
+                  "kind": "valid",
+                  "user": "unknown"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "anonymous",
+                "label": "Anonymous",
+                "credential": {
+                  "kind": "anonymous"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              }
+            ]
+          },
+          "assignment_inputs": {
+            "report.txt": "Assignment client report\n",
+            "revised.txt": "Assignment revision\n"
+          },
+          "example_inputs": {
+            "sample.txt": "Practice client report\n",
+            "amended.txt": "Practice revision\n"
+          },
+          "worked": [
+            {
+              "kind": "edit",
+              "text": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=YES\nchroot_local_user=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=077\n"
+            },
+            {
+              "kind": "save"
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "save_file",
+                "path": "/etc/vsftpd.user_list",
+                "text": "ravi\n"
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "admin",
+                "input": "chmod 755 /srv/practice/ravi"
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "admin",
+                "input": "chmod 770 /srv/practice/ravi/inbox"
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "admin",
+                "input": "systemctl restart vsftpd"
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "connect",
+                "client": 0
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "client",
+                "input": "get brief.txt preview.txt"
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "client",
+                "input": "put sample.txt inbox/report.txt"
+              }
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "ftp-identity-workspace {\"kind\":\"edit\",\"text\":\"local_enable=YES\\nanonymous_enable=NO\\nwrite_enable=YES\\nchroot_local_user=YES\\nuserlist_enable=YES\\nuserlist_deny=NO\\nlocal_umask=077\\n\"}",
+        "ftp-identity-workspace {\"kind\":\"save\"}",
+        "ftp-identity-workspace {\"kind\":\"event\",\"event\":{\"kind\":\"save_file\",\"path\":\"/etc/vsftpd.user_list\",\"text\":\"mira\\n\"}}",
+        "ftp-identity-workspace {\"kind\":\"event\",\"event\":{\"kind\":\"admin\",\"input\":\"chmod 755 /srv/mira\"}}",
+        "ftp-identity-workspace {\"kind\":\"event\",\"event\":{\"kind\":\"admin\",\"input\":\"chmod 770 /srv/mira/inbox\"}}",
+        "ftp-identity-workspace {\"kind\":\"event\",\"event\":{\"kind\":\"admin\",\"input\":\"systemctl restart vsftpd\"}}",
+        "ftp-identity-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-ftp-local-jail"
+      ]
+    },
+    {
+      "id": "lpic2-ftp-chroot-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-ftp-identity",
+      "topic": "FTP identity and confinement",
+      "title": "Hand over two FTP identities with different root policies",
+      "summary": "Keep Mira confined for private uploads, let Noah inspect the supplied maintenance record outside his home, and preserve Unix file privacy for both identities.",
+      "objective": "Allow both supplied valid identities; refuse anonymous, unknown and invalid credentials. Mira\u2019s /srv/mira must be her FTP root. She must upload/download private mode-600 files in /inbox; the root itself remains non-writable. Noah must retain the global simulated namespace and download /srv/records/notice.txt from his starting directory /srv/noah. Neither identity may read the administrator-only private file. Mira must not reach the maintenance record outside her root. Reconcile the login list, root policy, child permissions and saved/running configuration. Preserve outside files and supplied account identities.",
+      "difficulty": "Advanced",
+      "minutes": 34,
+      "steps": [
+        "Inspect /etc/vsftpd.conf and each supplied list in the editor. Keep both ravi and sara in the login allowlist. With default confinement YES, replace ravi with sara in /etc/vsftpd.chroot_list and save.",
+        "In Server terminal run chmod 770 /srv/practice/ravi/inbox, then systemctl restart vsftpd.",
+        "Connect as Ravi: pwd, put sample.txt inbox/report.txt, get /srv/records/notice.txt. Then connect as Sara: pwd and get /srv/records/notice.txt. Try get /srv/practice/ravi/private.txt as Sara."
+      ],
+      "guide": [
+        {
+          "title": "Read both lists before changing them",
+          "why": "The chroot list is now an exception list: Sara is outside the jail, Ravi remains inside. It is not a list of people allowed to log in.",
+          "action": "Inspect /etc/vsftpd.conf and each supplied list in the editor. Keep both ravi and sara in the login allowlist. With default confinement YES, replace ravi with sara in /etc/vsftpd.chroot_list and save.",
+          "commands": []
+        },
+        {
+          "title": "Publish the handover and useful upload rights",
+          "why": "Ravi\u2019s group can upload inside the non-writable root. Restart applies the saved settings and ends older connections.",
+          "action": "In Server terminal run chmod 770 /srv/practice/ravi/inbox, then systemctl restart vsftpd.",
+          "commands": [
+            {
+              "command": "cat /etc/vsftpd.conf",
+              "explanation": "Read saved configuration in the administrative context.",
+              "simulator_only": false
+            },
+            {
+              "command": "systemctl restart vsftpd",
+              "explanation": "Apply saved service settings and reconnect the simulated client afterward.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Investigate both roles",
+          "why": "Ravi\u2019s root is / and the outside record is missing there. Sara starts at /srv/practice/sara, can read the maintenance record and is denied the private file by Unix permissions.",
+          "action": "Connect as Ravi: pwd, put sample.txt inbox/report.txt, get /srv/records/notice.txt. Then connect as Sara: pwd and get /srv/records/notice.txt. Try get /srv/practice/ravi/private.txt as Sara.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Separate login permission, root selection and Unix file rights. Inspect the failing layer before editing.",
+        "Save every edited file. Apply service configuration with restart, then connect again.",
+        "Use the worked example to reason about the assignment\u2019s different identity names and server paths."
+      ],
+      "explanation": "The login list chooses permitted identities; the root policy chooses their namespace, and Unix mode bits still control actual file access. Non-writable roots can contain writable children. Save/apply/reconnect and verify useful transfers alongside refusals; equivalent supported configurations are accepted.",
+      "retry_guidance": "Read the specific failed behavior. Repair that policy or permission layer, save/apply as needed and retry.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://security.appspot.com/vsftpd/vsftpd_conf.html",
+        "https://sources.debian.org/src/vsftpd/3.0.5-1/parseconf.c/",
+        "https://sources.debian.org/src/vsftpd/3.0.5-0.2/secutil.c/"
+      ],
+      "simplifications": "In-process regular virtual files, ordinary mode bits and supplied credential proofs only. No real passwords/PAM, FTP daemon, sockets, TLS, symlinks or host commands. Administrative chmod/chgrp is owner-only. FTP configuration is saved/applied separately; this fixed restart model ends simulated connections. Each test starts with its own sample transfer files while retaining configuration/account-list/permission changes. Client files are virtual buffers. This vsftpd identity slice is not full LPIC-2 212.2 coverage; other server families and active/passive behavior remain separate limitations.",
+      "initial": {
+        "kind": "FtpIdentity",
+        "simulation": {
+          "source_id": "lpic2-ftp-chroot-handover",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "version": 1,
+              "server": "ftp-assignment-3",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira/inbox": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "admin",
+                    "group": "uploads"
+                  },
+                  "/srv/mira/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "review"
+                  },
+                  "/srv/noah/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public/public.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.user_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.chroot_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/srv/mira/brief.txt": "Partner briefing\n",
+                  "/srv/noah/brief.txt": "Maintenance briefing\n",
+                  "/srv/mira/private.txt": "Administrator-only fixture\n",
+                  "/srv/noah/private.txt": "Other private fixture\n",
+                  "/srv/records/notice.txt": "Maintenance status: ready\n",
+                  "/srv/public/public.txt": "Public fixture\n",
+                  "/etc/vsftpd.user_list": "mira\nnoah\n",
+                  "/etc/vsftpd.chroot_list": "mira\n"
+                },
+                "users": {
+                  "admin": [
+                    "staff",
+                    "uploads",
+                    "review",
+                    "public"
+                  ],
+                  "mira": [
+                    "uploads"
+                  ],
+                  "noah": [
+                    "review"
+                  ],
+                  "ftp": [
+                    "public"
+                  ]
+                },
+                "user": "admin",
+                "home": "/",
+                "cwd": "/",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "mira",
+                  "home": "/srv/mira",
+                  "enabled": true
+                },
+                {
+                  "user": "noah",
+                  "home": "/srv/noah",
+                  "enabled": true
+                }
+              ],
+              "anonymous_home": "/srv/public",
+              "saved": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=YES\nchroot_local_user=YES\nchroot_list_enable=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=077\n",
+              "published": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=YES\nchroot_local_user=YES\nchroot_list_enable=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=077\n",
+              "generation": 1
+            },
+            "history": [],
+            "local_files": {
+              "report.txt": "Assignment client report\n",
+              "revised.txt": "Assignment revision\n"
+            },
+            "admin_output": "",
+            "client_output": "",
+            "admin_input": "",
+            "client_input": "",
+            "editor_path": "",
+            "editor": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=YES\nchroot_local_user=YES\nchroot_list_enable=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=077\n",
+            "selected_client": 0,
+            "selected_case": 0,
+            "checked": false,
+            "last_trial": null
+          },
+          "example": {
+            "world": {
+              "version": 1,
+              "server": "ftp-example-3",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi/inbox": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "admin",
+                    "group": "uploads"
+                  },
+                  "/srv/practice/ravi/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "review"
+                  },
+                  "/srv/practice/sara/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public/public.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.user_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.chroot_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/srv/practice/ravi/brief.txt": "Partner briefing\n",
+                  "/srv/practice/sara/brief.txt": "Maintenance briefing\n",
+                  "/srv/practice/ravi/private.txt": "Administrator-only fixture\n",
+                  "/srv/practice/sara/private.txt": "Other private fixture\n",
+                  "/srv/records/notice.txt": "Maintenance status: ready\n",
+                  "/srv/public/public.txt": "Public fixture\n",
+                  "/etc/vsftpd.user_list": "ravi\nsara\n",
+                  "/etc/vsftpd.chroot_list": "ravi\n"
+                },
+                "users": {
+                  "admin": [
+                    "staff",
+                    "uploads",
+                    "review",
+                    "public"
+                  ],
+                  "ravi": [
+                    "uploads"
+                  ],
+                  "sara": [
+                    "review"
+                  ],
+                  "ftp": [
+                    "public"
+                  ]
+                },
+                "user": "admin",
+                "home": "/",
+                "cwd": "/",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "ravi",
+                  "home": "/srv/practice/ravi",
+                  "enabled": true
+                },
+                {
+                  "user": "sara",
+                  "home": "/srv/practice/sara",
+                  "enabled": true
+                }
+              ],
+              "anonymous_home": "/srv/public",
+              "saved": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=YES\nchroot_local_user=YES\nchroot_list_enable=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=077\n",
+              "published": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=YES\nchroot_local_user=YES\nchroot_list_enable=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=077\n",
+              "generation": 1
+            },
+            "history": [],
+            "local_files": {
+              "sample.txt": "Practice client report\n",
+              "amended.txt": "Practice revision\n"
+            },
+            "admin_output": "",
+            "client_output": "",
+            "admin_input": "",
+            "client_input": "",
+            "editor_path": "",
+            "editor": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=YES\nchroot_local_user=YES\nchroot_list_enable=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=077\n",
+            "selected_client": 0,
+            "selected_case": 0,
+            "checked": false,
+            "last_trial": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "FtpIdentity",
+        "definition": {
+          "source_id": "lpic2-ftp-chroot-handover",
+          "assignment": {
+            "id": "lpic2-ftp-chroot-handover-assignment",
+            "initial": {
+              "version": 1,
+              "server": "ftp-assignment-3",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira/inbox": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "admin",
+                    "group": "uploads"
+                  },
+                  "/srv/mira/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/mira/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "review"
+                  },
+                  "/srv/noah/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/noah/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public/public.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.user_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.chroot_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/srv/mira/brief.txt": "Partner briefing\n",
+                  "/srv/noah/brief.txt": "Maintenance briefing\n",
+                  "/srv/mira/private.txt": "Administrator-only fixture\n",
+                  "/srv/noah/private.txt": "Other private fixture\n",
+                  "/srv/records/notice.txt": "Maintenance status: ready\n",
+                  "/srv/public/public.txt": "Public fixture\n",
+                  "/etc/vsftpd.user_list": "mira\nnoah\n",
+                  "/etc/vsftpd.chroot_list": "mira\n"
+                },
+                "users": {
+                  "admin": [
+                    "staff",
+                    "uploads",
+                    "review",
+                    "public"
+                  ],
+                  "mira": [
+                    "uploads"
+                  ],
+                  "noah": [
+                    "review"
+                  ],
+                  "ftp": [
+                    "public"
+                  ]
+                },
+                "user": "admin",
+                "home": "/",
+                "cwd": "/",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "mira",
+                  "home": "/srv/mira",
+                  "enabled": true
+                },
+                {
+                  "user": "noah",
+                  "home": "/srv/noah",
+                  "enabled": true
+                }
+              ],
+              "anonymous_home": "/srv/public",
+              "saved": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=YES\nchroot_local_user=YES\nchroot_list_enable=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=077\n",
+              "published": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=YES\nchroot_local_user=YES\nchroot_list_enable=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=077\n",
+              "generation": 1
+            },
+            "editable_files": [
+              "/etc/vsftpd.user_list",
+              "/etc/vsftpd.chroot_list"
+            ],
+            "cases": [
+              {
+                "id": "download-morning",
+                "label": "Download morning",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [
+                  {
+                    "path": "/srv/mira/brief.txt",
+                    "text": "Morning source data\n"
+                  }
+                ],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/brief.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Morning source data\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "download-evening",
+                "label": "Download evening",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [
+                  {
+                    "path": "/srv/mira/brief.txt",
+                    "text": "Evening source data has changed\n"
+                  }
+                ],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/brief.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Evening source data has changed\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "directory-names",
+                "label": "Directory names",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "list",
+                      "path": "/"
+                    },
+                    "expected": {
+                      "kind": "names",
+                      "names": [
+                        "brief.txt",
+                        "inbox",
+                        "private.txt"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "outside-absolute-path",
+                "label": "Outside absolute path",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "missing"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "parent-root-boundary",
+                "label": "Parent root boundary",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "../../../"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "missing"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "private-file-permissions",
+                "label": "Private file permissions",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/private.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "permission"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "upload-report",
+                "label": "Upload report",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "inbox"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/inbox"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "put",
+                      "path": "sample-report.txt",
+                      "text": "Daily report\n"
+                    },
+                    "expected": {
+                      "kind": "uploaded",
+                      "server_path": "/srv/mira/inbox/sample-report.txt",
+                      "text": "Daily report\n",
+                      "mode": 384
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "sample-report.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Daily report\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "upload-correction",
+                "label": "Upload correction",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "inbox"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/inbox"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "put",
+                      "path": "sample-correction.txt",
+                      "text": "Corrected report: checked\n"
+                    },
+                    "expected": {
+                      "kind": "uploaded",
+                      "server_path": "/srv/mira/inbox/sample-correction.txt",
+                      "text": "Corrected report: checked\n",
+                      "mode": 384
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "sample-correction.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Corrected report: checked\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "root-cannot-be-upload-directory",
+                "label": "Root cannot be upload directory",
+                "credential": {
+                  "kind": "valid",
+                  "user": "mira"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "put",
+                      "path": "/unexpected.txt",
+                      "text": "not allowed\n"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "permission"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "maintenance-outside-home",
+                "label": "Maintenance outside home",
+                "credential": {
+                  "kind": "valid",
+                  "user": "noah"
+                },
+                "denied_login": null,
+                "confined": false,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/srv/noah"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Maintenance status: ready\n"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/srv/mira/private.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "permission"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "wrong-credentials",
+                "label": "Wrong credentials",
+                "credential": {
+                  "kind": "invalid",
+                  "user": "mira"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "unknown-account",
+                "label": "Unknown account",
+                "credential": {
+                  "kind": "valid",
+                  "user": "unknown"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "anonymous",
+                "label": "Anonymous",
+                "credential": {
+                  "kind": "anonymous"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-ftp-chroot-handover-example",
+            "initial": {
+              "version": 1,
+              "server": "ftp-example-3",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi/inbox": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "admin",
+                    "group": "uploads"
+                  },
+                  "/srv/practice/ravi/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/ravi/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara/inbox": {
+                    "directory": true,
+                    "mode": 504,
+                    "owner": "admin",
+                    "group": "review"
+                  },
+                  "/srv/practice/sara/brief.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/practice/sara/private.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/records/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/srv/public/public.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.user_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  },
+                  "/etc/vsftpd.chroot_list": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "admin",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/srv/practice/ravi/brief.txt": "Partner briefing\n",
+                  "/srv/practice/sara/brief.txt": "Maintenance briefing\n",
+                  "/srv/practice/ravi/private.txt": "Administrator-only fixture\n",
+                  "/srv/practice/sara/private.txt": "Other private fixture\n",
+                  "/srv/records/notice.txt": "Maintenance status: ready\n",
+                  "/srv/public/public.txt": "Public fixture\n",
+                  "/etc/vsftpd.user_list": "ravi\nsara\n",
+                  "/etc/vsftpd.chroot_list": "ravi\n"
+                },
+                "users": {
+                  "admin": [
+                    "staff",
+                    "uploads",
+                    "review",
+                    "public"
+                  ],
+                  "ravi": [
+                    "uploads"
+                  ],
+                  "sara": [
+                    "review"
+                  ],
+                  "ftp": [
+                    "public"
+                  ]
+                },
+                "user": "admin",
+                "home": "/",
+                "cwd": "/",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "ravi",
+                  "home": "/srv/practice/ravi",
+                  "enabled": true
+                },
+                {
+                  "user": "sara",
+                  "home": "/srv/practice/sara",
+                  "enabled": true
+                }
+              ],
+              "anonymous_home": "/srv/public",
+              "saved": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=YES\nchroot_local_user=YES\nchroot_list_enable=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=077\n",
+              "published": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=YES\nchroot_local_user=YES\nchroot_list_enable=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=077\n",
+              "generation": 1
+            },
+            "editable_files": [
+              "/etc/vsftpd.user_list",
+              "/etc/vsftpd.chroot_list"
+            ],
+            "cases": [
+              {
+                "id": "download-morning",
+                "label": "Download morning",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [
+                  {
+                    "path": "/srv/practice/ravi/brief.txt",
+                    "text": "Morning source data\n"
+                  }
+                ],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/brief.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Morning source data\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "download-evening",
+                "label": "Download evening",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [
+                  {
+                    "path": "/srv/practice/ravi/brief.txt",
+                    "text": "Evening source data has changed\n"
+                  }
+                ],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/brief.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Evening source data has changed\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "directory-names",
+                "label": "Directory names",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "list",
+                      "path": "/"
+                    },
+                    "expected": {
+                      "kind": "names",
+                      "names": [
+                        "brief.txt",
+                        "inbox",
+                        "private.txt"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "outside-absolute-path",
+                "label": "Outside absolute path",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "missing"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "parent-root-boundary",
+                "label": "Parent root boundary",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "../../../"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "missing"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "private-file-permissions",
+                "label": "Private file permissions",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/private.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "permission"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "upload-report",
+                "label": "Upload report",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "inbox"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/inbox"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "put",
+                      "path": "sample-report.txt",
+                      "text": "Daily report\n"
+                    },
+                    "expected": {
+                      "kind": "uploaded",
+                      "server_path": "/srv/practice/ravi/inbox/sample-report.txt",
+                      "text": "Daily report\n",
+                      "mode": 384
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "sample-report.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Daily report\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "upload-correction",
+                "label": "Upload correction",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "cd",
+                      "path": "inbox"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/inbox"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "put",
+                      "path": "sample-correction.txt",
+                      "text": "Corrected report: checked\n"
+                    },
+                    "expected": {
+                      "kind": "uploaded",
+                      "server_path": "/srv/practice/ravi/inbox/sample-correction.txt",
+                      "text": "Corrected report: checked\n",
+                      "mode": 384
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "sample-correction.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Corrected report: checked\n"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "root-cannot-be-upload-directory",
+                "label": "Root cannot be upload directory",
+                "credential": {
+                  "kind": "valid",
+                  "user": "ravi"
+                },
+                "denied_login": null,
+                "confined": true,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "put",
+                      "path": "/unexpected.txt",
+                      "text": "not allowed\n"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "permission"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "maintenance-outside-home",
+                "label": "Maintenance outside home",
+                "credential": {
+                  "kind": "valid",
+                  "user": "sara"
+                },
+                "denied_login": null,
+                "confined": false,
+                "inputs": [],
+                "steps": [
+                  {
+                    "operation": {
+                      "kind": "pwd"
+                    },
+                    "expected": {
+                      "kind": "directory",
+                      "path": "/srv/practice/sara"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/srv/records/notice.txt"
+                    },
+                    "expected": {
+                      "kind": "download",
+                      "text": "Maintenance status: ready\n"
+                    }
+                  },
+                  {
+                    "operation": {
+                      "kind": "get",
+                      "path": "/srv/practice/ravi/private.txt"
+                    },
+                    "expected": {
+                      "kind": "denied",
+                      "layer": "permission"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "wrong-credentials",
+                "label": "Wrong credentials",
+                "credential": {
+                  "kind": "invalid",
+                  "user": "ravi"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "unknown-account",
+                "label": "Unknown account",
+                "credential": {
+                  "kind": "valid",
+                  "user": "unknown"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              },
+              {
+                "id": "anonymous",
+                "label": "Anonymous",
+                "credential": {
+                  "kind": "anonymous"
+                },
+                "denied_login": "authentication",
+                "confined": false,
+                "inputs": [],
+                "steps": []
+              }
+            ]
+          },
+          "assignment_inputs": {
+            "report.txt": "Assignment client report\n",
+            "revised.txt": "Assignment revision\n"
+          },
+          "example_inputs": {
+            "sample.txt": "Practice client report\n",
+            "amended.txt": "Practice revision\n"
+          },
+          "worked": [
+            {
+              "kind": "edit",
+              "text": "local_enable=YES\nanonymous_enable=NO\nwrite_enable=YES\nchroot_local_user=YES\nuserlist_enable=YES\nuserlist_deny=NO\nlocal_umask=077\nchroot_list_enable=YES\n"
+            },
+            {
+              "kind": "save"
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "save_file",
+                "path": "/etc/vsftpd.user_list",
+                "text": "ravi\nsara\n"
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "save_file",
+                "path": "/etc/vsftpd.chroot_list",
+                "text": "sara\n"
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "admin",
+                "input": "chmod 755 /srv/practice/ravi"
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "admin",
+                "input": "chmod 770 /srv/practice/ravi/inbox"
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "admin",
+                "input": "systemctl restart vsftpd"
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "connect",
+                "client": 0
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "client",
+                "input": "get brief.txt preview.txt"
+              }
+            },
+            {
+              "kind": "event",
+              "event": {
+                "kind": "client",
+                "input": "put sample.txt inbox/report.txt"
+              }
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "ftp-identity-workspace {\"kind\":\"edit\",\"text\":\"local_enable=YES\\nanonymous_enable=NO\\nwrite_enable=YES\\nchroot_local_user=YES\\nuserlist_enable=YES\\nuserlist_deny=NO\\nlocal_umask=077\\nchroot_list_enable=YES\\n\"}",
+        "ftp-identity-workspace {\"kind\":\"save\"}",
+        "ftp-identity-workspace {\"kind\":\"event\",\"event\":{\"kind\":\"save_file\",\"path\":\"/etc/vsftpd.user_list\",\"text\":\"mira\\nnoah\\n\"}}",
+        "ftp-identity-workspace {\"kind\":\"event\",\"event\":{\"kind\":\"save_file\",\"path\":\"/etc/vsftpd.chroot_list\",\"text\":\"noah\\n\"}}",
+        "ftp-identity-workspace {\"kind\":\"event\",\"event\":{\"kind\":\"admin\",\"input\":\"chmod 755 /srv/mira\"}}",
+        "ftp-identity-workspace {\"kind\":\"event\",\"event\":{\"kind\":\"admin\",\"input\":\"chmod 770 /srv/mira/inbox\"}}",
+        "ftp-identity-workspace {\"kind\":\"event\",\"event\":{\"kind\":\"admin\",\"input\":\"systemctl restart vsftpd\"}}",
+        "ftp-identity-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-ftp-upload-rights"
+      ]
+    }
+  ]
+}

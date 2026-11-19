@@ -1,0 +1,218 @@
+[
+  {
+    "id": "lpic2-exposure-client-policy",
+    "goal": "Compare local listeners with two client views, then repair access without losing useful services.",
+    "context": "Builds on local socket ownership and ordered numeric host-filter rules. This lesson adds client-view evidence; it does not require a real scanner or network.",
+    "concepts": [
+      {
+        "title": "A local listener is only one part of a connection",
+        "text": "A listener is a socket waiting for connections. ss -lntp shows the supplied TCP listeners and their owning processes on this server. A listening SSH socket can still be unreachable from a client because a host rule blocks it."
+      },
+      {
+        "title": "Read open, closed and filtered as evidence",
+        "text": "Open means this modeled connection reaches a retained listener. Closed means the request and response are permitted but no listener accepts that port. Filtered means a dropped request or reply prevents a conclusion about the listener. None of these labels identifies a vulnerability or proves application health."
+      },
+      {
+        "title": "Test one TCP port with nc",
+        "text": "Use nc -n -v -z ADDRESS PORT in Observer terminal. -n uses the numeric address without name lookup; -v shows the result; -z tests a connection without sending application data. The flags can also be grouped as -nvz. Success has exit status 0. Connection refused means the path permits a reply but no listener accepts it; a modeled timeout means a request or reply was dropped. Both have status 1 and remain useful observations, not failed assignment grades. An unsupported command instead shows a diagnostic and has no port observation."
+      },
+      {
+        "title": "A Telnet transport client stays open",
+        "text": "For a supplied non-default TCP port, telnet -c ADDRESS PORT opens a transport diagnostic. -c skips startup configuration; this simulator never reads personal files. A successful connection leaves the client running, with no exit status yet. Choose Escape to local prompt, then enter quit to close it. Login, application data and TELNET negotiation on port 23 are outside this activity."
+      },
+      {
+        "title": "Choose whose view you are testing",
+        "text": "The Observe from selector supplies the client source address. In this worked example, Admin is 10.50.0.30 and Public is 10.60.0.40, both testing 192.0.2.10. The same server can be filtered from one client and open from another. For the nmap alternative, -n keeps numbers, -Pn skips discovery, -sT chooses TCP connect, and -p selects individual ports."
+      },
+      {
+        "title": "Repair the range while preserving useful access",
+        "text": "The initial SSH drop names the Admin range by mistake. Inspect rule order, then repair the current INPUT decisions for the full client networks. OUTPUT must also permit replies. Keep required connections working; dropping everything or naming only a displayed client is not a complete repair."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Supplied example server",
+        "value": "192.0.2.10",
+        "explanation": "Practice uses different addresses and ranges from the independent assignment."
+      },
+      {
+        "label": "Local SSH evidence",
+        "value": "ss -lntp → a TCP 22 listener is retained",
+        "explanation": "A local listener does not prove that a client request reaches it."
+      },
+      {
+        "label": "Single-port example probes",
+        "value": "nc -n -v -z 192.0.2.10 443\nnc -nvz 192.0.2.10 80\nnc -nvz 192.0.2.10 22",
+        "explanation": "From example Admin, HTTPS succeeds (status 0), port 80 is refused (status 1), and SSH is initially filtered (status 1). The output area shows actual results only after Run command. nmap remains available for a multi-port overview."
+      },
+      {
+        "label": "Open an example transport",
+        "value": "telnet -c 192.0.2.10 443",
+        "explanation": "Expected: transport connected, client still running. This tests TCP reachability only, not HTTPS or TLS behavior. The disabled data field and Escape to local prompt button make the current mode visible."
+      },
+      {
+        "label": "After the native Escape action",
+        "value": "quit",
+        "explanation": "Choose Escape to local prompt (the real CLI equivalent is Ctrl+]), then type quit and Run command. Expected: client exited with status 0. That exit is not a new service-health result. Do not reuse nc -n: telnet -n is a trace-file option and is unsupported here."
+      },
+      {
+        "label": "Before repair · Admin",
+        "value": "22/tcp filtered;80/tcp closed",
+        "explanation": "The wrong range drop blocks SSH; the permitted diagnostic port has no listener."
+      },
+      {
+        "label": "Before repair · Public",
+        "value": "22/tcp open;9000/tcp open",
+        "explanation": "The useful socket evidence and two observer views point to a range-policy error."
+      },
+      {
+        "label": "Example policy repair",
+        "value": "iptables -D INPUT 1\niptables -A INPUT -s 10.60.0.0/24 -p tcp --dport 22 -j DROP\niptables -A INPUT -s 10.60.0.0/24 -p tcp --dport 9000 -j DROP",
+        "explanation": "Only this example starts with the wrong first rule. Read the current list before changing another workspace."
+      },
+      {
+        "label": "After repair · both views",
+        "value": "Admin:22/443/9000 open\nPublic:443 open;22/9000 filtered\nBoth:80 closed",
+        "explanation": "The policy protects the whole two client ranges while preserving the stated diagnostic and useful connections."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Read the server evidence",
+        "action": "In Server terminal, run ss -lntp, then iptables -S INPUT. Find TCP 22 and read the source range on its drop rule.",
+        "observe": "Initially, SSH is listening locally, but the drop names Admin 10.50.0.0/24."
+      },
+      {
+        "title": "Compare probes and the running client",
+        "action": "In Observer terminal, Run command with nc -nvz 192.0.2.10 443, then nc -nvz 192.0.2.10 80. Next run telnet -c 192.0.2.10 443. Choose Escape to local prompt, type quit, then Run command. Use Observe from to compare nc -nvz 192.0.2.10 22 from Admin and Public.",
+        "observe": "Before repair: HTTPS connects, port 80 is refused, and SSH differs between the two views. nc completes each probe; the Telnet transport stays open until you leave it. Status 1 is a useful negative observation, not an assignment grade."
+      },
+      {
+        "title": "Repair, repeat and check",
+        "action": "In Server terminal, remove the wrong first rule with iptables -D INPUT 1. Add the Public-range drops for TCP 22 and 9000 shown in the worked example. Repeat the nc probes for these ports and HTTPS from both positions, then Check example.",
+        "observe": "The new reports are actual results. After a policy change the earlier scan is cleared; an entire /24 is graded, not only the displayed sample clients."
+      }
+    ],
+    "requirements": [
+      "On virtual server 198.51.100.20, keep TCP ports 22, 443 and 9000 reachable for the whole Admin range 10.20.0.0/24.",
+      "For the whole Public range 10.30.0.0/24, keep 443 reachable but filter 22 and 9000. A single displayed client address is not the whole range.",
+      "Keep diagnostic TCP 80 reachable enough to report closed from both observer positions; no service should be started there.",
+      "Preserve all supplied processes and listener owners. Repair the current host filter, then Check configuration."
+    ],
+    "status": "updated",
+    "source": "scenarios/service-exposure-lessons-v1.json",
+    "review": {
+      "introduction": "Individually reviewed the unchanged original requirements and existing nc concepts, plus the new connection-lifecycle concept and two annotated different-address worked rows. The real local escape and quit behavior is distinguished from data sent to a service. Model and widget checks pass; current native/candidate rendering pending.",
+      "example": "Reviewed each specific Server terminal, Observer terminal, Run command, Observe from and Escape to local prompt action against actual typed states and separate practice addresses. The client stays running until explicit local quit; unsupported data is disabled. Core13/state checks and11widget/capture/cold-plan checks pass. Native flow and cold reopening pending.",
+      "assignment": "Original Task/Goal, owner-preservation clauses and whole-client-range state grading remain exact. All existing independent requirements are preserved; no repair solution or requirement to reproduce one command sequence is added. Existing completion does not imply new utility mastery. Native/candidate and independent novice acceptance pending."
+    }
+  },
+  {
+    "id": "lpic2-exposure-listener-retirement",
+    "goal": "Retire one exposed service using process and listener evidence. Preserve the other instances and useful client access.",
+    "context": "Builds on the preceding client-policy lesson and careful runtime retirement. The full assignment combines local owner evidence with two observer views.",
+    "concepts": [
+      {
+        "title": "A process name can have more than one instance",
+        "text": "Two supplied processes are both called previewd. One owns the wildcard 9000 listener, which can be observed remotely; the other owns only loopback 9001. Match the bind address, port and owning process in ss -lntp before choosing an instance."
+      },
+      {
+        "title": "Pausing and retiring are different actions",
+        "text": "STOP pauses a process but retains its socket in this subset. A pending TERM on a paused owner also does not remove that socket until its lifecycle ends. A completed TERM, INT or KILL retires the selected owner. This assignment must preserve the approved instances and services."
+      },
+      {
+        "title": "Test one TCP port with nc",
+        "text": "Use nc -n -v -z ADDRESS PORT in Observer terminal. -n uses the numeric address without name lookup; -v shows the result; -z tests a connection without sending application data. The flags can also be grouped as -nvz. Success has exit status 0. Connection refused means the path permits a reply but no listener accepts it; a modeled timeout means a request or reply was dropped. Both have status 1 and remain useful observations, not failed assignment grades. An unsupported command instead shows a diagnostic and has no port observation."
+      },
+      {
+        "title": "A Telnet transport client stays open",
+        "text": "For a supplied non-default TCP port, telnet -c ADDRESS PORT opens a transport diagnostic. -c skips startup configuration; this simulator never reads personal files. A successful connection leaves the client running, with no exit status yet. Choose Escape to local prompt, then enter quit to close it. Login, application data and TELNET negotiation on port 23 are outside this activity."
+      },
+      {
+        "title": "A quiet scan does not prove that the owner ended",
+        "text": "A firewall drop can make an existing listener look filtered. Verify both the process state and the observer results. After the unused owner ends, closed or filtered is acceptable for its port; the approved SSH and HTTPS connections must still work."
+      },
+      {
+        "title": "Use the second view as a preservation check",
+        "text": "Admin and Public have different SSH access, while HTTPS is required for both. Scan from both supplied positions after the repair. Do not end all processes with the same name or stop a useful service merely to make one negative test pass."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Separate example",
+        "value": "192.0.2.10",
+        "explanation": "The independent assignment has different server/client addresses and owner IDs."
+      },
+      {
+        "label": "Example socket ownership",
+        "value": "0.0.0.0:9000 → previewd PID 110\n127.0.0.1:9001 → previewd PID 111",
+        "explanation": "pgrep lists both names; the socket row identifies which one is exposed."
+      },
+      {
+        "label": "Single-port example probes",
+        "value": "nc -n -v -z 192.0.2.10 9000\nnc -nvz 192.0.2.10 443",
+        "explanation": "Before retirement both connections succeed (status 0). After the exposed owner actually ends, 9000 is refused (status 1) while HTTPS still succeeds. A negative connection result can be the correct repaired outcome."
+      },
+      {
+        "label": "Open an example transport",
+        "value": "telnet -c 192.0.2.10 443",
+        "explanation": "Expected: transport connected, client still running. This tests TCP reachability only, not HTTPS or TLS behavior. The disabled data field and Escape to local prompt button make the current mode visible."
+      },
+      {
+        "label": "After the native Escape action",
+        "value": "quit",
+        "explanation": "Choose Escape to local prompt (the real CLI equivalent is Ctrl+]), then type quit and Run command. Expected: client exited with status 0. That exit is not a new service-health result. Do not reuse nc -n: telnet -n is a trace-file option and is unsupported here."
+      },
+      {
+        "label": "Before repair",
+        "value": "9000/tcp open from Admin and Public",
+        "explanation": "The wildcard listener remains while its owner is active or paused."
+      },
+      {
+        "label": "Retire only the example owner",
+        "value": "kill -TERM 110",
+        "explanation": "Use the owner identified by the example evidence, then inspect it again. This is not an assignment PID to copy."
+      },
+      {
+        "label": "After repair",
+        "value": "9000/tcp closed from both views\nloopback 9001 owner unchanged",
+        "explanation": "The preserved current filter permits a conclusive closed response. Additional filtering is also acceptable after actual retirement."
+      },
+      {
+        "label": "Preserve useful access",
+        "value": "Admin:22/443 open\nPublic:22 filtered;443 open",
+        "explanation": "A repair that ends a required owner or breaks a whole client range fails the task."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Find the exposed owner",
+        "action": "In Server terminal run ss -lntp and pgrep -x previewd. Match wildcard 9000 to PID 110; keep loopback 9001 and PID 111.",
+        "observe": "The process name alone has two matches. Only the wildcard owner is the practice retirement target."
+      },
+      {
+        "title": "Inspect one port and leave a running client",
+        "action": "In Observer terminal, Run command with nc -nvz 192.0.2.10 9000, then telnet -c 192.0.2.10 443. Choose Escape to local prompt, type quit and Run command. Change Observe from to Public and repeat the preview probe.",
+        "observe": "Preview and HTTPS transport connect before retirement. Telnet keeps a client open; its local quit ends only that client. Do not confuse a successful TCP connection with a healthy application, or quit with stopping a server process."
+      },
+      {
+        "title": "End the right owner and verify",
+        "action": "In Server terminal run kill -TERM 110. Repeat nc -nvz 192.0.2.10 9000 and the HTTPS probe from both observers, inspect ss again, then Check example. Use the independent assignment evidence for its different owner IDs.",
+        "observe": "The retired preview now refuses a connection (status 1); HTTPS still succeeds (status 0). A correct negative probe is different from a command diagnostic. STOP or firewall-only concealment still fails retirement."
+      }
+    ],
+    "requirements": [
+      "Retire the owner of the unused wildcard TCP 9000 preview. A paused owner or a firewall-only concealment is insufficient.",
+      "Preserve the loopback-only preview on TCP 9001 and every approved owner, including SSH and HTTPS.",
+      "Keep SSH on TCP 22 reachable for Admin clients 10.20.0.0/24 and filtered for Public clients 10.30.0.0/24; HTTPS on 443 must work from both ranges.",
+      "TCP 9000 must no longer be open from either observer; closed or filtered is acceptable after its actual owner has ended."
+    ],
+    "status": "updated",
+    "source": "scenarios/service-exposure-lessons-v1.json",
+    "review": {
+      "introduction": "Individually reviewed the unchanged original requirements and existing nc concepts, plus the new connection-lifecycle concept and two annotated different-address worked rows. The real local escape and quit behavior is distinguished from data sent to a service. Model and widget checks pass; current native/candidate rendering pending.",
+      "example": "Reviewed each specific Server terminal, Observer terminal, Run command, Observe from and Escape to local prompt action against actual typed states and separate practice addresses. The client stays running until explicit local quit; unsupported data is disabled. Core13/state checks and11widget/capture/cold-plan checks pass. Native flow and cold reopening pending.",
+      "assignment": "Original Task/Goal, owner-preservation clauses and whole-client-range state grading remain exact. All existing independent requirements are preserved; no repair solution or requirement to reproduce one command sequence is added. Existing completion does not imply new utility mastery. Native/candidate and independent novice acceptance pending."
+    }
+  }
+]

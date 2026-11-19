@@ -1,0 +1,1009 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-vlan-gateway-repair",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "id": "ccna-default-access-membership",
+      "topic": "Default VLAN membership",
+      "title": "Move a new desk out of default VLAN 1",
+      "summary": "Put a new desk in its workgroup while preserving the working default-VLAN devices.",
+      "explanation": "The desk uses its workgroup’s VLAN while the existing legacy devices still share VLAN 1. The trunk’s native setting stays in place.",
+      "hints": [
+        "The desk’s access setting and both trunk native settings have different roles.",
+        "Find the Shipping Peer’s access VLAN in the station table.",
+        "Test both the changed workgroup pair and the unchanged legacy pair."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-1/configuration_guide/int_hw/b_171_int_and_hw_9300_cg/configuring_interface_characteristics.html"
+      ],
+      "simplifications": "Two fixed connected switches with deliberate static access or trunk mode, existing normal-range VLANs and mutual Ethernet broadcast checks. No IOS parser, DTP, VTP, voice policy, STP or real network.",
+      "prerequisites": [
+        "ccna-vlan-native"
+      ],
+      "objective": "Move the Shipping Desk into the same Ethernet segment as the Shipping Peer. Keep the two legacy devices working together, separate from the Shipping Desk.",
+      "retry_guidance": "Read which part of the Ethernet or IPv4 path did not work, then test again.",
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A default access choice still assigns the port to VLAN 1 in this switch model. Clearing an explicit choice returns it to that default. A station normally sends its access port an untagged Ethernet frame.",
+          "action": "Verify the supplied path.",
+          "commands": []
+        },
+        {
+          "title": "Try the separate example",
+          "why": "The native VLAN tells a trunk how to carry untagged frames between switches. Both ends of the supplied trunk agree on VLAN 88. This setting has no effect on the desk’s default access VLAN.",
+          "action": "Verify the supplied path.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "An Ethernet connection may be up while a desk is in the wrong group. Use an Ethernet broadcast to see who can receive a frame. Check the legacy pair separately after making a change.",
+          "action": "Verify the supplied path.",
+          "commands": []
+        }
+      ],
+      "initial": {
+        "kind": "AutomationWorkshop",
+        "simulation": {
+          "version": 1,
+          "source_id": "ccna-default-access-membership",
+          "view": "introduction",
+          "assignment": {
+            "source": "{\"activity\":\"access_default\",\"supplied\":{\"desk\":\"shipping-desk\",\"desk_peer\":\"shipping-peer\",\"fabric\":{\"cables\":[{\"a\":{\"host\":\"shipping-desk\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"desk-1\",\"switch\":\"east\"},\"id\":\"shipping-desk-link\",\"up\":true},{\"a\":{\"host\":\"shipping-peer\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"desk-2\",\"switch\":\"west\"},\"id\":\"shipping-peer-link\",\"up\":true},{\"a\":{\"host\":\"label-counter\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"legacy-1\",\"switch\":\"east\"},\"id\":\"label-counter-link\",\"up\":true},{\"a\":{\"host\":\"inventory-monitor\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"legacy-2\",\"switch\":\"west\"},\"id\":\"inventory-monitor-link\",\"up\":true},{\"a\":{\"kind\":\"switch\",\"port\":\"uplink\",\"switch\":\"east\"},\"b\":{\"kind\":\"switch\",\"port\":\"uplink\",\"switch\":\"west\"},\"id\":\"floor-link\",\"up\":true}],\"hosts\":{\"inventory-monitor\":{\"label\":\"Inventory Monitor\",\"up\":true},\"label-counter\":{\"label\":\"Label Counter\",\"up\":true},\"shipping-desk\":{\"label\":\"Shipping Desk\",\"up\":true},\"shipping-peer\":{\"label\":\"Shipping Peer\",\"up\":true}},\"switches\":{\"east\":{\"label\":\"East switch\",\"ports\":{\"desk-1\":{\"mode\":{\"kind\":\"access\",\"vlan\":1},\"up\":true},\"legacy-1\":{\"mode\":{\"kind\":\"access\",\"vlan\":1},\"up\":true},\"uplink\":{\"mode\":{\"allowed\":[1,40,88],\"kind\":\"trunk\",\"native\":88},\"up\":true}},\"vlans\":[1,40,88]},\"west\":{\"label\":\"West switch\",\"ports\":{\"desk-2\":{\"mode\":{\"kind\":\"access\",\"vlan\":40},\"up\":true},\"legacy-2\":{\"mode\":{\"kind\":\"access\",\"vlan\":1},\"up\":true},\"uplink\":{\"mode\":{\"allowed\":[1,40,88],\"kind\":\"trunk\",\"native\":88},\"up\":true}},\"vlans\":[1,40,88]}}},\"initial\":{\"access\":null},\"legacy\":[\"label-counter\",\"inventory-monitor\"]}}",
+            "work": {
+              "current": {
+                "activity": "access_default",
+                "choice": {
+                  "access": null
+                }
+              },
+              "checked": false
+            }
+          },
+          "example": {
+            "source": "{\"activity\":\"access_default\",\"supplied\":{\"desk\":\"bench-desk\",\"desk_peer\":\"bench-peer\",\"fabric\":{\"cables\":[{\"a\":{\"host\":\"bench-desk\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"desk-1\",\"switch\":\"east\"},\"id\":\"bench-desk-link\",\"up\":true},{\"a\":{\"host\":\"bench-peer\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"desk-2\",\"switch\":\"west\"},\"id\":\"bench-peer-link\",\"up\":true},{\"a\":{\"host\":\"class-counter\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"legacy-1\",\"switch\":\"east\"},\"id\":\"class-counter-link\",\"up\":true},{\"a\":{\"host\":\"class-monitor\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"legacy-2\",\"switch\":\"west\"},\"id\":\"class-monitor-link\",\"up\":true},{\"a\":{\"kind\":\"switch\",\"port\":\"uplink\",\"switch\":\"east\"},\"b\":{\"kind\":\"switch\",\"port\":\"uplink\",\"switch\":\"west\"},\"id\":\"floor-link\",\"up\":true}],\"hosts\":{\"bench-desk\":{\"label\":\"Bench Desk\",\"up\":true},\"bench-peer\":{\"label\":\"Bench Peer\",\"up\":true},\"class-counter\":{\"label\":\"Class Counter\",\"up\":true},\"class-monitor\":{\"label\":\"Class Monitor\",\"up\":true}},\"switches\":{\"east\":{\"label\":\"East switch\",\"ports\":{\"desk-1\":{\"mode\":{\"kind\":\"access\",\"vlan\":1},\"up\":true},\"legacy-1\":{\"mode\":{\"kind\":\"access\",\"vlan\":1},\"up\":true},\"uplink\":{\"mode\":{\"allowed\":[1,30,88],\"kind\":\"trunk\",\"native\":88},\"up\":true}},\"vlans\":[1,30,88]},\"west\":{\"label\":\"West switch\",\"ports\":{\"desk-2\":{\"mode\":{\"kind\":\"access\",\"vlan\":30},\"up\":true},\"legacy-2\":{\"mode\":{\"kind\":\"access\",\"vlan\":1},\"up\":true},\"uplink\":{\"mode\":{\"allowed\":[1,30,88],\"kind\":\"trunk\",\"native\":88},\"up\":true}},\"vlans\":[1,30,88]}}},\"initial\":{\"access\":1},\"legacy\":[\"class-counter\",\"class-monitor\"]}}",
+            "work": {
+              "current": {
+                "activity": "access_default",
+                "choice": {
+                  "access": 1
+                }
+              },
+              "checked": false
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "AutomationWorkshop",
+        "definition": {
+          "version": 1,
+          "source_id": "ccna-default-access-membership",
+          "assignment": {
+            "activity": "access_default",
+            "supplied": {
+              "fabric": {
+                "switches": {
+                  "east": {
+                    "label": "East switch",
+                    "vlans": [
+                      1,
+                      40,
+                      88
+                    ],
+                    "ports": {
+                      "desk-1": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 1
+                        }
+                      },
+                      "legacy-1": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 1
+                        }
+                      },
+                      "uplink": {
+                        "up": true,
+                        "mode": {
+                          "kind": "trunk",
+                          "native": 88,
+                          "allowed": [
+                            1,
+                            40,
+                            88
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "west": {
+                    "label": "West switch",
+                    "vlans": [
+                      1,
+                      40,
+                      88
+                    ],
+                    "ports": {
+                      "desk-2": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 40
+                        }
+                      },
+                      "legacy-2": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 1
+                        }
+                      },
+                      "uplink": {
+                        "up": true,
+                        "mode": {
+                          "kind": "trunk",
+                          "native": 88,
+                          "allowed": [
+                            1,
+                            40,
+                            88
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "hosts": {
+                  "shipping-desk": {
+                    "label": "Shipping Desk",
+                    "up": true
+                  },
+                  "shipping-peer": {
+                    "label": "Shipping Peer",
+                    "up": true
+                  },
+                  "label-counter": {
+                    "label": "Label Counter",
+                    "up": true
+                  },
+                  "inventory-monitor": {
+                    "label": "Inventory Monitor",
+                    "up": true
+                  }
+                },
+                "cables": [
+                  {
+                    "id": "shipping-desk-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "shipping-desk"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "east",
+                      "port": "desk-1"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "shipping-peer-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "shipping-peer"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "west",
+                      "port": "desk-2"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "label-counter-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "label-counter"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "east",
+                      "port": "legacy-1"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "inventory-monitor-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "inventory-monitor"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "west",
+                      "port": "legacy-2"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "floor-link",
+                    "a": {
+                      "kind": "switch",
+                      "switch": "east",
+                      "port": "uplink"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "west",
+                      "port": "uplink"
+                    },
+                    "up": true
+                  }
+                ]
+              },
+              "desk": "shipping-desk",
+              "desk_peer": "shipping-peer",
+              "legacy": [
+                "label-counter",
+                "inventory-monitor"
+              ],
+              "initial": {
+                "access": null
+              }
+            }
+          },
+          "example": {
+            "activity": "access_default",
+            "supplied": {
+              "fabric": {
+                "switches": {
+                  "east": {
+                    "label": "East switch",
+                    "vlans": [
+                      1,
+                      30,
+                      88
+                    ],
+                    "ports": {
+                      "desk-1": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 1
+                        }
+                      },
+                      "legacy-1": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 1
+                        }
+                      },
+                      "uplink": {
+                        "up": true,
+                        "mode": {
+                          "kind": "trunk",
+                          "native": 88,
+                          "allowed": [
+                            1,
+                            30,
+                            88
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "west": {
+                    "label": "West switch",
+                    "vlans": [
+                      1,
+                      30,
+                      88
+                    ],
+                    "ports": {
+                      "desk-2": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 30
+                        }
+                      },
+                      "legacy-2": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 1
+                        }
+                      },
+                      "uplink": {
+                        "up": true,
+                        "mode": {
+                          "kind": "trunk",
+                          "native": 88,
+                          "allowed": [
+                            1,
+                            30,
+                            88
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "hosts": {
+                  "bench-desk": {
+                    "label": "Bench Desk",
+                    "up": true
+                  },
+                  "bench-peer": {
+                    "label": "Bench Peer",
+                    "up": true
+                  },
+                  "class-counter": {
+                    "label": "Class Counter",
+                    "up": true
+                  },
+                  "class-monitor": {
+                    "label": "Class Monitor",
+                    "up": true
+                  }
+                },
+                "cables": [
+                  {
+                    "id": "bench-desk-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "bench-desk"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "east",
+                      "port": "desk-1"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "bench-peer-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "bench-peer"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "west",
+                      "port": "desk-2"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "class-counter-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "class-counter"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "east",
+                      "port": "legacy-1"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "class-monitor-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "class-monitor"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "west",
+                      "port": "legacy-2"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "floor-link",
+                    "a": {
+                      "kind": "switch",
+                      "switch": "east",
+                      "port": "uplink"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "west",
+                      "port": "uplink"
+                    },
+                    "up": true
+                  }
+                ]
+              },
+              "desk": "bench-desk",
+              "desk_peer": "bench-peer",
+              "legacy": [
+                "class-counter",
+                "class-monitor"
+              ],
+              "initial": {
+                "access": 1
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "automation-workshop {\"op\":\"SetAccessDefault\",\"choice\":{\"access\":40}}",
+        "automation-workshop {\"op\":\"Check\"}"
+      ]
+    },
+    {
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-vlan-gateway-repair",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "id": "ccna-switched-gateway-repair",
+      "topic": "Switched virtual interfaces and gateways",
+      "title": "Restore IPv4 routing between separate VLANs",
+      "summary": "Repair the VLAN gateways and restore IPv4 delivery and replies while keeping Ethernet traffic separated.",
+      "explanation": "Each subnet has a working gateway, both VLANs can travel across the trunk and the switch routes IP between them. Their Ethernet broadcasts remain separate.",
+      "hints": [
+        "Check the VLAN interface state and its address plan separately.",
+        "A working outbound path can still fail when the server has no valid return gateway.",
+        "If the server’s gateway is up but unreachable across the trunk, compare the far uplink and the VLAN ID."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-7/configuration_guide/int_hw/b_177_int_and_hw_9300_cg/configuring_interface_characteristics.html"
+      ],
+      "simplifications": "Bounded native edits for two preassigned VLANs, one matched trunk, immediate active-port state, and connected IPv4 route and reply checks. No ARP timing, live STP, physical access, Cisco CLI, VTP, port channels, QoS, dynamic routing or router-on-a-stick.",
+      "prerequisites": [
+        "ccna-default-access-membership",
+        "ccna-ipv4-return-route"
+      ],
+      "objective": "Enable IPv4 routing and both VLAN gateway interfaces. Use distinct usable gateway addresses with the prefixes shown. Give each of the three stations the default gateway for its VLAN and admit both VLANs at the far uplink. Both studio stations need an IPv4 reply from the render server. Preserve studio Ethernet delivery and keep the server’s broadcasts separate.",
+      "retry_guidance": "Read which part of the Ethernet or IPv4 path did not work, then test again.",
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "An SVI is a switch’s IP interface for one VLAN. Choose a usable address that is not already assigned in that VLAN’s subnet. Enable the interface. Its line state requires an active local port carrying the VLAN.",
+          "action": "Verify the supplied path.",
+          "commands": []
+        },
+        {
+          "title": "Try the separate example",
+          "why": "A local SVI can be up even when the far end of an active trunk does not admit that VLAN. Compare the far uplink’s allowed VLANs with the stations’ access memberships.",
+          "action": "Verify the supplied path.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "Enable IPv4 routing and point each station at the gateway in its own subnet. Test delivery and a reply. The gateway can pass IPv4 traffic between VLANs while Ethernet broadcasts stay within each VLAN.",
+          "action": "Verify the supplied path.",
+          "commands": []
+        }
+      ],
+      "initial": {
+        "kind": "AutomationWorkshop",
+        "simulation": {
+          "version": 1,
+          "source_id": "ccna-switched-gateway-repair",
+          "view": "introduction",
+          "assignment": {
+            "source": "{\"activity\":\"routed_vlans\",\"supplied\":{\"endpoints\":[{\"address\":{\"address\":\"10.45.1.22\",\"prefix\":24},\"id\":\"studio-a\"},{\"address\":{\"address\":\"10.45.1.31\",\"prefix\":24},\"id\":\"studio-b\"},{\"address\":{\"address\":\"10.70.1.42\",\"prefix\":24},\"id\":\"render-server\"}],\"fabric\":{\"cables\":[{\"a\":{\"host\":\"studio-a\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"desk-1\",\"switch\":\"east\"},\"id\":\"studio-a-link\",\"up\":true},{\"a\":{\"host\":\"studio-b\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"desk-2\",\"switch\":\"west\"},\"id\":\"studio-b-link\",\"up\":true},{\"a\":{\"host\":\"render-server\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"server-1\",\"switch\":\"west\"},\"id\":\"render-server-link\",\"up\":true},{\"a\":{\"kind\":\"switch\",\"port\":\"uplink\",\"switch\":\"east\"},\"b\":{\"kind\":\"switch\",\"port\":\"uplink\",\"switch\":\"west\"},\"id\":\"floor-link\",\"up\":true}],\"hosts\":{\"render-server\":{\"label\":\"Render Server\",\"up\":true},\"studio-a\":{\"label\":\"Studio A\",\"up\":true},\"studio-b\":{\"label\":\"Studio B\",\"up\":true}},\"switches\":{\"east\":{\"label\":\"East switch\",\"ports\":{\"desk-1\":{\"mode\":{\"kind\":\"access\",\"vlan\":45},\"up\":true},\"uplink\":{\"mode\":{\"allowed\":[1,45,70,99],\"kind\":\"trunk\",\"native\":99},\"up\":true}},\"vlans\":[1,45,70,99]},\"west\":{\"label\":\"West switch\",\"ports\":{\"desk-2\":{\"mode\":{\"kind\":\"access\",\"vlan\":45},\"up\":true},\"server-1\":{\"mode\":{\"kind\":\"access\",\"vlan\":70},\"up\":true},\"uplink\":{\"mode\":{\"allowed\":[1,45,70,99],\"kind\":\"trunk\",\"native\":99},\"up\":true}},\"vlans\":[1,45,70,99]}}},\"initial\":{\"allow_remote\":[true,false],\"gateways\":[\"10.45.1.1\",\"10.45.1.254\",null],\"interfaces\":[{\"address\":{\"address\":\"10.45.1.1\",\"prefix\":24},\"enabled\":false},{\"address\":{\"address\":\"10.70.1.1\",\"prefix\":25},\"enabled\":true}],\"routing\":false},\"interfaces\":[{\"subnet\":{\"address\":\"10.45.1.0\",\"length\":24},\"vlan\":45},{\"subnet\":{\"address\":\"10.70.1.0\",\"length\":24},\"vlan\":70}],\"router_switch\":\"east\"}}",
+            "work": {
+              "current": {
+                "activity": "routed_vlans",
+                "draft": {
+                  "routing": false,
+                  "enable": [
+                    false,
+                    true
+                  ],
+                  "interfaces": [
+                    "10.45.1.1/24",
+                    "10.70.1.1/25"
+                  ],
+                  "gateways": [
+                    "10.45.1.1",
+                    "10.45.1.254",
+                    ""
+                  ],
+                  "allow_remote": [
+                    true,
+                    false
+                  ]
+                }
+              },
+              "checked": false
+            }
+          },
+          "example": {
+            "source": "{\"activity\":\"routed_vlans\",\"supplied\":{\"endpoints\":[{\"address\":{\"address\":\"192.0.2.22\",\"prefix\":24},\"id\":\"bench-a\"},{\"address\":{\"address\":\"192.0.2.31\",\"prefix\":24},\"id\":\"bench-b\"},{\"address\":{\"address\":\"198.51.100.42\",\"prefix\":24},\"id\":\"demo-server\"}],\"fabric\":{\"cables\":[{\"a\":{\"host\":\"bench-a\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"desk-1\",\"switch\":\"east\"},\"id\":\"bench-a-link\",\"up\":true},{\"a\":{\"host\":\"bench-b\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"desk-2\",\"switch\":\"west\"},\"id\":\"bench-b-link\",\"up\":true},{\"a\":{\"host\":\"demo-server\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"server-1\",\"switch\":\"west\"},\"id\":\"demo-server-link\",\"up\":true},{\"a\":{\"kind\":\"switch\",\"port\":\"uplink\",\"switch\":\"east\"},\"b\":{\"kind\":\"switch\",\"port\":\"uplink\",\"switch\":\"west\"},\"id\":\"floor-link\",\"up\":true}],\"hosts\":{\"bench-a\":{\"label\":\"Bench A\",\"up\":true},\"bench-b\":{\"label\":\"Bench B\",\"up\":true},\"demo-server\":{\"label\":\"Demo Server\",\"up\":true}},\"switches\":{\"east\":{\"label\":\"East switch\",\"ports\":{\"desk-1\":{\"mode\":{\"kind\":\"access\",\"vlan\":32},\"up\":true},\"uplink\":{\"mode\":{\"allowed\":[1,32,64,87],\"kind\":\"trunk\",\"native\":87},\"up\":true}},\"vlans\":[1,32,64,87]},\"west\":{\"label\":\"West switch\",\"ports\":{\"desk-2\":{\"mode\":{\"kind\":\"access\",\"vlan\":32},\"up\":true},\"server-1\":{\"mode\":{\"kind\":\"access\",\"vlan\":64},\"up\":true},\"uplink\":{\"mode\":{\"allowed\":[1,32,64,87],\"kind\":\"trunk\",\"native\":87},\"up\":true}},\"vlans\":[1,32,64,87]}}},\"initial\":{\"allow_remote\":[true,false],\"gateways\":[\"192.0.2.1\",\"192.0.2.254\",null],\"interfaces\":[{\"address\":{\"address\":\"192.0.2.1\",\"prefix\":24},\"enabled\":true},{\"address\":null,\"enabled\":true}],\"routing\":false},\"interfaces\":[{\"subnet\":{\"address\":\"192.0.2.0\",\"length\":24},\"vlan\":32},{\"subnet\":{\"address\":\"198.51.100.0\",\"length\":24},\"vlan\":64}],\"router_switch\":\"east\"}}",
+            "work": {
+              "current": {
+                "activity": "routed_vlans",
+                "draft": {
+                  "routing": false,
+                  "enable": [
+                    true,
+                    true
+                  ],
+                  "interfaces": [
+                    "192.0.2.1/24",
+                    ""
+                  ],
+                  "gateways": [
+                    "192.0.2.1",
+                    "192.0.2.254",
+                    ""
+                  ],
+                  "allow_remote": [
+                    true,
+                    false
+                  ]
+                }
+              },
+              "checked": false
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "AutomationWorkshop",
+        "definition": {
+          "version": 1,
+          "source_id": "ccna-switched-gateway-repair",
+          "assignment": {
+            "activity": "routed_vlans",
+            "supplied": {
+              "fabric": {
+                "switches": {
+                  "east": {
+                    "label": "East switch",
+                    "vlans": [
+                      1,
+                      45,
+                      70,
+                      99
+                    ],
+                    "ports": {
+                      "desk-1": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 45
+                        }
+                      },
+                      "uplink": {
+                        "up": true,
+                        "mode": {
+                          "kind": "trunk",
+                          "native": 99,
+                          "allowed": [
+                            1,
+                            45,
+                            70,
+                            99
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "west": {
+                    "label": "West switch",
+                    "vlans": [
+                      1,
+                      45,
+                      70,
+                      99
+                    ],
+                    "ports": {
+                      "desk-2": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 45
+                        }
+                      },
+                      "server-1": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 70
+                        }
+                      },
+                      "uplink": {
+                        "up": true,
+                        "mode": {
+                          "kind": "trunk",
+                          "native": 99,
+                          "allowed": [
+                            1,
+                            45,
+                            70,
+                            99
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "hosts": {
+                  "studio-a": {
+                    "label": "Studio A",
+                    "up": true
+                  },
+                  "studio-b": {
+                    "label": "Studio B",
+                    "up": true
+                  },
+                  "render-server": {
+                    "label": "Render Server",
+                    "up": true
+                  }
+                },
+                "cables": [
+                  {
+                    "id": "studio-a-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "studio-a"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "east",
+                      "port": "desk-1"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "studio-b-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "studio-b"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "west",
+                      "port": "desk-2"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "render-server-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "render-server"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "west",
+                      "port": "server-1"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "floor-link",
+                    "a": {
+                      "kind": "switch",
+                      "switch": "east",
+                      "port": "uplink"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "west",
+                      "port": "uplink"
+                    },
+                    "up": true
+                  }
+                ]
+              },
+              "router_switch": "east",
+              "endpoints": [
+                {
+                  "id": "studio-a",
+                  "address": {
+                    "address": "10.45.1.22",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "id": "studio-b",
+                  "address": {
+                    "address": "10.45.1.31",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "id": "render-server",
+                  "address": {
+                    "address": "10.70.1.42",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "interfaces": [
+                {
+                  "vlan": 45,
+                  "subnet": {
+                    "address": "10.45.1.0",
+                    "length": 24
+                  }
+                },
+                {
+                  "vlan": 70,
+                  "subnet": {
+                    "address": "10.70.1.0",
+                    "length": 24
+                  }
+                }
+              ],
+              "initial": {
+                "routing": false,
+                "interfaces": [
+                  {
+                    "enabled": false,
+                    "address": {
+                      "address": "10.45.1.1",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "enabled": true,
+                    "address": {
+                      "address": "10.70.1.1",
+                      "prefix": 25
+                    }
+                  }
+                ],
+                "gateways": [
+                  "10.45.1.1",
+                  "10.45.1.254",
+                  null
+                ],
+                "allow_remote": [
+                  true,
+                  false
+                ]
+              }
+            }
+          },
+          "example": {
+            "activity": "routed_vlans",
+            "supplied": {
+              "fabric": {
+                "switches": {
+                  "east": {
+                    "label": "East switch",
+                    "vlans": [
+                      1,
+                      32,
+                      64,
+                      87
+                    ],
+                    "ports": {
+                      "desk-1": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 32
+                        }
+                      },
+                      "uplink": {
+                        "up": true,
+                        "mode": {
+                          "kind": "trunk",
+                          "native": 87,
+                          "allowed": [
+                            1,
+                            32,
+                            64,
+                            87
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "west": {
+                    "label": "West switch",
+                    "vlans": [
+                      1,
+                      32,
+                      64,
+                      87
+                    ],
+                    "ports": {
+                      "desk-2": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 32
+                        }
+                      },
+                      "server-1": {
+                        "up": true,
+                        "mode": {
+                          "kind": "access",
+                          "vlan": 64
+                        }
+                      },
+                      "uplink": {
+                        "up": true,
+                        "mode": {
+                          "kind": "trunk",
+                          "native": 87,
+                          "allowed": [
+                            1,
+                            32,
+                            64,
+                            87
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "hosts": {
+                  "bench-a": {
+                    "label": "Bench A",
+                    "up": true
+                  },
+                  "bench-b": {
+                    "label": "Bench B",
+                    "up": true
+                  },
+                  "demo-server": {
+                    "label": "Demo Server",
+                    "up": true
+                  }
+                },
+                "cables": [
+                  {
+                    "id": "bench-a-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "bench-a"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "east",
+                      "port": "desk-1"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "bench-b-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "bench-b"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "west",
+                      "port": "desk-2"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "demo-server-link",
+                    "a": {
+                      "kind": "host",
+                      "host": "demo-server"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "west",
+                      "port": "server-1"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "floor-link",
+                    "a": {
+                      "kind": "switch",
+                      "switch": "east",
+                      "port": "uplink"
+                    },
+                    "b": {
+                      "kind": "switch",
+                      "switch": "west",
+                      "port": "uplink"
+                    },
+                    "up": true
+                  }
+                ]
+              },
+              "router_switch": "east",
+              "endpoints": [
+                {
+                  "id": "bench-a",
+                  "address": {
+                    "address": "192.0.2.22",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "id": "bench-b",
+                  "address": {
+                    "address": "192.0.2.31",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "id": "demo-server",
+                  "address": {
+                    "address": "198.51.100.42",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "interfaces": [
+                {
+                  "vlan": 32,
+                  "subnet": {
+                    "address": "192.0.2.0",
+                    "length": 24
+                  }
+                },
+                {
+                  "vlan": 64,
+                  "subnet": {
+                    "address": "198.51.100.0",
+                    "length": 24
+                  }
+                }
+              ],
+              "initial": {
+                "routing": false,
+                "interfaces": [
+                  {
+                    "enabled": true,
+                    "address": {
+                      "address": "192.0.2.1",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "enabled": true,
+                    "address": null
+                  }
+                ],
+                "gateways": [
+                  "192.0.2.1",
+                  "192.0.2.254",
+                  null
+                ],
+                "allow_remote": [
+                  true,
+                  false
+                ]
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "automation-workshop {\"op\":\"ChangeSviDraft\",\"draft\":{\"routing\":true,\"enable\":[true,true],\"interfaces\":[\"10.45.1.1/24\",\"10.70.1.1/24\"],\"gateways\":[\"10.45.1.1\",\"10.45.1.1\",\"10.70.1.1\"],\"allow_remote\":[true,true]}}",
+        "automation-workshop {\"op\":\"Check\"}"
+      ]
+    }
+  ]
+}

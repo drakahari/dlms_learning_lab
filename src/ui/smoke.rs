@@ -1,32 +1,78 @@
 //! Application-only Fedora renderer/input checks with isolated private progress.
 //! The safe development runner supplies disk-backed temporary directories.
 use super::*;
+
+// Capture adapters that open the complete current catalog share this exact count.
+const CURRENT_CATALOG_SIZE: (usize, usize) = (543, 224);
+pub(super) mod dns_access;
+pub(super) mod maintenance_notices;
+pub(super) mod source_install;
+pub(super) mod print_queues;
+pub(super) mod localization;
+mod timezones;
+mod wireless_channels;
+mod wlan_profiles;
+mod snmp_monitor;
+mod proxy_policy;
+mod mixed_ip;
+mod echo_diagnosis;
+mod protocol_evidence;
+mod service_clients;
+mod reverse_proxy;
+mod http_cache;
+mod wlan_paths;
+pub(super) mod capacity_planning;
+pub(super) mod resource_observations;
+pub(in crate::ui) mod aaa_access;
 mod accounts;
 mod accounts_lessons;
+mod accounts_template;
 mod acl;
 mod acl_lessons;
 pub(in crate::ui) mod apache_static_lessons;
+pub(in crate::ui) mod arp_inspection;
+mod autofs;
+pub(in crate::ui) mod boot_entry;
+pub(in crate::ui) mod grub_menu;
+pub(in crate::ui) mod bios_loader;
+pub(in crate::ui) mod grub_settings;
+mod capacity_lessons;
 mod capture_lessons;
+mod capture_size;
 mod case_history;
 mod client_learning;
+mod command_location;
 pub(in crate::ui) mod command_vectors;
 pub(in crate::ui) mod cron_lessons;
 mod debian_packages_lessons;
 mod dhcpv4;
 mod dhcpv4_lessons;
 pub(in crate::ui) mod disk_preparation;
+pub(in crate::ui) mod disk_layout;
 mod dns_reverse;
 pub(in crate::ui) mod ere_evidence;
 pub(in crate::ui) mod etherchannel_lessons;
+pub(in crate::ui) mod eui64;
 pub(in crate::ui) mod file_backup_lessons;
 mod find_lessons;
+mod gateway_lessons;
+pub(in crate::ui) mod ldap_access;
+pub(in crate::ui) mod ldap_changes;
+pub(in crate::ui) mod ldap_client;
+pub(in crate::ui) mod ldap_password;
 mod legacy_terminal;
+mod links_lessons;
+mod listener_audit;
 pub(in crate::ui) mod literal_lessons;
+pub(in crate::ui) mod local_access;
 pub(in crate::ui) mod loop_recovery;
 pub(in crate::ui) mod lvm_lessons;
+pub(in crate::ui) mod lvm_provisioning;
 mod mac_layout;
 mod mac_learning;
 mod mac_lessons;
+pub(in crate::ui) mod management;
+pub(in crate::ui) mod mbr_layouts;
 pub(in crate::ui) mod nat;
 pub(in crate::ui) mod nat_lessons;
 mod nfs_alignment;
@@ -39,7 +85,9 @@ mod ospf;
 mod ospf_lessons;
 pub(in crate::ui) mod physical_link_lessons;
 pub(in crate::ui) mod private_office;
+mod raid_assembly;
 pub(super) mod reopen;
+mod repository_lessons;
 pub(in crate::ui) mod rpm_lessons;
 mod safe_automation_lessons;
 mod script_feedback;
@@ -48,6 +96,17 @@ pub(in crate::ui) mod snapshot_lessons;
 pub(super) mod spanning_tree;
 mod spanning_tree_lessons;
 mod substitution;
+pub(in crate::ui) mod swap_policy;
+mod syslog_lessons;
+mod transport;
+mod chrony;
+mod local_mail;
+mod device_path;
+pub(super) mod json_inventory;
+pub(super) mod rest_controller;
+pub(super) mod measurement_reports;
+mod copied_journal;
+mod rescue_startup;
 mod unit_manager;
 mod unit_manager_lessons;
 
@@ -74,6 +133,31 @@ pub(super) fn smoke_control_visible(
         return false;
     }
     visible.contains(target.center()) && visible.expand(tolerance).contains_rect(target)
+}
+
+/// Count actual action polls, not redraws while waiting for a native event or
+/// animation. Optimized Wayland frames can arrive much faster than wall time.
+/// Passive waits still obey the same absolute timeout on every invocation.
+fn native_action_due(
+    polls: &mut usize,
+    now: f64,
+    next: f64,
+    elapsed: std::time::Duration,
+) -> Result<bool, &'static str> {
+    if elapsed >= std::time::Duration::from_secs(15) {
+        return Err("native action exceeded15second wall deadline");
+    }
+    if !now.is_finite() || !next.is_finite() {
+        return Err("non-finite native action clock");
+    }
+    if now < next {
+        return Ok(false);
+    }
+    *polls += 1;
+    if *polls >= 1200 {
+        return Err("native action exceeded1200eligible polls");
+    }
+    Ok(true)
 }
 impl LabApp {
     fn storage_reference_action(
@@ -165,7 +249,11 @@ impl LabApp {
         ctx.request_repaint();
         false
     }
-    fn reveal_smoke_control(&mut self, ctx: &egui::Context, r: egui::Rect) -> bool {
+    pub(in crate::ui) fn reveal_smoke_control(
+        &mut self,
+        ctx: &egui::Context,
+        r: egui::Rect,
+    ) -> bool {
         let visible = self
             .metrics
             .main_viewport
@@ -334,6 +422,30 @@ impl LabApp {
                     .and_then(|d| d.downcast_ref::<String>())
                     .cloned()
                     .unwrap_or("capture".into());
+                if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("shared-libraries-batch") {
+                    assert!(
+                        self.capture_pending,
+                        "Unexpected library screenshot delivery"
+                    );
+                    let expected = shared_libraries_lessons::shared_libraries_expected_captures(
+                        &self.scenarios,
+                    );
+                    assert!(
+                        expected.contains(&name),
+                        "Unknown fixed library capture name"
+                    );
+                    let key = egui::Id::new("shared-library-delivered-captures");
+                    ctx.data_mut(|d| {
+                        let mut seen = d
+                            .get_temp::<std::collections::BTreeSet<String>>(key)
+                            .unwrap_or_default();
+                        assert!(
+                            seen.insert(name.clone()),
+                            "Duplicate library screenshot delivery"
+                        );
+                        d.insert_temp(key, seen);
+                    });
+                }
                 let dir = std::path::Path::new("screenshots/workspaces");
                 std::fs::create_dir_all(dir).unwrap();
                 let mut encoder = png::Encoder::new(
@@ -754,7 +866,7 @@ impl LabApp {
                 }
                 shot = capture;
             }
-            n @ 64000..=64676 => {
+            n @ 64000..=64680 => {
                 let (advance, capture) = self.optional_inputs_lessons_native(ctx, n);
                 if !advance {
                     return;
@@ -7265,6 +7377,38 @@ mod visibility_tests {
     use super::*;
 
     #[test]
+    fn native_wait_does_not_spend_action_polls_on_fast_release_redraws() {
+        let mut polls = 0;
+        // Actual optimized failure: 1200redraws in218ms, still in a timed
+        // phase. A million passive frames must not impersonate action retries.
+        for _ in 0..1_000_000 {
+            assert_eq!(native_action_due(&mut polls, 1.1, 1.15,
+                std::time::Duration::from_millis(218)), Ok(false));
+        }
+        assert_eq!(polls, 0);
+        assert_eq!(native_action_due(&mut polls, 1.15, 1.15,
+            std::time::Duration::from_millis(300)), Ok(true));
+        assert_eq!(polls, 1);
+    }
+
+    #[test]
+    fn native_wait_keeps_absolute_timeout_and_active_poll_limit() {
+        let mut polls = 0;
+        assert!(native_action_due(&mut polls, 1., 100.,
+            std::time::Duration::from_secs(15)).is_err());
+        assert_eq!(polls, 0, "Passive waits still time out");
+        for _ in 0..1199 {
+            assert_eq!(native_action_due(&mut polls, 1., 1.,
+                std::time::Duration::from_secs(1)), Ok(true));
+        }
+        assert!(native_action_due(&mut polls, 1., 1.,
+            std::time::Duration::from_secs(1)).is_err());
+        assert_eq!(polls, 1200, "The active poll bound must not be raised");
+        assert!(native_action_due(&mut polls, f64::NAN, 1.,
+            std::time::Duration::ZERO).is_err());
+    }
+
+    #[test]
     fn reopen_visibility_accepts_measured_fractional_clip_rounding() {
         let visible =
             egui::Rect::from_min_max(egui::pos2(0., 116.6875), egui::pos2(845.3333, 421.3333));
@@ -7457,3 +7601,127 @@ mod visibility_tests {
         assert!(run.is_none(), "cancelled work must not publish any grade");
     }
 }
+
+mod host_lessons;
+
+mod debug_recovery;
+
+mod linux_logging_lessons;
+
+mod startup_lessons;
+
+mod qos_lessons;
+
+mod backup_selection;
+
+mod dhcp_config_lessons;
+
+mod nm_lessons;
+
+mod optional_mount;
+
+mod client_names;
+
+mod resolver_search;
+
+mod debian_contents;
+mod debian_sources;
+
+mod user_mounts;
+
+mod debian_conflicts;
+
+mod fs_integrity_lessons;
+
+mod startup_files_lessons;
+
+mod conffile_lessons;
+
+mod raid1_lessons;
+
+pub(in crate::ui) mod shared_libraries_lessons;
+
+mod file_index;
+
+mod directory_policy;
+
+mod recursive_tree;
+
+mod kernel_modules;
+
+mod rpm_metadata;
+mod rpm_patch;
+
+mod pam_auth;
+
+pub(in crate::ui) mod aging;
+
+pub(in crate::ui) mod port_security;
+
+pub(in crate::ui) mod dhcp_snooping;
+
+pub(in crate::ui) mod ldap_configuration;
+
+pub(in crate::ui) mod ldap_schema;
+
+pub(in crate::ui) mod ldap_schema_query;
+
+mod ssh_access;
+
+mod modal_lessons;
+
+mod network_transfers;
+
+mod network_architectures;
+
+mod samba_shares;
+
+mod virtual_isolation;
+
+mod smtp;
+mod guest_driver;
+
+mod sieve;
+mod mailbox;
+mod mailbox_admin;
+
+mod sieve_addresses;
+
+mod sieve_delivery;
+
+mod sieve_vacation;
+
+mod procmail_migration;
+
+mod linux_router;
+mod linux_flow;
+mod linux_v6;
+mod linux_service_router;
+
+mod linux_v6_admin;
+
+mod linux_v6_startup;
+
+mod ftp_identity;
+mod service_exposure;
+
+mod auth_filter;
+mod vpn_point;
+
+mod ids_rule;
+
+mod poe;
+
+mod kernel_build;
+
+mod dkms;
+mod initramfs;
+mod pxe;
+mod iscsi;
+mod ata_smart;
+mod apache_https;
+mod desktop_profile;
+mod security_investigation;
+
+mod staged_network;
+pub(super) use staged_network::NetworkFlow;

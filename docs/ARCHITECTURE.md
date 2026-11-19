@@ -7,7 +7,9 @@ One native Rust package; no browser runtime, plugin platform, host-shell executi
 | `ere.rs` | Standalone bounded C-locale byte ERE parser/NFA foundation; not yet a learner command, utility or lesson |
 | `lvm.rs` | Pure bounded virtual extent allocation and separate filesystem growth; no authored LVM unit integrated yet |
 | `ntp.rs` | Pure bounded single-upstream dependency/stratum and immutable-environment checks; no authored NTP unit integrated yet |
+| `rest_controller.rs`, `rest_workspace.rs`, `ui/rest_controller_page.rs` | Bounded in-process REST metadata/resources, atomic Ethernet/VLAN projection, source-bound request replay, separate saved practice and current-state grading; no HTTP transport, server or host commands |
 | `engine.rs` | Typed simulation state, constrained command parser, live grading for current activity types |
+| `resource_measurements.rs`, `resource_observations.rs`, `resource_observation_workspace.rs`, `ui/resource_observation_page.rs` | Pure counter arithmetic, bounded supplied vmstat/memory replay, typed evidence reports and separate saved practice; three resource-observation lessons, no live host monitoring |
 | `filesystem.rs`, `terminal_teaching.rs` | Bounded ordinary-user virtual file tree and separate persisted ungraded terminal practice |
 | `dns.rs`, `dns_workspace.rs`, `dns_teaching.rs`, `ui/dns_workspace.rs` | Bounded authoritative RRsets/aliases, separate configured/primary/secondary copies, typed readiness/serial decisions, current outcomes, native record editing/lookups and isolated saved practice; six authored forward-zone/recovery assignments |
 | `ipv4_routing.rs`, `ipv4_routing_workspace.rs`, `ipv4_routing_teaching.rs` | Bounded IPv4 static forwarding, endpoint-bound requirements, atomic native drafts and isolated saved practice; six authored route/recovery tasks |
@@ -263,3 +265,35 @@ two Cargo jobs, two runtime threads and verified disk-backed artifacts.
 Unit-only authoring examples belong under `tests/fixtures/`. Every JSON file in
 `scenarios/` other than `units-v1.json` must be an actual versioned scenario Pack;
 coverage validation rejects stray metadata instead of treating it as a lab.
+
+## Authoring controller request lessons
+
+Follow JSON inventories in prerequisite order. A source-owned Spec maps named port
+bindings to the supplied access fabric; learners can change only typed profiles
+and binding selections. Author independent positive paths plus protected groups,
+profile descriptions/data or retirement outcomes as appropriate. The exact request
+sequence/status is not the goal. Include complete PUT and different-name alternatives,
+wrong metadata/types, partial moves, preservation failures and broken-again checks.
+Review intentional starter errors and keep assignment repairs out of default prose.
+
+Task validation bounds source/state/references and actually reaches all requirements
+through worked requests. Saved sessions contain only bounded drafts and successful
+state-changing request history, replayed against that authored source. Never import
+a resource snapshot or response as completion authority. Introduction and guided
+practice use a distinct network/resource store; guidance must precede each action,
+not become visible only after it succeeds. See REST_CONTROLLER_SUBSET.md for schema,
+limits, model tests, native evidence and explicit unsupported HTTP/auth behavior.
+
+## Supplied DKMS lifecycle workspaces (2026-11-17)
+
+`dkms` is an original finite command parser and typed registration/per-kernel
+build/installation model. Supplied kernels/source descriptions are already
+build-ready; neither recipes nor C nor real DKMS run. `dkms_workspace` owns task
+requirements, protected original records/installed versions, bounded history and
+independent practice/assignment source snapshots. `dkms_source` validates authored
+identity and persistence context before engine actions. `ui/dkms_page` reuses the
+shared native teaching/form/input components and presents an investigation console.
+New enum arms preserve old serialization and require source-aware progress saves.
+Every original protected record must remain exact; harmless additional uninstalled
+builds are accepted so ordinary mistakes remain recoverable in the supported subset.
+Current success is recomputed from state, not console transcripts. See DKMS_SUBSET.md.

@@ -896,6 +896,20 @@ fn optional_help_is_progressive_persists_requests_and_requires_separate_worked_a
 
 // Return the actual painted frame; geometry alone did not catch a collapsed
 // nested terminal viewport in the original native Fedora screenshots.
+// Outer navigation must not accidentally wheel the terminal's own history.
+// A left gutter disappears when enlarged text makes the workspace full width.
+fn outer_transcript_pointer(root: egui::Rect, output: egui::Rect) -> egui::Pos2 {
+    let choices = [
+        egui::pos2(root.center().x, root.top() + 1.),
+        egui::pos2(root.center().x, root.bottom() - 1.),
+    ];
+    let p = choices
+        .into_iter()
+        .find(|p| !output.expand(4.).contains(*p))
+        .expect("Six-row transcript leaves an actual outer-scroll target");
+    assert!(root.contains(p) && !output.expand(4.).contains(p));
+    p
+}
 fn transcript_paint_frame(
     ctx: &egui::Context,
     a: &mut LabApp,
@@ -1016,10 +1030,7 @@ fn populated_assignment_and_practice_transcripts_keep_six_rows_and_paint_latest_
                             &mut a,
                             width,
                             vec![
-                                egui::Event::PointerMoved(egui::pos2(
-                                    root.left() + 1.,
-                                    root.center().y,
-                                )),
+                                egui::Event::PointerMoved(outer_transcript_pointer(root, output)),
                                 egui::Event::MouseWheel {
                                     unit: egui::MouseWheelUnit::Point,
                                     delta: egui::vec2(
@@ -1048,6 +1059,34 @@ fn populated_assignment_and_practice_transcripts_keep_six_rows_and_paint_latest_
                         (viewport.height() - row * 6.).abs() <= tolerance,
                         "Exactly six font-derived rows, independent of remaining outer height"
                     );
+                    if !out.shapes.iter().any(|s| {
+                        transcript_text_paints_inside(
+                            &s.shape,
+                            s.clip_rect,
+                            viewport,
+                            &latest,
+                            tolerance,
+                        )
+                    }) {
+                        let observed = out
+                            .shapes
+                            .iter()
+                            .filter_map(|s| match &s.shape {
+                                egui::Shape::Text(t)
+                                    if t.visual_bounding_rect().intersects(viewport) =>
+                                {
+                                    Some((t.galley.text(), t.visual_bounding_rect(), s.clip_rect))
+                                }
+                                _ => None,
+                            })
+                            .collect::<Vec<_>>();
+                        eprintln!(
+                            "LVM latest={latest:?}, output={viewport:?}, outer={:?}, pointer={:?}, deltas={:?}, observed={observed:?}",
+                            a.metrics.main_scroll_offset,
+                            ctx.input(|i| i.pointer.hover_pos()),
+                            ctx.input(|i| (i.raw_scroll_delta, i.smooth_scroll_delta))
+                        );
+                    }
                     assert!(
                         out.shapes.iter().any(|s| transcript_text_paints_inside(
                             &s.shape,

@@ -1,0 +1,1646 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-initramfs-root-drivers",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Early userspace: dracut and inspection",
+      "unit": "linux-initramfs-recovery",
+      "title": "Repair the drivers available before the root filesystem",
+      "summary": "Use saved driver choices and dracut to repair an initramfs that cannot reach its root disk.",
+      "objective": "Save the driver-selection fragment and regenerate early userspace for supplied kernel 6.6.61. Make the selected candidate reach the supplied NVMe/ext4 root and keep every working fallback file unchanged.",
+      "retry_guidance": "Read each failed result: saved fragment, selected kernel, actual image contents, root handoff and protected fallback are checked separately.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "The kernel needs early drivers before it can reach the main filesystem.",
+          "action": "Read the worked example and supplied generic profile; the required kernel and module inputs are already prepared.",
+          "commands": []
+        },
+        {
+          "title": "Investigate the separate example",
+          "why": "A filename and a generation message do not prove the right drivers or kernel were selected.",
+          "action": "Use the example editor and console. Save changes, inspect the represented contents with lsinitrd and check the actual entry.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "The selected files and preserved fallback determine the result.",
+          "action": "Use the assignment’s supplied values; save any changed fragment or entry, regenerate the intended image and select Check configuration.",
+          "commands": []
+        }
+      ],
+      "explanation": "An initramfs provides early userspace before the main filesystem is available. This supplied generic profile includes the prepared NVMe/ext4 drivers unless the saved fragment omits them. Saving configuration does not rebuild an existing image. Inspecting the image and testing the selected entry connect driver choices to the actual modeled root handoff. Different literal edits and supported command forms are accepted; the fallback remains unchanged.",
+      "hints": [
+        "Inspect the image named in the candidate’s initrd line; compare its Kernel line and driver files with the supplied target.",
+        "Save the fragment before generating. In dracut, --kver selects a kernel; -k is a different, unsupported module-directory option.",
+        "+= appends text; appending an empty string does not remove an existing omission. Change or remove the omission, save, then regenerate."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://raw.githubusercontent.com/dracut-ng/dracut/112/man/dracut.8.adoc",
+        "https://dracut-ng.github.io/dracut/man/dracut.conf.5.html",
+        "https://dracut-ng.github.io/dracut/man/lsinitrd.1.html"
+      ],
+      "simplifications": "Supplied generic baseline hostonly=no, prepared NVMe/ext4 kernel/module records and five driver names only. Literal omit_drivers assignments/comments; no general dracut.conf shell evaluation. Explicit kernel/output dracut and limited lsinitrd driver-file inventory, not real archive data. No host discovery, feature modules, compression, hooks, privilege checks, C compilation, firmware, actual tools or boot. mkinitrd/mkinitramfs remain unsupported. All paths, files and root/init checks are simulated.",
+      "prerequisites": [
+        "lpic2-kernel-staged-handover"
+      ],
+      "initial": {
+        "kind": "Initramfs",
+        "simulation": {
+          "assignment": {
+            "source_task": "{\"id\":\"lpic2-initramfs-root-drivers\",\"kind\":\"Drivers\",\"instructions\":\"Save the driver-selection fragment and regenerate early userspace for supplied kernel 6.6.61. Make the selected candidate reach the supplied NVMe/ext4 root and keep every working fallback file unchanged.\",\"prefix\":\"/\",\"initial_config\":\"# Driver choices for the supplied generic profile.\\nomit_drivers+=\\\" nvme \\\"\\n\",\"initial_store\":{\"images\":[{\"path\":\"/boot/vmlinuz-6.6.60\",\"build\":{\"source_id\":\"fallback-source\",\"release\":\"6.6.60\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false}},{\"path\":\"/boot/vmlinuz-6.6.61\",\"build\":{\"source_id\":\"target-source\",\"release\":\"6.6.61\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false}}],\"modules\":[{\"path\":\"/lib/modules/6.6.60\",\"build\":{\"source_id\":\"fallback-source\",\"release\":\"6.6.60\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true}},{\"path\":\"/lib/modules/6.6.61\",\"build\":{\"source_id\":\"target-source\",\"release\":\"6.6.61\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true}}],\"initramfs\":[{\"path\":\"/boot/initramfs-6.6.60.img\",\"image\":{\"image_build\":{\"source_id\":\"fallback-source\",\"release\":\"6.6.60\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false},\"module_build\":{\"source_id\":\"fallback-source\",\"release\":\"6.6.60\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true},\"included\":[\"ext4\",\"jbd2\",\"mbcache\",\"nvme\",\"nvme_core\"]}},{\"path\":\"/boot/initramfs-6.6.61.img\",\"image\":{\"image_build\":{\"source_id\":\"target-source\",\"release\":\"6.6.61\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false},\"module_build\":{\"source_id\":\"target-source\",\"release\":\"6.6.61\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true},\"included\":[\"ext4\",\"jbd2\",\"mbcache\",\"nvme_core\"]}}],\"entries\":[{\"path\":\"/boot/loader/entries/fallback.conf\",\"source\":\"title Training candidate\\nlinux /vmlinuz-6.6.60\\ninitrd /initramfs-6.6.60.img\\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\\n\"},{\"path\":\"/boot/loader/entries/candidate.conf\",\"source\":\"title Training candidate\\nlinux /vmlinuz-6.6.61\\ninitrd /initramfs-6.6.61.img\\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\\n\"}]},\"root\":{\"uuid\":\"11111111-2222-3333-4444-555555555555\",\"label\":\"Supplied NVMe/ext4 root\",\"required_drivers\":[\"nvme_core\",\"nvme\",\"jbd2\",\"mbcache\",\"ext4\"],\"init_present\":true},\"wanted_release\":\"6.6.61\",\"entry_filename\":\"candidate.conf\",\"initial_entry\":\"title Training candidate\\nlinux /vmlinuz-6.6.61\\ninitrd /initramfs-6.6.61.img\\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\\n\",\"preserve_paths\":[\"/boot/vmlinuz-6.6.60\",\"/lib/modules/6.6.60\",\"/boot/initramfs-6.6.60.img\",\"/boot/loader/entries/fallback.conf\"],\"reference\":[{\"op\":\"ConfigDraft\",\"text\":\"# Keep the supplied root drivers available.\\nomit_drivers=\\\"\\\"\\n\"},{\"op\":\"SaveConfig\"},{\"op\":\"Run\",\"input\":\"dracut --force --kver 6.6.61 /boot/initramfs-6.6.61.img\"},{\"op\":\"Check\"}]}",
+            "work": {
+              "checked": false,
+              "command_draft": "",
+              "config_draft": "# Driver choices for the supplied generic profile.\nomit_drivers+=\" nvme \"\n",
+              "entry_draft": "title Training candidate\nlinux /vmlinuz-6.6.61\ninitrd /initramfs-6.6.61.img\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\n",
+              "entry_filename": "candidate.conf",
+              "log": [],
+              "saved_config_source": "# Driver choices for the supplied generic profile.\nomit_drivers+=\" nvme \"\n",
+              "saved_entry": "/boot/loader/entries/candidate.conf",
+              "store": {
+                "entries": [
+                  {
+                    "path": "/boot/loader/entries/fallback.conf",
+                    "source": "title Training candidate\nlinux /vmlinuz-6.6.60\ninitrd /initramfs-6.6.60.img\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\n"
+                  },
+                  {
+                    "path": "/boot/loader/entries/candidate.conf",
+                    "source": "title Training candidate\nlinux /vmlinuz-6.6.61\ninitrd /initramfs-6.6.61.img\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\n"
+                  }
+                ],
+                "images": [
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.6.60",
+                      "source_id": "fallback-source"
+                    },
+                    "path": "/boot/vmlinuz-6.6.60"
+                  },
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.6.61",
+                      "source_id": "target-source"
+                    },
+                    "path": "/boot/vmlinuz-6.6.61"
+                  }
+                ],
+                "initramfs": [
+                  {
+                    "image": {
+                      "image_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": true,
+                        "modules": false,
+                        "release": "6.6.60",
+                        "source_id": "fallback-source"
+                      },
+                      "included": [
+                        "ext4",
+                        "jbd2",
+                        "mbcache",
+                        "nvme",
+                        "nvme_core"
+                      ],
+                      "module_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": false,
+                        "modules": true,
+                        "release": "6.6.60",
+                        "source_id": "fallback-source"
+                      }
+                    },
+                    "path": "/boot/initramfs-6.6.60.img"
+                  },
+                  {
+                    "image": {
+                      "image_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": true,
+                        "modules": false,
+                        "release": "6.6.61",
+                        "source_id": "target-source"
+                      },
+                      "included": [
+                        "ext4",
+                        "jbd2",
+                        "mbcache",
+                        "nvme_core"
+                      ],
+                      "module_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": false,
+                        "modules": true,
+                        "release": "6.6.61",
+                        "source_id": "target-source"
+                      }
+                    },
+                    "path": "/boot/initramfs-6.6.61.img"
+                  }
+                ],
+                "modules": [
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.6.60",
+                      "source_id": "fallback-source"
+                    },
+                    "path": "/lib/modules/6.6.60"
+                  },
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.6.61",
+                      "source_id": "target-source"
+                    },
+                    "path": "/lib/modules/6.6.61"
+                  }
+                ]
+              }
+            }
+          },
+          "example": {
+            "source_task": "{\"id\":\"lpic2-initramfs-root-drivers-example\",\"kind\":\"Drivers\",\"instructions\":\"Save the driver choices and prepare matching early userspace for target 6.1.121. Verify the selected candidate reaches the supplied root; preserve the working 6.1.120 fallback.\",\"prefix\":\"/\",\"initial_config\":\"# Driver choices for the supplied generic profile.\\nomit_drivers+=\\\" nvme \\\"\\n\",\"initial_store\":{\"images\":[{\"path\":\"/boot/vmlinuz-6.1.120\",\"build\":{\"source_id\":\"fallback-source\",\"release\":\"6.1.120\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false}},{\"path\":\"/boot/vmlinuz-6.1.121\",\"build\":{\"source_id\":\"target-source\",\"release\":\"6.1.121\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false}}],\"modules\":[{\"path\":\"/lib/modules/6.1.120\",\"build\":{\"source_id\":\"fallback-source\",\"release\":\"6.1.120\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true}},{\"path\":\"/lib/modules/6.1.121\",\"build\":{\"source_id\":\"target-source\",\"release\":\"6.1.121\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true}}],\"initramfs\":[{\"path\":\"/boot/initramfs-6.1.120.img\",\"image\":{\"image_build\":{\"source_id\":\"fallback-source\",\"release\":\"6.1.120\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false},\"module_build\":{\"source_id\":\"fallback-source\",\"release\":\"6.1.120\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true},\"included\":[\"ext4\",\"jbd2\",\"mbcache\",\"nvme\",\"nvme_core\"]}},{\"path\":\"/boot/initramfs-6.1.121.img\",\"image\":{\"image_build\":{\"source_id\":\"target-source\",\"release\":\"6.1.121\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false},\"module_build\":{\"source_id\":\"target-source\",\"release\":\"6.1.121\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true},\"included\":[\"ext4\",\"jbd2\",\"mbcache\",\"nvme_core\"]}}],\"entries\":[{\"path\":\"/boot/loader/entries/fallback.conf\",\"source\":\"title Training candidate\\nlinux /vmlinuz-6.1.120\\ninitrd /initramfs-6.1.120.img\\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\\n\"},{\"path\":\"/boot/loader/entries/candidate.conf\",\"source\":\"title Training candidate\\nlinux /vmlinuz-6.1.121\\ninitrd /initramfs-6.1.121.img\\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\\n\"}]},\"root\":{\"uuid\":\"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\"label\":\"Supplied NVMe/ext4 root\",\"required_drivers\":[\"nvme_core\",\"nvme\",\"jbd2\",\"mbcache\",\"ext4\"],\"init_present\":true},\"wanted_release\":\"6.1.121\",\"entry_filename\":\"candidate.conf\",\"initial_entry\":\"title Training candidate\\nlinux /vmlinuz-6.1.121\\ninitrd /initramfs-6.1.121.img\\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\\n\",\"preserve_paths\":[\"/boot/vmlinuz-6.1.120\",\"/lib/modules/6.1.120\",\"/boot/initramfs-6.1.120.img\",\"/boot/loader/entries/fallback.conf\"],\"reference\":[{\"op\":\"ConfigDraft\",\"text\":\"# Keep the supplied root drivers available.\\nomit_drivers=\\\"\\\"\\n\"},{\"op\":\"SaveConfig\"},{\"op\":\"Run\",\"input\":\"dracut --force --kver 6.1.121 /boot/initramfs-6.1.121.img\"},{\"op\":\"Check\"}]}",
+            "work": {
+              "checked": false,
+              "command_draft": "",
+              "config_draft": "# Driver choices for the supplied generic profile.\nomit_drivers+=\" nvme \"\n",
+              "entry_draft": "title Training candidate\nlinux /vmlinuz-6.1.121\ninitrd /initramfs-6.1.121.img\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\n",
+              "entry_filename": "candidate.conf",
+              "log": [],
+              "saved_config_source": "# Driver choices for the supplied generic profile.\nomit_drivers+=\" nvme \"\n",
+              "saved_entry": "/boot/loader/entries/candidate.conf",
+              "store": {
+                "entries": [
+                  {
+                    "path": "/boot/loader/entries/fallback.conf",
+                    "source": "title Training candidate\nlinux /vmlinuz-6.1.120\ninitrd /initramfs-6.1.120.img\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\n"
+                  },
+                  {
+                    "path": "/boot/loader/entries/candidate.conf",
+                    "source": "title Training candidate\nlinux /vmlinuz-6.1.121\ninitrd /initramfs-6.1.121.img\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\n"
+                  }
+                ],
+                "images": [
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.1.120",
+                      "source_id": "fallback-source"
+                    },
+                    "path": "/boot/vmlinuz-6.1.120"
+                  },
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.1.121",
+                      "source_id": "target-source"
+                    },
+                    "path": "/boot/vmlinuz-6.1.121"
+                  }
+                ],
+                "initramfs": [
+                  {
+                    "image": {
+                      "image_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": true,
+                        "modules": false,
+                        "release": "6.1.120",
+                        "source_id": "fallback-source"
+                      },
+                      "included": [
+                        "ext4",
+                        "jbd2",
+                        "mbcache",
+                        "nvme",
+                        "nvme_core"
+                      ],
+                      "module_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": false,
+                        "modules": true,
+                        "release": "6.1.120",
+                        "source_id": "fallback-source"
+                      }
+                    },
+                    "path": "/boot/initramfs-6.1.120.img"
+                  },
+                  {
+                    "image": {
+                      "image_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": true,
+                        "modules": false,
+                        "release": "6.1.121",
+                        "source_id": "target-source"
+                      },
+                      "included": [
+                        "ext4",
+                        "jbd2",
+                        "mbcache",
+                        "nvme_core"
+                      ],
+                      "module_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": false,
+                        "modules": true,
+                        "release": "6.1.121",
+                        "source_id": "target-source"
+                      }
+                    },
+                    "path": "/boot/initramfs-6.1.121.img"
+                  }
+                ],
+                "modules": [
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.1.120",
+                      "source_id": "fallback-source"
+                    },
+                    "path": "/lib/modules/6.1.120"
+                  },
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.1.121",
+                      "source_id": "target-source"
+                    },
+                    "path": "/lib/modules/6.1.121"
+                  }
+                ]
+              }
+            }
+          },
+          "source_id": "lpic2-initramfs-root-drivers",
+          "version": 1,
+          "view": "introduction"
+        }
+      },
+      "goal": {
+        "kind": "Initramfs",
+        "definition": {
+          "assignment": {
+            "entry_filename": "candidate.conf",
+            "id": "lpic2-initramfs-root-drivers",
+            "initial_config": "# Driver choices for the supplied generic profile.\nomit_drivers+=\" nvme \"\n",
+            "initial_entry": "title Training candidate\nlinux /vmlinuz-6.6.61\ninitrd /initramfs-6.6.61.img\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\n",
+            "initial_store": {
+              "entries": [
+                {
+                  "path": "/boot/loader/entries/fallback.conf",
+                  "source": "title Training candidate\nlinux /vmlinuz-6.6.60\ninitrd /initramfs-6.6.60.img\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\n"
+                },
+                {
+                  "path": "/boot/loader/entries/candidate.conf",
+                  "source": "title Training candidate\nlinux /vmlinuz-6.6.61\ninitrd /initramfs-6.6.61.img\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\n"
+                }
+              ],
+              "images": [
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": true,
+                    "modules": false,
+                    "release": "6.6.60",
+                    "source_id": "fallback-source"
+                  },
+                  "path": "/boot/vmlinuz-6.6.60"
+                },
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": true,
+                    "modules": false,
+                    "release": "6.6.61",
+                    "source_id": "target-source"
+                  },
+                  "path": "/boot/vmlinuz-6.6.61"
+                }
+              ],
+              "initramfs": [
+                {
+                  "image": {
+                    "image_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.6.60",
+                      "source_id": "fallback-source"
+                    },
+                    "included": [
+                      "ext4",
+                      "jbd2",
+                      "mbcache",
+                      "nvme",
+                      "nvme_core"
+                    ],
+                    "module_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.6.60",
+                      "source_id": "fallback-source"
+                    }
+                  },
+                  "path": "/boot/initramfs-6.6.60.img"
+                },
+                {
+                  "image": {
+                    "image_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.6.61",
+                      "source_id": "target-source"
+                    },
+                    "included": [
+                      "ext4",
+                      "jbd2",
+                      "mbcache",
+                      "nvme_core"
+                    ],
+                    "module_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.6.61",
+                      "source_id": "target-source"
+                    }
+                  },
+                  "path": "/boot/initramfs-6.6.61.img"
+                }
+              ],
+              "modules": [
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": false,
+                    "modules": true,
+                    "release": "6.6.60",
+                    "source_id": "fallback-source"
+                  },
+                  "path": "/lib/modules/6.6.60"
+                },
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": false,
+                    "modules": true,
+                    "release": "6.6.61",
+                    "source_id": "target-source"
+                  },
+                  "path": "/lib/modules/6.6.61"
+                }
+              ]
+            },
+            "instructions": "Save the driver-selection fragment and regenerate early userspace for supplied kernel 6.6.61. Make the selected candidate reach the supplied NVMe/ext4 root and keep every working fallback file unchanged.",
+            "kind": "Drivers",
+            "prefix": "/",
+            "preserve_paths": [
+              "/boot/vmlinuz-6.6.60",
+              "/lib/modules/6.6.60",
+              "/boot/initramfs-6.6.60.img",
+              "/boot/loader/entries/fallback.conf"
+            ],
+            "reference": [
+              {
+                "op": "ConfigDraft",
+                "text": "# Keep the supplied root drivers available.\nomit_drivers=\"\"\n"
+              },
+              {
+                "op": "SaveConfig"
+              },
+              {
+                "input": "dracut --force --kver 6.6.61 /boot/initramfs-6.6.61.img",
+                "op": "Run"
+              },
+              {
+                "op": "Check"
+              }
+            ],
+            "root": {
+              "init_present": true,
+              "label": "Supplied NVMe/ext4 root",
+              "required_drivers": [
+                "nvme_core",
+                "nvme",
+                "jbd2",
+                "mbcache",
+                "ext4"
+              ],
+              "uuid": "11111111-2222-3333-4444-555555555555"
+            },
+            "wanted_release": "6.6.61"
+          },
+          "example": {
+            "entry_filename": "candidate.conf",
+            "id": "lpic2-initramfs-root-drivers-example",
+            "initial_config": "# Driver choices for the supplied generic profile.\nomit_drivers+=\" nvme \"\n",
+            "initial_entry": "title Training candidate\nlinux /vmlinuz-6.1.121\ninitrd /initramfs-6.1.121.img\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\n",
+            "initial_store": {
+              "entries": [
+                {
+                  "path": "/boot/loader/entries/fallback.conf",
+                  "source": "title Training candidate\nlinux /vmlinuz-6.1.120\ninitrd /initramfs-6.1.120.img\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\n"
+                },
+                {
+                  "path": "/boot/loader/entries/candidate.conf",
+                  "source": "title Training candidate\nlinux /vmlinuz-6.1.121\ninitrd /initramfs-6.1.121.img\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\n"
+                }
+              ],
+              "images": [
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": true,
+                    "modules": false,
+                    "release": "6.1.120",
+                    "source_id": "fallback-source"
+                  },
+                  "path": "/boot/vmlinuz-6.1.120"
+                },
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": true,
+                    "modules": false,
+                    "release": "6.1.121",
+                    "source_id": "target-source"
+                  },
+                  "path": "/boot/vmlinuz-6.1.121"
+                }
+              ],
+              "initramfs": [
+                {
+                  "image": {
+                    "image_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.1.120",
+                      "source_id": "fallback-source"
+                    },
+                    "included": [
+                      "ext4",
+                      "jbd2",
+                      "mbcache",
+                      "nvme",
+                      "nvme_core"
+                    ],
+                    "module_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.1.120",
+                      "source_id": "fallback-source"
+                    }
+                  },
+                  "path": "/boot/initramfs-6.1.120.img"
+                },
+                {
+                  "image": {
+                    "image_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.1.121",
+                      "source_id": "target-source"
+                    },
+                    "included": [
+                      "ext4",
+                      "jbd2",
+                      "mbcache",
+                      "nvme_core"
+                    ],
+                    "module_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.1.121",
+                      "source_id": "target-source"
+                    }
+                  },
+                  "path": "/boot/initramfs-6.1.121.img"
+                }
+              ],
+              "modules": [
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": false,
+                    "modules": true,
+                    "release": "6.1.120",
+                    "source_id": "fallback-source"
+                  },
+                  "path": "/lib/modules/6.1.120"
+                },
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": false,
+                    "modules": true,
+                    "release": "6.1.121",
+                    "source_id": "target-source"
+                  },
+                  "path": "/lib/modules/6.1.121"
+                }
+              ]
+            },
+            "instructions": "Save the driver choices and prepare matching early userspace for target 6.1.121. Verify the selected candidate reaches the supplied root; preserve the working 6.1.120 fallback.",
+            "kind": "Drivers",
+            "prefix": "/",
+            "preserve_paths": [
+              "/boot/vmlinuz-6.1.120",
+              "/lib/modules/6.1.120",
+              "/boot/initramfs-6.1.120.img",
+              "/boot/loader/entries/fallback.conf"
+            ],
+            "reference": [
+              {
+                "op": "ConfigDraft",
+                "text": "# Keep the supplied root drivers available.\nomit_drivers=\"\"\n"
+              },
+              {
+                "op": "SaveConfig"
+              },
+              {
+                "input": "dracut --force --kver 6.1.121 /boot/initramfs-6.1.121.img",
+                "op": "Run"
+              },
+              {
+                "op": "Check"
+              }
+            ],
+            "root": {
+              "init_present": true,
+              "label": "Supplied NVMe/ext4 root",
+              "required_drivers": [
+                "nvme_core",
+                "nvme",
+                "jbd2",
+                "mbcache",
+                "ext4"
+              ],
+              "uuid": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+            },
+            "wanted_release": "6.1.121"
+          },
+          "source_id": "lpic2-initramfs-root-drivers",
+          "version": 1
+        }
+      },
+      "solution": [
+        "initramfs-workspace {\"practice\":false,\"action\":{\"op\":\"ConfigDraft\",\"text\":\"# Keep the supplied root drivers available.\\nomit_drivers=\\\"\\\"\\n\"}}",
+        "initramfs-workspace {\"practice\":false,\"action\":{\"op\":\"SaveConfig\"}}",
+        "initramfs-workspace {\"practice\":false,\"action\":{\"input\":\"dracut --force --kver 6.6.61 /boot/initramfs-6.6.61.img\",\"op\":\"Run\"}}",
+        "initramfs-workspace {\"practice\":false,\"action\":{\"op\":\"Check\"}}"
+      ]
+    },
+    {
+      "id": "lpic2-initramfs-kernel-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Early userspace: dracut and inspection",
+      "unit": "linux-initramfs-recovery",
+      "title": "Match early userspace to the kernel without losing recovery",
+      "summary": "Inspect a misleading image filename, prepare matching early userspace and preserve a working fallback.",
+      "objective": "Prepare early userspace matching supplied kernel 6.6.61 and select it with a saved candidate entry. Verify root and init handoff; preserve the working 6.6.60 fallback files.",
+      "retry_guidance": "Read each failed result: saved fragment, selected kernel, actual image contents, root handoff and protected fallback are checked separately.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "The kernel needs early drivers before it can reach the main filesystem.",
+          "action": "Read the worked example and supplied generic profile; the required kernel and module inputs are already prepared.",
+          "commands": []
+        },
+        {
+          "title": "Investigate the separate example",
+          "why": "A filename and a generation message do not prove the right drivers or kernel were selected.",
+          "action": "Use the example editor and console. Save changes, inspect the represented contents with lsinitrd and check the actual entry.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "The selected files and preserved fallback determine the result.",
+          "action": "Use the assignment’s supplied values; save any changed fragment or entry, regenerate the intended image and select Check configuration.",
+          "commands": []
+        }
+      ],
+      "explanation": "The entry selects a kernel and one or more early-userspace images. Their internal release and supplied build identities must agree; a version-looking filename is not evidence. You can rebuild the selected image in place with force, or create a different image and save an entry that selects it. The checks follow the actual selected files and preserve the working fallback, rather than requiring one command transcript.",
+      "hints": [
+        "Inspect the image named in the candidate’s initrd line; compare its Kernel line and driver files with the supplied target.",
+        "Save the fragment before generating. In dracut, --kver selects a kernel; -k is a different, unsupported module-directory option.",
+        "A new unselected image cannot repair an entry that still points to a wrong image. Rebuild the selected output with force, or save an entry selecting your new output."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://raw.githubusercontent.com/dracut-ng/dracut/112/man/dracut.8.adoc",
+        "https://dracut-ng.github.io/dracut/man/dracut.conf.5.html",
+        "https://dracut-ng.github.io/dracut/man/lsinitrd.1.html"
+      ],
+      "simplifications": "Supplied generic baseline hostonly=no, prepared NVMe/ext4 kernel/module records and five driver names only. Literal omit_drivers assignments/comments; no general dracut.conf shell evaluation. Explicit kernel/output dracut and limited lsinitrd driver-file inventory, not real archive data. No host discovery, feature modules, compression, hooks, privilege checks, C compilation, firmware, actual tools or boot. mkinitrd/mkinitramfs remain unsupported. All paths, files and root/init checks are simulated.",
+      "prerequisites": [
+        "lpic2-kernel-staged-handover",
+        "lpic2-initramfs-root-drivers"
+      ],
+      "initial": {
+        "kind": "Initramfs",
+        "simulation": {
+          "assignment": {
+            "source_task": "{\"id\":\"lpic2-initramfs-kernel-handover\",\"kind\":\"Handover\",\"instructions\":\"Prepare early userspace matching supplied kernel 6.6.61 and select it with a saved candidate entry. Verify root and init handoff; preserve the working 6.6.60 fallback files.\",\"prefix\":\"/\",\"initial_config\":\"# No driver omissions in this profile.\\n\",\"initial_store\":{\"images\":[{\"path\":\"/boot/vmlinuz-6.6.60\",\"build\":{\"source_id\":\"fallback-source\",\"release\":\"6.6.60\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false}},{\"path\":\"/boot/vmlinuz-6.6.61\",\"build\":{\"source_id\":\"target-source\",\"release\":\"6.6.61\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false}}],\"modules\":[{\"path\":\"/lib/modules/6.6.60\",\"build\":{\"source_id\":\"fallback-source\",\"release\":\"6.6.60\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true}},{\"path\":\"/lib/modules/6.6.61\",\"build\":{\"source_id\":\"target-source\",\"release\":\"6.6.61\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true}}],\"initramfs\":[{\"path\":\"/boot/initramfs-6.6.60.img\",\"image\":{\"image_build\":{\"source_id\":\"fallback-source\",\"release\":\"6.6.60\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false},\"module_build\":{\"source_id\":\"fallback-source\",\"release\":\"6.6.60\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true},\"included\":[\"ext4\",\"jbd2\",\"mbcache\",\"nvme\",\"nvme_core\"]}},{\"path\":\"/boot/initramfs-6.6.61.img\",\"image\":{\"image_build\":{\"source_id\":\"fallback-source\",\"release\":\"6.6.60\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false},\"module_build\":{\"source_id\":\"fallback-source\",\"release\":\"6.6.60\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true},\"included\":[\"ext4\",\"jbd2\",\"mbcache\",\"nvme\",\"nvme_core\"]}}],\"entries\":[{\"path\":\"/boot/loader/entries/fallback.conf\",\"source\":\"title Training candidate\\nlinux /vmlinuz-6.6.60\\ninitrd /initramfs-6.6.60.img\\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\\n\"},{\"path\":\"/boot/loader/entries/candidate.conf\",\"source\":\"title Training candidate\\nlinux /vmlinuz-6.6.61\\ninitrd /initramfs-6.6.61.img\\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\\n\"}]},\"root\":{\"uuid\":\"11111111-2222-3333-4444-555555555555\",\"label\":\"Supplied NVMe/ext4 root\",\"required_drivers\":[\"nvme_core\",\"nvme\",\"jbd2\",\"mbcache\",\"ext4\"],\"init_present\":true},\"wanted_release\":\"6.6.61\",\"entry_filename\":\"candidate.conf\",\"initial_entry\":\"title Training candidate\\nlinux /vmlinuz-6.6.61\\ninitrd /initramfs-6.6.61.img\\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\\n\",\"preserve_paths\":[\"/boot/vmlinuz-6.6.60\",\"/lib/modules/6.6.60\",\"/boot/initramfs-6.6.60.img\",\"/boot/loader/entries/fallback.conf\"],\"reference\":[{\"op\":\"Run\",\"input\":\"dracut /boot/repaired.img 6.6.61\"},{\"op\":\"EntryDraft\",\"filename\":\"trial.conf\",\"text\":\"title Training candidate\\nlinux /vmlinuz-6.6.61\\ninitrd /repaired.img\\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\\n\"},{\"op\":\"SaveEntry\"},{\"op\":\"Check\"}]}",
+            "work": {
+              "checked": false,
+              "command_draft": "",
+              "config_draft": "# No driver omissions in this profile.\n",
+              "entry_draft": "title Training candidate\nlinux /vmlinuz-6.6.61\ninitrd /initramfs-6.6.61.img\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\n",
+              "entry_filename": "candidate.conf",
+              "log": [],
+              "saved_config_source": "# No driver omissions in this profile.\n",
+              "saved_entry": "/boot/loader/entries/candidate.conf",
+              "store": {
+                "entries": [
+                  {
+                    "path": "/boot/loader/entries/fallback.conf",
+                    "source": "title Training candidate\nlinux /vmlinuz-6.6.60\ninitrd /initramfs-6.6.60.img\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\n"
+                  },
+                  {
+                    "path": "/boot/loader/entries/candidate.conf",
+                    "source": "title Training candidate\nlinux /vmlinuz-6.6.61\ninitrd /initramfs-6.6.61.img\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\n"
+                  }
+                ],
+                "images": [
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.6.60",
+                      "source_id": "fallback-source"
+                    },
+                    "path": "/boot/vmlinuz-6.6.60"
+                  },
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.6.61",
+                      "source_id": "target-source"
+                    },
+                    "path": "/boot/vmlinuz-6.6.61"
+                  }
+                ],
+                "initramfs": [
+                  {
+                    "image": {
+                      "image_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": true,
+                        "modules": false,
+                        "release": "6.6.60",
+                        "source_id": "fallback-source"
+                      },
+                      "included": [
+                        "ext4",
+                        "jbd2",
+                        "mbcache",
+                        "nvme",
+                        "nvme_core"
+                      ],
+                      "module_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": false,
+                        "modules": true,
+                        "release": "6.6.60",
+                        "source_id": "fallback-source"
+                      }
+                    },
+                    "path": "/boot/initramfs-6.6.60.img"
+                  },
+                  {
+                    "image": {
+                      "image_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": true,
+                        "modules": false,
+                        "release": "6.6.60",
+                        "source_id": "fallback-source"
+                      },
+                      "included": [
+                        "ext4",
+                        "jbd2",
+                        "mbcache",
+                        "nvme",
+                        "nvme_core"
+                      ],
+                      "module_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": false,
+                        "modules": true,
+                        "release": "6.6.60",
+                        "source_id": "fallback-source"
+                      }
+                    },
+                    "path": "/boot/initramfs-6.6.61.img"
+                  }
+                ],
+                "modules": [
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.6.60",
+                      "source_id": "fallback-source"
+                    },
+                    "path": "/lib/modules/6.6.60"
+                  },
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.6.61",
+                      "source_id": "target-source"
+                    },
+                    "path": "/lib/modules/6.6.61"
+                  }
+                ]
+              }
+            }
+          },
+          "example": {
+            "source_task": "{\"id\":\"lpic2-initramfs-kernel-handover-example\",\"kind\":\"Handover\",\"instructions\":\"Save the driver choices and prepare matching early userspace for target 6.1.121. Verify the selected candidate reaches the supplied root; preserve the working 6.1.120 fallback.\",\"prefix\":\"/\",\"initial_config\":\"# No driver omissions in this profile.\\n\",\"initial_store\":{\"images\":[{\"path\":\"/boot/vmlinuz-6.1.120\",\"build\":{\"source_id\":\"fallback-source\",\"release\":\"6.1.120\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false}},{\"path\":\"/boot/vmlinuz-6.1.121\",\"build\":{\"source_id\":\"target-source\",\"release\":\"6.1.121\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false}}],\"modules\":[{\"path\":\"/lib/modules/6.1.120\",\"build\":{\"source_id\":\"fallback-source\",\"release\":\"6.1.120\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true}},{\"path\":\"/lib/modules/6.1.121\",\"build\":{\"source_id\":\"target-source\",\"release\":\"6.1.121\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true}}],\"initramfs\":[{\"path\":\"/boot/initramfs-6.1.120.img\",\"image\":{\"image_build\":{\"source_id\":\"fallback-source\",\"release\":\"6.1.120\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false},\"module_build\":{\"source_id\":\"fallback-source\",\"release\":\"6.1.120\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true},\"included\":[\"ext4\",\"jbd2\",\"mbcache\",\"nvme\",\"nvme_core\"]}},{\"path\":\"/boot/initramfs-6.1.121.img\",\"image\":{\"image_build\":{\"source_id\":\"fallback-source\",\"release\":\"6.1.120\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":true,\"modules\":false},\"module_build\":{\"source_id\":\"fallback-source\",\"release\":\"6.1.120\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"\"},\"image\":false,\"modules\":true},\"included\":[\"ext4\",\"jbd2\",\"mbcache\",\"nvme\",\"nvme_core\"]}}],\"entries\":[{\"path\":\"/boot/loader/entries/fallback.conf\",\"source\":\"title Training candidate\\nlinux /vmlinuz-6.1.120\\ninitrd /initramfs-6.1.120.img\\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\\n\"},{\"path\":\"/boot/loader/entries/candidate.conf\",\"source\":\"title Training candidate\\nlinux /vmlinuz-6.1.121\\ninitrd /initramfs-6.1.121.img\\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\\n\"}]},\"root\":{\"uuid\":\"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\"label\":\"Supplied NVMe/ext4 root\",\"required_drivers\":[\"nvme_core\",\"nvme\",\"jbd2\",\"mbcache\",\"ext4\"],\"init_present\":true},\"wanted_release\":\"6.1.121\",\"entry_filename\":\"candidate.conf\",\"initial_entry\":\"title Training candidate\\nlinux /vmlinuz-6.1.121\\ninitrd /initramfs-6.1.121.img\\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\\n\",\"preserve_paths\":[\"/boot/vmlinuz-6.1.120\",\"/lib/modules/6.1.120\",\"/boot/initramfs-6.1.120.img\",\"/boot/loader/entries/fallback.conf\"],\"reference\":[{\"op\":\"Run\",\"input\":\"dracut /boot/repaired.img 6.1.121\"},{\"op\":\"EntryDraft\",\"filename\":\"trial.conf\",\"text\":\"title Training candidate\\nlinux /vmlinuz-6.1.121\\ninitrd /repaired.img\\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\\n\"},{\"op\":\"SaveEntry\"},{\"op\":\"Check\"}]}",
+            "work": {
+              "checked": false,
+              "command_draft": "",
+              "config_draft": "# No driver omissions in this profile.\n",
+              "entry_draft": "title Training candidate\nlinux /vmlinuz-6.1.121\ninitrd /initramfs-6.1.121.img\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\n",
+              "entry_filename": "candidate.conf",
+              "log": [],
+              "saved_config_source": "# No driver omissions in this profile.\n",
+              "saved_entry": "/boot/loader/entries/candidate.conf",
+              "store": {
+                "entries": [
+                  {
+                    "path": "/boot/loader/entries/fallback.conf",
+                    "source": "title Training candidate\nlinux /vmlinuz-6.1.120\ninitrd /initramfs-6.1.120.img\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\n"
+                  },
+                  {
+                    "path": "/boot/loader/entries/candidate.conf",
+                    "source": "title Training candidate\nlinux /vmlinuz-6.1.121\ninitrd /initramfs-6.1.121.img\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\n"
+                  }
+                ],
+                "images": [
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.1.120",
+                      "source_id": "fallback-source"
+                    },
+                    "path": "/boot/vmlinuz-6.1.120"
+                  },
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.1.121",
+                      "source_id": "target-source"
+                    },
+                    "path": "/boot/vmlinuz-6.1.121"
+                  }
+                ],
+                "initramfs": [
+                  {
+                    "image": {
+                      "image_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": true,
+                        "modules": false,
+                        "release": "6.1.120",
+                        "source_id": "fallback-source"
+                      },
+                      "included": [
+                        "ext4",
+                        "jbd2",
+                        "mbcache",
+                        "nvme",
+                        "nvme_core"
+                      ],
+                      "module_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": false,
+                        "modules": true,
+                        "release": "6.1.120",
+                        "source_id": "fallback-source"
+                      }
+                    },
+                    "path": "/boot/initramfs-6.1.120.img"
+                  },
+                  {
+                    "image": {
+                      "image_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": true,
+                        "modules": false,
+                        "release": "6.1.120",
+                        "source_id": "fallback-source"
+                      },
+                      "included": [
+                        "ext4",
+                        "jbd2",
+                        "mbcache",
+                        "nvme",
+                        "nvme_core"
+                      ],
+                      "module_build": {
+                        "config": {
+                          "ext4": "Module",
+                          "initrd": true,
+                          "localversion": "",
+                          "modules": true,
+                          "nvme": "Module"
+                        },
+                        "image": false,
+                        "modules": true,
+                        "release": "6.1.120",
+                        "source_id": "fallback-source"
+                      }
+                    },
+                    "path": "/boot/initramfs-6.1.121.img"
+                  }
+                ],
+                "modules": [
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.1.120",
+                      "source_id": "fallback-source"
+                    },
+                    "path": "/lib/modules/6.1.120"
+                  },
+                  {
+                    "build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.1.121",
+                      "source_id": "target-source"
+                    },
+                    "path": "/lib/modules/6.1.121"
+                  }
+                ]
+              }
+            }
+          },
+          "source_id": "lpic2-initramfs-kernel-handover",
+          "version": 1,
+          "view": "introduction"
+        }
+      },
+      "goal": {
+        "kind": "Initramfs",
+        "definition": {
+          "assignment": {
+            "entry_filename": "candidate.conf",
+            "id": "lpic2-initramfs-kernel-handover",
+            "initial_config": "# No driver omissions in this profile.\n",
+            "initial_entry": "title Training candidate\nlinux /vmlinuz-6.6.61\ninitrd /initramfs-6.6.61.img\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\n",
+            "initial_store": {
+              "entries": [
+                {
+                  "path": "/boot/loader/entries/fallback.conf",
+                  "source": "title Training candidate\nlinux /vmlinuz-6.6.60\ninitrd /initramfs-6.6.60.img\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\n"
+                },
+                {
+                  "path": "/boot/loader/entries/candidate.conf",
+                  "source": "title Training candidate\nlinux /vmlinuz-6.6.61\ninitrd /initramfs-6.6.61.img\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\n"
+                }
+              ],
+              "images": [
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": true,
+                    "modules": false,
+                    "release": "6.6.60",
+                    "source_id": "fallback-source"
+                  },
+                  "path": "/boot/vmlinuz-6.6.60"
+                },
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": true,
+                    "modules": false,
+                    "release": "6.6.61",
+                    "source_id": "target-source"
+                  },
+                  "path": "/boot/vmlinuz-6.6.61"
+                }
+              ],
+              "initramfs": [
+                {
+                  "image": {
+                    "image_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.6.60",
+                      "source_id": "fallback-source"
+                    },
+                    "included": [
+                      "ext4",
+                      "jbd2",
+                      "mbcache",
+                      "nvme",
+                      "nvme_core"
+                    ],
+                    "module_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.6.60",
+                      "source_id": "fallback-source"
+                    }
+                  },
+                  "path": "/boot/initramfs-6.6.60.img"
+                },
+                {
+                  "image": {
+                    "image_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.6.60",
+                      "source_id": "fallback-source"
+                    },
+                    "included": [
+                      "ext4",
+                      "jbd2",
+                      "mbcache",
+                      "nvme",
+                      "nvme_core"
+                    ],
+                    "module_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.6.60",
+                      "source_id": "fallback-source"
+                    }
+                  },
+                  "path": "/boot/initramfs-6.6.61.img"
+                }
+              ],
+              "modules": [
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": false,
+                    "modules": true,
+                    "release": "6.6.60",
+                    "source_id": "fallback-source"
+                  },
+                  "path": "/lib/modules/6.6.60"
+                },
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": false,
+                    "modules": true,
+                    "release": "6.6.61",
+                    "source_id": "target-source"
+                  },
+                  "path": "/lib/modules/6.6.61"
+                }
+              ]
+            },
+            "instructions": "Prepare early userspace matching supplied kernel 6.6.61 and select it with a saved candidate entry. Verify root and init handoff; preserve the working 6.6.60 fallback files.",
+            "kind": "Handover",
+            "prefix": "/",
+            "preserve_paths": [
+              "/boot/vmlinuz-6.6.60",
+              "/lib/modules/6.6.60",
+              "/boot/initramfs-6.6.60.img",
+              "/boot/loader/entries/fallback.conf"
+            ],
+            "reference": [
+              {
+                "input": "dracut /boot/repaired.img 6.6.61",
+                "op": "Run"
+              },
+              {
+                "filename": "trial.conf",
+                "op": "EntryDraft",
+                "text": "title Training candidate\nlinux /vmlinuz-6.6.61\ninitrd /repaired.img\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\n"
+              },
+              {
+                "op": "SaveEntry"
+              },
+              {
+                "op": "Check"
+              }
+            ],
+            "root": {
+              "init_present": true,
+              "label": "Supplied NVMe/ext4 root",
+              "required_drivers": [
+                "nvme_core",
+                "nvme",
+                "jbd2",
+                "mbcache",
+                "ext4"
+              ],
+              "uuid": "11111111-2222-3333-4444-555555555555"
+            },
+            "wanted_release": "6.6.61"
+          },
+          "example": {
+            "entry_filename": "candidate.conf",
+            "id": "lpic2-initramfs-kernel-handover-example",
+            "initial_config": "# No driver omissions in this profile.\n",
+            "initial_entry": "title Training candidate\nlinux /vmlinuz-6.1.121\ninitrd /initramfs-6.1.121.img\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\n",
+            "initial_store": {
+              "entries": [
+                {
+                  "path": "/boot/loader/entries/fallback.conf",
+                  "source": "title Training candidate\nlinux /vmlinuz-6.1.120\ninitrd /initramfs-6.1.120.img\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\n"
+                },
+                {
+                  "path": "/boot/loader/entries/candidate.conf",
+                  "source": "title Training candidate\nlinux /vmlinuz-6.1.121\ninitrd /initramfs-6.1.121.img\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\n"
+                }
+              ],
+              "images": [
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": true,
+                    "modules": false,
+                    "release": "6.1.120",
+                    "source_id": "fallback-source"
+                  },
+                  "path": "/boot/vmlinuz-6.1.120"
+                },
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": true,
+                    "modules": false,
+                    "release": "6.1.121",
+                    "source_id": "target-source"
+                  },
+                  "path": "/boot/vmlinuz-6.1.121"
+                }
+              ],
+              "initramfs": [
+                {
+                  "image": {
+                    "image_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.1.120",
+                      "source_id": "fallback-source"
+                    },
+                    "included": [
+                      "ext4",
+                      "jbd2",
+                      "mbcache",
+                      "nvme",
+                      "nvme_core"
+                    ],
+                    "module_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.1.120",
+                      "source_id": "fallback-source"
+                    }
+                  },
+                  "path": "/boot/initramfs-6.1.120.img"
+                },
+                {
+                  "image": {
+                    "image_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": true,
+                      "modules": false,
+                      "release": "6.1.120",
+                      "source_id": "fallback-source"
+                    },
+                    "included": [
+                      "ext4",
+                      "jbd2",
+                      "mbcache",
+                      "nvme",
+                      "nvme_core"
+                    ],
+                    "module_build": {
+                      "config": {
+                        "ext4": "Module",
+                        "initrd": true,
+                        "localversion": "",
+                        "modules": true,
+                        "nvme": "Module"
+                      },
+                      "image": false,
+                      "modules": true,
+                      "release": "6.1.120",
+                      "source_id": "fallback-source"
+                    }
+                  },
+                  "path": "/boot/initramfs-6.1.121.img"
+                }
+              ],
+              "modules": [
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": false,
+                    "modules": true,
+                    "release": "6.1.120",
+                    "source_id": "fallback-source"
+                  },
+                  "path": "/lib/modules/6.1.120"
+                },
+                {
+                  "build": {
+                    "config": {
+                      "ext4": "Module",
+                      "initrd": true,
+                      "localversion": "",
+                      "modules": true,
+                      "nvme": "Module"
+                    },
+                    "image": false,
+                    "modules": true,
+                    "release": "6.1.121",
+                    "source_id": "target-source"
+                  },
+                  "path": "/lib/modules/6.1.121"
+                }
+              ]
+            },
+            "instructions": "Save the driver choices and prepare matching early userspace for target 6.1.121. Verify the selected candidate reaches the supplied root; preserve the working 6.1.120 fallback.",
+            "kind": "Handover",
+            "prefix": "/",
+            "preserve_paths": [
+              "/boot/vmlinuz-6.1.120",
+              "/lib/modules/6.1.120",
+              "/boot/initramfs-6.1.120.img",
+              "/boot/loader/entries/fallback.conf"
+            ],
+            "reference": [
+              {
+                "input": "dracut /boot/repaired.img 6.1.121",
+                "op": "Run"
+              },
+              {
+                "filename": "trial.conf",
+                "op": "EntryDraft",
+                "text": "title Training candidate\nlinux /vmlinuz-6.1.121\ninitrd /repaired.img\noptions root=UUID=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee ro\n"
+              },
+              {
+                "op": "SaveEntry"
+              },
+              {
+                "op": "Check"
+              }
+            ],
+            "root": {
+              "init_present": true,
+              "label": "Supplied NVMe/ext4 root",
+              "required_drivers": [
+                "nvme_core",
+                "nvme",
+                "jbd2",
+                "mbcache",
+                "ext4"
+              ],
+              "uuid": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+            },
+            "wanted_release": "6.1.121"
+          },
+          "source_id": "lpic2-initramfs-kernel-handover",
+          "version": 1
+        }
+      },
+      "solution": [
+        "initramfs-workspace {\"practice\":false,\"action\":{\"input\":\"dracut /boot/repaired.img 6.6.61\",\"op\":\"Run\"}}",
+        "initramfs-workspace {\"practice\":false,\"action\":{\"filename\":\"trial.conf\",\"op\":\"EntryDraft\",\"text\":\"title Training candidate\\nlinux /vmlinuz-6.6.61\\ninitrd /repaired.img\\noptions root=UUID=11111111-2222-3333-4444-555555555555 ro\\n\"}}",
+        "initramfs-workspace {\"practice\":false,\"action\":{\"op\":\"SaveEntry\"}}",
+        "initramfs-workspace {\"practice\":false,\"action\":{\"op\":\"Check\"}}"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4494 @@
+[
+  {
+    "definition": {
+      "source_id": "lpic2-nat-shared-address-replies",
+      "assignment": {
+        "id": "assignment-share",
+        "facts": {
+          "links": [
+            {
+              "name": "lan0",
+              "address": "10.20.30.1",
+              "prefix": 24,
+              "up": true
+            },
+            {
+              "name": "wan0",
+              "address": "198.51.100.1",
+              "prefix": 24,
+              "up": true
+            }
+          ],
+          "routes": [
+            {
+              "destination": {
+                "network": "0.0.0.0",
+                "prefix": 0
+              },
+              "device": "wan0",
+              "via": "198.51.100.254",
+              "metric": 10
+            }
+          ]
+        },
+        "forwarding": true,
+        "initial": {
+          "filter": {
+            "base": {
+              "input": {
+                "policy": "Drop",
+                "rules": []
+              },
+              "forward": {
+                "policy": "Drop",
+                "rules": [
+                  {
+                    "source": {
+                      "network": "10.20.30.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "203.0.113.9",
+                      "prefix": 32
+                    },
+                    "ingress": "lan0",
+                    "egress": "wan0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": "wan0",
+                    "egress": "lan0",
+                    "protocol": null,
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              "output": {
+                "policy": "Accept",
+                "rules": []
+              }
+            },
+            "input": [],
+            "forward": [
+              "New",
+              "New"
+            ],
+            "output": []
+          },
+          "nat": {
+            "prerouting": [],
+            "postrouting": [
+              {
+                "predicate": {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": null,
+                  "ingress": null,
+                  "egress": "wan0",
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": null,
+                  "target": "Accept"
+                },
+                "target": {
+                  "Snat": {
+                    "address": "198.51.100.1",
+                    "ports": {
+                      "first": 40000,
+                      "last": 40000
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "connections": {
+            "next_id": 1,
+            "entries": []
+          }
+        },
+        "preserve_prerouting": true,
+        "policies": [
+          {
+            "dnat": false,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ],
+            "class": "New"
+          },
+          {
+            "dnat": true,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ],
+            "class": "New"
+          },
+          {
+            "dnat": false,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "class": "Established"
+          },
+          {
+            "dnat": true,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "class": "Established"
+          }
+        ],
+        "nat_policies": [
+          {
+            "label": "Share the supplied public source address",
+            "transport": "Tcp",
+            "requirement": {
+              "SourceAddress": "198.51.100.1"
+            },
+            "domains": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.9",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ],
+            "expected": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.9",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ]
+          }
+        ],
+        "cases": [
+          {
+            "id": "two-clients",
+            "label": "Two clients share one address",
+            "events": [
+              {
+                "label": "Client A request",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "10.20.30.55",
+                      "port": 40000
+                    },
+                    "destination": {
+                      "address": "203.0.113.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.1",
+                    "port": null
+                  },
+                  "destination": {
+                    "address": "203.0.113.9",
+                    "port": 443
+                  }
+                }
+              },
+              {
+                "label": "Client B request",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "10.20.30.56",
+                      "port": 40000
+                    },
+                    "destination": {
+                      "address": "203.0.113.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.1",
+                    "port": null
+                  },
+                  "destination": {
+                    "address": "203.0.113.9",
+                    "port": 443
+                  }
+                }
+              },
+              {
+                "label": "Reply to A",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "reply",
+                  "event": 0
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "203.0.113.9",
+                    "port": 443
+                  },
+                  "destination": {
+                    "address": "10.20.30.55",
+                    "port": 40000
+                  }
+                }
+              },
+              {
+                "label": "Reply to B",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "reply",
+                  "event": 1
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "203.0.113.9",
+                    "port": 443
+                  },
+                  "destination": {
+                    "address": "10.20.30.56",
+                    "port": 40000
+                  }
+                }
+              },
+              {
+                "label": "Client A continues",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "original",
+                  "event": 0
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.1",
+                    "port": null
+                  },
+                  "destination": {
+                    "address": "203.0.113.9",
+                    "port": 443
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "unsolicited-inbound",
+            "label": "New inbound traffic stays blocked",
+            "events": [
+              {
+                "label": "Unrequested incoming connection",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "203.0.113.9",
+                      "port": 12345
+                    },
+                    "destination": {
+                      "address": "10.20.30.55",
+                      "port": 22
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "filtered"
+                }
+              }
+            ]
+          },
+          {
+            "id": "wrong-outbound-port",
+            "label": "Other new outbound services stay blocked",
+            "events": [
+              {
+                "label": "Wrong web port",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "10.20.30.55",
+                      "port": 40000
+                    },
+                    "destination": {
+                      "address": "203.0.113.9",
+                      "port": 8080
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "filtered"
+                }
+              }
+            ]
+          },
+          {
+            "id": "wrong-outbound-protocol",
+            "label": "TCP and UDP are different",
+            "events": [
+              {
+                "label": "UDP is not this web service",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Udp",
+                    "source": {
+                      "address": "10.20.30.55",
+                      "port": 40000
+                    },
+                    "destination": {
+                      "address": "203.0.113.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "filtered"
+                }
+              }
+            ]
+          },
+          {
+            "id": "outside-lan-source",
+            "label": "Other source networks stay blocked",
+            "events": [
+              {
+                "label": "Source outside the supplied LAN",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "192.0.2.77",
+                      "port": 40000
+                    },
+                    "destination": {
+                      "address": "203.0.113.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "filtered"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "example": {
+        "id": "practice-share",
+        "facts": {
+          "links": [
+            {
+              "name": "lan0",
+              "address": "172.20.4.1",
+              "prefix": 24,
+              "up": true
+            },
+            {
+              "name": "wan0",
+              "address": "192.0.2.1",
+              "prefix": 24,
+              "up": true
+            }
+          ],
+          "routes": [
+            {
+              "destination": {
+                "network": "0.0.0.0",
+                "prefix": 0
+              },
+              "device": "wan0",
+              "via": "192.0.2.254",
+              "metric": 10
+            }
+          ]
+        },
+        "forwarding": true,
+        "initial": {
+          "filter": {
+            "base": {
+              "input": {
+                "policy": "Drop",
+                "rules": []
+              },
+              "forward": {
+                "policy": "Drop",
+                "rules": [
+                  {
+                    "source": {
+                      "network": "172.20.4.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.9",
+                      "prefix": 32
+                    },
+                    "ingress": "lan0",
+                    "egress": "wan0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": "wan0",
+                    "egress": "lan0",
+                    "protocol": null,
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              "output": {
+                "policy": "Accept",
+                "rules": []
+              }
+            },
+            "input": [],
+            "forward": [
+              "New",
+              "New"
+            ],
+            "output": []
+          },
+          "nat": {
+            "prerouting": [],
+            "postrouting": [
+              {
+                "predicate": {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": null,
+                  "ingress": null,
+                  "egress": "wan0",
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": null,
+                  "target": "Accept"
+                },
+                "target": {
+                  "Snat": {
+                    "address": "192.0.2.1",
+                    "ports": {
+                      "first": 41000,
+                      "last": 41000
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "connections": {
+            "next_id": 1,
+            "entries": []
+          }
+        },
+        "preserve_prerouting": true,
+        "policies": [
+          {
+            "dnat": false,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ],
+            "class": "New"
+          },
+          {
+            "dnat": true,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ],
+            "class": "New"
+          },
+          {
+            "dnat": false,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "class": "Established"
+          },
+          {
+            "dnat": true,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "class": "Established"
+          }
+        ],
+        "nat_policies": [
+          {
+            "label": "Share the supplied public source address",
+            "transport": "Tcp",
+            "requirement": {
+              "SourceAddress": "192.0.2.1"
+            },
+            "domains": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.9",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ],
+            "expected": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.9",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ]
+          }
+        ],
+        "cases": [
+          {
+            "id": "two-clients",
+            "label": "Two clients share one address",
+            "events": [
+              {
+                "label": "Client A request",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "172.20.4.55",
+                      "port": 41000
+                    },
+                    "destination": {
+                      "address": "198.51.100.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "192.0.2.1",
+                    "port": null
+                  },
+                  "destination": {
+                    "address": "198.51.100.9",
+                    "port": 443
+                  }
+                }
+              },
+              {
+                "label": "Client B request",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "172.20.4.56",
+                      "port": 41000
+                    },
+                    "destination": {
+                      "address": "198.51.100.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "192.0.2.1",
+                    "port": null
+                  },
+                  "destination": {
+                    "address": "198.51.100.9",
+                    "port": 443
+                  }
+                }
+              },
+              {
+                "label": "Reply to A",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "reply",
+                  "event": 0
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.9",
+                    "port": 443
+                  },
+                  "destination": {
+                    "address": "172.20.4.55",
+                    "port": 41000
+                  }
+                }
+              },
+              {
+                "label": "Reply to B",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "reply",
+                  "event": 1
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.9",
+                    "port": 443
+                  },
+                  "destination": {
+                    "address": "172.20.4.56",
+                    "port": 41000
+                  }
+                }
+              },
+              {
+                "label": "Client A continues",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "original",
+                  "event": 0
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "192.0.2.1",
+                    "port": null
+                  },
+                  "destination": {
+                    "address": "198.51.100.9",
+                    "port": 443
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "unsolicited-inbound",
+            "label": "New inbound traffic stays blocked",
+            "events": [
+              {
+                "label": "Unrequested incoming connection",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "198.51.100.9",
+                      "port": 12345
+                    },
+                    "destination": {
+                      "address": "172.20.4.55",
+                      "port": 22
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "filtered"
+                }
+              }
+            ]
+          },
+          {
+            "id": "wrong-outbound-port",
+            "label": "Other new outbound services stay blocked",
+            "events": [
+              {
+                "label": "Wrong web port",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "172.20.4.55",
+                      "port": 41000
+                    },
+                    "destination": {
+                      "address": "198.51.100.9",
+                      "port": 8080
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "filtered"
+                }
+              }
+            ]
+          },
+          {
+            "id": "wrong-outbound-protocol",
+            "label": "TCP and UDP are different",
+            "events": [
+              {
+                "label": "UDP is not this web service",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Udp",
+                    "source": {
+                      "address": "172.20.4.55",
+                      "port": 41000
+                    },
+                    "destination": {
+                      "address": "198.51.100.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "filtered"
+                }
+              }
+            ]
+          },
+          {
+            "id": "outside-lan-source",
+            "label": "Other source networks stay blocked",
+            "events": [
+              {
+                "label": "Source outside the supplied LAN",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "203.0.113.77",
+                      "port": 41000
+                    },
+                    "destination": {
+                      "address": "198.51.100.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "filtered"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "worked": [
+        {
+          "kind": "command",
+          "line": "iptables -F FORWARD"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -P FORWARD DROP"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -A FORWARD -m conntrack --ctstate ESTABLISHED -j ACCEPT"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -A FORWARD -i lan0 -o wan0 -s 172.20.4.0/24 -d 198.51.100.9 -p tcp --dport 443 -m conntrack --ctstate NEW -j ACCEPT"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -t nat -F POSTROUTING"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -t nat -A POSTROUTING -o wan0 -s 172.20.4.0/24 -p tcp -j SNAT --to-source 192.0.2.1"
+        },
+        {
+          "kind": "check"
+        }
+      ]
+    },
+    "solution": [
+      {
+        "kind": "command",
+        "line": "iptables -F FORWARD"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -P FORWARD DROP"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -A FORWARD -m conntrack --ctstate ESTABLISHED -j ACCEPT"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -A FORWARD -i lan0 -o wan0 -s 10.20.30.0/24 -d 203.0.113.9 -p tcp --dport 443 -m conntrack --ctstate NEW -j ACCEPT"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -t nat -F POSTROUTING"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -t nat -A POSTROUTING -o wan0 -s 10.20.30.0/24 -p tcp -j SNAT --to-source 198.51.100.1"
+      },
+      {
+        "kind": "check"
+      }
+    ]
+  },
+  {
+    "definition": {
+      "source_id": "lpic2-nat-published-service-policy",
+      "assignment": {
+        "id": "assignment-publish",
+        "facts": {
+          "links": [
+            {
+              "name": "lan0",
+              "address": "10.20.30.1",
+              "prefix": 24,
+              "up": true
+            },
+            {
+              "name": "wan0",
+              "address": "198.51.100.1",
+              "prefix": 24,
+              "up": true
+            }
+          ],
+          "routes": [
+            {
+              "destination": {
+                "network": "0.0.0.0",
+                "prefix": 0
+              },
+              "device": "wan0",
+              "via": "198.51.100.254",
+              "metric": 10
+            }
+          ]
+        },
+        "forwarding": true,
+        "initial": {
+          "filter": {
+            "base": {
+              "input": {
+                "policy": "Drop",
+                "rules": []
+              },
+              "forward": {
+                "policy": "Drop",
+                "rules": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": null,
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.20.30.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "203.0.113.9",
+                      "prefix": 32
+                    },
+                    "ingress": "lan0",
+                    "egress": "wan0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": {
+                      "network": "198.51.100.1",
+                      "prefix": 32
+                    },
+                    "ingress": "wan0",
+                    "egress": "lan0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 8443,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              "output": {
+                "policy": "Accept",
+                "rules": []
+              }
+            },
+            "input": [],
+            "forward": [
+              "Established",
+              "New",
+              "New"
+            ],
+            "output": []
+          },
+          "nat": {
+            "prerouting": [
+              {
+                "predicate": {
+                  "source": null,
+                  "destination": {
+                    "network": "198.51.100.1",
+                    "prefix": 32
+                  },
+                  "ingress": "wan0",
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 8443,
+                  "target": "Accept"
+                },
+                "target": {
+                  "Dnat": {
+                    "address": "10.20.30.99",
+                    "port": 443
+                  }
+                }
+              }
+            ],
+            "postrouting": [
+              {
+                "predicate": {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": null,
+                  "ingress": null,
+                  "egress": "wan0",
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": null,
+                  "target": "Accept"
+                },
+                "target": {
+                  "Snat": {
+                    "address": "198.51.100.1",
+                    "ports": null
+                  }
+                }
+              }
+            ]
+          },
+          "connections": {
+            "next_id": 1,
+            "entries": []
+          }
+        },
+        "preserve_prerouting": false,
+        "policies": [
+          {
+            "dnat": false,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ],
+            "class": "New"
+          },
+          {
+            "dnat": true,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": {
+                  "network": "10.20.30.42",
+                  "prefix": 32
+                },
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ],
+            "class": "New"
+          },
+          {
+            "dnat": false,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "class": "Established"
+          },
+          {
+            "dnat": true,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "class": "Established"
+          }
+        ],
+        "nat_policies": [
+          {
+            "label": "Share the supplied public source address",
+            "transport": "Tcp",
+            "requirement": {
+              "SourceAddress": "198.51.100.1"
+            },
+            "domains": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.9",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ],
+            "expected": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.9",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "label": "Publish only the stated TCP endpoint",
+            "transport": "Tcp",
+            "requirement": {
+              "ChangedToDestination": {
+                "address": "10.20.30.42",
+                "port": 443
+              }
+            },
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "expected": [
+              {
+                "source": null,
+                "destination": {
+                  "network": "198.51.100.1",
+                  "prefix": 32
+                },
+                "ingress": "wan0",
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 8443,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "label": "Keep other TCP destinations unchanged",
+            "transport": "Tcp",
+            "requirement": {
+              "DestinationOrIdentity": {
+                "address": "10.20.30.42",
+                "port": 443
+              }
+            },
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "expected": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "label": "Publish only the stated UDP endpoint",
+            "transport": "Udp",
+            "requirement": {
+              "ChangedToDestination": {
+                "address": "10.20.30.42",
+                "port": 443
+              }
+            },
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "expected": []
+          },
+          {
+            "label": "Keep other UDP destinations unchanged",
+            "transport": "Udp",
+            "requirement": {
+              "DestinationOrIdentity": {
+                "address": "10.20.30.42",
+                "port": 443
+              }
+            },
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "expected": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ]
+          }
+        ],
+        "cases": [
+          {
+            "id": "published-service",
+            "label": "Reach the published service",
+            "events": [
+              {
+                "label": "First external request",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "203.0.113.55",
+                      "port": 50000
+                    },
+                    "destination": {
+                      "address": "198.51.100.1",
+                      "port": 8443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "203.0.113.55",
+                    "port": 50000
+                  },
+                  "destination": {
+                    "address": "10.20.30.42",
+                    "port": 443
+                  }
+                }
+              },
+              {
+                "label": "Reply to first client",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "reply",
+                  "event": 0
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.1",
+                    "port": 8443
+                  },
+                  "destination": {
+                    "address": "203.0.113.55",
+                    "port": 50000
+                  }
+                }
+              },
+              {
+                "label": "Second external request",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "203.0.113.56",
+                      "port": 50001
+                    },
+                    "destination": {
+                      "address": "198.51.100.1",
+                      "port": 8443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "203.0.113.56",
+                    "port": 50001
+                  },
+                  "destination": {
+                    "address": "10.20.30.42",
+                    "port": 443
+                  }
+                }
+              },
+              {
+                "label": "Reply to second client",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "reply",
+                  "event": 2
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.1",
+                    "port": 8443
+                  },
+                  "destination": {
+                    "address": "203.0.113.56",
+                    "port": 50001
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "two-clients",
+            "label": "Two clients share one address",
+            "events": [
+              {
+                "label": "Client A request",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "10.20.30.55",
+                      "port": 40000
+                    },
+                    "destination": {
+                      "address": "203.0.113.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.1",
+                    "port": null
+                  },
+                  "destination": {
+                    "address": "203.0.113.9",
+                    "port": 443
+                  }
+                }
+              },
+              {
+                "label": "Client B request",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "10.20.30.56",
+                      "port": 40000
+                    },
+                    "destination": {
+                      "address": "203.0.113.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.1",
+                    "port": null
+                  },
+                  "destination": {
+                    "address": "203.0.113.9",
+                    "port": 443
+                  }
+                }
+              },
+              {
+                "label": "Reply to A",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "reply",
+                  "event": 0
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "203.0.113.9",
+                    "port": 443
+                  },
+                  "destination": {
+                    "address": "10.20.30.55",
+                    "port": 40000
+                  }
+                }
+              },
+              {
+                "label": "Reply to B",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "reply",
+                  "event": 1
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "203.0.113.9",
+                    "port": 443
+                  },
+                  "destination": {
+                    "address": "10.20.30.56",
+                    "port": 40000
+                  }
+                }
+              },
+              {
+                "label": "Client A continues",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "original",
+                  "event": 0
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.1",
+                    "port": null
+                  },
+                  "destination": {
+                    "address": "203.0.113.9",
+                    "port": 443
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "direct-private",
+            "label": "Direct private address stays protected",
+            "events": [
+              {
+                "label": "No destination translation",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "203.0.113.55",
+                      "port": 50002
+                    },
+                    "destination": {
+                      "address": "10.20.30.42",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "filtered"
+                }
+              }
+            ]
+          },
+          {
+            "id": "other-public-port",
+            "label": "Other public ports stay unpublished",
+            "events": [
+              {
+                "label": "Wrong public port",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "203.0.113.55",
+                      "port": 50003
+                    },
+                    "destination": {
+                      "address": "198.51.100.1",
+                      "port": 8444
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "not_forwarded"
+                }
+              }
+            ]
+          },
+          {
+            "id": "other-public-address",
+            "label": "Other public addresses stay unpublished",
+            "events": [
+              {
+                "label": "Wrong public address",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "203.0.113.55",
+                      "port": 50004
+                    },
+                    "destination": {
+                      "address": "198.51.100.99",
+                      "port": 8443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "not_forwarded"
+                }
+              }
+            ]
+          },
+          {
+            "id": "no-udp-publication",
+            "label": "UDP is not the published TCP service",
+            "events": [
+              {
+                "label": "UDP request",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Udp",
+                    "source": {
+                      "address": "203.0.113.55",
+                      "port": 50005
+                    },
+                    "destination": {
+                      "address": "198.51.100.1",
+                      "port": 8443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "not_forwarded"
+                }
+              }
+            ]
+          },
+          {
+            "id": "outside-lan-source",
+            "label": "Other source networks stay blocked",
+            "events": [
+              {
+                "label": "Source outside the supplied LAN",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "192.0.2.77",
+                      "port": 40000
+                    },
+                    "destination": {
+                      "address": "203.0.113.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "filtered"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "example": {
+        "id": "practice-publish",
+        "facts": {
+          "links": [
+            {
+              "name": "lan0",
+              "address": "172.20.4.1",
+              "prefix": 24,
+              "up": true
+            },
+            {
+              "name": "wan0",
+              "address": "192.0.2.1",
+              "prefix": 24,
+              "up": true
+            }
+          ],
+          "routes": [
+            {
+              "destination": {
+                "network": "0.0.0.0",
+                "prefix": 0
+              },
+              "device": "wan0",
+              "via": "192.0.2.254",
+              "metric": 10
+            }
+          ]
+        },
+        "forwarding": true,
+        "initial": {
+          "filter": {
+            "base": {
+              "input": {
+                "policy": "Drop",
+                "rules": []
+              },
+              "forward": {
+                "policy": "Drop",
+                "rules": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": null,
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "172.20.4.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.9",
+                      "prefix": 32
+                    },
+                    "ingress": "lan0",
+                    "egress": "wan0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": {
+                      "network": "192.0.2.1",
+                      "prefix": 32
+                    },
+                    "ingress": "wan0",
+                    "egress": "lan0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 9443,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              "output": {
+                "policy": "Accept",
+                "rules": []
+              }
+            },
+            "input": [],
+            "forward": [
+              "Established",
+              "New",
+              "New"
+            ],
+            "output": []
+          },
+          "nat": {
+            "prerouting": [
+              {
+                "predicate": {
+                  "source": null,
+                  "destination": {
+                    "network": "192.0.2.1",
+                    "prefix": 32
+                  },
+                  "ingress": "wan0",
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 9443,
+                  "target": "Accept"
+                },
+                "target": {
+                  "Dnat": {
+                    "address": "172.20.4.99",
+                    "port": 443
+                  }
+                }
+              }
+            ],
+            "postrouting": [
+              {
+                "predicate": {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": null,
+                  "ingress": null,
+                  "egress": "wan0",
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": null,
+                  "target": "Accept"
+                },
+                "target": {
+                  "Snat": {
+                    "address": "192.0.2.1",
+                    "ports": null
+                  }
+                }
+              }
+            ]
+          },
+          "connections": {
+            "next_id": 1,
+            "entries": []
+          }
+        },
+        "preserve_prerouting": false,
+        "policies": [
+          {
+            "dnat": false,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ],
+            "class": "New"
+          },
+          {
+            "dnat": true,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": {
+                  "network": "172.20.4.42",
+                  "prefix": 32
+                },
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ],
+            "class": "New"
+          },
+          {
+            "dnat": false,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "class": "Established"
+          },
+          {
+            "dnat": true,
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "lan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": null,
+                "ingress": "wan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "class": "Established"
+          }
+        ],
+        "nat_policies": [
+          {
+            "label": "Share the supplied public source address",
+            "transport": "Tcp",
+            "requirement": {
+              "SourceAddress": "192.0.2.1"
+            },
+            "domains": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.9",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ],
+            "expected": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.9",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "label": "Publish only the stated TCP endpoint",
+            "transport": "Tcp",
+            "requirement": {
+              "ChangedToDestination": {
+                "address": "172.20.4.42",
+                "port": 443
+              }
+            },
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "expected": [
+              {
+                "source": null,
+                "destination": {
+                  "network": "192.0.2.1",
+                  "prefix": 32
+                },
+                "ingress": "wan0",
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 9443,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "label": "Keep other TCP destinations unchanged",
+            "transport": "Tcp",
+            "requirement": {
+              "DestinationOrIdentity": {
+                "address": "172.20.4.42",
+                "port": 443
+              }
+            },
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "expected": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "label": "Publish only the stated UDP endpoint",
+            "transport": "Udp",
+            "requirement": {
+              "ChangedToDestination": {
+                "address": "172.20.4.42",
+                "port": 443
+              }
+            },
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "expected": []
+          },
+          {
+            "label": "Keep other UDP destinations unchanged",
+            "transport": "Udp",
+            "requirement": {
+              "DestinationOrIdentity": {
+                "address": "172.20.4.42",
+                "port": 443
+              }
+            },
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "expected": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ]
+          }
+        ],
+        "cases": [
+          {
+            "id": "published-service",
+            "label": "Reach the published service",
+            "events": [
+              {
+                "label": "First external request",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "198.51.100.55",
+                      "port": 50000
+                    },
+                    "destination": {
+                      "address": "192.0.2.1",
+                      "port": 9443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.55",
+                    "port": 50000
+                  },
+                  "destination": {
+                    "address": "172.20.4.42",
+                    "port": 443
+                  }
+                }
+              },
+              {
+                "label": "Reply to first client",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "reply",
+                  "event": 0
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "192.0.2.1",
+                    "port": 9443
+                  },
+                  "destination": {
+                    "address": "198.51.100.55",
+                    "port": 50000
+                  }
+                }
+              },
+              {
+                "label": "Second external request",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "198.51.100.56",
+                      "port": 50001
+                    },
+                    "destination": {
+                      "address": "192.0.2.1",
+                      "port": 9443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.56",
+                    "port": 50001
+                  },
+                  "destination": {
+                    "address": "172.20.4.42",
+                    "port": 443
+                  }
+                }
+              },
+              {
+                "label": "Reply to second client",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "reply",
+                  "event": 2
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "192.0.2.1",
+                    "port": 9443
+                  },
+                  "destination": {
+                    "address": "198.51.100.56",
+                    "port": 50001
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "two-clients",
+            "label": "Two clients share one address",
+            "events": [
+              {
+                "label": "Client A request",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "172.20.4.55",
+                      "port": 41000
+                    },
+                    "destination": {
+                      "address": "198.51.100.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "192.0.2.1",
+                    "port": null
+                  },
+                  "destination": {
+                    "address": "198.51.100.9",
+                    "port": 443
+                  }
+                }
+              },
+              {
+                "label": "Client B request",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "172.20.4.56",
+                      "port": 41000
+                    },
+                    "destination": {
+                      "address": "198.51.100.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "192.0.2.1",
+                    "port": null
+                  },
+                  "destination": {
+                    "address": "198.51.100.9",
+                    "port": 443
+                  }
+                }
+              },
+              {
+                "label": "Reply to A",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "reply",
+                  "event": 0
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.9",
+                    "port": 443
+                  },
+                  "destination": {
+                    "address": "172.20.4.55",
+                    "port": 41000
+                  }
+                }
+              },
+              {
+                "label": "Reply to B",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "reply",
+                  "event": 1
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "198.51.100.9",
+                    "port": 443
+                  },
+                  "destination": {
+                    "address": "172.20.4.56",
+                    "port": 41000
+                  }
+                }
+              },
+              {
+                "label": "Client A continues",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "original",
+                  "event": 0
+                },
+                "expected": {
+                  "kind": "outgoing",
+                  "source": {
+                    "address": "192.0.2.1",
+                    "port": null
+                  },
+                  "destination": {
+                    "address": "198.51.100.9",
+                    "port": 443
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "direct-private",
+            "label": "Direct private address stays protected",
+            "events": [
+              {
+                "label": "No destination translation",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "198.51.100.55",
+                      "port": 50002
+                    },
+                    "destination": {
+                      "address": "172.20.4.42",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "filtered"
+                }
+              }
+            ]
+          },
+          {
+            "id": "other-public-port",
+            "label": "Other public ports stay unpublished",
+            "events": [
+              {
+                "label": "Wrong public port",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "198.51.100.55",
+                      "port": 50003
+                    },
+                    "destination": {
+                      "address": "192.0.2.1",
+                      "port": 9444
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "not_forwarded"
+                }
+              }
+            ]
+          },
+          {
+            "id": "other-public-address",
+            "label": "Other public addresses stay unpublished",
+            "events": [
+              {
+                "label": "Wrong public address",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "198.51.100.55",
+                      "port": 50004
+                    },
+                    "destination": {
+                      "address": "192.0.2.99",
+                      "port": 9443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "not_forwarded"
+                }
+              }
+            ]
+          },
+          {
+            "id": "no-udp-publication",
+            "label": "UDP is not the published TCP service",
+            "events": [
+              {
+                "label": "UDP request",
+                "ingress": "wan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Udp",
+                    "source": {
+                      "address": "198.51.100.55",
+                      "port": 50005
+                    },
+                    "destination": {
+                      "address": "192.0.2.1",
+                      "port": 9443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "not_forwarded"
+                }
+              }
+            ]
+          },
+          {
+            "id": "outside-lan-source",
+            "label": "Other source networks stay blocked",
+            "events": [
+              {
+                "label": "Source outside the supplied LAN",
+                "ingress": "lan0",
+                "packet": {
+                  "kind": "literal",
+                  "tuple": {
+                    "transport": "Tcp",
+                    "source": {
+                      "address": "203.0.113.77",
+                      "port": 41000
+                    },
+                    "destination": {
+                      "address": "198.51.100.9",
+                      "port": 443
+                    }
+                  }
+                },
+                "expected": {
+                  "kind": "filtered"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "worked": [
+        {
+          "kind": "command",
+          "line": "iptables -F FORWARD"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -P FORWARD DROP"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -A FORWARD -m conntrack --ctstate ESTABLISHED -j ACCEPT"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -A FORWARD -i lan0 -o wan0 -s 172.20.4.0/24 -d 198.51.100.9 -p tcp --dport 443 -m conntrack --ctstate NEW -j ACCEPT"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -A FORWARD -i wan0 -o lan0 -d 172.20.4.42 -p tcp --dport 443 -m conntrack --ctstate DNAT -j ACCEPT"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -t nat -F PREROUTING"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -t nat -A PREROUTING -i wan0 -d 192.0.2.1 -p tcp --dport 9443 -j DNAT --to-destination 172.20.4.42:443"
+        },
+        {
+          "kind": "check"
+        }
+      ]
+    },
+    "solution": [
+      {
+        "kind": "command",
+        "line": "iptables -F FORWARD"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -P FORWARD DROP"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -A FORWARD -m conntrack --ctstate ESTABLISHED -j ACCEPT"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -A FORWARD -i lan0 -o wan0 -s 10.20.30.0/24 -d 203.0.113.9 -p tcp --dport 443 -m conntrack --ctstate NEW -j ACCEPT"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -A FORWARD -i wan0 -o lan0 -d 10.20.30.42 -p tcp --dport 443 -m conntrack --ctstate DNAT -j ACCEPT"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -t nat -F PREROUTING"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -t nat -A PREROUTING -i wan0 -d 198.51.100.1 -p tcp --dport 8443 -j DNAT --to-destination 10.20.30.42:443"
+      },
+      {
+        "kind": "check"
+      }
+    ]
+  }
+]

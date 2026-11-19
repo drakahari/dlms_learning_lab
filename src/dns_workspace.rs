@@ -76,6 +76,9 @@ fn absolute(text: &str) -> Result<String, String> {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Draft {
+    /// Inert optional command draft, absent in existing saved work by default.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub utility: Option<UtilityDraft>,
     pub version: u32,
     pub serial: String,
     pub text: String,
@@ -85,9 +88,17 @@ pub struct Draft {
     pub output: String,
     pub notice: Option<String>,
 }
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct UtilityDraft {
+    pub enabled: bool,
+    #[serde(deserialize_with = "crate::cron::text::<_,512>")]
+    pub input: String,
+}
 impl Draft {
     pub fn new(server: &Server) -> Self {
         Self {
+            utility: None,
             version: 1,
             serial: server.configured.serial.to_string(),
             text: server
@@ -119,6 +130,7 @@ impl Draft {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.utility.as_ref().is_none_or(|u|u.input.len() <= crate::dns_query_tools::MAX_COMMAND)
             && self.serial.len() <= 40
             && self.text.len() <= MAX_TEXT
             && self.query_name.len() <= 1024
@@ -200,6 +212,13 @@ impl Draft {
             self.output.push('\n');
             self.output.push_str(&record_text(record));
         }
+        Ok(())
+    }
+    pub fn lookup_utility(&mut self, server:&Server, plan:&crate::dns_query_tools::Plan)->Result<(),String>{
+        self.output.clear();
+        if !self.valid(){return Err("Lookup draft exceeds supported bounds".into());}
+        let command=self.utility.as_ref().filter(|u|u.enabled).ok_or("Choose Use lookup commands before running a utility query.")?;
+        self.output=plan.observe(server,&command.input)?.output()?;
         Ok(())
     }
 }

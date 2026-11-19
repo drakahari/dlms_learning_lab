@@ -1,0 +1,164 @@
+[
+  {
+    "id": "lpic2-kernel-root-build",
+    "goal": "Repair a source configuration and verify image, modules and early-userspace inputs.",
+    "context": "Builds on supplied-source projects, module choices and boot-entry recovery. All source versions are fixed teaching fixtures, not a recommendation to deploy these kernels.",
+    "concepts": [
+      {
+        "title": "A kernel needs the drivers for its root disk",
+        "text": "The kernel starts the system and manages hardware. This fixture has an NVMe disk containing an ext4 filesystem. It needs both the storage and filesystem drivers before it can reach the system root. Other hardware support is supplied by a fixed baseline."
+      },
+      {
+        "title": "Choose built-in, loadable or absent",
+        "text": "In the five-setting fragment, y builds a driver into the image, m builds it as a separately loaded module, and n leaves it out. CONFIG_MODULES=y permits modules. CONFIG_BLK_DEV_INITRD=y lets this image load an external initramfs: a small early-userspace image that can load root drivers before the main system is available."
+      },
+      {
+        "title": "Save, build and inspect different outputs",
+        "text": "Type configuration changes in the editor and select Save configuration. The build console reads that saved file. make bzImage builds image metadata; make modules builds module metadata; make all builds both when modules are enabled. CONFIG_LOCALVERSION adds a literal release suffix. Changing the editor or source leaves earlier outputs intact until rebuilt."
+      },
+      {
+        "title": "Early userspace must match its build",
+        "text": "With m root drivers, build modules as well as the image, then use Assemble build initramfs. The model assembles the declared driver inputs for that exact source/configuration. With both root drivers built in, bare-device readiness can pass without an initramfs, but this assignment still requires external loading support. Readiness is not an actual boot or a UUID boot guarantee."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Separate supplied source",
+        "value": "6.1.120 + -practice → 6.1.120-practice",
+        "explanation": "Worked values differ from the assignment. The source and saved configuration determine the build identity."
+      },
+      {
+        "label": "Supported worked fragment",
+        "value": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=m\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-practice\"\n",
+        "explanation": "The supplied example chooses modular NVMe/ext4 drivers and external loading. y driver alternatives are also supported."
+      },
+      {
+        "label": "Build",
+        "value": "make all",
+        "explanation": "Expected: image and selectable module metadata for the saved example configuration. Actual console results appear only after Run."
+      },
+      {
+        "label": "Root-driver prerequisites",
+        "value": "image + matching modules → Assemble build initramfs",
+        "explanation": "Expected readiness: NVMe and ext4 support available. A successful make operation alone does not prove the resulting image has the needed drivers."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Inspect and repair the example fragment",
+        "action": "In Configuration, change the missing NVMe setting from n to m. Select Save configuration.",
+        "observe": "The saved configuration summary changes. Earlier build outputs do not update when you edit the draft."
+      },
+      {
+        "title": "Build the saved inputs",
+        "action": "Enter make all in the build console and select Run. Compare Image build and Module build with the selected source and release suffix.",
+        "observe": "Actual results list modeled outputs for the saved inputs. Change the release suffix, save it and build only bzImage to observe different image and module snapshots."
+      },
+      {
+        "title": "Assemble, check and diagnose",
+        "action": "Rebuild with make all after any changed inputs. Select Assemble build initramfs, then Check build. Set NVMe back to n, save, rebuild and check again.",
+        "observe": "Actual objective feedback distinguishes missing drivers, unsaved changes and mismatched outputs. Retry with matching modular inputs or supported built-in choices."
+      }
+    ],
+    "requirements": [
+      "Build the supplied target image with external initramfs-loading support and working NVMe/ext4 root-driver support.",
+      "Keep the saved configuration and build inputs consistent; a modular repair or supported built-in alternative may satisfy the task."
+    ],
+    "status": "updated",
+    "source": "scenarios/kernel-build-lessons-v1.json",
+    "review": {
+      "introduction": "Read each root-driver/configuration concept and different-source worked example against the finite model. Explains saved inputs, y/m/n, image/module separation, early userspace and limits before assessment; native rendering pending.",
+      "example": "Read the actual source picker, configuration editor, make console, staging buttons and entry actions. Separate sources and UUID/release values preserve assignment independence. Focused authored examples and supported alternatives pass; native keyboard/layout checks pending.",
+      "assignment": "Read every independent requirement against the actual source-bound build/staging/boot and fallback checks. Intentional missing driver or unfinished entry remains. No worked recipe is filled by default. Focused wrong/partial/resume/reset tests pass; native/cold evidence pending."
+    }
+  },
+  {
+    "id": "lpic2-kernel-staged-handover",
+    "goal": "Keep a working recovery path while staging and verifying a different kernel build.",
+    "context": "Builds on supplied-source projects, module choices and boot-entry recovery. All source versions are fixed teaching fixtures, not a recommendation to deploy these kernels.",
+    "concepts": [
+      {
+        "title": "A kernel needs the drivers for its root disk",
+        "text": "The kernel starts the system and manages hardware. This fixture has an NVMe disk containing an ext4 filesystem. It needs both the storage and filesystem drivers before it can reach the system root. Other hardware support is supplied by a fixed baseline."
+      },
+      {
+        "title": "Choose built-in, loadable or absent",
+        "text": "In the five-setting fragment, y builds a driver into the image, m builds it as a separately loaded module, and n leaves it out. CONFIG_MODULES=y permits modules. CONFIG_BLK_DEV_INITRD=y lets this image load an external initramfs: a small early-userspace image that can load root drivers before the main system is available."
+      },
+      {
+        "title": "Save, build and inspect different outputs",
+        "text": "Type configuration changes in the editor and select Save configuration. The build console reads that saved file. make bzImage builds image metadata; make modules builds module metadata; make all builds both when modules are enabled. CONFIG_LOCALVERSION adds a literal release suffix. Changing the editor or source leaves earlier outputs intact until rebuilt."
+      },
+      {
+        "title": "Stage beside the fallback",
+        "text": "Builds still belong to the source workspace. Stage image places the versioned image inside the displayed virtual boot directory. make modules_install INSTALL_MOD_PATH=/training places matching module metadata under the example root. Assemble staged initramfs uses the selected staged image and module tree. These native controls are explicit simulator operations, not Linux commands to memorize."
+      },
+      {
+        "title": "Select the files the boot trial will actually use",
+        "text": "A loader entry names a linux image and optional initrd path relative to virtual $BOOT. Its options identify the supplied root by UUID. In this exercise UUID lookup needs early userspace even if root drivers are built in. Save entry changes a virtual file; Check configuration then tests the candidate and checks that the original fallback files remain unchanged."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Separate supplied source",
+        "value": "6.1.120 + -practice → 6.1.120-practice",
+        "explanation": "Worked values differ from the assignment. The source and saved configuration determine the build identity."
+      },
+      {
+        "label": "Supported worked fragment",
+        "value": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=m\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-practice\"\n",
+        "explanation": "The supplied example chooses modular NVMe/ext4 drivers and external loading. y driver alternatives are also supported."
+      },
+      {
+        "label": "Build",
+        "value": "make all",
+        "explanation": "Expected: image and selectable module metadata for the saved example configuration. Actual console results appear only after Run."
+      },
+      {
+        "label": "Module staging",
+        "value": "make modules_install INSTALL_MOD_PATH=/training",
+        "explanation": "Expected virtual directory: /training/lib/modules/6.1.120-practice. INSTALL_MOD_PATH relocates the module-install root; it is not an image-build option."
+      },
+      {
+        "label": "Versioned loader selection",
+        "value": "title Supplied kernel candidate\nlinux /vmlinuz-6.1.120-practice\ninitrd /initramfs-6.1.120-practice.img\noptions root=UUID=11111111-aaaa-bbbb-cccc-222222222222 ro\n",
+        "explanation": "Use a new entry filename, retain the fallback and select the actual staged image/initramfs paths relative to virtual $BOOT."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Inspect and repair the example fragment",
+        "action": "Choose the 6.1.120 target source. Inspect the example configuration and select Save configuration.",
+        "observe": "The saved configuration summary changes. Earlier build outputs do not update when you edit the draft."
+      },
+      {
+        "title": "Build the saved inputs",
+        "action": "Enter make all in the build console and select Run. Compare Image build and Module build with the selected source and release suffix.",
+        "observe": "Actual results list modeled outputs for the saved inputs. Change the release suffix, save it and build only bzImage to observe different image and module snapshots."
+      },
+      {
+        "title": "Stage a candidate beside the fallback",
+        "action": "Select Stage image. Run make modules_install INSTALL_MOD_PATH=/training. Select the new staged image, then Assemble staged initramfs.",
+        "observe": "Virtual staged files show separate image, module and initramfs paths. An incorrect module root gives a missing-tree diagnostic; building modules is not the same as installing them."
+      },
+      {
+        "title": "Save an independent boot selection",
+        "action": "Edit the candidate entry using the new staged paths and displayed root UUID. Select Save entry, then Check configuration. Keep fallback.conf unchanged.",
+        "observe": "Results distinguish the new target, boot handoff and preserved fallback. Try an incorrect root UUID and check again; restore it and retry."
+      }
+    ],
+    "requirements": [
+      "Stage a working boot candidate from the supplied target source, using the saved configuration and a new loader-entry filename.",
+      "Use the supplied system-root identity.",
+      "Preserve every original fallback image, module tree, initramfs and entry unchanged.",
+      "Verify a new-kernel boot through root and init handoff; booting the old fallback alone is insufficient."
+    ],
+    "status": "updated",
+    "source": "scenarios/kernel-build-lessons-v1.json",
+    "review": {
+      "introduction": "Read each root-driver/configuration concept and different-source worked example against the finite model. Explains saved inputs, y/m/n, image/module separation, early userspace and limits before assessment; native rendering pending.",
+      "example": "Read the actual source picker, configuration editor, make console, staging buttons and entry actions. Separate sources and UUID/release values preserve assignment independence. Focused authored examples and supported alternatives pass; native keyboard/layout checks pending.",
+      "assignment": "Read every independent requirement against the actual source-bound build/staging/boot and fallback checks. Intentional missing driver or unfinished entry remains. No worked recipe is filled by default. Focused wrong/partial/resume/reset tests pass; native/cold evidence pending."
+    }
+  }
+]

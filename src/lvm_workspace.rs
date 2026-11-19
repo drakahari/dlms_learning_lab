@@ -1,5 +1,19 @@
 //! A bounded growth session over the pure LVM model. No host devices or processes.
 //! Assignment and practice use separate state; goals never trust saved success.
+pub mod activation;
+pub mod config_scan;
+pub mod config_scan_session;
+pub mod device_reference;
+pub mod device_reference_flow;
+pub mod device_reference_session;
+pub mod mount_flow;
+pub mod mount_session;
+pub mod provision;
+pub mod pv_capacity;
+pub mod rename;
+pub mod retirement;
+pub mod snapshot;
+pub mod snapshot_flow;
 use crate::{
     cron_workspace as bounded, lvm,
     script_teaching::{Concept, View},
@@ -19,6 +33,14 @@ pub struct Target {
     pub minimum_lv: u64,
     pub minimum_filesystem: u64,
     pub fill_lv: bool,
+    #[serde(
+        default,
+        skip_serializing_if = "Vec::is_empty",
+        deserialize_with = "pv_capacity::targets"
+    )]
+    pub pv_sizes: Vec<pv_capacity::Target>,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub preserve_volume: bool,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -32,8 +54,24 @@ pub struct Lesson {
     pub fixture: lvm::State,
     #[serde(deserialize_with = "bounded::sequence::<_,Target,4>")]
     pub targets: Vec<Target>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub plan: Option<provision::Plan>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub retirement: Option<retirement::Plan>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub availability: Option<activation::Plan>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub renaming: Option<rename::Plan>,
     #[serde(deserialize_with = "bounded::sequence::<_,Command,12>")]
     pub worked: Vec<Command>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub snapshot_practice: Option<snapshot_flow::Practice>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_reference_practice: Option<device_reference_flow::Practice>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub config_scan_practice: Option<config_scan::Practice>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mount_practice: Option<mount_flow::Practice>,
     #[serde(deserialize_with = "crate::cron::text::<_,1600>")]
     pub try_change: String,
     #[serde(deserialize_with = "crate::cron::text::<_,2048>")]
@@ -55,6 +93,22 @@ pub struct Definition {
     pub initial: lvm::State,
     #[serde(deserialize_with = "bounded::sequence::<_,Target,4>")]
     pub targets: Vec<Target>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub plan: Option<provision::Plan>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub retirement: Option<retirement::Plan>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub availability: Option<activation::Plan>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub renaming: Option<rename::Plan>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub snapshot_task: Option<snapshot_flow::Task>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub device_reference_task: Option<device_reference_flow::Task>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub config_scan_task: Option<config_scan::Task>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mount_task: Option<mount_flow::Task>,
     pub lesson: Lesson,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -85,6 +139,15 @@ pub struct Session {
     pub checked: bool,
     pub example_checked: bool,
     pub selected_example: usize,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reference_runtime: Option<device_reference_session::Runtime>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub config_scan_runtime: Option<config_scan::Runtime>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mount_runtime: Option<mount_session::Runtime>,
+}
+fn is_false(value: &bool) -> bool {
+    !*value
 }
 fn model(s: &lvm::State) -> Result<(), String> {
     if s.groups
@@ -103,10 +166,30 @@ fn model(s: &lvm::State) -> Result<(), String> {
 /// Blank devices may legitimately join a wrong supplied VG; feedback then exposes
 /// the changed protected context. No wrong answer is silently normalized.
 pub fn same_problem(initial: &lvm::State, current: &lvm::State) -> bool {
+    if initial.snapshots.is_some() || current.snapshots.is_some() {
+        return false;
+    }
+    if initial.pv_capacity != current.pv_capacity {
+        return false;
+    }
+    if initial.identity.is_some() || current.identity.is_some() {
+        return rename::same_problem(initial, current);
+    }
+    if !lvm::activation::same_context(initial, current) {
+        return false;
+    }
+    if initial.provisioning == Some(lvm::provision::Profile::Lifecycle) {
+        return retirement::same_problem(initial, current);
+    }
     if model(initial).is_err()
         || model(current).is_err()
+        || initial.provisioning != current.provisioning
         || initial.devices.keys().ne(current.devices.keys())
-        || initial.groups.keys().ne(current.groups.keys())
+        || initial
+            .groups
+            .keys()
+            .any(|g| !current.groups.contains_key(g))
+        || (initial.provisioning.is_none() && initial.groups.keys().ne(current.groups.keys()))
     {
         return false;
     }
@@ -128,7 +211,11 @@ pub fn same_problem(initial: &lvm::State, current: &lvm::State) -> bool {
     for (name, before) in &initial.groups {
         let after = &current.groups[name];
         if before.extent_bytes != after.extent_bytes
-            || before.volumes.keys().ne(after.volumes.keys())
+            || before
+                .volumes
+                .keys()
+                .any(|v| !after.volumes.contains_key(v))
+            || (initial.provisioning.is_none() && before.volumes.keys().ne(after.volumes.keys()))
         {
             return false;
         }
@@ -152,7 +239,7 @@ fn valid_targets(initial: &lvm::State, targets: &[Target]) -> bool {
         return false;
     }
     let mut ids = BTreeSet::new();
-    targets.iter().all(|t| {
+    let valid = targets.iter().all(|t| {
         ids.insert(t.volume.strip_prefix("/dev/").unwrap_or(&t.volume))
             && t.minimum_lv > 0
             && t.minimum_filesystem > 0
@@ -161,16 +248,63 @@ fn valid_targets(initial: &lvm::State, targets: &[Target]) -> bool {
             && initial
                 .volume(&t.volume)
                 .is_ok_and(|(_, v)| v.filesystem.is_some())
-    })
+    });
+    valid && pv_capacity::valid(initial, targets)
 }
-fn outcomes(initial: &lvm::State, current: &lvm::State, targets: &[Target]) -> Vec<(bool, String)> {
+fn valid_task(
+    initial: &lvm::State,
+    targets: &[Target],
+    plan: Option<&provision::Plan>,
+    retirement: Option<&retirement::Plan>,
+    availability: Option<&activation::Plan>,
+    renaming: Option<&rename::Plan>,
+) -> bool {
+    if let Some(p) = renaming {
+        return targets.is_empty()
+            && plan.is_none()
+            && retirement.is_none()
+            && availability.is_none()
+            && p.valid(initial);
+    }
+    if initial.identity.is_some() || initial.activation.is_some() != availability.is_some() {
+        return false;
+    }
+    match (plan, retirement, availability) {
+        (Some(p), None, None) => targets.is_empty() && p.valid(initial),
+        (None, Some(p), None) => targets.is_empty() && p.valid(initial),
+        (None, None, Some(p)) => targets.is_empty() && p.valid(initial),
+        (None, None, None) => initial.provisioning.is_none() && valid_targets(initial, targets),
+        _ => false,
+    }
+}
+fn outcomes(
+    initial: &lvm::State,
+    current: &lvm::State,
+    targets: &[Target],
+    plan: Option<&provision::Plan>,
+    retirement: Option<&retirement::Plan>,
+    availability: Option<&activation::Plan>,
+    renaming: Option<&rename::Plan>,
+) -> Vec<(bool, String)> {
+    if let Some(p) = renaming {
+        return p.outcomes(initial, current);
+    }
+    if let Some(p) = availability {
+        return p.outcomes(initial, current);
+    }
+    if let Some(p) = retirement {
+        return p.outcomes(initial, current);
+    }
+    if let Some(p) = plan {
+        return p.outcomes(initial, current);
+    }
     if !same_problem(initial, current) || !valid_targets(initial, targets) {
         return vec![(
             false,
             "The supplied device, group, volume or allocation-prefix context differs".into(),
         )];
     }
-    let mut rows = Vec::new();
+    let mut rows = pv_capacity::outcomes(initial, current, targets);
     for t in targets {
         let before = initial
             .volume(&t.volume)
@@ -256,10 +390,49 @@ fn all(rows: &[(bool, String)]) -> bool {
 impl Definition {
     /// Structural admission only: no reference execution on idle/current grading.
     pub fn shape(&self) -> Result<(), String> {
+        if self.mount_task.is_some() || self.lesson.mount_practice.is_some() {return mount_session::definition_shape(self);}
+        if self.config_scan_task.is_some() || self.lesson.config_scan_practice.is_some() {
+            return config_scan_session::definition_shape(self);
+        }
+        if self.device_reference_task.is_some() || self.lesson.device_reference_practice.is_some() {
+            return device_reference_session::definition_shape(self);
+        }
+        if self.initial.snapshots.is_some()
+            || self.lesson.fixture.snapshots.is_some()
+            || self.snapshot_task.is_some()
+            || self.lesson.snapshot_practice.is_some()
+        {
+            return snapshot_flow::definition_shape(self);
+        }
         model(&self.initial)?;
         model(&self.lesson.fixture)?;
-        if !valid_targets(&self.initial, &self.targets)
-            || !valid_targets(&self.lesson.fixture, &self.lesson.targets)
+        if !valid_task(
+            &self.initial,
+            &self.targets,
+            self.plan.as_ref(),
+            self.retirement.as_ref(),
+            self.availability.as_ref(),
+            self.renaming.as_ref(),
+        ) || !valid_task(
+            &self.lesson.fixture,
+            &self.lesson.targets,
+            self.lesson.plan.as_ref(),
+            self.lesson.retirement.as_ref(),
+            self.lesson.availability.as_ref(),
+            self.lesson.renaming.as_ref(),
+        ) || self.renaming.is_some() != self.lesson.renaming.is_some()
+            || self.availability.is_some() != self.lesson.availability.is_some()
+            || self.retirement.is_some() != self.lesson.retirement.is_some()
+            || self.plan.is_some() != self.lesson.plan.is_some()
+            || self
+                .plan
+                .as_ref()
+                .zip(self.lesson.plan.as_ref())
+                .is_some_and(|(a, b)| {
+                    a.groups
+                        .iter()
+                        .any(|g| b.groups.iter().any(|e| e.name == g.name))
+                })
             || !bounded::within(self, MAX_DEFINITION)
             || self.lesson.concepts.is_empty()
             || self.lesson.concepts.len() > 6
@@ -314,26 +487,83 @@ impl Definition {
     /// Authoring gate only; the native learner must explicitly run each command.
     pub fn validate(&self) -> Result<(), String> {
         self.shape()?;
+        if let Some(task) = &self.mount_task {task.validate(&self.initial)?;return self.lesson.mount_practice.as_ref().unwrap().validate(&self.lesson.fixture);}
+        if let Some(task) = &self.config_scan_task {
+            task.validate()?;
+            return self.lesson.config_scan_practice.as_ref().unwrap().validate();
+        }
+        if let Some(task) = &self.device_reference_task {
+            task.validate(&self.initial)?;
+            return self
+                .lesson
+                .device_reference_practice
+                .as_ref()
+                .unwrap()
+                .validate(&self.lesson.fixture);
+        }
+        if let Some(task) = &self.snapshot_task {
+            task.validate(&self.initial)?;
+            return self
+                .lesson
+                .snapshot_practice
+                .as_ref()
+                .unwrap()
+                .validate(&self.lesson.fixture);
+        }
         let l = &self.lesson;
         let mut example = l.fixture.clone();
-        if all(&outcomes(&l.fixture, &example, &l.targets)) {
+        if all(&outcomes(
+            &l.fixture,
+            &example,
+            &l.targets,
+            l.plan.as_ref(),
+            l.retirement.as_ref(),
+            l.availability.as_ref(),
+            l.renaming.as_ref(),
+        )) {
             return Err("Practice must require real changes".into());
         }
         for c in &l.worked {
             example.execute(&c.text).map_err(|e| e.to_string())?;
         }
-        if !all(&outcomes(&l.fixture, &example, &l.targets)) {
+        if !all(&outcomes(
+            &l.fixture,
+            &example,
+            &l.targets,
+            l.plan.as_ref(),
+            l.retirement.as_ref(),
+            l.availability.as_ref(),
+            l.renaming.as_ref(),
+        )) {
             return Err("Worked example misses its outcomes".into());
         }
         let before = example.clone();
         example.execute(&l.experiment).map_err(|e| e.to_string())?;
-        if example == before || all(&outcomes(&l.fixture, &example, &l.targets)) {
+        if example == before
+            || all(&outcomes(
+                &l.fixture,
+                &example,
+                &l.targets,
+                l.plan.as_ref(),
+                l.retirement.as_ref(),
+                l.availability.as_ref(),
+                l.renaming.as_ref(),
+            ))
+        {
             return Err(
                 "Practice experiment must change state and expose a real incomplete outcome".into(),
             );
         }
         example.execute(&l.repair).map_err(|e| e.to_string())?;
-        if !all(&outcomes(&l.fixture, &example, &l.targets)) {
+        if !all(&outcomes(
+            &l.fixture,
+            &example,
+            &l.targets,
+            l.plan.as_ref(),
+            l.retirement.as_ref(),
+            l.availability.as_ref(),
+            l.renaming.as_ref(),
+        )) {
             return Err("Practice repair misses its outcomes".into());
         }
         Ok(())
@@ -345,20 +575,67 @@ impl Definition {
                 "LVM source/session context is invalid; previous work retained".into(),
             )];
         }
-        outcomes(&self.initial, &s.current, &self.targets)
+        if let Some(task) = &self.mount_task {return s.mount_runtime.as_ref().unwrap().assignment.checks(&task.context,&self.initial,&s.current);}
+        if let Some(task) = &self.config_scan_task {
+            return s.config_scan_runtime.as_ref().unwrap().assignment.checks(&task.context);
+        }
+        if let Some(task) = &self.device_reference_task {
+            return s.reference_runtime.as_ref().unwrap().assignment.checks(
+                &task.context,
+                &self.initial,
+                &s.current,
+            );
+        }
+        if let Some(task) = &self.snapshot_task {
+            return task.context.checks(&self.initial, &s.current);
+        }
+        outcomes(
+            &self.initial,
+            &s.current,
+            &self.targets,
+            self.plan.as_ref(),
+            self.retirement.as_ref(),
+            self.availability.as_ref(),
+            self.renaming.as_ref(),
+        )
     }
     pub fn practice_checks(&self, s: &Session) -> Vec<(bool, String)> {
         if self.bound(s).is_err() {
             return vec![(false, "Separate practice context differs".into())];
         }
-        outcomes(&self.lesson.fixture, &s.example, &self.lesson.targets)
+        if let Some(practice) = &self.lesson.mount_practice {return s.mount_runtime.as_ref().unwrap().example.checks(&practice.context,&self.lesson.fixture,&s.example);}
+        if let Some(practice) = &self.lesson.config_scan_practice {
+            return s.config_scan_runtime.as_ref().unwrap().example.checks(&practice.context);
+        }
+        if let Some(practice) = &self.lesson.device_reference_practice {
+            return s.reference_runtime.as_ref().unwrap().example.checks(
+                &practice.context,
+                &self.lesson.fixture,
+                &s.example,
+            );
+        }
+        if let Some(practice) = &self.lesson.snapshot_practice {
+            return practice.context.checks(&self.lesson.fixture, &s.example);
+        }
+        outcomes(
+            &self.lesson.fixture,
+            &s.example,
+            &self.lesson.targets,
+            self.lesson.plan.as_ref(),
+            self.lesson.retirement.as_ref(),
+            self.lesson.availability.as_ref(),
+            self.lesson.renaming.as_ref(),
+        )
     }
     pub fn bound(&self, s: &Session) -> Result<(), String> {
         self.shape()?;
         s.validate()?;
+        device_reference_session::bound(self, s)?;
+        config_scan_session::bound(self, s)?;
+        mount_session::bound(self, s)?;
         if s.initial != self.initial
             || s.example_initial != self.lesson.fixture
-            || s.selected_example >= self.lesson.worked.len()
+            || s.selected_example >= self.example_steps().len()
         {
             return Err("LVM session belongs to another authored assignment/practice".into());
         }
@@ -382,21 +659,34 @@ impl Session {
             checked: false,
             example_checked: false,
             selected_example: 0,
+            reference_runtime: device_reference_session::Runtime::new(d)?,
+            config_scan_runtime: config_scan_session::fresh(d)?,
+            mount_runtime: mount_session::Runtime::new(d)?,
         };
         s.validate()?;
         Ok(s)
     }
     pub fn validate(&self) -> Result<(), String> {
+        if let Some(runtime)=&self.mount_runtime {runtime.shape()?;}
+        if let Some(runtime) = &self.config_scan_runtime {runtime.shape()?;}
+        if let Some(runtime) = &self.reference_runtime {
+            runtime.shape()?;
+        }
         if self.version != 1
-            || !same_problem(&self.initial, &self.current)
-            || !same_problem(&self.example_initial, &self.example)
+            || !snapshot_flow::session_context(&self.initial, &self.current)
+            || !snapshot_flow::session_context(&self.example_initial, &self.example)
             || self.command.len() > 2048
             || self.example_command.len() > 2048
             || self.command.contains(['\0', '\n', '\r'])
             || self.example_command.contains(['\0', '\n', '\r'])
             || self.transcript.len() > 32
             || self.example_transcript.len() > 32
-            || self.selected_example >= 12
+            || self.selected_example
+                >= if self.initial.snapshots.is_some() {
+                    16
+                } else {
+                    12
+                }
             || self
                 .transcript
                 .iter()
@@ -435,7 +725,7 @@ impl Session {
     }
     pub fn select_example(&mut self, d: &Definition, index: usize) -> Result<(), String> {
         d.bound(self)?;
-        if index >= d.lesson.worked.len() {
+        if index >= d.example_steps().len() {
             return Err("No such separate example command".into());
         }
         let mut next = self.clone();
@@ -459,17 +749,44 @@ impl Session {
         practice: bool,
     ) -> Result<String, String> {
         d.bound(self)?;
+        if d.mount_task.is_some() {return self.mount_action(d,&mount_flow::Operation::Command{text:input.into()},practice);}
+        if d.config_scan_task.is_some() {return Err("Use the simulated configuration editor and Run scan controls; shell and LVM commands are not executed in this workspace".into());}
         if input.len() > 2048 || input.contains(['\0', '\n', '\r']) {
             return Err("Use one LVM command up to2048bytes; previous work retained".into());
         }
         let mut next = self.clone();
-        let output = (if practice {
+        let current = if practice {
             &mut next.example
         } else {
             &mut next.current
-        })
-        .execute(input)
-        .map_err(|e| e.to_string())?;
+        };
+        let output = if let Some(context) = d.reference_context(practice) {
+            let live = if practice {
+                &mut next.reference_runtime.as_mut().unwrap().example
+            } else {
+                &mut next.reference_runtime.as_mut().unwrap().assignment
+            };
+            let initial = if practice {
+                &d.lesson.fixture
+            } else {
+                &d.initial
+            };
+            live.apply(
+                context,
+                initial,
+                current,
+                &device_reference_session::decode(input)?,
+            )?
+        } else if let Some(context) = d.snapshot_context(practice) {
+            let initial = if practice {
+                &d.lesson.fixture
+            } else {
+                &d.initial
+            };
+            snapshot_flow::decode(input)?.apply(context, initial, current)?
+        } else {
+            current.execute(input).map_err(|e| e.to_string())?
+        };
         let rows = if practice {
             &mut next.example_transcript
         } else {
@@ -493,11 +810,23 @@ impl Session {
     }
     pub fn insert(&mut self, d: &Definition, index: usize) -> Result<(), String> {
         d.bound(self)?;
-        let c = d
-            .lesson
-            .worked
-            .get(index)
-            .ok_or("No such separate example command")?;
+        if d.config_scan_task.is_some() {return Err("Use the guided configuration action; it is not a Linux command".into());}
+        if d.mount_helper(index) {return Err("Use the explicit simulated mount-configuration action; it is not a terminal command".into());}
+        if d.reference_helper(index) {
+            return Err(
+                "Use the explicit simulator configuration action; it is not a Linux command".into(),
+            );
+        }
+        if d.lesson
+            .snapshot_practice
+            .as_ref()
+            .and_then(|p| p.worked.get(index))
+            .is_some_and(|s| !matches!(s.operation, snapshot_flow::Operation::Command { .. }))
+        {
+            return Err("Use the explicit simulator action; it is not a Linux command".into());
+        }
+        let steps = d.example_steps();
+        let c = steps.get(index).ok_or("No such separate example command")?;
         let mut next = self.clone();
         next.selected_example = index;
         next.example_command = c.text.clone();
@@ -510,6 +839,12 @@ impl Session {
         d.bound(self)?;
         let mut next = self.clone();
         next.example = d.lesson.fixture.clone();
+        if let Some(p)=&d.lesson.mount_practice {next.mount_runtime.as_mut().unwrap().example=mount_flow::Live::new(&p.context,&d.lesson.fixture)?;}
+        if let (Some(t),Some(p),Some(r))=(&d.config_scan_task,&d.lesson.config_scan_practice,&mut next.config_scan_runtime) {r.reset_example(t,p)?;}
+        if let Some(practice) = &d.lesson.device_reference_practice {
+            next.reference_runtime.as_mut().unwrap().example =
+                device_reference_flow::Live::new(&practice.context)?;
+        }
         next.example_command.clear();
         next.example_transcript.clear();
         next.example_checked = false;
@@ -575,6 +910,7 @@ fn foreign_empty(w: &crate::workspace::WorkspaceData) -> bool {
         terminal_learning: _,
         process_learning: _,
         accounts_learning: _,
+        accounts_template_drafts: _,
         discovery_draft: _,
         discovery_learning: _,
         storage_draft: _,
@@ -648,6 +984,7 @@ fn foreign_empty(w: &crate::workspace::WorkspaceData) -> bool {
         && w.terminal_learning.is_none()
         && w.process_learning.is_none()
         && w.accounts_learning.is_none()
+        && w.accounts_template_drafts.is_none()
         && w.discovery_draft.is_none()
         && w.discovery_learning.is_none()
         && w.storage_draft.is_none()
@@ -719,7 +1056,11 @@ pub fn source(s: &crate::pack::Scenario) -> Result<(), String> {
     };
     definition.shape()?;
     simulation.validate()?;
-    if simulation.initial != definition.initial
+    definition.bound(simulation)?;
+    if simulation.mount_runtime != mount_session::Runtime::new(definition)?
+        || simulation.config_scan_runtime != config_scan_session::fresh(definition)?
+        || simulation.reference_runtime != device_reference_session::Runtime::new(definition)?
+        || simulation.initial != definition.initial
         || simulation.current != definition.initial
         || simulation.example_initial != definition.lesson.fixture
         || simulation.example != definition.lesson.fixture
@@ -734,6 +1075,10 @@ pub fn source(s: &crate::pack::Scenario) -> Result<(), String> {
     {
         return Err("Authored initial must be the fresh assignment and independent example".into());
     }
+    if let Some(t)=&definition.mount_task
+        && s.solution != t.reference.iter().map(|op|op.description()).collect::<Vec<_>>() {return Err("Mount source needs the exact human native-action roster; saved configuration remains typed data".into());}
+    if let Some(t)=&definition.config_scan_task
+        && s.solution != t.reference.iter().map(|op|op.label().to_owned()).collect::<Vec<_>>() {return Err("Configuration source needs the exact human native-action roster; reference data stays typed".into());}
     let crate::pack::Scenario {
         one_off_teaching: _,
         physical_link_teaching: _,

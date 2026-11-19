@@ -10,6 +10,8 @@ pub const MAX_DEFINITION: usize = 98_304;
 pub const MAX_SCENARIO: usize = 393_216;
 pub const MAX_ATTEMPT: usize = 1_048_576;
 pub const HELP: &str = "Restricted virtual RPM console: rpm -q/-ql/-qf/--path/-qp/-qpl; --provides/--requires/--whatprovides; one fixed epoch queryformat; local -i/-U/--reinstall/-e. Declared noarch script-free metadata only, no host RPM, resolver, scripts, signatures, multilib or rpm -V. Unmodeled results are explicitly SimulatorUnsupported without an invented RPM status. Check inspects actual current outcomes; console history is never credit.";
+pub const PATCH_HELP: &str = "Restricted virtual RPM console: literal RPM queries and supplied local -i/-U/--reinstall/-e transactions. Training advisory/origin facts are supplied data, not real CVEs or signature verification. Same-manifest regular configurations may retain local text and stage .rpmnew or .rpmsave; collisions, attribute changes and unmodeled operations refuse atomically. No host RPM, repository resolver, scripts, signatures or running-service verification. Check uses the actual installed version, target release, dependencies and retained files.";
+pub const METADATA_HELP: &str = "Restricted virtual RPM console: rpm -q/-ql/-qf/--path/-qp/-qpl; --provides/--requires/--whatprovides; one fixed epoch queryformat; local -i/-U/--reinstall/-e; rpm --restore EXACT_INSTALLED_NAME. Restore changes only declared ordinary-file mode, owner, group and modified time, preserving contents and installed versions. All package payload paths must exist; missing-file partial restoration is explicitly unsupported. No --all, capabilities, special files/modes, xattrs, signatures, rpm -V, resolver, scripts or host operations. The payload inspector is simulated comparison, not rpm -V; intentional site text may differ. Check inspects current outcomes, not command history.";
 pub fn notice(s: impl AsRef<str>) -> String {
     let s = s.as_ref();
     let mut n = s.len().min(512);
@@ -200,6 +202,10 @@ pub fn admitted(s: &State) -> bool {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Requirement {
+    AdvisoryFixed {
+        #[serde(deserialize_with = "string::<_,64>")]
+        advisory: String,
+    },
     Installed {
         package: Identity,
         version: Option<core::Constraint>,
@@ -209,6 +215,15 @@ pub enum Requirement {
     },
     OwnedPayloadMatches {
         package: Identity,
+        #[serde(deserialize_with = "string::<_,160>")]
+        path: String,
+    },
+    OwnedMetadataMatches {
+        package: Identity,
+        #[serde(deserialize_with = "string::<_,160>")]
+        path: String,
+    },
+    PreserveInitialContents {
         #[serde(deserialize_with = "string::<_,160>")]
         path: String,
     },
@@ -229,13 +244,16 @@ impl Requirement {
         matches!(
             self,
             Self::Installed { .. }
+                | Self::AdvisoryFixed { .. }
                 | Self::SatisfiesCapability { .. }
                 | Self::OwnedPayloadMatches { .. }
+                | Self::OwnedMetadataMatches { .. }
         )
     }
     fn valid(&self, i: &State) -> bool {
         let c = i.catalog();
         match self {
+            Self::AdvisoryFixed { advisory } => advisory.starts_with("TRAINING-") && advisory.len() <= 64,
             Self::Installed { package, version } => {
                 identity(c, package) && version.as_ref().is_none_or(|v| v.evr.as_str().len() <= 128)
             }
@@ -248,7 +266,8 @@ impl Requirement {
                         a.identity.name == q.capability || a.provides.contains_key(&q.capability)
                     })
             }
-            Self::OwnedPayloadMatches { package, path: p } => {
+            Self::OwnedPayloadMatches { package, path: p }
+            | Self::OwnedMetadataMatches { package, path: p } => {
                 identity(c, package)
                     && path(p)
                     && c.archives
@@ -257,15 +276,20 @@ impl Requirement {
             }
             Self::Absent { package } => identity(c, package),
             Self::DependenciesHealthy {} => true,
-            Self::PreserveInitialFile { path: p } => path(p) && i.runtime().files.contains_key(p),
+            Self::PreserveInitialFile { path: p }
+            | Self::PreserveInitialContents { path: p } => path(p) && i.runtime().files.contains_key(p),
             Self::PreserveInitialPackage { package } => {
                 identity(c, package) && i.runtime().installed.iter().any(|v| v.identity == *package)
             }
         }
     }
-    fn check(&self, i: &State, s: &State, v: &core::ValidatedQueries<'_>) -> (bool, String) {
+    fn check(&self, i: &State, s: &State, v: &core::ValidatedQueries<'_>, patch: Option<&crate::rpm_patch_policy::Policy>) -> (bool, String) {
+        if let Self::AdvisoryFixed { advisory } = self {
+            return patch.map_or_else(|| (false, "The source-owned advisory is unavailable.".into()), |policy| policy.check(s, advisory));
+        }
         let r = s.runtime();
         let ok = match self {
+            Self::AdvisoryFixed { .. } => unreachable!("Handled above"),
             Self::Installed { package, version } => {
                 v.installed(package).ok().flatten().is_some_and(|a| {
                     version.as_ref().is_none_or(|q| {
@@ -291,6 +315,11 @@ impl Requirement {
                     && v.file_issues(package)
                         .is_ok_and(|rows| !rows.iter().any(|x| &x.path == path))
             }
+            Self::OwnedMetadataMatches { package, path } => v.installed(package).ok().flatten()
+                .and_then(|a| a.files.get(path)).zip(r.files.get(path))
+                .is_some_and(|(expected,actual)|core::same_recorded_metadata(actual,&expected.file)),
+            Self::PreserveInitialContents { path } => i.runtime().files.get(path)
+                .zip(r.files.get(path)).is_some_and(|(old,actual)|old.contents==actual.contents),
             Self::Absent { package } => v.installed(package).is_ok_and(|x| x.is_none()),
             Self::DependenciesHealthy {} => v.dependency_issues().is_empty(),
             Self::PreserveInitialFile { path } => i
@@ -312,6 +341,7 @@ impl Requirement {
                 }),
         };
         let target = match self {
+            Self::AdvisoryFixed { .. } => unreachable!("Handled above"),
             Self::Installed { package, .. } => {
                 format!("{} has the required installed version", package.name)
             }
@@ -321,6 +351,24 @@ impl Requirement {
             Self::OwnedPayloadMatches { path, .. } => {
                 format!("Recorded owner and simulated payload match for {path}")
             }
+            Self::OwnedMetadataMatches { package, path } => {
+                let expected=v.installed(package).ok().flatten().and_then(|a|a.files.get(path));
+                match (expected,r.files.get(path)) {
+                    (Some(expected),Some(actual)) if !ok => {
+                        let expected=&expected.file;
+                        let mut differences=Vec::new();
+                        if actual.mode!=expected.mode { differences.push(format!("mode {:04o}, recorded {:04o}",actual.mode,expected.mode)); }
+                        if actual.owner!=expected.owner { differences.push(format!("owner {}, recorded {}",actual.owner,expected.owner)); }
+                        if actual.group!=expected.group { differences.push(format!("group {}, recorded {}",actual.group,expected.group)); }
+                        if actual.mtime!=expected.mtime { differences.push(format!("modified time {}, recorded {}",actual.mtime,expected.mtime)); }
+                        format!("Metadata for {path}: {}. Metadata repair preserves file text.",differences.join("; "))
+                    }
+                    (Some(_),Some(_)) => format!("Recorded regular-file metadata matches for {path}"),
+                    (_,None) => format!("The file {path} is missing; metadata repair cannot recreate its contents"),
+                    (None,_) => format!("No installed {} record supplies {path}",package.name),
+                }
+            }
+            Self::PreserveInitialContents { path } => format!("The original text of {path} is preserved; metadata repair must not replace site settings"),
             Self::Absent { package } => format!("{} is absent", package.name),
             Self::DependenciesHealthy {} => {
                 "All declared installed requirements are satisfied".into()
@@ -345,7 +393,12 @@ pub struct Definition {
     pub initial: State,
     pub archive_paths: BTreeMap<String, String>,
     pub requirements: Vec<Requirement>,
+    #[serde(skip_serializing_if = "metadata_disabled")]
+    pub allow_metadata_restore: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub patch_policy: Option<crate::rpm_patch_policy::Policy>,
 }
+fn metadata_disabled(value:&bool)->bool { !*value }
 impl<'de> Deserialize<'de> for Definition {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         #[derive(Deserialize)]
@@ -356,19 +409,34 @@ impl<'de> Deserialize<'de> for Definition {
             archive_paths: BTreeMap<String, String>,
             #[serde(deserialize_with = "list::<_,Requirement,24>")]
             requirements: Vec<Requirement>,
+            #[serde(default)]
+            allow_metadata_restore: bool,
+            #[serde(default)]
+            patch_policy: Option<crate::rpm_patch_policy::Policy>,
         }
         let r = Raw::deserialize(d)?;
         let v = Self {
             initial: r.initial,
             archive_paths: r.archive_paths,
             requirements: r.requirements,
+            allow_metadata_restore: r.allow_metadata_restore,
+            patch_policy: r.patch_policy,
         };
         v.validate().map_err(D::Error::custom)?;
         Ok(v)
     }
 }
 impl Definition {
+    pub fn command_help(&self)->&'static str { if self.patch_policy.is_some() { PATCH_HELP } else if self.allow_metadata_restore { METADATA_HELP } else { HELP } }
     pub fn validate(&self) -> Result<(), String> {
+        if let Some(policy) = &self.patch_policy { policy.validate(&self.initial)?; }
+        if self.requirements.iter().any(|r| matches!(r, Requirement::AdvisoryFixed { advisory }
+            if self.patch_policy.as_ref().is_none_or(|p| !p.advisories.iter().any(|a| &a.id == advisory)))) {
+            return Err("Advisory requirements need their matching source-owned patch policy".into());
+        }
+        if !self.allow_metadata_restore && self.requirements.iter().any(|r|matches!(r,Requirement::OwnedMetadataMatches{..}) || (self.patch_policy.is_none() && matches!(r,Requirement::PreserveInitialContents{..}))) {
+            return Err("Metadata-only requirements need an explicit authored metadata-restore activity".into());
+        }
         if self.requirements.is_empty()
             || self.requirements.len() > 24
             || self.archive_paths.len() > 12
@@ -411,7 +479,27 @@ impl Definition {
         }
         self.requirements
             .iter()
-            .map(|r| r.check(&self.initial, s, &v))
+            .map(|r| {
+                let (ok, mut message) = r.check(&self.initial, s, &v, self.patch_policy.as_ref());
+                if self.patch_policy.is_some() && let Requirement::PreserveInitialContents { path } = r {
+                    message = notice(if ok { format!("Site settings in {path} are preserved") }
+                        else { format!("Not yet: retain the original site settings in {path}. A fixed package alone does not meet the configuration requirement.") });
+                }
+                if self.patch_policy.is_some() && !ok && let Requirement::OwnedPayloadMatches { path, .. } = r {
+                    message = notice(format!("Not yet: restore the actual packaged file {path} from its installed archive. Its text or recorded attributes are missing/different; a fixed version header alone is not enough. Exact reinstall preserves deliberate configuration text in this activity."));
+                }
+                // Only the new source-opted lessons teach this distinction. Keep
+                // previous lessons' feedback and grading exactly as authored.
+                if self.allow_metadata_restore && !ok
+                    && let Requirement::OwnedPayloadMatches { package, path } = r
+                    && let Some(expected) = v.installed(package).ok().flatten().and_then(|a| a.files.get(path))
+                    && let Some(actual) = s.runtime().files.get(path)
+                    && actual.contents != expected.file.contents
+                {
+                    message = notice(format!("{message}. File text still differs from the installed record; restoring attributes cannot replace damaged text."));
+                }
+                (ok, message)
+            })
             .collect()
     }
 }
@@ -435,12 +523,27 @@ pub fn apply(d: &Definition, s: &mut State, a: &core::Action) -> Result<core::Pl
         return Err("RPM bounded action/context differs; current state retained".into());
     } // closure bounds ALL possible payload candidates before this clone.
     let mut candidate = s.clone();
-    let p = candidate.apply(a).map_err(|e| notice(e.message))?;
+    let p = if d.patch_policy.is_some() {
+        let update = crate::rpm_configuration::transition(s, a).map_err(|e| notice(e.message))?;
+        candidate = update.state;
+        update.plan
+    } else { candidate.apply(a).map_err(|e| notice(e.message))? };
     if !admitted(&candidate) {
         return Err("RPM app aggregate limit; previous state retained".into());
     }
     *s = candidate;
     Ok(p)
+}
+
+/// Source-authorized metadata repair; saved Session/state carries no authority.
+pub fn restore_metadata(d:&Definition,s:&mut State,package:&Identity)->Result<(),String>{
+    if !d.allow_metadata_restore || d.validate().is_err() || !d.same_assignment(s) || !admitted(s) {
+        return Err("Metadata restore is not enabled for this authored context; previous state retained".into());
+    }
+    let candidate=s.restored_metadata(package).map_err(|e|notice(e.message))?;
+    if !admitted(&candidate) { return Err("RPM app aggregate limit; previous state retained".into()); }
+    *s=candidate;
+    Ok(())
 }
 
 // Exhaustive classification: new typed metadata requires a deliberate admission decision.
@@ -487,6 +590,7 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         terminal_learning,
         process_learning,
         accounts_learning,
+        accounts_template_drafts,
         discovery_draft,
         discovery_learning,
         storage_draft,
@@ -554,6 +658,7 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         || terminal_learning.is_some()
         || process_learning.is_some()
         || accounts_learning.is_some()
+        || accounts_template_drafts.is_some()
         || discovery_draft.is_some()
         || discovery_learning.is_some()
         || storage_draft.is_some()

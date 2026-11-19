@@ -119,6 +119,14 @@ fn each_objective_is_current_state_not_historical_credit() {
                 panic!()
             };
             match requirement {
+                Requirement::WhereisDeployment {definition} => {
+                    let path=definition.mutable_files.iter().find(|p|definition.expected.files.contains_key(*p)).unwrap();
+                    tree.files.insert(path.clone(),"Wrong published release, despite matching filename.\n".into());
+                }
+                Requirement::CommandLocation {definition} => {
+                    let path=&definition.selected[0].path;
+                    tree.nodes.get_mut(path).unwrap().mode ^=0o100;
+                }
                 Requirement::Contents { path, .. } => {
                     tree.files.insert(path.clone(), "broken".into());
                 }

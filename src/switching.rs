@@ -332,7 +332,28 @@ impl Fabric {
     }
     /// Broadcast visibility only: no ICMP, ARP, MAC learning or protocol-control simulation.
     pub fn broadcast(&self, source: &str) -> Result<Broadcast, String> {
+        self.broadcast_frame(source, None, &BTreeMap::new())
+    }
+    /// Opt-in tagged software endpoints. The original broadcast API remains
+    /// untagged with untagged-only receivers. A listed receiver accepts only its
+    /// actual configured VLAN IDs (an empty set accepts no data VLAN).
+    pub fn broadcast_frame(
+        &self,
+        source: &str,
+        transmit_tag: Option<u16>,
+        receiver_vlans: &BTreeMap<String, BTreeSet<u16>>,
+    ) -> Result<Broadcast, String> {
         self.validate()?;
+        if transmit_tag.is_some_and(|n| !vlan(n)) {
+            return Err("This data-VLAN subset uses IDs1–4094; priority tag0 is outside scope and4095 is reserved".into());
+        }
+        if receiver_vlans.len() > 32
+            || receiver_vlans.iter().any(|(host, tags)| {
+                !self.hosts.contains_key(host) || tags.len() > 4 || tags.iter().any(|n| !vlan(*n))
+            })
+        {
+            return Err("Tagged receivers need provided endpoints and at most four configured data VLANs each".into());
+        }
         let h = self.hosts.get(source).ok_or("Unknown source workstation")?;
         let mut result = Broadcast::default();
         if !h.up {
@@ -357,7 +378,12 @@ impl Fabric {
         let Jack::Switch { switch, port } = peer else {
             return Err("Unsupported workstation-to-workstation attachment".into());
         };
-        let mut pending = VecDeque::from([(switch.clone(), port.clone(), None, Vec::<Hop>::new())]);
+        let mut pending = VecDeque::from([(
+            switch.clone(),
+            port.clone(),
+            transmit_tag,
+            Vec::<Hop>::new(),
+        )]);
         let mut visited = BTreeSet::new();
         let mut work = 0;
         while let Some((switch, ingress, tag, path)) = pending.pop_front() {
@@ -436,6 +462,15 @@ impl Fabric {
                     Jack::Host { host } => {
                         if !self.hosts[host].up {
                             result.drop_reason(format!("{host} is stopped"));
+                        } else if let Some(tags) = receiver_vlans.get(host) {
+                            if out_tag.is_some_and(|n| tags.contains(&n)) {
+                                result.recipients.insert(host.clone(), next_path);
+                            } else {
+                                result.drop_reason(format!(
+                                    "{host}: {} cannot reach an active VLAN software interface on this parent",
+                                    out_tag.map(|n| format!("tag{n}")).unwrap_or_else(|| "untagged frame".into())
+                                ));
+                            }
                         } else if out_tag.is_some() {
                             result.drop_reason(format!("{host} accepts only untagged frames"));
                         } else {

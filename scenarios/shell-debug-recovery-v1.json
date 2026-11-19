@@ -1,0 +1,689 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-debug-status",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-debug-recovery",
+      "topic": "Diagnostics and checked recovery",
+      "title": "Repair diagnostics that hide a failed investigation",
+      "summary": "Add useful trace output while retaining the investigation’s stdout, error status and input files.",
+      "objective": "Accept exactly MODE FILE, with MODE quiet or trace; otherwise print Usage: inspect quiet-or-trace FILE on stderr and exit2 before any trace. FILE must be a one-line ASCII name matching ^[a-z][a-z0-9.-]{0,11}$; invalid names print Invalid file on stderr and exit2 before tracing. For a valid interface, trace mode writes Trace: reading FILE on stderr first. quiet mode writes no trace lines. A missing input prints Missing file: FILE on stderr, no stdout, and finishes with status2. For an existing input, select literal ERROR lines in original order. With matches, print Findings: then each complete matching line on stdout and finish with status0. With none, print No findings on stdout and finish with status1. Output lines end with LF; preserve spaces/backslashes within matched text. Trace mode writes Trace: result N on stderr last, using the actual final investigation status. Diagnostics must not change that status or contaminate stdout. Keep every virtual file unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Repair and test the full script",
+        "Review the edge cases"
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "Script",
+        "source": "usage() { printf 'Usage: inspect quiet-or-trace FILE\\n' >&2; exit 2; }\nif test \"$#\" -ne 2; then usage; fi\nmode=$1\nfile=$2\ncase \"$mode\" in quiet|trace) : ;; *) usage ;; esac\ncase \"$file\" in *'\n'*) printf 'Invalid file\\n' >&2; exit 2 ;; esac\nif printf '%s\\n' \"$file\" | grep -Eq -- '^[a-z][a-z0-9.-]{0,11}$'; then :; else printf 'Invalid file\\n' >&2; exit 2; fi\nif test \"$mode\" = trace; then printf 'Trace: reading %s\\n' \"$file\"; fi\nif test -f \"$file\"; then\n  matches=$(grep -F 'ERROR' \"$file\")\n  printf 'Filter finished\\n'\n  result=$?\n  if test \"$result\" -eq 0; then\n    printf 'Findings:\\n%s\\n'  $matches\n  else\n    printf 'No findings\\n'\n  fi\nelse\n  printf 'Missing file: %s\\n' \"$file\" >&2\n  result=2\nfi\nif test \"$mode\" = trace; then printf 'Trace: result %s\\n' \"$result\" >&2; fi\nexit \"$result\"\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "quiet · Findings preserve spaces and wildcard data",
+            "args": [
+              "quiet",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "INFO ready\nERROR  disk * nearly full\nERROR café\\path\n"
+            },
+            "stdout": "Findings:\nERROR  disk * nearly full\nERROR café\\path\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "INFO ready\nERROR  disk * nearly full\nERROR café\\path\n"
+            }
+          },
+          {
+            "name": "quiet · No findings remains status one",
+            "args": [
+              "quiet",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "INFO ready\nWARN warm\n"
+            },
+            "stdout": "No findings\n",
+            "stderr": "",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "INFO ready\nWARN warm\n"
+            }
+          },
+          {
+            "name": "quiet · Last matching line has no LF",
+            "args": [
+              "quiet",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "ERROR final"
+            },
+            "stdout": "Findings:\nERROR final\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "ERROR final"
+            }
+          },
+          {
+            "name": "quiet · Missing input is status two",
+            "args": [
+              "quiet",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n"
+            },
+            "stdout": "",
+            "stderr": "Missing file: events.log\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n"
+            }
+          },
+          {
+            "name": "trace · Findings preserve spaces and wildcard data",
+            "args": [
+              "trace",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "INFO ready\nERROR  disk * nearly full\nERROR café\\path\n"
+            },
+            "stdout": "Findings:\nERROR  disk * nearly full\nERROR café\\path\n",
+            "stderr": "Trace: reading events.log\nTrace: result 0\n",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "INFO ready\nERROR  disk * nearly full\nERROR café\\path\n"
+            }
+          },
+          {
+            "name": "trace · No findings remains status one",
+            "args": [
+              "trace",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "INFO ready\nWARN warm\n"
+            },
+            "stdout": "No findings\n",
+            "stderr": "Trace: reading events.log\nTrace: result 1\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "INFO ready\nWARN warm\n"
+            }
+          },
+          {
+            "name": "trace · Last matching line has no LF",
+            "args": [
+              "trace",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "ERROR final"
+            },
+            "stdout": "Findings:\nERROR final\n",
+            "stderr": "Trace: reading events.log\nTrace: result 0\n",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "ERROR final"
+            }
+          },
+          {
+            "name": "trace · Missing input is status two",
+            "args": [
+              "trace",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n"
+            },
+            "stdout": "",
+            "stderr": "Trace: reading events.log\nMissing file: events.log\nTrace: result 2\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n"
+            }
+          },
+          {
+            "name": "Missing arguments",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "ERROR unseen\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: inspect quiet-or-trace FILE\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "ERROR unseen\n"
+            }
+          },
+          {
+            "name": "Invalid mode",
+            "args": [
+              "debug",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "ERROR unseen\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: inspect quiet-or-trace FILE\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "ERROR unseen\n"
+            }
+          },
+          {
+            "name": "Traversal rejected before tracing",
+            "args": [
+              "trace",
+              "../private"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "ERROR unseen\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid file\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "ERROR unseen\n"
+            }
+          },
+          {
+            "name": "Multiline filename",
+            "args": [
+              "trace",
+              "events.log\nother"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "ERROR unseen\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid file\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/events.log": "ERROR unseen\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "usage() { printf 'Usage: inspect quiet-or-trace FILE\\n' >&2; exit 2; }\nif test \"$#\" -ne 2; then usage; fi\nmode=$1\nfile=$2\ncase \"$mode\" in quiet|trace) : ;; *) usage ;; esac\ncase \"$file\" in *'\n'*) printf 'Invalid file\\n' >&2; exit 2 ;; esac\nif printf '%s\\n' \"$file\" | grep -Eq -- '^[a-z][a-z0-9.-]{0,11}$'; then :; else printf 'Invalid file\\n' >&2; exit 2; fi\nif test \"$mode\" = trace; then printf 'Trace: reading %s\\n' \"$file\" >&2; fi\nif test -f \"$file\"; then\n  matches=$(grep -F 'ERROR' \"$file\")\n  result=$?\n  if test \"$result\" -eq 0; then\n    printf 'Findings:\\n%s\\n' \"$matches\"\n  else\n    printf 'No findings\\n'\n  fi\nelse\n  printf 'Missing file: %s\\n' \"$file\" >&2\n  result=2\nfi\nif test \"$mode\" = trace; then printf 'Trace: result %s\\n' \"$result\" >&2; fi\nexit \"$result\"\n"
+      ],
+      "explanation": "One supported approach follows. Equivalent supported scripts are accepted by their complete behavior.\n\nusage() { printf 'Usage: inspect quiet-or-trace FILE\\n' >&2; exit 2; }\nif test \"$#\" -ne 2; then usage; fi\nmode=$1\nfile=$2\ncase \"$mode\" in quiet|trace) : ;; *) usage ;; esac\ncase \"$file\" in *'\n'*) printf 'Invalid file\\n' >&2; exit 2 ;; esac\nif printf '%s\\n' \"$file\" | grep -Eq -- '^[a-z][a-z0-9.-]{0,11}$'; then :; else printf 'Invalid file\\n' >&2; exit 2; fi\nif test \"$mode\" = trace; then printf 'Trace: reading %s\\n' \"$file\" >&2; fi\nif test -f \"$file\"; then\n  matches=$(grep -F 'ERROR' \"$file\")\n  result=$?\n  if test \"$result\" -eq 0; then\n    printf 'Findings:\\n%s\\n' \"$matches\"\n  else\n    printf 'No findings\\n'\n  fi\nelse\n  printf 'Missing file: %s\\n' \"$file\" >&2\n  result=2\nfi\nif test \"$mode\" = trace; then printf 'Trace: result %s\\n' \"$result\" >&2; fi\nexit \"$result\"\n",
+      "hints": [
+        "Capture grep’s status immediately, before printf or a debug helper changes $?.",
+        "Trace messages belong only on stderr and only in trace mode; they must not appear in the business report.",
+        "Print captured matching lines as one quoted value and explicitly exit with the saved investigation status."
+      ],
+      "sources": [
+        "https://www.gnu.org/s/bash/manual/html_node/Exit-Status.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Redirections.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Arrays.html"
+      ],
+      "simplifications": "In-process evaluator15 only; flat virtual UTF-8 files, bounded input/instructions/memory/output. No host commands, real locks, filesystem metadata, trap/set-x, signals, atomic rename, concurrent writers or crash recovery. Manual trace is script-authored diagnostic output. Recovery cases start with fixed supplied prior work. Arrays in the recovery project are Bash-specific, not portable sh.",
+      "retry_guidance": "Compare stdout, stderr, status and every resulting virtual file separately. If only trace cases fail, inspect stream routing and the point where $? is saved. For recovery, inspect the first late error and any unintended earlier file changes.",
+      "teaching": {
+        "prerequisite_note": "Builds on quoting, exit status, streams, whole-line reads, Bash arrays and exact snapshot comparisons. Reopen those units if needed; this unit combines them into repair projects, with no new shell syntax.",
+        "concepts": [
+          {
+            "title": "A script has separate results",
+            "text": "Standard output is the business report; standard error is where this task places diagnostics. Exit status is a third result: 0 means findings, 1 means none, and 2 means the specified input error. A trace message must not quietly change one of those results."
+          },
+          {
+            "title": "Save status before reporting",
+            "text": "$? belongs to the most recently finished command. A successful printf changes it to 0. Immediately save a meaningful status with result=$?; use that saved variable for later messages and exit. The worked example deliberately starts with false, whose status is 1."
+          },
+          {
+            "title": "Add tracing deliberately",
+            "text": "The assignment uses its own quiet/trace argument, not Bash set -x. Gate Trace lines on that argument and send them with >&2. Quote captured matches when printing so spaces and literal wildcard text stay intact. This is manual instrumentation within the supported subset."
+          }
+        ],
+        "example": "false\nresult=$?\nprintf 'Trace: saved result %s\\n' \"$result\" >&2\nprintf 'Business report stays on stdout\\n'\nexit \"$result\"\n",
+        "inputs": "This separate sample uses different data and demonstrates the central reasoning before the full assignment. Each test starts with its own sample inputs; simulated files reset before each test.",
+        "try_change": "Move result=$? below the first printf and Run example. Read which comparison failed.",
+        "fixture": {
+          "name": "Saved status example",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated work.\n",
+            "/work/demo.txt": "Example only.\n"
+          },
+          "stdout": "Business report stays on stdout\n",
+          "stderr": "Trace: saved result 1\n",
+          "status": 1,
+          "after": {
+            "/work/keep.txt": "Protected unrelated work.\n",
+            "/work/demo.txt": "Example only.\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "shell-recovery-ledger",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-debug-recovery",
+      "topic": "Diagnostics and checked recovery",
+      "title": "Resume a checked handover without trusting its checkpoint",
+      "summary": "Reconcile saved work with its actual outputs, validate the whole request, then preview or finish only pending work.",
+      "objective": "Accept exactly preview or apply as one argument; otherwise print Usage: resume preview-or-apply on stderr and exit2. Then require jobs.txt and checkpoint.txt in that order; a missing file prints Missing file: NAME on stderr and exits2. jobs.txt contains 0–8 LF-separated IDs; a final LF is optional. Every ID must match ASCII ^[a-z][a-z0-9]{0,5}$ and be unique. Blank/invalid/duplicate/excess rows print Invalid jobs on stderr and exit2. Then every checkpoint.txt row must be a unique requested ID, or print Invalid checkpoint and exit2. Validate outputs in jobs order before printing a plan or changing any file. A checkpointed ID needs ID.done containing exactly Completed: ID plus one LF; otherwise print Checkpoint mismatch: ID and exit2. A non-checkpointed ID must have no ID.done file; if present print Untracked output: ID and exit2. The first such problem wins. On successful validation, stdout lists Already: ID or Pending: ID for each job in jobs order, then Already count: N and Pending count: N. All lines end with LF; success has empty stderr and status0. preview changes no files. apply writes Completed: ID plus one LF to each pending ID.done, retains all existing completed outputs, and writes checkpoint.txt as every job ID in jobs order with LF after each (empty for no jobs). Preserve jobs.txt and every unrelated file. Any specified error has no stdout and leaves every file unchanged. This is deterministic reconciliation of supplied prior work, not real crash recovery, atomic publication, locks or concurrent execution.",
+      "difficulty": "Intermediate",
+      "minutes": 45,
+      "steps": [
+        "Understand the task",
+        "Repair and test the full script",
+        "Review the edge cases"
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "Script",
+        "source": "# This attempt writes too soon and trusts substring matches. Repair it.\nmode=$1\nalready=0\npending=0\nwhile IFS= read -r id || test -n \"$id\"; do\n  if grep -F \"$id\" checkpoint.txt; then\n    already=$((already+1))\n  else\n    printf 'Completed: %s\\n' \"$id\" > \"$id.done\"\n    printf '%s\\n' \"$id\" >> checkpoint.txt\n    pending=$((pending+1))\n  fi\ndone < jobs.txt\nprintf 'Already count: %s\\nPending count: %s\\n' \"$already\" \"$pending\"\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "preview · resume a partial checkpoint",
+            "args": [
+              "preview"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\n",
+              "/work/alpha.done": "Completed: alpha\n"
+            },
+            "stdout": "Already: alpha\nPending: beta\nPending: gamma\nAlready count: 1\nPending count: 2\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\n",
+              "/work/alpha.done": "Completed: alpha\n"
+            }
+          },
+          {
+            "name": "apply · resume a partial checkpoint",
+            "args": [
+              "apply"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\n",
+              "/work/alpha.done": "Completed: alpha\n"
+            },
+            "stdout": "Already: alpha\nPending: beta\nPending: gamma\nAlready count: 1\nPending count: 2\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\nbeta\ngamma\n",
+              "/work/alpha.done": "Completed: alpha\n",
+              "/work/beta.done": "Completed: beta\n",
+              "/work/gamma.done": "Completed: gamma\n"
+            }
+          },
+          {
+            "name": "apply · completed reordered checkpoint",
+            "args": [
+              "apply"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "a\nb2\n",
+              "/work/checkpoint.txt": "b2\na\n",
+              "/work/a.done": "Completed: a\n",
+              "/work/b2.done": "Completed: b2\n"
+            },
+            "stdout": "Already: a\nAlready: b2\nAlready count: 2\nPending count: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "a\nb2\n",
+              "/work/checkpoint.txt": "a\nb2\n",
+              "/work/a.done": "Completed: a\n",
+              "/work/b2.done": "Completed: b2\n"
+            }
+          },
+          {
+            "name": "apply · final records without LF",
+            "args": [
+              "apply"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "x1\nx2",
+              "/work/checkpoint.txt": "x1",
+              "/work/x1.done": "Completed: x1\n"
+            },
+            "stdout": "Already: x1\nPending: x2\nAlready count: 1\nPending count: 1\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "x1\nx2",
+              "/work/checkpoint.txt": "x1\nx2\n",
+              "/work/x1.done": "Completed: x1\n",
+              "/work/x2.done": "Completed: x2\n"
+            }
+          },
+          {
+            "name": "Malformed late job must prevent earlier writes",
+            "args": [
+              "apply"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\n../bad\n",
+              "/work/checkpoint.txt": "alpha\n",
+              "/work/alpha.done": "Completed: alpha\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid jobs\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\n../bad\n",
+              "/work/checkpoint.txt": "alpha\n",
+              "/work/alpha.done": "Completed: alpha\n"
+            }
+          },
+          {
+            "name": "Unknown checkpoint entry",
+            "args": [
+              "apply"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\nunknown\n",
+              "/work/alpha.done": "Completed: alpha\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid checkpoint\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\nunknown\n",
+              "/work/alpha.done": "Completed: alpha\n"
+            }
+          },
+          {
+            "name": "Missing checkpoint artifact",
+            "args": [
+              "apply"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\ngamma\n",
+              "/work/alpha.done": "Completed: alpha\n"
+            },
+            "stdout": "",
+            "stderr": "Checkpoint mismatch: gamma\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\ngamma\n",
+              "/work/alpha.done": "Completed: alpha\n"
+            }
+          },
+          {
+            "name": "Missing terminal LF is not an exact checkpoint artifact",
+            "args": [
+              "apply"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\n",
+              "/work/alpha.done": "Completed: alpha"
+            },
+            "stdout": "",
+            "stderr": "Checkpoint mismatch: alpha\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\n",
+              "/work/alpha.done": "Completed: alpha"
+            }
+          },
+          {
+            "name": "Untracked late output must protect all earlier work",
+            "args": [
+              "apply"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\n",
+              "/work/alpha.done": "Completed: alpha\n",
+              "/work/gamma.done": "Unrelated existing text\n"
+            },
+            "stdout": "",
+            "stderr": "Untracked output: gamma\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\n",
+              "/work/alpha.done": "Completed: alpha\n",
+              "/work/gamma.done": "Unrelated existing text\n"
+            }
+          },
+          {
+            "name": "Missing jobs.txt",
+            "args": [
+              "apply"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/checkpoint.txt": "alpha\n",
+              "/work/alpha.done": "Completed: alpha\n"
+            },
+            "stdout": "",
+            "stderr": "Missing file: jobs.txt\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/checkpoint.txt": "alpha\n",
+              "/work/alpha.done": "Completed: alpha\n"
+            }
+          },
+          {
+            "name": "Invalid interface ['run']",
+            "args": [
+              "run"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\n",
+              "/work/alpha.done": "Completed: alpha\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: resume preview-or-apply\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+              "/work/checkpoint.txt": "alpha\n",
+              "/work/alpha.done": "Completed: alpha\n"
+            }
+          },
+          {
+            "name": "All eight new jobs fit the bounded unit",
+            "args": [
+              "apply"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "a\nb\nc\nd\ne\nf\ng\nh\n",
+              "/work/checkpoint.txt": ""
+            },
+            "stdout": "Pending: a\nPending: b\nPending: c\nPending: d\nPending: e\nPending: f\nPending: g\nPending: h\nAlready count: 0\nPending count: 8\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/jobs.txt": "a\nb\nc\nd\ne\nf\ng\nh\n",
+              "/work/checkpoint.txt": "a\nb\nc\nd\ne\nf\ng\nh\n",
+              "/work/a.done": "Completed: a\n",
+              "/work/b.done": "Completed: b\n",
+              "/work/c.done": "Completed: c\n",
+              "/work/d.done": "Completed: d\n",
+              "/work/e.done": "Completed: e\n",
+              "/work/f.done": "Completed: f\n",
+              "/work/g.done": "Completed: g\n",
+              "/work/h.done": "Completed: h\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if test \"$#\" -ne 1; then printf 'Usage: resume preview-or-apply\\n' >&2; exit 2; fi\nmode=$1\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: resume preview-or-apply\\n' >&2; exit 2 ;; esac\nfor file in jobs.txt checkpoint.txt; do\n  if test -f \"$file\"; then :; else printf 'Missing file: %s\\n' \"$file\" >&2; exit 2; fi\ndone\njobs=()\nseen='|'\nwhile IFS= read -r id || test -n \"$id\"; do\n  if printf '%s\\n' \"$id\" | grep -Eq -- '^[a-z][a-z0-9]{0,5}$'; then :; else printf 'Invalid jobs\\n' >&2; exit 2; fi\n  case \"$seen\" in *\"|$id|\"*) printf 'Invalid jobs\\n' >&2; exit 2 ;; esac\n  seen=$seen$id'|'\n  jobs=( \"${jobs[@]}\" \"$id\" )\n  if test \"${#jobs[@]}\" -gt 8; then printf 'Invalid jobs\\n' >&2; exit 2; fi\ndone < jobs.txt\ncompleted='|'\nwhile IFS= read -r id || test -n \"$id\"; do\n  case \"$seen\" in *\"|$id|\"*) : ;; *) printf 'Invalid checkpoint\\n' >&2; exit 2 ;; esac\n  case \"$completed\" in *\"|$id|\"*) printf 'Invalid checkpoint\\n' >&2; exit 2 ;; esac\n  completed=$completed$id'|'\ndone < checkpoint.txt\npending=()\nalready=0\nledger=''\nplan=''\nfor id in \"${jobs[@]}\"; do\n  case \"$completed\" in\n    *\"|$id|\"*)\n      if test -f \"$id.done\"; then :; else printf 'Checkpoint mismatch: %s\\n' \"$id\" >&2; exit 2; fi\n      actual=$(cat \"$id.done\"; printf '.')\n      expected='Completed: '$id'\n.'\n      if test \"$actual\" = \"$expected\"; then :; else printf 'Checkpoint mismatch: %s\\n' \"$id\" >&2; exit 2; fi\n      plan=$plan'Already: '$id'\n'\n      already=$((already+1))\n      ;;\n    *)\n      if test -f \"$id.done\"; then printf 'Untracked output: %s\\n' \"$id\" >&2; exit 2; fi\n      pending=( \"${pending[@]}\" \"$id\" )\n      plan=$plan'Pending: '$id'\n'\n      ;;\n  esac\n  ledger=$ledger$id'\n'\ndone\nif test \"$mode\" = apply; then\n  for id in \"${pending[@]}\"; do printf 'Completed: %s\\n' \"$id\" > \"$id.done\"; done\n  printf '%s' \"$ledger\" > checkpoint.txt\nfi\nprintf '%sAlready count: %s\\nPending count: %s\\n' \"$plan\" \"$already\" \"${#pending[@]}\"\nexit 0\n"
+      ],
+      "explanation": "One supported approach follows. Equivalent supported scripts are accepted by their complete behavior.\n\nif test \"$#\" -ne 1; then printf 'Usage: resume preview-or-apply\\n' >&2; exit 2; fi\nmode=$1\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: resume preview-or-apply\\n' >&2; exit 2 ;; esac\nfor file in jobs.txt checkpoint.txt; do\n  if test -f \"$file\"; then :; else printf 'Missing file: %s\\n' \"$file\" >&2; exit 2; fi\ndone\njobs=()\nseen='|'\nwhile IFS= read -r id || test -n \"$id\"; do\n  if printf '%s\\n' \"$id\" | grep -Eq -- '^[a-z][a-z0-9]{0,5}$'; then :; else printf 'Invalid jobs\\n' >&2; exit 2; fi\n  case \"$seen\" in *\"|$id|\"*) printf 'Invalid jobs\\n' >&2; exit 2 ;; esac\n  seen=$seen$id'|'\n  jobs=( \"${jobs[@]}\" \"$id\" )\n  if test \"${#jobs[@]}\" -gt 8; then printf 'Invalid jobs\\n' >&2; exit 2; fi\ndone < jobs.txt\ncompleted='|'\nwhile IFS= read -r id || test -n \"$id\"; do\n  case \"$seen\" in *\"|$id|\"*) : ;; *) printf 'Invalid checkpoint\\n' >&2; exit 2 ;; esac\n  case \"$completed\" in *\"|$id|\"*) printf 'Invalid checkpoint\\n' >&2; exit 2 ;; esac\n  completed=$completed$id'|'\ndone < checkpoint.txt\npending=()\nalready=0\nledger=''\nplan=''\nfor id in \"${jobs[@]}\"; do\n  case \"$completed\" in\n    *\"|$id|\"*)\n      if test -f \"$id.done\"; then :; else printf 'Checkpoint mismatch: %s\\n' \"$id\" >&2; exit 2; fi\n      actual=$(cat \"$id.done\"; printf '.')\n      expected='Completed: '$id'\n.'\n      if test \"$actual\" = \"$expected\"; then :; else printf 'Checkpoint mismatch: %s\\n' \"$id\" >&2; exit 2; fi\n      plan=$plan'Already: '$id'\n'\n      already=$((already+1))\n      ;;\n    *)\n      if test -f \"$id.done\"; then printf 'Untracked output: %s\\n' \"$id\" >&2; exit 2; fi\n      pending=( \"${pending[@]}\" \"$id\" )\n      plan=$plan'Pending: '$id'\n'\n      ;;\n  esac\n  ledger=$ledger$id'\n'\ndone\nif test \"$mode\" = apply; then\n  for id in \"${pending[@]}\"; do printf 'Completed: %s\\n' \"$id\" > \"$id.done\"; done\n  printf '%s' \"$ledger\" > checkpoint.txt\nfi\nprintf '%sAlready count: %s\\nPending count: %s\\n' \"$plan\" \"$already\" \"${#pending[@]}\"\nexit 0\n",
+      "hints": [
+        "Validate all job IDs and checkpoint membership before opening output redirects. Do not let grep substring matching stand in for an exact ID match.",
+        "Check completed output bytes, including the final LF. An untracked pre-existing output must be reported, not overwritten.",
+        "Stage pending IDs and the report, then apply only after every check passes. preview must never write checkpoint.txt or output files."
+      ],
+      "sources": [
+        "https://www.gnu.org/s/bash/manual/html_node/Exit-Status.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Redirections.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Arrays.html"
+      ],
+      "simplifications": "In-process evaluator15 only; flat virtual UTF-8 files, bounded input/instructions/memory/output. No host commands, real locks, filesystem metadata, trap/set-x, signals, atomic rename, concurrent writers or crash recovery. Manual trace is script-authored diagnostic output. Recovery cases start with fixed supplied prior work. Arrays in the recovery project are Bash-specific, not portable sh.",
+      "retry_guidance": "Compare stdout, stderr, status and every resulting virtual file separately. If only trace cases fail, inspect stream routing and the point where $? is saved. For recovery, inspect the first late error and any unintended earlier file changes.",
+      "teaching": {
+        "prerequisite_note": "Builds on quoting, exit status, streams, whole-line reads, Bash arrays and exact snapshot comparisons. Reopen those units if needed; this unit combines them into repair projects, with no new shell syntax.",
+        "concepts": [
+          {
+            "title": "A checkpoint is a claim, not proof",
+            "text": "A saved list says which jobs were finished earlier. Before skipping them, compare that claim with their actual output. A missing or changed completed output is a reconciliation error; silently overwriting it would hide the inconsistency."
+          },
+          {
+            "title": "Validate the whole request before writing",
+            "text": "Collect and validate every job and checkpoint first. Then inspect all requested outputs. An error near the end must leave earlier pending jobs untouched. Bash arrays can hold pending IDs until this preflight is complete; quoted \"${pending[@]}\" keeps each ID a separate item."
+          },
+          {
+            "title": "Separate observation from repair",
+            "text": "The worked example only observes whether two different sample outputs exist. The assignment requires stronger evidence: exact contents and validated checkpoint membership. preview reports decisions without writes; apply uses the same validated plan to finish pending work."
+          },
+          {
+            "title": "Compare exact text and keep recovery honest",
+            "text": "Command substitution removes final LFs. To check exact output, append a non-LF sentinel inside the capture and compare against expected text with the same sentinel. This technique was taught in snapshot comparison. Runs start with supplied simulated prior work; no interrupted execution is being resumed."
+          }
+        ],
+        "example": "for name in fern moss; do\n  if test -f \"$name.done\"; then\n    printf 'Already present: %s\\n' \"$name\"\n  else\n    printf 'Needs review: %s\\n' \"$name\"\n  fi\ndone\n",
+        "inputs": "This separate sample uses different data and demonstrates the central reasoning before the full assignment. Each test starts with its own sample inputs; simulated files reset before each test.",
+        "try_change": "Change the first sample name from fern to another absent name, then Run example. Compare the actual observation.",
+        "fixture": {
+          "name": "Separate recovery observation",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated work.\n",
+            "/work/fern.done": "Completed: fern\n"
+          },
+          "stdout": "Already present: fern\nNeeds review: moss\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Protected unrelated work.\n",
+            "/work/fern.done": "Completed: fern\n"
+          }
+        }
+      }
+    }
+  ]
+}

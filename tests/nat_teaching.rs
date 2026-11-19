@@ -449,6 +449,9 @@ fn actual9_profile_plus_practice_retains_every_old_attempt_raw_target_and_receip
     evidence::exact(&loaded.attempts[&s.id], &selected);
     assert_eq!(loaded.attempts.len(), 134);
     let receipts = serde_json::to_value(loaded.migration_receipts).unwrap();
-    assert_eq!(receipts["shell"], serde_json::json!([7, 8, 9, 15]));
+    // Saving adds only the current writer receipt; the genuine historical
+    // receipts, raw fixture and every old attempt remain exact above/below.
+    assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 19);
+    assert_eq!(receipts["shell"], serde_json::json!([7, 8, 9, 19]));
     assert_eq!(evidence::original9(), raw);
 }

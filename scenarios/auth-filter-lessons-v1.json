@@ -1,0 +1,499 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-auth-filter-detection",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-auth-log-filters",
+      "topic": "Authentication log filters",
+      "title": "Restore useful denied-login detection",
+      "summary": "Repair a filter that detects denied logins without treating successful logins or unrelated messages as failures.",
+      "objective": "Match complete rejected-login records with a reported numeric IPv4 address for the supplied application. Handle the changing usernames, decimal ports and addresses in every supplied sample; do not restrict the filter to one recorded user. Leave accepted logins, unrelated applications, incomplete records and extra-text notices unmatched. Save the repaired virtual filter and preserve every supplied log sample.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Inspect the example log and filter.",
+        "Edit, save and test the separate example.",
+        "Compare outcomes, diagnose a mistake and retry."
+      ],
+      "guide": [
+        {
+          "title": "1. Read the records beside the example filter",
+          "why": "The starter’s accepted event word selects the wrong kind of login. The worked example shows how to describe a complete rejected record while allowing its fields to change.",
+          "action": "Read the workshop log lines and the event word in the example editor. Which lines describe rejected logins, and which describe successful or unrelated events?",
+          "commands": [
+            {
+              "command": "cat /var/log/workshop-auth.log",
+              "explanation": "Read only the selected supplied virtual log sample.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "2. Repair and test the saved example",
+          "why": "Expected: complete workshop rejected records match; accepted, incomplete, other-application and extra-text records stay unmatched. The command output and row labels show actual results after each run.",
+          "action": "Change the example event word from accepted to rejected. Save virtual filter, then Run command. Compare the actual labels beside each supplied line. Use Log sample to try the changed fields and lookalike events.",
+          "commands": [
+            {
+              "command": "fail2ban-regex --usedns=no /var/log/workshop-auth.log /etc/fail2ban/filter.d/workshop-auth.conf",
+              "explanation": "Test the saved example filter against its selected virtual sample.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "3. Diagnose a deliberate mistake and retry",
+          "why": "Successful logins become false positives and real failures are missed. Retrying uses the same preserved example; assignment work stays in its own editor.",
+          "action": "Use Check example. Then change rejected back to accepted in the example filter, save and run again. Read its failure feedback, restore rejected, save and check again.",
+          "commands": []
+        }
+      ],
+      "explanation": "The repaired pattern selects this application’s rejected event, describes changing usernames and ports, and requires the reported address. Beginning/end anchors keep partial and extra-text records out. The saved filter is evaluated against contrasting samples rather than compared with one expected string; equivalent supported patterns can pass. This is offline classification, not a working protection daemon.",
+      "hints": [
+        "Read one rejected and one accepted record. The fixed event word should describe the messages you need to detect.",
+        "Use the changing-field classes taught in the Introduction, and keep <HOST> as the complete reported-address field. Use ^ and $ to bound the required whole record.",
+        "Test the changing fields and lookalike samples too. A literal username misses other users; an unbounded or overbroad event pattern can select unrelated messages."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://raw.githubusercontent.com/fail2ban/fail2ban/1.1.1/man/fail2ban-regex.1",
+        "https://raw.githubusercontent.com/fail2ban/fail2ban/1.1.1/man/jail.conf.5"
+      ],
+      "simplifications": "Offline fixed application messages and numeric IPv4 only. The disclosed common ASCII pattern subset excludes Python shorthand, lookarounds/backreferences, multiline/date processing, name lookup, includes and executable actions. This unit does not install/run Fail2ban, an IDS, a scanner or a firewall. Actual fail2ban-regex comparison is unavailable; fixed supported patterns were compared with Python re. All files, command output and changes are virtual.",
+      "initial": {
+        "kind": "AuthFilter",
+        "simulation": {
+          "view": "introduction",
+          "assignment": {
+            "source_task": "{\"id\":\"lpic2-auth-filter-detection\",\"log_path\":\"/var/log/vault-auth.log\",\"filter_path\":\"/etc/fail2ban/filter.d/vault-auth.conf\",\"initial_filter\":\"[Definition]\\nfailregex = ^vault accepted user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+$\\n\",\"cases\":[{\"id\":\"ordinary-events\",\"label\":\"Denied and successful logins\",\"lines\":[\"vault rejected user=alex from 192.0.2.9 port 53142\",\"vault accepted user=alex from 192.0.2.9 port 53143\",\"vault rejected user=Ops_1 from 203.0.113.88 port 22\",\"ordinary application notice\"],\"expected\":[\"matched\",\"missed\",\"matched\",\"missed\"]},{\"id\":\"changing-fields\",\"label\":\"Changing names, addresses and ports\",\"lines\":[\"vault rejected user=Ops_1 from 203.0.113.88 port 65535\",\"vault rejected user=web-team from 198.51.100.6 port 1\",\"vault accepted user=web-team from 198.51.100.6 port 443\",\"vault rejected user=probe from 192.0.2.9 port 9000\"],\"expected\":[\"matched\",\"matched\",\"missed\",\"matched\"]},{\"id\":\"lookalike-events\",\"label\":\"Complete records from the correct application\",\"lines\":[\"audit-vault rejected user=alex from 192.0.2.9 port 42\",\"vault rejected user=alex from 192.0.2.9 port 42 trailing notice\",\"vault rejected user=alex without a recorded address\",\"vault rejected user=x from 203.0.113.88 port 32768\"],\"expected\":[\"missed\",\"missed\",\"missed\",\"matched\"]}]}",
+            "saved": "[Definition]\nfailregex = ^vault accepted user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+$\n",
+            "editor": "[Definition]\nfailregex = ^vault accepted user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+$\n",
+            "command": "fail2ban-regex --usedns=no /var/log/vault-auth.log /etc/fail2ban/filter.d/vault-auth.conf",
+            "selected": 0,
+            "console": "",
+            "last_run": null,
+            "checked": false,
+            "history": []
+          },
+          "example": {
+            "source_task": "{\"id\":\"lpic2-auth-filter-detection-example\",\"log_path\":\"/var/log/workshop-auth.log\",\"filter_path\":\"/etc/fail2ban/filter.d/workshop-auth.conf\",\"initial_filter\":\"[Definition]\\nfailregex = ^workshop accepted user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+$\\n\",\"cases\":[{\"id\":\"ordinary-events\",\"label\":\"Denied and successful logins\",\"lines\":[\"workshop rejected user=tariq from 203.0.113.42 port 53142\",\"workshop accepted user=tariq from 203.0.113.42 port 53143\",\"workshop rejected user=Nora_7 from 198.51.100.65 port 22\",\"ordinary application notice\"],\"expected\":[\"matched\",\"missed\",\"matched\",\"missed\"]},{\"id\":\"changing-fields\",\"label\":\"Changing names, addresses and ports\",\"lines\":[\"workshop rejected user=Nora_7 from 198.51.100.65 port 65535\",\"workshop rejected user=docs-team from 192.0.2.44 port 1\",\"workshop accepted user=docs-team from 192.0.2.44 port 443\",\"workshop rejected user=probe from 203.0.113.42 port 9000\"],\"expected\":[\"matched\",\"matched\",\"missed\",\"matched\"]},{\"id\":\"lookalike-events\",\"label\":\"Complete records from the correct application\",\"lines\":[\"audit-workshop rejected user=tariq from 203.0.113.42 port 42\",\"workshop rejected user=tariq from 203.0.113.42 port 42 trailing notice\",\"workshop rejected user=tariq without a recorded address\",\"workshop rejected user=x from 198.51.100.65 port 32768\"],\"expected\":[\"missed\",\"missed\",\"missed\",\"matched\"]}]}",
+            "saved": "[Definition]\nfailregex = ^workshop accepted user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+$\n",
+            "editor": "[Definition]\nfailregex = ^workshop accepted user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+$\n",
+            "command": "fail2ban-regex --usedns=no /var/log/workshop-auth.log /etc/fail2ban/filter.d/workshop-auth.conf",
+            "selected": 0,
+            "console": "",
+            "last_run": null,
+            "checked": false,
+            "history": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "AuthFilter",
+        "definition": {
+          "source_id": "lpic2-auth-filter-detection",
+          "assignment": {
+            "id": "lpic2-auth-filter-detection",
+            "log_path": "/var/log/vault-auth.log",
+            "filter_path": "/etc/fail2ban/filter.d/vault-auth.conf",
+            "initial_filter": "[Definition]\nfailregex = ^vault accepted user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+$\n",
+            "cases": [
+              {
+                "id": "ordinary-events",
+                "label": "Denied and successful logins",
+                "lines": [
+                  "vault rejected user=alex from 192.0.2.9 port 53142",
+                  "vault accepted user=alex from 192.0.2.9 port 53143",
+                  "vault rejected user=Ops_1 from 203.0.113.88 port 22",
+                  "ordinary application notice"
+                ],
+                "expected": [
+                  "matched",
+                  "missed",
+                  "matched",
+                  "missed"
+                ]
+              },
+              {
+                "id": "changing-fields",
+                "label": "Changing names, addresses and ports",
+                "lines": [
+                  "vault rejected user=Ops_1 from 203.0.113.88 port 65535",
+                  "vault rejected user=web-team from 198.51.100.6 port 1",
+                  "vault accepted user=web-team from 198.51.100.6 port 443",
+                  "vault rejected user=probe from 192.0.2.9 port 9000"
+                ],
+                "expected": [
+                  "matched",
+                  "matched",
+                  "missed",
+                  "matched"
+                ]
+              },
+              {
+                "id": "lookalike-events",
+                "label": "Complete records from the correct application",
+                "lines": [
+                  "audit-vault rejected user=alex from 192.0.2.9 port 42",
+                  "vault rejected user=alex from 192.0.2.9 port 42 trailing notice",
+                  "vault rejected user=alex without a recorded address",
+                  "vault rejected user=x from 203.0.113.88 port 32768"
+                ],
+                "expected": [
+                  "missed",
+                  "missed",
+                  "missed",
+                  "matched"
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-auth-filter-detection-example",
+            "log_path": "/var/log/workshop-auth.log",
+            "filter_path": "/etc/fail2ban/filter.d/workshop-auth.conf",
+            "initial_filter": "[Definition]\nfailregex = ^workshop accepted user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+$\n",
+            "cases": [
+              {
+                "id": "ordinary-events",
+                "label": "Denied and successful logins",
+                "lines": [
+                  "workshop rejected user=tariq from 203.0.113.42 port 53142",
+                  "workshop accepted user=tariq from 203.0.113.42 port 53143",
+                  "workshop rejected user=Nora_7 from 198.51.100.65 port 22",
+                  "ordinary application notice"
+                ],
+                "expected": [
+                  "matched",
+                  "missed",
+                  "matched",
+                  "missed"
+                ]
+              },
+              {
+                "id": "changing-fields",
+                "label": "Changing names, addresses and ports",
+                "lines": [
+                  "workshop rejected user=Nora_7 from 198.51.100.65 port 65535",
+                  "workshop rejected user=docs-team from 192.0.2.44 port 1",
+                  "workshop accepted user=docs-team from 192.0.2.44 port 443",
+                  "workshop rejected user=probe from 203.0.113.42 port 9000"
+                ],
+                "expected": [
+                  "matched",
+                  "matched",
+                  "missed",
+                  "matched"
+                ]
+              },
+              {
+                "id": "lookalike-events",
+                "label": "Complete records from the correct application",
+                "lines": [
+                  "audit-workshop rejected user=tariq from 203.0.113.42 port 42",
+                  "workshop rejected user=tariq from 203.0.113.42 port 42 trailing notice",
+                  "workshop rejected user=tariq without a recorded address",
+                  "workshop rejected user=x from 198.51.100.65 port 32768"
+                ],
+                "expected": [
+                  "missed",
+                  "missed",
+                  "missed",
+                  "matched"
+                ]
+              }
+            ]
+          },
+          "worked": [
+            {
+              "kind": "Edit",
+              "text": "[Definition]\nfailregex = ^workshop rejected user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+$\n"
+            },
+            {
+              "kind": "Save"
+            },
+            {
+              "kind": "Run"
+            },
+            {
+              "kind": "Check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "auth-filter-workspace {\"practice\":false,\"action\":{\"kind\":\"Edit\",\"text\":\"[Definition]\\nfailregex = ^vault rejected user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+$\\n\"}}",
+        "auth-filter-workspace {\"practice\":false,\"action\":{\"kind\":\"Save\"}}",
+        "auth-filter-workspace {\"practice\":false,\"action\":{\"kind\":\"Run\"}}",
+        "auth-filter-workspace {\"practice\":false,\"action\":{\"kind\":\"Check\"}}"
+      ],
+      "prerequisites": [
+        "lpic2-exposure-client-policy"
+      ]
+    },
+    {
+      "id": "lpic2-auth-filter-exceptions",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-auth-log-filters",
+      "topic": "Authentication log filters",
+      "title": "Remove health-check false positives without hiding real failures",
+      "summary": "Keep real denied logins detectable while excluding only explicitly marked failed health checks.",
+      "objective": "Match complete denied-login records for the supplied application, including changing names, ports and numeric addresses. Ignore denied records marked source=health; an interactive failure with the same username and address must still match. Leave accepted logins, unrelated notices and incomplete or extra-text records unmatched. Save the repaired virtual filter and preserve every supplied log sample.",
+      "difficulty": "Intermediate",
+      "minutes": 28,
+      "steps": [
+        "Inspect the example log and filter.",
+        "Edit, save and test the separate example.",
+        "Compare outcomes, diagnose a mistake and retry."
+      ],
+      "guide": [
+        {
+          "title": "1. Inspect the false positives beside the editor",
+          "why": "The starter selects successful events and ignores a username. The supplied health and interactive lines show why those are separate mistakes.",
+          "action": "Read the selected archive log sample and the example filter. Use Log sample to compare ordinary events with Health checks and real users sharing an identity. Identify the event word and source marker before editing.",
+          "commands": [
+            {
+              "command": "cat /var/log/archive-auth.log",
+              "explanation": "Read only the selected supplied virtual log sample.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "2. Save a precise filter and test its real results",
+          "why": "Expected: genuine denied logins match, denied health checks are ignored, and successful logins remain unmatched. Actual results appear only after the test command runs.",
+          "action": "Restrict the example failure pattern to denied records, and make its ignore rule specific to denied source=health records. Save virtual filter, then Run command. Read each Matched, Ignored or Missed label beside the actual line.",
+          "commands": [
+            {
+              "command": "fail2ban-regex --usedns=no /var/log/archive-auth.log /etc/fail2ban/filter.d/archive-auth.conf",
+              "explanation": "Test the saved example filter against its selected virtual sample.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "3. Try a broader exception and repair it",
+          "why": "The interactive probe failure is now hidden as well. The failed sample explains the lost detection; restoring the specific exception repairs it.",
+          "action": "After Check example passes, change the ignore rule to select the probe username regardless of source. Save and test the health-exception sample, then Check example. Restore the narrow source marker and check again.",
+          "commands": []
+        }
+      ],
+      "explanation": "The event-specific failure rule keeps accepted logins out. A separate narrow ignore rule identifies denied health checks by their source marker, while interactive failures sharing the identity remain detectable. All samples are checked again against the saved text. A passing filter test is not proof of an installed/running protection daemon or firewall action.",
+      "hints": [
+        "Compare a denied health record with a denied interactive record that shares its username and address. What field distinguishes them?",
+        "The failure rule should identify the application and denied event, with ^ and $ bounding the complete record. The exception also needs the denied event and source=health.",
+        "A username-only or address-only exception is too broad. Accepted health records should remain unmatched because the stated exception is for denied health checks."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://raw.githubusercontent.com/fail2ban/fail2ban/1.1.1/man/fail2ban-regex.1",
+        "https://raw.githubusercontent.com/fail2ban/fail2ban/1.1.1/man/jail.conf.5"
+      ],
+      "simplifications": "Offline fixed application messages and numeric IPv4 only. The disclosed common ASCII pattern subset excludes Python shorthand, lookarounds/backreferences, multiline/date processing, name lookup, includes and executable actions. This unit does not install/run Fail2ban, an IDS, a scanner or a firewall. Actual fail2ban-regex comparison is unavailable; fixed supported patterns were compared with Python re. All files, command output and changes are virtual.",
+      "initial": {
+        "kind": "AuthFilter",
+        "simulation": {
+          "view": "introduction",
+          "assignment": {
+            "source_task": "{\"id\":\"lpic2-auth-filter-exceptions\",\"log_path\":\"/var/log/gateway-auth.log\",\"filter_path\":\"/etc/fail2ban/filter.d/gateway-auth.conf\",\"initial_filter\":\"[Definition]\\nfailregex = ^gateway [a-z]+ user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+ source=[a-z]+$\\nignoreregex = ^gateway denied user=probe \\n\",\"cases\":[{\"id\":\"ordinary-events\",\"label\":\"Denied and successful logins\",\"lines\":[\"gateway denied user=alex from 192.0.2.9 port 53142 source=interactive\",\"gateway accepted user=alex from 192.0.2.9 port 53143 source=interactive\",\"gateway denied user=Ops_1 from 203.0.113.88 port 22 source=interactive\",\"ordinary application notice\"],\"expected\":[\"matched\",\"missed\",\"matched\",\"missed\"]},{\"id\":\"changing-fields\",\"label\":\"Changing names, addresses and ports\",\"lines\":[\"gateway denied user=Ops_1 from 203.0.113.88 port 65535 source=interactive\",\"gateway denied user=web-team from 198.51.100.6 port 1 source=interactive\",\"gateway accepted user=web-team from 198.51.100.6 port 443 source=interactive\",\"gateway denied user=probe from 192.0.2.9 port 9000 source=interactive\"],\"expected\":[\"matched\",\"matched\",\"missed\",\"matched\"]},{\"id\":\"lookalike-events\",\"label\":\"Complete records from the correct application\",\"lines\":[\"audit-gateway denied user=alex from 192.0.2.9 port 42 source=interactive\",\"gateway denied user=alex from 192.0.2.9 port 42 source=interactive trailing notice\",\"gateway denied user=alex without a recorded address\",\"gateway denied user=x from 203.0.113.88 port 32768 source=interactive\"],\"expected\":[\"missed\",\"missed\",\"missed\",\"matched\"]},{\"id\":\"health-exceptions\",\"label\":\"Health checks and real users sharing an identity\",\"lines\":[\"gateway denied user=probe from 192.0.2.9 port 100 source=health\",\"gateway denied user=probe from 192.0.2.9 port 101 source=interactive\",\"gateway denied user=alex from 203.0.113.88 port 102 source=health\",\"gateway accepted user=probe from 192.0.2.9 port 103 source=health\"],\"expected\":[\"ignored\",\"matched\",\"ignored\",\"missed\"]}]}",
+            "saved": "[Definition]\nfailregex = ^gateway [a-z]+ user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+ source=[a-z]+$\nignoreregex = ^gateway denied user=probe \n",
+            "editor": "[Definition]\nfailregex = ^gateway [a-z]+ user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+ source=[a-z]+$\nignoreregex = ^gateway denied user=probe \n",
+            "command": "fail2ban-regex --usedns=no /var/log/gateway-auth.log /etc/fail2ban/filter.d/gateway-auth.conf",
+            "selected": 0,
+            "console": "",
+            "last_run": null,
+            "checked": false,
+            "history": []
+          },
+          "example": {
+            "source_task": "{\"id\":\"lpic2-auth-filter-exceptions-example\",\"log_path\":\"/var/log/archive-auth.log\",\"filter_path\":\"/etc/fail2ban/filter.d/archive-auth.conf\",\"initial_filter\":\"[Definition]\\nfailregex = ^archive [a-z]+ user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+ source=[a-z]+$\\nignoreregex = ^archive denied user=probe \\n\",\"cases\":[{\"id\":\"ordinary-events\",\"label\":\"Denied and successful logins\",\"lines\":[\"archive denied user=tariq from 203.0.113.42 port 53142 source=interactive\",\"archive accepted user=tariq from 203.0.113.42 port 53143 source=interactive\",\"archive denied user=Nora_7 from 198.51.100.65 port 22 source=interactive\",\"ordinary application notice\"],\"expected\":[\"matched\",\"missed\",\"matched\",\"missed\"]},{\"id\":\"changing-fields\",\"label\":\"Changing names, addresses and ports\",\"lines\":[\"archive denied user=Nora_7 from 198.51.100.65 port 65535 source=interactive\",\"archive denied user=docs-team from 192.0.2.44 port 1 source=interactive\",\"archive accepted user=docs-team from 192.0.2.44 port 443 source=interactive\",\"archive denied user=probe from 203.0.113.42 port 9000 source=interactive\"],\"expected\":[\"matched\",\"matched\",\"missed\",\"matched\"]},{\"id\":\"lookalike-events\",\"label\":\"Complete records from the correct application\",\"lines\":[\"audit-archive denied user=tariq from 203.0.113.42 port 42 source=interactive\",\"archive denied user=tariq from 203.0.113.42 port 42 source=interactive trailing notice\",\"archive denied user=tariq without a recorded address\",\"archive denied user=x from 198.51.100.65 port 32768 source=interactive\"],\"expected\":[\"missed\",\"missed\",\"missed\",\"matched\"]},{\"id\":\"health-exceptions\",\"label\":\"Health checks and real users sharing an identity\",\"lines\":[\"archive denied user=probe from 203.0.113.42 port 100 source=health\",\"archive denied user=probe from 203.0.113.42 port 101 source=interactive\",\"archive denied user=tariq from 198.51.100.65 port 102 source=health\",\"archive accepted user=probe from 203.0.113.42 port 103 source=health\"],\"expected\":[\"ignored\",\"matched\",\"ignored\",\"missed\"]}]}",
+            "saved": "[Definition]\nfailregex = ^archive [a-z]+ user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+ source=[a-z]+$\nignoreregex = ^archive denied user=probe \n",
+            "editor": "[Definition]\nfailregex = ^archive [a-z]+ user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+ source=[a-z]+$\nignoreregex = ^archive denied user=probe \n",
+            "command": "fail2ban-regex --usedns=no /var/log/archive-auth.log /etc/fail2ban/filter.d/archive-auth.conf",
+            "selected": 0,
+            "console": "",
+            "last_run": null,
+            "checked": false,
+            "history": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "AuthFilter",
+        "definition": {
+          "source_id": "lpic2-auth-filter-exceptions",
+          "assignment": {
+            "id": "lpic2-auth-filter-exceptions",
+            "log_path": "/var/log/gateway-auth.log",
+            "filter_path": "/etc/fail2ban/filter.d/gateway-auth.conf",
+            "initial_filter": "[Definition]\nfailregex = ^gateway [a-z]+ user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+ source=[a-z]+$\nignoreregex = ^gateway denied user=probe \n",
+            "cases": [
+              {
+                "id": "ordinary-events",
+                "label": "Denied and successful logins",
+                "lines": [
+                  "gateway denied user=alex from 192.0.2.9 port 53142 source=interactive",
+                  "gateway accepted user=alex from 192.0.2.9 port 53143 source=interactive",
+                  "gateway denied user=Ops_1 from 203.0.113.88 port 22 source=interactive",
+                  "ordinary application notice"
+                ],
+                "expected": [
+                  "matched",
+                  "missed",
+                  "matched",
+                  "missed"
+                ]
+              },
+              {
+                "id": "changing-fields",
+                "label": "Changing names, addresses and ports",
+                "lines": [
+                  "gateway denied user=Ops_1 from 203.0.113.88 port 65535 source=interactive",
+                  "gateway denied user=web-team from 198.51.100.6 port 1 source=interactive",
+                  "gateway accepted user=web-team from 198.51.100.6 port 443 source=interactive",
+                  "gateway denied user=probe from 192.0.2.9 port 9000 source=interactive"
+                ],
+                "expected": [
+                  "matched",
+                  "matched",
+                  "missed",
+                  "matched"
+                ]
+              },
+              {
+                "id": "lookalike-events",
+                "label": "Complete records from the correct application",
+                "lines": [
+                  "audit-gateway denied user=alex from 192.0.2.9 port 42 source=interactive",
+                  "gateway denied user=alex from 192.0.2.9 port 42 source=interactive trailing notice",
+                  "gateway denied user=alex without a recorded address",
+                  "gateway denied user=x from 203.0.113.88 port 32768 source=interactive"
+                ],
+                "expected": [
+                  "missed",
+                  "missed",
+                  "missed",
+                  "matched"
+                ]
+              },
+              {
+                "id": "health-exceptions",
+                "label": "Health checks and real users sharing an identity",
+                "lines": [
+                  "gateway denied user=probe from 192.0.2.9 port 100 source=health",
+                  "gateway denied user=probe from 192.0.2.9 port 101 source=interactive",
+                  "gateway denied user=alex from 203.0.113.88 port 102 source=health",
+                  "gateway accepted user=probe from 192.0.2.9 port 103 source=health"
+                ],
+                "expected": [
+                  "ignored",
+                  "matched",
+                  "ignored",
+                  "missed"
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-auth-filter-exceptions-example",
+            "log_path": "/var/log/archive-auth.log",
+            "filter_path": "/etc/fail2ban/filter.d/archive-auth.conf",
+            "initial_filter": "[Definition]\nfailregex = ^archive [a-z]+ user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+ source=[a-z]+$\nignoreregex = ^archive denied user=probe \n",
+            "cases": [
+              {
+                "id": "ordinary-events",
+                "label": "Denied and successful logins",
+                "lines": [
+                  "archive denied user=tariq from 203.0.113.42 port 53142 source=interactive",
+                  "archive accepted user=tariq from 203.0.113.42 port 53143 source=interactive",
+                  "archive denied user=Nora_7 from 198.51.100.65 port 22 source=interactive",
+                  "ordinary application notice"
+                ],
+                "expected": [
+                  "matched",
+                  "missed",
+                  "matched",
+                  "missed"
+                ]
+              },
+              {
+                "id": "changing-fields",
+                "label": "Changing names, addresses and ports",
+                "lines": [
+                  "archive denied user=Nora_7 from 198.51.100.65 port 65535 source=interactive",
+                  "archive denied user=docs-team from 192.0.2.44 port 1 source=interactive",
+                  "archive accepted user=docs-team from 192.0.2.44 port 443 source=interactive",
+                  "archive denied user=probe from 203.0.113.42 port 9000 source=interactive"
+                ],
+                "expected": [
+                  "matched",
+                  "matched",
+                  "missed",
+                  "matched"
+                ]
+              },
+              {
+                "id": "lookalike-events",
+                "label": "Complete records from the correct application",
+                "lines": [
+                  "audit-archive denied user=tariq from 203.0.113.42 port 42 source=interactive",
+                  "archive denied user=tariq from 203.0.113.42 port 42 source=interactive trailing notice",
+                  "archive denied user=tariq without a recorded address",
+                  "archive denied user=x from 198.51.100.65 port 32768 source=interactive"
+                ],
+                "expected": [
+                  "missed",
+                  "missed",
+                  "missed",
+                  "matched"
+                ]
+              },
+              {
+                "id": "health-exceptions",
+                "label": "Health checks and real users sharing an identity",
+                "lines": [
+                  "archive denied user=probe from 203.0.113.42 port 100 source=health",
+                  "archive denied user=probe from 203.0.113.42 port 101 source=interactive",
+                  "archive denied user=tariq from 198.51.100.65 port 102 source=health",
+                  "archive accepted user=probe from 203.0.113.42 port 103 source=health"
+                ],
+                "expected": [
+                  "ignored",
+                  "matched",
+                  "ignored",
+                  "missed"
+                ]
+              }
+            ]
+          },
+          "worked": [
+            {
+              "kind": "Edit",
+              "text": "[Definition]\nfailregex = ^archive denied user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+ source=[a-z]+$\nignoreregex = ^archive denied user=[A-Za-z0-9_-]+ from [0-9.]+ port [0-9]+ source=health$\n"
+            },
+            {
+              "kind": "Save"
+            },
+            {
+              "kind": "Run"
+            },
+            {
+              "kind": "Check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "auth-filter-workspace {\"practice\":false,\"action\":{\"kind\":\"Edit\",\"text\":\"[Definition]\\nfailregex = ^gateway denied user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+ source=[a-z]+$\\nignoreregex = ^gateway denied user=[A-Za-z0-9_-]+ from [0-9.]+ port [0-9]+ source=health$\\n\"}}",
+        "auth-filter-workspace {\"practice\":false,\"action\":{\"kind\":\"Save\"}}",
+        "auth-filter-workspace {\"practice\":false,\"action\":{\"kind\":\"Run\"}}",
+        "auth-filter-workspace {\"practice\":false,\"action\":{\"kind\":\"Check\"}}"
+      ],
+      "prerequisites": [
+        "lpic2-auth-filter-detection"
+      ]
+    }
+  ]
+}

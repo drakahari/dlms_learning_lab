@@ -1,0 +1,140 @@
+[
+  {
+    "id": "lpic2-pxe-firmware-selection",
+    "goal": "Repair the boot-file policy for BIOS and x64 UEFI clients without sending a boot file to ordinary DHCP clients.",
+    "context": "Uses supplied address leases, two simulated boot servers, and the DHCP and file transfer foundations. The server inventory reports the actual type of each stored program.",
+    "concepts": [
+      {
+        "title": "An address is the first step",
+        "text": "An ordinary DHCP client can use its address lease immediately. A machine starting from the network also needs the address of a boot server and the name of a program on that server. A valid lease therefore says nothing about whether a boot file exists or can run."
+      },
+      {
+        "title": "Match the program to the firmware",
+        "text": "The PXE request supplies a client architecture. In this exercise option 93 value 0 is a legacy PC BIOS client, and 7 is an x64 UEFI client. A BIOS PXELINUX program cannot run as an x64 UEFI application, even with an .efi filename."
+      },
+      {
+        "title": "Compare the server and the file together",
+        "text": "Two servers can respond to the same filename with different contents. Inspect the client and the stored artifact, then edit the architecture row. The unconditional rule can also hand a boot file to an ordinary client. Save boot-file policy changes what the modeled clients receive."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Compare the clients",
+        "value": "PC BIOS · 0\nx64 UEFI · 7",
+        "explanation": "Both already have working address leases. Only the PXE clients need initial programs."
+      },
+      {
+        "label": "Inspect the incorrect rule",
+        "value": "198.51.100.11 / training/recovery.efi",
+        "explanation": "This server stores a BIOS program under that filename. The x64 client cannot start it."
+      },
+      {
+        "label": "Use the compatible file",
+        "value": "198.51.100.10 / training/recovery.efi",
+        "explanation": "The other server supplies an x64 UEFI application under the same filename."
+      },
+      {
+        "label": "Save and verify both paths",
+        "value": "Unconditional offer: off",
+        "explanation": "Preserve the legacy rule. Save your changes, then check that both PXE clients receive compatible programs and the ordinary client receives no boot file."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Inspect clients and server files",
+        "action": "Choose x64 UEFI recovery PC under Inspect a client. Open Inspect boot server files and compare training/recovery.efi on both server addresses.",
+        "observe": "The requested name exists on both servers. The old server supplies a BIOS program, so the current x64 UEFI rule fails."
+      },
+      {
+        "title": "Repair the saved offers",
+        "action": "In the x64 UEFI row, set Server address to 198.51.100.10 and keep training/recovery.efi. Turn off the unconditional offer and select Save boot-file policy.",
+        "observe": "The x64 rule now names a compatible program. The legacy row remains valid, and ordinary DHCP receives no boot file."
+      },
+      {
+        "title": "Check both boot paths and the ordinary lease",
+        "action": "Select Check configuration. Re-enable the unconditional offer, save and check again. Turn it off, save and retry.",
+        "observe": "The new failure belongs to the ordinary client even while both PXE clients still receive valid programs."
+      }
+    ],
+    "requirements": [
+      "Give each PXE client a compatible boot program using the supplied file inventory.",
+      "Keep ordinary DHCP free of boot-file offers."
+    ],
+    "status": "updated",
+    "source": "scenarios/pxe-lessons-v1.json",
+    "review": {
+      "introduction": "Introduces the supplied request and file metadata in prerequisite order, using different-input addresses and filenames from the independent assignment.",
+      "example": "Matches the named inspection and save actions to actual model behavior, including a negative trial and a repair. Actual native rendering verification is pending.",
+      "assignment": "States independent requirements without solutions. The grader evaluates separately saved client outcomes and checks the unaffected client. Native verification is pending."
+    }
+  },
+  {
+    "id": "lpic2-pxelinux-client-lookup",
+    "goal": "Find the file that actually controls the maintenance client, repair its early boot pair, and keep the shared fallback working.",
+    "context": "Builds on boot-file selection and kernel and initramfs handoff. Both BIOS clients already reach the supplied PXELINUX 6.x program and core module.",
+    "concepts": [
+      {
+        "title": "PXELINUX uses the boot program directory",
+        "text": "After receiving the BIOS program, the represented PXELINUX 6.x process looks for ldlinux.c32 beside it. The program’s parent directory is also the base for configuration lookup and the relative kernel and initramfs paths."
+      },
+      {
+        "title": "The first configuration found takes priority",
+        "text": "The BIOS client tries its UUID if present, its Ethernet identifier, uppercase hexadecimal IPv4 prefixes from most to least specific, then default. It looks inside pxelinux.cfg relative to the program. If a client-specific file is present and contains a mistake, the lower-priority default does not replace it."
+      },
+      {
+        "title": "A configuration selects two matching files",
+        "text": "DEFAULT names the single LABEL in this exercise. LINUX names the kernel file and INITRD names the early-userspace image. Both paths are relative to the boot program directory, even though the configuration file is under pxelinux.cfg. Inspect the two stored releases and keep the fallback client’s files unchanged."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Trace the maintenance client",
+        "value": "training/pxelinux.cfg/01-02-00-00-00-00-43",
+        "explanation": "No file matches the example UUID, so the Ethernet-specific file is selected before default."
+      },
+      {
+        "label": "Compare the stored releases",
+        "value": "6.1.121 kernel\n6.1.120 initramfs",
+        "explanation": "Both files exist. The initramfs still belongs to the fallback release."
+      },
+      {
+        "label": "Repair the selected entry",
+        "value": "INITRD images/initramfs-6.1.121.img",
+        "explanation": "Keep the existing LINUX path. Paths are relative to training/, so do not prefix this entry with pxelinux.cfg/."
+      },
+      {
+        "label": "Check the unaffected client",
+        "value": "training/pxelinux.cfg/default",
+        "explanation": "The other BIOS client continues to use its existing 6.1.120 pair."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Find the configuration actually selected",
+        "action": "Choose Maintenance client under Inspect a client and expand Configuration paths tried. Compare the selected filename and releases, then select Protected fallback client.",
+        "observe": "The client-specific file has priority over the default file, even when its saved image choices do not match."
+      },
+      {
+        "title": "Edit and save the client-specific file",
+        "action": "Keep the displayed Name in pxelinux.cfg. In PXELINUX configuration change the INITRD line to images/initramfs-6.1.121.img and select Save configuration.",
+        "observe": "The saved file chooses a matching kernel and initramfs. The editor paths are relative to the PXELINUX program directory."
+      },
+      {
+        "title": "Verify both clients and diagnose a path error",
+        "action": "Select Check configuration. Try prefixing the INITRD value with pxelinux.cfg/, save and check. Restore the relative image path, save and retry.",
+        "observe": "The extra directory prefix breaks only the maintenance client. The fallback client's original boot pair is still checked separately."
+      }
+    ],
+    "requirements": [
+      "Repair the client-specific PXELINUX configuration so the maintenance client selects release 6.6.61.",
+      "Keep the fallback client's original kernel and initramfs."
+    ],
+    "status": "updated",
+    "source": "scenarios/pxe-lessons-v1.json",
+    "review": {
+      "introduction": "Introduces the supplied request and file metadata in prerequisite order, using different-input addresses and filenames from the independent assignment.",
+      "example": "Matches the named inspection and save actions to actual model behavior, including a negative trial and a repair. Actual native rendering verification is pending.",
+      "assignment": "States independent requirements without solutions. The grader evaluates separately saved client outcomes and checks the unaffected client. Native verification is pending."
+    }
+  }
+]

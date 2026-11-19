@@ -1,0 +1,3220 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-syslog-local-remote",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Syslog policy and evidence",
+      "unit": "ccna-syslog-policy",
+      "title": "Keep local detail without flooding Operations",
+      "summary": "Choose separate urgency budgets for two logging outputs.",
+      "objective": "At Quarry, retain emergency 0, error 3 and port warning 4 locally; filter notice 5 and debug 7 locally. Send only emergency and error to Operations 10.214.0.100, using facility 22 or 23. Do not deliver its warning, notice or debug there. Both output policies must meet these cases; clearing the old log is not a repair.",
+      "retry_guidance": "Read the first failing current outcome, then the next stage it exposes. Apply or repair pending drafts. Keep the complete positive/negative and protected-policy requirements in view; do not erase history to imitate a policy repair.",
+      "difficulty": "Beginner",
+      "minutes": 18,
+      "steps": [
+        "Read the event requirements and fixed delivery facts",
+        "Investigate the selected source and collector settings",
+        "Apply a complete policy without changing protected peers",
+        "Check positive and negative current decisions; retain useful history"
+      ],
+      "guide": [
+        {
+          "title": "Read the event requirements and fixed delivery facts",
+          "why": "Severity, facility and delivery are independent facts.",
+          "action": "Use Introduction or the full Assignment; read every required case.",
+          "commands": []
+        },
+        {
+          "title": "Investigate the selected source and collector settings",
+          "why": "An early refusal can mask a later one.",
+          "action": "Choose a source or collector and inspect its native settings and supplied facts.",
+          "commands": []
+        },
+        {
+          "title": "Apply a complete policy without changing protected peers",
+          "why": "A passing primary path cannot replace the protected peer's policy.",
+          "action": "Edit the native fields and Apply settings. Pending fields are not applied state.",
+          "commands": []
+        },
+        {
+          "title": "Check positive and negative current decisions; retain useful history",
+          "why": "Old accepted records can remain after a policy breaks.",
+          "action": "Use Generate simulated event for evidence if useful, then Check configuration for the full task.",
+          "commands": []
+        }
+      ],
+      "explanation": "One native worked approach: Choose source 10.214.0.10. Set process enabled, local warning, remote error, facility 23 and collectors 10.214.0.100. Fill only populates the draft; choose Apply settings. Choose collector 10.214.0.100. Set the selector rows to facility 23: warning. Fill only populates the draft; choose Apply settings. Equivalent settings pass when all required current outcomes and protected policies hold. Generating or clearing history is optional and cannot substitute for current policy.",
+      "hints": [
+        "Warning 4 includes 0 through 4; error 3 includes 0 through 3. The two output thresholds need not match.",
+        "Remote acceptance depends on BOTH the source threshold and the collector selector for the chosen export facility.",
+        "Keep the positive emergency/error cases while testing warning/notice/debug negatives. A source or collector can do the remote filtering."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc5424.html#section-6.2.1",
+        "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/bsm/configuration/15-s/bsm-15-s-book/bsm-troubleshooting.html"
+      ],
+      "simplifications": "Offline native policy controls only; no IOS/Linux command parser, packets, routing changes, real collector, console/monitor, timestamps, authentication, rotation or full syslog protocol. Delivery availability and event templates are immutable supplied facts. Circular histories are measured in records, not real logging-buffer byte sizes. This models selected logging-policy concepts, not a complete IOS device or syslog protocol.",
+      "initial": {
+        "kind": "Syslog",
+        "simulation": {
+          "version": 1,
+          "current": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.214.0.10": {
+                  "name": "Quarry access switch",
+                  "history_capacity": 6
+                }
+              },
+              "collectors": {
+                "10.214.0.100": {
+                  "name": "Quarry operations",
+                  "history_capacity": 6
+                }
+              },
+              "events": {
+                "quarry-emergency": {
+                  "subsystem": "SYS",
+                  "severity": "emergency",
+                  "mnemonic": "EMERGENCY",
+                  "text": "Supplied quarry emergency event"
+                },
+                "quarry-error": {
+                  "subsystem": "SYS",
+                  "severity": "error",
+                  "mnemonic": "ERROR",
+                  "text": "Supplied quarry error event"
+                },
+                "quarry-port-fault": {
+                  "subsystem": "LINK",
+                  "severity": "warning",
+                  "mnemonic": "PORT_FAULT",
+                  "text": "Supplied quarry port-fault event"
+                },
+                "quarry-notice": {
+                  "subsystem": "SYS",
+                  "severity": "notice",
+                  "mnemonic": "NOTICE",
+                  "text": "Supplied quarry notice event"
+                },
+                "quarry-debug": {
+                  "subsystem": "SYS",
+                  "severity": "debug",
+                  "mnemonic": "DEBUG",
+                  "text": "Supplied quarry debug event"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.214.0.10",
+                  "collector": "10.214.0.100",
+                  "available": true
+                }
+              ]
+            },
+            "devices": {
+              "10.214.0.10": {
+                "process_enabled": true,
+                "buffer_threshold": "debug",
+                "remote_threshold": "debug",
+                "export_facility": 23,
+                "hosts": [
+                  "10.214.0.100"
+                ]
+              }
+            },
+            "collectors": {
+              "10.214.0.100": {
+                "selectors": {
+                  "23": "debug"
+                }
+              }
+            },
+            "local": {
+              "10.214.0.10": []
+            },
+            "remote": {
+              "10.214.0.100": []
+            },
+            "next_sequence": 1
+          },
+          "example": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.224.0.11": {
+                  "name": "Alder practice source",
+                  "history_capacity": 6
+                }
+              },
+              "collectors": {
+                "10.224.0.101": {
+                  "name": "Alder practice collector",
+                  "history_capacity": 6
+                }
+              },
+              "events": {
+                "alder-critical": {
+                  "subsystem": "DEMO",
+                  "severity": "critical",
+                  "mnemonic": "CRITICAL",
+                  "text": "Supplied alder critical event"
+                },
+                "alder-error": {
+                  "subsystem": "DEMO",
+                  "severity": "error",
+                  "mnemonic": "ERROR",
+                  "text": "Supplied alder error event"
+                },
+                "alder-debug": {
+                  "subsystem": "DEMO",
+                  "severity": "debug",
+                  "mnemonic": "DEBUG",
+                  "text": "Supplied alder debug event"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.224.0.11",
+                  "collector": "10.224.0.101",
+                  "available": true
+                }
+              ]
+            },
+            "devices": {
+              "10.224.0.11": {
+                "process_enabled": true,
+                "buffer_threshold": "debug",
+                "remote_threshold": null,
+                "export_facility": 17,
+                "hosts": [
+                  "10.224.0.101"
+                ]
+              }
+            },
+            "collectors": {
+              "10.224.0.101": {
+                "selectors": {
+                  "17": "informational"
+                }
+              }
+            },
+            "local": {
+              "10.224.0.11": []
+            },
+            "remote": {
+              "10.224.0.101": []
+            },
+            "next_sequence": 1
+          },
+          "editor": {
+            "selected": {
+              "kind": "source",
+              "address": "10.214.0.10"
+            },
+            "event": "quarry-emergency",
+            "sources": {
+              "10.214.0.10": {
+                "enabled": true,
+                "buffer": "debug",
+                "remote": "debug",
+                "facility": 23,
+                "hosts": [
+                  "10.214.0.100"
+                ]
+              }
+            },
+            "collectors": {
+              "10.214.0.100": {
+                "rows": [
+                  {
+                    "facility": 23,
+                    "threshold": "debug"
+                  }
+                ]
+              }
+            }
+          },
+          "example_editor": {
+            "selected": {
+              "kind": "source",
+              "address": "10.224.0.11"
+            },
+            "event": "alder-critical",
+            "sources": {
+              "10.224.0.11": {
+                "enabled": true,
+                "buffer": "debug",
+                "remote": null,
+                "facility": 17,
+                "hosts": [
+                  "10.224.0.101"
+                ]
+              }
+            },
+            "collectors": {
+              "10.224.0.101": {
+                "rows": [
+                  {
+                    "facility": 17,
+                    "threshold": "informational"
+                  }
+                ]
+              }
+            }
+          },
+          "view": "introduction",
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Syslog",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.214.0.10": {
+                  "name": "Quarry access switch",
+                  "history_capacity": 6
+                }
+              },
+              "collectors": {
+                "10.214.0.100": {
+                  "name": "Quarry operations",
+                  "history_capacity": 6
+                }
+              },
+              "events": {
+                "quarry-emergency": {
+                  "subsystem": "SYS",
+                  "severity": "emergency",
+                  "mnemonic": "EMERGENCY",
+                  "text": "Supplied quarry emergency event"
+                },
+                "quarry-error": {
+                  "subsystem": "SYS",
+                  "severity": "error",
+                  "mnemonic": "ERROR",
+                  "text": "Supplied quarry error event"
+                },
+                "quarry-port-fault": {
+                  "subsystem": "LINK",
+                  "severity": "warning",
+                  "mnemonic": "PORT_FAULT",
+                  "text": "Supplied quarry port-fault event"
+                },
+                "quarry-notice": {
+                  "subsystem": "SYS",
+                  "severity": "notice",
+                  "mnemonic": "NOTICE",
+                  "text": "Supplied quarry notice event"
+                },
+                "quarry-debug": {
+                  "subsystem": "SYS",
+                  "severity": "debug",
+                  "mnemonic": "DEBUG",
+                  "text": "Supplied quarry debug event"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.214.0.10",
+                  "collector": "10.214.0.100",
+                  "available": true
+                }
+              ]
+            },
+            "devices": {
+              "10.214.0.10": {
+                "process_enabled": true,
+                "buffer_threshold": "debug",
+                "remote_threshold": "debug",
+                "export_facility": 23,
+                "hosts": [
+                  "10.214.0.100"
+                ]
+              }
+            },
+            "collectors": {
+              "10.214.0.100": {
+                "selectors": {
+                  "23": "debug"
+                }
+              }
+            },
+            "local": {
+              "10.214.0.10": []
+            },
+            "remote": {
+              "10.214.0.100": []
+            },
+            "next_sequence": 1
+          },
+          "targets": [
+            {
+              "device": "10.214.0.10",
+              "event": "quarry-emergency",
+              "local": true,
+              "remote": {
+                "10.214.0.100": {
+                  "accept": true,
+                  "facilities": [
+                    22,
+                    23
+                  ]
+                }
+              }
+            },
+            {
+              "device": "10.214.0.10",
+              "event": "quarry-error",
+              "local": true,
+              "remote": {
+                "10.214.0.100": {
+                  "accept": true,
+                  "facilities": [
+                    22,
+                    23
+                  ]
+                }
+              }
+            },
+            {
+              "device": "10.214.0.10",
+              "event": "quarry-port-fault",
+              "local": true,
+              "remote": {
+                "10.214.0.100": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.214.0.10",
+              "event": "quarry-notice",
+              "local": false,
+              "remote": {
+                "10.214.0.100": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.214.0.10",
+              "event": "quarry-debug",
+              "local": false,
+              "remote": {
+                "10.214.0.100": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            }
+          ],
+          "protected_sources": [],
+          "protected_collectors": [],
+          "lesson": {
+            "prerequisite_note": "You need to recognize an IPv4 source and collector address. No IOS syntax or prior logging knowledge is assumed; read the concepts below, then try this separate native example.",
+            "concepts": [
+              {
+                "title": "Events, current decisions and old records",
+                "text": "A source creates an event; a collector receives selected events. Generate simulated event uses one supplied template. Accepted records remain historical evidence after settings change. Check configuration asks fresh positive AND negative cases, so old success or clearing a log cannot repair a broken policy."
+              },
+              {
+                "title": "Urgency runs toward zero",
+                "text": "Severity 0 emergency, 1 alert, 2 critical, 3 error, 4 warning, 5 notice, 6 informational and 7 debug describe decreasing urgency. A threshold includes its number and all smaller numbers: warning 4 accepts 0 through 4, not 5 through 7. Off disables that output. The modeled process switch affects local and remote outputs; no console is modeled."
+              },
+              {
+                "title": "Local and remote have independent budgets",
+                "text": "The local buffer and remote export use separate thresholds. A warning may belong locally while only errors and more urgent events go remote. Collector filtering happens after source filtering; a collector cannot recover an event the source did not export."
+              },
+              {
+                "title": "Facility is not the subsystem label",
+                "text": "The event's LINK, AUTH or SYS label names its message subsystem. Export facility is a separate numeric category, 0 through 23. Local0 through local7 are facilities 16 through 23. Changing that source facility does not change LINK into another subsystem. A priority number is facility times 8 plus severity; this activity does not construct protocol packets."
+              },
+              {
+                "title": "Follow the delivery path",
+                "text": "Check the source process, remote threshold and collector address, then supplied delivery availability and the collector's facility selector. The first refusal can hide another problem. An unavailable supplied path is fixed exercise evidence; editing policy cannot make it a real network connection. Collector selectors admit that facility at their threshold or more urgent."
+              },
+              {
+                "title": "Apply deliberately and protect the other work",
+                "text": "Choose the source or collector, edit its native table, then Apply settings. Unapplied changes are saved drafts; Generate still uses applied policy. Protected policies must stay exactly as supplied. Practice uses different addresses and events. Fill example settings only fills its draft; Apply is separate. Reset example restores practice; main Reset requires confirmation. Neither is real-device undo."
+              }
+            ],
+            "description": "Keep Alder critical and error events locally, but send only critical events to its practice collector using facility 17. Debug stays out of both outputs. These addresses and event IDs are unrelated to Quarry.",
+            "fixture": {
+              "version": 1,
+              "environment": {
+                "devices": {
+                  "10.224.0.11": {
+                    "name": "Alder practice source",
+                    "history_capacity": 6
+                  }
+                },
+                "collectors": {
+                  "10.224.0.101": {
+                    "name": "Alder practice collector",
+                    "history_capacity": 6
+                  }
+                },
+                "events": {
+                  "alder-critical": {
+                    "subsystem": "DEMO",
+                    "severity": "critical",
+                    "mnemonic": "CRITICAL",
+                    "text": "Supplied alder critical event"
+                  },
+                  "alder-error": {
+                    "subsystem": "DEMO",
+                    "severity": "error",
+                    "mnemonic": "ERROR",
+                    "text": "Supplied alder error event"
+                  },
+                  "alder-debug": {
+                    "subsystem": "DEMO",
+                    "severity": "debug",
+                    "mnemonic": "DEBUG",
+                    "text": "Supplied alder debug event"
+                  }
+                },
+                "deliveries": [
+                  {
+                    "device": "10.224.0.11",
+                    "collector": "10.224.0.101",
+                    "available": true
+                  }
+                ]
+              },
+              "devices": {
+                "10.224.0.11": {
+                  "process_enabled": true,
+                  "buffer_threshold": "debug",
+                  "remote_threshold": null,
+                  "export_facility": 17,
+                  "hosts": [
+                    "10.224.0.101"
+                  ]
+                }
+              },
+              "collectors": {
+                "10.224.0.101": {
+                  "selectors": {
+                    "17": "informational"
+                  }
+                }
+              },
+              "local": {
+                "10.224.0.11": []
+              },
+              "remote": {
+                "10.224.0.101": []
+              },
+              "next_sequence": 1
+            },
+            "targets": [
+              {
+                "device": "10.224.0.11",
+                "event": "alder-critical",
+                "local": true,
+                "remote": {
+                  "10.224.0.101": {
+                    "accept": true,
+                    "facilities": [
+                      17
+                    ]
+                  }
+                }
+              },
+              {
+                "device": "10.224.0.11",
+                "event": "alder-error",
+                "local": true,
+                "remote": {
+                  "10.224.0.101": {
+                    "accept": false,
+                    "facilities": []
+                  }
+                }
+              },
+              {
+                "device": "10.224.0.11",
+                "event": "alder-debug",
+                "local": false,
+                "remote": {
+                  "10.224.0.101": {
+                    "accept": false,
+                    "facilities": []
+                  }
+                }
+              }
+            ],
+            "protected_sources": [],
+            "protected_collectors": [],
+            "worked": [
+              {
+                "action": {
+                  "action": "apply_source",
+                  "device": "10.224.0.11",
+                  "policy": {
+                    "process_enabled": true,
+                    "buffer_threshold": "error",
+                    "remote_threshold": "critical",
+                    "export_facility": 17,
+                    "hosts": [
+                      "10.224.0.101"
+                    ]
+                  }
+                },
+                "explanation": "Alder example: Choose source 10.224.0.11. Set process enabled, local error, remote critical, facility 17 and collectors 10.224.0.101. Fill only populates the draft; choose Apply settings."
+              }
+            ],
+            "try_change": "After the example passes, try this deliberate mistake: Choose source 10.224.0.11. Set process enabled, local debug, remote critical, facility 17 and collectors 10.224.0.101. Fill only populates the draft; choose Apply settings. Check again and read the newly failed case. Repair with: Choose source 10.224.0.11. Set process enabled, local error, remote critical, facility 17 and collectors 10.224.0.101. Fill only populates the draft; choose Apply settings. Alternatively Reset example and manually replay. The assignment is separate.",
+            "experiment": {
+              "action": "apply_source",
+              "device": "10.224.0.11",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "debug",
+                "remote_threshold": "critical",
+                "export_facility": 17,
+                "hosts": [
+                  "10.224.0.101"
+                ]
+              }
+            },
+            "repair": {
+              "action": "apply_source",
+              "device": "10.224.0.11",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "error",
+                "remote_threshold": "critical",
+                "export_facility": 17,
+                "hosts": [
+                  "10.224.0.101"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "{\"action\":\"apply_source\",\"device\":\"10.214.0.10\",\"policy\":{\"process_enabled\":true,\"buffer_threshold\":\"warning\",\"remote_threshold\":\"error\",\"export_facility\":23,\"hosts\":[\"10.214.0.100\"]}}",
+        "{\"action\":\"apply_collector\",\"collector\":\"10.214.0.100\",\"policy\":{\"selectors\":{\"23\":\"warning\"}}}"
+      ],
+      "prerequisites": [
+        "ccna-ipv4"
+      ]
+    },
+    {
+      "id": "ccna-syslog-export-path",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Syslog policy and evidence",
+      "unit": "ccna-syslog-policy",
+      "title": "Recover the usable export path",
+      "summary": "Follow the refusal chain without pretending policy repairs connectivity.",
+      "objective": "Restore Orchard's critical and uplink-warning events in the local buffer and at healthy Operations 10.215.0.110 using facility 18 or 19. Exclude notice/debug locally and at Operations. No event may be delivered to retired 10.215.0.120; its supplied path is unavailable. Keep BOTH collector policies exactly as supplied. Diagnose the source process and destination as well as filtering.",
+      "retry_guidance": "Read the first failing current outcome, then the next stage it exposes. Apply or repair pending drafts. Keep the complete positive/negative and protected-policy requirements in view; do not erase history to imitate a policy repair.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Read the event requirements and fixed delivery facts",
+        "Investigate the selected source and collector settings",
+        "Apply a complete policy without changing protected peers",
+        "Check positive and negative current decisions; retain useful history"
+      ],
+      "guide": [
+        {
+          "title": "Read the event requirements and fixed delivery facts",
+          "why": "Severity, facility and delivery are independent facts.",
+          "action": "Use Introduction or the full Assignment; read every required case.",
+          "commands": []
+        },
+        {
+          "title": "Investigate the selected source and collector settings",
+          "why": "An early refusal can mask a later one.",
+          "action": "Choose a source or collector and inspect its native settings and supplied facts.",
+          "commands": []
+        },
+        {
+          "title": "Apply a complete policy without changing protected peers",
+          "why": "A passing primary path cannot replace the protected peer's policy.",
+          "action": "Edit the native fields and Apply settings. Pending fields are not applied state.",
+          "commands": []
+        },
+        {
+          "title": "Check positive and negative current decisions; retain useful history",
+          "why": "Old accepted records can remain after a policy breaks.",
+          "action": "Use Generate simulated event for evidence if useful, then Check configuration for the full task.",
+          "commands": []
+        }
+      ],
+      "explanation": "One native worked approach: Choose source 10.215.0.20. Set process enabled, local warning, remote warning, facility 18 and collectors 10.215.0.110. Fill only populates the draft; choose Apply settings. Equivalent settings pass when all required current outcomes and protected policies hold. Generating or clearing history is optional and cannot substitute for current policy.",
+      "hints": [
+        "The first refusal may be a disabled source process. Fixing the address alone cannot enable local or remote logging.",
+        "Read the supplied delivery facts. Operations is available; the retired collector is not. Those facts are not editable routes.",
+        "Both collector selectors are protected. Either choose facility 18 and let its selector filter detail, or use facility 19 with a source threshold that excludes notice."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc5424.html#section-6.2.1",
+        "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/bsm/configuration/15-s/bsm-15-s-book/bsm-troubleshooting.html"
+      ],
+      "simplifications": "Offline native policy controls only; no IOS/Linux command parser, packets, routing changes, real collector, console/monitor, timestamps, authentication, rotation or full syslog protocol. Delivery availability and event templates are immutable supplied facts. Circular histories are measured in records, not real logging-buffer byte sizes. This models selected logging-policy concepts, not a complete IOS device or syslog protocol.",
+      "initial": {
+        "kind": "Syslog",
+        "simulation": {
+          "version": 1,
+          "current": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.215.0.20": {
+                  "name": "Orchard distribution source",
+                  "history_capacity": 6
+                }
+              },
+              "collectors": {
+                "10.215.0.110": {
+                  "name": "Orchard healthy Operations",
+                  "history_capacity": 6
+                },
+                "10.215.0.120": {
+                  "name": "Orchard unavailable retired collector",
+                  "history_capacity": 6
+                }
+              },
+              "events": {
+                "orchard-critical": {
+                  "subsystem": "SYS",
+                  "severity": "critical",
+                  "mnemonic": "CRITICAL",
+                  "text": "Supplied orchard critical event"
+                },
+                "orchard-uplink": {
+                  "subsystem": "LINK",
+                  "severity": "warning",
+                  "mnemonic": "UPLINK",
+                  "text": "Supplied orchard uplink event"
+                },
+                "orchard-notice": {
+                  "subsystem": "SYS",
+                  "severity": "notice",
+                  "mnemonic": "NOTICE",
+                  "text": "Supplied orchard notice event"
+                },
+                "orchard-debug": {
+                  "subsystem": "SYS",
+                  "severity": "debug",
+                  "mnemonic": "DEBUG",
+                  "text": "Supplied orchard debug event"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.215.0.20",
+                  "collector": "10.215.0.110",
+                  "available": true
+                },
+                {
+                  "device": "10.215.0.20",
+                  "collector": "10.215.0.120",
+                  "available": false
+                }
+              ]
+            },
+            "devices": {
+              "10.215.0.20": {
+                "process_enabled": false,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 18,
+                "hosts": [
+                  "10.215.0.120"
+                ]
+              }
+            },
+            "collectors": {
+              "10.215.0.110": {
+                "selectors": {
+                  "18": "warning",
+                  "19": "notice"
+                }
+              },
+              "10.215.0.120": {
+                "selectors": {
+                  "18": "debug",
+                  "19": "debug"
+                }
+              }
+            },
+            "local": {
+              "10.215.0.20": []
+            },
+            "remote": {
+              "10.215.0.110": [],
+              "10.215.0.120": []
+            },
+            "next_sequence": 1
+          },
+          "example": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.225.0.21": {
+                  "name": "Birch practice source",
+                  "history_capacity": 6
+                }
+              },
+              "collectors": {
+                "10.225.0.111": {
+                  "name": "Birch available collector",
+                  "history_capacity": 6
+                },
+                "10.225.0.121": {
+                  "name": "Birch unavailable collector",
+                  "history_capacity": 6
+                }
+              },
+              "events": {
+                "birch-fault": {
+                  "subsystem": "DEMO",
+                  "severity": "error",
+                  "mnemonic": "FAULT",
+                  "text": "Supplied birch fault event"
+                },
+                "birch-notice": {
+                  "subsystem": "DEMO",
+                  "severity": "notice",
+                  "mnemonic": "NOTICE",
+                  "text": "Supplied birch notice event"
+                },
+                "birch-detail": {
+                  "subsystem": "DEMO",
+                  "severity": "debug",
+                  "mnemonic": "DETAIL",
+                  "text": "Supplied birch detail event"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.225.0.21",
+                  "collector": "10.225.0.111",
+                  "available": true
+                },
+                {
+                  "device": "10.225.0.21",
+                  "collector": "10.225.0.121",
+                  "available": false
+                }
+              ]
+            },
+            "devices": {
+              "10.225.0.21": {
+                "process_enabled": false,
+                "buffer_threshold": "error",
+                "remote_threshold": "error",
+                "export_facility": 20,
+                "hosts": [
+                  "10.225.0.121"
+                ]
+              }
+            },
+            "collectors": {
+              "10.225.0.111": {
+                "selectors": {
+                  "20": "error"
+                }
+              },
+              "10.225.0.121": {
+                "selectors": {
+                  "20": "debug"
+                }
+              }
+            },
+            "local": {
+              "10.225.0.21": []
+            },
+            "remote": {
+              "10.225.0.111": [],
+              "10.225.0.121": []
+            },
+            "next_sequence": 1
+          },
+          "editor": {
+            "selected": {
+              "kind": "source",
+              "address": "10.215.0.20"
+            },
+            "event": "orchard-critical",
+            "sources": {
+              "10.215.0.20": {
+                "enabled": false,
+                "buffer": "warning",
+                "remote": "warning",
+                "facility": 18,
+                "hosts": [
+                  "10.215.0.120"
+                ]
+              }
+            },
+            "collectors": {
+              "10.215.0.110": {
+                "rows": [
+                  {
+                    "facility": 18,
+                    "threshold": "warning"
+                  },
+                  {
+                    "facility": 19,
+                    "threshold": "notice"
+                  }
+                ]
+              },
+              "10.215.0.120": {
+                "rows": [
+                  {
+                    "facility": 18,
+                    "threshold": "debug"
+                  },
+                  {
+                    "facility": 19,
+                    "threshold": "debug"
+                  }
+                ]
+              }
+            }
+          },
+          "example_editor": {
+            "selected": {
+              "kind": "source",
+              "address": "10.225.0.21"
+            },
+            "event": "birch-fault",
+            "sources": {
+              "10.225.0.21": {
+                "enabled": false,
+                "buffer": "error",
+                "remote": "error",
+                "facility": 20,
+                "hosts": [
+                  "10.225.0.121"
+                ]
+              }
+            },
+            "collectors": {
+              "10.225.0.111": {
+                "rows": [
+                  {
+                    "facility": 20,
+                    "threshold": "error"
+                  }
+                ]
+              },
+              "10.225.0.121": {
+                "rows": [
+                  {
+                    "facility": 20,
+                    "threshold": "debug"
+                  }
+                ]
+              }
+            }
+          },
+          "view": "introduction",
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Syslog",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.215.0.20": {
+                  "name": "Orchard distribution source",
+                  "history_capacity": 6
+                }
+              },
+              "collectors": {
+                "10.215.0.110": {
+                  "name": "Orchard healthy Operations",
+                  "history_capacity": 6
+                },
+                "10.215.0.120": {
+                  "name": "Orchard unavailable retired collector",
+                  "history_capacity": 6
+                }
+              },
+              "events": {
+                "orchard-critical": {
+                  "subsystem": "SYS",
+                  "severity": "critical",
+                  "mnemonic": "CRITICAL",
+                  "text": "Supplied orchard critical event"
+                },
+                "orchard-uplink": {
+                  "subsystem": "LINK",
+                  "severity": "warning",
+                  "mnemonic": "UPLINK",
+                  "text": "Supplied orchard uplink event"
+                },
+                "orchard-notice": {
+                  "subsystem": "SYS",
+                  "severity": "notice",
+                  "mnemonic": "NOTICE",
+                  "text": "Supplied orchard notice event"
+                },
+                "orchard-debug": {
+                  "subsystem": "SYS",
+                  "severity": "debug",
+                  "mnemonic": "DEBUG",
+                  "text": "Supplied orchard debug event"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.215.0.20",
+                  "collector": "10.215.0.110",
+                  "available": true
+                },
+                {
+                  "device": "10.215.0.20",
+                  "collector": "10.215.0.120",
+                  "available": false
+                }
+              ]
+            },
+            "devices": {
+              "10.215.0.20": {
+                "process_enabled": false,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 18,
+                "hosts": [
+                  "10.215.0.120"
+                ]
+              }
+            },
+            "collectors": {
+              "10.215.0.110": {
+                "selectors": {
+                  "18": "warning",
+                  "19": "notice"
+                }
+              },
+              "10.215.0.120": {
+                "selectors": {
+                  "18": "debug",
+                  "19": "debug"
+                }
+              }
+            },
+            "local": {
+              "10.215.0.20": []
+            },
+            "remote": {
+              "10.215.0.110": [],
+              "10.215.0.120": []
+            },
+            "next_sequence": 1
+          },
+          "targets": [
+            {
+              "device": "10.215.0.20",
+              "event": "orchard-critical",
+              "local": true,
+              "remote": {
+                "10.215.0.110": {
+                  "accept": true,
+                  "facilities": [
+                    18,
+                    19
+                  ]
+                },
+                "10.215.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.215.0.20",
+              "event": "orchard-uplink",
+              "local": true,
+              "remote": {
+                "10.215.0.110": {
+                  "accept": true,
+                  "facilities": [
+                    18,
+                    19
+                  ]
+                },
+                "10.215.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.215.0.20",
+              "event": "orchard-notice",
+              "local": false,
+              "remote": {
+                "10.215.0.110": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.215.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.215.0.20",
+              "event": "orchard-debug",
+              "local": false,
+              "remote": {
+                "10.215.0.110": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.215.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            }
+          ],
+          "protected_sources": [],
+          "protected_collectors": [
+            "10.215.0.110",
+            "10.215.0.120"
+          ],
+          "lesson": {
+            "prerequisite_note": "You need to recognize an IPv4 source and collector address. No IOS syntax or prior logging knowledge is assumed; read the concepts below, then try this separate native example.",
+            "concepts": [
+              {
+                "title": "Events, current decisions and old records",
+                "text": "A source creates an event; a collector receives selected events. Generate simulated event uses one supplied template. Accepted records remain historical evidence after settings change. Check configuration asks fresh positive AND negative cases, so old success or clearing a log cannot repair a broken policy."
+              },
+              {
+                "title": "Urgency runs toward zero",
+                "text": "Severity 0 emergency, 1 alert, 2 critical, 3 error, 4 warning, 5 notice, 6 informational and 7 debug describe decreasing urgency. A threshold includes its number and all smaller numbers: warning 4 accepts 0 through 4, not 5 through 7. Off disables that output. The modeled process switch affects local and remote outputs; no console is modeled."
+              },
+              {
+                "title": "Local and remote have independent budgets",
+                "text": "The local buffer and remote export use separate thresholds. A warning may belong locally while only errors and more urgent events go remote. Collector filtering happens after source filtering; a collector cannot recover an event the source did not export."
+              },
+              {
+                "title": "Facility is not the subsystem label",
+                "text": "The event's LINK, AUTH or SYS label names its message subsystem. Export facility is a separate numeric category, 0 through 23. Local0 through local7 are facilities 16 through 23. Changing that source facility does not change LINK into another subsystem. A priority number is facility times 8 plus severity; this activity does not construct protocol packets."
+              },
+              {
+                "title": "Follow the delivery path",
+                "text": "Check the source process, remote threshold and collector address, then supplied delivery availability and the collector's facility selector. The first refusal can hide another problem. An unavailable supplied path is fixed exercise evidence; editing policy cannot make it a real network connection. Collector selectors admit that facility at their threshold or more urgent."
+              },
+              {
+                "title": "Apply deliberately and protect the other work",
+                "text": "Choose the source or collector, edit its native table, then Apply settings. Unapplied changes are saved drafts; Generate still uses applied policy. Protected policies must stay exactly as supplied. Practice uses different addresses and events. Fill example settings only fills its draft; Apply is separate. Reset example restores practice; main Reset requires confirmation. Neither is real-device undo."
+              }
+            ],
+            "description": "Birch must retain and export its error event to the supplied available collector; notice/debug must stay out. Enable its modeled process and choose the available address. Keep both collector policies unchanged; no policy edit can repair the supplied unavailable path.",
+            "fixture": {
+              "version": 1,
+              "environment": {
+                "devices": {
+                  "10.225.0.21": {
+                    "name": "Birch practice source",
+                    "history_capacity": 6
+                  }
+                },
+                "collectors": {
+                  "10.225.0.111": {
+                    "name": "Birch available collector",
+                    "history_capacity": 6
+                  },
+                  "10.225.0.121": {
+                    "name": "Birch unavailable collector",
+                    "history_capacity": 6
+                  }
+                },
+                "events": {
+                  "birch-fault": {
+                    "subsystem": "DEMO",
+                    "severity": "error",
+                    "mnemonic": "FAULT",
+                    "text": "Supplied birch fault event"
+                  },
+                  "birch-notice": {
+                    "subsystem": "DEMO",
+                    "severity": "notice",
+                    "mnemonic": "NOTICE",
+                    "text": "Supplied birch notice event"
+                  },
+                  "birch-detail": {
+                    "subsystem": "DEMO",
+                    "severity": "debug",
+                    "mnemonic": "DETAIL",
+                    "text": "Supplied birch detail event"
+                  }
+                },
+                "deliveries": [
+                  {
+                    "device": "10.225.0.21",
+                    "collector": "10.225.0.111",
+                    "available": true
+                  },
+                  {
+                    "device": "10.225.0.21",
+                    "collector": "10.225.0.121",
+                    "available": false
+                  }
+                ]
+              },
+              "devices": {
+                "10.225.0.21": {
+                  "process_enabled": false,
+                  "buffer_threshold": "error",
+                  "remote_threshold": "error",
+                  "export_facility": 20,
+                  "hosts": [
+                    "10.225.0.121"
+                  ]
+                }
+              },
+              "collectors": {
+                "10.225.0.111": {
+                  "selectors": {
+                    "20": "error"
+                  }
+                },
+                "10.225.0.121": {
+                  "selectors": {
+                    "20": "debug"
+                  }
+                }
+              },
+              "local": {
+                "10.225.0.21": []
+              },
+              "remote": {
+                "10.225.0.111": [],
+                "10.225.0.121": []
+              },
+              "next_sequence": 1
+            },
+            "targets": [
+              {
+                "device": "10.225.0.21",
+                "event": "birch-fault",
+                "local": true,
+                "remote": {
+                  "10.225.0.111": {
+                    "accept": true,
+                    "facilities": [
+                      20
+                    ]
+                  },
+                  "10.225.0.121": {
+                    "accept": false,
+                    "facilities": []
+                  }
+                }
+              },
+              {
+                "device": "10.225.0.21",
+                "event": "birch-notice",
+                "local": false,
+                "remote": {
+                  "10.225.0.111": {
+                    "accept": false,
+                    "facilities": []
+                  },
+                  "10.225.0.121": {
+                    "accept": false,
+                    "facilities": []
+                  }
+                }
+              },
+              {
+                "device": "10.225.0.21",
+                "event": "birch-detail",
+                "local": false,
+                "remote": {
+                  "10.225.0.111": {
+                    "accept": false,
+                    "facilities": []
+                  },
+                  "10.225.0.121": {
+                    "accept": false,
+                    "facilities": []
+                  }
+                }
+              }
+            ],
+            "protected_sources": [],
+            "protected_collectors": [
+              "10.225.0.111",
+              "10.225.0.121"
+            ],
+            "worked": [
+              {
+                "action": {
+                  "action": "apply_source",
+                  "device": "10.225.0.21",
+                  "policy": {
+                    "process_enabled": true,
+                    "buffer_threshold": "error",
+                    "remote_threshold": "error",
+                    "export_facility": 20,
+                    "hosts": [
+                      "10.225.0.111"
+                    ]
+                  }
+                },
+                "explanation": "Birch example: Choose source 10.225.0.21. Set process enabled, local error, remote error, facility 20 and collectors 10.225.0.111. Fill only populates the draft; choose Apply settings."
+              }
+            ],
+            "try_change": "After the example passes, try this deliberate mistake: Choose source 10.225.0.21. Set process enabled, local error, remote error, facility 20 and collectors 10.225.0.121. Fill only populates the draft; choose Apply settings. Check again and read the newly failed case. Repair with: Choose source 10.225.0.21. Set process enabled, local error, remote error, facility 20 and collectors 10.225.0.111. Fill only populates the draft; choose Apply settings. Alternatively Reset example and manually replay. The assignment is separate.",
+            "experiment": {
+              "action": "apply_source",
+              "device": "10.225.0.21",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "error",
+                "remote_threshold": "error",
+                "export_facility": 20,
+                "hosts": [
+                  "10.225.0.121"
+                ]
+              }
+            },
+            "repair": {
+              "action": "apply_source",
+              "device": "10.225.0.21",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "error",
+                "remote_threshold": "error",
+                "export_facility": 20,
+                "hosts": [
+                  "10.225.0.111"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "{\"action\":\"apply_source\",\"device\":\"10.215.0.20\",\"policy\":{\"process_enabled\":true,\"buffer_threshold\":\"warning\",\"remote_threshold\":\"warning\",\"export_facility\":18,\"hosts\":[\"10.215.0.110\"]}}"
+      ],
+      "prerequisites": [
+        "ccna-ipv4",
+        "ccna-syslog-local-remote"
+      ]
+    },
+    {
+      "id": "ccna-syslog-facility-routing",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Syslog policy and evidence",
+      "unit": "ccna-syslog-policy",
+      "title": "Route categories without confusing subsystem labels",
+      "summary": "Repair collector selectors while the source identities and export policies remain fixed.",
+      "objective": "Keep both Cedar source policies EXACTLY unchanged. Operations 10.216.0.100 must receive access source 10.216.0.10's port-warning and authentication-error using its fixed facility 16. Audit 10.216.0.110 must receive audit source 10.216.0.20's same two event types using fixed facility 20. Neither collector receives the other source or either source's debug. Repair collector selectors; the LINK/AUTH message labels do not choose a destination facility.",
+      "retry_guidance": "Read the first failing current outcome, then the next stage it exposes. Apply or repair pending drafts. Keep the complete positive/negative and protected-policy requirements in view; do not erase history to imitate a policy repair.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Read the event requirements and fixed delivery facts",
+        "Investigate the selected source and collector settings",
+        "Apply a complete policy without changing protected peers",
+        "Check positive and negative current decisions; retain useful history"
+      ],
+      "guide": [
+        {
+          "title": "Read the event requirements and fixed delivery facts",
+          "why": "Severity, facility and delivery are independent facts.",
+          "action": "Use Introduction or the full Assignment; read every required case.",
+          "commands": []
+        },
+        {
+          "title": "Investigate the selected source and collector settings",
+          "why": "An early refusal can mask a later one.",
+          "action": "Choose a source or collector and inspect its native settings and supplied facts.",
+          "commands": []
+        },
+        {
+          "title": "Apply a complete policy without changing protected peers",
+          "why": "A passing primary path cannot replace the protected peer's policy.",
+          "action": "Edit the native fields and Apply settings. Pending fields are not applied state.",
+          "commands": []
+        },
+        {
+          "title": "Check positive and negative current decisions; retain useful history",
+          "why": "Old accepted records can remain after a policy breaks.",
+          "action": "Use Generate simulated event for evidence if useful, then Check configuration for the full task.",
+          "commands": []
+        }
+      ],
+      "explanation": "One native worked approach: Choose collector 10.216.0.100. Set the selector rows to facility 16: warning. Fill only populates the draft; choose Apply settings. Choose collector 10.216.0.110. Set the selector rows to facility 20: warning. Fill only populates the draft; choose Apply settings. Equivalent settings pass when all required current outcomes and protected policies hold. Generating or clearing history is optional and cannot substitute for current policy.",
+      "hints": [
+        "Inspect each source's export facility separately from the event's LINK or AUTH subsystem label.",
+        "Operations needs facility 16; Audit needs facility 20. A collector selector for an unrelated numeric category cannot recover those events.",
+        "The fixed sources already filter debug. Broader collector thresholds or unused extra selectors are legitimate if all current cases pass and both source policies stay unchanged."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc5424.html#section-6.2.1",
+        "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/bsm/configuration/15-s/bsm-15-s-book/bsm-troubleshooting.html"
+      ],
+      "simplifications": "Offline native policy controls only; no IOS/Linux command parser, packets, routing changes, real collector, console/monitor, timestamps, authentication, rotation or full syslog protocol. Delivery availability and event templates are immutable supplied facts. Circular histories are measured in records, not real logging-buffer byte sizes. This models selected logging-policy concepts, not a complete IOS device or syslog protocol.",
+      "initial": {
+        "kind": "Syslog",
+        "simulation": {
+          "version": 1,
+          "current": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.216.0.10": {
+                  "name": "Cedar access source",
+                  "history_capacity": 6
+                },
+                "10.216.0.20": {
+                  "name": "Cedar audit source",
+                  "history_capacity": 6
+                }
+              },
+              "collectors": {
+                "10.216.0.100": {
+                  "name": "Cedar Operations",
+                  "history_capacity": 6
+                },
+                "10.216.0.110": {
+                  "name": "Cedar Audit",
+                  "history_capacity": 6
+                }
+              },
+              "events": {
+                "cedar-port-change": {
+                  "subsystem": "LINK",
+                  "severity": "warning",
+                  "mnemonic": "PORT_CHANGE",
+                  "text": "Supplied cedar port-change event"
+                },
+                "cedar-auth-failure": {
+                  "subsystem": "AUTH",
+                  "severity": "error",
+                  "mnemonic": "AUTH_FAILURE",
+                  "text": "Supplied cedar auth-failure event"
+                },
+                "cedar-debug": {
+                  "subsystem": "SYS",
+                  "severity": "debug",
+                  "mnemonic": "DEBUG",
+                  "text": "Supplied cedar debug event"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.216.0.10",
+                  "collector": "10.216.0.100",
+                  "available": true
+                },
+                {
+                  "device": "10.216.0.10",
+                  "collector": "10.216.0.110",
+                  "available": true
+                },
+                {
+                  "device": "10.216.0.20",
+                  "collector": "10.216.0.100",
+                  "available": true
+                },
+                {
+                  "device": "10.216.0.20",
+                  "collector": "10.216.0.110",
+                  "available": true
+                }
+              ]
+            },
+            "devices": {
+              "10.216.0.10": {
+                "process_enabled": true,
+                "buffer_threshold": null,
+                "remote_threshold": "warning",
+                "export_facility": 16,
+                "hosts": [
+                  "10.216.0.100"
+                ]
+              },
+              "10.216.0.20": {
+                "process_enabled": true,
+                "buffer_threshold": null,
+                "remote_threshold": "warning",
+                "export_facility": 20,
+                "hosts": [
+                  "10.216.0.110"
+                ]
+              }
+            },
+            "collectors": {
+              "10.216.0.100": {
+                "selectors": {
+                  "3": "debug"
+                }
+              },
+              "10.216.0.110": {
+                "selectors": {
+                  "4": "debug"
+                }
+              }
+            },
+            "local": {
+              "10.216.0.10": [],
+              "10.216.0.20": []
+            },
+            "remote": {
+              "10.216.0.100": [],
+              "10.216.0.110": []
+            },
+            "next_sequence": 1
+          },
+          "example": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.226.0.12": {
+                  "name": "Cedar practice fixed source",
+                  "history_capacity": 6
+                }
+              },
+              "collectors": {
+                "10.226.0.102": {
+                  "name": "Cedar practice inbox",
+                  "history_capacity": 6
+                }
+              },
+              "events": {
+                "cedar-practice-port": {
+                  "subsystem": "LINK",
+                  "severity": "warning",
+                  "mnemonic": "PORT",
+                  "text": "Supplied cedar-practice port event"
+                },
+                "cedar-practice-auth": {
+                  "subsystem": "AUTH",
+                  "severity": "error",
+                  "mnemonic": "AUTH",
+                  "text": "Supplied cedar-practice auth event"
+                },
+                "cedar-practice-detail": {
+                  "subsystem": "SYS",
+                  "severity": "debug",
+                  "mnemonic": "DETAIL",
+                  "text": "Supplied cedar-practice detail event"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.226.0.12",
+                  "collector": "10.226.0.102",
+                  "available": true
+                }
+              ]
+            },
+            "devices": {
+              "10.226.0.12": {
+                "process_enabled": true,
+                "buffer_threshold": null,
+                "remote_threshold": "warning",
+                "export_facility": 17,
+                "hosts": [
+                  "10.226.0.102"
+                ]
+              }
+            },
+            "collectors": {
+              "10.226.0.102": {
+                "selectors": {
+                  "4": "warning"
+                }
+              }
+            },
+            "local": {
+              "10.226.0.12": []
+            },
+            "remote": {
+              "10.226.0.102": []
+            },
+            "next_sequence": 1
+          },
+          "editor": {
+            "selected": {
+              "kind": "source",
+              "address": "10.216.0.10"
+            },
+            "event": "cedar-port-change",
+            "sources": {
+              "10.216.0.10": {
+                "enabled": true,
+                "buffer": null,
+                "remote": "warning",
+                "facility": 16,
+                "hosts": [
+                  "10.216.0.100"
+                ]
+              },
+              "10.216.0.20": {
+                "enabled": true,
+                "buffer": null,
+                "remote": "warning",
+                "facility": 20,
+                "hosts": [
+                  "10.216.0.110"
+                ]
+              }
+            },
+            "collectors": {
+              "10.216.0.100": {
+                "rows": [
+                  {
+                    "facility": 3,
+                    "threshold": "debug"
+                  }
+                ]
+              },
+              "10.216.0.110": {
+                "rows": [
+                  {
+                    "facility": 4,
+                    "threshold": "debug"
+                  }
+                ]
+              }
+            }
+          },
+          "example_editor": {
+            "selected": {
+              "kind": "source",
+              "address": "10.226.0.12"
+            },
+            "event": "cedar-practice-port",
+            "sources": {
+              "10.226.0.12": {
+                "enabled": true,
+                "buffer": null,
+                "remote": "warning",
+                "facility": 17,
+                "hosts": [
+                  "10.226.0.102"
+                ]
+              }
+            },
+            "collectors": {
+              "10.226.0.102": {
+                "rows": [
+                  {
+                    "facility": 4,
+                    "threshold": "warning"
+                  }
+                ]
+              }
+            }
+          },
+          "view": "introduction",
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Syslog",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.216.0.10": {
+                  "name": "Cedar access source",
+                  "history_capacity": 6
+                },
+                "10.216.0.20": {
+                  "name": "Cedar audit source",
+                  "history_capacity": 6
+                }
+              },
+              "collectors": {
+                "10.216.0.100": {
+                  "name": "Cedar Operations",
+                  "history_capacity": 6
+                },
+                "10.216.0.110": {
+                  "name": "Cedar Audit",
+                  "history_capacity": 6
+                }
+              },
+              "events": {
+                "cedar-port-change": {
+                  "subsystem": "LINK",
+                  "severity": "warning",
+                  "mnemonic": "PORT_CHANGE",
+                  "text": "Supplied cedar port-change event"
+                },
+                "cedar-auth-failure": {
+                  "subsystem": "AUTH",
+                  "severity": "error",
+                  "mnemonic": "AUTH_FAILURE",
+                  "text": "Supplied cedar auth-failure event"
+                },
+                "cedar-debug": {
+                  "subsystem": "SYS",
+                  "severity": "debug",
+                  "mnemonic": "DEBUG",
+                  "text": "Supplied cedar debug event"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.216.0.10",
+                  "collector": "10.216.0.100",
+                  "available": true
+                },
+                {
+                  "device": "10.216.0.10",
+                  "collector": "10.216.0.110",
+                  "available": true
+                },
+                {
+                  "device": "10.216.0.20",
+                  "collector": "10.216.0.100",
+                  "available": true
+                },
+                {
+                  "device": "10.216.0.20",
+                  "collector": "10.216.0.110",
+                  "available": true
+                }
+              ]
+            },
+            "devices": {
+              "10.216.0.10": {
+                "process_enabled": true,
+                "buffer_threshold": null,
+                "remote_threshold": "warning",
+                "export_facility": 16,
+                "hosts": [
+                  "10.216.0.100"
+                ]
+              },
+              "10.216.0.20": {
+                "process_enabled": true,
+                "buffer_threshold": null,
+                "remote_threshold": "warning",
+                "export_facility": 20,
+                "hosts": [
+                  "10.216.0.110"
+                ]
+              }
+            },
+            "collectors": {
+              "10.216.0.100": {
+                "selectors": {
+                  "3": "debug"
+                }
+              },
+              "10.216.0.110": {
+                "selectors": {
+                  "4": "debug"
+                }
+              }
+            },
+            "local": {
+              "10.216.0.10": [],
+              "10.216.0.20": []
+            },
+            "remote": {
+              "10.216.0.100": [],
+              "10.216.0.110": []
+            },
+            "next_sequence": 1
+          },
+          "targets": [
+            {
+              "device": "10.216.0.10",
+              "event": "cedar-port-change",
+              "local": null,
+              "remote": {
+                "10.216.0.100": {
+                  "accept": true,
+                  "facilities": [
+                    16
+                  ]
+                },
+                "10.216.0.110": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.216.0.10",
+              "event": "cedar-auth-failure",
+              "local": null,
+              "remote": {
+                "10.216.0.100": {
+                  "accept": true,
+                  "facilities": [
+                    16
+                  ]
+                },
+                "10.216.0.110": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.216.0.10",
+              "event": "cedar-debug",
+              "local": null,
+              "remote": {
+                "10.216.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.216.0.110": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.216.0.20",
+              "event": "cedar-port-change",
+              "local": null,
+              "remote": {
+                "10.216.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.216.0.110": {
+                  "accept": true,
+                  "facilities": [
+                    20
+                  ]
+                }
+              }
+            },
+            {
+              "device": "10.216.0.20",
+              "event": "cedar-auth-failure",
+              "local": null,
+              "remote": {
+                "10.216.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.216.0.110": {
+                  "accept": true,
+                  "facilities": [
+                    20
+                  ]
+                }
+              }
+            },
+            {
+              "device": "10.216.0.20",
+              "event": "cedar-debug",
+              "local": null,
+              "remote": {
+                "10.216.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.216.0.110": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            }
+          ],
+          "protected_sources": [
+            "10.216.0.10",
+            "10.216.0.20"
+          ],
+          "protected_collectors": [],
+          "lesson": {
+            "prerequisite_note": "You need to recognize an IPv4 source and collector address. No IOS syntax or prior logging knowledge is assumed; read the concepts below, then try this separate native example.",
+            "concepts": [
+              {
+                "title": "Events, current decisions and old records",
+                "text": "A source creates an event; a collector receives selected events. Generate simulated event uses one supplied template. Accepted records remain historical evidence after settings change. Check configuration asks fresh positive AND negative cases, so old success or clearing a log cannot repair a broken policy."
+              },
+              {
+                "title": "Urgency runs toward zero",
+                "text": "Severity 0 emergency, 1 alert, 2 critical, 3 error, 4 warning, 5 notice, 6 informational and 7 debug describe decreasing urgency. A threshold includes its number and all smaller numbers: warning 4 accepts 0 through 4, not 5 through 7. Off disables that output. The modeled process switch affects local and remote outputs; no console is modeled."
+              },
+              {
+                "title": "Local and remote have independent budgets",
+                "text": "The local buffer and remote export use separate thresholds. A warning may belong locally while only errors and more urgent events go remote. Collector filtering happens after source filtering; a collector cannot recover an event the source did not export."
+              },
+              {
+                "title": "Facility is not the subsystem label",
+                "text": "The event's LINK, AUTH or SYS label names its message subsystem. Export facility is a separate numeric category, 0 through 23. Local0 through local7 are facilities 16 through 23. Changing that source facility does not change LINK into another subsystem. A priority number is facility times 8 plus severity; this activity does not construct protocol packets."
+              },
+              {
+                "title": "Follow the delivery path",
+                "text": "Check the source process, remote threshold and collector address, then supplied delivery availability and the collector's facility selector. The first refusal can hide another problem. An unavailable supplied path is fixed exercise evidence; editing policy cannot make it a real network connection. Collector selectors admit that facility at their threshold or more urgent."
+              },
+              {
+                "title": "Apply deliberately and protect the other work",
+                "text": "Choose the source or collector, edit its native table, then Apply settings. Unapplied changes are saved drafts; Generate still uses applied policy. Protected policies must stay exactly as supplied. Practice uses different addresses and events. Fill example settings only fills its draft; Apply is separate. Reset example restores practice; main Reset requires confirmation. Neither is real-device undo."
+              }
+            ],
+            "description": "The same fixed practice source exports LINK and AUTH events using facility 17 (local1). Correct the collector's selector to accept its warning/error and exclude debug. Leave the source policy unchanged; LINK and AUTH are not numeric facility choices.",
+            "fixture": {
+              "version": 1,
+              "environment": {
+                "devices": {
+                  "10.226.0.12": {
+                    "name": "Cedar practice fixed source",
+                    "history_capacity": 6
+                  }
+                },
+                "collectors": {
+                  "10.226.0.102": {
+                    "name": "Cedar practice inbox",
+                    "history_capacity": 6
+                  }
+                },
+                "events": {
+                  "cedar-practice-port": {
+                    "subsystem": "LINK",
+                    "severity": "warning",
+                    "mnemonic": "PORT",
+                    "text": "Supplied cedar-practice port event"
+                  },
+                  "cedar-practice-auth": {
+                    "subsystem": "AUTH",
+                    "severity": "error",
+                    "mnemonic": "AUTH",
+                    "text": "Supplied cedar-practice auth event"
+                  },
+                  "cedar-practice-detail": {
+                    "subsystem": "SYS",
+                    "severity": "debug",
+                    "mnemonic": "DETAIL",
+                    "text": "Supplied cedar-practice detail event"
+                  }
+                },
+                "deliveries": [
+                  {
+                    "device": "10.226.0.12",
+                    "collector": "10.226.0.102",
+                    "available": true
+                  }
+                ]
+              },
+              "devices": {
+                "10.226.0.12": {
+                  "process_enabled": true,
+                  "buffer_threshold": null,
+                  "remote_threshold": "warning",
+                  "export_facility": 17,
+                  "hosts": [
+                    "10.226.0.102"
+                  ]
+                }
+              },
+              "collectors": {
+                "10.226.0.102": {
+                  "selectors": {
+                    "4": "warning"
+                  }
+                }
+              },
+              "local": {
+                "10.226.0.12": []
+              },
+              "remote": {
+                "10.226.0.102": []
+              },
+              "next_sequence": 1
+            },
+            "targets": [
+              {
+                "device": "10.226.0.12",
+                "event": "cedar-practice-port",
+                "local": null,
+                "remote": {
+                  "10.226.0.102": {
+                    "accept": true,
+                    "facilities": [
+                      17
+                    ]
+                  }
+                }
+              },
+              {
+                "device": "10.226.0.12",
+                "event": "cedar-practice-auth",
+                "local": null,
+                "remote": {
+                  "10.226.0.102": {
+                    "accept": true,
+                    "facilities": [
+                      17
+                    ]
+                  }
+                }
+              },
+              {
+                "device": "10.226.0.12",
+                "event": "cedar-practice-detail",
+                "local": null,
+                "remote": {
+                  "10.226.0.102": {
+                    "accept": false,
+                    "facilities": []
+                  }
+                }
+              }
+            ],
+            "protected_sources": [
+              "10.226.0.12"
+            ],
+            "protected_collectors": [],
+            "worked": [
+              {
+                "action": {
+                  "action": "apply_collector",
+                  "collector": "10.226.0.102",
+                  "policy": {
+                    "selectors": {
+                      "17": "warning"
+                    }
+                  }
+                },
+                "explanation": "Cedar practice: Choose collector 10.226.0.102. Set the selector rows to facility 17: warning. Fill only populates the draft; choose Apply settings."
+              }
+            ],
+            "try_change": "After the example passes, try this deliberate mistake: Choose collector 10.226.0.102. Set the selector rows to facility 4: warning. Fill only populates the draft; choose Apply settings. Check again and read the newly failed case. Repair with: Choose collector 10.226.0.102. Set the selector rows to facility 17: warning. Fill only populates the draft; choose Apply settings. Alternatively Reset example and manually replay. The assignment is separate.",
+            "experiment": {
+              "action": "apply_collector",
+              "collector": "10.226.0.102",
+              "policy": {
+                "selectors": {
+                  "4": "warning"
+                }
+              }
+            },
+            "repair": {
+              "action": "apply_collector",
+              "collector": "10.226.0.102",
+              "policy": {
+                "selectors": {
+                  "17": "warning"
+                }
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "{\"action\":\"apply_collector\",\"collector\":\"10.216.0.100\",\"policy\":{\"selectors\":{\"16\":\"warning\"}}}",
+        "{\"action\":\"apply_collector\",\"collector\":\"10.216.0.110\",\"policy\":{\"selectors\":{\"20\":\"warning\"}}}"
+      ],
+      "prerequisites": [
+        "ccna-ipv4",
+        "ccna-syslog-export-path"
+      ]
+    },
+    {
+      "id": "ccna-syslog-policy-handover",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Syslog policy and evidence",
+      "unit": "ccna-syslog-policy",
+      "title": "Hand over Operations without breaking Audit",
+      "summary": "Migrate two distinct urgency budgets while retaining a protected third pipeline.",
+      "objective": "Move Harbor access and branch exports to new Operations 10.217.0.110 using facility 22 or 23; neither may deliver to retired 10.217.0.100 or Audit. Access retains critical/error/warning locally and remotely, excluding notice/debug. Branch retains only critical/error locally and remotely, excluding warning/notice/debug. Keep audit source 10.217.0.30 and BOTH retired Operations and Audit collector policies EXACTLY unchanged; Audit must still accept its critical and reject its warning. Historical old-inbox rows may remain; current delivery decides completion.",
+      "retry_guidance": "Read the first failing current outcome, then the next stage it exposes. Apply or repair pending drafts. Keep the complete positive/negative and protected-policy requirements in view; do not erase history to imitate a policy repair.",
+      "difficulty": "Advanced",
+      "minutes": 30,
+      "steps": [
+        "Read the event requirements and fixed delivery facts",
+        "Investigate the selected source and collector settings",
+        "Apply a complete policy without changing protected peers",
+        "Check positive and negative current decisions; retain useful history"
+      ],
+      "guide": [
+        {
+          "title": "Read the event requirements and fixed delivery facts",
+          "why": "Severity, facility and delivery are independent facts.",
+          "action": "Use Introduction or the full Assignment; read every required case.",
+          "commands": []
+        },
+        {
+          "title": "Investigate the selected source and collector settings",
+          "why": "An early refusal can mask a later one.",
+          "action": "Choose a source or collector and inspect its native settings and supplied facts.",
+          "commands": []
+        },
+        {
+          "title": "Apply a complete policy without changing protected peers",
+          "why": "A passing primary path cannot replace the protected peer's policy.",
+          "action": "Edit the native fields and Apply settings. Pending fields are not applied state.",
+          "commands": []
+        },
+        {
+          "title": "Check positive and negative current decisions; retain useful history",
+          "why": "Old accepted records can remain after a policy breaks.",
+          "action": "Use Generate simulated event for evidence if useful, then Check configuration for the full task.",
+          "commands": []
+        }
+      ],
+      "explanation": "One native worked approach: Choose collector 10.217.0.110. Set the selector rows to facility 22: warning, facility 23: error. Fill only populates the draft; choose Apply settings. Choose source 10.217.0.10. Set process enabled, local warning, remote warning, facility 22 and collectors 10.217.0.110. Fill only populates the draft; choose Apply settings. Choose source 10.217.0.20. Set process enabled, local error, remote error, facility 23 and collectors 10.217.0.110. Fill only populates the draft; choose Apply settings. Equivalent settings pass when all required current outcomes and protected policies hold. Generating or clearing history is optional and cannot substitute for current policy.",
+      "hints": [
+        "Treat the new collector selector and each moving source as separate changes. Updating just one source is an incomplete handover.",
+        "Keep the branch's narrower urgency budget: a warning belongs to access Operations but not branch Operations.",
+        "Remove old destination delivery through the moving sources, not by disabling the protected retired collector. Recheck the unchanged audit pipeline as well as the new one."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc5424.html#section-6.2.1",
+        "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/bsm/configuration/15-s/bsm-15-s-book/bsm-troubleshooting.html"
+      ],
+      "simplifications": "Offline native policy controls only; no IOS/Linux command parser, packets, routing changes, real collector, console/monitor, timestamps, authentication, rotation or full syslog protocol. Delivery availability and event templates are immutable supplied facts. Circular histories are measured in records, not real logging-buffer byte sizes. This models selected logging-policy concepts, not a complete IOS device or syslog protocol.",
+      "initial": {
+        "kind": "Syslog",
+        "simulation": {
+          "version": 1,
+          "current": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.217.0.10": {
+                  "name": "Harbor access",
+                  "history_capacity": 6
+                },
+                "10.217.0.20": {
+                  "name": "Harbor branch",
+                  "history_capacity": 6
+                },
+                "10.217.0.30": {
+                  "name": "Harbor protected audit",
+                  "history_capacity": 6
+                }
+              },
+              "collectors": {
+                "10.217.0.100": {
+                  "name": "Harbor retired Operations",
+                  "history_capacity": 6
+                },
+                "10.217.0.110": {
+                  "name": "Harbor new Operations",
+                  "history_capacity": 6
+                },
+                "10.217.0.120": {
+                  "name": "Harbor protected Audit",
+                  "history_capacity": 6
+                }
+              },
+              "events": {
+                "harbor-critical": {
+                  "subsystem": "AUTH",
+                  "severity": "critical",
+                  "mnemonic": "CRITICAL",
+                  "text": "Supplied harbor critical event"
+                },
+                "harbor-error": {
+                  "subsystem": "SYS",
+                  "severity": "error",
+                  "mnemonic": "ERROR",
+                  "text": "Supplied harbor error event"
+                },
+                "harbor-port": {
+                  "subsystem": "LINK",
+                  "severity": "warning",
+                  "mnemonic": "PORT",
+                  "text": "Supplied harbor port event"
+                },
+                "harbor-notice": {
+                  "subsystem": "SYS",
+                  "severity": "notice",
+                  "mnemonic": "NOTICE",
+                  "text": "Supplied harbor notice event"
+                },
+                "harbor-debug": {
+                  "subsystem": "SYS",
+                  "severity": "debug",
+                  "mnemonic": "DEBUG",
+                  "text": "Supplied harbor debug event"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.217.0.10",
+                  "collector": "10.217.0.100",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.10",
+                  "collector": "10.217.0.110",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.10",
+                  "collector": "10.217.0.120",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.20",
+                  "collector": "10.217.0.100",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.20",
+                  "collector": "10.217.0.110",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.20",
+                  "collector": "10.217.0.120",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.30",
+                  "collector": "10.217.0.100",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.30",
+                  "collector": "10.217.0.110",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.30",
+                  "collector": "10.217.0.120",
+                  "available": true
+                }
+              ]
+            },
+            "devices": {
+              "10.217.0.10": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 22,
+                "hosts": [
+                  "10.217.0.100"
+                ]
+              },
+              "10.217.0.20": {
+                "process_enabled": true,
+                "buffer_threshold": "error",
+                "remote_threshold": "error",
+                "export_facility": 23,
+                "hosts": [
+                  "10.217.0.100"
+                ]
+              },
+              "10.217.0.30": {
+                "process_enabled": true,
+                "buffer_threshold": "critical",
+                "remote_threshold": "critical",
+                "export_facility": 20,
+                "hosts": [
+                  "10.217.0.120"
+                ]
+              }
+            },
+            "collectors": {
+              "10.217.0.100": {
+                "selectors": {
+                  "22": "debug",
+                  "23": "debug"
+                }
+              },
+              "10.217.0.110": {
+                "selectors": {}
+              },
+              "10.217.0.120": {
+                "selectors": {
+                  "20": "critical"
+                }
+              }
+            },
+            "local": {
+              "10.217.0.10": [],
+              "10.217.0.20": [],
+              "10.217.0.30": []
+            },
+            "remote": {
+              "10.217.0.100": [],
+              "10.217.0.110": [],
+              "10.217.0.120": []
+            },
+            "next_sequence": 1
+          },
+          "example": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.227.0.11": {
+                  "name": "Dahlia moving source",
+                  "history_capacity": 6
+                },
+                "10.227.0.21": {
+                  "name": "Dahlia protected peer",
+                  "history_capacity": 6
+                }
+              },
+              "collectors": {
+                "10.227.0.101": {
+                  "name": "Dahlia retained inbox",
+                  "history_capacity": 6
+                },
+                "10.227.0.111": {
+                  "name": "Dahlia new inbox",
+                  "history_capacity": 6
+                }
+              },
+              "events": {
+                "dahlia-error": {
+                  "subsystem": "DEMO",
+                  "severity": "error",
+                  "mnemonic": "ERROR",
+                  "text": "Supplied dahlia error event"
+                },
+                "dahlia-warning": {
+                  "subsystem": "DEMO",
+                  "severity": "warning",
+                  "mnemonic": "WARNING",
+                  "text": "Supplied dahlia warning event"
+                },
+                "dahlia-debug": {
+                  "subsystem": "DEMO",
+                  "severity": "debug",
+                  "mnemonic": "DEBUG",
+                  "text": "Supplied dahlia debug event"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.227.0.11",
+                  "collector": "10.227.0.101",
+                  "available": true
+                },
+                {
+                  "device": "10.227.0.11",
+                  "collector": "10.227.0.111",
+                  "available": true
+                },
+                {
+                  "device": "10.227.0.21",
+                  "collector": "10.227.0.101",
+                  "available": true
+                },
+                {
+                  "device": "10.227.0.21",
+                  "collector": "10.227.0.111",
+                  "available": true
+                }
+              ]
+            },
+            "devices": {
+              "10.227.0.11": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 17,
+                "hosts": [
+                  "10.227.0.101"
+                ]
+              },
+              "10.227.0.21": {
+                "process_enabled": true,
+                "buffer_threshold": "error",
+                "remote_threshold": "error",
+                "export_facility": 18,
+                "hosts": [
+                  "10.227.0.101"
+                ]
+              }
+            },
+            "collectors": {
+              "10.227.0.101": {
+                "selectors": {
+                  "17": "warning",
+                  "18": "error"
+                }
+              },
+              "10.227.0.111": {
+                "selectors": {}
+              }
+            },
+            "local": {
+              "10.227.0.11": [],
+              "10.227.0.21": []
+            },
+            "remote": {
+              "10.227.0.101": [],
+              "10.227.0.111": []
+            },
+            "next_sequence": 1
+          },
+          "editor": {
+            "selected": {
+              "kind": "source",
+              "address": "10.217.0.10"
+            },
+            "event": "harbor-critical",
+            "sources": {
+              "10.217.0.10": {
+                "enabled": true,
+                "buffer": "warning",
+                "remote": "warning",
+                "facility": 22,
+                "hosts": [
+                  "10.217.0.100"
+                ]
+              },
+              "10.217.0.20": {
+                "enabled": true,
+                "buffer": "error",
+                "remote": "error",
+                "facility": 23,
+                "hosts": [
+                  "10.217.0.100"
+                ]
+              },
+              "10.217.0.30": {
+                "enabled": true,
+                "buffer": "critical",
+                "remote": "critical",
+                "facility": 20,
+                "hosts": [
+                  "10.217.0.120"
+                ]
+              }
+            },
+            "collectors": {
+              "10.217.0.100": {
+                "rows": [
+                  {
+                    "facility": 22,
+                    "threshold": "debug"
+                  },
+                  {
+                    "facility": 23,
+                    "threshold": "debug"
+                  }
+                ]
+              },
+              "10.217.0.110": {
+                "rows": []
+              },
+              "10.217.0.120": {
+                "rows": [
+                  {
+                    "facility": 20,
+                    "threshold": "critical"
+                  }
+                ]
+              }
+            }
+          },
+          "example_editor": {
+            "selected": {
+              "kind": "source",
+              "address": "10.227.0.11"
+            },
+            "event": "dahlia-error",
+            "sources": {
+              "10.227.0.11": {
+                "enabled": true,
+                "buffer": "warning",
+                "remote": "warning",
+                "facility": 17,
+                "hosts": [
+                  "10.227.0.101"
+                ]
+              },
+              "10.227.0.21": {
+                "enabled": true,
+                "buffer": "error",
+                "remote": "error",
+                "facility": 18,
+                "hosts": [
+                  "10.227.0.101"
+                ]
+              }
+            },
+            "collectors": {
+              "10.227.0.101": {
+                "rows": [
+                  {
+                    "facility": 17,
+                    "threshold": "warning"
+                  },
+                  {
+                    "facility": 18,
+                    "threshold": "error"
+                  }
+                ]
+              },
+              "10.227.0.111": {
+                "rows": []
+              }
+            }
+          },
+          "view": "introduction",
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Syslog",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.217.0.10": {
+                  "name": "Harbor access",
+                  "history_capacity": 6
+                },
+                "10.217.0.20": {
+                  "name": "Harbor branch",
+                  "history_capacity": 6
+                },
+                "10.217.0.30": {
+                  "name": "Harbor protected audit",
+                  "history_capacity": 6
+                }
+              },
+              "collectors": {
+                "10.217.0.100": {
+                  "name": "Harbor retired Operations",
+                  "history_capacity": 6
+                },
+                "10.217.0.110": {
+                  "name": "Harbor new Operations",
+                  "history_capacity": 6
+                },
+                "10.217.0.120": {
+                  "name": "Harbor protected Audit",
+                  "history_capacity": 6
+                }
+              },
+              "events": {
+                "harbor-critical": {
+                  "subsystem": "AUTH",
+                  "severity": "critical",
+                  "mnemonic": "CRITICAL",
+                  "text": "Supplied harbor critical event"
+                },
+                "harbor-error": {
+                  "subsystem": "SYS",
+                  "severity": "error",
+                  "mnemonic": "ERROR",
+                  "text": "Supplied harbor error event"
+                },
+                "harbor-port": {
+                  "subsystem": "LINK",
+                  "severity": "warning",
+                  "mnemonic": "PORT",
+                  "text": "Supplied harbor port event"
+                },
+                "harbor-notice": {
+                  "subsystem": "SYS",
+                  "severity": "notice",
+                  "mnemonic": "NOTICE",
+                  "text": "Supplied harbor notice event"
+                },
+                "harbor-debug": {
+                  "subsystem": "SYS",
+                  "severity": "debug",
+                  "mnemonic": "DEBUG",
+                  "text": "Supplied harbor debug event"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.217.0.10",
+                  "collector": "10.217.0.100",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.10",
+                  "collector": "10.217.0.110",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.10",
+                  "collector": "10.217.0.120",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.20",
+                  "collector": "10.217.0.100",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.20",
+                  "collector": "10.217.0.110",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.20",
+                  "collector": "10.217.0.120",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.30",
+                  "collector": "10.217.0.100",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.30",
+                  "collector": "10.217.0.110",
+                  "available": true
+                },
+                {
+                  "device": "10.217.0.30",
+                  "collector": "10.217.0.120",
+                  "available": true
+                }
+              ]
+            },
+            "devices": {
+              "10.217.0.10": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 22,
+                "hosts": [
+                  "10.217.0.100"
+                ]
+              },
+              "10.217.0.20": {
+                "process_enabled": true,
+                "buffer_threshold": "error",
+                "remote_threshold": "error",
+                "export_facility": 23,
+                "hosts": [
+                  "10.217.0.100"
+                ]
+              },
+              "10.217.0.30": {
+                "process_enabled": true,
+                "buffer_threshold": "critical",
+                "remote_threshold": "critical",
+                "export_facility": 20,
+                "hosts": [
+                  "10.217.0.120"
+                ]
+              }
+            },
+            "collectors": {
+              "10.217.0.100": {
+                "selectors": {
+                  "22": "debug",
+                  "23": "debug"
+                }
+              },
+              "10.217.0.110": {
+                "selectors": {}
+              },
+              "10.217.0.120": {
+                "selectors": {
+                  "20": "critical"
+                }
+              }
+            },
+            "local": {
+              "10.217.0.10": [],
+              "10.217.0.20": [],
+              "10.217.0.30": []
+            },
+            "remote": {
+              "10.217.0.100": [],
+              "10.217.0.110": [],
+              "10.217.0.120": []
+            },
+            "next_sequence": 1
+          },
+          "targets": [
+            {
+              "device": "10.217.0.10",
+              "event": "harbor-critical",
+              "local": true,
+              "remote": {
+                "10.217.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.110": {
+                  "accept": true,
+                  "facilities": [
+                    22,
+                    23
+                  ]
+                },
+                "10.217.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.217.0.10",
+              "event": "harbor-error",
+              "local": true,
+              "remote": {
+                "10.217.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.110": {
+                  "accept": true,
+                  "facilities": [
+                    22,
+                    23
+                  ]
+                },
+                "10.217.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.217.0.10",
+              "event": "harbor-port",
+              "local": true,
+              "remote": {
+                "10.217.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.110": {
+                  "accept": true,
+                  "facilities": [
+                    22,
+                    23
+                  ]
+                },
+                "10.217.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.217.0.10",
+              "event": "harbor-notice",
+              "local": false,
+              "remote": {
+                "10.217.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.110": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.217.0.10",
+              "event": "harbor-debug",
+              "local": false,
+              "remote": {
+                "10.217.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.110": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.217.0.20",
+              "event": "harbor-critical",
+              "local": true,
+              "remote": {
+                "10.217.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.110": {
+                  "accept": true,
+                  "facilities": [
+                    22,
+                    23
+                  ]
+                },
+                "10.217.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.217.0.20",
+              "event": "harbor-error",
+              "local": true,
+              "remote": {
+                "10.217.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.110": {
+                  "accept": true,
+                  "facilities": [
+                    22,
+                    23
+                  ]
+                },
+                "10.217.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.217.0.20",
+              "event": "harbor-port",
+              "local": false,
+              "remote": {
+                "10.217.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.110": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.217.0.20",
+              "event": "harbor-notice",
+              "local": false,
+              "remote": {
+                "10.217.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.110": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.217.0.20",
+              "event": "harbor-debug",
+              "local": false,
+              "remote": {
+                "10.217.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.110": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            },
+            {
+              "device": "10.217.0.30",
+              "event": "harbor-critical",
+              "local": true,
+              "remote": {
+                "10.217.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.110": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.120": {
+                  "accept": true,
+                  "facilities": [
+                    20
+                  ]
+                }
+              }
+            },
+            {
+              "device": "10.217.0.30",
+              "event": "harbor-port",
+              "local": false,
+              "remote": {
+                "10.217.0.100": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.110": {
+                  "accept": false,
+                  "facilities": []
+                },
+                "10.217.0.120": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            }
+          ],
+          "protected_sources": [
+            "10.217.0.30"
+          ],
+          "protected_collectors": [
+            "10.217.0.100",
+            "10.217.0.120"
+          ],
+          "lesson": {
+            "prerequisite_note": "You need to recognize an IPv4 source and collector address. No IOS syntax or prior logging knowledge is assumed; read the concepts below, then try this separate native example.",
+            "concepts": [
+              {
+                "title": "Events, current decisions and old records",
+                "text": "A source creates an event; a collector receives selected events. Generate simulated event uses one supplied template. Accepted records remain historical evidence after settings change. Check configuration asks fresh positive AND negative cases, so old success or clearing a log cannot repair a broken policy."
+              },
+              {
+                "title": "Urgency runs toward zero",
+                "text": "Severity 0 emergency, 1 alert, 2 critical, 3 error, 4 warning, 5 notice, 6 informational and 7 debug describe decreasing urgency. A threshold includes its number and all smaller numbers: warning 4 accepts 0 through 4, not 5 through 7. Off disables that output. The modeled process switch affects local and remote outputs; no console is modeled."
+              },
+              {
+                "title": "Local and remote have independent budgets",
+                "text": "The local buffer and remote export use separate thresholds. A warning may belong locally while only errors and more urgent events go remote. Collector filtering happens after source filtering; a collector cannot recover an event the source did not export."
+              },
+              {
+                "title": "Facility is not the subsystem label",
+                "text": "The event's LINK, AUTH or SYS label names its message subsystem. Export facility is a separate numeric category, 0 through 23. Local0 through local7 are facilities 16 through 23. Changing that source facility does not change LINK into another subsystem. A priority number is facility times 8 plus severity; this activity does not construct protocol packets."
+              },
+              {
+                "title": "Follow the delivery path",
+                "text": "Check the source process, remote threshold and collector address, then supplied delivery availability and the collector's facility selector. The first refusal can hide another problem. An unavailable supplied path is fixed exercise evidence; editing policy cannot make it a real network connection. Collector selectors admit that facility at their threshold or more urgent."
+              },
+              {
+                "title": "Apply deliberately and protect the other work",
+                "text": "Choose the source or collector, edit its native table, then Apply settings. Unapplied changes are saved drafts; Generate still uses applied policy. Protected policies must stay exactly as supplied. Practice uses different addresses and events. Fill example settings only fills its draft; Apply is separate. Reset example restores practice; main Reset requires confirmation. Neither is real-device undo."
+              }
+            ],
+            "description": "Move Dahlia's warning/error stream to the new inbox and stop its old-inbox deliveries. Keep debug out. The other source and retained inbox policy must stay exactly unchanged so its existing error stream still works. Apply the new receiver selector and the moving source policy separately.",
+            "fixture": {
+              "version": 1,
+              "environment": {
+                "devices": {
+                  "10.227.0.11": {
+                    "name": "Dahlia moving source",
+                    "history_capacity": 6
+                  },
+                  "10.227.0.21": {
+                    "name": "Dahlia protected peer",
+                    "history_capacity": 6
+                  }
+                },
+                "collectors": {
+                  "10.227.0.101": {
+                    "name": "Dahlia retained inbox",
+                    "history_capacity": 6
+                  },
+                  "10.227.0.111": {
+                    "name": "Dahlia new inbox",
+                    "history_capacity": 6
+                  }
+                },
+                "events": {
+                  "dahlia-error": {
+                    "subsystem": "DEMO",
+                    "severity": "error",
+                    "mnemonic": "ERROR",
+                    "text": "Supplied dahlia error event"
+                  },
+                  "dahlia-warning": {
+                    "subsystem": "DEMO",
+                    "severity": "warning",
+                    "mnemonic": "WARNING",
+                    "text": "Supplied dahlia warning event"
+                  },
+                  "dahlia-debug": {
+                    "subsystem": "DEMO",
+                    "severity": "debug",
+                    "mnemonic": "DEBUG",
+                    "text": "Supplied dahlia debug event"
+                  }
+                },
+                "deliveries": [
+                  {
+                    "device": "10.227.0.11",
+                    "collector": "10.227.0.101",
+                    "available": true
+                  },
+                  {
+                    "device": "10.227.0.11",
+                    "collector": "10.227.0.111",
+                    "available": true
+                  },
+                  {
+                    "device": "10.227.0.21",
+                    "collector": "10.227.0.101",
+                    "available": true
+                  },
+                  {
+                    "device": "10.227.0.21",
+                    "collector": "10.227.0.111",
+                    "available": true
+                  }
+                ]
+              },
+              "devices": {
+                "10.227.0.11": {
+                  "process_enabled": true,
+                  "buffer_threshold": "warning",
+                  "remote_threshold": "warning",
+                  "export_facility": 17,
+                  "hosts": [
+                    "10.227.0.101"
+                  ]
+                },
+                "10.227.0.21": {
+                  "process_enabled": true,
+                  "buffer_threshold": "error",
+                  "remote_threshold": "error",
+                  "export_facility": 18,
+                  "hosts": [
+                    "10.227.0.101"
+                  ]
+                }
+              },
+              "collectors": {
+                "10.227.0.101": {
+                  "selectors": {
+                    "17": "warning",
+                    "18": "error"
+                  }
+                },
+                "10.227.0.111": {
+                  "selectors": {}
+                }
+              },
+              "local": {
+                "10.227.0.11": [],
+                "10.227.0.21": []
+              },
+              "remote": {
+                "10.227.0.101": [],
+                "10.227.0.111": []
+              },
+              "next_sequence": 1
+            },
+            "targets": [
+              {
+                "device": "10.227.0.11",
+                "event": "dahlia-error",
+                "local": true,
+                "remote": {
+                  "10.227.0.101": {
+                    "accept": false,
+                    "facilities": []
+                  },
+                  "10.227.0.111": {
+                    "accept": true,
+                    "facilities": [
+                      17
+                    ]
+                  }
+                }
+              },
+              {
+                "device": "10.227.0.11",
+                "event": "dahlia-warning",
+                "local": true,
+                "remote": {
+                  "10.227.0.101": {
+                    "accept": false,
+                    "facilities": []
+                  },
+                  "10.227.0.111": {
+                    "accept": true,
+                    "facilities": [
+                      17
+                    ]
+                  }
+                }
+              },
+              {
+                "device": "10.227.0.11",
+                "event": "dahlia-debug",
+                "local": false,
+                "remote": {
+                  "10.227.0.101": {
+                    "accept": false,
+                    "facilities": []
+                  },
+                  "10.227.0.111": {
+                    "accept": false,
+                    "facilities": []
+                  }
+                }
+              },
+              {
+                "device": "10.227.0.21",
+                "event": "dahlia-error",
+                "local": true,
+                "remote": {
+                  "10.227.0.101": {
+                    "accept": true,
+                    "facilities": [
+                      18
+                    ]
+                  },
+                  "10.227.0.111": {
+                    "accept": false,
+                    "facilities": []
+                  }
+                }
+              },
+              {
+                "device": "10.227.0.21",
+                "event": "dahlia-warning",
+                "local": false,
+                "remote": {
+                  "10.227.0.101": {
+                    "accept": false,
+                    "facilities": []
+                  },
+                  "10.227.0.111": {
+                    "accept": false,
+                    "facilities": []
+                  }
+                }
+              }
+            ],
+            "protected_sources": [
+              "10.227.0.21"
+            ],
+            "protected_collectors": [
+              "10.227.0.101"
+            ],
+            "worked": [
+              {
+                "action": {
+                  "action": "apply_collector",
+                  "collector": "10.227.0.111",
+                  "policy": {
+                    "selectors": {
+                      "17": "warning"
+                    }
+                  }
+                },
+                "explanation": "Dahlia example: Choose collector 10.227.0.111. Set the selector rows to facility 17: warning. Fill only populates the draft; choose Apply settings."
+              },
+              {
+                "action": {
+                  "action": "apply_source",
+                  "device": "10.227.0.11",
+                  "policy": {
+                    "process_enabled": true,
+                    "buffer_threshold": "warning",
+                    "remote_threshold": "warning",
+                    "export_facility": 17,
+                    "hosts": [
+                      "10.227.0.111"
+                    ]
+                  }
+                },
+                "explanation": "Dahlia example: Choose source 10.227.0.11. Set process enabled, local warning, remote warning, facility 17 and collectors 10.227.0.111. Fill only populates the draft; choose Apply settings."
+              }
+            ],
+            "try_change": "After the example passes, try this deliberate mistake: Choose source 10.227.0.11. Set process enabled, local warning, remote warning, facility 17 and collectors 10.227.0.101. Fill only populates the draft; choose Apply settings. Check again and read the newly failed case. Repair with: Choose source 10.227.0.11. Set process enabled, local warning, remote warning, facility 17 and collectors 10.227.0.111. Fill only populates the draft; choose Apply settings. Alternatively Reset example and manually replay. The assignment is separate.",
+            "experiment": {
+              "action": "apply_source",
+              "device": "10.227.0.11",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 17,
+                "hosts": [
+                  "10.227.0.101"
+                ]
+              }
+            },
+            "repair": {
+              "action": "apply_source",
+              "device": "10.227.0.11",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 17,
+                "hosts": [
+                  "10.227.0.111"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "{\"action\":\"apply_collector\",\"collector\":\"10.217.0.110\",\"policy\":{\"selectors\":{\"22\":\"warning\",\"23\":\"error\"}}}",
+        "{\"action\":\"apply_source\",\"device\":\"10.217.0.10\",\"policy\":{\"process_enabled\":true,\"buffer_threshold\":\"warning\",\"remote_threshold\":\"warning\",\"export_facility\":22,\"hosts\":[\"10.217.0.110\"]}}",
+        "{\"action\":\"apply_source\",\"device\":\"10.217.0.20\",\"policy\":{\"process_enabled\":true,\"buffer_threshold\":\"error\",\"remote_threshold\":\"error\",\"export_facility\":23,\"hosts\":[\"10.217.0.110\"]}}"
+      ],
+      "prerequisites": [
+        "ccna-ipv4",
+        "ccna-syslog-facility-routing"
+      ]
+    }
+  ]
+}

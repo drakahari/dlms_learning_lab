@@ -1,0 +1,1752 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-transport-port-pairing",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-transport-conversations",
+      "topic": "TCP, UDP and application endpoints",
+      "title": "Pair clients with TCP and UDP listeners",
+      "summary": "Match two report conversations without disrupting a same-port UDP sensor.",
+      "objective": "Deliver both report-main and report-retry by TCP to a matching Server TCP listener. You may choose any matching nonzero service port; each conversation needs a distinct client port.\n\nKeep the supplied sensor UDP listener and datagram settings unchanged and deliver its complete content.\n\nKeep the supplied topology and router policy unchanged. Use the protocol/port settings, then Check configuration; review every exchange.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Understand the conversations",
+        "Try separate practice settings",
+        "Repair the full assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the conversations",
+          "why": "Addresses choose hosts; protocols and ports choose applications. Read the essential explanation and worked practice values.",
+          "action": "Read Introduction, then open Try example or the full Assignment.",
+          "commands": []
+        },
+        {
+          "title": "Try separate practice settings",
+          "why": "Use different hosts and values before repairing independent work.",
+          "action": "Use the practice settings and Check configuration; inspect the actual traces and try the suggested mutation.",
+          "commands": []
+        },
+        {
+          "title": "Repair the full assignment",
+          "why": "Every required conversation and protection must work together.",
+          "action": "Edit the independent settings or ACL document, then Check configuration and inspect every requirement.",
+          "commands": []
+        }
+      ],
+      "explanation": "1. An address finds a computer; a port finds an application\nThe IP address chooses a host. A destination port chooses a listening application on that host. The sender also has a source port, which lets the reply return to the right conversation. A listener must match the transport protocol as well as the port number.\n\n2. TCP opens a two-way conversation\nA client sends SYN (a request to start). A listening server returns SYN-ACK (its opening reply), reversing both address and port pairs. The client sends ACK (an acknowledgement). Only after both peers have opened the connection can this activity send its report. TCP provides an ordered byte stream in real systems; this small model demonstrates the opening and one supplied fragment, not retransmission or congestion control.\n\n3. UDP sends a datagram directly\nUDP does not use the TCP handshake. The sensor sends one supplied datagram. The trace distinguishes sending, delivery to a host and receipt by a matching UDP listener. No reply or successful delivery is guaranteed by UDP itself.\n\n4. Worked pairing with different practice values\nIn the separate practice network, report clients target TCP 8088 but the TCP listener starts on 8089. Set the TCP listener to 8088, then Check configuration: both reports can open and deliver. UDP 8088 is a different listener, so it can receive the sensor datagram at the same numeric port. Another valid repair is to point both report clients at TCP 8089. Changing only one report leaves partial completion.",
+      "hints": [
+        "Compare the protocol and destination port with the listener. Client ports identify conversations, not the server application.",
+        "Inspect the first failed exchange and its last packet. Which address and port pair is actually leaving the server?",
+        "Read source and destination port conditions separately, and keep the protected services and restrictions working."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc9293.html",
+        "https://www.rfc-editor.org/rfc/rfc768.html",
+        "https://www.rfc-editor.org/rfc/rfc6335.html"
+      ],
+      "simplifications": "Primary references inspected2026-11-05: current CCNA v1.1/1.5; RFC 9293 normal TCP opening, RFC 768 UDP and RFC 6335 port namespaces. Exact IPv4 endpoint bindings, existing finite routed stateless ACLs, three handshake packets and one supplied UTF-8 fragment or one UDP datagram. No real sockets/network/host commands, retransmission, sequence numbers, congestion, data ACK, close/reset, wildcard binding, IPv6/NAT or complete TCP implementation. Activity ports 1\u201365535; UDP source zero is excluded here, not declared universally invalid.",
+      "initial": {
+        "kind": "Transport",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-transport-port-pairing",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "listeners": [
+                {
+                  "protocol": "tcp",
+                  "port": "8444"
+                },
+                {
+                  "protocol": "udp",
+                  "port": "8443"
+                }
+              ],
+              "exchanges": [
+                {
+                  "id": "report-main",
+                  "protocol": "tcp",
+                  "client_port": "50123",
+                  "server_port": "8443"
+                },
+                {
+                  "id": "report-retry",
+                  "protocol": "tcp",
+                  "client_port": "50124",
+                  "server_port": "8443"
+                },
+                {
+                  "id": "sensor",
+                  "protocol": "udp",
+                  "client_port": "51234",
+                  "server_port": "8443"
+                }
+              ],
+              "documents": {
+                "schema_version": 1,
+                "routers": {
+                  "R1": ""
+                }
+              }
+            },
+            "tested": null
+          },
+          "practice": {
+            "draft": {
+              "listeners": [
+                {
+                  "protocol": "tcp",
+                  "port": "8089"
+                },
+                {
+                  "protocol": "udp",
+                  "port": "8088"
+                }
+              ],
+              "exchanges": [
+                {
+                  "id": "report-main",
+                  "protocol": "tcp",
+                  "client_port": "50123",
+                  "server_port": "8088"
+                },
+                {
+                  "id": "report-retry",
+                  "protocol": "tcp",
+                  "client_port": "50124",
+                  "server_port": "8088"
+                },
+                {
+                  "id": "sensor",
+                  "protocol": "udp",
+                  "client_port": "51234",
+                  "server_port": "8088"
+                }
+              ],
+              "documents": {
+                "schema_version": 1,
+                "routers": {
+                  "R1": ""
+                }
+              }
+            },
+            "tested": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "Transport",
+        "definition": {
+          "version": 1,
+          "source_id": "ccna-transport-port-pairing",
+          "assignment": {
+            "transport": {
+              "version": 1,
+              "hosts": [
+                {
+                  "id": "Client",
+                  "address": "192.0.2.10"
+                },
+                {
+                  "id": "Server",
+                  "address": "198.51.100.20"
+                }
+              ],
+              "listeners": [
+                {
+                  "protocol": "tcp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 8444
+                  }
+                },
+                {
+                  "protocol": "udp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 8443
+                  }
+                }
+              ],
+              "exchanges": [
+                {
+                  "id": "report-main",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Client",
+                    "port": 50123
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 8443
+                  },
+                  "payload": "Daily report: ready\n"
+                },
+                {
+                  "id": "report-retry",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Client",
+                    "port": 50124
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 8443
+                  },
+                  "payload": "Retry report: caf\u00e9\n"
+                },
+                {
+                  "id": "sensor",
+                  "protocol": "udp",
+                  "client": {
+                    "host": "Client",
+                    "port": 51234
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 8443
+                  },
+                  "payload": "temperature=21\n"
+                }
+              ]
+            },
+            "network": {
+              "schema_version": 1,
+              "host_endpoints": {
+                "Client": "lan",
+                "Server": "lan"
+              },
+              "topology": {
+                "devices": {
+                  "Client": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "length": 0,
+                          "address": "0.0.0.0"
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "R1": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.1",
+                          "prefix": 24
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Server": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.20",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "length": 0,
+                          "address": "0.0.0.0"
+                        },
+                        "interface": "lan",
+                        "via": "198.51.100.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              },
+              "devices": {}
+            },
+            "editable_listeners": [
+              0
+            ],
+            "editable_exchanges": [
+              "report-main",
+              "report-retry"
+            ],
+            "editable_routers": [],
+            "requirements": [
+              {
+                "kind": "receive",
+                "exchange": "report-main",
+                "protocol": "tcp",
+                "server_port": null
+              },
+              {
+                "kind": "receive",
+                "exchange": "report-retry",
+                "protocol": "tcp",
+                "server_port": null
+              },
+              {
+                "kind": "receive",
+                "exchange": "sensor",
+                "protocol": "udp",
+                "server_port": 8443
+              }
+            ]
+          },
+          "example": {
+            "transport": {
+              "version": 1,
+              "hosts": [
+                {
+                  "id": "Client",
+                  "address": "203.0.113.30"
+                },
+                {
+                  "id": "Server",
+                  "address": "192.0.2.40"
+                }
+              ],
+              "listeners": [
+                {
+                  "protocol": "tcp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 8089
+                  }
+                },
+                {
+                  "protocol": "udp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 8088
+                  }
+                }
+              ],
+              "exchanges": [
+                {
+                  "id": "report-main",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Client",
+                    "port": 50123
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 8088
+                  },
+                  "payload": "Daily report: ready\n"
+                },
+                {
+                  "id": "report-retry",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Client",
+                    "port": 50124
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 8088
+                  },
+                  "payload": "Retry report: caf\u00e9\n"
+                },
+                {
+                  "id": "sensor",
+                  "protocol": "udp",
+                  "client": {
+                    "host": "Client",
+                    "port": 51234
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 8088
+                  },
+                  "payload": "temperature=21\n"
+                }
+              ]
+            },
+            "network": {
+              "schema_version": 1,
+              "host_endpoints": {
+                "Client": "lan",
+                "Server": "lan"
+              },
+              "topology": {
+                "devices": {
+                  "Client": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "203.0.113.30",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "length": 0,
+                          "address": "0.0.0.0"
+                        },
+                        "interface": "lan",
+                        "via": "203.0.113.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "R1": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "203.0.113.1",
+                          "prefix": 24
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Server": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.40",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "length": 0,
+                          "address": "0.0.0.0"
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              },
+              "devices": {}
+            },
+            "editable_listeners": [
+              0
+            ],
+            "editable_exchanges": [
+              "report-main",
+              "report-retry"
+            ],
+            "editable_routers": [],
+            "requirements": [
+              {
+                "kind": "receive",
+                "exchange": "report-main",
+                "protocol": "tcp",
+                "server_port": null
+              },
+              {
+                "kind": "receive",
+                "exchange": "report-retry",
+                "protocol": "tcp",
+                "server_port": null
+              },
+              {
+                "kind": "receive",
+                "exchange": "sensor",
+                "protocol": "udp",
+                "server_port": 8088
+              }
+            ]
+          },
+          "worked_assignment": {
+            "listeners": [
+              {
+                "protocol": "tcp",
+                "port": "8443"
+              },
+              {
+                "protocol": "udp",
+                "port": "8443"
+              }
+            ],
+            "exchanges": [
+              {
+                "id": "report-main",
+                "protocol": "tcp",
+                "client_port": "50123",
+                "server_port": "8443"
+              },
+              {
+                "id": "report-retry",
+                "protocol": "tcp",
+                "client_port": "50124",
+                "server_port": "8443"
+              },
+              {
+                "id": "sensor",
+                "protocol": "udp",
+                "client_port": "51234",
+                "server_port": "8443"
+              }
+            ],
+            "documents": {
+              "schema_version": 1,
+              "routers": {
+                "R1": ""
+              }
+            }
+          },
+          "worked_example": {
+            "listeners": [
+              {
+                "protocol": "tcp",
+                "port": "8088"
+              },
+              {
+                "protocol": "udp",
+                "port": "8088"
+              }
+            ],
+            "exchanges": [
+              {
+                "id": "report-main",
+                "protocol": "tcp",
+                "client_port": "50123",
+                "server_port": "8088"
+              },
+              {
+                "id": "report-retry",
+                "protocol": "tcp",
+                "client_port": "50124",
+                "server_port": "8088"
+              },
+              {
+                "id": "sensor",
+                "protocol": "udp",
+                "client_port": "51234",
+                "server_port": "8088"
+              }
+            ],
+            "documents": {
+              "schema_version": 1,
+              "routers": {
+                "R1": ""
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "@transport {\"kind\":\"edit\",\"draft\":{\"listeners\":[{\"protocol\":\"tcp\",\"port\":\"8443\"},{\"protocol\":\"udp\",\"port\":\"8443\"}],\"exchanges\":[{\"id\":\"report-main\",\"protocol\":\"tcp\",\"client_port\":\"50123\",\"server_port\":\"8443\"},{\"id\":\"report-retry\",\"protocol\":\"tcp\",\"client_port\":\"50124\",\"server_port\":\"8443\"},{\"id\":\"sensor\",\"protocol\":\"udp\",\"client_port\":\"51234\",\"server_port\":\"8443\"}],\"documents\":{\"schema_version\":1,\"routers\":{\"R1\":\"\"}}}}",
+        "@transport {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "ccna-ipv4-return-route"
+      ]
+    },
+    {
+      "id": "ccna-transport-return-policy",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-transport-conversations",
+      "topic": "TCP, UDP and application endpoints",
+      "title": "Repair a blocked TCP return path",
+      "summary": "Diagnose the reverse packet and restore reports while retaining three restrictions.",
+      "objective": "Restore both TCP report conversations to Server service 8443, including the return SYN-ACK and received report content.\n\nKeep the UDP sensor service 9555 working. Keep maintenance-forward, unsolicited-datagram and other-service blocked at the named office policy boundary.\n\nEdit only R1\u2019s ACL document. Keep all endpoint settings and the supplied routes intact. Use Check configuration and inspect every exchange, not only the first successful packet.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the conversations",
+        "Try separate practice settings",
+        "Repair the full assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the conversations",
+          "why": "Addresses choose hosts; protocols and ports choose applications. Read the essential explanation and worked practice values.",
+          "action": "Read Introduction, then open Try example or the full Assignment.",
+          "commands": []
+        },
+        {
+          "title": "Try separate practice settings",
+          "why": "Use different hosts and values before repairing independent work.",
+          "action": "Use the practice settings and Check configuration; inspect the actual traces and try the suggested mutation.",
+          "commands": []
+        },
+        {
+          "title": "Repair the full assignment",
+          "why": "Every required conversation and protection must work together.",
+          "action": "Edit the independent settings or ACL document, then Check configuration and inspect every requirement.",
+          "commands": []
+        }
+      ],
+      "explanation": "1. Read the opening in both directions\nA TCP SYN travels from the client\u2019s high source port to the server\u2019s service port. SYN-ACK travels from that service port back to the original client port. Forward delivery alone cannot establish a TCP connection. Look at the actual packet pairs in the trace before editing a rule.\n\n2. Read an ordered ACL rule\nIn the supplied extended ACL document, a port after the first address matches the source port; a port after the second address matches the destination port. Rules are evaluated in sequence order, first match wins. interface office with ip access-group RETURN out applies as packets leave the router toward the client. The matching syntax is a bounded IOS-style subset; the editor does not execute equipment commands.\n\n3. Worked reverse rule with different practice values\nThe practice reports use service 8088 and client ports 50123/50124. Their SYN-ACK packets have source 8088 and those high destination ports. A reverse permit matching destination 8088 is therefore on the wrong side. Match source 8088 and destination range 49152\u201365535 for the supplied server/client hosts. Keep FORWARD in place and the final deny so unsolicited traffic remains blocked.\n\n4. Verify useful work and preserved restrictions\nCheck configuration sends two independent report conversations, a UDP sensor datagram and three forbidden probes. A missing listener does not prove an ACL restriction. Allowing everything fixes a report but fails the protected probes; blocking everything fails the report. This finite roster verifies stated behavior rather than every possible network flow.",
+      "hints": [
+        "Compare the protocol and destination port with the listener. Client ports identify conversations, not the server application.",
+        "Inspect the first failed exchange and its last packet. Which address and port pair is actually leaving the server?",
+        "Read source and destination port conditions separately, and keep the protected services and restrictions working."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc9293.html",
+        "https://www.rfc-editor.org/rfc/rfc768.html",
+        "https://www.rfc-editor.org/rfc/rfc6335.html"
+      ],
+      "simplifications": "Primary references inspected2026-11-05: current CCNA v1.1/1.5; RFC 9293 normal TCP opening, RFC 768 UDP and RFC 6335 port namespaces. Exact IPv4 endpoint bindings, existing finite routed stateless ACLs, three handshake packets and one supplied UTF-8 fragment or one UDP datagram. No real sockets/network/host commands, retransmission, sequence numbers, congestion, data ACK, close/reset, wildcard binding, IPv6/NAT or complete TCP implementation. Activity ports 1\u201365535; UDP source zero is excluded here, not declared universally invalid.",
+      "initial": {
+        "kind": "Transport",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-transport-return-policy",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "listeners": [
+                {
+                  "protocol": "tcp",
+                  "port": "8443"
+                },
+                {
+                  "protocol": "udp",
+                  "port": "9555"
+                },
+                {
+                  "protocol": "udp",
+                  "port": "9999"
+                },
+                {
+                  "protocol": "udp",
+                  "port": "9998"
+                },
+                {
+                  "protocol": "tcp",
+                  "port": "60000"
+                }
+              ],
+              "exchanges": [
+                {
+                  "id": "report-main",
+                  "protocol": "tcp",
+                  "client_port": "50123",
+                  "server_port": "8443"
+                },
+                {
+                  "id": "report-retry",
+                  "protocol": "tcp",
+                  "client_port": "50124",
+                  "server_port": "8443"
+                },
+                {
+                  "id": "sensor",
+                  "protocol": "udp",
+                  "client_port": "51234",
+                  "server_port": "9555"
+                },
+                {
+                  "id": "maintenance-forward",
+                  "protocol": "udp",
+                  "client_port": "60001",
+                  "server_port": "9999"
+                },
+                {
+                  "id": "unsolicited-datagram",
+                  "protocol": "udp",
+                  "client_port": "40000",
+                  "server_port": "9998"
+                },
+                {
+                  "id": "other-service",
+                  "protocol": "tcp",
+                  "client_port": "22",
+                  "server_port": "60000"
+                }
+              ],
+              "documents": {
+                "schema_version": 1,
+                "routers": {
+                  "R1": "ip access-list extended FORWARD\n 10 permit tcp host 192.0.2.10 host 198.51.100.20 eq 8443\n 20 permit udp host 192.0.2.10 host 198.51.100.20 eq 9555\n 30 deny ip any any\nexit\nip access-list extended RETURN\n 10 permit tcp host 198.51.100.20 host 192.0.2.10 eq 8443\n 30 deny ip any any\nexit\ninterface office\n ip access-group FORWARD in\n ip access-group RETURN out\nexit\n"
+                }
+              }
+            },
+            "tested": null
+          },
+          "practice": {
+            "draft": {
+              "listeners": [
+                {
+                  "protocol": "tcp",
+                  "port": "8088"
+                },
+                {
+                  "protocol": "udp",
+                  "port": "9777"
+                },
+                {
+                  "protocol": "udp",
+                  "port": "9999"
+                },
+                {
+                  "protocol": "udp",
+                  "port": "9998"
+                },
+                {
+                  "protocol": "tcp",
+                  "port": "60000"
+                }
+              ],
+              "exchanges": [
+                {
+                  "id": "report-main",
+                  "protocol": "tcp",
+                  "client_port": "50123",
+                  "server_port": "8088"
+                },
+                {
+                  "id": "report-retry",
+                  "protocol": "tcp",
+                  "client_port": "50124",
+                  "server_port": "8088"
+                },
+                {
+                  "id": "sensor",
+                  "protocol": "udp",
+                  "client_port": "51234",
+                  "server_port": "9777"
+                },
+                {
+                  "id": "maintenance-forward",
+                  "protocol": "udp",
+                  "client_port": "60001",
+                  "server_port": "9999"
+                },
+                {
+                  "id": "unsolicited-datagram",
+                  "protocol": "udp",
+                  "client_port": "40000",
+                  "server_port": "9998"
+                },
+                {
+                  "id": "other-service",
+                  "protocol": "tcp",
+                  "client_port": "22",
+                  "server_port": "60000"
+                }
+              ],
+              "documents": {
+                "schema_version": 1,
+                "routers": {
+                  "R1": "ip access-list extended FORWARD\n 10 permit tcp host 203.0.113.30 host 192.0.2.40 eq 8088\n 20 permit udp host 203.0.113.30 host 192.0.2.40 eq 9777\n 30 deny ip any any\nexit\nip access-list extended RETURN\n 10 permit tcp host 192.0.2.40 host 203.0.113.30 eq 8088\n 30 deny ip any any\nexit\ninterface office\n ip access-group FORWARD in\n ip access-group RETURN out\nexit\n"
+                }
+              }
+            },
+            "tested": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "Transport",
+        "definition": {
+          "version": 1,
+          "source_id": "ccna-transport-return-policy",
+          "assignment": {
+            "transport": {
+              "version": 1,
+              "hosts": [
+                {
+                  "id": "Client",
+                  "address": "192.0.2.10"
+                },
+                {
+                  "id": "Server",
+                  "address": "198.51.100.20"
+                }
+              ],
+              "listeners": [
+                {
+                  "protocol": "tcp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 8443
+                  }
+                },
+                {
+                  "protocol": "udp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 9555
+                  }
+                },
+                {
+                  "protocol": "udp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 9999
+                  }
+                },
+                {
+                  "protocol": "udp",
+                  "endpoint": {
+                    "host": "Client",
+                    "port": 9998
+                  }
+                },
+                {
+                  "protocol": "tcp",
+                  "endpoint": {
+                    "host": "Client",
+                    "port": 60000
+                  }
+                }
+              ],
+              "exchanges": [
+                {
+                  "id": "report-main",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Client",
+                    "port": 50123
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 8443
+                  },
+                  "payload": "Daily report: ready\n"
+                },
+                {
+                  "id": "report-retry",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Client",
+                    "port": 50124
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 8443
+                  },
+                  "payload": "Retry report: caf\u00e9\n"
+                },
+                {
+                  "id": "sensor",
+                  "protocol": "udp",
+                  "client": {
+                    "host": "Client",
+                    "port": 51234
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 9555
+                  },
+                  "payload": "temperature=21\n"
+                },
+                {
+                  "id": "maintenance-forward",
+                  "protocol": "udp",
+                  "client": {
+                    "host": "Client",
+                    "port": 60001
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 9999
+                  },
+                  "payload": "maintenance request\n"
+                },
+                {
+                  "id": "unsolicited-datagram",
+                  "protocol": "udp",
+                  "client": {
+                    "host": "Server",
+                    "port": 40000
+                  },
+                  "server": {
+                    "host": "Client",
+                    "port": 9998
+                  },
+                  "payload": "unexpected notice\n"
+                },
+                {
+                  "id": "other-service",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Server",
+                    "port": 22
+                  },
+                  "server": {
+                    "host": "Client",
+                    "port": 60000
+                  },
+                  "payload": "not the report service\n"
+                }
+              ]
+            },
+            "network": {
+              "schema_version": 1,
+              "host_endpoints": {
+                "Client": "lan",
+                "Server": "lan"
+              },
+              "topology": {
+                "devices": {
+                  "Client": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "length": 0,
+                          "address": "0.0.0.0"
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "R1": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.1",
+                          "prefix": 24
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Server": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.20",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "length": 0,
+                          "address": "0.0.0.0"
+                        },
+                        "interface": "lan",
+                        "via": "198.51.100.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              },
+              "devices": {
+                "R1": {
+                  "policy": {
+                    "schema_version": 1,
+                    "lists": {
+                      "FORWARD": {
+                        "kind": "extended",
+                        "rules": [
+                          {
+                            "id": "seq-10",
+                            "action": "permit",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "192.0.2.10",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "destination": {
+                                "base": "198.51.100.20",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "protocol": {
+                                "kind": "tcp",
+                                "source_port": {
+                                  "kind": "any"
+                                },
+                                "destination_port": {
+                                  "kind": "eq",
+                                  "port": 8443
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-20",
+                            "action": "permit",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "192.0.2.10",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "destination": {
+                                "base": "198.51.100.20",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "protocol": {
+                                "kind": "udp",
+                                "source_port": {
+                                  "kind": "any"
+                                },
+                                "destination_port": {
+                                  "kind": "eq",
+                                  "port": 9555
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-30",
+                            "action": "deny",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "destination": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "protocol": {
+                                "kind": "ip"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "RETURN": {
+                        "kind": "extended",
+                        "rules": [
+                          {
+                            "id": "seq-10",
+                            "action": "permit",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "198.51.100.20",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "destination": {
+                                "base": "192.0.2.10",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "protocol": {
+                                "kind": "tcp",
+                                "source_port": {
+                                  "kind": "any"
+                                },
+                                "destination_port": {
+                                  "kind": "eq",
+                                  "port": 8443
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-30",
+                            "action": "deny",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "destination": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "protocol": {
+                                "kind": "ip"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "attachments": {
+                    "office": {
+                      "inbound": "FORWARD",
+                      "outbound": "RETURN"
+                    }
+                  }
+                }
+              }
+            },
+            "editable_listeners": [],
+            "editable_exchanges": [],
+            "editable_routers": [
+              "R1"
+            ],
+            "requirements": [
+              {
+                "kind": "receive",
+                "exchange": "report-main",
+                "protocol": "tcp",
+                "server_port": 8443
+              },
+              {
+                "kind": "receive",
+                "exchange": "report-retry",
+                "protocol": "tcp",
+                "server_port": 8443
+              },
+              {
+                "kind": "receive",
+                "exchange": "sensor",
+                "protocol": "udp",
+                "server_port": 9555
+              },
+              {
+                "kind": "block",
+                "exchange": "maintenance-forward",
+                "at": {
+                  "device": "R1",
+                  "interface": "office",
+                  "direction": "inbound"
+                }
+              },
+              {
+                "kind": "block",
+                "exchange": "unsolicited-datagram",
+                "at": {
+                  "device": "R1",
+                  "interface": "office",
+                  "direction": "outbound"
+                }
+              },
+              {
+                "kind": "block",
+                "exchange": "other-service",
+                "at": {
+                  "device": "R1",
+                  "interface": "office",
+                  "direction": "outbound"
+                }
+              }
+            ]
+          },
+          "example": {
+            "transport": {
+              "version": 1,
+              "hosts": [
+                {
+                  "id": "Client",
+                  "address": "203.0.113.30"
+                },
+                {
+                  "id": "Server",
+                  "address": "192.0.2.40"
+                }
+              ],
+              "listeners": [
+                {
+                  "protocol": "tcp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 8088
+                  }
+                },
+                {
+                  "protocol": "udp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 9777
+                  }
+                },
+                {
+                  "protocol": "udp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 9999
+                  }
+                },
+                {
+                  "protocol": "udp",
+                  "endpoint": {
+                    "host": "Client",
+                    "port": 9998
+                  }
+                },
+                {
+                  "protocol": "tcp",
+                  "endpoint": {
+                    "host": "Client",
+                    "port": 60000
+                  }
+                }
+              ],
+              "exchanges": [
+                {
+                  "id": "report-main",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Client",
+                    "port": 50123
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 8088
+                  },
+                  "payload": "Daily report: ready\n"
+                },
+                {
+                  "id": "report-retry",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Client",
+                    "port": 50124
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 8088
+                  },
+                  "payload": "Retry report: caf\u00e9\n"
+                },
+                {
+                  "id": "sensor",
+                  "protocol": "udp",
+                  "client": {
+                    "host": "Client",
+                    "port": 51234
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 9777
+                  },
+                  "payload": "temperature=21\n"
+                },
+                {
+                  "id": "maintenance-forward",
+                  "protocol": "udp",
+                  "client": {
+                    "host": "Client",
+                    "port": 60001
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 9999
+                  },
+                  "payload": "maintenance request\n"
+                },
+                {
+                  "id": "unsolicited-datagram",
+                  "protocol": "udp",
+                  "client": {
+                    "host": "Server",
+                    "port": 40000
+                  },
+                  "server": {
+                    "host": "Client",
+                    "port": 9998
+                  },
+                  "payload": "unexpected notice\n"
+                },
+                {
+                  "id": "other-service",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Server",
+                    "port": 22
+                  },
+                  "server": {
+                    "host": "Client",
+                    "port": 60000
+                  },
+                  "payload": "not the report service\n"
+                }
+              ]
+            },
+            "network": {
+              "schema_version": 1,
+              "host_endpoints": {
+                "Client": "lan",
+                "Server": "lan"
+              },
+              "topology": {
+                "devices": {
+                  "Client": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "203.0.113.30",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "length": 0,
+                          "address": "0.0.0.0"
+                        },
+                        "interface": "lan",
+                        "via": "203.0.113.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "R1": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "203.0.113.1",
+                          "prefix": 24
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Server": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.40",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "length": 0,
+                          "address": "0.0.0.0"
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              },
+              "devices": {
+                "R1": {
+                  "policy": {
+                    "schema_version": 1,
+                    "lists": {
+                      "FORWARD": {
+                        "kind": "extended",
+                        "rules": [
+                          {
+                            "id": "seq-10",
+                            "action": "permit",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "203.0.113.30",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "destination": {
+                                "base": "192.0.2.40",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "protocol": {
+                                "kind": "tcp",
+                                "source_port": {
+                                  "kind": "any"
+                                },
+                                "destination_port": {
+                                  "kind": "eq",
+                                  "port": 8088
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-20",
+                            "action": "permit",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "203.0.113.30",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "destination": {
+                                "base": "192.0.2.40",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "protocol": {
+                                "kind": "udp",
+                                "source_port": {
+                                  "kind": "any"
+                                },
+                                "destination_port": {
+                                  "kind": "eq",
+                                  "port": 9777
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-30",
+                            "action": "deny",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "destination": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "protocol": {
+                                "kind": "ip"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "RETURN": {
+                        "kind": "extended",
+                        "rules": [
+                          {
+                            "id": "seq-10",
+                            "action": "permit",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "192.0.2.40",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "destination": {
+                                "base": "203.0.113.30",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "protocol": {
+                                "kind": "tcp",
+                                "source_port": {
+                                  "kind": "any"
+                                },
+                                "destination_port": {
+                                  "kind": "eq",
+                                  "port": 8088
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-30",
+                            "action": "deny",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "destination": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "protocol": {
+                                "kind": "ip"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "attachments": {
+                    "office": {
+                      "inbound": "FORWARD",
+                      "outbound": "RETURN"
+                    }
+                  }
+                }
+              }
+            },
+            "editable_listeners": [],
+            "editable_exchanges": [],
+            "editable_routers": [
+              "R1"
+            ],
+            "requirements": [
+              {
+                "kind": "receive",
+                "exchange": "report-main",
+                "protocol": "tcp",
+                "server_port": 8088
+              },
+              {
+                "kind": "receive",
+                "exchange": "report-retry",
+                "protocol": "tcp",
+                "server_port": 8088
+              },
+              {
+                "kind": "receive",
+                "exchange": "sensor",
+                "protocol": "udp",
+                "server_port": 9777
+              },
+              {
+                "kind": "block",
+                "exchange": "maintenance-forward",
+                "at": {
+                  "device": "R1",
+                  "interface": "office",
+                  "direction": "inbound"
+                }
+              },
+              {
+                "kind": "block",
+                "exchange": "unsolicited-datagram",
+                "at": {
+                  "device": "R1",
+                  "interface": "office",
+                  "direction": "outbound"
+                }
+              },
+              {
+                "kind": "block",
+                "exchange": "other-service",
+                "at": {
+                  "device": "R1",
+                  "interface": "office",
+                  "direction": "outbound"
+                }
+              }
+            ]
+          },
+          "worked_assignment": {
+            "listeners": [
+              {
+                "protocol": "tcp",
+                "port": "8443"
+              },
+              {
+                "protocol": "udp",
+                "port": "9555"
+              },
+              {
+                "protocol": "udp",
+                "port": "9999"
+              },
+              {
+                "protocol": "udp",
+                "port": "9998"
+              },
+              {
+                "protocol": "tcp",
+                "port": "60000"
+              }
+            ],
+            "exchanges": [
+              {
+                "id": "report-main",
+                "protocol": "tcp",
+                "client_port": "50123",
+                "server_port": "8443"
+              },
+              {
+                "id": "report-retry",
+                "protocol": "tcp",
+                "client_port": "50124",
+                "server_port": "8443"
+              },
+              {
+                "id": "sensor",
+                "protocol": "udp",
+                "client_port": "51234",
+                "server_port": "9555"
+              },
+              {
+                "id": "maintenance-forward",
+                "protocol": "udp",
+                "client_port": "60001",
+                "server_port": "9999"
+              },
+              {
+                "id": "unsolicited-datagram",
+                "protocol": "udp",
+                "client_port": "40000",
+                "server_port": "9998"
+              },
+              {
+                "id": "other-service",
+                "protocol": "tcp",
+                "client_port": "22",
+                "server_port": "60000"
+              }
+            ],
+            "documents": {
+              "schema_version": 1,
+              "routers": {
+                "R1": "ip access-list extended FORWARD\n 10 permit tcp host 192.0.2.10 host 198.51.100.20 eq 8443\n 20 permit udp host 192.0.2.10 host 198.51.100.20 eq 9555\n 30 deny ip any any\nexit\nip access-list extended RETURN\n 10 permit tcp host 198.51.100.20 eq 8443 host 192.0.2.10 range 49152 65535\n 30 deny ip any any\nexit\ninterface office\n ip access-group FORWARD in\n ip access-group RETURN out\nexit\n"
+              }
+            }
+          },
+          "worked_example": {
+            "listeners": [
+              {
+                "protocol": "tcp",
+                "port": "8088"
+              },
+              {
+                "protocol": "udp",
+                "port": "9777"
+              },
+              {
+                "protocol": "udp",
+                "port": "9999"
+              },
+              {
+                "protocol": "udp",
+                "port": "9998"
+              },
+              {
+                "protocol": "tcp",
+                "port": "60000"
+              }
+            ],
+            "exchanges": [
+              {
+                "id": "report-main",
+                "protocol": "tcp",
+                "client_port": "50123",
+                "server_port": "8088"
+              },
+              {
+                "id": "report-retry",
+                "protocol": "tcp",
+                "client_port": "50124",
+                "server_port": "8088"
+              },
+              {
+                "id": "sensor",
+                "protocol": "udp",
+                "client_port": "51234",
+                "server_port": "9777"
+              },
+              {
+                "id": "maintenance-forward",
+                "protocol": "udp",
+                "client_port": "60001",
+                "server_port": "9999"
+              },
+              {
+                "id": "unsolicited-datagram",
+                "protocol": "udp",
+                "client_port": "40000",
+                "server_port": "9998"
+              },
+              {
+                "id": "other-service",
+                "protocol": "tcp",
+                "client_port": "22",
+                "server_port": "60000"
+              }
+            ],
+            "documents": {
+              "schema_version": 1,
+              "routers": {
+                "R1": "ip access-list extended FORWARD\n 10 permit tcp host 203.0.113.30 host 192.0.2.40 eq 8088\n 20 permit udp host 203.0.113.30 host 192.0.2.40 eq 9777\n 30 deny ip any any\nexit\nip access-list extended RETURN\n 10 permit tcp host 192.0.2.40 eq 8088 host 203.0.113.30 range 49152 65535\n 30 deny ip any any\nexit\ninterface office\n ip access-group FORWARD in\n ip access-group RETURN out\nexit\n"
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "@transport {\"kind\":\"edit\",\"draft\":{\"listeners\":[{\"protocol\":\"tcp\",\"port\":\"8443\"},{\"protocol\":\"udp\",\"port\":\"9555\"},{\"protocol\":\"udp\",\"port\":\"9999\"},{\"protocol\":\"udp\",\"port\":\"9998\"},{\"protocol\":\"tcp\",\"port\":\"60000\"}],\"exchanges\":[{\"id\":\"report-main\",\"protocol\":\"tcp\",\"client_port\":\"50123\",\"server_port\":\"8443\"},{\"id\":\"report-retry\",\"protocol\":\"tcp\",\"client_port\":\"50124\",\"server_port\":\"8443\"},{\"id\":\"sensor\",\"protocol\":\"udp\",\"client_port\":\"51234\",\"server_port\":\"9555\"},{\"id\":\"maintenance-forward\",\"protocol\":\"udp\",\"client_port\":\"60001\",\"server_port\":\"9999\"},{\"id\":\"unsolicited-datagram\",\"protocol\":\"udp\",\"client_port\":\"40000\",\"server_port\":\"9998\"},{\"id\":\"other-service\",\"protocol\":\"tcp\",\"client_port\":\"22\",\"server_port\":\"60000\"}],\"documents\":{\"schema_version\":1,\"routers\":{\"R1\":\"ip access-list extended FORWARD\\n 10 permit tcp host 192.0.2.10 host 198.51.100.20 eq 8443\\n 20 permit udp host 192.0.2.10 host 198.51.100.20 eq 9555\\n 30 deny ip any any\\nexit\\nip access-list extended RETURN\\n 10 permit tcp host 198.51.100.20 eq 8443 host 192.0.2.10 range 49152 65535\\n 30 deny ip any any\\nexit\\ninterface office\\n ip access-group FORWARD in\\n ip access-group RETURN out\\nexit\\n\"}}}}",
+        "@transport {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "ccna-transport-port-pairing",
+        "ccna-acl-direction-repair"
+      ]
+    }
+  ]
+}

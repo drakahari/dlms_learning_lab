@@ -359,38 +359,10 @@ struct Warm {
 }
 pub(in crate::ui) fn goal_rows(
     ctx: &egui::Context,
-    text: &str,
+    scenario: &Scenario,
     visible: egui::Rect,
-) -> Option<(Vec<egui::Rect>, egui::Rect)> {
-    fn find(
-        s: &egui::Shape,
-        clip: egui::Rect,
-        text: &str,
-        visible: egui::Rect,
-    ) -> Option<(Vec<egui::Rect>, egui::Rect)> {
-        match s {
-            egui::Shape::Text(s) if s.galley.text() == text => {
-                assert!(!s.galley.elided);
-                let rows = s
-                    .galley
-                    .rows
-                    .iter()
-                    .filter(|r| !r.text().trim().is_empty())
-                    .map(|r| r.rect().translate(s.pos.to_vec2()))
-                    .collect::<Vec<_>>();
-                assert!(!rows.is_empty() && rows.len() <= 128);
-                Some((rows, clip.intersect(visible)))
-            }
-            egui::Shape::Vec(shapes) => shapes.iter().find_map(|s| find(s, clip, text, visible)),
-            _ => None,
-        }
-    }
-    ctx.graphics(|g| {
-        g.get(egui::LayerId::background()).and_then(|l| {
-            l.all_entries()
-                .find_map(|s| find(&s.shape, s.clip_rect, text, visible))
-        })
-    })
+) -> Option<lesson_presentation::paint::Rows> {
+    lesson_presentation::paint::collect(ctx, scenario, visible)
 }
 // Match the existing ERE route: acknowledge observed fullscreen state and a
 // distinct physical width, rather than assuming the WM honors InnerSize.
@@ -576,7 +548,7 @@ impl LabApp {
                 .as_ref()
                 .unwrap()
                 .shell
-                .contains(&15)
+                .contains(&19)
         );
         assert_eq!(std::fs::read(&self.path).unwrap(), raw);
         assert_eq!(full(&self.progress), old);
@@ -600,7 +572,7 @@ impl LabApp {
         ctx.data_mut(|d| d.insert_temp(root_key, root));
         assert_eq!(stage, self.smoke_stage);
         assert!(self.snapshot_capture_active() && self._smoke_profile.is_some());
-        assert_eq!(shell::EVALUATOR_REVISION, 15);
+        assert_eq!(shell::EVALUATOR_REVISION, 19);
         assert_eq!(
             (
                 registration::before_scenarios(&self.scenarios).len(),
@@ -790,7 +762,7 @@ impl LabApp {
                     .main_viewport
                     .unwrap()
                     .intersect(ctx.content_rect());
-                let Some((rows, clip)) = goal_rows(ctx, &s.objective, visible) else {
+                let Some(rows) = goal_rows(ctx, s, visible) else {
                     let key = egui::Id::new(("snapshot-goal-seek", stage));
                     let n = ctx.data(|d| d.get_temp::<usize>(key)).unwrap_or(0);
                     if matches!(n, 0 | 1 | 19) {
@@ -845,17 +817,55 @@ impl LabApp {
                     ctx.request_repaint();
                     return (false, None);
                 };
-                let row = if *last {
-                    *rows.last().unwrap()
+                let proof_key = egui::Id::new((
+                    "assignment-row-proof",
+                    s.id.as_str(),
+                    self.scale.to_bits(),
+                    self.theme_id.as_str(),
+                    ctx.content_rect().width().to_bits(),
+                ));
+                let proof = lesson_presentation::paint::observe(ctx, proof_key, &rows);
+                let index = if *last {
+                    proof.first_missing().unwrap_or(rows.rows.len() - 1)
                 } else {
-                    rows[0]
+                    0
                 };
+                // One Goal phase can visit several genuinely different rows.
+                // Keep the existing20-pulse limit per stable row identity, plus
+                // the unchanged overall phase/frame deadline. Never reset on
+                // moving coordinates while the same row is being revealed.
+                let row_key = egui::Id::new(("snapshot-goal-active-row", self.smoke_stage));
+                let wheel_key = egui::Id::new(("bounded-native-scroll", self.smoke_stage));
+                let identity = rows.keys[index];
+                ctx.data_mut(|d| {
+                    if d.get_temp::<(usize, usize)>(row_key) != Some(identity) {
+                        d.insert_temp(row_key, identity);
+                        d.remove::<usize>(wheel_key);
+                    }
+                });
+                let row = rows.rows[index];
+                let clip = rows.clips[index];
                 if !smoke_control_visible(row, clip, ctx.pixels_per_point()) {
                     if !self.reveal_smoke_control(ctx, row) {
                         return (false, None);
                     }
                     ctx.request_repaint();
                     return (false, None);
+                }
+                assert!(
+                    rows.witnessed[index],
+                    "Actual endpoint/requirement glyphs must paint unobscured inside their own clip"
+                );
+                if *last && !proof.complete() {
+                    self.started = Instant::now();
+                    ctx.request_repaint();
+                    return (false, None);
+                }
+                if *last {
+                    assert!(
+                        proof.complete(),
+                        "Every essential assignment row was actually witnessed"
+                    );
                 }
                 shot = Some(format!("{id}-{label}"));
             }

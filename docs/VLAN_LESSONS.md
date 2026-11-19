@@ -1,35 +1,96 @@
-# VLAN groups, trunks and handover
+## Scoped exact Fedora candidate verified —2026-11-08
 
-Four distinct authored assignments in `vlan-data-foundations`, bundled offline in `scenarios/vlan-data-v1.json`. This extends the catalog to55 assignments/thirteen units; numerical values in the isolated examples do not count as extra labs. Unit prerequisites are advisory. The first lesson requires no subnetting, binary or terminal knowledge; later assignments remain directly accessible.
+340labs/118units; new unit navigation LPIC-2 → Linux VLANs: saved profiles and
+two-way tagged paths. All338previous labs/117units/73LPIC-2presentation values
+preserved. Exact T174340Z/R41receipt, selected-input identity and acceptance limits
+are in CHECKPOINT.md. R39actual120native actions/36PNG exits0/reaped; nine final
+images opened. The1/2partial case remains correct, both-direction failures explain
+which return is missing, independent starters keep intentional mistakes, and
+light200narrow/dark150wide controls remain readable with native scrolling.
 
-| Assignment | Skill and practical outcome | Prior lesson |
-| --- | --- | --- |
-| `ccna-vlan-access` | Diagnose a wrong access membership on one switch while maintaining two usable, separate groups | None |
-| `ccna-vlan-trunk` | Establish a trunk and distinguish an active VLAN database from each port’s allowed list; three independent causes | Access membership |
-| `ccna-vlan-native` | Trace tagged/untagged classification, align the requested native policy and distinguish a one-way path from service/isolation | Trunks |
-| `ccna-vlan-handover` | Repair five interacting access/database/list/native/port-state faults in a three-group handover and verify the complete policy | Native classification |
+Representative actual packaged screens (private local evidence):
+- [Commissioning introduction](../.build-artifacts/native-runs/run-k437wflh/screenshots/workspaces/vlan-lpic2-vlan-profile-commission-introduction.png)
+- [Guided mistake and partial result](../.build-artifacts/native-runs/run-k437wflh/screenshots/workspaces/vlan-lpic2-vlan-profile-commission-practice-return-failure.png)
+- [Independent assignment](../.build-artifacts/native-runs/run-k437wflh/screenshots/workspaces/vlan-lpic2-vlan-profile-commission-assignment-unchecked.png)
+- [Light200editor and actions](../.build-artifacts/native-runs/run-k437wflh/screenshots/workspaces/teaching-lpic2-vlan-return-handover-assignment-light-200-controls.png)
 
-## Teaching and interaction
+This note was added AFTER final receipt/freeze release. Do not replay its frozen
+MAINreader against later source or documentation. Same-process save/read only;
+installed/cold, other-platform, screen-reader and independent novice acceptance
+remain pending. No complete objective or full curriculum claim.
 
-Each Learn introduction teaches its prerequisites in plain language, gives a different office to try, and names a concrete experiment. It can be skipped or reopened. The example has its own saved fabric/draft and explicit Apply and test example action; optional Load example settings fills only that practice draft. Example results cannot earn assignment credit. Challenge keeps the full assignment and native editor without opening guidance or solutions.
+---
 
-A selected-switch table keeps connected equipment, up state, port mode and relevant VLAN fields together. Active VLANs and Allowed VLANs use comma-separated individual IDs; IOS ranges are deliberately unsupported. Desktop rows align; narrow/larger-text controls stack with ordinary scrolling. Check configuration is the single apply/grade action. Bounded malformed entries stay editable and cannot partly apply. Default retry feedback shows the first two failures; all objective results, broadcast delivery/path evidence, hints, worked explanations and source/limitation references are optional.
+# Linux VLAN profiles: implementation and verification ledger
 
-The handover checks all three positive workgroup pairs, every cross-group west/east separation pair, all six access memberships and both native settings. Local separation follows the explicit access/native constraints and is independently tested across all endpoint pairs. Group service remains required: deleting/stopping/uncabling endpoints or disabling uplinks cannot stand in for isolation. A one-way leak cannot pass a negative case. Equivalent allowed-list order, leading-zero input and extra unused groups are accepted when the stated policy remains correct; no exact-string grading is used.
+2026-11-08. A focused LPIC-2 increment of objective205.2, after persistent
+Ethernet profiles. It does not complete bonding, bridging, authentication or the
+whole objective. The latest verified artifact is still338T163747Z/R43;
+new development content below is not yet a verified candidate.
 
-## Scope and sources
+## Two different assignments
 
-Checked2026-10-22 against current CCNA200-301 v1.1; the announced v2.0 remains separately planned. This unit provides **partial** data-access2.1/2.1.a and trunk/802.1Q/native2.2/2.2.a/b/c practice. Voice/default-VLAN-specific progression, inter-VLAN routing, MAC learning, STP/PVST, real IOS command practice and equipment acceptance remain absent. No vendor endorsement, full exam preparation or hardware equivalence is claimed.
+- `lpic2-vlan-profile-commission`: match a software interface's saved tag and host
+  address to the supplied switch/IP plan while keeping Audit unchanged.
+- `lpic2-vlan-return-handover`: diagnose a correct-IP/native-return failure and
+  prepare a future selection that survives the unavailable alternate-parent case.
+  Both current snapshots deliberately remain unchanged; this is not an immediate
+  activation exercise or another address variant of the first task.
 
-- Current issuer objectives: https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf
-- Cisco Catalyst9300 IOS XE17.18 VLAN trunk guide, updated2025-07-31: https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-18/configuration_guide/vlan/b_1718_vlan_9300_cg/configuring_vlan_trunks.html
-- Pinned Cisco Nexus5000 NX-OS5.0(3)N1(1) access/trunk guide (tagged-native ingress policy): https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus5000/sw/layer2/503_n1_1/Cisco_n5k_layer2_config_gd_rel_503_N1_1_chapter6.html
-- Cisco PVID/type inconsistency protection, doc24063, updated2025-08-18: https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24063-pvid-inconsistency-24063.html
+Unit `linux-vlan-profiles` follows `linux-persistent-networking`. First-lab
+prerequisite `lpic1-nm-uplink-handover`; second depends on the first. Navigation
+once verified: LPIC-2 → Linux VLANs: saved profiles and two-way tagged paths.
+Each includes Introduction, separate practice, full independent requirements,
+an editor and two deterministic cases. New stable IDs earn no inherited credit.
+Assignment addresses use10.150/151 and10.154/155; separate examples use10.160/161
+and10.164/165 with distinct profile UUIDs. Correct configurations are absent from
+assignment starters; source switch plans are inputs, not secret answer strings.
 
-The model traces broadcasts only. **Actual Catalyst PVST/PVID protection may block native mismatches even on a physical tree.** Its absence here is disclosed before the native exercise and in references. The model’s untagged classification cannot be presented as a prediction of all real equipment. See SWITCHING_SUBSET.md for precise supported behavior, bounds and exclusions; ARCHITECTURE.md for declarative authoring and progress integration.
+## Fidelity and preservation
 
-## Verification
+See [the capability contract](VLAN_HOST_SUBSET.md). The original Ethernet parser
+and policy entry points stay strict. New source-held optional VLAN facts alone
+enable the wider keyfile parser and actual selected parent/tag propagation.
+Absent facts are omitted from serialized environments. No evaluator change,
+new dependencies, host interfaces, commands, packets, daemon or file access.
+The old untagged switching entry point retains its old reception policy.
+Wrong tags leave carrier independent; both outward and accepted return are needed.
+A return to another subinterface on the same NIC does not count as delivery.
 
-`tests/switching_content.rs` exercises references, equivalent editor repairs, plausible wrong and partial repairs, each individually broken policy, the exact suggested example changes and separate draft/credit/reset/resume behavior. Every omitted handover repair stays incomplete. Model tests cover every VLAN ID1–4094, a maximum physical forest and9216 native/allowed/database transition cases; these are analytical model comparisons, not hardware or packet-capture acceptance. No learner input reaches real processes, files or networks.
+Two different software interfaces may share a physical parent with distinct IDs.
+A same-parent/same-ID activation conflict fails explicitly rather than silently
+publishing an arbitrary partial selection. Existing settled DHCP-unavailable
+behavior remains unchanged in the old Ethernet model. This is a bounded model,
+not a daemon/runtime conformance claim. The prescribed flags/protocol subset and
+unsupported priority, discovery, UUID-parent, nested, DHCP/IPv6 VLAN and bond/bridge
+cases remain disclosed. Checked official links and dates are in the contract.
 
-Native Fedora synthetic flows and screenshots are recorded in IMPLEMENTATION_LEDGER.md. They verify renderer/input behavior, not independent novice usability, screen-reader acceptance or Windows/macOS desktop runtime. Existing saved scenario IDs/versions are unchanged, and no new answers/mastery are invented for old attempts.
+## Actual checks to date
+
+Private working evidence: `.build-artifacts/continuation/resume-20261108/nm-vlan/`.
+R13:72focused Rust tests pass:35new endpoint/parser/path/session checks and37existing
+switching/Ethernet parser/policy/workspace regressions. R08caught the co-activation
+failure; its original assertion remains unchanged. R12caught a missing explicit
+None in a legacy test fixture; no assertion was weakened. R14/R15library and app
+staging builds pass. R16rejected an empty gateway-export fixture; R19rejected an authored default
+selection mismatch. The source-enabled default now selects Reports, leaving old
+Ethernet defaults exact. R22caught an unversioned synthetic Progress fixture; R23
+retains a compile diagnostic from that fixture correction. No production progress
+format was changed. R24all8authored,6VLANsession and8existingNMworkspace tests pass.
+R27/R28/R29library/app/all-targetClippy pass. R31inventory335updated+5already-meets
+is generated; R33full-current Python923checks pass after updating only the expanded
+presentation count (all old prefix digests retained). R35strict coverage passes:
+280Partial/8Supporting/952Open, no newly complete reference or parent. The first
+strict run rejected a UI-test path in the integration-test-only CSV column; its
+restriction is preserved and actual widget evidence stays documented here.
+All338previous scenario values/order and117unit values/order are exact; alternate
+settings and the genuinely passing individual native88case are checked explicitly.
+R25all3real-egui widget checks pass, including keyboard editing, two widths, five
+scales and light/dark. R26all5actual route/capture regressions pass, preserving old
+static/DHCP routes. Exact new-package/native acceptance still pending.
+
+Rendered screens, new authored integration, content-preserving catalog comparison,
+current QA, Clippy, package identity and native flows are still pending here.
+The prior338candidate/evidence and original install/progress remain untouched.
+Windows/macOS/Omarchy runtime, physical-device, screen-reader and independent
+novice comprehension remain unverified. No release, push, merge or installation.

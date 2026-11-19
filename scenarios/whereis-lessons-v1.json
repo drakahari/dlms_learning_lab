@@ -1,0 +1,1201 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-whereis-support-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-application-support-discovery",
+      "topic": "Application discovery with whereis",
+      "title": "Repair an application’s manual and source handover",
+      "summary": "Find separate application artifacts, publish the approved manual/source release and preserve neighboring tools.",
+      "objective": "reportctl already has a working binary in /apps/bin. Read /apps/stage/release.txt and inspect the separate binary, manual and source search folders. Publish the approved staged manual as /apps/man/reportctl.1 and source as /apps/source/reportctl.c. Remove only /apps/man/reportctl-old.1. Verify all three category paths AND current file contents. Preserve the binary, audit tool, archive, stage, folders, private notes, permissions and supplied settings. Optional scratch /work/support.tmp must be absent at handover.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Locate and inspect each artifact",
+        "Publish and verify the handover"
+      ],
+      "guide": [
+        {
+          "title": "Separate discovery from correctness",
+          "why": "A working executable says nothing about its manual or source release.",
+          "action": "Use the three supplied whereis forms, then read the release note and current/staged artifacts with cat.",
+          "commands": []
+        },
+        {
+          "title": "Make a narrow file handover",
+          "why": "An archived file can have the right name and wrong content.",
+          "action": "Copy approved staged support files to their named destinations; remove only the explicitly retired manual.",
+          "commands": []
+        },
+        {
+          "title": "Verify names and contents",
+          "why": "whereis reports locations, not version compatibility.",
+          "action": "Repeat category queries, inspect published files and choose Check work. Keep all protected files and remove any scratch file.",
+          "commands": []
+        }
+      ],
+      "explanation": "The binary was already eligible in the fixed PATH. whereis searches distinct categories by name: the manual lacked the exact reportctl.1 name, while the source path existed but held release 1. The release note authorizes release 4, so copying both staged support files fixes their contents; removing only the retired manual completes the handover. A location alone does not prove version, permissions or content. The complete-state check also preserves the binary, audit files, archive, stage, notes and settings.",
+      "hints": [
+        "Use whereis -b -B /apps/bin -f reportctl, then -m -M /apps/man and -s -S /apps/source with the same -f reportctl ending. What does a bare reportctl: line tell you?",
+        "Read /apps/stage/release.txt. Compare the staged files with the published source; the archive is an older release. A found source pathname can still hold obsolete text.",
+        "Use the existing cp and rm commands for only the named support files. Query again and cat the published manual/source; preserve all neighboring metadata and bytes."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/ (LPIC-1 5.0, 104.7; checked 2026-11-05)",
+        "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.41/util-linux-2.41.5.tar.xz (official whereis source/manual; checked 2026-11-05)",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html (existing bounded ordinary-file copying; web fetch unavailable 2026-11-05)"
+      ],
+      "simplifications": "In-process virtual files only; no artifact is executed. whereis supports one supplied dot-free name/category/directory at a time: -b -B DIR -f NAME, -m -M DIR -f NAME, -s -S DIR -f NAME. Only NAME, NAME.1 and NAME.c are admitted; significant other suffixes/compression/multiple matches refuse honestly. No default host search, environment search, links, package database, man renderer, compilation or actual binary validation. A normal missing query prints NAME: and status 0. which/type query only supplied fixed PATH. Only four named ordinary-file slots can change; generic literal filesystem subset remains documented. All data and resource limits remain local.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/apps": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/apps/bin": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/apps/stage": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/apps/archive": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/apps/man": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/apps/source": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/apps/bin/reportctl": {
+              "directory": false,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/apps/bin/auditctl": {
+              "directory": false,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/apps/man/reportctl-old.1": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/apps/man/auditctl.1": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/apps/source/reportctl.c": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/apps/source/auditctl.c": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/apps/archive/reportctl.1": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/apps/archive/reportctl.c": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/apps/stage/reportctl.1": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/apps/stage/reportctl.c": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/apps/stage/release.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work/notes.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/apps/bin/reportctl": "Supplied inert application binary record\n",
+            "/apps/bin/auditctl": "Preserve audit binary record\n",
+            "/apps/man/reportctl-old.1": "reportctl retired manual, release 1\n",
+            "/apps/man/auditctl.1": "Preserve audit documentation\n",
+            "/apps/source/reportctl.c": "reportctl source release 1\n",
+            "/apps/source/auditctl.c": "Preserve audit source\n",
+            "/apps/archive/reportctl.1": "reportctl retired manual, release 1\n",
+            "/apps/archive/reportctl.c": "reportctl source release 1\n",
+            "/apps/stage/reportctl.1": "reportctl current manual, release 4\nUsage: reportctl summary\n",
+            "/apps/stage/reportctl.c": "reportctl source release 4\nCurrent summary implementation record\n",
+            "/apps/stage/release.txt": "Approved release 4. Publish its staged manual and source under the exact program name. Retire only reportctl-old.1 from the manual folder. Keep all staged, archived and audit files.\n",
+            "/work/notes.txt": "Private handover notes: preserve these bytes\n"
+          },
+          "users": {
+            "alex": [
+              "staff"
+            ],
+            "root": [
+              "root"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "previous": null,
+          "umask": 18,
+          "clock": 0,
+          "modified": {},
+          "command_location": {
+            "version": 1,
+            "source_id": "lpic1-whereis-support-handover-assignment",
+            "path": "/apps/bin",
+            "names": [
+              "reportctl"
+            ]
+          }
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "WhereisDeployment",
+            "definition": {
+              "version": 1,
+              "initial": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/apps": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/bin": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/stage": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/archive": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/man": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/apps/source": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/apps/bin/reportctl": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/bin/auditctl": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/man/reportctl-old.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/apps/man/auditctl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/source/reportctl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/apps/source/auditctl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/archive/reportctl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/archive/reportctl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/stage/reportctl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/stage/reportctl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/stage/release.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work/notes.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "alex",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/apps/bin/reportctl": "Supplied inert application binary record\n",
+                  "/apps/bin/auditctl": "Preserve audit binary record\n",
+                  "/apps/man/reportctl-old.1": "reportctl retired manual, release 1\n",
+                  "/apps/man/auditctl.1": "Preserve audit documentation\n",
+                  "/apps/source/reportctl.c": "reportctl source release 1\n",
+                  "/apps/source/auditctl.c": "Preserve audit source\n",
+                  "/apps/archive/reportctl.1": "reportctl retired manual, release 1\n",
+                  "/apps/archive/reportctl.c": "reportctl source release 1\n",
+                  "/apps/stage/reportctl.1": "reportctl current manual, release 4\nUsage: reportctl summary\n",
+                  "/apps/stage/reportctl.c": "reportctl source release 4\nCurrent summary implementation record\n",
+                  "/apps/stage/release.txt": "Approved release 4. Publish its staged manual and source under the exact program name. Retire only reportctl-old.1 from the manual folder. Keep all staged, archived and audit files.\n",
+                  "/work/notes.txt": "Private handover notes: preserve these bytes\n"
+                },
+                "users": {
+                  "alex": [
+                    "staff"
+                  ],
+                  "root": [
+                    "root"
+                  ]
+                },
+                "user": "alex",
+                "home": "/work",
+                "cwd": "/work",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {},
+                "command_location": {
+                  "version": 1,
+                  "source_id": "lpic1-whereis-support-handover-assignment",
+                  "path": "/apps/bin",
+                  "names": [
+                    "reportctl"
+                  ]
+                }
+              },
+              "expected": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/apps": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/bin": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/stage": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/archive": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/man": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/apps/source": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/apps/bin/reportctl": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/bin/auditctl": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/man/auditctl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/source/reportctl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/apps/source/auditctl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/archive/reportctl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/archive/reportctl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/stage/reportctl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/stage/reportctl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/apps/stage/release.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work/notes.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/apps/man/reportctl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/apps/bin/reportctl": "Supplied inert application binary record\n",
+                  "/apps/bin/auditctl": "Preserve audit binary record\n",
+                  "/apps/man/auditctl.1": "Preserve audit documentation\n",
+                  "/apps/source/reportctl.c": "reportctl source release 4\nCurrent summary implementation record\n",
+                  "/apps/source/auditctl.c": "Preserve audit source\n",
+                  "/apps/archive/reportctl.1": "reportctl retired manual, release 1\n",
+                  "/apps/archive/reportctl.c": "reportctl source release 1\n",
+                  "/apps/stage/reportctl.1": "reportctl current manual, release 4\nUsage: reportctl summary\n",
+                  "/apps/stage/reportctl.c": "reportctl source release 4\nCurrent summary implementation record\n",
+                  "/apps/stage/release.txt": "Approved release 4. Publish its staged manual and source under the exact program name. Retire only reportctl-old.1 from the manual folder. Keep all staged, archived and audit files.\n",
+                  "/work/notes.txt": "Private handover notes: preserve these bytes\n",
+                  "/apps/man/reportctl.1": "reportctl current manual, release 4\nUsage: reportctl summary\n"
+                },
+                "users": {
+                  "alex": [
+                    "staff"
+                  ],
+                  "root": [
+                    "root"
+                  ]
+                },
+                "user": "alex",
+                "home": "/work",
+                "cwd": "/work",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {},
+                "command_location": {
+                  "version": 1,
+                  "source_id": "lpic1-whereis-support-handover-assignment",
+                  "path": "/apps/bin",
+                  "names": [
+                    "reportctl"
+                  ]
+                }
+              },
+              "context": {
+                "version": 1,
+                "source_id": "lpic1-whereis-support-handover-assignment",
+                "names": [
+                  "reportctl"
+                ],
+                "directories": [
+                  {
+                    "category": "binary",
+                    "path": "/apps/bin"
+                  },
+                  {
+                    "category": "manual",
+                    "path": "/apps/man"
+                  },
+                  {
+                    "category": "source",
+                    "path": "/apps/source"
+                  }
+                ]
+              },
+              "mutable_files": [
+                "/apps/man/reportctl.1",
+                "/apps/source/reportctl.c",
+                "/apps/man/reportctl-old.1",
+                "/work/support.tmp"
+              ],
+              "selected": [
+                {
+                  "category": "binary",
+                  "name": "reportctl",
+                  "path": "/apps/bin/reportctl"
+                },
+                {
+                  "category": "manual",
+                  "name": "reportctl",
+                  "path": "/apps/man/reportctl.1"
+                },
+                {
+                  "category": "source",
+                  "name": "reportctl",
+                  "path": "/apps/source/reportctl.c"
+                }
+              ]
+            }
+          },
+          {
+            "kind": "Contents",
+            "path": "/apps/man/reportctl.1",
+            "text": "reportctl current manual, release 4\nUsage: reportctl summary\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/apps/source/reportctl.c",
+            "text": "reportctl source release 4\nCurrent summary implementation record\n"
+          },
+          {
+            "kind": "Absent",
+            "path": "/apps/man/reportctl-old.1"
+          }
+        ]
+      },
+      "solution": [
+        "cp /apps/stage/reportctl.1 /apps/man/reportctl.1",
+        "cp /apps/stage/reportctl.c /apps/source/reportctl.c",
+        "rm /apps/man/reportctl-old.1"
+      ],
+      "prerequisites": [
+        "lpic1-command-permission-search",
+        "lpic1-fhs-locate-active-files"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "After command search/permissions and current-file handover: use cat, cp and rm on ordinary virtual files. Here, learn to locate separate program artifacts without confusing a pathname with a current release.",
+        "concepts": [
+          {
+            "title": "One application has several kinds of files",
+            "text": "The program file, its manual and its source serve different purposes. which checks eligible external commands in the supplied PATH; whereis names files in a selected category. Neither action runs the program here. A found filename does not prove that its contents are current."
+          },
+          {
+            "title": "Read the query and its result",
+            "text": "In whereis -m -M /gallery/man -f democtl, -m selects manuals, -M gives the folder, and -f ends the folder list before the program name. Use -b/-B for the binary and -s/-S for source. A result starts democtl: followed by a path. A bare democtl: means no matching name in that folder; the normal query still exits successfully."
+          },
+          {
+            "title": "Inspect the release before copying",
+            "text": "The worked release note approves release 3. Read it with cat, then compare staged and published files. The gallery manual is absent under the exact democtl.1 name; its existing source has release 1. cp places a current file at the required destination. rm removes only the explicitly retired manual; preserve the archive and neighboring audit files."
+          },
+          {
+            "title": "Verify the handover, not only the lookup",
+            "text": "Repeat category discovery after editing, and cat the published source/manual. whereis cannot tell an archived release from a current one with the same name. Check work in the assignment checks names, complete file contents and preservation. help and show are simulator references; files are never executed."
+          }
+        ],
+        "example": [
+          "whereis -b -B /gallery/bin -f democtl",
+          "whereis -m -M /gallery/man -f democtl",
+          "cat /gallery/stage/release.txt",
+          "cp /gallery/stage/democtl.1 /gallery/man/democtl.1",
+          "cp /gallery/stage/democtl.c /gallery/source/democtl.c",
+          "rm /gallery/man/democtl-old.1",
+          "whereis -m -M /gallery/man -f democtl",
+          "cat /gallery/source/democtl.c"
+        ],
+        "inputs": "Worked setup: democtl already has its binary in /gallery/bin. Its correctly named manual is missing, and the published source is release 1. /gallery/stage/release.txt approves release 3; /gallery/archive retains release 1.",
+        "try_change": "After the worked repair, copy /gallery/archive/democtl.c over /gallery/source/democtl.c. Run whereis -s -S /gallery/source -f democtl, then cat that file: its path still appears but the content is old. Restore the staged source and read it again.",
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/gallery": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/bin": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/stage": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/archive": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/man": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/gallery/source": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/gallery/bin/democtl": {
+              "directory": false,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/bin/auditctl": {
+              "directory": false,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/man/democtl-old.1": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/gallery/man/auditctl.1": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/source/democtl.c": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/gallery/source/auditctl.c": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/archive/democtl.1": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/archive/democtl.c": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/stage/democtl.1": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/stage/democtl.c": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/stage/release.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work/notes.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/gallery/bin/democtl": "Supplied inert application binary record\n",
+            "/gallery/bin/auditctl": "Preserve audit binary record\n",
+            "/gallery/man/democtl-old.1": "democtl retired manual, release 1\n",
+            "/gallery/man/auditctl.1": "Preserve audit documentation\n",
+            "/gallery/source/democtl.c": "democtl source release 1\n",
+            "/gallery/source/auditctl.c": "Preserve audit source\n",
+            "/gallery/archive/democtl.1": "democtl retired manual, release 1\n",
+            "/gallery/archive/democtl.c": "democtl source release 1\n",
+            "/gallery/stage/democtl.1": "democtl current manual, release 3\nUsage: democtl summary\n",
+            "/gallery/stage/democtl.c": "democtl source release 3\nCurrent summary implementation record\n",
+            "/gallery/stage/release.txt": "Approved release 3. Publish its staged manual and source under the exact program name. Retire only democtl-old.1 from the manual folder. Keep all staged, archived and audit files.\n",
+            "/work/notes.txt": "Private handover notes: preserve these bytes\n"
+          },
+          "users": {
+            "alex": [
+              "staff"
+            ],
+            "root": [
+              "root"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "previous": null,
+          "umask": 18,
+          "clock": 0,
+          "modified": {},
+          "command_location": {
+            "version": 1,
+            "source_id": "lpic1-whereis-support-handover-example",
+            "path": "/gallery/bin",
+            "names": [
+              "democtl"
+            ]
+          }
+        },
+        "outcomes": [
+          {
+            "kind": "WhereisDeployment",
+            "definition": {
+              "version": 1,
+              "initial": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/bin": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/stage": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/archive": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/man": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/source": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/bin/democtl": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/bin/auditctl": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/man/democtl-old.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/man/auditctl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/source/democtl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/source/auditctl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/archive/democtl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/archive/democtl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/stage/democtl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/stage/democtl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/stage/release.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work/notes.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "alex",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/gallery/bin/democtl": "Supplied inert application binary record\n",
+                  "/gallery/bin/auditctl": "Preserve audit binary record\n",
+                  "/gallery/man/democtl-old.1": "democtl retired manual, release 1\n",
+                  "/gallery/man/auditctl.1": "Preserve audit documentation\n",
+                  "/gallery/source/democtl.c": "democtl source release 1\n",
+                  "/gallery/source/auditctl.c": "Preserve audit source\n",
+                  "/gallery/archive/democtl.1": "democtl retired manual, release 1\n",
+                  "/gallery/archive/democtl.c": "democtl source release 1\n",
+                  "/gallery/stage/democtl.1": "democtl current manual, release 3\nUsage: democtl summary\n",
+                  "/gallery/stage/democtl.c": "democtl source release 3\nCurrent summary implementation record\n",
+                  "/gallery/stage/release.txt": "Approved release 3. Publish its staged manual and source under the exact program name. Retire only democtl-old.1 from the manual folder. Keep all staged, archived and audit files.\n",
+                  "/work/notes.txt": "Private handover notes: preserve these bytes\n"
+                },
+                "users": {
+                  "alex": [
+                    "staff"
+                  ],
+                  "root": [
+                    "root"
+                  ]
+                },
+                "user": "alex",
+                "home": "/work",
+                "cwd": "/work",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {},
+                "command_location": {
+                  "version": 1,
+                  "source_id": "lpic1-whereis-support-handover-example",
+                  "path": "/gallery/bin",
+                  "names": [
+                    "democtl"
+                  ]
+                }
+              },
+              "expected": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/bin": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/stage": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/archive": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/man": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/source": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/bin/democtl": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/bin/auditctl": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/man/auditctl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/source/democtl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/source/auditctl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/archive/democtl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/archive/democtl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/stage/democtl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/stage/democtl.c": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/stage/release.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work/notes.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/man/democtl.1": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/gallery/bin/democtl": "Supplied inert application binary record\n",
+                  "/gallery/bin/auditctl": "Preserve audit binary record\n",
+                  "/gallery/man/auditctl.1": "Preserve audit documentation\n",
+                  "/gallery/source/democtl.c": "democtl source release 3\nCurrent summary implementation record\n",
+                  "/gallery/source/auditctl.c": "Preserve audit source\n",
+                  "/gallery/archive/democtl.1": "democtl retired manual, release 1\n",
+                  "/gallery/archive/democtl.c": "democtl source release 1\n",
+                  "/gallery/stage/democtl.1": "democtl current manual, release 3\nUsage: democtl summary\n",
+                  "/gallery/stage/democtl.c": "democtl source release 3\nCurrent summary implementation record\n",
+                  "/gallery/stage/release.txt": "Approved release 3. Publish its staged manual and source under the exact program name. Retire only democtl-old.1 from the manual folder. Keep all staged, archived and audit files.\n",
+                  "/work/notes.txt": "Private handover notes: preserve these bytes\n",
+                  "/gallery/man/democtl.1": "democtl current manual, release 3\nUsage: democtl summary\n"
+                },
+                "users": {
+                  "alex": [
+                    "staff"
+                  ],
+                  "root": [
+                    "root"
+                  ]
+                },
+                "user": "alex",
+                "home": "/work",
+                "cwd": "/work",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {},
+                "command_location": {
+                  "version": 1,
+                  "source_id": "lpic1-whereis-support-handover-example",
+                  "path": "/gallery/bin",
+                  "names": [
+                    "democtl"
+                  ]
+                }
+              },
+              "context": {
+                "version": 1,
+                "source_id": "lpic1-whereis-support-handover-example",
+                "names": [
+                  "democtl"
+                ],
+                "directories": [
+                  {
+                    "category": "binary",
+                    "path": "/gallery/bin"
+                  },
+                  {
+                    "category": "manual",
+                    "path": "/gallery/man"
+                  },
+                  {
+                    "category": "source",
+                    "path": "/gallery/source"
+                  }
+                ]
+              },
+              "mutable_files": [
+                "/gallery/man/democtl.1",
+                "/gallery/source/democtl.c",
+                "/gallery/man/democtl-old.1",
+                "/work/support.tmp"
+              ],
+              "selected": [
+                {
+                  "category": "binary",
+                  "name": "democtl",
+                  "path": "/gallery/bin/democtl"
+                },
+                {
+                  "category": "manual",
+                  "name": "democtl",
+                  "path": "/gallery/man/democtl.1"
+                },
+                {
+                  "category": "source",
+                  "name": "democtl",
+                  "path": "/gallery/source/democtl.c"
+                }
+              ]
+            }
+          },
+          {
+            "kind": "Contents",
+            "path": "/gallery/man/democtl.1",
+            "text": "democtl current manual, release 3\nUsage: democtl summary\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/gallery/source/democtl.c",
+            "text": "democtl source release 3\nCurrent summary implementation record\n"
+          },
+          {
+            "kind": "Absent",
+            "path": "/gallery/man/democtl-old.1"
+          }
+        ]
+      },
+      "retry_guidance": "A found path does not prove the release is current. Read the staged release note and compare published files with cat. Use the approved staged manual/source, retire only the named old manual, and preserve the binary and neighboring files."
+    }
+  ]
+}

@@ -1,0 +1,851 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-kernel-root-build",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Kernel configuration and staging",
+      "unit": "linux-kernel-build-staging",
+      "title": "Build a kernel with root-driver support",
+      "summary": "Repair a source configuration and verify image, modules and early-userspace inputs.",
+      "objective": "Build the supplied target image with external initramfs-loading support and working NVMe/ext4 root-driver support. Keep the saved configuration and build inputs consistent; a modular repair or supported built-in alternative may satisfy the task.",
+      "retry_guidance": "Read each failed outcome. Compare saved versus draft settings, source/release identity and actual virtual paths before retrying.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Try the separate worked example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A saved configuration, its outputs and installed files are separate states.",
+          "action": "Read the introduction and worked example, then investigate the supplied workspace.",
+          "commands": []
+        },
+        {
+          "title": "Explore the separate example",
+          "why": "Saved inputs, build outputs and staged files can disagree after an edit.",
+          "action": "Use the worked values in the separate example; inspect the actual output and retry a changed setting.",
+          "commands": []
+        },
+        {
+          "title": "Check the independent assignment",
+          "why": "A successful build command alone does not prove all required outcomes.",
+          "action": "Complete the supplied assignment and select Check configuration or Check build; use each failed outcome to repair the state.",
+          "commands": []
+        }
+      ],
+      "explanation": "A configuration is an input, not a rebuilt image. Save supported root-driver choices, then build the target source. Built-in drivers are part of the image; loadable root drivers also need matching module inputs and early userspace. Changing a configuration or source does not update earlier build records.",
+      "hints": [
+        "Compare the saved configuration with the draft before rebuilding.",
+        "A loadable root driver needs matching module inputs and early userspace.",
+        "Try both supported driver strategies: built-in, or modules with a matching initramfs."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://docs.kernel.org/kbuild/kbuild.html",
+        "https://docs.kernel.org/kbuild/kconfig.html",
+        "https://docs.kernel.org/filesystems/ramfs-rootfs-initramfs.html"
+      ],
+      "simplifications": "Checked2026-11-16local/17UTC; LPIC-2 v4.5 objective201.2, narrow practical subset only. Five-setting supplied configuration, fixed NVMe/ext4 baseline, typed build records and virtual staging. No actual compilation, Kconfig dependency evaluation, arbitrary Makefile/recipes, DKMS, firmware or real boot. Native staging/initramfs controls are simulator helpers. Supported literal make subset is documented in KERNEL_BUILD_SUBSET.md. UUID boot uses supplied early userspace. No host files, processes or network.",
+      "prerequisites": [
+        "lpic2-source-project-build",
+        "lpic1-boot-recovery-handoff"
+      ],
+      "initial": {
+        "kind": "KernelBuild",
+        "simulation": {
+          "version": 1,
+          "source_id": "lpic2-kernel-root-build",
+          "view": "introduction",
+          "assignment": {
+            "source_task": "{\"id\":\"lpic2-kernel-root-build\",\"kind\":\"Image\",\"instructions\":\"Build the supplied target image with external initramfs-loading support and working NVMe/ext4 root-driver support. Keep the saved configuration and build inputs consistent; a modular repair or supported built-in alternative may satisfy the task.\",\"sources\":[{\"id\":\"candidate-source\",\"release\":\"6.6.61\",\"title\":\"Supplied target source 6.6.61\"}],\"initial_source\":0,\"wanted_source\":0,\"initial_config\":\"CONFIG_MODULES=y\\nCONFIG_BLK_DEV_INITRD=y\\nCONFIG_BLK_DEV_NVME=n\\nCONFIG_EXT4_FS=m\\nCONFIG_LOCALVERSION=\\\"-candidate\\\"\\n\",\"stage_root\":\"/staging\",\"initial_entry_filename\":\"candidate.conf\",\"initial_entry\":\"\",\"initial_store\":{\"images\":[],\"modules\":[],\"initramfs\":[],\"entries\":[]},\"root\":null,\"require_initrd_support\":true,\"reference\":[{\"op\":\"Config\",\"text\":\"CONFIG_MODULES=y\\nCONFIG_BLK_DEV_INITRD=y\\nCONFIG_BLK_DEV_NVME=m\\nCONFIG_EXT4_FS=m\\nCONFIG_LOCALVERSION=\\\"-candidate\\\"\\n\"},{\"op\":\"SaveConfig\"},{\"op\":\"Run\",\"input\":\"make all\"},{\"op\":\"WorkingInitramfs\"},{\"op\":\"Check\"}]}",
+            "work": {
+              "source": 0,
+              "config_draft": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=n\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-candidate\"\n",
+              "saved_config": {
+                "modules": true,
+                "initrd": true,
+                "nvme": "Disabled",
+                "ext4": "Module",
+                "localversion": "-candidate"
+              },
+              "command_draft": "",
+              "outputs": {
+                "image": null,
+                "modules": null,
+                "initramfs": null
+              },
+              "store": {
+                "images": [],
+                "modules": [],
+                "initramfs": [],
+                "entries": []
+              },
+              "entry_filename": "candidate.conf",
+              "entry_draft": "",
+              "saved_entry": null,
+              "checked": false,
+              "log": []
+            }
+          },
+          "example": {
+            "source_task": "{\"id\":\"lpic2-kernel-root-build-example\",\"kind\":\"Image\",\"instructions\":\"Build the supplied target image with external initramfs-loading support and working NVMe/ext4 root-driver support. Keep the saved configuration and build inputs consistent; a modular repair or supported built-in alternative may satisfy the task.\",\"sources\":[{\"id\":\"training-source\",\"release\":\"6.1.120\",\"title\":\"Supplied target source 6.1.120\"}],\"initial_source\":0,\"wanted_source\":0,\"initial_config\":\"CONFIG_MODULES=y\\nCONFIG_BLK_DEV_INITRD=y\\nCONFIG_BLK_DEV_NVME=n\\nCONFIG_EXT4_FS=m\\nCONFIG_LOCALVERSION=\\\"-practice\\\"\\n\",\"stage_root\":\"/training\",\"initial_entry_filename\":\"candidate.conf\",\"initial_entry\":\"\",\"initial_store\":{\"images\":[],\"modules\":[],\"initramfs\":[],\"entries\":[]},\"root\":null,\"require_initrd_support\":true,\"reference\":[{\"op\":\"Config\",\"text\":\"CONFIG_MODULES=y\\nCONFIG_BLK_DEV_INITRD=y\\nCONFIG_BLK_DEV_NVME=m\\nCONFIG_EXT4_FS=m\\nCONFIG_LOCALVERSION=\\\"-practice\\\"\\n\"},{\"op\":\"SaveConfig\"},{\"op\":\"Run\",\"input\":\"make all\"},{\"op\":\"WorkingInitramfs\"},{\"op\":\"Check\"}]}",
+            "work": {
+              "source": 0,
+              "config_draft": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=n\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-practice\"\n",
+              "saved_config": {
+                "modules": true,
+                "initrd": true,
+                "nvme": "Disabled",
+                "ext4": "Module",
+                "localversion": "-practice"
+              },
+              "command_draft": "",
+              "outputs": {
+                "image": null,
+                "modules": null,
+                "initramfs": null
+              },
+              "store": {
+                "images": [],
+                "modules": [],
+                "initramfs": [],
+                "entries": []
+              },
+              "entry_filename": "candidate.conf",
+              "entry_draft": "",
+              "saved_entry": null,
+              "checked": false,
+              "log": []
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "KernelBuild",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-kernel-root-build",
+          "assignment": {
+            "id": "lpic2-kernel-root-build",
+            "kind": "Image",
+            "instructions": "Build the supplied target image with external initramfs-loading support and working NVMe/ext4 root-driver support. Keep the saved configuration and build inputs consistent; a modular repair or supported built-in alternative may satisfy the task.",
+            "sources": [
+              {
+                "id": "candidate-source",
+                "release": "6.6.61",
+                "title": "Supplied target source 6.6.61"
+              }
+            ],
+            "initial_source": 0,
+            "wanted_source": 0,
+            "initial_config": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=n\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-candidate\"\n",
+            "stage_root": "/staging",
+            "initial_entry_filename": "candidate.conf",
+            "initial_entry": "",
+            "initial_store": {
+              "images": [],
+              "modules": [],
+              "initramfs": [],
+              "entries": []
+            },
+            "root": null,
+            "require_initrd_support": true,
+            "reference": [
+              {
+                "op": "Config",
+                "text": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=m\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-candidate\"\n"
+              },
+              {
+                "op": "SaveConfig"
+              },
+              {
+                "op": "Run",
+                "input": "make all"
+              },
+              {
+                "op": "WorkingInitramfs"
+              },
+              {
+                "op": "Check"
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-kernel-root-build-example",
+            "kind": "Image",
+            "instructions": "Build the supplied target image with external initramfs-loading support and working NVMe/ext4 root-driver support. Keep the saved configuration and build inputs consistent; a modular repair or supported built-in alternative may satisfy the task.",
+            "sources": [
+              {
+                "id": "training-source",
+                "release": "6.1.120",
+                "title": "Supplied target source 6.1.120"
+              }
+            ],
+            "initial_source": 0,
+            "wanted_source": 0,
+            "initial_config": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=n\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-practice\"\n",
+            "stage_root": "/training",
+            "initial_entry_filename": "candidate.conf",
+            "initial_entry": "",
+            "initial_store": {
+              "images": [],
+              "modules": [],
+              "initramfs": [],
+              "entries": []
+            },
+            "root": null,
+            "require_initrd_support": true,
+            "reference": [
+              {
+                "op": "Config",
+                "text": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=m\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-practice\"\n"
+              },
+              {
+                "op": "SaveConfig"
+              },
+              {
+                "op": "Run",
+                "input": "make all"
+              },
+              {
+                "op": "WorkingInitramfs"
+              },
+              {
+                "op": "Check"
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"Config\",\"text\":\"CONFIG_MODULES=y\\nCONFIG_BLK_DEV_INITRD=y\\nCONFIG_BLK_DEV_NVME=m\\nCONFIG_EXT4_FS=m\\nCONFIG_LOCALVERSION=\\\"-candidate\\\"\\n\"}}",
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"SaveConfig\"}}",
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"Run\",\"input\":\"make all\"}}",
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"WorkingInitramfs\"}}",
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"Check\"}}"
+      ]
+    },
+    {
+      "id": "lpic2-kernel-staged-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Kernel configuration and staging",
+      "unit": "linux-kernel-build-staging",
+      "title": "Stage a new kernel beside a working fallback",
+      "summary": "Keep a working recovery path while staging and verifying a different kernel build.",
+      "objective": "Stage a working boot candidate from the supplied target source, using the saved configuration and a new loader-entry filename. Use the supplied system-root identity. Preserve every original fallback image, module tree, initramfs and entry unchanged. Verify a new-kernel boot through root and init handoff; booting the old fallback alone is insufficient.",
+      "retry_guidance": "Read each failed outcome. Compare saved versus draft settings, source/release identity and actual virtual paths before retrying.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Try the separate worked example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A saved configuration, its outputs and installed files are separate states.",
+          "action": "Read the introduction and worked example, then investigate the supplied workspace.",
+          "commands": []
+        },
+        {
+          "title": "Explore the separate example",
+          "why": "Saved inputs, build outputs and staged files can disagree after an edit.",
+          "action": "Use the worked values in the separate example; inspect the actual output and retry a changed setting.",
+          "commands": []
+        },
+        {
+          "title": "Check the independent assignment",
+          "why": "A successful build command alone does not prove all required outcomes.",
+          "action": "Complete the supplied assignment and select Check configuration or Check build; use each failed outcome to repair the state.",
+          "commands": []
+        }
+      ],
+      "explanation": "Build outputs, installed files and loader selections are different states. The candidate must select a staged image from the requested source and current configuration. A matching release label alone is not sufficient. Matching early userspace supplies root-driver modules and UUID lookup; the original fallback must remain available unchanged.",
+      "hints": [
+        "Compare the saved configuration with the draft before rebuilding.",
+        "A loadable root driver needs matching module inputs and early userspace.",
+        "Use actual virtual file paths and retain the working fallback."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://docs.kernel.org/kbuild/kbuild.html",
+        "https://docs.kernel.org/kbuild/kconfig.html",
+        "https://docs.kernel.org/filesystems/ramfs-rootfs-initramfs.html"
+      ],
+      "simplifications": "Checked2026-11-16local/17UTC; LPIC-2 v4.5 objective201.2, narrow practical subset only. Five-setting supplied configuration, fixed NVMe/ext4 baseline, typed build records and virtual staging. No actual compilation, Kconfig dependency evaluation, arbitrary Makefile/recipes, DKMS, firmware or real boot. Native staging/initramfs controls are simulator helpers. Supported literal make subset is documented in KERNEL_BUILD_SUBSET.md. UUID boot uses supplied early userspace. No host files, processes or network.",
+      "prerequisites": [
+        "lpic2-kernel-root-build"
+      ],
+      "initial": {
+        "kind": "KernelBuild",
+        "simulation": {
+          "version": 1,
+          "source_id": "lpic2-kernel-staged-handover",
+          "view": "introduction",
+          "assignment": {
+            "source_task": "{\"id\":\"lpic2-kernel-staged-handover\",\"kind\":\"Boot\",\"instructions\":\"Stage a working boot candidate from the supplied target source, using the saved configuration and a new loader-entry filename. Use the supplied system-root identity. Preserve every original fallback image, module tree, initramfs and entry unchanged. Verify a new-kernel boot through root and init handoff; booting the old fallback alone is insufficient.\",\"sources\":[{\"id\":\"working-fallback-source\",\"release\":\"6.6.60\",\"title\":\"Preserved working fallback 6.6.60\"},{\"id\":\"candidate-source\",\"release\":\"6.6.61\",\"title\":\"Supplied target source 6.6.61\"}],\"initial_source\":0,\"wanted_source\":1,\"initial_config\":\"CONFIG_MODULES=y\\nCONFIG_BLK_DEV_INITRD=y\\nCONFIG_BLK_DEV_NVME=m\\nCONFIG_EXT4_FS=m\\nCONFIG_LOCALVERSION=\\\"-candidate\\\"\\n\",\"stage_root\":\"/staging\",\"initial_entry_filename\":\"candidate.conf\",\"initial_entry\":\"title New kernel candidate\\nlinux /choose-staged-image\\noptions root=UUID=24242424-3333-4444-5555-666666666666 ro\\n\",\"initial_store\":{\"images\":[{\"path\":\"/staging/boot/vmlinuz-6.6.60-safe\",\"build\":{\"source_id\":\"working-fallback-source\",\"release\":\"6.6.60-safe\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"-safe\"},\"image\":true,\"modules\":false}}],\"modules\":[{\"path\":\"/staging/lib/modules/6.6.60-safe\",\"build\":{\"source_id\":\"working-fallback-source\",\"release\":\"6.6.60-safe\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"-safe\"},\"image\":false,\"modules\":true}}],\"initramfs\":[{\"path\":\"/staging/boot/initramfs-6.6.60-safe.img\",\"image\":{\"image_build\":{\"source_id\":\"working-fallback-source\",\"release\":\"6.6.60-safe\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"-safe\"},\"image\":true,\"modules\":false},\"module_build\":{\"source_id\":\"working-fallback-source\",\"release\":\"6.6.60-safe\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"-safe\"},\"image\":false,\"modules\":true},\"included\":[\"ext4\",\"jbd2\",\"mbcache\",\"nvme\",\"nvme_core\"]}}],\"entries\":[{\"path\":\"/staging/boot/loader/entries/fallback.conf\",\"source\":\"title Supplied kernel candidate\\nlinux /vmlinuz-6.6.60-safe\\ninitrd /initramfs-6.6.60-safe.img\\noptions root=UUID=24242424-3333-4444-5555-666666666666 ro\\n\"}]},\"root\":{\"uuid\":\"24242424-3333-4444-5555-666666666666\",\"label\":\"Supplied NVMe/ext4 system root\",\"required_drivers\":[\"nvme_core\",\"nvme\",\"jbd2\",\"mbcache\",\"ext4\"],\"init_present\":true},\"require_initrd_support\":true,\"reference\":[{\"op\":\"Source\",\"index\":1},{\"op\":\"Config\",\"text\":\"CONFIG_MODULES=y\\nCONFIG_BLK_DEV_INITRD=y\\nCONFIG_BLK_DEV_NVME=m\\nCONFIG_EXT4_FS=m\\nCONFIG_LOCALVERSION=\\\"-candidate\\\"\\n\"},{\"op\":\"SaveConfig\"},{\"op\":\"Run\",\"input\":\"make all\"},{\"op\":\"StageImage\"},{\"op\":\"Run\",\"input\":\"make modules_install INSTALL_MOD_PATH=/staging\"},{\"op\":\"Initramfs\",\"image_path\":\"/staging/boot/vmlinuz-6.6.61-candidate\"},{\"op\":\"EntryDraft\",\"filename\":\"candidate.conf\",\"text\":\"title Supplied kernel candidate\\nlinux /vmlinuz-6.6.61-candidate\\ninitrd /initramfs-6.6.61-candidate.img\\noptions root=UUID=24242424-3333-4444-5555-666666666666 ro\\n\"},{\"op\":\"SaveEntry\"},{\"op\":\"Check\"}]}",
+            "work": {
+              "source": 0,
+              "config_draft": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=m\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-candidate\"\n",
+              "saved_config": {
+                "modules": true,
+                "initrd": true,
+                "nvme": "Module",
+                "ext4": "Module",
+                "localversion": "-candidate"
+              },
+              "command_draft": "",
+              "outputs": {
+                "image": null,
+                "modules": null,
+                "initramfs": null
+              },
+              "store": {
+                "images": [
+                  {
+                    "path": "/staging/boot/vmlinuz-6.6.60-safe",
+                    "build": {
+                      "source_id": "working-fallback-source",
+                      "release": "6.6.60-safe",
+                      "config": {
+                        "modules": true,
+                        "initrd": true,
+                        "nvme": "Module",
+                        "ext4": "Module",
+                        "localversion": "-safe"
+                      },
+                      "image": true,
+                      "modules": false
+                    }
+                  }
+                ],
+                "modules": [
+                  {
+                    "path": "/staging/lib/modules/6.6.60-safe",
+                    "build": {
+                      "source_id": "working-fallback-source",
+                      "release": "6.6.60-safe",
+                      "config": {
+                        "modules": true,
+                        "initrd": true,
+                        "nvme": "Module",
+                        "ext4": "Module",
+                        "localversion": "-safe"
+                      },
+                      "image": false,
+                      "modules": true
+                    }
+                  }
+                ],
+                "initramfs": [
+                  {
+                    "path": "/staging/boot/initramfs-6.6.60-safe.img",
+                    "image": {
+                      "image_build": {
+                        "source_id": "working-fallback-source",
+                        "release": "6.6.60-safe",
+                        "config": {
+                          "modules": true,
+                          "initrd": true,
+                          "nvme": "Module",
+                          "ext4": "Module",
+                          "localversion": "-safe"
+                        },
+                        "image": true,
+                        "modules": false
+                      },
+                      "module_build": {
+                        "source_id": "working-fallback-source",
+                        "release": "6.6.60-safe",
+                        "config": {
+                          "modules": true,
+                          "initrd": true,
+                          "nvme": "Module",
+                          "ext4": "Module",
+                          "localversion": "-safe"
+                        },
+                        "image": false,
+                        "modules": true
+                      },
+                      "included": [
+                        "ext4",
+                        "jbd2",
+                        "mbcache",
+                        "nvme",
+                        "nvme_core"
+                      ]
+                    }
+                  }
+                ],
+                "entries": [
+                  {
+                    "path": "/staging/boot/loader/entries/fallback.conf",
+                    "source": "title Supplied kernel candidate\nlinux /vmlinuz-6.6.60-safe\ninitrd /initramfs-6.6.60-safe.img\noptions root=UUID=24242424-3333-4444-5555-666666666666 ro\n"
+                  }
+                ]
+              },
+              "entry_filename": "candidate.conf",
+              "entry_draft": "title New kernel candidate\nlinux /choose-staged-image\noptions root=UUID=24242424-3333-4444-5555-666666666666 ro\n",
+              "saved_entry": null,
+              "checked": false,
+              "log": []
+            }
+          },
+          "example": {
+            "source_task": "{\"id\":\"lpic2-kernel-staged-handover-example\",\"kind\":\"Boot\",\"instructions\":\"Stage a working boot candidate from the supplied target source, using the saved configuration and a new loader-entry filename. Use the supplied system-root identity. Preserve every original fallback image, module tree, initramfs and entry unchanged. Verify a new-kernel boot through root and init handoff; booting the old fallback alone is insufficient.\",\"sources\":[{\"id\":\"training-fallback-source\",\"release\":\"6.1.119\",\"title\":\"Preserved working fallback 6.1.119\"},{\"id\":\"training-source\",\"release\":\"6.1.120\",\"title\":\"Supplied target source 6.1.120\"}],\"initial_source\":0,\"wanted_source\":1,\"initial_config\":\"CONFIG_MODULES=y\\nCONFIG_BLK_DEV_INITRD=y\\nCONFIG_BLK_DEV_NVME=m\\nCONFIG_EXT4_FS=m\\nCONFIG_LOCALVERSION=\\\"-practice\\\"\\n\",\"stage_root\":\"/training\",\"initial_entry_filename\":\"candidate.conf\",\"initial_entry\":\"title New kernel candidate\\nlinux /choose-staged-image\\noptions root=UUID=11111111-aaaa-bbbb-cccc-222222222222 ro\\n\",\"initial_store\":{\"images\":[{\"path\":\"/training/boot/vmlinuz-6.1.119-safe\",\"build\":{\"source_id\":\"training-fallback-source\",\"release\":\"6.1.119-safe\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"-safe\"},\"image\":true,\"modules\":false}}],\"modules\":[{\"path\":\"/training/lib/modules/6.1.119-safe\",\"build\":{\"source_id\":\"training-fallback-source\",\"release\":\"6.1.119-safe\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"-safe\"},\"image\":false,\"modules\":true}}],\"initramfs\":[{\"path\":\"/training/boot/initramfs-6.1.119-safe.img\",\"image\":{\"image_build\":{\"source_id\":\"training-fallback-source\",\"release\":\"6.1.119-safe\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"-safe\"},\"image\":true,\"modules\":false},\"module_build\":{\"source_id\":\"training-fallback-source\",\"release\":\"6.1.119-safe\",\"config\":{\"modules\":true,\"initrd\":true,\"nvme\":\"Module\",\"ext4\":\"Module\",\"localversion\":\"-safe\"},\"image\":false,\"modules\":true},\"included\":[\"ext4\",\"jbd2\",\"mbcache\",\"nvme\",\"nvme_core\"]}}],\"entries\":[{\"path\":\"/training/boot/loader/entries/fallback.conf\",\"source\":\"title Supplied kernel candidate\\nlinux /vmlinuz-6.1.119-safe\\ninitrd /initramfs-6.1.119-safe.img\\noptions root=UUID=11111111-aaaa-bbbb-cccc-222222222222 ro\\n\"}]},\"root\":{\"uuid\":\"11111111-aaaa-bbbb-cccc-222222222222\",\"label\":\"Supplied NVMe/ext4 system root\",\"required_drivers\":[\"nvme_core\",\"nvme\",\"jbd2\",\"mbcache\",\"ext4\"],\"init_present\":true},\"require_initrd_support\":true,\"reference\":[{\"op\":\"Source\",\"index\":1},{\"op\":\"Config\",\"text\":\"CONFIG_MODULES=y\\nCONFIG_BLK_DEV_INITRD=y\\nCONFIG_BLK_DEV_NVME=m\\nCONFIG_EXT4_FS=m\\nCONFIG_LOCALVERSION=\\\"-practice\\\"\\n\"},{\"op\":\"SaveConfig\"},{\"op\":\"Run\",\"input\":\"make all\"},{\"op\":\"StageImage\"},{\"op\":\"Run\",\"input\":\"make modules_install INSTALL_MOD_PATH=/training\"},{\"op\":\"Initramfs\",\"image_path\":\"/training/boot/vmlinuz-6.1.120-practice\"},{\"op\":\"EntryDraft\",\"filename\":\"candidate.conf\",\"text\":\"title Supplied kernel candidate\\nlinux /vmlinuz-6.1.120-practice\\ninitrd /initramfs-6.1.120-practice.img\\noptions root=UUID=11111111-aaaa-bbbb-cccc-222222222222 ro\\n\"},{\"op\":\"SaveEntry\"},{\"op\":\"Check\"}]}",
+            "work": {
+              "source": 0,
+              "config_draft": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=m\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-practice\"\n",
+              "saved_config": {
+                "modules": true,
+                "initrd": true,
+                "nvme": "Module",
+                "ext4": "Module",
+                "localversion": "-practice"
+              },
+              "command_draft": "",
+              "outputs": {
+                "image": null,
+                "modules": null,
+                "initramfs": null
+              },
+              "store": {
+                "images": [
+                  {
+                    "path": "/training/boot/vmlinuz-6.1.119-safe",
+                    "build": {
+                      "source_id": "training-fallback-source",
+                      "release": "6.1.119-safe",
+                      "config": {
+                        "modules": true,
+                        "initrd": true,
+                        "nvme": "Module",
+                        "ext4": "Module",
+                        "localversion": "-safe"
+                      },
+                      "image": true,
+                      "modules": false
+                    }
+                  }
+                ],
+                "modules": [
+                  {
+                    "path": "/training/lib/modules/6.1.119-safe",
+                    "build": {
+                      "source_id": "training-fallback-source",
+                      "release": "6.1.119-safe",
+                      "config": {
+                        "modules": true,
+                        "initrd": true,
+                        "nvme": "Module",
+                        "ext4": "Module",
+                        "localversion": "-safe"
+                      },
+                      "image": false,
+                      "modules": true
+                    }
+                  }
+                ],
+                "initramfs": [
+                  {
+                    "path": "/training/boot/initramfs-6.1.119-safe.img",
+                    "image": {
+                      "image_build": {
+                        "source_id": "training-fallback-source",
+                        "release": "6.1.119-safe",
+                        "config": {
+                          "modules": true,
+                          "initrd": true,
+                          "nvme": "Module",
+                          "ext4": "Module",
+                          "localversion": "-safe"
+                        },
+                        "image": true,
+                        "modules": false
+                      },
+                      "module_build": {
+                        "source_id": "training-fallback-source",
+                        "release": "6.1.119-safe",
+                        "config": {
+                          "modules": true,
+                          "initrd": true,
+                          "nvme": "Module",
+                          "ext4": "Module",
+                          "localversion": "-safe"
+                        },
+                        "image": false,
+                        "modules": true
+                      },
+                      "included": [
+                        "ext4",
+                        "jbd2",
+                        "mbcache",
+                        "nvme",
+                        "nvme_core"
+                      ]
+                    }
+                  }
+                ],
+                "entries": [
+                  {
+                    "path": "/training/boot/loader/entries/fallback.conf",
+                    "source": "title Supplied kernel candidate\nlinux /vmlinuz-6.1.119-safe\ninitrd /initramfs-6.1.119-safe.img\noptions root=UUID=11111111-aaaa-bbbb-cccc-222222222222 ro\n"
+                  }
+                ]
+              },
+              "entry_filename": "candidate.conf",
+              "entry_draft": "title New kernel candidate\nlinux /choose-staged-image\noptions root=UUID=11111111-aaaa-bbbb-cccc-222222222222 ro\n",
+              "saved_entry": null,
+              "checked": false,
+              "log": []
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "KernelBuild",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-kernel-staged-handover",
+          "assignment": {
+            "id": "lpic2-kernel-staged-handover",
+            "kind": "Boot",
+            "instructions": "Stage a working boot candidate from the supplied target source, using the saved configuration and a new loader-entry filename. Use the supplied system-root identity. Preserve every original fallback image, module tree, initramfs and entry unchanged. Verify a new-kernel boot through root and init handoff; booting the old fallback alone is insufficient.",
+            "sources": [
+              {
+                "id": "working-fallback-source",
+                "release": "6.6.60",
+                "title": "Preserved working fallback 6.6.60"
+              },
+              {
+                "id": "candidate-source",
+                "release": "6.6.61",
+                "title": "Supplied target source 6.6.61"
+              }
+            ],
+            "initial_source": 0,
+            "wanted_source": 1,
+            "initial_config": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=m\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-candidate\"\n",
+            "stage_root": "/staging",
+            "initial_entry_filename": "candidate.conf",
+            "initial_entry": "title New kernel candidate\nlinux /choose-staged-image\noptions root=UUID=24242424-3333-4444-5555-666666666666 ro\n",
+            "initial_store": {
+              "images": [
+                {
+                  "path": "/staging/boot/vmlinuz-6.6.60-safe",
+                  "build": {
+                    "source_id": "working-fallback-source",
+                    "release": "6.6.60-safe",
+                    "config": {
+                      "modules": true,
+                      "initrd": true,
+                      "nvme": "Module",
+                      "ext4": "Module",
+                      "localversion": "-safe"
+                    },
+                    "image": true,
+                    "modules": false
+                  }
+                }
+              ],
+              "modules": [
+                {
+                  "path": "/staging/lib/modules/6.6.60-safe",
+                  "build": {
+                    "source_id": "working-fallback-source",
+                    "release": "6.6.60-safe",
+                    "config": {
+                      "modules": true,
+                      "initrd": true,
+                      "nvme": "Module",
+                      "ext4": "Module",
+                      "localversion": "-safe"
+                    },
+                    "image": false,
+                    "modules": true
+                  }
+                }
+              ],
+              "initramfs": [
+                {
+                  "path": "/staging/boot/initramfs-6.6.60-safe.img",
+                  "image": {
+                    "image_build": {
+                      "source_id": "working-fallback-source",
+                      "release": "6.6.60-safe",
+                      "config": {
+                        "modules": true,
+                        "initrd": true,
+                        "nvme": "Module",
+                        "ext4": "Module",
+                        "localversion": "-safe"
+                      },
+                      "image": true,
+                      "modules": false
+                    },
+                    "module_build": {
+                      "source_id": "working-fallback-source",
+                      "release": "6.6.60-safe",
+                      "config": {
+                        "modules": true,
+                        "initrd": true,
+                        "nvme": "Module",
+                        "ext4": "Module",
+                        "localversion": "-safe"
+                      },
+                      "image": false,
+                      "modules": true
+                    },
+                    "included": [
+                      "ext4",
+                      "jbd2",
+                      "mbcache",
+                      "nvme",
+                      "nvme_core"
+                    ]
+                  }
+                }
+              ],
+              "entries": [
+                {
+                  "path": "/staging/boot/loader/entries/fallback.conf",
+                  "source": "title Supplied kernel candidate\nlinux /vmlinuz-6.6.60-safe\ninitrd /initramfs-6.6.60-safe.img\noptions root=UUID=24242424-3333-4444-5555-666666666666 ro\n"
+                }
+              ]
+            },
+            "root": {
+              "uuid": "24242424-3333-4444-5555-666666666666",
+              "label": "Supplied NVMe/ext4 system root",
+              "required_drivers": [
+                "nvme_core",
+                "nvme",
+                "jbd2",
+                "mbcache",
+                "ext4"
+              ],
+              "init_present": true
+            },
+            "require_initrd_support": true,
+            "reference": [
+              {
+                "op": "Source",
+                "index": 1
+              },
+              {
+                "op": "Config",
+                "text": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=m\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-candidate\"\n"
+              },
+              {
+                "op": "SaveConfig"
+              },
+              {
+                "op": "Run",
+                "input": "make all"
+              },
+              {
+                "op": "StageImage"
+              },
+              {
+                "op": "Run",
+                "input": "make modules_install INSTALL_MOD_PATH=/staging"
+              },
+              {
+                "op": "Initramfs",
+                "image_path": "/staging/boot/vmlinuz-6.6.61-candidate"
+              },
+              {
+                "op": "EntryDraft",
+                "filename": "candidate.conf",
+                "text": "title Supplied kernel candidate\nlinux /vmlinuz-6.6.61-candidate\ninitrd /initramfs-6.6.61-candidate.img\noptions root=UUID=24242424-3333-4444-5555-666666666666 ro\n"
+              },
+              {
+                "op": "SaveEntry"
+              },
+              {
+                "op": "Check"
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-kernel-staged-handover-example",
+            "kind": "Boot",
+            "instructions": "Stage a working boot candidate from the supplied target source, using the saved configuration and a new loader-entry filename. Use the supplied system-root identity. Preserve every original fallback image, module tree, initramfs and entry unchanged. Verify a new-kernel boot through root and init handoff; booting the old fallback alone is insufficient.",
+            "sources": [
+              {
+                "id": "training-fallback-source",
+                "release": "6.1.119",
+                "title": "Preserved working fallback 6.1.119"
+              },
+              {
+                "id": "training-source",
+                "release": "6.1.120",
+                "title": "Supplied target source 6.1.120"
+              }
+            ],
+            "initial_source": 0,
+            "wanted_source": 1,
+            "initial_config": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=m\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-practice\"\n",
+            "stage_root": "/training",
+            "initial_entry_filename": "candidate.conf",
+            "initial_entry": "title New kernel candidate\nlinux /choose-staged-image\noptions root=UUID=11111111-aaaa-bbbb-cccc-222222222222 ro\n",
+            "initial_store": {
+              "images": [
+                {
+                  "path": "/training/boot/vmlinuz-6.1.119-safe",
+                  "build": {
+                    "source_id": "training-fallback-source",
+                    "release": "6.1.119-safe",
+                    "config": {
+                      "modules": true,
+                      "initrd": true,
+                      "nvme": "Module",
+                      "ext4": "Module",
+                      "localversion": "-safe"
+                    },
+                    "image": true,
+                    "modules": false
+                  }
+                }
+              ],
+              "modules": [
+                {
+                  "path": "/training/lib/modules/6.1.119-safe",
+                  "build": {
+                    "source_id": "training-fallback-source",
+                    "release": "6.1.119-safe",
+                    "config": {
+                      "modules": true,
+                      "initrd": true,
+                      "nvme": "Module",
+                      "ext4": "Module",
+                      "localversion": "-safe"
+                    },
+                    "image": false,
+                    "modules": true
+                  }
+                }
+              ],
+              "initramfs": [
+                {
+                  "path": "/training/boot/initramfs-6.1.119-safe.img",
+                  "image": {
+                    "image_build": {
+                      "source_id": "training-fallback-source",
+                      "release": "6.1.119-safe",
+                      "config": {
+                        "modules": true,
+                        "initrd": true,
+                        "nvme": "Module",
+                        "ext4": "Module",
+                        "localversion": "-safe"
+                      },
+                      "image": true,
+                      "modules": false
+                    },
+                    "module_build": {
+                      "source_id": "training-fallback-source",
+                      "release": "6.1.119-safe",
+                      "config": {
+                        "modules": true,
+                        "initrd": true,
+                        "nvme": "Module",
+                        "ext4": "Module",
+                        "localversion": "-safe"
+                      },
+                      "image": false,
+                      "modules": true
+                    },
+                    "included": [
+                      "ext4",
+                      "jbd2",
+                      "mbcache",
+                      "nvme",
+                      "nvme_core"
+                    ]
+                  }
+                }
+              ],
+              "entries": [
+                {
+                  "path": "/training/boot/loader/entries/fallback.conf",
+                  "source": "title Supplied kernel candidate\nlinux /vmlinuz-6.1.119-safe\ninitrd /initramfs-6.1.119-safe.img\noptions root=UUID=11111111-aaaa-bbbb-cccc-222222222222 ro\n"
+                }
+              ]
+            },
+            "root": {
+              "uuid": "11111111-aaaa-bbbb-cccc-222222222222",
+              "label": "Supplied NVMe/ext4 system root",
+              "required_drivers": [
+                "nvme_core",
+                "nvme",
+                "jbd2",
+                "mbcache",
+                "ext4"
+              ],
+              "init_present": true
+            },
+            "require_initrd_support": true,
+            "reference": [
+              {
+                "op": "Source",
+                "index": 1
+              },
+              {
+                "op": "Config",
+                "text": "CONFIG_MODULES=y\nCONFIG_BLK_DEV_INITRD=y\nCONFIG_BLK_DEV_NVME=m\nCONFIG_EXT4_FS=m\nCONFIG_LOCALVERSION=\"-practice\"\n"
+              },
+              {
+                "op": "SaveConfig"
+              },
+              {
+                "op": "Run",
+                "input": "make all"
+              },
+              {
+                "op": "StageImage"
+              },
+              {
+                "op": "Run",
+                "input": "make modules_install INSTALL_MOD_PATH=/training"
+              },
+              {
+                "op": "Initramfs",
+                "image_path": "/training/boot/vmlinuz-6.1.120-practice"
+              },
+              {
+                "op": "EntryDraft",
+                "filename": "candidate.conf",
+                "text": "title Supplied kernel candidate\nlinux /vmlinuz-6.1.120-practice\ninitrd /initramfs-6.1.120-practice.img\noptions root=UUID=11111111-aaaa-bbbb-cccc-222222222222 ro\n"
+              },
+              {
+                "op": "SaveEntry"
+              },
+              {
+                "op": "Check"
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"Source\",\"index\":1}}",
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"Config\",\"text\":\"CONFIG_MODULES=y\\nCONFIG_BLK_DEV_INITRD=y\\nCONFIG_BLK_DEV_NVME=m\\nCONFIG_EXT4_FS=m\\nCONFIG_LOCALVERSION=\\\"-candidate\\\"\\n\"}}",
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"SaveConfig\"}}",
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"Run\",\"input\":\"make all\"}}",
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"StageImage\"}}",
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"Run\",\"input\":\"make modules_install INSTALL_MOD_PATH=/staging\"}}",
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"Initramfs\",\"image_path\":\"/staging/boot/vmlinuz-6.6.61-candidate\"}}",
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"EntryDraft\",\"filename\":\"candidate.conf\",\"text\":\"title Supplied kernel candidate\\nlinux /vmlinuz-6.6.61-candidate\\ninitrd /initramfs-6.6.61-candidate.img\\noptions root=UUID=24242424-3333-4444-5555-666666666666 ro\\n\"}}",
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"SaveEntry\"}}",
+        "kernel-workspace {\"practice\":false,\"action\":{\"op\":\"Check\"}}"
+      ]
+    }
+  ]
+}

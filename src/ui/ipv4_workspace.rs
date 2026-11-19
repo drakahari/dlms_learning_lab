@@ -116,8 +116,20 @@ impl Assignment {
         }
     }
     pub fn render(&mut self, ui: &mut egui::Ui, challenge: bool, metrics: &mut Metrics) {
-        ui.heading("Configure a second workstation");
-        ui.label(format!("A workstation is configured as {}/{}. Determine its network address, broadcast address, and usable host range, then assign a valid, different address to a second workstation.",self.exercise.ip,self.exercise.prefix));
+        ccna_presentation::lead(ui, "YOUR TASK", "Configure a second workstation");
+        ui.monospace(format!(
+            "Workstation 1: {}/{}",
+            self.exercise.ip, self.exercise.prefix
+        ));
+        for requirement in [
+            "Find the network and broadcast addresses.",
+            "Enter the first and last usable host addresses.",
+            "Give Workstation 2 a usable address in the same subnet, different from Workstation 1.",
+        ] {
+            ccna_presentation::prose(ui, &format!("• {requirement}"));
+        }
+        ui.add_space(8.);
+        ui.strong("Workspace · Two computers on one subnet");
         let checked_second = self
             .checked_answers
             .as_ref()

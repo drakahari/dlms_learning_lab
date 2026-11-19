@@ -1,0 +1,315 @@
+{
+  "schema_version": 1,
+  "source": "if test \"$#\" -ne 2; then\n    printf 'Usage: triage OWNERS EVENTS\\n' >&2\n    exit 2\nfi\nregistry=$1\nevents=$2\nif test -f \"$registry\"; then true\nelse\n    printf 'Owner file is missing.\\n' >&2\n    exit 2\nfi\nif test -f \"$events\"; then true\nelse\n    printf 'Event file is missing.\\n' >&2\n    exit 2\nfi\ndeclare -A owners\nrow=0\nwhile IFS= read -r entry || test -n \"$entry\"; do\n    row=$((row + 1))\n    if printf '%s\\n' \"$entry\" | grep -Eq -- '^[a-z][a-z0-9-]*\\|[^|]+$'; then true\n    else\n        printf 'Invalid owner row: %s\\n' \"$row\" >&2\n        exit 2\n    fi\n    device=$(printf '%s\\n' \"$entry\" | cut -d '|' -f 1)\n    case \"$device\" in\n        ?????????????????????????????????*)\n            printf 'Invalid owner row: %s\\n' \"$row\" >&2\n            exit 2\n            ;;\n    esac\n    owner=$(printf '%s\\n' \"$entry\" | cut -d '|' -f 2)\n    if test -n \"${owners[$device]}\"; then\n        printf 'Duplicate device: %s\\n' \"$device\" >&2\n        exit 2\n    fi\n    owners[\"$device\"]=\"$owner\"\ndone < \"$registry\"\nreported=0\nskipped=0\nrow=0\nwhile IFS= read -r event || test -n \"$event\"; do\n    row=$((row + 1))\n    if printf '%s\\n' \"$event\" | grep -Eq -- '^(INFO|WARN|ERROR)\\|[a-z][a-z0-9-]*\\|[^|]*$'; then true\n    else\n        printf 'Skipped row %s: malformed event\\n' \"$row\" >&2\n        skipped=$((skipped + 1))\n        continue\n    fi\n    level=$(printf '%s\\n' \"$event\" | cut -d '|' -f 1)\n    device=$(printf '%s\\n' \"$event\" | cut -d '|' -f 2)\n    case \"$device\" in\n        ?????????????????????????????????*)\n            printf 'Skipped row %s: malformed event\\n' \"$row\" >&2\n            skipped=$((skipped + 1))\n            continue\n            ;;\n    esac\n    if test \"$level\" = INFO; then continue; fi\n    message=$(printf '%s\\n' \"$event\" | cut -d '|' -f 3)\n    owner=\"${owners[$device]}\"\n    if test -z \"$owner\"; then\n        printf 'Unassigned row %s: %s\\n' \"$row\" \"$device\" >&2\n        skipped=$((skipped + 1))\n        continue\n    fi\n    printf '%s|%s|%s|%s\\n' \"$level\" \"$device\" \"$owner\" \"$message\"\n    reported=$((reported + 1))\ndone < \"$events\"\nprintf 'Reported: %s\\nSkipped: %s\\n' \"$reported\" \"$skipped\"\nif test \"$skipped\" -gt 0; then exit 1; fi\nexit 0\n",
+  "alternate": "if test \"$#\" -ne 2; then\n    printf 'Usage: triage OWNERS EVENTS\\n' >&2\n    exit 2\nfi\nregistry=$1\nevents=$2\nif test -f \"$registry\"; then true\nelse\n    printf 'Owner file is missing.\\n' >&2\n    exit 2\nfi\nif test -f \"$events\"; then true\nelse\n    printf 'Event file is missing.\\n' >&2\n    exit 2\nfi\nseen='|'\nrow=0\nwhile IFS= read -r entry || test -n \"$entry\"; do\n    row=$((row + 1))\n    if printf '%s\\n' \"$entry\" | grep -Eq -- '^[a-z][a-z0-9-]*\\|[^|]+$'; then true\n    else\n        printf 'Invalid owner row: %s\\n' \"$row\" >&2\n        exit 2\n    fi\n    device=$(printf '%s\\n' \"$entry\" | cut -d '|' -f 1)\n    case \"$device\" in\n        ?????????????????????????????????*)\n            printf 'Invalid owner row: %s\\n' \"$row\" >&2\n            exit 2\n            ;;\n    esac\n    owner=$(printf '%s\\n' \"$entry\" | cut -d '|' -f 2)\n    case \"$seen\" in\n        *\"|$device|\"*)\n            printf 'Duplicate device: %s\\n' \"$device\" >&2\n            exit 2\n            ;;\n    esac\n    seen=\"$seen$device|\"\ndone < \"$registry\"\nreported=0\nskipped=0\nrow=0\nwhile IFS= read -r event || test -n \"$event\"; do\n    row=$((row + 1))\n    if printf '%s\\n' \"$event\" | grep -Eq -- '^(INFO|WARN|ERROR)\\|[a-z][a-z0-9-]*\\|[^|]*$'; then true\n    else\n        printf 'Skipped row %s: malformed event\\n' \"$row\" >&2\n        skipped=$((skipped + 1))\n        continue\n    fi\n    level=$(printf '%s\\n' \"$event\" | cut -d '|' -f 1)\n    device=$(printf '%s\\n' \"$event\" | cut -d '|' -f 2)\n    case \"$device\" in\n        ?????????????????????????????????*)\n            printf 'Skipped row %s: malformed event\\n' \"$row\" >&2\n            skipped=$((skipped + 1))\n            continue\n            ;;\n    esac\n    if test \"$level\" = INFO; then continue; fi\n    message=$(printf '%s\\n' \"$event\" | cut -d '|' -f 3)\n    mapping=$(grep -E -- \"^$device\\|\" \"$registry\")\n    owner=$(printf '%s\\n' \"$mapping\" | cut -d '|' -f 2)\n    if test -z \"$owner\"; then\n        printf 'Unassigned row %s: %s\\n' \"$row\" \"$device\" >&2\n        skipped=$((skipped + 1))\n        continue\n    fi\n    printf '%s|%s|%s|%s\\n' \"$level\" \"$device\" \"$owner\" \"$message\"\n    reported=$((reported + 1))\ndone < \"$events\"\nprintf 'Reported: %s\\nSkipped: %s\\n' \"$reported\" \"$skipped\"\nif test \"$skipped\" -gt 0; then exit 1; fi\nexit 0\n",
+  "cases": [
+    {
+      "name": "Correlate owners while retaining event order",
+      "args": [
+        "owners.txt",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|Network team\nstore|Storage team\n",
+        "/work/events.log": "INFO|edge|link ready\nERROR|store|disk wait\nWARN|edge|drops high\nERROR|store|retry later\n"
+      },
+      "stdout": "ERROR|store|Storage team|disk wait\nWARN|edge|Network team|drops high\nERROR|store|Storage team|retry later\nReported: 3\nSkipped: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|Network team\nstore|Storage team\n",
+        "/work/events.log": "INFO|edge|link ready\nERROR|store|disk wait\nWARN|edge|drops high\nERROR|store|retry later\n"
+      }
+    },
+    {
+      "name": "Literal message and owner bytes survive",
+      "args": [
+        "owners.txt",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "node-a|  Night shift 100% * \\\nnode-b|Café desk\n",
+        "/work/events.log": "WARN|node-a|  cost $5 [check] * \\\nERROR|node-b|owner's alert  "
+      },
+      "stdout": "WARN|node-a|  Night shift 100% * \\|  cost $5 [check] * \\\nERROR|node-b|Café desk|owner's alert  \nReported: 2\nSkipped: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "node-a|  Night shift 100% * \\\nnode-b|Café desk\n",
+        "/work/events.log": "WARN|node-a|  cost $5 [check] * \\\nERROR|node-b|owner's alert  "
+      }
+    },
+    {
+      "name": "Both final records lack a newline",
+      "args": [
+        "owners.txt",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "alpha|North\nbeta|South",
+        "/work/events.log": "WARN|alpha|first\nERROR|beta|last"
+      },
+      "stdout": "WARN|alpha|North|first\nERROR|beta|South|last\nReported: 2\nSkipped: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "alpha|North\nbeta|South",
+        "/work/events.log": "WARN|alpha|first\nERROR|beta|last"
+      }
+    },
+    {
+      "name": "Continue after malformed and unassigned rows",
+      "args": [
+        "owners.txt",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|Network\n",
+        "/work/events.log": "ERROR|lost|one\nbad row\nWARN|edge|keep this\nINFO|unknown|ignore this\nWARN|lost|two\nERROR|edge|last\n"
+      },
+      "stdout": "WARN|edge|Network|keep this\nERROR|edge|Network|last\nReported: 2\nSkipped: 3\n",
+      "stderr": "Unassigned row 1: lost\nSkipped row 2: malformed event\nUnassigned row 5: lost\n",
+      "status": 1,
+      "after": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|Network\n",
+        "/work/events.log": "ERROR|lost|one\nbad row\nWARN|edge|keep this\nINFO|unknown|ignore this\nWARN|lost|two\nERROR|edge|last\n"
+      }
+    },
+    {
+      "name": "Duplicate registry rejects before any event output",
+      "args": [
+        "owners.txt",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|First\nedge|Second\n",
+        "/work/events.log": "WARN|edge|must not print\n"
+      },
+      "stdout": "",
+      "stderr": "Duplicate device: edge\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|First\nedge|Second\n",
+        "/work/events.log": "WARN|edge|must not print\n"
+      }
+    },
+    {
+      "name": "Malformed late registry rejects before output",
+      "args": [
+        "owners.txt",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|North\nbroken row",
+        "/work/events.log": "ERROR|edge|must not print\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid owner row: 2\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|North\nbroken row",
+        "/work/events.log": "ERROR|edge|must not print\n"
+      }
+    },
+    {
+      "name": "Empty registry still checks events",
+      "args": [
+        "owners.txt",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "",
+        "/work/events.log": "INFO|new|hello\nWARN|new|needs owner\n"
+      },
+      "stdout": "Reported: 0\nSkipped: 1\n",
+      "stderr": "Unassigned row 2: new\n",
+      "status": 1,
+      "after": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "",
+        "/work/events.log": "INFO|new|hello\nWARN|new|needs owner\n"
+      }
+    },
+    {
+      "name": "Empty events produces honest zero counts",
+      "args": [
+        "owners.txt",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|North\n",
+        "/work/events.log": ""
+      },
+      "stdout": "Reported: 0\nSkipped: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|North\n",
+        "/work/events.log": ""
+      }
+    },
+    {
+      "name": "Invalid event shapes count once each",
+      "args": [
+        "owners.txt",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|North\n",
+        "/work/events.log": "warn|edge|bad level\nWARN||empty device\nERROR|edge|extra|bar\n\nWARN|edge|\nINFO|edge|ok\n"
+      },
+      "stdout": "WARN|edge|North|\nReported: 1\nSkipped: 4\n",
+      "stderr": "Skipped row 1: malformed event\nSkipped row 2: malformed event\nSkipped row 3: malformed event\nSkipped row 4: malformed event\n",
+      "status": 1,
+      "after": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|North\n",
+        "/work/events.log": "warn|edge|bad level\nWARN||empty device\nERROR|edge|extra|bar\n\nWARN|edge|\nINFO|edge|ok\n"
+      }
+    },
+    {
+      "name": "Eight rows, maximum128-byte fields,32-byte devices and80-byte literal filenames",
+      "args": [
+        "owners rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.txt",
+        "events eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.txt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa0|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa2|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa3|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa5|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa6|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+        "/work/events eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.log": "WARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "stdout": "WARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nReported: 8\nSkipped: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.txt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa0|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa2|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa3|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa5|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa6|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+        "/work/events eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.log": "WARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "name": "Missing event file is an input error",
+      "args": [
+        "owners.txt",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|North\n"
+      },
+      "stdout": "",
+      "stderr": "Event file is missing.\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|North\n"
+      }
+    },
+    {
+      "name": "Wrong argument count never starts processing",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|North\n",
+        "/work/events.log": "WARN|edge|ignored\n"
+      },
+      "stdout": "",
+      "stderr": "Usage: triage OWNERS EVENTS\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Keep this unrelated note.\n",
+        "/work/match.log": "Literal * is message text.\n",
+        "/work/owners.txt": "edge|North\n",
+        "/work/events.log": "WARN|edge|ignored\n"
+      }
+    }
+  ],
+  "example_source": "if test \"$#\" -ne 2; then\n    printf 'Usage: workshop OWNERS EVENTS\\n' >&2\n    exit 2\nfi\nregistry=$1\nevents=$2\nif test -f \"$registry\"; then true\nelse\n    printf 'Owner file is missing.\\n' >&2\n    exit 2\nfi\nif test -f \"$events\"; then true\nelse\n    printf 'Event file is missing.\\n' >&2\n    exit 2\nfi\ndeclare -A owners\nrow=0\nwhile IFS= read -r entry || test -n \"$entry\"; do\n    row=$((row + 1))\n    if printf '%s\\n' \"$entry\" | grep -Eq -- '^[a-z][a-z0-9-]*\\|[^|]+$'; then true\n    else\n        printf 'Invalid owner row: %s\\n' \"$row\" >&2\n        exit 2\n    fi\n    device=$(printf '%s\\n' \"$entry\" | cut -d '|' -f 1)\n    case \"$device\" in\n        ?????????????????????????????????*)\n            printf 'Invalid owner row: %s\\n' \"$row\" >&2\n            exit 2\n            ;;\n    esac\n    owner=$(printf '%s\\n' \"$entry\" | cut -d '|' -f 2)\n    if test -n \"${owners[$device]}\"; then\n        printf 'Duplicate device: %s\\n' \"$device\" >&2\n        exit 2\n    fi\n    owners[\"$device\"]=\"$owner\"\ndone < \"$registry\"\nreported=0\nskipped=0\nrow=0\nwhile IFS= read -r event || test -n \"$event\"; do\n    row=$((row + 1))\n    if printf '%s\\n' \"$event\" | grep -Eq -- '^(INFO|WARN|ERROR)\\|[a-z][a-z0-9-]*\\|[^|]*$'; then true\n    else\n        printf 'Skipped row %s: malformed event\\n' \"$row\" >&2\n        skipped=$((skipped + 1))\n        continue\n    fi\n    level=$(printf '%s\\n' \"$event\" | cut -d '|' -f 1)\n    device=$(printf '%s\\n' \"$event\" | cut -d '|' -f 2)\n    case \"$device\" in\n        ?????????????????????????????????*)\n            printf 'Skipped row %s: malformed event\\n' \"$row\" >&2\n            skipped=$((skipped + 1))\n            continue\n            ;;\n    esac\n    if test \"$level\" = INFO; then continue; fi\n    message=$(printf '%s\\n' \"$event\" | cut -d '|' -f 3)\n    owner=\"${owners[$device]}\"\n    if test -z \"$owner\"; then\n        printf 'Unassigned row %s: %s\\n' \"$row\" \"$device\" >&2\n        skipped=$((skipped + 1))\n        continue\n    fi\n    printf '%s|%s|%s|%s\\n' \"$level\" \"$device\" \"$owner\" \"$message\"\n    reported=$((reported + 1))\ndone < \"$events\"\nprintf 'Reported: %s\\nSkipped: %s\\n' \"$reported\" \"$skipped\"\nif test \"$skipped\" -gt 0; then exit 1; fi\nexit 0\n",
+  "example_case": {
+    "name": "Workshop reader and shelf",
+    "args": [
+      "owners.txt",
+      "events.log"
+    ],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "reader|Workshop desk\nshelf|Archive desk",
+      "/work/events.log": "INFO|reader|ready\nWARN|shelf|stock low\nERROR|reader|paper jam"
+    },
+    "stdout": "WARN|shelf|Archive desk|stock low\nERROR|reader|Workshop desk|paper jam\nReported: 2\nSkipped: 0\n",
+    "stderr": "",
+    "status": 0,
+    "after": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "reader|Workshop desk\nshelf|Archive desk",
+      "/work/events.log": "INFO|reader|ready\nWARN|shelf|stock low\nERROR|reader|paper jam"
+    }
+  }
+}

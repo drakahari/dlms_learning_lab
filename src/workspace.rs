@@ -93,6 +93,8 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub accounts_learning: Option<crate::accounts_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub accounts_template_drafts: Option<crate::accounts_template::Drafts>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub discovery_draft: Option<crate::discovery_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub discovery_learning: Option<crate::discovery_teaching::Learning>,
@@ -227,6 +229,7 @@ impl WorkspaceData {
             && self.terminal_learning.as_ref().is_none_or(|l| l.valid())
             && self.process_learning.as_ref().is_none_or(|l| l.valid())
             && self.accounts_learning.as_ref().is_none_or(|l| l.valid())
+            && self.accounts_template_drafts.as_ref().is_none_or(|d| d.valid())
             && self.spanning_tree_draft.as_ref().is_none_or(|d| d.valid())
             && self
                 .spanning_tree_learning
@@ -394,12 +397,187 @@ pub(crate) fn reject_nfs_metadata(a: &Attempt) -> Result<(), String> {
     }
 }
 pub fn prepare(a: &mut Attempt) {
+    if let State::RaidAssembly{simulation}=&a.state {if simulation.shape(){a.workspace.get_or_insert_with(WorkspaceData::new);}return;}
+    if let State::Autofs{simulation}=&a.state {if simulation.shape(){a.workspace.get_or_insert_with(WorkspaceData::new);}return;}
+    if let State::DirectoryPolicy{simulation}=&a.state {if simulation.validate().is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}return;}
+
+    if let State::FileIndex{simulation}=&a.state{if crate::file_index_source::shape(simulation){a.workspace.get_or_insert_with(WorkspaceData::new);}return;}
+
+    if let State::Raid1{simulation}=&a.state{if simulation.validate().is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}return;}
+
+    if let State::StartupFiles{simulation}=&a.state {
+        if simulation.validate_unbound().is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}
+        return;
+    }
+    if let State::FsIntegrity{simulation}=&a.state {
+        if simulation.validate(&simulation.definition).is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}
+        return;
+    }
+    if let State::UserMounts{simulation}=&a.state {
+        if simulation.validate(&simulation.definition).is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}
+        return;
+    }
+    if let State::Environment{simulation}=&a.state {
+        if simulation.validate(&simulation.definition).is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}
+        return;
+    }
+
+    if let State::DebianSources { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::ClientNames { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::RemovableMounts { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::NmProfiles { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::PamStack { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::Aging { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::PortSecurity { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::DhcpSnooping { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::ArpInspection { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::ManagementPolicy { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::LocalAccess { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::AaaAccess { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::LdapClient { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::LdapAccess { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::LdapPassword { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::LdapChanges { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::DhcpConfig { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::Qos { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::LinuxLogging { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::VirtualIsolation{simulation}=&a.state {if simulation.validate().is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}return;}
+    if let State::GuestDrivers{simulation}=&a.state {if simulation.validate().is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}return;}
+    if let State::SambaShare{simulation}=&a.state {if simulation.validate().is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}return;}
+    if let State::CampusArchitecture{simulation}=&a.state {if simulation.validate().is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}return;}
+    if let State::NetworkTransfer{simulation}=&a.state {if simulation.validate().is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}return;}
+    if let State::EditorHandover{simulation}=&a.state {if simulation.validate().is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}return;}
+    if let State::ModalEditing{simulation}=&a.state {if simulation.validate().is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}return;}
+    if let State::SshAccess{simulation}=&a.state {if simulation.validate().is_ok(){a.workspace.get_or_insert_with(WorkspaceData::new);}return;}
+    if let State::HostNetwork { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::Repositories { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::Capacity { simulation } = &a.state {
+        if simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if matches!(a.state, State::Links { .. }) {
+        a.workspace.get_or_insert_with(WorkspaceData::new);
+        return;
+    }
     // This family needs held source authority; binding::prepare owns admission.
     if matches!(a.state, State::PartitionFs { .. }) {
         return;
     }
     if let State::Hsrp { simulation } = &a.state {
         if crate::hsrp_workspace::metadata(a).is_ok() && simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
+    if let State::Syslog { simulation } = &a.state {
+        if crate::syslog_workspace::metadata(a).is_ok() && simulation.validate().is_ok() {
             a.workspace.get_or_insert_with(WorkspaceData::new);
         }
         return;
@@ -691,6 +869,7 @@ pub fn issues(s: &State, g: &engine::Goal) -> Vec<String> {
             .filter_map(|requirement| {
                 use crate::processes::Requirement;
                 let pid = match requirement {
+                    Requirement::Listener { endpoint, .. } => endpoint.pid,
                     Requirement::Phase { pid, .. }
                     | Requirement::Niceness { pid, .. }
                     | Requirement::NoPendingTermination { pid }
@@ -701,11 +880,17 @@ pub fn issues(s: &State, g: &engine::Goal) -> Vec<String> {
             })
             .collect();
     }
+    if let (State::Filesystem {tree}, engine::Goal::Filesystem {requirements})=(s,g)
+        && let Err(error)=crate::filesystem::discovery_policy::for_current(requirements,tree) {
+        return vec![error];
+    }
     let checks = engine::checks(s, g);
     checks.iter().enumerate().filter(|(_,c)|!c.0).map(|(i,(_,label))| match s {
         State::Filesystem{tree}=>if let engine::Goal::Filesystem{requirements}=g {
             use crate::filesystem::Requirement;
             match &requirements[i] {
+                Requirement::CommandLocation {definition} => definition.check(tree).1,
+                Requirement::WhereisDeployment {definition} => definition.check(tree).1,
                 Requirement::Contents{path,..}=>if tree.files.contains_key(path) {format!("{path} has different text. Check which source you copied; compare it with cat before retrying.")} else {format!("{path} is missing as a file. Inspect its parent folder and check the destination name.")},
                 Requirement::Entry{path,directory}=>format!("{path} must be a {}. Use ls on its parent to check the name and type.",if *directory {"directory"}else{"file"}),
                 Requirement::Absent{path}=>format!("{path} still exists. Check that its replacement is safe before removing the requested old entry."),

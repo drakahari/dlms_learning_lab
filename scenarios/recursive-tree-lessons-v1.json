@@ -1,0 +1,1210 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-tree-private-stage",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-recursive-handovers",
+      "topic": "Recursive directory handovers",
+      "title": "Create a private working tree",
+      "summary": "Copy an entire project tree with private defaults while preserving its source.",
+      "objective": "Create /work/private-copy as a complete independent copy of /work/incoming, including nested, hidden and empty entries. Retain each source entry’s owner permission bits on the copy; remove group and other access. Transferred entries belong to alex, primary group staff. Set the simulated session’s creation mask so later ordinary files and folders also default to owner-only access. Preserve the source, its contents and permissions, and every unrelated supplied entry; leave no scratch copies.",
+      "retry_guidance": "Inspect the failing outcome, repair the working files, then check again. Reset restores only this attempt if you need the supplied source back.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair",
+        "Verify the complete handover"
+      ],
+      "guide": [
+        {
+          "title": "Copy a directory, not just its visible files",
+          "why": "A directory tree includes nested folders, empty folders and hidden names. cp -R copies the named directory and everything below it. Copying only the files shown by ordinary ls misses important parts.",
+          "action": "Inspect the practice template before copying it.",
+          "commands": [
+            {
+              "command": "find /practice/template -type f",
+              "explanation": "Compare the surviving names.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Choose access before creating the copy",
+          "why": "umask removes permission bits from newly created entries; it does not add permissions or repair existing copies. 077 removes group and other access. A source file with 644 becomes 600; a source directory with 755 becomes 700. A read-only source with 444 remains read-only at 400.",
+          "action": "Set the practice creation mask, then copy the complete template to the unused working path.",
+          "commands": [
+            {
+              "command": "umask 077",
+              "explanation": "Set defaults for later new entries; existing files do not change.",
+              "simulator_only": false
+            },
+            {
+              "command": "cp -R /practice/template /practice/working",
+              "explanation": "Copy the named practice files or complete directory.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Inspect content and access",
+          "why": "The person running a normal new copy becomes its owner and uses their primary group; source ownership is not preserved. find checks nested names, ls -la shows hidden names and modes, and cat inspects exact file content. The source must remain unchanged.",
+          "action": "Inspect the copy, including hidden names. Check the example, change its mask to 022 and observe that changing the mask does not alter existing entries.",
+          "commands": [
+            {
+              "command": "ls -ld /practice/working",
+              "explanation": "Inspect the copied access.",
+              "simulator_only": false
+            },
+            {
+              "command": "ls -l /practice/working",
+              "explanation": "Inspect the copied access.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "A directory tree includes nested folders, empty folders and hidden names. cp -R copies the named directory and everything below it. Copying only the files shown by ordinary ls misses important parts. umask removes permission bits from newly created entries; it does not add permissions or repair existing copies. 077 removes group and other access. A source file with 644 becomes 600; a source directory with 755 becomes 700. A read-only source with 444 remains read-only at 400. The person running a normal new copy becomes its owner and uses their primary group; source ownership is not preserved. find checks nested names, ls -la shows hidden names and modes, and cat inspects exact file content. The source must remain unchanged.",
+      "hints": [
+        "Compare the complete source and destination with find and ls -la. Check nested and hidden entries as well as visible files.",
+        "The creation mask affects new entries only. Inspect existing modes with ls -l; do not assume changing umask repairs a permissive copy.",
+        "The worked approach is available on request. Verify exact contents and permissions, and preserve similarly named unrelated paths."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/#rdp-we-103.3_Perform_basic_file_management (LPIC-1 v5.0, objective 103.3; checked 2026-11-06)",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html (installed Coreutils 9.10 Info inspected; fixed same-user comparisons 2026-11-06)",
+        "https://www.gnu.org/software/coreutils/manual/html_node/rm-invocation.html (installed Coreutils 9.10 Info inspected; fixed noninteractive comparisons 2026-11-06)"
+      ],
+      "simplifications": "Bounded ordinary virtual files and directories only. One source and destination; recursive -R, -r and --recursive aliases, with optional --. No merge/overwrite, trailing slash/final-dot operands, links, devices, preservation flags, real timestamps, ACL/SELinux, root overrides or host access. Recursive removal is noninteractive. Refused recursive actions are atomic in this simulation; real commands can leave partial changes. No safety guarantee for using these commands on a real system.",
+      "initial": {
+        "kind": "RecursiveTree",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-tree-private-stage",
+          "view": "introduction",
+          "example_command": 0,
+          "assignment": {
+            "role": "assignment",
+            "tree": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incoming": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/work/incoming/docs": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/work/incoming/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/work/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incoming/README.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/work/incoming/.index": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/work/incoming/docs/runbook.txt": {
+                  "directory": false,
+                  "mode": 292,
+                  "owner": "bea",
+                  "group": "team"
+                }
+              },
+              "files": {
+                "/work/keep.txt": "Retain this unrelated private note\n",
+                "/work/incoming/README.txt": "Independent: Overview\n",
+                "/work/incoming/.index": "Independent: hidden index without LF",
+                "/work/incoming/docs/runbook.txt": "Independent: Runbook: café\n\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ],
+                "bea": [
+                  "team",
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/work",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "practice": {
+            "role": "practice",
+            "tree": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/template": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/practice/template/docs": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/practice/template/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/practice/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/template/README.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/practice/template/.index": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/practice/template/docs/runbook.txt": {
+                  "directory": false,
+                  "mode": 292,
+                  "owner": "bea",
+                  "group": "team"
+                }
+              },
+              "files": {
+                "/practice/keep.txt": "Retain this unrelated private note\n",
+                "/practice/template/README.txt": "Practice: Overview\n",
+                "/practice/template/.index": "Practice: hidden index without LF",
+                "/practice/template/docs/runbook.txt": "Practice: Runbook: café\n\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ],
+                "bea": [
+                  "team",
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/practice",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "command": "",
+            "transcript": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "RecursiveTree",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic1-tree-private-stage",
+          "assignment": {
+            "root": "/work",
+            "initial": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incoming": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/work/incoming/docs": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/work/incoming/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/work/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incoming/README.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/work/incoming/.index": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/work/incoming/docs/runbook.txt": {
+                  "directory": false,
+                  "mode": 292,
+                  "owner": "bea",
+                  "group": "team"
+                }
+              },
+              "files": {
+                "/work/keep.txt": "Retain this unrelated private note\n",
+                "/work/incoming/README.txt": "Independent: Overview\n",
+                "/work/incoming/.index": "Independent: hidden index without LF",
+                "/work/incoming/docs/runbook.txt": "Independent: Runbook: café\n\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ],
+                "bea": [
+                  "team",
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/work",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "task": {
+              "kind": "stage",
+              "source": "/work/incoming",
+              "destination": "/work/private-copy",
+              "private_defaults": true
+            }
+          },
+          "example": {
+            "root": "/practice",
+            "initial": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/template": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/practice/template/docs": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/practice/template/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/practice/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/template/README.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/practice/template/.index": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "bea",
+                  "group": "team"
+                },
+                "/practice/template/docs/runbook.txt": {
+                  "directory": false,
+                  "mode": 292,
+                  "owner": "bea",
+                  "group": "team"
+                }
+              },
+              "files": {
+                "/practice/keep.txt": "Retain this unrelated private note\n",
+                "/practice/template/README.txt": "Practice: Overview\n",
+                "/practice/template/.index": "Practice: hidden index without LF",
+                "/practice/template/docs/runbook.txt": "Practice: Runbook: café\n\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ],
+                "bea": [
+                  "team",
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/practice",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "task": {
+              "kind": "stage",
+              "source": "/practice/template",
+              "destination": "/practice/working",
+              "private_defaults": true
+            }
+          },
+          "reference": [
+            "umask 077",
+            "cp -R /work/incoming /work/private-copy"
+          ],
+          "example_commands": [
+            "find /practice/template -type f",
+            "umask 077",
+            "cp -R /practice/template /practice/working",
+            "ls -ld /practice/working",
+            "ls -l /practice/working"
+          ]
+        }
+      },
+      "solution": [
+        "umask 077",
+        "cp -R /work/incoming /work/private-copy",
+        "@tree-check"
+      ],
+      "prerequisites": [
+        "lpic1-creation-mask",
+        "lpic1-search-private-handover"
+      ]
+    },
+    {
+      "id": "lpic1-tree-verified-retirement",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-recursive-handovers",
+      "topic": "Recursive directory handovers",
+      "title": "Repair a handover before retiring its source",
+      "summary": "Find missing hidden and nested content, repair the copy, then retire precisely.",
+      "objective": "Complete /work/handover with every supplied entry and exact file content, including nested files, hidden names and empty directories. Retain the source permission bits on the handover; transferred entries belong to alex, primary group staff. Verify the handover before removing /work/old-project completely. Keep /work/old-project-current, /work/keep.txt and every unrelated entry unchanged; leave no scratch copies.",
+      "retry_guidance": "Inspect the failing outcome, repair the working files, then check again. Reset restores only this attempt if you need the supplied source back.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair",
+        "Verify the complete handover"
+      ],
+      "guide": [
+        {
+          "title": "Compare the whole tree",
+          "why": "A handover can look complete at the top level while losing a hidden index or a nested runbook. find visits nested files; ls -la includes names beginning with a dot. Empty directories also belong to the tree.",
+          "action": "Run both find commands. Compare nested and hidden names, not only the directory labels.",
+          "commands": [
+            {
+              "command": "find /practice/ready-notes -type f",
+              "explanation": "Compare the surviving names.",
+              "simulator_only": false
+            },
+            {
+              "command": "find /practice/retired-notes -type f",
+              "explanation": "Compare the surviving names.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Repair before retiring",
+          "why": "Copy the missing files while the original still exists. Ordinary cp preserves file content, filters source permission bits through the creation mask and makes a newly created file yours. Check contents and permissions before deleting the source.",
+          "action": "Copy the two missing entries into the practice handover. Inspect their contents before removing anything.",
+          "commands": [
+            {
+              "command": "cp /practice/retired-notes/.index /practice/ready-notes/.index",
+              "explanation": "Copy the named practice files or complete directory.",
+              "simulator_only": false
+            },
+            {
+              "command": "cp /practice/retired-notes/docs/runbook.txt /practice/ready-notes/docs/runbook.txt",
+              "explanation": "Copy the named practice files or complete directory.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify what remains",
+          "why": "rm -r removes a directory and all names below it, including hidden names. It is not a backup or an undo command. The supplied similarly named current project must remain. Real rm can prompt or leave partial work on failure; this simulated subset is noninteractive and refuses atomically.",
+          "action": "Retire only the old practice directory, then inspect the surviving handover and check the example.",
+          "commands": [
+            {
+              "command": "rm -r /practice/retired-notes",
+              "explanation": "Remove only this old practice tree after verifying its copy.",
+              "simulator_only": false
+            },
+            {
+              "command": "find /practice/ready-notes -type f",
+              "explanation": "Compare the surviving names.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "A handover can look complete at the top level while losing a hidden index or a nested runbook. find visits nested files; ls -la includes names beginning with a dot. Empty directories also belong to the tree. Copy the missing files while the original still exists. Ordinary cp preserves file content, filters source permission bits through the creation mask and makes a newly created file yours. Check contents and permissions before deleting the source. rm -r removes a directory and all names below it, including hidden names. It is not a backup or an undo command. The supplied similarly named current project must remain. Real rm can prompt or leave partial work on failure; this simulated subset is noninteractive and refuses atomically.",
+      "hints": [
+        "Compare the complete source and destination with find and ls -la. Check nested and hidden entries as well as visible files.",
+        "The creation mask affects new entries only. Inspect existing modes with ls -l; do not assume changing umask repairs a permissive copy.",
+        "The worked approach is available on request. Verify exact contents and permissions, and preserve similarly named unrelated paths."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/#rdp-we-103.3_Perform_basic_file_management (LPIC-1 v5.0, objective 103.3; checked 2026-11-06)",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html (installed Coreutils 9.10 Info inspected; fixed same-user comparisons 2026-11-06)",
+        "https://www.gnu.org/software/coreutils/manual/html_node/rm-invocation.html (installed Coreutils 9.10 Info inspected; fixed noninteractive comparisons 2026-11-06)"
+      ],
+      "simplifications": "Bounded ordinary virtual files and directories only. One source and destination; recursive -R, -r and --recursive aliases, with optional --. No merge/overwrite, trailing slash/final-dot operands, links, devices, preservation flags, real timestamps, ACL/SELinux, root overrides or host access. Recursive removal is noninteractive. Refused recursive actions are atomic in this simulation; real commands can leave partial changes. No safety guarantee for using these commands on a real system.",
+      "initial": {
+        "kind": "RecursiveTree",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-tree-verified-retirement",
+          "view": "introduction",
+          "example_command": 0,
+          "assignment": {
+            "role": "assignment",
+            "tree": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project/docs": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project/README.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project/.index": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project/docs/runbook.txt": {
+                  "directory": false,
+                  "mode": 292,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project-current": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project-current/live.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/handover": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/handover/docs": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/handover/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/handover/README.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/work/keep.txt": "Retain this unrelated private note\n",
+                "/work/old-project/README.txt": "Independent: Overview\n",
+                "/work/old-project/.index": "Independent: hidden index without LF",
+                "/work/old-project/docs/runbook.txt": "Independent: Runbook: café\n\n",
+                "/work/old-project-current/live.txt": "Live project: keep this tree\n",
+                "/work/handover/README.txt": "Independent: Overview\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ],
+                "bea": [
+                  "team",
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/work",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "practice": {
+            "role": "practice",
+            "tree": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes/docs": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes/README.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes/.index": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes/docs/runbook.txt": {
+                  "directory": false,
+                  "mode": 292,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes-current": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes-current/live.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/ready-notes": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/ready-notes/docs": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/ready-notes/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/ready-notes/README.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/practice/keep.txt": "Retain this unrelated private note\n",
+                "/practice/retired-notes/README.txt": "Practice: Overview\n",
+                "/practice/retired-notes/.index": "Practice: hidden index without LF",
+                "/practice/retired-notes/docs/runbook.txt": "Practice: Runbook: café\n\n",
+                "/practice/retired-notes-current/live.txt": "Live project: keep this tree\n",
+                "/practice/ready-notes/README.txt": "Practice: Overview\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ],
+                "bea": [
+                  "team",
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/practice",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "command": "",
+            "transcript": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "RecursiveTree",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic1-tree-verified-retirement",
+          "assignment": {
+            "root": "/work",
+            "initial": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project/docs": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project/README.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project/.index": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project/docs/runbook.txt": {
+                  "directory": false,
+                  "mode": 292,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project-current": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/old-project-current/live.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/handover": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/handover/docs": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/handover/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/handover/README.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/work/keep.txt": "Retain this unrelated private note\n",
+                "/work/old-project/README.txt": "Independent: Overview\n",
+                "/work/old-project/.index": "Independent: hidden index without LF",
+                "/work/old-project/docs/runbook.txt": "Independent: Runbook: café\n\n",
+                "/work/old-project-current/live.txt": "Live project: keep this tree\n",
+                "/work/handover/README.txt": "Independent: Overview\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ],
+                "bea": [
+                  "team",
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/work",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "task": {
+              "kind": "retire",
+              "source": "/work/old-project",
+              "destination": "/work/handover"
+            }
+          },
+          "example": {
+            "root": "/practice",
+            "initial": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes/docs": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes/README.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes/.index": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes/docs/runbook.txt": {
+                  "directory": false,
+                  "mode": 292,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes-current": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/retired-notes-current/live.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/ready-notes": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/ready-notes/docs": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/ready-notes/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/ready-notes/README.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/practice/keep.txt": "Retain this unrelated private note\n",
+                "/practice/retired-notes/README.txt": "Practice: Overview\n",
+                "/practice/retired-notes/.index": "Practice: hidden index without LF",
+                "/practice/retired-notes/docs/runbook.txt": "Practice: Runbook: café\n\n",
+                "/practice/retired-notes-current/live.txt": "Live project: keep this tree\n",
+                "/practice/ready-notes/README.txt": "Practice: Overview\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ],
+                "bea": [
+                  "team",
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/practice",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "task": {
+              "kind": "retire",
+              "source": "/practice/retired-notes",
+              "destination": "/practice/ready-notes"
+            }
+          },
+          "reference": [
+            "cp /work/old-project/.index /work/handover/.index",
+            "cp /work/old-project/docs/runbook.txt /work/handover/docs/runbook.txt",
+            "rm -r /work/old-project"
+          ],
+          "example_commands": [
+            "find /practice/ready-notes -type f",
+            "find /practice/retired-notes -type f",
+            "cp /practice/retired-notes/.index /practice/ready-notes/.index",
+            "cp /practice/retired-notes/docs/runbook.txt /practice/ready-notes/docs/runbook.txt",
+            "rm -r /practice/retired-notes",
+            "find /practice/ready-notes -type f"
+          ]
+        }
+      },
+      "solution": [
+        "cp /work/old-project/.index /work/handover/.index",
+        "cp /work/old-project/docs/runbook.txt /work/handover/docs/runbook.txt",
+        "rm -r /work/old-project",
+        "@tree-check"
+      ],
+      "prerequisites": [
+        "lpic1-tree-private-stage"
+      ]
+    }
+  ]
+}

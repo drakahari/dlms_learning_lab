@@ -1,0 +1,785 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-proxy-client-boundary",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Proxy access policy",
+      "unit": "linux-proxy-access-policy",
+      "title": "Close a proxy client-access leak",
+      "summary": "Find why neighbouring clients can use a staff-only proxy and repair the saved and applied policy.",
+      "objective": "Permit GET requests from every staff source address in 10.44.16.0/20 to destination port 80. Refuse every other source address, method or destination port. Named requests are examples, not an exhaustive client list. Save and apply the policy; changing only the editor or only the future saved file is not a completed handover.",
+      "retry_guidance": "Inspect the first failing request and its first matching rule. Recheck the address range, method, destination port and rule order; save, apply and check again.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the supplied clients, requests and full policy requirements.",
+        "Inspect the currently applied decision for a failed request.",
+        "Edit squid.conf, save it, check its syntax and apply the saved policy.",
+        "Check sample requests plus the full supported request space, then repair any remaining leak."
+      ],
+      "guide": [],
+      "explanation": "A src ACL matches a whole address prefix. Values in one ACL are alternatives, while tests in a rule are combined. A narrow staff source, the requested destination port and the requested method must all match before allowing access; an explicit final deny all refuses everything else. Save and apply are different transitions.",
+      "hints": [
+        "Compare the request that should be refused with the first rule it actually reaches.",
+        "Check the third-octet boundaries of 10.44.16.0/20; a broad /16 includes neighbouring networks.",
+        "Combine the staff, destination-port and GET-method tests; allowing only the displayed client examples is too narrow."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.squid-cache.org/Versions/v3/3.5/cfgman/acl.html",
+        "https://www.squid-cache.org/Versions/v3/3.5/cfgman/http_access.html",
+        "https://wiki.squid-cache.org/SquidFaq/SquidAcl"
+      ],
+      "simplifications": "Bounded original Squid 3.5-style ACL parser over supplied IPv4/method/port records. src, port, method and http_access only; no live proxy, packets, DNS/domain ACLs, cache, authentication, resource controls, IPv6, regex, Includes, host files/commands or TLS inspection. Saving/applied-policy transitions are explicit simulator rules, not real Squid service acceptance. Internal @proxy-policy actions are authored-source data helpers, not shell or Squid commands.",
+      "initial": {
+        "kind": "ProxyPolicy",
+        "simulation": {
+          "version": 1,
+          "source": {
+            "initial": {
+              "version": 1,
+              "id": "lpic2-proxy-client-boundary",
+              "initial_config": "acl staff src 10.44.0.0/16\nacl web port 80\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+              "required_policy": "acl staff src 10.44.16.0/20\nacl web port 80\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+              "cases": [
+                {
+                  "id": "first-staff",
+                  "label": "First staff client",
+                  "request": {
+                    "client": "10.44.16.1",
+                    "method": "GET",
+                    "destination_port": 80
+                  },
+                  "expected": "allow"
+                },
+                {
+                  "id": "last-staff",
+                  "label": "Last staff client",
+                  "request": {
+                    "client": "10.44.31.254",
+                    "method": "GET",
+                    "destination_port": 80
+                  },
+                  "expected": "allow"
+                },
+                {
+                  "id": "before-staff",
+                  "label": "Before staff",
+                  "request": {
+                    "client": "10.44.15.254",
+                    "method": "GET",
+                    "destination_port": 80
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "after-staff",
+                  "label": "After staff",
+                  "request": {
+                    "client": "10.44.32.1",
+                    "method": "GET",
+                    "destination_port": 80
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "outside",
+                  "label": "Outside client",
+                  "request": {
+                    "client": "198.51.100.13",
+                    "method": "GET",
+                    "destination_port": 80
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "unsafe-port",
+                  "label": "Staff using a mail port",
+                  "request": {
+                    "client": "10.44.20.7",
+                    "method": "GET",
+                    "destination_port": 25
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "wrong-method",
+                  "label": "Staff using POST",
+                  "request": {
+                    "client": "10.44.20.7",
+                    "method": "POST",
+                    "destination_port": 80
+                  },
+                  "expected": "deny"
+                }
+              ]
+            },
+            "example": {
+              "version": 1,
+              "id": "lpic2-proxy-client-boundary-example",
+              "initial_config": "acl staff src 172.20.0.0/16\nacl web port 8080\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+              "required_policy": "acl staff src 172.20.4.0/24\nacl web port 8080\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+              "cases": [
+                {
+                  "id": "first-staff",
+                  "label": "First staff client",
+                  "request": {
+                    "client": "172.20.4.1",
+                    "method": "GET",
+                    "destination_port": 8080
+                  },
+                  "expected": "allow"
+                },
+                {
+                  "id": "last-staff",
+                  "label": "Last staff client",
+                  "request": {
+                    "client": "172.20.4.254",
+                    "method": "GET",
+                    "destination_port": 8080
+                  },
+                  "expected": "allow"
+                },
+                {
+                  "id": "before-staff",
+                  "label": "Before staff",
+                  "request": {
+                    "client": "172.20.3.254",
+                    "method": "GET",
+                    "destination_port": 8080
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "after-staff",
+                  "label": "After staff",
+                  "request": {
+                    "client": "172.20.5.1",
+                    "method": "GET",
+                    "destination_port": 8080
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "outside",
+                  "label": "Outside client",
+                  "request": {
+                    "client": "198.51.100.11",
+                    "method": "GET",
+                    "destination_port": 8080
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "unsafe-port",
+                  "label": "Staff using a mail port",
+                  "request": {
+                    "client": "172.20.4.8",
+                    "method": "GET",
+                    "destination_port": 25
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "wrong-method",
+                  "label": "Staff using POST",
+                  "request": {
+                    "client": "172.20.4.8",
+                    "method": "POST",
+                    "destination_port": 8080
+                  },
+                  "expected": "deny"
+                }
+              ]
+            }
+          },
+          "view": "introduction",
+          "practice": {
+            "task_id": "lpic2-proxy-client-boundary-example",
+            "editor": "acl staff src 172.20.0.0/16\nacl web port 8080\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+            "world": {
+              "saved": "acl staff src 172.20.0.0/16\nacl web port 8080\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+              "applied": "acl staff src 172.20.0.0/16\nacl web port 8080\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+              "generation": 0
+            },
+            "selected_case": "first-staff",
+            "checked_stamp": null
+          },
+          "assignment": {
+            "task_id": "lpic2-proxy-client-boundary",
+            "editor": "acl staff src 10.44.0.0/16\nacl web port 80\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+            "world": {
+              "saved": "acl staff src 10.44.0.0/16\nacl web port 80\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+              "applied": "acl staff src 10.44.0.0/16\nacl web port 80\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+              "generation": 0
+            },
+            "selected_case": "first-staff",
+            "checked_stamp": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "ProxyPolicy",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "id": "lpic2-proxy-client-boundary",
+            "initial_config": "acl staff src 10.44.0.0/16\nacl web port 80\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+            "required_policy": "acl staff src 10.44.16.0/20\nacl web port 80\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+            "cases": [
+              {
+                "id": "first-staff",
+                "label": "First staff client",
+                "request": {
+                  "client": "10.44.16.1",
+                  "method": "GET",
+                  "destination_port": 80
+                },
+                "expected": "allow"
+              },
+              {
+                "id": "last-staff",
+                "label": "Last staff client",
+                "request": {
+                  "client": "10.44.31.254",
+                  "method": "GET",
+                  "destination_port": 80
+                },
+                "expected": "allow"
+              },
+              {
+                "id": "before-staff",
+                "label": "Before staff",
+                "request": {
+                  "client": "10.44.15.254",
+                  "method": "GET",
+                  "destination_port": 80
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "after-staff",
+                "label": "After staff",
+                "request": {
+                  "client": "10.44.32.1",
+                  "method": "GET",
+                  "destination_port": 80
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "outside",
+                "label": "Outside client",
+                "request": {
+                  "client": "198.51.100.13",
+                  "method": "GET",
+                  "destination_port": 80
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "unsafe-port",
+                "label": "Staff using a mail port",
+                "request": {
+                  "client": "10.44.20.7",
+                  "method": "GET",
+                  "destination_port": 25
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "wrong-method",
+                "label": "Staff using POST",
+                "request": {
+                  "client": "10.44.20.7",
+                  "method": "POST",
+                  "destination_port": 80
+                },
+                "expected": "deny"
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "id": "lpic2-proxy-client-boundary-example",
+            "initial_config": "acl staff src 172.20.0.0/16\nacl web port 8080\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+            "required_policy": "acl staff src 172.20.4.0/24\nacl web port 8080\nacl reads method GET\nhttp_access allow staff web reads\nhttp_access deny all\n",
+            "cases": [
+              {
+                "id": "first-staff",
+                "label": "First staff client",
+                "request": {
+                  "client": "172.20.4.1",
+                  "method": "GET",
+                  "destination_port": 8080
+                },
+                "expected": "allow"
+              },
+              {
+                "id": "last-staff",
+                "label": "Last staff client",
+                "request": {
+                  "client": "172.20.4.254",
+                  "method": "GET",
+                  "destination_port": 8080
+                },
+                "expected": "allow"
+              },
+              {
+                "id": "before-staff",
+                "label": "Before staff",
+                "request": {
+                  "client": "172.20.3.254",
+                  "method": "GET",
+                  "destination_port": 8080
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "after-staff",
+                "label": "After staff",
+                "request": {
+                  "client": "172.20.5.1",
+                  "method": "GET",
+                  "destination_port": 8080
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "outside",
+                "label": "Outside client",
+                "request": {
+                  "client": "198.51.100.11",
+                  "method": "GET",
+                  "destination_port": 8080
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "unsafe-port",
+                "label": "Staff using a mail port",
+                "request": {
+                  "client": "172.20.4.8",
+                  "method": "GET",
+                  "destination_port": 25
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "wrong-method",
+                "label": "Staff using POST",
+                "request": {
+                  "client": "172.20.4.8",
+                  "method": "POST",
+                  "destination_port": 8080
+                },
+                "expected": "deny"
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "@proxy-policy {\"action\":\"edit\",\"config\":\"acl staff src 10.44.16.0/20\\nacl web port 80\\nacl reads method GET\\nhttp_access allow staff web reads\\nhttp_access deny all\\n\"}",
+        "@proxy-policy {\"action\":\"save\"}",
+        "@proxy-policy {\"action\":\"validate\"}",
+        "@proxy-policy {\"action\":\"apply\"}",
+        "@proxy-policy {\"action\":\"check\"}"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "lpic2-proxy-connect-order",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Proxy access policy",
+      "unit": "linux-proxy-access-policy",
+      "title": "Repair a tunnel restriction that runs too late",
+      "summary": "Keep ordinary web access working while preventing CONNECT tunnels to unsafe ports.",
+      "objective": "Permit staff clients in 10.70.8.0/24 to use non-CONNECT methods on destination ports 80 and 443. Permit CONNECT only for staff clients targeting destination port 443; refuse CONNECT to every other port. Refuse all requests from other source addresses and all requests to other destination ports. Apply the policy to the whole stated ranges, not only the named samples. Save and apply a policy that satisfies these requirements; preserve independent practice work.",
+      "retry_guidance": "Inspect the first failing request and its first matching rule. Recheck the address range, method, destination port and rule order; save, apply and check again.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the supplied clients, requests and full policy requirements.",
+        "Inspect the currently applied decision for a failed request.",
+        "Edit squid.conf, save it, check its syntax and apply the saved policy.",
+        "Check sample requests plus the full supported request space, then repair any remaining leak."
+      ],
+      "guide": [],
+      "explanation": "Access tests in one rule must all match, and the first matching rule decides. A later tunnel restriction cannot undo an earlier broad permit. Guard the allowed destination ports and unsafe CONNECT requests before allowing the staff subnet. Port permission does not prove TLS or establish a real connection.",
+      "hints": [
+        "Compare the request that should be refused with the first rule it actually reaches.",
+        "A later deny cannot undo an earlier matching allow.",
+        "Guard both ordinary destination ports and CONNECT before the general staff permit."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.squid-cache.org/Versions/v3/3.5/cfgman/acl.html",
+        "https://www.squid-cache.org/Versions/v3/3.5/cfgman/http_access.html",
+        "https://wiki.squid-cache.org/SquidFaq/SquidAcl"
+      ],
+      "simplifications": "Bounded original Squid 3.5-style ACL parser over supplied IPv4/method/port records. src, port, method and http_access only; no live proxy, packets, DNS/domain ACLs, cache, authentication, resource controls, IPv6, regex, Includes, host files/commands or TLS inspection. Saving/applied-policy transitions are explicit simulator rules, not real Squid service acceptance. Internal @proxy-policy actions are authored-source data helpers, not shell or Squid commands.",
+      "initial": {
+        "kind": "ProxyPolicy",
+        "simulation": {
+          "version": 1,
+          "source": {
+            "initial": {
+              "version": 1,
+              "id": "lpic2-proxy-connect-order",
+              "initial_config": "acl staff src 10.70.8.0/24\nacl web port 80 443\nacl secure port 443\nacl tunnels method CONNECT\nhttp_access allow staff web\nhttp_access deny tunnels !secure\nhttp_access deny all\n",
+              "required_policy": "acl staff src 10.70.8.0/24\nacl web port 80 443\nacl secure port 443\nacl tunnels method CONNECT\nhttp_access deny !web\nhttp_access deny tunnels !secure\nhttp_access allow staff\nhttp_access deny all\n",
+              "cases": [
+                {
+                  "id": "plain-web",
+                  "label": "Staff GET",
+                  "request": {
+                    "client": "10.70.8.12",
+                    "method": "GET",
+                    "destination_port": 80
+                  },
+                  "expected": "allow"
+                },
+                {
+                  "id": "secure-web",
+                  "label": "Staff POST",
+                  "request": {
+                    "client": "10.70.8.12",
+                    "method": "POST",
+                    "destination_port": 443
+                  },
+                  "expected": "allow"
+                },
+                {
+                  "id": "secure-tunnel",
+                  "label": "CONNECT secure",
+                  "request": {
+                    "client": "10.70.8.12",
+                    "method": "CONNECT",
+                    "destination_port": 443
+                  },
+                  "expected": "allow"
+                },
+                {
+                  "id": "unsafe-tunnel",
+                  "label": "CONNECT plain",
+                  "request": {
+                    "client": "10.70.8.12",
+                    "method": "CONNECT",
+                    "destination_port": 80
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "mail-tunnel",
+                  "label": "CONNECT mail",
+                  "request": {
+                    "client": "10.70.8.12",
+                    "method": "CONNECT",
+                    "destination_port": 25
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "visitor",
+                  "label": "Visitor GET",
+                  "request": {
+                    "client": "10.70.9.12",
+                    "method": "GET",
+                    "destination_port": 80
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "other-method",
+                  "label": "Staff OPTIONS",
+                  "request": {
+                    "client": "10.70.8.12",
+                    "method": "OPTIONS",
+                    "destination_port": 443
+                  },
+                  "expected": "allow"
+                }
+              ]
+            },
+            "example": {
+              "version": 1,
+              "id": "lpic2-proxy-connect-order-example",
+              "initial_config": "acl staff src 172.22.4.0/24\nacl web port 8080 8443\nacl secure port 8443\nacl tunnels method CONNECT\nhttp_access allow staff web\nhttp_access deny tunnels !secure\nhttp_access deny all\n",
+              "required_policy": "acl staff src 172.22.4.0/24\nacl web port 8080 8443\nacl secure port 8443\nacl tunnels method CONNECT\nhttp_access deny !web\nhttp_access deny tunnels !secure\nhttp_access allow staff\nhttp_access deny all\n",
+              "cases": [
+                {
+                  "id": "plain-web",
+                  "label": "Staff GET",
+                  "request": {
+                    "client": "172.22.4.8",
+                    "method": "GET",
+                    "destination_port": 8080
+                  },
+                  "expected": "allow"
+                },
+                {
+                  "id": "secure-web",
+                  "label": "Staff POST",
+                  "request": {
+                    "client": "172.22.4.8",
+                    "method": "POST",
+                    "destination_port": 8443
+                  },
+                  "expected": "allow"
+                },
+                {
+                  "id": "secure-tunnel",
+                  "label": "CONNECT secure",
+                  "request": {
+                    "client": "172.22.4.8",
+                    "method": "CONNECT",
+                    "destination_port": 8443
+                  },
+                  "expected": "allow"
+                },
+                {
+                  "id": "unsafe-tunnel",
+                  "label": "CONNECT plain",
+                  "request": {
+                    "client": "172.22.4.8",
+                    "method": "CONNECT",
+                    "destination_port": 8080
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "mail-tunnel",
+                  "label": "CONNECT mail",
+                  "request": {
+                    "client": "172.22.4.8",
+                    "method": "CONNECT",
+                    "destination_port": 25
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "visitor",
+                  "label": "Visitor GET",
+                  "request": {
+                    "client": "172.22.5.8",
+                    "method": "GET",
+                    "destination_port": 8080
+                  },
+                  "expected": "deny"
+                },
+                {
+                  "id": "other-method",
+                  "label": "Staff OPTIONS",
+                  "request": {
+                    "client": "172.22.4.8",
+                    "method": "OPTIONS",
+                    "destination_port": 8443
+                  },
+                  "expected": "allow"
+                }
+              ]
+            }
+          },
+          "view": "introduction",
+          "practice": {
+            "task_id": "lpic2-proxy-connect-order-example",
+            "editor": "acl staff src 172.22.4.0/24\nacl web port 8080 8443\nacl secure port 8443\nacl tunnels method CONNECT\nhttp_access allow staff web\nhttp_access deny tunnels !secure\nhttp_access deny all\n",
+            "world": {
+              "saved": "acl staff src 172.22.4.0/24\nacl web port 8080 8443\nacl secure port 8443\nacl tunnels method CONNECT\nhttp_access allow staff web\nhttp_access deny tunnels !secure\nhttp_access deny all\n",
+              "applied": "acl staff src 172.22.4.0/24\nacl web port 8080 8443\nacl secure port 8443\nacl tunnels method CONNECT\nhttp_access allow staff web\nhttp_access deny tunnels !secure\nhttp_access deny all\n",
+              "generation": 0
+            },
+            "selected_case": "plain-web",
+            "checked_stamp": null
+          },
+          "assignment": {
+            "task_id": "lpic2-proxy-connect-order",
+            "editor": "acl staff src 10.70.8.0/24\nacl web port 80 443\nacl secure port 443\nacl tunnels method CONNECT\nhttp_access allow staff web\nhttp_access deny tunnels !secure\nhttp_access deny all\n",
+            "world": {
+              "saved": "acl staff src 10.70.8.0/24\nacl web port 80 443\nacl secure port 443\nacl tunnels method CONNECT\nhttp_access allow staff web\nhttp_access deny tunnels !secure\nhttp_access deny all\n",
+              "applied": "acl staff src 10.70.8.0/24\nacl web port 80 443\nacl secure port 443\nacl tunnels method CONNECT\nhttp_access allow staff web\nhttp_access deny tunnels !secure\nhttp_access deny all\n",
+              "generation": 0
+            },
+            "selected_case": "plain-web",
+            "checked_stamp": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "ProxyPolicy",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "id": "lpic2-proxy-connect-order",
+            "initial_config": "acl staff src 10.70.8.0/24\nacl web port 80 443\nacl secure port 443\nacl tunnels method CONNECT\nhttp_access allow staff web\nhttp_access deny tunnels !secure\nhttp_access deny all\n",
+            "required_policy": "acl staff src 10.70.8.0/24\nacl web port 80 443\nacl secure port 443\nacl tunnels method CONNECT\nhttp_access deny !web\nhttp_access deny tunnels !secure\nhttp_access allow staff\nhttp_access deny all\n",
+            "cases": [
+              {
+                "id": "plain-web",
+                "label": "Staff GET",
+                "request": {
+                  "client": "10.70.8.12",
+                  "method": "GET",
+                  "destination_port": 80
+                },
+                "expected": "allow"
+              },
+              {
+                "id": "secure-web",
+                "label": "Staff POST",
+                "request": {
+                  "client": "10.70.8.12",
+                  "method": "POST",
+                  "destination_port": 443
+                },
+                "expected": "allow"
+              },
+              {
+                "id": "secure-tunnel",
+                "label": "CONNECT secure",
+                "request": {
+                  "client": "10.70.8.12",
+                  "method": "CONNECT",
+                  "destination_port": 443
+                },
+                "expected": "allow"
+              },
+              {
+                "id": "unsafe-tunnel",
+                "label": "CONNECT plain",
+                "request": {
+                  "client": "10.70.8.12",
+                  "method": "CONNECT",
+                  "destination_port": 80
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "mail-tunnel",
+                "label": "CONNECT mail",
+                "request": {
+                  "client": "10.70.8.12",
+                  "method": "CONNECT",
+                  "destination_port": 25
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "visitor",
+                "label": "Visitor GET",
+                "request": {
+                  "client": "10.70.9.12",
+                  "method": "GET",
+                  "destination_port": 80
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "other-method",
+                "label": "Staff OPTIONS",
+                "request": {
+                  "client": "10.70.8.12",
+                  "method": "OPTIONS",
+                  "destination_port": 443
+                },
+                "expected": "allow"
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "id": "lpic2-proxy-connect-order-example",
+            "initial_config": "acl staff src 172.22.4.0/24\nacl web port 8080 8443\nacl secure port 8443\nacl tunnels method CONNECT\nhttp_access allow staff web\nhttp_access deny tunnels !secure\nhttp_access deny all\n",
+            "required_policy": "acl staff src 172.22.4.0/24\nacl web port 8080 8443\nacl secure port 8443\nacl tunnels method CONNECT\nhttp_access deny !web\nhttp_access deny tunnels !secure\nhttp_access allow staff\nhttp_access deny all\n",
+            "cases": [
+              {
+                "id": "plain-web",
+                "label": "Staff GET",
+                "request": {
+                  "client": "172.22.4.8",
+                  "method": "GET",
+                  "destination_port": 8080
+                },
+                "expected": "allow"
+              },
+              {
+                "id": "secure-web",
+                "label": "Staff POST",
+                "request": {
+                  "client": "172.22.4.8",
+                  "method": "POST",
+                  "destination_port": 8443
+                },
+                "expected": "allow"
+              },
+              {
+                "id": "secure-tunnel",
+                "label": "CONNECT secure",
+                "request": {
+                  "client": "172.22.4.8",
+                  "method": "CONNECT",
+                  "destination_port": 8443
+                },
+                "expected": "allow"
+              },
+              {
+                "id": "unsafe-tunnel",
+                "label": "CONNECT plain",
+                "request": {
+                  "client": "172.22.4.8",
+                  "method": "CONNECT",
+                  "destination_port": 8080
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "mail-tunnel",
+                "label": "CONNECT mail",
+                "request": {
+                  "client": "172.22.4.8",
+                  "method": "CONNECT",
+                  "destination_port": 25
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "visitor",
+                "label": "Visitor GET",
+                "request": {
+                  "client": "172.22.5.8",
+                  "method": "GET",
+                  "destination_port": 8080
+                },
+                "expected": "deny"
+              },
+              {
+                "id": "other-method",
+                "label": "Staff OPTIONS",
+                "request": {
+                  "client": "172.22.4.8",
+                  "method": "OPTIONS",
+                  "destination_port": 8443
+                },
+                "expected": "allow"
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "@proxy-policy {\"action\":\"edit\",\"config\":\"acl staff src 10.70.8.0/24\\nacl web port 80 443\\nacl secure port 443\\nacl tunnels method CONNECT\\nhttp_access deny !web\\nhttp_access deny tunnels !secure\\nhttp_access allow staff\\nhttp_access deny all\\n\"}",
+        "@proxy-policy {\"action\":\"save\"}",
+        "@proxy-policy {\"action\":\"validate\"}",
+        "@proxy-policy {\"action\":\"apply\"}",
+        "@proxy-policy {\"action\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-proxy-client-boundary"
+      ]
+    }
+  ]
+}

@@ -18,7 +18,7 @@ Defined before the introductory unit (checked 2026-10-21). This is an in-process
 
 For bounded `break` and `continue`, see **Evaluator13: bounded loop control** below.
 
-Reject unsupported operators/syntax: backticks, bracket/recursive/directory globbing, tilde/brace expansion, parameter operators beyond the read-only extension below, unsupported array forms, subshells, groups, background jobs, here-documents/strings, `until`, `select`, `export`, other `set` forms, `eval`, `exec`, `source`/`.`. No host commands, filesystem metadata/links/devices, executable files, non-C utility locale behavior or binary/NUL data. Filename matching is limited to the documented * and ? subset; unsupported patterns fail explicitly. `[[ ]]` and Bash-only syntax are not taught in unit 1. Foundation/composition/reusable/text units use portable shell syntax; the scope unit explicitly teaches Bash local. The reference oracle is Bash in its default mode with controlled inputs.
+Reject unsupported operators/syntax: backticks, bracket/recursive/directory globbing, tilde/brace expansion, parameter operators beyond the read-only extension below, unsupported array forms, subshells, groups, background jobs, here-documents/strings, `until`, `select`, unlisted `export` forms, other `set` forms, `eval`, `exec`, `source`/`.`. No host commands, filesystem metadata/links/devices, executable files, non-C utility locale behavior or binary/NUL data. Filename matching is limited to the documented * and ? subset; unsupported patterns fail explicitly. `[[ ]]` and Bash-only syntax are not taught in unit 1. Foundation/composition/reusable/text units use portable shell syntax; the scope unit explicitly teaches Bash local. The reference oracle is Bash in its default mode with controlled inputs.
 
 Diagnostic clarification (2026-10-25): `elif` clauses remain unsupported. Use
 nested `if`/`else` blocks. A bare unquoted `elif` command head, including a pipeline
@@ -392,3 +392,80 @@ have run. Memory/expansion/instruction/ERE counters and Stop bounds do not chang
 This narrow capability passes11core groups plus all prior scripting/history
 regressions and32actual fixed GNU Bash comparisons. It adds no authored scenario
 or full Bash/issuer coverage; see LITERAL_TRIM_REFERENCE.md.
+
+
+## Debugging and checked recovery projects — no language extension
+
+2026-11-02: two new editor repair projects use evaluator15 exactly as disclosed
+above. Manual quiet/trace diagnostics preserve saved status and separate streams;
+recovery reconciles fixed supplied checkpoints/outputs before preview/apply.
+There is no set-x, trap, signals, real crash/restart, locking or atomic rename.
+The unchanged12-case assignment maximum is respected (24 graded input sets and
+16 supplemental boundary fixtures).40 controlled real-Bash comparisons and
+in-process references/alternatives pass; DEBUG_RECOVERY_LESSONS.md records exact
+evidence and still-pending packaged/native acceptance. No historical evaluator
+observations or previous progress are relabeled as new mastery.
+
+
+## Evaluator17: bounded export attributes and child settings
+
+Literal `export NAME` / `export NAME=value` and Bash-specific `export -n NAME`
+now work in the disclosed global scalar subset. Declaration values preserve
+spaces and wildcard text; already inherited ordinary values start exported.
+A bounded observation separates parent values from actual child-visible values.
+Functions, pipelines, loops, case, arrays, substitution scopes and xtrace
+combinations are explicitly refused for these new environment operations;
+ordinary non-environment support remains as documented above. Locale-control
+exports are outside this C/POSIX-fixed activity. See
+[SHELL_ENVIRONMENT_SUBSET.md](SHELL_ENVIRONMENT_SUBSET.md) for precise limits,
+source references and the28controlled Bash comparisons. This does not implement
+startup files, PATH lookup, aliases or a host process launcher.
+
+The new typed environment editor uses two bounded in-process VMs, grades actual
+parent/child outcomes over multiple cases and keeps practice separate. Loaded
+observations are unverified until actual cooperative replay; no saved pass flag
+supplies credit. Original script Outcome/Record wires and historical evidence are
+unchanged. New lesson/native acceptance is recorded separately in
+[ENVIRONMENT_LESSONS.md](ENVIRONMENT_LESSONS.md).
+
+## Evaluator18: bounded flat-file lifecycle
+
+`mktemp [--] TEMPLATE`, `mv [--] SOURCE DEST` and `rm [--] FILE` operate only on
+the existing flat virtual files. Templates explicitly end in six X characters;
+use the returned quoted name, never assume its spelling. No default template,
+directories, recursive/force flags, real security randomness, traps, locks or
+crash/Stop rollback is simulated. Active input/open-output aliases refuse
+honestly; earlier redirection effects are not undone. See
+[SHELL_FILE_LIFECYCLE_SUBSET.md](SHELL_FILE_LIFECYCLE_SUBSET.md) and the three
+[publication/cleanup/recovery projects](SHELL_FILE_LIFECYCLE_LESSONS.md).
+Genuine17 source/results remain separately sealed; existing progress is retained
+with historical credit rather than relabeled18 mastery.
+
+## Evaluator19: bounded named maps
+
+The advanced named-map unit adds fresh `declare -A NAME`, standalone keyed
+assignments, quoted dynamic lookups, entry counts and key0 scalar behavior.
+This is Bash-specific, not portable shell. Keys are literal data, never code.
+Supported grammar, resource bounds and explicit exclusions are in
+[SHELL_ASSOCIATIVE_SUBSET.md](SHELL_ASSOCIATIVE_SUBSET.md). The first scope does
+not provide enumeration, attributes, conversion, complex subscripts, map-local
+shadowing, map exports or map/xtrace combinations. Existing indexed-array and
+utility grammar is preserved; in particular cut uses separate -d and -f values.
+
+Actual19matches16fixed Bash5.3.9builtin recipes;679previous actual18outcomes
+remain exact. See SHELL_ASSOCIATIVE_REFERENCE.md and SHELL_EVALUATOR18_BASELINE.md
+for the independently retained evidence and limits. Historical results/drafts
+remain preserved, while current grading requires actual19execution. These
+capabilities and tests do not imply full Bash, exam or novice acceptance.
+
+
+## Authored indexed content recovery — evaluator19 unchanged
+
+The two `shell-content-backups` projects reuse the existing quoted arguments,
+Bash dense-list reconstruction, conditions/case, literal read/EOF and redirections.
+There is no new syntax, command, interpreter revision or dependency. They create
+and validate a small indexed set of exact text copies, then restore selected files
+without consuming recovery data. See [SHELL_CONTENT_BACKUPS.md](SHELL_CONTENT_BACKUPS.md)
+for input-domain bounds, genuine alternate methods, meaningful negatives and actual
+verification. This is not archive extraction, metadata backup, locking/traps or
+crash-safe recovery. Those wider roadmap gaps remain open.

@@ -68,14 +68,25 @@ impl LabApp {
         match view {
             teaching::View::Introduction => {
                 let l = scenario.mac_teaching.as_ref().expect("validated teaching");
-                ui.label(&l.prerequisite_note);
-                for c in &l.concepts {
-                    ui.label(RichText::new(&c.title).strong());
-                    ui.label(&c.text);
+                if ccna_presentation::enabled(&scenario) {
+                    ccna_presentation::concepts(
+                        ui,
+                        &scenario,
+                        &l.prerequisite_note,
+                        l.concepts.iter().map(|c| (c.title.clone(), c.text.clone())),
+                    );
+                } else {
+                    ui.label(&l.prerequisite_note);
+                    for c in &l.concepts {
+                        ui.label(RichText::new(&c.title).strong());
+                        ui.label(&c.text);
+                    }
                 }
-                ui.label(RichText::new("An Ethernet example to try").strong());
-                ui.label(&l.example_description);
-                ui.label(format!("Try a change: {}", l.try_change));
+                lesson_presentation::worked(ui, &l.example_description);
+                lesson_presentation::worked_rows(ui, &scenario);
+                if !ccna_presentation::enabled(&scenario) {
+                    ui.label(format!("Try a change: {}", l.try_change));
+                }
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -90,9 +101,12 @@ impl LabApp {
                 });
             }
             teaching::View::Example => {
+                ccna_presentation::example(ui, &scenario, true);
                 let l = scenario.mac_teaching.as_ref().unwrap();
                 ui.label("Practice only · Sends and settings never change your assignment or earn completion.");
-                ui.label(&l.example_description);
+                if !ccna_presentation::enabled(&scenario) {
+                    ui.label(&l.example_description);
+                }
                 let mut learning = self.progress.attempts[&scenario.id]
                     .workspace
                     .as_ref()
@@ -164,7 +178,9 @@ impl LabApp {
                     }
                 });
                 ui.label("Insert fills the matching native controls only. Use the labeled action button to perform it.");
-                ui.label(format!("Try a change: {}", l.try_change));
+                if !ccna_presentation::enabled(&scenario) {
+                    ui.label(format!("Try a change: {}", l.try_change));
+                }
                 let config = config_needed(&l.outcomes, &l.fixture);
                 let before = learning.draft.clone();
                 let changed = mac_controls(
@@ -194,12 +210,7 @@ impl LabApp {
                     }
                     let checks = learning.checks(l);
                     if !checks.is_empty() {
-                        mac_feedback(
-                            ui,
-                            &checks,
-                            "Example checks pass · Your assignment is unchanged.",
-                            (i, true),
-                        );
+                        mac_feedback(ui, &checks, "Example checks pass", (i, true));
                     } else if learning.checked {
                         ui.label("Practice draft not applied · Apply settings before checking the current settings.");
                     }
@@ -221,8 +232,7 @@ impl LabApp {
                     .mac_learning = Some(learning);
             }
             teaching::View::Assignment => {
-                ui.label(RichText::new("Understand the task").strong());
-                ui.label(&scenario.objective);
+                ccna_presentation::assignment(ui, &scenario);
                 let State::MacLearning { mut simulation } =
                     self.progress.attempts[&scenario.id].state.clone()
                 else {

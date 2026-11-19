@@ -1,0 +1,519 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-smart-short-diagnosis",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-ata-smart-maintenance",
+      "topic": "ATA storage diagnostics and monitoring",
+      "title": "Run a fresh self-test on the reported ATA disk",
+      "summary": "Find the disk on the maintenance ticket, run a fresh short test and record what happened.",
+      "objective": "Identify the supplied disk by its ticket serial and run its short self-test to completion. Record the latest self-test status and its first-error LBA if it reports a read failure. Keep the other supplied disk's test history untouched.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "retry_guidance": "Use the failed requirement and the latest output or selected preview. Repair the specific mismatch and check again.",
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A Linux device path can change when devices are detected in a different order. Use smartctl -i on a listed path and match Serial Number to the ticket before starting any test.",
+          "action": "Read the worked example.",
+          "commands": []
+        },
+        {
+          "title": "Investigate with separate inputs",
+          "why": "The overall health result from smartctl -H is a current headline. The self-test log tells what individual tests observed, with the newest stored result first. A drive can report PASSED while its log still contains a read failure.",
+          "action": "Compare the guided practice output and supplied device facts.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "The current device identities and outcomes determine credit.",
+          "action": "Check the independent task after making changes.",
+          "commands": []
+        }
+      ],
+      "explanation": "The selected disk completed a fresh short test. The ticket matches that test, and the other disk's history stayed intact. Treat a read failure as evidence to investigate. A SMART test does not repair damage or guarantee future health.",
+      "hints": [
+        "Run smartctl -i on each listed path and compare Serial Number to the ticket.",
+        "The start command does not finish the test. Use the virtual time button until the test has completed.",
+        "Compare the newest self-test line against the ticket status and first-error LBA. Check the line number and lifetime hours as well as the words."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://github.com/smartmontools/smartmontools/blob/main/src/smartctl.8.in",
+        "https://www.smartmontools.org/static/doxygen/smartd_8cpp_source.html",
+        "https://github.com/mirror/smartmontools/blob/master/smartd.conf.5.in"
+      ],
+      "simplifications": "The supplied virtual ATA drives model disk identity, overall health, a bounded short test and its self-test log. The saved smartd.conf subset previews explicit device rules in two supplied layouts. No host device access, kernel or service changes, physical timings, extended tests, arbitrary shell, device scans, SSH, actual SMART commands, alerts or hardware monitoring.",
+      "prerequisites": [
+        "lpic2-mount-identity"
+      ],
+      "initial": {
+        "kind": "AtaSmart",
+        "simulation": {
+          "assignment": {
+            "source": "{\"inventory\":{\"disks\":[{\"model\":\"Workshop ATA 500\",\"serial\":\"WORK-INDEX-86\",\"stable\":\"/dev/disk/by-id/ata-Workshop_WORK-INDEX-86\",\"current_name\":\"/dev/sda\",\"maintenance_name\":\"/dev/sda\",\"health\":\"passed\",\"hours\":1754,\"short_test_minutes\":2,\"new_short_result\":\"completed\",\"log\":[{\"hours\":1740,\"result\":\"completed\"}]},{\"model\":\"Workshop ATA 500\",\"serial\":\"WORK-ARCHIVE-81\",\"stable\":\"/dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81\",\"current_name\":\"/dev/sdb\",\"maintenance_name\":\"/dev/sdb\",\"health\":\"passed\",\"hours\":1754,\"short_test_minutes\":3,\"new_short_result\":{\"read_failure\":{\"first_lba\":497616}},\"log\":[{\"hours\":1661,\"result\":{\"read_failure\":{\"first_lba\":491520}}},{\"hours\":1600,\"result\":\"completed\"}]}]},\"goal\":{\"kind\":\"diagnostic\",\"primary_serial\":\"WORK-ARCHIVE-81\"}}",
+            "work": {
+              "checked": false,
+              "command": "",
+              "monitor_draft": "",
+              "monitor_saved": "",
+              "state": {
+                "disks": [
+                  {
+                    "completed": 0,
+                    "last_current": null,
+                    "log": [
+                      {
+                        "hours": 1740,
+                        "result": "completed"
+                      }
+                    ],
+                    "remaining_minutes": null,
+                    "started": 0
+                  },
+                  {
+                    "completed": 0,
+                    "last_current": null,
+                    "log": [
+                      {
+                        "hours": 1661,
+                        "result": {
+                          "read_failure": {
+                            "first_lba": 491520
+                          }
+                        }
+                      },
+                      {
+                        "hours": 1600,
+                        "result": "completed"
+                      }
+                    ],
+                    "remaining_minutes": null,
+                    "started": 0
+                  }
+                ],
+                "minutes": 0
+              },
+              "ticket": {
+                "disposition": "unset",
+                "first_lba": ""
+              },
+              "transcript": []
+            }
+          },
+          "example": {
+            "source": "{\"inventory\":{\"disks\":[{\"model\":\"Workshop ATA 500\",\"serial\":\"TRAIN-CACHE-19\",\"stable\":\"/dev/disk/by-id/ata-Workshop_TRAIN-CACHE-19\",\"current_name\":\"/dev/sdd\",\"maintenance_name\":\"/dev/sdd\",\"health\":\"passed\",\"hours\":1754,\"short_test_minutes\":3,\"new_short_result\":\"completed\",\"log\":[{\"hours\":1720,\"result\":\"completed\"}]},{\"model\":\"Workshop ATA 500\",\"serial\":\"TRAIN-MEDIA-14\",\"stable\":\"/dev/disk/by-id/ata-Workshop_TRAIN-MEDIA-14\",\"current_name\":\"/dev/sdc\",\"maintenance_name\":\"/dev/sdc\",\"health\":\"passed\",\"hours\":1754,\"short_test_minutes\":2,\"new_short_result\":\"completed\",\"log\":[{\"hours\":1600,\"result\":{\"read_failure\":{\"first_lba\":8192}}}]}]},\"goal\":{\"kind\":\"diagnostic\",\"primary_serial\":\"TRAIN-MEDIA-14\"}}",
+            "work": {
+              "checked": false,
+              "command": "",
+              "monitor_draft": "",
+              "monitor_saved": "",
+              "state": {
+                "disks": [
+                  {
+                    "completed": 0,
+                    "last_current": null,
+                    "log": [
+                      {
+                        "hours": 1720,
+                        "result": "completed"
+                      }
+                    ],
+                    "remaining_minutes": null,
+                    "started": 0
+                  },
+                  {
+                    "completed": 0,
+                    "last_current": null,
+                    "log": [
+                      {
+                        "hours": 1600,
+                        "result": {
+                          "read_failure": {
+                            "first_lba": 8192
+                          }
+                        }
+                      }
+                    ],
+                    "remaining_minutes": null,
+                    "started": 0
+                  }
+                ],
+                "minutes": 0
+              },
+              "ticket": {
+                "disposition": "unset",
+                "first_lba": ""
+              },
+              "transcript": []
+            }
+          },
+          "source_id": "lpic2-smart-short-diagnosis",
+          "version": 1,
+          "view": "introduction"
+        }
+      },
+      "goal": {
+        "kind": "AtaSmart",
+        "definition": {
+          "assignment": {
+            "goal": {
+              "kind": "diagnostic",
+              "primary_serial": "WORK-ARCHIVE-81"
+            },
+            "inventory": {
+              "disks": [
+                {
+                  "current_name": "/dev/sda",
+                  "health": "passed",
+                  "hours": 1754,
+                  "log": [
+                    {
+                      "hours": 1740,
+                      "result": "completed"
+                    }
+                  ],
+                  "maintenance_name": "/dev/sda",
+                  "model": "Workshop ATA 500",
+                  "new_short_result": "completed",
+                  "serial": "WORK-INDEX-86",
+                  "short_test_minutes": 2,
+                  "stable": "/dev/disk/by-id/ata-Workshop_WORK-INDEX-86"
+                },
+                {
+                  "current_name": "/dev/sdb",
+                  "health": "passed",
+                  "hours": 1754,
+                  "log": [
+                    {
+                      "hours": 1661,
+                      "result": {
+                        "read_failure": {
+                          "first_lba": 491520
+                        }
+                      }
+                    },
+                    {
+                      "hours": 1600,
+                      "result": "completed"
+                    }
+                  ],
+                  "maintenance_name": "/dev/sdb",
+                  "model": "Workshop ATA 500",
+                  "new_short_result": {
+                    "read_failure": {
+                      "first_lba": 497616
+                    }
+                  },
+                  "serial": "WORK-ARCHIVE-81",
+                  "short_test_minutes": 3,
+                  "stable": "/dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81"
+                }
+              ]
+            }
+          },
+          "example": {
+            "goal": {
+              "kind": "diagnostic",
+              "primary_serial": "TRAIN-MEDIA-14"
+            },
+            "inventory": {
+              "disks": [
+                {
+                  "current_name": "/dev/sdd",
+                  "health": "passed",
+                  "hours": 1754,
+                  "log": [
+                    {
+                      "hours": 1720,
+                      "result": "completed"
+                    }
+                  ],
+                  "maintenance_name": "/dev/sdd",
+                  "model": "Workshop ATA 500",
+                  "new_short_result": "completed",
+                  "serial": "TRAIN-CACHE-19",
+                  "short_test_minutes": 3,
+                  "stable": "/dev/disk/by-id/ata-Workshop_TRAIN-CACHE-19"
+                },
+                {
+                  "current_name": "/dev/sdc",
+                  "health": "passed",
+                  "hours": 1754,
+                  "log": [
+                    {
+                      "hours": 1600,
+                      "result": {
+                        "read_failure": {
+                          "first_lba": 8192
+                        }
+                      }
+                    }
+                  ],
+                  "maintenance_name": "/dev/sdc",
+                  "model": "Workshop ATA 500",
+                  "new_short_result": "completed",
+                  "serial": "TRAIN-MEDIA-14",
+                  "short_test_minutes": 2,
+                  "stable": "/dev/disk/by-id/ata-Workshop_TRAIN-MEDIA-14"
+                }
+              ]
+            }
+          },
+          "source_id": "lpic2-smart-short-diagnosis",
+          "version": 1
+        }
+      },
+      "solution": [
+        "ata-smart-workspace {\"input\":\"smartctl -i /dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81\",\"op\":\"Run\"}",
+        "ata-smart-workspace {\"input\":\"smartctl -H /dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81\",\"op\":\"Run\"}",
+        "ata-smart-workspace {\"input\":\"smartctl -l selftest /dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81\",\"op\":\"Run\"}",
+        "ata-smart-workspace {\"input\":\"smartctl -t short /dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81\",\"op\":\"Run\"}",
+        "ata-smart-workspace {\"input\":\"smartctl -c /dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81\",\"op\":\"Run\"}",
+        "ata-smart-workspace {\"op\":\"Advance\"}",
+        "ata-smart-workspace {\"op\":\"Advance\"}",
+        "ata-smart-workspace {\"op\":\"Advance\"}",
+        "ata-smart-workspace {\"input\":\"smartctl -l selftest /dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81\",\"op\":\"Run\"}",
+        "ata-smart-workspace {\"op\":\"Record\",\"ticket\":{\"disposition\":\"read_failure\",\"first_lba\":\"497616\"}}",
+        "ata-smart-workspace {\"op\":\"Check\"}"
+      ]
+    },
+    {
+      "id": "lpic2-smart-monitor-identity",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-ata-smart-maintenance",
+      "topic": "ATA storage diagnostics and monitoring",
+      "title": "Keep the right disks under SMART monitoring after a rename",
+      "summary": "Repair saved monitoring rules so they keep watching the intended disks when the Linux path names change.",
+      "objective": "Watch health and the self-test log for the supplied primary disk in both layouts. Keep one health-only rule for the supplied auxiliary disk in both layouts. Save a readable configuration with just those intended devices and verify both previews.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "retry_guidance": "Use the failed requirement and the latest output or selected preview. Repair the specific mismatch and check again.",
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "The first field is a device name or path. In this SMART configuration subset, -H enables overall health monitoring and -l selftest asks to watch the self-test log. A # comment is ignored.",
+          "action": "Read the worked example.",
+          "commands": []
+        },
+        {
+          "title": "Investigate with separate inputs",
+          "why": "The same name, such as /dev/sda, can refer to a different disk after maintenance. The supplied /dev/disk/by-id/ paths follow the serials in both layouts. In the preview, compare which serial each rule would monitor.",
+          "action": "Compare the guided practice output and supplied device facts.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "The current device identities and outcomes determine credit.",
+          "action": "Check the independent task after making changes.",
+          "commands": []
+        }
+      ],
+      "explanation": "The saved rules resolve to the intended primary and auxiliary disk in both represented layouts. The primary keeps health and self-test monitoring, and the auxiliary keeps its original health check.",
+      "hints": [
+        "Expand the supplied paths and compare the same serial across both layouts.",
+        "Save the edited file before comparing previews. The flags follow the device on the same line.",
+        "Check that all expected checks are on their own intended serial. A rule on a reused name can select the other disk even though the file parses."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://github.com/smartmontools/smartmontools/blob/main/src/smartctl.8.in",
+        "https://www.smartmontools.org/static/doxygen/smartd_8cpp_source.html",
+        "https://github.com/mirror/smartmontools/blob/master/smartd.conf.5.in"
+      ],
+      "simplifications": "The supplied virtual ATA drives model disk identity, overall health, a bounded short test and its self-test log. The saved smartd.conf subset previews explicit device rules in two supplied layouts. No host device access, kernel or service changes, physical timings, extended tests, arbitrary shell, device scans, SSH, actual SMART commands, alerts or hardware monitoring.",
+      "prerequisites": [
+        "lpic2-smart-short-diagnosis"
+      ],
+      "initial": {
+        "kind": "AtaSmart",
+        "simulation": {
+          "assignment": {
+            "source": "{\"inventory\":{\"disks\":[{\"model\":\"Workshop ATA 500\",\"serial\":\"WORK-PRIMARY-92\",\"stable\":\"/dev/disk/by-id/ata-Workshop_WORK-PRIMARY-92\",\"current_name\":\"/dev/sda\",\"maintenance_name\":\"/dev/sdb\",\"health\":\"passed\",\"hours\":1754,\"short_test_minutes\":3,\"new_short_result\":{\"read_failure\":{\"first_lba\":871614}},\"log\":[]},{\"model\":\"Workshop ATA 500\",\"serial\":\"WORK-HISTORY-99\",\"stable\":\"/dev/disk/by-id/ata-Workshop_WORK-HISTORY-99\",\"current_name\":\"/dev/sdb\",\"maintenance_name\":\"/dev/sda\",\"health\":\"passed\",\"hours\":1754,\"short_test_minutes\":2,\"new_short_result\":\"completed\",\"log\":[{\"hours\":1710,\"result\":\"completed\"}]}]},\"goal\":{\"kind\":\"monitoring\",\"primary_serial\":\"WORK-PRIMARY-92\",\"auxiliary_serial\":\"WORK-HISTORY-99\",\"initial_config\":\"# Local disk monitoring\\n/dev/sda -H -l selftest\\n/dev/sdb -H\\n\"}}",
+            "work": {
+              "checked": false,
+              "command": "",
+              "monitor_draft": "# Local disk monitoring\n/dev/sda -H -l selftest\n/dev/sdb -H\n",
+              "monitor_saved": "# Local disk monitoring\n/dev/sda -H -l selftest\n/dev/sdb -H\n",
+              "state": {
+                "disks": [
+                  {
+                    "completed": 0,
+                    "last_current": null,
+                    "log": [],
+                    "remaining_minutes": null,
+                    "started": 0
+                  },
+                  {
+                    "completed": 0,
+                    "last_current": null,
+                    "log": [
+                      {
+                        "hours": 1710,
+                        "result": "completed"
+                      }
+                    ],
+                    "remaining_minutes": null,
+                    "started": 0
+                  }
+                ],
+                "minutes": 0
+              },
+              "ticket": {
+                "disposition": "unset",
+                "first_lba": ""
+              },
+              "transcript": []
+            }
+          },
+          "example": {
+            "source": "{\"inventory\":{\"disks\":[{\"model\":\"Workshop ATA 500\",\"serial\":\"TRAIN-PRIMARY-25\",\"stable\":\"/dev/disk/by-id/ata-Workshop_TRAIN-PRIMARY-25\",\"current_name\":\"/dev/sdc\",\"maintenance_name\":\"/dev/sdf\",\"health\":\"passed\",\"hours\":1754,\"short_test_minutes\":2,\"new_short_result\":{\"read_failure\":{\"first_lba\":15462}},\"log\":[]},{\"model\":\"Workshop ATA 500\",\"serial\":\"TRAIN-AUX-26\",\"stable\":\"/dev/disk/by-id/ata-Workshop_TRAIN-AUX-26\",\"current_name\":\"/dev/sde\",\"maintenance_name\":\"/dev/sde\",\"health\":\"passed\",\"hours\":1754,\"short_test_minutes\":2,\"new_short_result\":\"completed\",\"log\":[]}]},\"goal\":{\"kind\":\"monitoring\",\"primary_serial\":\"TRAIN-PRIMARY-25\",\"auxiliary_serial\":\"TRAIN-AUX-26\",\"initial_config\":\"# Local disk monitoring\\n/dev/sdc -H -l selftest\\n/dev/disk/by-id/ata-Workshop_TRAIN-AUX-26 -H\\n\"}}",
+            "work": {
+              "checked": false,
+              "command": "",
+              "monitor_draft": "# Local disk monitoring\n/dev/sdc -H -l selftest\n/dev/disk/by-id/ata-Workshop_TRAIN-AUX-26 -H\n",
+              "monitor_saved": "# Local disk monitoring\n/dev/sdc -H -l selftest\n/dev/disk/by-id/ata-Workshop_TRAIN-AUX-26 -H\n",
+              "state": {
+                "disks": [
+                  {
+                    "completed": 0,
+                    "last_current": null,
+                    "log": [],
+                    "remaining_minutes": null,
+                    "started": 0
+                  },
+                  {
+                    "completed": 0,
+                    "last_current": null,
+                    "log": [],
+                    "remaining_minutes": null,
+                    "started": 0
+                  }
+                ],
+                "minutes": 0
+              },
+              "ticket": {
+                "disposition": "unset",
+                "first_lba": ""
+              },
+              "transcript": []
+            }
+          },
+          "source_id": "lpic2-smart-monitor-identity",
+          "version": 1,
+          "view": "introduction"
+        }
+      },
+      "goal": {
+        "kind": "AtaSmart",
+        "definition": {
+          "assignment": {
+            "goal": {
+              "auxiliary_serial": "WORK-HISTORY-99",
+              "initial_config": "# Local disk monitoring\n/dev/sda -H -l selftest\n/dev/sdb -H\n",
+              "kind": "monitoring",
+              "primary_serial": "WORK-PRIMARY-92"
+            },
+            "inventory": {
+              "disks": [
+                {
+                  "current_name": "/dev/sda",
+                  "health": "passed",
+                  "hours": 1754,
+                  "log": [],
+                  "maintenance_name": "/dev/sdb",
+                  "model": "Workshop ATA 500",
+                  "new_short_result": {
+                    "read_failure": {
+                      "first_lba": 871614
+                    }
+                  },
+                  "serial": "WORK-PRIMARY-92",
+                  "short_test_minutes": 3,
+                  "stable": "/dev/disk/by-id/ata-Workshop_WORK-PRIMARY-92"
+                },
+                {
+                  "current_name": "/dev/sdb",
+                  "health": "passed",
+                  "hours": 1754,
+                  "log": [
+                    {
+                      "hours": 1710,
+                      "result": "completed"
+                    }
+                  ],
+                  "maintenance_name": "/dev/sda",
+                  "model": "Workshop ATA 500",
+                  "new_short_result": "completed",
+                  "serial": "WORK-HISTORY-99",
+                  "short_test_minutes": 2,
+                  "stable": "/dev/disk/by-id/ata-Workshop_WORK-HISTORY-99"
+                }
+              ]
+            }
+          },
+          "example": {
+            "goal": {
+              "auxiliary_serial": "TRAIN-AUX-26",
+              "initial_config": "# Local disk monitoring\n/dev/sdc -H -l selftest\n/dev/disk/by-id/ata-Workshop_TRAIN-AUX-26 -H\n",
+              "kind": "monitoring",
+              "primary_serial": "TRAIN-PRIMARY-25"
+            },
+            "inventory": {
+              "disks": [
+                {
+                  "current_name": "/dev/sdc",
+                  "health": "passed",
+                  "hours": 1754,
+                  "log": [],
+                  "maintenance_name": "/dev/sdf",
+                  "model": "Workshop ATA 500",
+                  "new_short_result": {
+                    "read_failure": {
+                      "first_lba": 15462
+                    }
+                  },
+                  "serial": "TRAIN-PRIMARY-25",
+                  "short_test_minutes": 2,
+                  "stable": "/dev/disk/by-id/ata-Workshop_TRAIN-PRIMARY-25"
+                },
+                {
+                  "current_name": "/dev/sde",
+                  "health": "passed",
+                  "hours": 1754,
+                  "log": [],
+                  "maintenance_name": "/dev/sde",
+                  "model": "Workshop ATA 500",
+                  "new_short_result": "completed",
+                  "serial": "TRAIN-AUX-26",
+                  "short_test_minutes": 2,
+                  "stable": "/dev/disk/by-id/ata-Workshop_TRAIN-AUX-26"
+                }
+              ]
+            }
+          },
+          "source_id": "lpic2-smart-monitor-identity",
+          "version": 1
+        }
+      },
+      "solution": [
+        "ata-smart-workspace {\"contents\":\"/dev/disk/by-id/ata-Workshop_WORK-PRIMARY-92 -H -l selftest\\n/dev/disk/by-id/ata-Workshop_WORK-HISTORY-99 -H\\n\",\"op\":\"Draft\"}",
+        "ata-smart-workspace {\"op\":\"Save\"}",
+        "ata-smart-workspace {\"op\":\"Check\"}"
+      ]
+    }
+  ]
+}

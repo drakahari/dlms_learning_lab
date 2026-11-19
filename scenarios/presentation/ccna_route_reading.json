@@ -1,0 +1,68 @@
+[
+  {
+    "id": "ccna-route-reading-backup",
+    "context": "Builds on static next hops, longest prefix matching and the point-to-point OSPF cost lab.",
+    "goal": "Use the installed IPv4 table to restore the intended OSPF exit and keep a static fallback.",
+    "concepts": [
+      {
+        "title": "Read the source and network size",
+        "text": "A routing table lists installed routes. C marks a directly connected network, L a local interface address, S a static route and O an intra-area OSPF route. S* marks the supplied static default. The /length and dotted-decimal mask describe the same size. For example, /26 leaves six zero bits in the mask, so the final mask octet is 192."
+      },
+      {
+        "title": "Read distance and metric separately",
+        "text": "For the same exact network and mask, the router prefers the eligible source with the lower administrative distance. The first number in [110/23] is distance. The second is metric. OSPF adds outgoing costs along each path and the destination LAN cost, then offers its best path. Do not compare an OSPF cost directly with a static route's distance."
+      },
+      {
+        "title": "Look up a destination in the installed table",
+        "text": "From the installed rows that contain an address, the longest prefix wins. A /26 can win inside its range while a /24 serves nearby addresses. A higher-distance static route for the same /26 can replace an OSPF row when the announcement is no longer available."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Read the OSPF offer",
+        "value": "O 198.51.100.64/26 [110/21]",
+        "explanation": "The shown path uses 5 + 9 + 7 = 21. The dotted mask is 255.255.255.192. The distance is 110."
+      },
+      {
+        "label": "Keep a floating backup",
+        "value": "S 198.51.100.64/26 [145/0]",
+        "explanation": "The static route has the same prefix and a higher distance. It becomes the installed /26 only after the OSPF announcement is withdrawn."
+      },
+      {
+        "label": "Compare inside and outside",
+        "value": "198.51.100.100 → /26\n198.51.100.130 → /24",
+        "explanation": "A wider static /24 at distance 1 remains installed. Its smaller distance does not beat the longer prefix for .100."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Stop the static route overriding the OSPF offer",
+        "action": "Look at Current installed decision. Enter 145 in Static backup distance.",
+        "observe": "The same-prefix OSPF offer replaces the static entry. The static backup stays ready."
+      },
+      {
+        "title": "Change the preferred OSPF path",
+        "action": "Open Compare OSPF branch costs. The Maple path adds 7 and 5 after its outgoing cost. Enter 3 in Outgoing OSPF cost, then enter the /26 dotted mask in Inspect with network mask.",
+        "observe": "Maple now has the lower cost. The exact query displays the O row with metric 15."
+      },
+      {
+        "title": "Compare the current and withdrawal tables",
+        "action": "Under Destination lookup, compare the first two addresses with the address ending in .128. Open Trial: withdraw the service announcement and try the inside addresses again. Select Check workspace.",
+        "observe": "Inside the service range, the current row uses OSPF and the trial uses the static backup. Outside it, the /24 stays in place."
+      }
+    ],
+    "requirements": [
+      "Use the OSPF exit toward Harbor for both addresses inside the Records service network.",
+      "Keep the wider site route for the outside address. Keep the local, connected and default entries working.",
+      "Keep the supplied static backup usable when the service announcement is withdrawn.",
+      "Use the dotted-decimal mask to inspect the exact service entry."
+    ],
+    "source": "scenarios/ccna-route-reading-lessons-v1.json",
+    "status": "updated",
+    "review": {
+      "introduction": "Explains how to read route codes, mask, cost and distance using three worked observations.",
+      "example": "Uses two actual OSPF paths, a static backup, destination lookups and a separate announcement-withdrawal trial.",
+      "assignment": "Independent branch route control and exact mask query with inside, outside, local, connected and fallback checks."
+    }
+  }
+]

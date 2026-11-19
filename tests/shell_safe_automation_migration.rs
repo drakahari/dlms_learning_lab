@@ -53,7 +53,7 @@ fn history(profile: &Progress, include_main: bool) -> BTreeMap<String, Vec<shell
         .collect()
 }
 fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
-    assert_eq!(shell::EVALUATOR_REVISION, 15);
+    assert_eq!(shell::EVALUATOR_REVISION, 19);
     let raw = evidence::original9();
     let original: Progress = serde_json::from_slice(&raw).unwrap();
     let labs = pack::bundled().unwrap();
@@ -362,7 +362,7 @@ fn unchanged_except_execution_and_history(now: &Progress, old: &Progress) {
 }
 #[test]
 fn empty_legacy9_record_shape_is_explicitly_ungraded_not_a_fabricated_execution() {
-    assert_eq!(shell::EVALUATOR_REVISION, 15);
+    assert_eq!(shell::EVALUATOR_REVISION, 19);
     let labs = pack::bundled().unwrap();
     let lab = labs.iter().find(|s| s.id == "shell-arguments").unwrap();
     let mut attempt = Attempt::new(lab, 1);

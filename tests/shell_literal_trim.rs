@@ -44,7 +44,7 @@ fn expect(source: &str, c: &Case, stdout: &str, files: BTreeMap<String, String>)
 
 #[test]
 fn scalar_truth_table_removes_only_one_literal_edge_without_mutating_values() {
-    assert_eq!(shell::EVALUATOR_REVISION, 15);
+    assert_eq!(shell::EVALUATOR_REVISION, 19);
     let source = r#"printf '<%s>|<%s>|<%s>\n' "${value#pre}" "${value%post}" "$value""#;
     for (value, text) in [
         (None, "<>|<>|<>\n"),

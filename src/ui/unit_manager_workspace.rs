@@ -79,35 +79,56 @@ impl LabApp {
             .as_ref()
             .expect("validated unit-manager teaching");
         ui.heading(&s.title);
+        let recovery_lesson = lesson.definition.fresh.recovery_target.is_some();
         let blocked = self.reset_pending
             || self.settings_open
             || self.theme_preview
             || self.data_tools.modal_open();
         match view {
             teaching::View::Introduction => {
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for c in &lesson.concepts {
-                    ui.label(RichText::new(&c.title).strong());
-                    ui.label(&c.text);
+                lesson_presentation::concepts(
+                    ui,
+                    s,
+                    &lesson.prerequisite_note,
+                    lesson
+                        .concepts
+                        .iter()
+                        .filter(|_| !recovery_lesson)
+                        .map(|c| (c.title.clone(), c.text.clone())),
+                );
+                lesson_presentation::worked(ui, &lesson.example_description);
+                lesson_presentation::worked_rows(ui, s);
+                controls::collapsing_header(ui, "Full worked sequence").show(ui, |ui| {
+                    for (n, action) in lesson.example_actions.iter().enumerate() {
+                        lesson_presentation::section(ui, n + 1, &action.title, &action.explanation);
+                    }
+                });
+                let technical_help = |ui: &mut egui::Ui| {
+                    ui.label("Edit only the supplied virtual files. Save updates the text; type commands in the virtual terminal and press Enter or Run command to investigate and apply changes.");
+                    ui.label("Open Loaded definition and current inputs below the editor to inspect the loaded virtual program and the data actually consumed by its current run. This read-only view does not apply your edits.");
+                    if let Some(unit) = lesson
+                        .definition
+                        .initial
+                        .inventory()
+                        .units
+                        .iter()
+                        .find(|u| u.ends_with(".service"))
+                    {
+                        ui.label(RichText::new(format!("systemctl status {unit}")).monospace());
+                        ui.label("Read its loaded definition and current runtime state without changing either.");
+                        ui.label(RichText::new(format!("journalctl -u {unit} -o cat")).monospace());
+                        ui.label("Read retained simulated job messages. No timestamps or process IDs are invented.");
+                    }
+                    controls::collapsing_header(ui, "Explore after practice").show(ui, |ui| {
+                        lesson_presentation::practice_step(ui, s, 2);
+                    });
+                };
+                if recovery_lesson {
+                    controls::collapsing_header(ui, "Editor and terminal help · optional")
+                        .show(ui, technical_help);
+                } else {
+                    technical_help(ui);
                 }
-                ui.label(RichText::new("A separate example to investigate").strong());
-                ui.label(&lesson.example_description);
-                ui.label("Edit only the supplied virtual files. Save updates the text; type commands in the virtual terminal and press Enter or Run command to investigate and apply changes.");
-                ui.label("Open Loaded definition and current inputs below the editor to inspect the loaded virtual program and the data actually consumed by its current run. This read-only view does not apply your edits.");
-                if let Some(unit) = lesson
-                    .definition
-                    .initial
-                    .inventory()
-                    .units
-                    .iter()
-                    .find(|u| u.ends_with(".service"))
-                {
-                    ui.label(RichText::new(format!("systemctl status {unit}")).monospace());
-                    ui.label("Read its loaded definition and current runtime state without changing either.");
-                    ui.label(RichText::new(format!("journalctl -u {unit} -o cat")).monospace());
-                    ui.label("Read retained simulated job messages. No timestamps or process IDs are invented.");
-                }
-                ui.label(format!("Try a change: {}", lesson.try_change));
                 let mut next = None;
                 ui.add_enabled_ui(!blocked, |ui| {
                     ui.horizontal_wrapped(|ui| {
@@ -128,10 +149,6 @@ impl LabApp {
                 }
             }
             teaching::View::Example => {
-                ui.label(
-                    "Practice example · Ungraded; your assignment and its drafts stay separate.",
-                );
-                ui.label(&lesson.example_description);
                 let l = self
                     .progress
                     .attempts
@@ -143,16 +160,37 @@ impl LabApp {
                     .unit_manager_learning
                     .as_mut()
                     .unwrap();
+                let step = if !recovery_lesson || l.state.runtime().is_empty() {
+                    0
+                } else if l.checked && l.checks(lesson).iter().all(|check| check.0) {
+                    2
+                } else {
+                    1
+                };
+                lesson_presentation::practice_step(ui, s, step);
                 let mut changed = false;
                 ui.add_enabled_ui(!blocked,|ui|{
-                    ui.horizontal_wrapped(|ui|{
+                    let mut example_tools = |ui: &mut egui::Ui| {
+                        ui.horizontal_wrapped(|ui|{
                         let r=ui.add(button("Fill worked editor drafts"));self.metrics.insert=Some(r.rect);
                         if r.clicked(){self.notice=l.fill_worked(lesson).err();changed=true;}
                         let r=ui.add(button("Reset example only"));self.metrics.example_reset=Some(r.rect);
                         if r.clicked(){*l=Learning::new(lesson).expect("validated lesson");l.view=teaching::View::Example;self.notice=None;changed=true;self.focus_input=false;}
                     });
-                    ui.label(RichText::new("Fill changes example text only. Save it and use the virtual terminal to investigate and apply it.").small().color(palette(ui).muted));
-                    let (guide_changed, inserted) = example_guidance(ui, lesson, l, &mut self.metrics);
+                        ui.label(RichText::new("Fill changes example text only. Save it and use the virtual terminal to investigate and apply it.").small().color(palette(ui).muted));
+                        if !recovery_lesson {
+                            lesson_presentation::practice_step(ui, s, 1);
+                        }
+                        example_guidance(ui, lesson, l, &mut self.metrics)
+                    };
+                    let (guide_changed, inserted) = if recovery_lesson {
+                        controls::collapsing_header(ui, "Worked practice and reset · optional")
+                            .show(ui, example_tools)
+                            .body_returned
+                            .unwrap_or_default()
+                    } else {
+                        example_tools(ui)
+                    };
                     changed |= guide_changed;
                     if inserted { self.focus_input = true; }
                     // An Insert click requests the terminal on the NEXT frame,
@@ -163,9 +201,11 @@ impl LabApp {
                     changed|=effects.dirty;if effects.invalidate{l.checked=false;}
                     let r=ui.add(primary(ui,"Check example · ungraded"));self.metrics.check=Some(r.rect);
                     if r.clicked(){l.checked=true;changed=true;}
-                    let result=controls::feedback(ui,r.clicked(),|ui|{if l.checked{let checks=l.checks(lesson);if checks.iter().all(|c|c.0){ui.colored_label(palette(ui).success,"Example checks pass · No assignment credit");}else{for(_,message)in checks.iter().filter(|c|!c.0).take(2){ui.colored_label(palette(ui).error,message);}}}});self.metrics.feedback=Some(result.response.rect);
+                    let result=controls::feedback(ui,r.clicked(),|ui|{if l.checked{let checks=l.checks(lesson);if checks.iter().all(|c|c.0){ui.colored_label(palette(ui).success,"Example checks pass");}else{for(_,message)in checks.iter().filter(|c|!c.0).take(2){ui.colored_label(palette(ui).error,format!("Needs work · {message}"));}}}});self.metrics.feedback=Some(result.response.rect);
                 });
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                if !recovery_lesson {
+                    lesson_presentation::practice_step(ui, s, 2);
+                }
                 let r = ui.add_enabled(!blocked, button("Open full assignment"));
                 self.metrics.assignment_action = Some(r.rect);
                 let assignment = r.clicked();
@@ -175,7 +215,7 @@ impl LabApp {
                 }
             }
             teaching::View::Assignment => {
-                ui.label(&s.objective);
+                lesson_presentation::assignment(ui, s);
                 let a = self.progress.attempts.get_mut(&s.id).unwrap();
                 let engine::State::UnitManager { simulation } = &mut a.state else {
                     unreachable!()
@@ -233,11 +273,18 @@ impl LabApp {
                         if completed {
                             ui.colored_label(
                                 palette(ui).success,
-                                "Objective complete · Current and fresh-session checks pass.",
+                                if definition.fresh.recovery_target.is_some() {
+                                    "Assignment complete · Recovery available and ordinary startup verified."
+                                } else {
+                                    "Objective complete · Current and fresh-session checks pass."
+                                },
                             );
                         } else {
                             for (_, message) in checks.iter().filter(|c| !c.0).take(2) {
-                                ui.colored_label(palette(ui).error, message);
+                                ui.colored_label(
+                                    palette(ui).error,
+                                    format!("Needs work · {message}"),
+                                );
                             }
                         }
                         egui::CollapsingHeader::new("Objective results")
@@ -311,6 +358,58 @@ fn real_command(action: &model::EditAction) -> Option<String> {
         _ => return None,
     })
 }
+fn startup_controls(
+    ui: &mut egui::Ui,
+    state: &mut core::State,
+    definition: &Definition,
+    controls: &mut PanelControls<'_>,
+) -> Effects {
+    let Some(recovery) = &definition.fresh.recovery_target else {
+        return Effects::default();
+    };
+    ui.strong("Simulated startup");
+    lesson_presentation::prose(
+        ui,
+        "Each startup uses the saved files. Choosing recovery for one session keeps the ordinary default.",
+    );
+    let mut effects = Effects::default();
+    ui.horizontal_wrapped(|ui| {
+        for (target, label) in [(None, "Start ordinary session"), (Some(recovery.as_str()), "Start recovery session")] {
+            let button = ui.add(button(label));
+            if target.is_some() {
+                controls.metrics.manager_start_recovery = Some(button.rect);
+            } else {
+                controls.metrics.manager_start_default = Some(button.rect);
+            }
+            if !button.clicked() {
+                continue;
+            }
+            let action = model::EditAction::Startup { target: target.map(str::to_owned) };
+            match model::apply(state, &definition.initial, &action) {
+                Ok(Some(report)) => {
+                    effects.dirty = true;
+                    effects.invalidate = true;
+                    let name = report.requested.as_deref().unwrap_or("Selected target");
+                    let failure = report.jobs.iter().find_map(|job| match &job.result {
+                        core::JobResult::Failed { message, .. } => Some(format!("{}: {message}", job.unit)),
+                        _ => None,
+                    });
+                    *controls.notice = Some(if report.requested_succeeded() == Some(true) {
+                        format!("Last startup reached {name}. Saved default: {}.", state.default_target())
+                    } else if let Some(failure) = failure {
+                        format!("Last startup did not reach {name}. {failure}")
+                    } else {
+                        format!("{name} did not start. Inspect the simulated jobs and journal.")
+                    });
+                }
+                Ok(None) => unreachable!("Startup always supplies a report"),
+                Err(error) => *controls.notice = Some(error),
+            }
+        }
+    });
+    effects
+}
+
 fn panel(
     ui: &mut egui::Ui,
     scope: (&str, bool),
@@ -320,8 +419,12 @@ fn panel(
     definition: &Definition,
     controls: &mut PanelControls<'_>,
 ) -> Effects {
+    let recovery_lesson = definition.fresh.recovery_target.is_some();
+    let mut effects = startup_controls(ui, state, definition, controls);
+    if recovery_lesson && let Some(message) = controls.notice.as_ref() {
+        lesson_presentation::prose(ui, message);
+    }
     summary(ui, state, draft);
-    let mut effects = Effects::default();
     if ui.available_width() >= ui.text_style_height(&egui::TextStyle::Body) * 52. {
         ui.columns(2, |columns| {
             effects.merge(editor(
@@ -329,6 +432,7 @@ fn panel(
                 scope,
                 state,
                 draft,
+                recovery_lesson,
                 controls.metrics,
                 controls.notice,
             ));
@@ -347,6 +451,7 @@ fn panel(
             scope,
             state,
             draft,
+            recovery_lesson,
             controls.metrics,
             controls.notice,
         ));
@@ -354,7 +459,7 @@ fn panel(
             ui, scope, state, session, definition, controls,
         ));
     }
-    if let Some(message) = controls.notice.as_ref() {
+    if !recovery_lesson && let Some(message) = controls.notice.as_ref() {
         ui.label(message);
     }
     let inspector = egui::CollapsingHeader::new("Loaded definition and current inputs")
@@ -444,6 +549,7 @@ fn editor(
     scope: (&str, bool),
     state: &mut core::State,
     draft: &mut Draft,
+    recovery_lesson: bool,
     metrics: &mut Metrics,
     notice: &mut Option<String>,
 ) -> Effects {
@@ -584,7 +690,13 @@ fn editor(
     metrics.editor_save = Some(save.rect);
     if save.clicked() {
         let differs = !draft.matches(state);
-        *notice=Some(match draft.apply(state){Ok(())=>"Saved editor drafts. Unit-file edits need manager reload; changed application inputs need stop, then start. Saving does not run or enable anything.".into(),Err(e)=>e});
+        *notice = Some(match draft.apply(state) {
+            Ok(()) if recovery_lesson => {
+                "Saved editor drafts. Check work tests ordinary startup with the saved files.".into()
+            }
+            Ok(()) => "Saved editor drafts. Unit-file edits need manager reload; changed application inputs need stop, then start. Saving does not run or enable anything.".into(),
+            Err(error) => error,
+        });
         effects.dirty = true;
         effects.invalidate |= differs;
     }
@@ -821,6 +933,8 @@ pub(super) fn inspection_rows(state: &core::State, unit: &str) -> Vec<(String, S
 fn example_action_title(action: &model::EditAction) -> String {
     match action {
         model::EditAction::Save { .. } => "Edit and save the example files".into(),
+        model::EditAction::Startup { target: None } => "Start the saved ordinary target".into(),
+        model::EditAction::Startup { target: Some(target) } => format!("Start one session with {target}"),
         model::EditAction::Manager { action } => match action {
             Action::DaemonReload {} => "Load the saved unit definitions".into(),
             Action::Start { unit } => format!("Start {unit}"),
@@ -912,7 +1026,7 @@ fn example_guidance(
             .small()
             .color(palette(ui).muted),
         );
-    } else {
+    } else if matches!(annotation.action, model::EditAction::Save { .. }) {
         ui.label(RichText::new("Make the described edit, then use Save editor drafts below. Nothing runs automatically.").small().color(palette(ui).muted));
     }
     (changed, inserted)

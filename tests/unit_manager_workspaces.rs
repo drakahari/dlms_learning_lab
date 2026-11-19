@@ -621,6 +621,7 @@ fn maximum_bounded_lesson() -> Lesson {
             execution.clone(),
         ],
         fresh: workspace::Fresh {
+            recovery_target: None,
             requirements: vec![runtime, execution],
             started: tasks.iter().chain(&targets).cloned().collect(),
             ordering: vec![workspace::Ordering {

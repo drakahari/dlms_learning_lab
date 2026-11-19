@@ -1,0 +1,742 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-ids-header-direction",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-ids-rule-evidence",
+      "topic": "Intrusion-detection rule evidence",
+      "title": "Aim an alert at the protected upload service",
+      "summary": "Repair a reversed rule header and verify its protocol, address, port and direction scope.",
+      "objective": "Alert only on supplied TCP records from 203.0.113.0/24 to 192.0.2.40 port 8088 in that direction. Require the case-sensitive literal UPLOAD anywhere in the supplied payload; different client addresses and source ports must still work. Leave reverse traffic, out-of-subnet clients, other destination addresses or ports, UDP and lower-case or absent markers without an alert. Save the repaired virtual rule with a positive sid for this activity, and preserve all supplied records.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Read the supplied pairs",
+        "Repair and replay the example",
+        "Investigate an overbroad repair"
+      ],
+      "guide": [
+        {
+          "title": "Read the supplied pairs",
+          "why": "The starter has the endpoint pairs reversed; its arrow selects the response instead of the request.",
+          "action": "Compare the example rule with the supplied request and reverse records. Identify which endpoint sends the SYNC request and which receives it.",
+          "commands": []
+        },
+        {
+          "title": "Repair and replay the example",
+          "why": "Expected: only scoped TCP requests with the uppercase SYNC literal alert. Actual decisions appear beside records after replay.",
+          "action": "Put the example client network on the left and the receiving host and port on the right. Save virtual rule, then Replay record set. Use Record set to inspect endpoint and protocol contrasts.",
+          "commands": []
+        },
+        {
+          "title": "Investigate an overbroad repair",
+          "why": "Expected: the reverse response also alerts. Its failed case identifies the unwanted detection; restoring -> excludes it.",
+          "action": "Choose Check example. Then change -> to <>, save and replay Request and reverse direction. Read the false-positive feedback, restore ->, save and check again.",
+          "commands": []
+        }
+      ],
+      "explanation": "The endpoint pairs select only the stated client network, receiving host and service port in the request direction. The literal content check then selects the marker. any in the source-port position permits changing client ports; <> would also admit the explicitly excluded response. Fresh contrasting records test those decisions rather than one command or rule string.",
+      "hints": [
+        "Read source address and source port together, then destination address and destination port. Compare a request and its reverse record.",
+        "The -> arrow should follow the requested traffic direction. Keep the client port flexible while selecting the receiving service port.",
+        "Test every record set. A bidirectional or any-address repair can fix detection while introducing a false positive."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://docs.snort.org/rules/",
+        "https://docs.snort.org/rules/headers/ips",
+        "https://docs.snort.org/rules/headers/ports",
+        "https://docs.snort.org/rules/headers/directions",
+        "https://docs.snort.org/rules/options/payload/content",
+        "https://docs.snort.org/rules/options/general/sid",
+        "https://greenbone.github.io/docs/latest/background.html"
+      ],
+      "simplifications": "Bounded offline Snort3-style header and ASCII-literal subset over supplied decoded IPv4 records. No packet capture/decoding, TCP reassembly, stream or service buffers, flow state, regex, hex content, variable/list/range headers, real daemon, inline prevention or vulnerability scan. A local positive sid is required here for identification; upstream permits omission. No actual Snort comparison has been verified.",
+      "initial": {
+        "kind": "IdsRule",
+        "simulation": {
+          "view": "introduction",
+          "assignment": {
+            "source_task": "{\"id\":\"lpic2-ids-header-direction\",\"rule_path\":\"/etc/snort/rules/upload.rules\",\"initial_rule\":\"alert tcp 192.0.2.40 8088 -> 203.0.113.0/24 any (msg:\\\"UPLOAD marker\\\";content:\\\"UPLOAD\\\";sid:1000201;)\",\"cases\":[{\"id\":\"direction\",\"label\":\"Request and reverse direction\",\"records\":[{\"protocol\":\"Tcp\",\"source\":\"203.0.113.10\",\"source_port\":41000,\"destination\":\"192.0.2.40\",\"destination_port\":8088,\"payload\":\"UPLOAD report\"},{\"protocol\":\"Tcp\",\"source\":\"192.0.2.40\",\"source_port\":8088,\"destination\":\"203.0.113.10\",\"destination_port\":41000,\"payload\":\"UPLOAD response\"},{\"protocol\":\"Tcp\",\"source\":\"203.0.113.10\",\"source_port\":41000,\"destination\":\"192.0.2.40\",\"destination_port\":8088,\"payload\":\"HEALTH report\"}],\"expected_alerts\":[true,false,false]},{\"id\":\"scope\",\"label\":\"Different clients and endpoint contrasts\",\"records\":[{\"protocol\":\"Tcp\",\"source\":\"203.0.113.240\",\"source_port\":53123,\"destination\":\"192.0.2.40\",\"destination_port\":8088,\"payload\":\"UPLOAD index\"},{\"protocol\":\"Tcp\",\"source\":\"203.0.114.10\",\"source_port\":41000,\"destination\":\"192.0.2.40\",\"destination_port\":8088,\"payload\":\"UPLOAD index\"},{\"protocol\":\"Tcp\",\"source\":\"203.0.113.10\",\"source_port\":41000,\"destination\":\"192.0.2.40\",\"destination_port\":8089,\"payload\":\"UPLOAD index\"},{\"protocol\":\"Tcp\",\"source\":\"203.0.113.10\",\"source_port\":41000,\"destination\":\"192.0.2.41\",\"destination_port\":8088,\"payload\":\"UPLOAD index\"}],\"expected_alerts\":[true,false,false,false]},{\"id\":\"protocol\",\"label\":\"Protocol and case contrasts\",\"records\":[{\"protocol\":\"Tcp\",\"source\":\"203.0.113.10\",\"source_port\":52100,\"destination\":\"192.0.2.40\",\"destination_port\":8088,\"payload\":\"UPLOAD archive\"},{\"protocol\":\"Udp\",\"source\":\"203.0.113.10\",\"source_port\":41000,\"destination\":\"192.0.2.40\",\"destination_port\":8088,\"payload\":\"UPLOAD archive\"},{\"protocol\":\"Tcp\",\"source\":\"203.0.113.10\",\"source_port\":41000,\"destination\":\"192.0.2.40\",\"destination_port\":8088,\"payload\":\"upload archive\"}],\"expected_alerts\":[true,false,false]}]}",
+            "saved": "alert tcp 192.0.2.40 8088 -> 203.0.113.0/24 any (msg:\"UPLOAD marker\";content:\"UPLOAD\";sid:1000201;)",
+            "editor": "alert tcp 192.0.2.40 8088 -> 203.0.113.0/24 any (msg:\"UPLOAD marker\";content:\"UPLOAD\";sid:1000201;)",
+            "selected": 0,
+            "last_run": null,
+            "checked": false,
+            "history": []
+          },
+          "example": {
+            "source_task": "{\"id\":\"lpic2-ids-header-direction-example\",\"rule_path\":\"/etc/snort/rules/header-workshop.rules\",\"initial_rule\":\"alert tcp 198.51.100.20 9090 -> 192.0.2.0/24 any (msg:\\\"SYNC marker\\\";content:\\\"SYNC\\\";sid:1000201;)\",\"cases\":[{\"id\":\"direction\",\"label\":\"Request and reverse direction\",\"records\":[{\"protocol\":\"Tcp\",\"source\":\"192.0.2.14\",\"source_port\":41000,\"destination\":\"198.51.100.20\",\"destination_port\":9090,\"payload\":\"SYNC report\"},{\"protocol\":\"Tcp\",\"source\":\"198.51.100.20\",\"source_port\":9090,\"destination\":\"192.0.2.14\",\"destination_port\":41000,\"payload\":\"SYNC response\"},{\"protocol\":\"Tcp\",\"source\":\"192.0.2.14\",\"source_port\":41000,\"destination\":\"198.51.100.20\",\"destination_port\":9090,\"payload\":\"HEALTH report\"}],\"expected_alerts\":[true,false,false]},{\"id\":\"scope\",\"label\":\"Different clients and endpoint contrasts\",\"records\":[{\"protocol\":\"Tcp\",\"source\":\"192.0.2.29\",\"source_port\":53123,\"destination\":\"198.51.100.20\",\"destination_port\":9090,\"payload\":\"SYNC index\"},{\"protocol\":\"Tcp\",\"source\":\"192.0.3.14\",\"source_port\":41000,\"destination\":\"198.51.100.20\",\"destination_port\":9090,\"payload\":\"SYNC index\"},{\"protocol\":\"Tcp\",\"source\":\"192.0.2.14\",\"source_port\":41000,\"destination\":\"198.51.100.20\",\"destination_port\":9091,\"payload\":\"SYNC index\"},{\"protocol\":\"Tcp\",\"source\":\"192.0.2.14\",\"source_port\":41000,\"destination\":\"198.51.100.21\",\"destination_port\":9090,\"payload\":\"SYNC index\"}],\"expected_alerts\":[true,false,false,false]},{\"id\":\"protocol\",\"label\":\"Protocol and case contrasts\",\"records\":[{\"protocol\":\"Tcp\",\"source\":\"192.0.2.14\",\"source_port\":52100,\"destination\":\"198.51.100.20\",\"destination_port\":9090,\"payload\":\"SYNC archive\"},{\"protocol\":\"Udp\",\"source\":\"192.0.2.14\",\"source_port\":41000,\"destination\":\"198.51.100.20\",\"destination_port\":9090,\"payload\":\"SYNC archive\"},{\"protocol\":\"Tcp\",\"source\":\"192.0.2.14\",\"source_port\":41000,\"destination\":\"198.51.100.20\",\"destination_port\":9090,\"payload\":\"sync archive\"}],\"expected_alerts\":[true,false,false]}]}",
+            "saved": "alert tcp 198.51.100.20 9090 -> 192.0.2.0/24 any (msg:\"SYNC marker\";content:\"SYNC\";sid:1000201;)",
+            "editor": "alert tcp 198.51.100.20 9090 -> 192.0.2.0/24 any (msg:\"SYNC marker\";content:\"SYNC\";sid:1000201;)",
+            "selected": 0,
+            "last_run": null,
+            "checked": false,
+            "history": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "IdsRule",
+        "definition": {
+          "source_id": "lpic2-ids-header-direction",
+          "assignment": {
+            "id": "lpic2-ids-header-direction",
+            "rule_path": "/etc/snort/rules/upload.rules",
+            "initial_rule": "alert tcp 192.0.2.40 8088 -> 203.0.113.0/24 any (msg:\"UPLOAD marker\";content:\"UPLOAD\";sid:1000201;)",
+            "cases": [
+              {
+                "id": "direction",
+                "label": "Request and reverse direction",
+                "records": [
+                  {
+                    "protocol": "Tcp",
+                    "source": "203.0.113.10",
+                    "source_port": 41000,
+                    "destination": "192.0.2.40",
+                    "destination_port": 8088,
+                    "payload": "UPLOAD report"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "192.0.2.40",
+                    "source_port": 8088,
+                    "destination": "203.0.113.10",
+                    "destination_port": 41000,
+                    "payload": "UPLOAD response"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "203.0.113.10",
+                    "source_port": 41000,
+                    "destination": "192.0.2.40",
+                    "destination_port": 8088,
+                    "payload": "HEALTH report"
+                  }
+                ],
+                "expected_alerts": [
+                  true,
+                  false,
+                  false
+                ]
+              },
+              {
+                "id": "scope",
+                "label": "Different clients and endpoint contrasts",
+                "records": [
+                  {
+                    "protocol": "Tcp",
+                    "source": "203.0.113.240",
+                    "source_port": 53123,
+                    "destination": "192.0.2.40",
+                    "destination_port": 8088,
+                    "payload": "UPLOAD index"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "203.0.114.10",
+                    "source_port": 41000,
+                    "destination": "192.0.2.40",
+                    "destination_port": 8088,
+                    "payload": "UPLOAD index"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "203.0.113.10",
+                    "source_port": 41000,
+                    "destination": "192.0.2.40",
+                    "destination_port": 8089,
+                    "payload": "UPLOAD index"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "203.0.113.10",
+                    "source_port": 41000,
+                    "destination": "192.0.2.41",
+                    "destination_port": 8088,
+                    "payload": "UPLOAD index"
+                  }
+                ],
+                "expected_alerts": [
+                  true,
+                  false,
+                  false,
+                  false
+                ]
+              },
+              {
+                "id": "protocol",
+                "label": "Protocol and case contrasts",
+                "records": [
+                  {
+                    "protocol": "Tcp",
+                    "source": "203.0.113.10",
+                    "source_port": 52100,
+                    "destination": "192.0.2.40",
+                    "destination_port": 8088,
+                    "payload": "UPLOAD archive"
+                  },
+                  {
+                    "protocol": "Udp",
+                    "source": "203.0.113.10",
+                    "source_port": 41000,
+                    "destination": "192.0.2.40",
+                    "destination_port": 8088,
+                    "payload": "UPLOAD archive"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "203.0.113.10",
+                    "source_port": 41000,
+                    "destination": "192.0.2.40",
+                    "destination_port": 8088,
+                    "payload": "upload archive"
+                  }
+                ],
+                "expected_alerts": [
+                  true,
+                  false,
+                  false
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-ids-header-direction-example",
+            "rule_path": "/etc/snort/rules/header-workshop.rules",
+            "initial_rule": "alert tcp 198.51.100.20 9090 -> 192.0.2.0/24 any (msg:\"SYNC marker\";content:\"SYNC\";sid:1000201;)",
+            "cases": [
+              {
+                "id": "direction",
+                "label": "Request and reverse direction",
+                "records": [
+                  {
+                    "protocol": "Tcp",
+                    "source": "192.0.2.14",
+                    "source_port": 41000,
+                    "destination": "198.51.100.20",
+                    "destination_port": 9090,
+                    "payload": "SYNC report"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "198.51.100.20",
+                    "source_port": 9090,
+                    "destination": "192.0.2.14",
+                    "destination_port": 41000,
+                    "payload": "SYNC response"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "192.0.2.14",
+                    "source_port": 41000,
+                    "destination": "198.51.100.20",
+                    "destination_port": 9090,
+                    "payload": "HEALTH report"
+                  }
+                ],
+                "expected_alerts": [
+                  true,
+                  false,
+                  false
+                ]
+              },
+              {
+                "id": "scope",
+                "label": "Different clients and endpoint contrasts",
+                "records": [
+                  {
+                    "protocol": "Tcp",
+                    "source": "192.0.2.29",
+                    "source_port": 53123,
+                    "destination": "198.51.100.20",
+                    "destination_port": 9090,
+                    "payload": "SYNC index"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "192.0.3.14",
+                    "source_port": 41000,
+                    "destination": "198.51.100.20",
+                    "destination_port": 9090,
+                    "payload": "SYNC index"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "192.0.2.14",
+                    "source_port": 41000,
+                    "destination": "198.51.100.20",
+                    "destination_port": 9091,
+                    "payload": "SYNC index"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "192.0.2.14",
+                    "source_port": 41000,
+                    "destination": "198.51.100.21",
+                    "destination_port": 9090,
+                    "payload": "SYNC index"
+                  }
+                ],
+                "expected_alerts": [
+                  true,
+                  false,
+                  false,
+                  false
+                ]
+              },
+              {
+                "id": "protocol",
+                "label": "Protocol and case contrasts",
+                "records": [
+                  {
+                    "protocol": "Tcp",
+                    "source": "192.0.2.14",
+                    "source_port": 52100,
+                    "destination": "198.51.100.20",
+                    "destination_port": 9090,
+                    "payload": "SYNC archive"
+                  },
+                  {
+                    "protocol": "Udp",
+                    "source": "192.0.2.14",
+                    "source_port": 41000,
+                    "destination": "198.51.100.20",
+                    "destination_port": 9090,
+                    "payload": "SYNC archive"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "192.0.2.14",
+                    "source_port": 41000,
+                    "destination": "198.51.100.20",
+                    "destination_port": 9090,
+                    "payload": "sync archive"
+                  }
+                ],
+                "expected_alerts": [
+                  true,
+                  false,
+                  false
+                ]
+              }
+            ]
+          },
+          "worked": [
+            {
+              "kind": "Edit",
+              "text": "alert tcp 192.0.2.0/24 any -> 198.51.100.20 9090 (msg:\"SYNC marker\";content:\"SYNC\";sid:1000201;)"
+            },
+            {
+              "kind": "Save"
+            },
+            {
+              "kind": "Replay"
+            },
+            {
+              "kind": "Check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "ids-rule-workspace {\"practice\":false,\"action\":{\"kind\":\"Edit\",\"text\":\"alert tcp 203.0.113.0/24 any -> 192.0.2.40 8088 (msg:\\\"UPLOAD marker\\\";content:\\\"UPLOAD\\\";sid:1000201;)\"}}",
+        "ids-rule-workspace {\"practice\":false,\"action\":{\"kind\":\"Save\"}}",
+        "ids-rule-workspace {\"practice\":false,\"action\":{\"kind\":\"Replay\"}}",
+        "ids-rule-workspace {\"practice\":false,\"action\":{\"kind\":\"Check\"}}"
+      ],
+      "prerequisites": [
+        "lpic2-auth-filter-detection",
+        "lpic2-exposure-client-policy"
+      ]
+    },
+    {
+      "id": "lpic2-ids-content-specificity",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-ids-rule-evidence",
+      "topic": "Intrusion-detection rule evidence",
+      "title": "Reduce marker alerts without losing required detections",
+      "summary": "Combine payload conditions and deliberate case handling, then test false positives and subnet boundaries.",
+      "objective": "Alert only on supplied TCP records from 10.24.32.0/20 to 192.0.2.60 port 8443. Require both the ADMIN marker, ignoring its letter case, and the exact case-sensitive literal action=reset anywhere in the same supplied payload; either order is allowed. Leave other actions, missing markers, out-of-subnet clients, wrong ports, UDP and reverse traffic without an alert. Save the repaired virtual rule with a positive sid for this activity, and preserve all supplied records.",
+      "difficulty": "Intermediate",
+      "minutes": 28,
+      "steps": [
+        "Compare actions beside the editor",
+        "Add the missing condition and replay",
+        "Test a case-handling mistake"
+      ],
+      "guide": [
+        {
+          "title": "Compare actions beside the editor",
+          "why": "The starter checks only the marker, so a harmless action also alerts. The example requires both clues.",
+          "action": "Read Marker, required action and lookalikes. Compare the supplied AUDIT records with change=disable and change=view.",
+          "commands": []
+        },
+        {
+          "title": "Add the missing condition and replay",
+          "why": "Expected: both clues and the scoped endpoints are required; changed marker case still alerts. Actual results come from the saved rule.",
+          "action": "Keep the marker condition case-insensitive. Add a separate case-sensitive content condition for change=disable. Save virtual rule, then Replay record set. Use Record set to try Subnet edges and changing clients, then Content case, independent order and protocol.",
+          "commands": []
+        },
+        {
+          "title": "Test a case-handling mistake",
+          "why": "The uppercase action lookalike becomes an unwanted alert. Applying nocase to one content condition does not require applying it to every condition.",
+          "action": "Choose Check example. Add nocase to the action condition, save and replay Content case, independent order and protocol. Read its failed case, remove that modifier, save and check again.",
+          "commands": []
+        }
+      ],
+      "explanation": "The header retains the required /20 client network and receiving service. The case-insensitive marker and case-sensitive action are separate required literals. Both must occur, but no relative cursor or ordering restriction was requested. Testing the harmless action, uppercase action lookalike and neighboring subnets detects broader rules that look plausible on one positive record.",
+      "hints": [
+        "Compare an alert you need with the harmless action. What text distinguishes them after the marker?",
+        "Use a second positive content option so both the marker and required action must occur. Choose letter-case handling separately for each literal.",
+        "Check the just-outside /20 clients and uppercase action lookalike as well as the positive records; a rule that handles only one record is incomplete."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://docs.snort.org/rules/",
+        "https://docs.snort.org/rules/headers/ips",
+        "https://docs.snort.org/rules/headers/ports",
+        "https://docs.snort.org/rules/headers/directions",
+        "https://docs.snort.org/rules/options/payload/content",
+        "https://docs.snort.org/rules/options/general/sid",
+        "https://greenbone.github.io/docs/latest/background.html"
+      ],
+      "simplifications": "Bounded offline Snort3-style header and ASCII-literal subset over supplied decoded IPv4 records. No packet capture/decoding, TCP reassembly, stream or service buffers, flow state, regex, hex content, variable/list/range headers, real daemon, inline prevention or vulnerability scan. A local positive sid is required here for identification; upstream permits omission. No actual Snort comparison has been verified.",
+      "initial": {
+        "kind": "IdsRule",
+        "simulation": {
+          "view": "introduction",
+          "assignment": {
+            "source_task": "{\"id\":\"lpic2-ids-content-specificity\",\"rule_path\":\"/etc/snort/rules/admin-marker.rules\",\"initial_rule\":\"alert tcp 10.24.32.0/20 any -> 192.0.2.60 8443 (content:\\\"ADMIN\\\",nocase;sid:1000202;)\",\"cases\":[{\"id\":\"content\",\"label\":\"Marker, required action and lookalikes\",\"records\":[{\"protocol\":\"Tcp\",\"source\":\"10.24.32.2\",\"source_port\":41000,\"destination\":\"192.0.2.60\",\"destination_port\":8443,\"payload\":\"ADMIN action=reset\"},{\"protocol\":\"Tcp\",\"source\":\"10.24.32.2\",\"source_port\":41000,\"destination\":\"192.0.2.60\",\"destination_port\":8443,\"payload\":\"ADMIN action=view\"},{\"protocol\":\"Tcp\",\"source\":\"10.24.32.2\",\"source_port\":41000,\"destination\":\"192.0.2.60\",\"destination_port\":8443,\"payload\":\"PUBLIC action=reset\"},{\"protocol\":\"Tcp\",\"source\":\"10.24.32.2\",\"source_port\":41000,\"destination\":\"192.0.2.60\",\"destination_port\":8443,\"payload\":\"admin action=reset\"}],\"expected_alerts\":[true,false,false,true]},{\"id\":\"boundaries\",\"label\":\"Subnet edges and changing clients\",\"records\":[{\"protocol\":\"Tcp\",\"source\":\"10.24.47.254\",\"source_port\":52042,\"destination\":\"192.0.2.60\",\"destination_port\":8443,\"payload\":\"Admin action=reset\"},{\"protocol\":\"Tcp\",\"source\":\"10.24.31.255\",\"source_port\":41000,\"destination\":\"192.0.2.60\",\"destination_port\":8443,\"payload\":\"ADMIN action=reset\"},{\"protocol\":\"Tcp\",\"source\":\"10.24.48.0\",\"source_port\":41000,\"destination\":\"192.0.2.60\",\"destination_port\":8443,\"payload\":\"ADMIN action=reset\"},{\"protocol\":\"Tcp\",\"source\":\"10.24.32.2\",\"source_port\":41000,\"destination\":\"192.0.2.60\",\"destination_port\":8444,\"payload\":\"ADMIN action=reset\"}],\"expected_alerts\":[true,false,false,false]},{\"id\":\"contrasts\",\"label\":\"Content case, independent order and protocol\",\"records\":[{\"protocol\":\"Tcp\",\"source\":\"10.24.32.2\",\"source_port\":60002,\"destination\":\"192.0.2.60\",\"destination_port\":8443,\"payload\":\"action=reset admin\"},{\"protocol\":\"Tcp\",\"source\":\"10.24.32.2\",\"source_port\":41000,\"destination\":\"192.0.2.60\",\"destination_port\":8443,\"payload\":\"ADMIN ACTION=RESET\"},{\"protocol\":\"Udp\",\"source\":\"10.24.32.2\",\"source_port\":41000,\"destination\":\"192.0.2.60\",\"destination_port\":8443,\"payload\":\"ADMIN action=reset\"},{\"protocol\":\"Tcp\",\"source\":\"192.0.2.60\",\"source_port\":8443,\"destination\":\"10.24.32.2\",\"destination_port\":41000,\"payload\":\"ADMIN action=reset\"}],\"expected_alerts\":[true,false,false,false]}]}",
+            "saved": "alert tcp 10.24.32.0/20 any -> 192.0.2.60 8443 (content:\"ADMIN\",nocase;sid:1000202;)",
+            "editor": "alert tcp 10.24.32.0/20 any -> 192.0.2.60 8443 (content:\"ADMIN\",nocase;sid:1000202;)",
+            "selected": 0,
+            "last_run": null,
+            "checked": false,
+            "history": []
+          },
+          "example": {
+            "source_task": "{\"id\":\"lpic2-ids-content-specificity-example\",\"rule_path\":\"/etc/snort/rules/content-workshop.rules\",\"initial_rule\":\"alert tcp 172.20.16.0/20 any -> 198.51.100.50 7070 (content:\\\"AUDIT\\\",nocase;sid:1000202;)\",\"cases\":[{\"id\":\"content\",\"label\":\"Marker, required action and lookalikes\",\"records\":[{\"protocol\":\"Tcp\",\"source\":\"172.20.16.2\",\"source_port\":41000,\"destination\":\"198.51.100.50\",\"destination_port\":7070,\"payload\":\"AUDIT change=disable\"},{\"protocol\":\"Tcp\",\"source\":\"172.20.16.2\",\"source_port\":41000,\"destination\":\"198.51.100.50\",\"destination_port\":7070,\"payload\":\"AUDIT change=view\"},{\"protocol\":\"Tcp\",\"source\":\"172.20.16.2\",\"source_port\":41000,\"destination\":\"198.51.100.50\",\"destination_port\":7070,\"payload\":\"PUBLIC change=disable\"},{\"protocol\":\"Tcp\",\"source\":\"172.20.16.2\",\"source_port\":41000,\"destination\":\"198.51.100.50\",\"destination_port\":7070,\"payload\":\"audit change=disable\"}],\"expected_alerts\":[true,false,false,true]},{\"id\":\"boundaries\",\"label\":\"Subnet edges and changing clients\",\"records\":[{\"protocol\":\"Tcp\",\"source\":\"172.20.31.254\",\"source_port\":52042,\"destination\":\"198.51.100.50\",\"destination_port\":7070,\"payload\":\"Audit change=disable\"},{\"protocol\":\"Tcp\",\"source\":\"172.20.15.255\",\"source_port\":41000,\"destination\":\"198.51.100.50\",\"destination_port\":7070,\"payload\":\"AUDIT change=disable\"},{\"protocol\":\"Tcp\",\"source\":\"172.20.32.0\",\"source_port\":41000,\"destination\":\"198.51.100.50\",\"destination_port\":7070,\"payload\":\"AUDIT change=disable\"},{\"protocol\":\"Tcp\",\"source\":\"172.20.16.2\",\"source_port\":41000,\"destination\":\"198.51.100.50\",\"destination_port\":7071,\"payload\":\"AUDIT change=disable\"}],\"expected_alerts\":[true,false,false,false]},{\"id\":\"contrasts\",\"label\":\"Content case, independent order and protocol\",\"records\":[{\"protocol\":\"Tcp\",\"source\":\"172.20.16.2\",\"source_port\":60002,\"destination\":\"198.51.100.50\",\"destination_port\":7070,\"payload\":\"change=disable audit\"},{\"protocol\":\"Tcp\",\"source\":\"172.20.16.2\",\"source_port\":41000,\"destination\":\"198.51.100.50\",\"destination_port\":7070,\"payload\":\"AUDIT CHANGE=DISABLE\"},{\"protocol\":\"Udp\",\"source\":\"172.20.16.2\",\"source_port\":41000,\"destination\":\"198.51.100.50\",\"destination_port\":7070,\"payload\":\"AUDIT change=disable\"},{\"protocol\":\"Tcp\",\"source\":\"198.51.100.50\",\"source_port\":7070,\"destination\":\"172.20.16.2\",\"destination_port\":41000,\"payload\":\"AUDIT change=disable\"}],\"expected_alerts\":[true,false,false,false]}]}",
+            "saved": "alert tcp 172.20.16.0/20 any -> 198.51.100.50 7070 (content:\"AUDIT\",nocase;sid:1000202;)",
+            "editor": "alert tcp 172.20.16.0/20 any -> 198.51.100.50 7070 (content:\"AUDIT\",nocase;sid:1000202;)",
+            "selected": 0,
+            "last_run": null,
+            "checked": false,
+            "history": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "IdsRule",
+        "definition": {
+          "source_id": "lpic2-ids-content-specificity",
+          "assignment": {
+            "id": "lpic2-ids-content-specificity",
+            "rule_path": "/etc/snort/rules/admin-marker.rules",
+            "initial_rule": "alert tcp 10.24.32.0/20 any -> 192.0.2.60 8443 (content:\"ADMIN\",nocase;sid:1000202;)",
+            "cases": [
+              {
+                "id": "content",
+                "label": "Marker, required action and lookalikes",
+                "records": [
+                  {
+                    "protocol": "Tcp",
+                    "source": "10.24.32.2",
+                    "source_port": 41000,
+                    "destination": "192.0.2.60",
+                    "destination_port": 8443,
+                    "payload": "ADMIN action=reset"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "10.24.32.2",
+                    "source_port": 41000,
+                    "destination": "192.0.2.60",
+                    "destination_port": 8443,
+                    "payload": "ADMIN action=view"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "10.24.32.2",
+                    "source_port": 41000,
+                    "destination": "192.0.2.60",
+                    "destination_port": 8443,
+                    "payload": "PUBLIC action=reset"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "10.24.32.2",
+                    "source_port": 41000,
+                    "destination": "192.0.2.60",
+                    "destination_port": 8443,
+                    "payload": "admin action=reset"
+                  }
+                ],
+                "expected_alerts": [
+                  true,
+                  false,
+                  false,
+                  true
+                ]
+              },
+              {
+                "id": "boundaries",
+                "label": "Subnet edges and changing clients",
+                "records": [
+                  {
+                    "protocol": "Tcp",
+                    "source": "10.24.47.254",
+                    "source_port": 52042,
+                    "destination": "192.0.2.60",
+                    "destination_port": 8443,
+                    "payload": "Admin action=reset"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "10.24.31.255",
+                    "source_port": 41000,
+                    "destination": "192.0.2.60",
+                    "destination_port": 8443,
+                    "payload": "ADMIN action=reset"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "10.24.48.0",
+                    "source_port": 41000,
+                    "destination": "192.0.2.60",
+                    "destination_port": 8443,
+                    "payload": "ADMIN action=reset"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "10.24.32.2",
+                    "source_port": 41000,
+                    "destination": "192.0.2.60",
+                    "destination_port": 8444,
+                    "payload": "ADMIN action=reset"
+                  }
+                ],
+                "expected_alerts": [
+                  true,
+                  false,
+                  false,
+                  false
+                ]
+              },
+              {
+                "id": "contrasts",
+                "label": "Content case, independent order and protocol",
+                "records": [
+                  {
+                    "protocol": "Tcp",
+                    "source": "10.24.32.2",
+                    "source_port": 60002,
+                    "destination": "192.0.2.60",
+                    "destination_port": 8443,
+                    "payload": "action=reset admin"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "10.24.32.2",
+                    "source_port": 41000,
+                    "destination": "192.0.2.60",
+                    "destination_port": 8443,
+                    "payload": "ADMIN ACTION=RESET"
+                  },
+                  {
+                    "protocol": "Udp",
+                    "source": "10.24.32.2",
+                    "source_port": 41000,
+                    "destination": "192.0.2.60",
+                    "destination_port": 8443,
+                    "payload": "ADMIN action=reset"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "192.0.2.60",
+                    "source_port": 8443,
+                    "destination": "10.24.32.2",
+                    "destination_port": 41000,
+                    "payload": "ADMIN action=reset"
+                  }
+                ],
+                "expected_alerts": [
+                  true,
+                  false,
+                  false,
+                  false
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-ids-content-specificity-example",
+            "rule_path": "/etc/snort/rules/content-workshop.rules",
+            "initial_rule": "alert tcp 172.20.16.0/20 any -> 198.51.100.50 7070 (content:\"AUDIT\",nocase;sid:1000202;)",
+            "cases": [
+              {
+                "id": "content",
+                "label": "Marker, required action and lookalikes",
+                "records": [
+                  {
+                    "protocol": "Tcp",
+                    "source": "172.20.16.2",
+                    "source_port": 41000,
+                    "destination": "198.51.100.50",
+                    "destination_port": 7070,
+                    "payload": "AUDIT change=disable"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "172.20.16.2",
+                    "source_port": 41000,
+                    "destination": "198.51.100.50",
+                    "destination_port": 7070,
+                    "payload": "AUDIT change=view"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "172.20.16.2",
+                    "source_port": 41000,
+                    "destination": "198.51.100.50",
+                    "destination_port": 7070,
+                    "payload": "PUBLIC change=disable"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "172.20.16.2",
+                    "source_port": 41000,
+                    "destination": "198.51.100.50",
+                    "destination_port": 7070,
+                    "payload": "audit change=disable"
+                  }
+                ],
+                "expected_alerts": [
+                  true,
+                  false,
+                  false,
+                  true
+                ]
+              },
+              {
+                "id": "boundaries",
+                "label": "Subnet edges and changing clients",
+                "records": [
+                  {
+                    "protocol": "Tcp",
+                    "source": "172.20.31.254",
+                    "source_port": 52042,
+                    "destination": "198.51.100.50",
+                    "destination_port": 7070,
+                    "payload": "Audit change=disable"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "172.20.15.255",
+                    "source_port": 41000,
+                    "destination": "198.51.100.50",
+                    "destination_port": 7070,
+                    "payload": "AUDIT change=disable"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "172.20.32.0",
+                    "source_port": 41000,
+                    "destination": "198.51.100.50",
+                    "destination_port": 7070,
+                    "payload": "AUDIT change=disable"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "172.20.16.2",
+                    "source_port": 41000,
+                    "destination": "198.51.100.50",
+                    "destination_port": 7071,
+                    "payload": "AUDIT change=disable"
+                  }
+                ],
+                "expected_alerts": [
+                  true,
+                  false,
+                  false,
+                  false
+                ]
+              },
+              {
+                "id": "contrasts",
+                "label": "Content case, independent order and protocol",
+                "records": [
+                  {
+                    "protocol": "Tcp",
+                    "source": "172.20.16.2",
+                    "source_port": 60002,
+                    "destination": "198.51.100.50",
+                    "destination_port": 7070,
+                    "payload": "change=disable audit"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "172.20.16.2",
+                    "source_port": 41000,
+                    "destination": "198.51.100.50",
+                    "destination_port": 7070,
+                    "payload": "AUDIT CHANGE=DISABLE"
+                  },
+                  {
+                    "protocol": "Udp",
+                    "source": "172.20.16.2",
+                    "source_port": 41000,
+                    "destination": "198.51.100.50",
+                    "destination_port": 7070,
+                    "payload": "AUDIT change=disable"
+                  },
+                  {
+                    "protocol": "Tcp",
+                    "source": "198.51.100.50",
+                    "source_port": 7070,
+                    "destination": "172.20.16.2",
+                    "destination_port": 41000,
+                    "payload": "AUDIT change=disable"
+                  }
+                ],
+                "expected_alerts": [
+                  true,
+                  false,
+                  false,
+                  false
+                ]
+              }
+            ]
+          },
+          "worked": [
+            {
+              "kind": "Edit",
+              "text": "alert tcp 172.20.16.0/20 any -> 198.51.100.50 7070 (content:\"AUDIT\",nocase;content:\"change=disable\";sid:1000202;)"
+            },
+            {
+              "kind": "Save"
+            },
+            {
+              "kind": "Replay"
+            },
+            {
+              "kind": "Check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "ids-rule-workspace {\"practice\":false,\"action\":{\"kind\":\"Edit\",\"text\":\"alert tcp 10.24.32.0/20 any -> 192.0.2.60 8443 (content:\\\"ADMIN\\\",nocase;content:\\\"action=reset\\\";sid:1000202;)\"}}",
+        "ids-rule-workspace {\"practice\":false,\"action\":{\"kind\":\"Save\"}}",
+        "ids-rule-workspace {\"practice\":false,\"action\":{\"kind\":\"Replay\"}}",
+        "ids-rule-workspace {\"practice\":false,\"action\":{\"kind\":\"Check\"}}"
+      ],
+      "prerequisites": [
+        "lpic2-ids-header-direction"
+      ]
+    }
+  ]
+}

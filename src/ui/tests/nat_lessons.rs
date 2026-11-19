@@ -585,7 +585,32 @@ fn ordinary_two_static_maps_fit_measured_child_and_current_maps_use_wide_right_c
     }
 }
 fn release_frame_for_control(ctx: &egui::Context, a: &mut LabApp, key: &str) -> egui::FullOutput {
-    let r = locate(ctx, a, key, false);
+    locate(ctx, a, key, false);
+    // The accepted task checklist can scroll the adjacent observation below
+    // the fold. Reveal BOTH the action and actual state panel before asserting
+    // what paints in its release frame; never interpret culled text as stale.
+    outer(ctx, a, |m| {
+        m.nat_controls
+            .iter()
+            .find(|v| v.0 == key)
+            .unwrap()
+            .1
+            .union(m.nat_state.expect("Actual applied-state panel"))
+    });
+    let r = a
+        .metrics
+        .nat_controls
+        .iter()
+        .find(|v| v.0 == key)
+        .unwrap()
+        .1;
+    frame(
+        ctx,
+        a,
+        1200.,
+        850.,
+        vec![egui::Event::PointerMoved(r.center())],
+    );
     let press = |pressed| {
         vec![
             egui::Event::PointerMoved(r.center()),
@@ -638,6 +663,33 @@ fn real_apply_and_reverse_paint_final_state_in_the_same_event_frame() {
         serde_json::to_value(&a.progress.attempts[IDS[0]].state).unwrap() == before,
         "Reverse never allocates"
     );
+    if painted_labels(&output, "After: 192.0.2.201 -> 10.40.1.10").is_empty() {
+        fn diagnostic(
+            shape: &egui::Shape,
+            clip: egui::Rect,
+            rows: &mut Vec<(String, egui::Rect, egui::Rect)>,
+        ) {
+            match shape {
+                egui::Shape::Text(t) => {
+                    rows.push((t.galley.text().into(), t.visual_bounding_rect(), clip))
+                }
+                egui::Shape::Vec(v) => {
+                    for s in v {
+                        diagnostic(s, clip, rows)
+                    }
+                }
+                _ => {}
+            }
+        }
+        let mut rows = vec![];
+        for shape in &output.shapes {
+            diagnostic(&shape.shape, shape.clip_rect, &mut rows);
+        }
+        eprintln!(
+            "NAT reverse actualstatepanel={:?},observation={:?},root={:?},paint={rows:?}",
+            a.metrics.nat_state, a.metrics.nat_observation, a.metrics.main_viewport
+        );
+    }
     assert_eq!(
         painted_labels(&output, "After: 192.0.2.201 -> 10.40.1.10").len(),
         1,

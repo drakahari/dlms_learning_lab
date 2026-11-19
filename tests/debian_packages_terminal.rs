@@ -483,6 +483,7 @@ fn large_but_admitted_formatted_query_rejects_output_without_truncating_or_mutat
                 version: Version::parse("1").unwrap(),
                 architecture: Architecture::All,
                 depends: vec![],
+                conflicts: vec![],
                 files: BTreeMap::new(),
             },
         );

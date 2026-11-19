@@ -1,0 +1,423 @@
+{
+  "assignment": {
+    "fabric": {
+      "switches": {
+        "east": {
+          "label": "East switch",
+          "vlans": [
+            1,
+            45,
+            70,
+            99
+          ],
+          "ports": {
+            "desk-1": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 45
+              }
+            },
+            "uplink": {
+              "up": true,
+              "mode": {
+                "kind": "trunk",
+                "native": 99,
+                "allowed": [
+                  1,
+                  45,
+                  70,
+                  99
+                ]
+              }
+            }
+          }
+        },
+        "west": {
+          "label": "West switch",
+          "vlans": [
+            1,
+            45,
+            70,
+            99
+          ],
+          "ports": {
+            "desk-2": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 45
+              }
+            },
+            "server-1": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 70
+              }
+            },
+            "uplink": {
+              "up": true,
+              "mode": {
+                "kind": "trunk",
+                "native": 99,
+                "allowed": [
+                  1,
+                  45,
+                  70,
+                  99
+                ]
+              }
+            }
+          }
+        }
+      },
+      "hosts": {
+        "studio-a": {
+          "label": "Studio A",
+          "up": true
+        },
+        "studio-b": {
+          "label": "Studio B",
+          "up": true
+        },
+        "render-server": {
+          "label": "Render Server",
+          "up": true
+        }
+      },
+      "cables": [
+        {
+          "id": "studio-a-link",
+          "a": {
+            "kind": "host",
+            "host": "studio-a"
+          },
+          "b": {
+            "kind": "switch",
+            "switch": "east",
+            "port": "desk-1"
+          },
+          "up": true
+        },
+        {
+          "id": "studio-b-link",
+          "a": {
+            "kind": "host",
+            "host": "studio-b"
+          },
+          "b": {
+            "kind": "switch",
+            "switch": "west",
+            "port": "desk-2"
+          },
+          "up": true
+        },
+        {
+          "id": "render-server-link",
+          "a": {
+            "kind": "host",
+            "host": "render-server"
+          },
+          "b": {
+            "kind": "switch",
+            "switch": "west",
+            "port": "server-1"
+          },
+          "up": true
+        },
+        {
+          "id": "floor-link",
+          "a": {
+            "kind": "switch",
+            "switch": "east",
+            "port": "uplink"
+          },
+          "b": {
+            "kind": "switch",
+            "switch": "west",
+            "port": "uplink"
+          },
+          "up": true
+        }
+      ]
+    },
+    "router_switch": "east",
+    "endpoints": [
+      {
+        "id": "studio-a",
+        "address": {
+          "address": "10.45.1.22",
+          "prefix": 24
+        }
+      },
+      {
+        "id": "studio-b",
+        "address": {
+          "address": "10.45.1.31",
+          "prefix": 24
+        }
+      },
+      {
+        "id": "render-server",
+        "address": {
+          "address": "10.70.1.42",
+          "prefix": 24
+        }
+      }
+    ],
+    "interfaces": [
+      {
+        "vlan": 45,
+        "subnet": {
+          "address": "10.45.1.0",
+          "length": 24
+        }
+      },
+      {
+        "vlan": 70,
+        "subnet": {
+          "address": "10.70.1.0",
+          "length": 24
+        }
+      }
+    ],
+    "initial": {
+      "routing": false,
+      "interfaces": [
+        {
+          "enabled": false,
+          "address": {
+            "address": "10.45.1.1",
+            "prefix": 24
+          }
+        },
+        {
+          "enabled": true,
+          "address": {
+            "address": "10.70.1.1",
+            "prefix": 25
+          }
+        }
+      ],
+      "gateways": [
+        "10.45.1.1",
+        "10.45.1.254",
+        null
+      ],
+      "allow_remote": [
+        true,
+        false
+      ]
+    }
+  },
+  "example": {
+    "fabric": {
+      "switches": {
+        "east": {
+          "label": "East switch",
+          "vlans": [
+            1,
+            32,
+            64,
+            87
+          ],
+          "ports": {
+            "desk-1": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 32
+              }
+            },
+            "uplink": {
+              "up": true,
+              "mode": {
+                "kind": "trunk",
+                "native": 87,
+                "allowed": [
+                  1,
+                  32,
+                  64,
+                  87
+                ]
+              }
+            }
+          }
+        },
+        "west": {
+          "label": "West switch",
+          "vlans": [
+            1,
+            32,
+            64,
+            87
+          ],
+          "ports": {
+            "desk-2": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 32
+              }
+            },
+            "server-1": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 64
+              }
+            },
+            "uplink": {
+              "up": true,
+              "mode": {
+                "kind": "trunk",
+                "native": 87,
+                "allowed": [
+                  1,
+                  32,
+                  64,
+                  87
+                ]
+              }
+            }
+          }
+        }
+      },
+      "hosts": {
+        "bench-a": {
+          "label": "Bench A",
+          "up": true
+        },
+        "bench-b": {
+          "label": "Bench B",
+          "up": true
+        },
+        "demo-server": {
+          "label": "Demo Server",
+          "up": true
+        }
+      },
+      "cables": [
+        {
+          "id": "bench-a-link",
+          "a": {
+            "kind": "host",
+            "host": "bench-a"
+          },
+          "b": {
+            "kind": "switch",
+            "switch": "east",
+            "port": "desk-1"
+          },
+          "up": true
+        },
+        {
+          "id": "bench-b-link",
+          "a": {
+            "kind": "host",
+            "host": "bench-b"
+          },
+          "b": {
+            "kind": "switch",
+            "switch": "west",
+            "port": "desk-2"
+          },
+          "up": true
+        },
+        {
+          "id": "demo-server-link",
+          "a": {
+            "kind": "host",
+            "host": "demo-server"
+          },
+          "b": {
+            "kind": "switch",
+            "switch": "west",
+            "port": "server-1"
+          },
+          "up": true
+        },
+        {
+          "id": "floor-link",
+          "a": {
+            "kind": "switch",
+            "switch": "east",
+            "port": "uplink"
+          },
+          "b": {
+            "kind": "switch",
+            "switch": "west",
+            "port": "uplink"
+          },
+          "up": true
+        }
+      ]
+    },
+    "router_switch": "east",
+    "endpoints": [
+      {
+        "id": "bench-a",
+        "address": {
+          "address": "192.0.2.22",
+          "prefix": 24
+        }
+      },
+      {
+        "id": "bench-b",
+        "address": {
+          "address": "192.0.2.31",
+          "prefix": 24
+        }
+      },
+      {
+        "id": "demo-server",
+        "address": {
+          "address": "198.51.100.42",
+          "prefix": 24
+        }
+      }
+    ],
+    "interfaces": [
+      {
+        "vlan": 32,
+        "subnet": {
+          "address": "192.0.2.0",
+          "length": 24
+        }
+      },
+      {
+        "vlan": 64,
+        "subnet": {
+          "address": "198.51.100.0",
+          "length": 24
+        }
+      }
+    ],
+    "initial": {
+      "routing": false,
+      "interfaces": [
+        {
+          "enabled": true,
+          "address": {
+            "address": "192.0.2.1",
+            "prefix": 24
+          }
+        },
+        {
+          "enabled": true,
+          "address": null
+        }
+      ],
+      "gateways": [
+        "192.0.2.1",
+        "192.0.2.254",
+        null
+      ],
+      "allow_remote": [
+        true,
+        false
+      ]
+    }
+  }
+}

@@ -1,0 +1,1548 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-qos-mark-boundary",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-qos-hop",
+      "topic": "Per-hop traffic treatment",
+      "title": "Mark traffic at a boundary without erasing other labels",
+      "summary": "Repair the boundary labels while preserving the independent report stream.",
+      "objective": "Rewrite every office-interactive packet to DSCP 46. Rewrite every untrusted office-guest packet to DSCP 0, regardless of its incoming label. Preserve the incoming DSCP on office-report; it varies between supplied packets. Deliver every packet in all three packet patterns. Queue priority is not required for this boundary-label task.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Understand the traffic policy",
+        "Try a different worked system",
+        "Repair the complete assignment"
+      ],
+      "guide": [],
+      "hints": [
+        "Read incoming labels, chosen queue and actual results separately; a larger DSCP number is not a priority rank.",
+        "Inspect every failed packet pattern and preserve the streams named in the task. Do not hide a delay failure by dropping packets.",
+        "Use the optional worked policy only when you want the full explanation; several supported queue sizes or non-high guest labels can be valid."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc2474"
+      ],
+      "simplifications": "Sources checked 2026-11-02: CCNA current v1.1/4.7 and RFC2474. Supplied named-flow classification only, equal-size packets, integer teaching slots, one packet per slot, explicit two-queue strict priority or FIFO, finite waiting buffers and tail drop. No host packets, network, clock, IOS, arbitrary header filters, variable serialization, fairness guarantee, RED/WRED/ECN, policing, shaping, TCP or end-to-end guarantee. This is a narrow practical slice, not complete QoS/exam preparation.",
+      "initial": {
+        "kind": "Qos",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-qos-mark-boundary",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "marks": {
+                "office-interactive": "Keep",
+                "office-report": "Keep",
+                "office-guest": "Keep"
+              },
+              "scheduler": "Fifo",
+              "priority_dscp": [],
+              "high_buffer": 0,
+              "standard_buffer": 8
+            },
+            "tested": null,
+            "diagnostic": null
+          },
+          "practice": {
+            "draft": {
+              "marks": {
+                "workshop-interactive": "Keep",
+                "workshop-report": "Keep",
+                "workshop-guest": "Keep"
+              },
+              "scheduler": "Fifo",
+              "priority_dscp": [],
+              "high_buffer": 0,
+              "standard_buffer": 8
+            },
+            "tested": null,
+            "diagnostic": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "Qos",
+        "definition": {
+          "initial": {
+            "id": "ccna-qos-mark-boundary",
+            "task": "Rewrite every office-interactive packet to DSCP 46. Rewrite every untrusted office-guest packet to DSCP 0, regardless of its incoming label. Preserve the incoming DSCP on office-report; it varies between supplied packets. Deliver every packet in all three packet patterns. Queue priority is not required for this boundary-label task.",
+            "streams": [
+              {
+                "id": "office-interactive",
+                "label": "Interactive stream",
+                "description": "Trusted interactive application traffic."
+              },
+              {
+                "id": "office-report",
+                "label": "Report stream",
+                "description": "Bulk reports; keep each incoming label."
+              },
+              {
+                "id": "office-guest",
+                "label": "Guest stream",
+                "description": "Untrusted guests; incoming labels do not establish trust."
+              }
+            ],
+            "workloads": [
+              {
+                "id": "case-1",
+                "label": "Opening burst",
+                "fixture": {
+                  "flows": [
+                    "office-guest",
+                    "office-interactive",
+                    "office-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p0-0",
+                      "flow": "office-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-1",
+                      "flow": "office-interactive",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-2",
+                      "flow": "office-guest",
+                      "arrival": 0,
+                      "dscp": 46
+                    },
+                    {
+                      "id": "p0-3",
+                      "flow": "office-interactive",
+                      "arrival": 1,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p0-4",
+                      "flow": "office-report",
+                      "arrival": 1,
+                      "dscp": 8
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              },
+              {
+                "id": "case-2",
+                "label": "Later interactive arrivals",
+                "fixture": {
+                  "flows": [
+                    "office-guest",
+                    "office-interactive",
+                    "office-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p1-0",
+                      "flow": "office-report",
+                      "arrival": 0,
+                      "dscp": 8
+                    },
+                    {
+                      "id": "p1-1",
+                      "flow": "office-interactive",
+                      "arrival": 0,
+                      "dscp": 34
+                    },
+                    {
+                      "id": "p1-2",
+                      "flow": "office-guest",
+                      "arrival": 0,
+                      "dscp": 63
+                    },
+                    {
+                      "id": "p1-3",
+                      "flow": "office-interactive",
+                      "arrival": 1,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p1-4",
+                      "flow": "office-report",
+                      "arrival": 1,
+                      "dscp": 0
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              },
+              {
+                "id": "case-3",
+                "label": "Repeated interactive arrivals",
+                "fixture": {
+                  "flows": [
+                    "office-guest",
+                    "office-interactive",
+                    "office-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p2-0",
+                      "flow": "office-report",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p2-1",
+                      "flow": "office-interactive",
+                      "arrival": 0,
+                      "dscp": 8
+                    },
+                    {
+                      "id": "p2-2",
+                      "flow": "office-guest",
+                      "arrival": 0,
+                      "dscp": 8
+                    },
+                    {
+                      "id": "p2-3",
+                      "flow": "office-interactive",
+                      "arrival": 1,
+                      "dscp": 34
+                    },
+                    {
+                      "id": "p2-4",
+                      "flow": "office-report",
+                      "arrival": 1,
+                      "dscp": 10
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Mark",
+                "flow": "office-interactive",
+                "dscp": 46
+              },
+              {
+                "kind": "Mark",
+                "flow": "office-guest",
+                "dscp": 0
+              },
+              {
+                "kind": "PreserveMark",
+                "flow": "office-report"
+              },
+              {
+                "kind": "DeliverAll",
+                "flow": "office-interactive"
+              },
+              {
+                "kind": "DeliverAll",
+                "flow": "office-report"
+              },
+              {
+                "kind": "DeliverAll",
+                "flow": "office-guest"
+              }
+            ],
+            "starter": {
+              "marks": {
+                "office-interactive": "Keep",
+                "office-report": "Keep",
+                "office-guest": "Keep"
+              },
+              "scheduler": "Fifo",
+              "priority_dscp": [],
+              "high_buffer": 0,
+              "standard_buffer": 8
+            }
+          },
+          "example": {
+            "id": "worked-0",
+            "task": "Rewrite every workshop-interactive packet to DSCP 12. Rewrite every untrusted workshop-guest packet to DSCP 0, regardless of its incoming label. Preserve the incoming DSCP on workshop-report; it varies between supplied packets. Deliver every packet in all three packet patterns. Queue priority is not required for this boundary-label task.",
+            "streams": [
+              {
+                "id": "workshop-interactive",
+                "label": "Interactive stream",
+                "description": "Trusted interactive application traffic."
+              },
+              {
+                "id": "workshop-report",
+                "label": "Report stream",
+                "description": "Bulk reports; keep each incoming label."
+              },
+              {
+                "id": "workshop-guest",
+                "label": "Guest stream",
+                "description": "Untrusted guests; incoming labels do not establish trust."
+              }
+            ],
+            "workloads": [
+              {
+                "id": "case-1",
+                "label": "Opening burst",
+                "fixture": {
+                  "flows": [
+                    "workshop-guest",
+                    "workshop-interactive",
+                    "workshop-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p0-0",
+                      "flow": "workshop-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-1",
+                      "flow": "workshop-interactive",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-2",
+                      "flow": "workshop-guest",
+                      "arrival": 0,
+                      "dscp": 12
+                    },
+                    {
+                      "id": "p0-3",
+                      "flow": "workshop-interactive",
+                      "arrival": 1,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p0-4",
+                      "flow": "workshop-report",
+                      "arrival": 1,
+                      "dscp": 8
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              },
+              {
+                "id": "case-2",
+                "label": "Later interactive arrivals",
+                "fixture": {
+                  "flows": [
+                    "workshop-guest",
+                    "workshop-interactive",
+                    "workshop-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p1-0",
+                      "flow": "workshop-report",
+                      "arrival": 0,
+                      "dscp": 8
+                    },
+                    {
+                      "id": "p1-1",
+                      "flow": "workshop-interactive",
+                      "arrival": 0,
+                      "dscp": 34
+                    },
+                    {
+                      "id": "p1-2",
+                      "flow": "workshop-guest",
+                      "arrival": 0,
+                      "dscp": 63
+                    },
+                    {
+                      "id": "p1-3",
+                      "flow": "workshop-interactive",
+                      "arrival": 1,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p1-4",
+                      "flow": "workshop-report",
+                      "arrival": 1,
+                      "dscp": 0
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              },
+              {
+                "id": "case-3",
+                "label": "Repeated interactive arrivals",
+                "fixture": {
+                  "flows": [
+                    "workshop-guest",
+                    "workshop-interactive",
+                    "workshop-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p2-0",
+                      "flow": "workshop-report",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p2-1",
+                      "flow": "workshop-interactive",
+                      "arrival": 0,
+                      "dscp": 8
+                    },
+                    {
+                      "id": "p2-2",
+                      "flow": "workshop-guest",
+                      "arrival": 0,
+                      "dscp": 8
+                    },
+                    {
+                      "id": "p2-3",
+                      "flow": "workshop-interactive",
+                      "arrival": 1,
+                      "dscp": 34
+                    },
+                    {
+                      "id": "p2-4",
+                      "flow": "workshop-report",
+                      "arrival": 1,
+                      "dscp": 10
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Mark",
+                "flow": "workshop-interactive",
+                "dscp": 12
+              },
+              {
+                "kind": "Mark",
+                "flow": "workshop-guest",
+                "dscp": 0
+              },
+              {
+                "kind": "PreserveMark",
+                "flow": "workshop-report"
+              },
+              {
+                "kind": "DeliverAll",
+                "flow": "workshop-interactive"
+              },
+              {
+                "kind": "DeliverAll",
+                "flow": "workshop-report"
+              },
+              {
+                "kind": "DeliverAll",
+                "flow": "workshop-guest"
+              }
+            ],
+            "starter": {
+              "marks": {
+                "workshop-interactive": "Keep",
+                "workshop-report": "Keep",
+                "workshop-guest": "Keep"
+              },
+              "scheduler": "Fifo",
+              "priority_dscp": [],
+              "high_buffer": 0,
+              "standard_buffer": 8
+            }
+          },
+          "example_worked": {
+            "marks": {
+              "workshop-interactive": {
+                "Set": 12
+              },
+              "workshop-report": "Keep",
+              "workshop-guest": {
+                "Set": 0
+              }
+            },
+            "scheduler": "Fifo",
+            "priority_dscp": [],
+            "high_buffer": 0,
+            "standard_buffer": 8
+          }
+        }
+      },
+      "solution": [
+        "QOS POLICY\n{\"marks\":{\"office-interactive\":{\"Set\":46},\"office-report\":\"Keep\",\"office-guest\":{\"Set\":0}},\"scheduler\":\"Fifo\",\"priority_dscp\":[],\"high_buffer\":0,\"standard_buffer\":8}"
+      ],
+      "prerequisites": [
+        "ccna-ipv4-network-route"
+      ],
+      "retry_guidance": "Compare the required outcome with actual labels, queue, drops and waiting in the failing packet pattern. Keep correct checks; change one policy decision and rerun.",
+      "explanation": "The reference is one supported policy, not a required command string. Classification and marking happen before queue selection; explicit mappings determine priority. Finite buffers and a one-packet-per-slot link derive actual departures and drops. All deterministic packet patterns are checked, and edits clear the tested result. Equivalent policies are accepted when every required outcome holds."
+    },
+    {
+      "id": "ccna-qos-queue-bursts",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-qos-hop",
+      "topic": "Per-hop traffic treatment",
+      "title": "Protect interactive packets when a shared link is busy",
+      "summary": "Repair queue selection so interactive packets wait less without losing reports.",
+      "objective": "Let every uplink-interactive packet begin transmission in its arrival slot: zero queue waiting in all three packet patterns. Deliver every uplink-report packet and preserve all incoming DSCP labels. Use at most the supplied eight waiting places across both queues. One equal-size packet can be transmitted per virtual slot; slots are not milliseconds.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the traffic policy",
+        "Try a different worked system",
+        "Repair the complete assignment"
+      ],
+      "guide": [],
+      "hints": [
+        "Read incoming labels, chosen queue and actual results separately; a larger DSCP number is not a priority rank.",
+        "Inspect every failed packet pattern and preserve the streams named in the task. Do not hide a delay failure by dropping packets.",
+        "Use the optional worked policy only when you want the full explanation; several supported queue sizes or non-high guest labels can be valid."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc2474"
+      ],
+      "simplifications": "Sources checked 2026-11-02: CCNA current v1.1/4.7 and RFC2474. Supplied named-flow classification only, equal-size packets, integer teaching slots, one packet per slot, explicit two-queue strict priority or FIFO, finite waiting buffers and tail drop. No host packets, network, clock, IOS, arbitrary header filters, variable serialization, fairness guarantee, RED/WRED/ECN, policing, shaping, TCP or end-to-end guarantee. This is a narrow practical slice, not complete QoS/exam preparation.",
+      "initial": {
+        "kind": "Qos",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-qos-queue-bursts",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "marks": {
+                "uplink-interactive": "Keep",
+                "uplink-report": "Keep"
+              },
+              "scheduler": "Fifo",
+              "priority_dscp": [],
+              "high_buffer": 0,
+              "standard_buffer": 8
+            },
+            "tested": null,
+            "diagnostic": null
+          },
+          "practice": {
+            "draft": {
+              "marks": {
+                "training-interactive": "Keep",
+                "training-report": "Keep"
+              },
+              "scheduler": "Fifo",
+              "priority_dscp": [],
+              "high_buffer": 0,
+              "standard_buffer": 8
+            },
+            "tested": null,
+            "diagnostic": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "Qos",
+        "definition": {
+          "initial": {
+            "id": "ccna-qos-queue-bursts",
+            "task": "Let every uplink-interactive packet begin transmission in its arrival slot: zero queue waiting in all three packet patterns. Deliver every uplink-report packet and preserve all incoming DSCP labels. Use at most the supplied eight waiting places across both queues. One equal-size packet can be transmitted per virtual slot; slots are not milliseconds.",
+            "streams": [
+              {
+                "id": "uplink-interactive",
+                "label": "Interactive stream",
+                "description": "Trusted interactive application traffic."
+              },
+              {
+                "id": "uplink-report",
+                "label": "Report stream",
+                "description": "Bulk reports; keep each incoming label."
+              }
+            ],
+            "workloads": [
+              {
+                "id": "case-1",
+                "label": "Opening burst",
+                "fixture": {
+                  "flows": [
+                    "uplink-interactive",
+                    "uplink-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p0-0",
+                      "flow": "uplink-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-1",
+                      "flow": "uplink-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-2",
+                      "flow": "uplink-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-3",
+                      "flow": "uplink-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-4",
+                      "flow": "uplink-interactive",
+                      "arrival": 1,
+                      "dscp": 46
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              },
+              {
+                "id": "case-2",
+                "label": "Later interactive arrivals",
+                "fixture": {
+                  "flows": [
+                    "uplink-interactive",
+                    "uplink-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p1-0",
+                      "flow": "uplink-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p1-1",
+                      "flow": "uplink-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p1-2",
+                      "flow": "uplink-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p1-3",
+                      "flow": "uplink-interactive",
+                      "arrival": 1,
+                      "dscp": 46
+                    },
+                    {
+                      "id": "p1-4",
+                      "flow": "uplink-report",
+                      "arrival": 2,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p1-5",
+                      "flow": "uplink-interactive",
+                      "arrival": 3,
+                      "dscp": 46
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              },
+              {
+                "id": "case-3",
+                "label": "Repeated interactive arrivals",
+                "fixture": {
+                  "flows": [
+                    "uplink-interactive",
+                    "uplink-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p2-0",
+                      "flow": "uplink-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p2-1",
+                      "flow": "uplink-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p2-2",
+                      "flow": "uplink-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p2-3",
+                      "flow": "uplink-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p2-4",
+                      "flow": "uplink-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p2-5",
+                      "flow": "uplink-interactive",
+                      "arrival": 0,
+                      "dscp": 46
+                    },
+                    {
+                      "id": "p2-6",
+                      "flow": "uplink-interactive",
+                      "arrival": 1,
+                      "dscp": 46
+                    },
+                    {
+                      "id": "p2-7",
+                      "flow": "uplink-interactive",
+                      "arrival": 2,
+                      "dscp": 46
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "MaxWait",
+                "flow": "uplink-interactive",
+                "slots": 0
+              },
+              {
+                "kind": "DeliverAll",
+                "flow": "uplink-report"
+              },
+              {
+                "kind": "PreserveMark",
+                "flow": "uplink-interactive"
+              },
+              {
+                "kind": "PreserveMark",
+                "flow": "uplink-report"
+              }
+            ],
+            "starter": {
+              "marks": {
+                "uplink-interactive": "Keep",
+                "uplink-report": "Keep"
+              },
+              "scheduler": "Fifo",
+              "priority_dscp": [],
+              "high_buffer": 0,
+              "standard_buffer": 8
+            }
+          },
+          "example": {
+            "id": "worked-1",
+            "task": "Let every training-interactive packet begin transmission in its arrival slot: zero queue waiting in all three packet patterns. Deliver every training-report packet and preserve all incoming DSCP labels. Use at most the supplied eight waiting places across both queues. One equal-size packet can be transmitted per virtual slot; slots are not milliseconds.",
+            "streams": [
+              {
+                "id": "training-interactive",
+                "label": "Interactive stream",
+                "description": "Trusted interactive application traffic."
+              },
+              {
+                "id": "training-report",
+                "label": "Report stream",
+                "description": "Bulk reports; keep each incoming label."
+              }
+            ],
+            "workloads": [
+              {
+                "id": "case-1",
+                "label": "Opening burst",
+                "fixture": {
+                  "flows": [
+                    "training-interactive",
+                    "training-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p0-0",
+                      "flow": "training-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-1",
+                      "flow": "training-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-2",
+                      "flow": "training-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-3",
+                      "flow": "training-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-4",
+                      "flow": "training-interactive",
+                      "arrival": 1,
+                      "dscp": 10
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              },
+              {
+                "id": "case-2",
+                "label": "Later interactive arrivals",
+                "fixture": {
+                  "flows": [
+                    "training-interactive",
+                    "training-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p1-0",
+                      "flow": "training-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p1-1",
+                      "flow": "training-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p1-2",
+                      "flow": "training-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p1-3",
+                      "flow": "training-interactive",
+                      "arrival": 1,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p1-4",
+                      "flow": "training-report",
+                      "arrival": 2,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p1-5",
+                      "flow": "training-interactive",
+                      "arrival": 3,
+                      "dscp": 10
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              },
+              {
+                "id": "case-3",
+                "label": "Repeated interactive arrivals",
+                "fixture": {
+                  "flows": [
+                    "training-interactive",
+                    "training-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p2-0",
+                      "flow": "training-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p2-1",
+                      "flow": "training-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p2-2",
+                      "flow": "training-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p2-3",
+                      "flow": "training-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p2-4",
+                      "flow": "training-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p2-5",
+                      "flow": "training-interactive",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p2-6",
+                      "flow": "training-interactive",
+                      "arrival": 1,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p2-7",
+                      "flow": "training-interactive",
+                      "arrival": 2,
+                      "dscp": 10
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "MaxWait",
+                "flow": "training-interactive",
+                "slots": 0
+              },
+              {
+                "kind": "DeliverAll",
+                "flow": "training-report"
+              },
+              {
+                "kind": "PreserveMark",
+                "flow": "training-interactive"
+              },
+              {
+                "kind": "PreserveMark",
+                "flow": "training-report"
+              }
+            ],
+            "starter": {
+              "marks": {
+                "training-interactive": "Keep",
+                "training-report": "Keep"
+              },
+              "scheduler": "Fifo",
+              "priority_dscp": [],
+              "high_buffer": 0,
+              "standard_buffer": 8
+            }
+          },
+          "example_worked": {
+            "marks": {
+              "training-interactive": "Keep",
+              "training-report": "Keep"
+            },
+            "scheduler": "StrictPriority",
+            "priority_dscp": [
+              10
+            ],
+            "high_buffer": 2,
+            "standard_buffer": 6
+          }
+        }
+      },
+      "solution": [
+        "QOS POLICY\n{\"marks\":{\"uplink-interactive\":\"Keep\",\"uplink-report\":\"Keep\"},\"scheduler\":\"StrictPriority\",\"priority_dscp\":[46],\"high_buffer\":2,\"standard_buffer\":6}"
+      ],
+      "prerequisites": [
+        "ccna-qos-mark-boundary"
+      ],
+      "retry_guidance": "Compare the required outcome with actual labels, queue, drops and waiting in the failing packet pattern. Keep correct checks; change one policy decision and rerun.",
+      "explanation": "The reference is one supported policy, not a required command string. Classification and marking happen before queue selection; explicit mappings determine priority. Finite buffers and a one-packet-per-slot link derive actual departures and drops. All deterministic packet patterns are checked, and edits clear the tested result. Equivalent policies are accepted when every required outcome holds."
+    },
+    {
+      "id": "ccna-qos-trusted-handover",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-qos-hop",
+      "topic": "Per-hop traffic treatment",
+      "title": "Hand over a trusted queue policy without starving other traffic",
+      "summary": "Repair trust, queue capacity and delivery together across the supplied packet patterns.",
+      "objective": "Mark branch-interactive as DSCP 46 and give every packet zero queue waiting in all three packet patterns. Keep every branch-guest packet outside the high queue and deliver all of them. Any outgoing guest label that satisfies that policy is acceptable. Preserve every incoming label on branch-report and deliver every report packet. Share no more than eight waiting places between the queues. Do not solve a delay problem by dropping the delayed traffic.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the traffic policy",
+        "Try a different worked system",
+        "Repair the complete assignment"
+      ],
+      "guide": [],
+      "hints": [
+        "Read incoming labels, chosen queue and actual results separately; a larger DSCP number is not a priority rank.",
+        "Inspect every failed packet pattern and preserve the streams named in the task. Do not hide a delay failure by dropping packets.",
+        "Use the optional worked policy only when you want the full explanation; several supported queue sizes or non-high guest labels can be valid."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc2474"
+      ],
+      "simplifications": "Sources checked 2026-11-02: CCNA current v1.1/4.7 and RFC2474. Supplied named-flow classification only, equal-size packets, integer teaching slots, one packet per slot, explicit two-queue strict priority or FIFO, finite waiting buffers and tail drop. No host packets, network, clock, IOS, arbitrary header filters, variable serialization, fairness guarantee, RED/WRED/ECN, policing, shaping, TCP or end-to-end guarantee. This is a narrow practical slice, not complete QoS/exam preparation.",
+      "initial": {
+        "kind": "Qos",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-qos-trusted-handover",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "marks": {
+                "branch-interactive": {
+                  "Set": 46
+                },
+                "branch-report": "Keep",
+                "branch-guest": "Keep"
+              },
+              "scheduler": "StrictPriority",
+              "priority_dscp": [
+                46
+              ],
+              "high_buffer": 5,
+              "standard_buffer": 3
+            },
+            "tested": null,
+            "diagnostic": null
+          },
+          "practice": {
+            "draft": {
+              "marks": {
+                "classroom-interactive": {
+                  "Set": 10
+                },
+                "classroom-report": "Keep",
+                "classroom-guest": "Keep"
+              },
+              "scheduler": "StrictPriority",
+              "priority_dscp": [
+                10
+              ],
+              "high_buffer": 5,
+              "standard_buffer": 3
+            },
+            "tested": null,
+            "diagnostic": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "Qos",
+        "definition": {
+          "initial": {
+            "id": "ccna-qos-trusted-handover",
+            "task": "Mark branch-interactive as DSCP 46 and give every packet zero queue waiting in all three packet patterns. Keep every branch-guest packet outside the high queue and deliver all of them. Any outgoing guest label that satisfies that policy is acceptable. Preserve every incoming label on branch-report and deliver every report packet. Share no more than eight waiting places between the queues. Do not solve a delay problem by dropping the delayed traffic.",
+            "streams": [
+              {
+                "id": "branch-interactive",
+                "label": "Interactive stream",
+                "description": "Trusted interactive application traffic."
+              },
+              {
+                "id": "branch-report",
+                "label": "Report stream",
+                "description": "Bulk reports; keep each incoming label."
+              },
+              {
+                "id": "branch-guest",
+                "label": "Guest stream",
+                "description": "Untrusted guests; incoming labels do not establish trust."
+              }
+            ],
+            "workloads": [
+              {
+                "id": "case-1",
+                "label": "Opening burst",
+                "fixture": {
+                  "flows": [
+                    "branch-guest",
+                    "branch-interactive",
+                    "branch-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p0-0",
+                      "flow": "branch-guest",
+                      "arrival": 0,
+                      "dscp": 46
+                    },
+                    {
+                      "id": "p0-1",
+                      "flow": "branch-guest",
+                      "arrival": 0,
+                      "dscp": 46
+                    },
+                    {
+                      "id": "p0-2",
+                      "flow": "branch-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-3",
+                      "flow": "branch-report",
+                      "arrival": 0,
+                      "dscp": 8
+                    },
+                    {
+                      "id": "p0-4",
+                      "flow": "branch-interactive",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-5",
+                      "flow": "branch-interactive",
+                      "arrival": 2,
+                      "dscp": 8
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              },
+              {
+                "id": "case-2",
+                "label": "Later interactive arrivals",
+                "fixture": {
+                  "flows": [
+                    "branch-guest",
+                    "branch-interactive",
+                    "branch-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p1-0",
+                      "flow": "branch-guest",
+                      "arrival": 0,
+                      "dscp": 46
+                    },
+                    {
+                      "id": "p1-1",
+                      "flow": "branch-guest",
+                      "arrival": 0,
+                      "dscp": 46
+                    },
+                    {
+                      "id": "p1-2",
+                      "flow": "branch-guest",
+                      "arrival": 0,
+                      "dscp": 46
+                    },
+                    {
+                      "id": "p1-3",
+                      "flow": "branch-guest",
+                      "arrival": 0,
+                      "dscp": 46
+                    },
+                    {
+                      "id": "p1-4",
+                      "flow": "branch-report",
+                      "arrival": 0,
+                      "dscp": 8
+                    },
+                    {
+                      "id": "p1-5",
+                      "flow": "branch-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p1-6",
+                      "flow": "branch-interactive",
+                      "arrival": 1,
+                      "dscp": 8
+                    },
+                    {
+                      "id": "p1-7",
+                      "flow": "branch-interactive",
+                      "arrival": 2,
+                      "dscp": 0
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              },
+              {
+                "id": "case-3",
+                "label": "Repeated interactive arrivals",
+                "fixture": {
+                  "flows": [
+                    "branch-guest",
+                    "branch-interactive",
+                    "branch-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p2-0",
+                      "flow": "branch-guest",
+                      "arrival": 0,
+                      "dscp": 46
+                    },
+                    {
+                      "id": "p2-1",
+                      "flow": "branch-guest",
+                      "arrival": 0,
+                      "dscp": 46
+                    },
+                    {
+                      "id": "p2-2",
+                      "flow": "branch-guest",
+                      "arrival": 0,
+                      "dscp": 46
+                    },
+                    {
+                      "id": "p2-3",
+                      "flow": "branch-report",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p2-4",
+                      "flow": "branch-report",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p2-5",
+                      "flow": "branch-interactive",
+                      "arrival": 0,
+                      "dscp": 34
+                    },
+                    {
+                      "id": "p2-6",
+                      "flow": "branch-interactive",
+                      "arrival": 2,
+                      "dscp": 34
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Mark",
+                "flow": "branch-interactive",
+                "dscp": 46
+              },
+              {
+                "kind": "MaxWait",
+                "flow": "branch-interactive",
+                "slots": 0
+              },
+              {
+                "kind": "AvoidPriority",
+                "flow": "branch-guest"
+              },
+              {
+                "kind": "DeliverAll",
+                "flow": "branch-guest"
+              },
+              {
+                "kind": "PreserveMark",
+                "flow": "branch-report"
+              },
+              {
+                "kind": "DeliverAll",
+                "flow": "branch-report"
+              }
+            ],
+            "starter": {
+              "marks": {
+                "branch-interactive": {
+                  "Set": 46
+                },
+                "branch-report": "Keep",
+                "branch-guest": "Keep"
+              },
+              "scheduler": "StrictPriority",
+              "priority_dscp": [
+                46
+              ],
+              "high_buffer": 5,
+              "standard_buffer": 3
+            }
+          },
+          "example": {
+            "id": "worked-2",
+            "task": "Mark classroom-interactive as DSCP 10 and give every packet zero queue waiting in all three packet patterns. Keep every classroom-guest packet outside the high queue and deliver all of them. Any outgoing guest label that satisfies that policy is acceptable. Preserve every incoming label on classroom-report and deliver every report packet. Share no more than eight waiting places between the queues. Do not solve a delay problem by dropping the delayed traffic.",
+            "streams": [
+              {
+                "id": "classroom-interactive",
+                "label": "Interactive stream",
+                "description": "Trusted interactive application traffic."
+              },
+              {
+                "id": "classroom-report",
+                "label": "Report stream",
+                "description": "Bulk reports; keep each incoming label."
+              },
+              {
+                "id": "classroom-guest",
+                "label": "Guest stream",
+                "description": "Untrusted guests; incoming labels do not establish trust."
+              }
+            ],
+            "workloads": [
+              {
+                "id": "case-1",
+                "label": "Opening burst",
+                "fixture": {
+                  "flows": [
+                    "classroom-guest",
+                    "classroom-interactive",
+                    "classroom-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p0-0",
+                      "flow": "classroom-guest",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p0-1",
+                      "flow": "classroom-guest",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p0-2",
+                      "flow": "classroom-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-3",
+                      "flow": "classroom-report",
+                      "arrival": 0,
+                      "dscp": 8
+                    },
+                    {
+                      "id": "p0-4",
+                      "flow": "classroom-interactive",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p0-5",
+                      "flow": "classroom-interactive",
+                      "arrival": 2,
+                      "dscp": 8
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              },
+              {
+                "id": "case-2",
+                "label": "Later interactive arrivals",
+                "fixture": {
+                  "flows": [
+                    "classroom-guest",
+                    "classroom-interactive",
+                    "classroom-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p1-0",
+                      "flow": "classroom-guest",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p1-1",
+                      "flow": "classroom-guest",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p1-2",
+                      "flow": "classroom-guest",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p1-3",
+                      "flow": "classroom-guest",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p1-4",
+                      "flow": "classroom-report",
+                      "arrival": 0,
+                      "dscp": 8
+                    },
+                    {
+                      "id": "p1-5",
+                      "flow": "classroom-report",
+                      "arrival": 0,
+                      "dscp": 0
+                    },
+                    {
+                      "id": "p1-6",
+                      "flow": "classroom-interactive",
+                      "arrival": 1,
+                      "dscp": 8
+                    },
+                    {
+                      "id": "p1-7",
+                      "flow": "classroom-interactive",
+                      "arrival": 2,
+                      "dscp": 0
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              },
+              {
+                "id": "case-3",
+                "label": "Repeated interactive arrivals",
+                "fixture": {
+                  "flows": [
+                    "classroom-guest",
+                    "classroom-interactive",
+                    "classroom-report"
+                  ],
+                  "packets": [
+                    {
+                      "id": "p2-0",
+                      "flow": "classroom-guest",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p2-1",
+                      "flow": "classroom-guest",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p2-2",
+                      "flow": "classroom-guest",
+                      "arrival": 0,
+                      "dscp": 10
+                    },
+                    {
+                      "id": "p2-3",
+                      "flow": "classroom-report",
+                      "arrival": 0,
+                      "dscp": 18
+                    },
+                    {
+                      "id": "p2-4",
+                      "flow": "classroom-report",
+                      "arrival": 0,
+                      "dscp": 18
+                    },
+                    {
+                      "id": "p2-5",
+                      "flow": "classroom-interactive",
+                      "arrival": 0,
+                      "dscp": 34
+                    },
+                    {
+                      "id": "p2-6",
+                      "flow": "classroom-interactive",
+                      "arrival": 2,
+                      "dscp": 34
+                    }
+                  ],
+                  "buffer_budget": 8
+                }
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Mark",
+                "flow": "classroom-interactive",
+                "dscp": 10
+              },
+              {
+                "kind": "MaxWait",
+                "flow": "classroom-interactive",
+                "slots": 0
+              },
+              {
+                "kind": "AvoidPriority",
+                "flow": "classroom-guest"
+              },
+              {
+                "kind": "DeliverAll",
+                "flow": "classroom-guest"
+              },
+              {
+                "kind": "PreserveMark",
+                "flow": "classroom-report"
+              },
+              {
+                "kind": "DeliverAll",
+                "flow": "classroom-report"
+              }
+            ],
+            "starter": {
+              "marks": {
+                "classroom-interactive": {
+                  "Set": 10
+                },
+                "classroom-report": "Keep",
+                "classroom-guest": "Keep"
+              },
+              "scheduler": "StrictPriority",
+              "priority_dscp": [
+                10
+              ],
+              "high_buffer": 5,
+              "standard_buffer": 3
+            }
+          },
+          "example_worked": {
+            "marks": {
+              "classroom-interactive": {
+                "Set": 10
+              },
+              "classroom-report": "Keep",
+              "classroom-guest": {
+                "Set": 0
+              }
+            },
+            "scheduler": "StrictPriority",
+            "priority_dscp": [
+              10
+            ],
+            "high_buffer": 2,
+            "standard_buffer": 6
+          }
+        }
+      },
+      "solution": [
+        "QOS POLICY\n{\"marks\":{\"branch-interactive\":{\"Set\":46},\"branch-report\":\"Keep\",\"branch-guest\":{\"Set\":0}},\"scheduler\":\"StrictPriority\",\"priority_dscp\":[46],\"high_buffer\":2,\"standard_buffer\":6}"
+      ],
+      "prerequisites": [
+        "ccna-qos-queue-bursts"
+      ],
+      "retry_guidance": "Compare the required outcome with actual labels, queue, drops and waiting in the failing packet pattern. Keep correct checks; change one policy decision and rerun.",
+      "explanation": "The reference is one supported policy, not a required command string. Classification and marking happen before queue selection; explicit mappings determine priority. Finite buffers and a one-packet-per-slot link derive actual departures and drops. All deterministic packet patterns are checked, and edits clear the tested result. Equivalent policies are accepted when every required outcome holds."
+    }
+  ]
+}

@@ -513,56 +513,72 @@ pub(super) fn observation_lines(effect: &core::Effect) -> Vec<String> {
     }
 }
 fn state_panel(ui: &mut egui::Ui, s: &core::State, p: &Presentation, metrics: &mut Metrics) {
-    ui.strong("Applied policy and existing maps");
-    if let Some(r) = s.configuration().dynamic {
-        ui.label(format!(
-            "Dynamic eligibility: {}/{} · pool {}–{}",
-            r.source.network, r.source.length, r.pool.first, r.pool.last
-        ));
-    } else {
-        ui.label("Dynamic mapping disabled");
-    }
-    // Borrow existing state; observing or checking never creates a binding.
-    let mapping = |id: &str| {
-        if let Some(g) = s.configuration().statics.get(id) {
-            format!("{g} · Static")
-        } else if let Some(g) = s.bindings().get(id) {
-            format!("{g} · Dynamic")
+    let panel = ui.scope(|ui| {
+        ui.strong("Applied policy and existing maps");
+        if let Some(r) = s.configuration().dynamic {
+            ui.label(format!(
+                "Dynamic eligibility: {}/{} · pool {}–{}",
+                r.source.network, r.source.length, r.pool.first, r.pool.last
+            ));
         } else {
-            "No current mapping".into()
+            ui.label("Dynamic mapping disabled");
         }
-    };
-    if ui.available_width() < controls::height(ui) * 15. {
-        for (id, addr) in &s.inventory().inside {
-            ui.label(format!("{id} · {addr}"));
-            ui.label(mapping(id));
-            ui.separator();
-        }
-    } else {
-        egui::Grid::new("nat-mapping-table")
-            .striped(true)
-            .show(ui, |ui| {
-                ui.strong("Inside");
-                ui.strong("Local address");
-                ui.strong("Existing global / type");
-                ui.end_row();
-                for (id, addr) in &s.inventory().inside {
-                    ui.label(id);
-                    ui.label(addr.to_string());
-                    ui.label(mapping(id));
-                    ui.end_row();
-                }
-            });
-    }
-    if let Some(effect) = &p.effect {
-        ui.strong("Last explicit action");
-        let r = ui.vertical(|ui| {
-            for line in observation_lines(effect) {
-                ui.label(line);
+        // Borrow existing state; observing or checking never creates a binding.
+        let mapping = |id: &str| {
+            if let Some(g) = s.configuration().statics.get(id) {
+                format!("{g} · Static")
+            } else if let Some(g) = s.bindings().get(id) {
+                format!("{g} · Dynamic")
+            } else {
+                "No current mapping".into()
             }
-        });
-        metrics.nat_observation = Some(r.response.rect);
-    }
+        };
+        if ui.available_width() < controls::height(ui) * 15. {
+            for (id, addr) in &s.inventory().inside {
+                ui.label(format!("{id} · {addr}"));
+                ui.label(mapping(id));
+                ui.separator();
+            }
+        } else {
+            egui::Grid::new("nat-mapping-table")
+                .striped(true)
+                .show(ui, |ui| {
+                    ui.strong("Inside");
+                    ui.strong("Local address");
+                    ui.strong("Existing global / type");
+                    ui.end_row();
+                    for (id, addr) in &s.inventory().inside {
+                        ui.label(id);
+                        ui.label(addr.to_string());
+                        ui.label(mapping(id));
+                        ui.end_row();
+                    }
+                });
+        }
+        ui.strong("Last explicit action");
+        // Three result lines fit without moving after Apply becomes a packet probe.
+        // Narrow wrapping can still grow naturally; no text is truncated or shrunk.
+        let height =
+            (ui.text_style_height(&egui::TextStyle::Body) + ui.spacing().item_spacing.y) * 3.;
+        let r = ui.allocate_ui_with_layout(
+            egui::vec2(ui.available_width(), height),
+            egui::Layout::top_down(egui::Align::Min),
+            |ui| {
+                ui.set_min_height(height);
+                if let Some(effect) = &p.effect {
+                    for line in observation_lines(effect) {
+                        ui.label(line);
+                    }
+                } else {
+                    ui.label("No action performed yet.");
+                }
+            },
+        );
+        if p.effect.is_some() {
+            metrics.nat_observation = Some(r.response.rect);
+        }
+    });
+    metrics.nat_state = Some(panel.response.rect);
 }
 // Borrow only the memo in card closures, leaving unrelated mutable UI fields free.
 pub(super) fn solved_with_memo(memo: &memo::Memo, a: &Attempt, s: &Scenario) -> bool {
@@ -820,15 +836,27 @@ impl LabApp {
                 return;
             }
         }
+        if view == teaching::View::Example {
+            ccna_presentation::example(ui, s, true);
+        }
         if view == teaching::View::Introduction {
             if let Some(l) = &s.nat_teaching {
-                ui.label(&l.prerequisite_note);
-                for c in &l.concepts {
-                    ui.strong(&c.title);
-                    ui.label(&c.text);
+                if ccna_presentation::enabled(s) {
+                    ccna_presentation::concepts(
+                        ui,
+                        s,
+                        &l.prerequisite_note,
+                        l.concepts.iter().map(|c| (c.title.clone(), c.text.clone())),
+                    );
+                } else {
+                    ui.label(&l.prerequisite_note);
+                    for c in &l.concepts {
+                        ui.strong(&c.title);
+                        ui.label(&c.text);
+                    }
                 }
-                ui.strong("A separate example to try");
-                ui.label(&l.example_description);
+                lesson_presentation::worked(ui, &l.example_description);
+                lesson_presentation::worked_rows(ui, s);
                 ui.add_enabled_ui(active, |ui| {
                     ui.horizontal_wrapped(|ui| {
                         let r = ui.add(primary(ui, "Try the separate example"));
@@ -882,8 +910,10 @@ impl LabApp {
                 ui.label("The retained practice action has another context.");
                 return;
             }
-            ui.label("Separate practice · Ungraded. Assignment state and drafts stay saved.");
-            ui.label(&lesson.example_description);
+
+            if !ccna_presentation::enabled(s) {
+                ui.label(&lesson.example_description);
+            }
             let old = l.selected_action;
             ui.add_enabled_ui(active, |ui| {
                 let picker =
@@ -930,7 +960,7 @@ impl LabApp {
             }
             (&l.fixture, &mut l.simulation, &mut l.draft)
         } else {
-            ui.label(&s.objective);
+            ccna_presentation::assignment(ui, s);
             let (
                 engine::State::BasicNat {
                     simulation: initial,
@@ -1005,7 +1035,7 @@ impl LabApp {
             .unwrap_or(&[]);
             let r = controls::feedback(ui, check, |ui| {
                 if practice {
-                    ui.strong("Example checks · No assignment credit");
+                    ui.strong("Actual example results");
                 }
                 for (index, (ok, message)) in rows.iter().enumerate() {
                     let response = ui.label(check_text(*ok, message));

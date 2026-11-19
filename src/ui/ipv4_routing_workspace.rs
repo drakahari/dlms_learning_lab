@@ -56,14 +56,28 @@ impl LabApp {
         match view {
             teaching::View::Introduction => {
                 let lesson = s.ipv4_routing_teaching.as_ref().unwrap();
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for concept in &lesson.concepts {
-                    ui.label(RichText::new(&concept.title).strong());
-                    ui.label(&concept.text);
+                if ccna_presentation::enabled(&s) {
+                    ccna_presentation::concepts(
+                        ui,
+                        &s,
+                        &lesson.prerequisite_note,
+                        lesson
+                            .concepts
+                            .iter()
+                            .map(|c| (c.title.clone(), c.text.clone())),
+                    );
+                } else {
+                    ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
+                    for concept in &lesson.concepts {
+                        ui.label(RichText::new(&concept.title).strong());
+                        ui.label(&concept.text);
+                    }
                 }
-                ui.label(RichText::new("A configuration example to try").strong());
-                ui.label(&lesson.example_description);
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                lesson_presentation::worked(ui, &lesson.example_description);
+                lesson_presentation::worked_rows(ui, &s);
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change));
+                }
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -78,9 +92,14 @@ impl LabApp {
                 });
             }
             teaching::View::Example => {
+                ccna_presentation::example(ui, &s, true);
                 let lesson = s.ipv4_routing_teaching.as_ref().unwrap();
-                ui.label("Practice example · Not graded; your assignment stays separate.");
-                ui.label(&lesson.example_description);
+                if !ccna_presentation::enabled(&s) {
+                    ui.label("Practice example · Not graded; your assignment stays separate.");
+                }
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(&lesson.example_description);
+                }
                 let mut learning = self.progress.attempts[&s.id]
                     .workspace
                     .as_ref()
@@ -107,7 +126,9 @@ impl LabApp {
                     learning.view = teaching::View::Assignment;
                     self.set_routing_v4_view(i, teaching::View::Assignment);
                 }
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change));
+                }
                 let old = learning.draft.clone();
                 configuration_editor(
                     ui,
@@ -167,7 +188,7 @@ impl LabApp {
                     .routing_v4_learning = Some(learning);
             }
             teaching::View::Assignment => {
-                ui.label(&s.objective);
+                ccna_presentation::assignment(ui, &s);
                 let State::Ipv4Routing { topology } = self.progress.attempts[&s.id].state.clone()
                 else {
                     return;
@@ -349,7 +370,11 @@ fn configuration_editor(
                 egui::Layout::top_down(egui::Align::Min),
                 |ui| {
                     ui.set_width(250.);
-                    neighbors(ui, topology, draft);
+                    let height = ui.text_style_height(&egui::TextStyle::Body) * 15.;
+                    egui::ScrollArea::vertical()
+                        .id_salt(("routing-v4-neighbors", index, practice))
+                        .max_height(height)
+                        .show(ui, |ui| neighbors(ui, topology, draft));
                 },
             );
             ui.allocate_ui_with_layout(
@@ -520,20 +545,55 @@ fn device_controls(
     } else {
         ui.label(RichText::new("Enter an address/prefix for each connected network. Link labels show which interfaces share a virtual cable.").small().color(palette(ui).muted));
         let before_focus = *focus;
-        for (port, iface) in &mut device.interfaces {
-            ui.horizontal_wrapped(|ui| {
-                controls::label(ui, RichText::new(port).strong(), 165.);
-                ui.checkbox(&mut iface.up, "Interface up");
-            });
-            field(
-                ui,
-                "Address/prefix",
-                &mut iface.address,
-                32,
-                (index, practice, &name, port, "address"),
-                metrics,
-                focus,
-            );
+        if ui.available_width() >= 600. {
+            egui::Grid::new(("routing-v4-interface-table", index, practice, &name))
+                .num_columns(3)
+                .spacing([12., 8.])
+                .show(ui, |ui| {
+                    ui.strong("Interface");
+                    ui.strong("State");
+                    ui.strong("Address/prefix");
+                    ui.end_row();
+                    for (port, iface) in &mut device.interfaces {
+                        controls::label(ui, RichText::new(port).strong(), 100.);
+                        ui.checkbox(&mut iface.up, "Up");
+                        let r = ui.add_sized(
+                            [250_f32.min(ui.available_width()), controls::height(ui)],
+                            controls::singleline(ui, &mut iface.address)
+                                .id(egui::Id::new((index, practice, &name, port, "address")))
+                                .char_limit(32),
+                        );
+                        name_control(&r, format!("{name}/{port} · Address/prefix"));
+                        metrics.inputs.push(r.rect);
+                        metrics.focus.get_or_insert(r.id);
+                        if *focus
+                            && !ui.input(|i| i.pointer.any_pressed() || i.pointer.any_released())
+                        {
+                            r.request_focus();
+                            *focus = false;
+                        }
+                        if r.changed() {
+                            workspace::bound(&mut iface.address, 32);
+                        }
+                        ui.end_row();
+                    }
+                });
+        } else {
+            for (port, iface) in &mut device.interfaces {
+                ui.horizontal_wrapped(|ui| {
+                    controls::label(ui, RichText::new(port).strong(), 165.);
+                    ui.checkbox(&mut iface.up, "Interface up");
+                });
+                field(
+                    ui,
+                    "Address/prefix",
+                    &mut iface.address,
+                    32,
+                    (index, practice, &name, port, "address"),
+                    metrics,
+                    focus,
+                );
+            }
         }
         if before_focus && *focus {
             ui.ctx().request_repaint();
@@ -581,7 +641,7 @@ pub(super) fn field(
                 controls::height(ui),
             ],
             controls::singleline(ui, value)
-                .id_salt(id)
+                .id(egui::Id::new(id))
                 .char_limit(limit),
         );
         r.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::TextEdit, true, label));

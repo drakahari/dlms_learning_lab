@@ -57,6 +57,7 @@ pub(super) struct RpmMetrics {
     pub next: Option<egui::Rect>,
     pub notice: Option<egui::Rect>,
     pub inspection_text: Vec<String>,
+    pub origin_rows: Vec<(egui::Rect, egui::Rect)>,
 }
 #[derive(Default)]
 pub(super) struct Presentation {
@@ -469,15 +470,30 @@ fn simulated_inspector(
                             "Mode {:o} · owner {} · group {} · mtime {}",
                             f.mode, f.owner, f.group, f.mtime
                         ));
+                        // Retain the same bounded text actually painted for native review.
+                        let rendered_text = display(&f.contents);
+                        metrics.rpm.inspection_text.push(rendered_text.to_string());
                         ui.add(
-                            egui::Label::new(
-                                RichText::new(display(&f.contents).as_ref()).monospace(),
-                            )
-                            .wrap()
-                            .selectable(true),
+                            egui::Label::new(RichText::new(rendered_text.as_ref()).monospace())
+                                .wrap()
+                                .selectable(true),
                         );
                     } else {
                         ui.label("Missing");
+                    }
+                }
+                if definition.patch_policy.is_some() {
+                    for suffix in [".rpmnew", ".rpmsave"] {
+                        let sidecar = format!("{path}{suffix}");
+                        if let Some(file) = state.runtime().files.get(&sidecar) {
+                            ui.strong("Staged configuration file · Read-only");
+                            ui.add(egui::Label::new(RichText::new(&sidecar).monospace()).wrap());
+                            let text = display(&file.contents);
+                            metrics.rpm.inspection_text.push(sidecar);
+                            metrics.rpm.inspection_text.push(text.to_string());
+                            ui.add(egui::Label::new(RichText::new(text.as_ref()).monospace())
+                                .wrap().selectable(true));
+                        }
                     }
                 }
             }
@@ -759,7 +775,6 @@ fn page_body(
 ) {
     let active = e.active;
     m.package_heading = Some(ui.heading(&s.title).rect);
-    ui.label(RichText::new(&s.objective).strong());
     ui.label(
         RichText::new(
             "Script-free RPM simulation · Commands operate only on declared virtual data",
@@ -802,13 +817,14 @@ fn page_body(
     }
     if view == teaching::View::Introduction {
         if let Some(l) = &s.rpm_packages_teaching {
-            ui.label(&l.prerequisite_note);
-            for c in &l.concepts {
-                ui.strong(&c.title);
-                ui.label(&c.text);
-            }
-            ui.strong("A separate example to investigate");
-            ui.label(&l.example_description);
+            lesson_presentation::concepts(
+                ui,
+                s,
+                &l.prerequisite_note,
+                l.concepts.iter().map(|c| (c.title.clone(), c.text.clone())),
+            );
+            lesson_presentation::worked(ui, &l.example_description);
+            lesson_presentation::worked_rows(ui, s);
             ui.add_enabled_ui(active, |ui| {
                 ui.horizontal_wrapped(|ui| {
                     for (label, target) in [
@@ -832,6 +848,20 @@ fn page_body(
         return;
     }
     let practice = view == teaching::View::Example;
+    if !practice {
+        lesson_presentation::assignment(ui, s);
+    }
+    // Only new source-owned patch activities show these supplied training facts.
+    // Old RPM lessons keep their existing workspace and appearance.
+    if let Some(definition) = if practice {
+        s.rpm_packages_teaching.as_ref().map(|l| &l.definition)
+    } else if let engine::Goal::RpmPackages { definition } = &s.goal {
+        Some(definition.as_ref())
+    } else {
+        None
+    } {
+        patch_facts(ui, definition, &mut m.rpm);
+    }
     let check_key =
         active && ui.input_mut(|i| i.consume_key(egui::Modifiers::CTRL, egui::Key::Enter));
     let scope = egui::Id::new(("rpm-workspace", &s.id, practice, p.epoch));
@@ -844,8 +874,7 @@ fn page_body(
             ui.colored_label(palette(ui).error,"The separate example selection differs from its authored source; previous work retained");
             return;
         }
-        ui.label("Practice example · Ungraded; separate packages and command history");
-        ui.label(&source.example_description);
+        lesson_presentation::practice_step(ui, s, 0);
         example_picker(ui, scope, a, source, m, e);
         if e.inserted {
             p.notice = None;
@@ -861,14 +890,15 @@ fn page_body(
             .as_ref()
             .unwrap()
             .selected_example;
-        ui.label(&source.example_commands[selected].explanation);
+        lesson_presentation::practice_step(ui, s, 1);
+        lesson_presentation::prose(ui, &source.example_commands[selected].explanation);
         ui.label(
             RichText::new(
                 "Insert fills the example command only. Read it, then press Run command.",
             )
             .small(),
         );
-        egui::CollapsingHeader::new("Try a change, then repair")
+        egui::CollapsingHeader::new("Full experiment and repair notes")
             .id_salt(scope.with("experiment"))
             .show(ui, |ui| {
                 ui.label(&source.try_change.description);
@@ -924,6 +954,9 @@ fn page_body(
         ui.add_enabled_ui(active, |ui| {
             simulated_inspector(ui, scope, state, definition, &mut p.inspect, m)
         });
+    }
+    if practice {
+        lesson_presentation::practice_step(ui, s, 2);
     }
     let response = ui.add_enabled(
         active,
@@ -1072,6 +1105,43 @@ fn page_body(
             }
         }
     }
+}
+
+fn patch_facts(ui: &mut egui::Ui, definition: &work::Definition, metrics: &mut RpmMetrics) {
+    let Some(policy) = &definition.patch_policy else { return; };
+    ui.add_space(ui.spacing().item_spacing.y);
+    ui.strong("Supplied training advisories");
+    for advisory in &policy.advisories {
+        lesson_presentation::prose(ui, &format!("{} · {} · {} {} · first fixed build {}",
+            advisory.id, advisory.package.name, advisory.product, advisory.release,
+            advisory.fixed_in.as_str()));
+    }
+    ui.label(RichText::new("Fictional practice facts. Verify installed data; no real CVE or running-service result is inferred.").small());
+    // Grid cell UIs report their own provisional width. Use the outer width once,
+    // before entering the grid, so a first layout cannot collapse into tiny cells.
+    let available = ui.available_width();
+    let narrow = available < ui.text_style_height(&egui::TextStyle::Body) * 38.0;
+    let gap = ui.spacing().item_spacing.x;
+    let left = if narrow { available } else { (available - gap) * 0.58 };
+    let right = if narrow { available } else { available - gap - left };
+    ui.strong("Local archive origins");
+    egui::Grid::new(ui.id().with(("patch-origin-facts", narrow)))
+        .num_columns(if narrow { 1 } else { 2 })
+        .min_col_width(0.)
+        .max_col_width(left.max(right))
+        .spacing([gap, ui.spacing().item_spacing.y])
+        .show(ui, |ui| {
+            for (path, archive) in &definition.archive_paths {
+                let origin = &policy.origins[archive];
+                let path_rect = controls::table_text_rect(ui, RichText::new(path).monospace(), left);
+                if narrow { ui.end_row(); }
+                let origin_rect = controls::table_text_rect(ui,
+                    format!("{} · system release {}", origin.product, origin.release), right);
+                metrics.origin_rows.push((path_rect, origin_rect));
+                ui.end_row();
+            }
+        });
+    ui.add_space(ui.spacing().item_spacing.y);
 }
 fn example_picker(
     ui: &mut egui::Ui,

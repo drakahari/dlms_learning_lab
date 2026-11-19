@@ -208,3 +208,39 @@ The74 retained outputs and source/executable bundle have manifest SHA256
 `5141c690ec4d12c887f78e62fd3b0e2603476a619b18bbb26e486fa415ff9a89`.
 M456 verifies the complete bundle without executing a probe or reference worker.
 Independent raw readback is recorded separately in the implementation ledger.
+
+
+## Later fixed GNU inode-directory comparison (2026-11-05)
+
+A separate `links_inode_reference.py` fixture adds six supported `ls -i` directory
+queries, two expressly excluded forms and one version call. MAIN runner R07/R08
+actually executed them against original0755 `/usr/bin/ls`, GNU coreutils9.10.
+No GNU implementation or manual text is imported into the application. This is
+bounded development reference execution; learner commands still use the in-process
+VFS exclusively. Closed C environment, held ELF descriptors, child-only NNP proof,
+CPU/address-space/time/output limits and project-disk fixtures apply; this is not
+a filesystem jail or proof of zero runtime-library reads.
+
+One owned world contains aliases across directories, an independent copy, regular
+mode0 data, symbolic and dangling entries, hidden-only/empty directories, a symbolic
+directory operand and literal dash/space names. Before/after FD snapshots preserve
+all16nodes/bytes/modes/targets. Each raw number is bound to its actual no-follow
+entry inode, not merely a matching equality partition. Compare ordered names,
+global identity relations and width-relative columns; real and virtual numeric IDs
+are intentionally different. All six supported rows match. GNU-valid FILE and -a
+outputs are retained separately; two honest VM refusals are **not** matches or
+supported options. No TTY-column, complete utility, permission, mount or platform
+conformance follows.
+
+Private retained attempt: `.build-artifacts/reference-runs/links-inode-r1`.
+Control702aa932cfbee85bbfd10ebd559d0b91aebaf5c9d24d24741e83b7a282b798b1;
+original LS54e936d37decdad9ecaf189b1de347605a0a99037ec87bd17679b6cbde871a0c;
+executed probe48185ece42fa9f9f315917e88de7f52b9fe2186879da6c170d1437fbbfc8f3fa.
+Actual observation36d43979d60142dc5073b2499821b03dc53b6637d9741845e638d273417e7287;
+comparison e30f95ab05e44f7b846b39010f86c6ca5638de5eb3f8deed44d61036de871fdb.
+The probe's actual668-file commitment is independently recomputed from89121
+canonical bytes: e1bb5df44788aeb599f484e5d3aa1c421141ed2895ec49286f91ba65f6a8d532.
+Independent final readback f004188c5844e75cd92c6f7a5b80c7b8607af19481241ea00880b10267bc83aa.
+Source/proposal alone and17guard groups do not substitute for these observations.
+The old8+6 reference and all failures stay immutable. Later UI/content edits do
+not retroactively change the retained source or authorize replay of this control.

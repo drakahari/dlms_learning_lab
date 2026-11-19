@@ -121,6 +121,7 @@ fn fixture() -> State {
         entries.insert(p.into(), e);
     }
     let policy = Policy {
+        editable_skeleton_leaves: BTreeMap::new(),
         fixture: "account-review".into(),
         today: EpochDay::parse("2026-10-23").unwrap(),
         protected_users: strings(&["root", "archive-service"]),

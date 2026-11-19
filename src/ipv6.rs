@@ -1,4 +1,5 @@
 //! Pure bounded IPv6 addressing and deterministic static forwarding; no network I/O.
+pub mod interface_id;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -518,6 +519,12 @@ pub struct InterfaceCondition {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Requirement {
+    ModifiedEui64 {
+        device: String,
+        interface: String,
+        mac: String,
+        network: Prefix,
+    },
     AddressIn {
         device: String,
         interface: String,
@@ -548,6 +555,12 @@ impl Requirement {
     pub fn valid_for(&self, t: &Topology) -> bool {
         let port = |d: &str, p: &str| t.devices.get(d).and_then(|d| d.interfaces.get(p));
         match self {
+            Self::ModifiedEui64 {
+                device,
+                interface,
+                mac,
+                network,
+            } => port(device, interface).is_some() && interface_id::address(mac, network).is_ok(),
             Self::AddressIn {
                 device,
                 interface,
@@ -606,6 +619,19 @@ impl Requirement {
             );
         }
         match self {
+            Self::ModifiedEui64 {
+                device,
+                interface,
+                mac,
+                network,
+            } => {
+                let (pass, message) = interface_id::check(
+                    t.devices[device].interfaces[interface].address.as_ref(),
+                    mac,
+                    network,
+                );
+                (pass, format!("{device}/{interface}: {message}"))
+            }
             Self::AddressIn {
                 device,
                 interface,

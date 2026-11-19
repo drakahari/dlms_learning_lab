@@ -123,8 +123,8 @@ fn mac_port_field_edit_invalidates_success_and_practice_undo_keeps_assignment_dr
     assert!(app.metrics.vlan_fields.is_empty());
     accounts_ui_click(&ctx, &mut app, |m| m.mac_settings);
     draw(&ctx, &mut app);
-    let (id, rect) = app.metrics.vlan_fields[0];
-    click(&ctx, &mut app, rect);
+    let (id, _rect) = app.metrics.vlan_fields[0];
+    accounts_ui_click(&ctx, &mut app, |m| m.vlan_fields.first().map(|v| v.1));
     assert!(ctx.memory(|m| m.has_focus(id)));
     frame(
         &ctx,
@@ -276,7 +276,7 @@ fn mac_pending_settings_teach_apply_while_vlan_keeps_its_actual_check_instructio
     for (view, expected) in [
         (
             teaching::View::Assignment,
-            "Draft changes · Check configuration applies and tests them",
+            "Draft not verified · Check configuration to apply and test these edits",
         ),
         (
             teaching::View::Example,
@@ -349,7 +349,12 @@ fn mac_preservation_only_tasks_start_with_send_and_table_and_optional_configurat
         "Quiet probes do not require a real wait"
     );
     assert!(!text.contains("Entry lifetime (seconds; 0 disables expiry)"));
-    assert!(text.contains("Learned MAC entries · applied state"));
+    reveal_ui_control(&ctx, &mut a, |m| m.mac_inspect);
+    let table_text = mac_rendered_text(&ctx, &mut a);
+    assert!(
+        table_text.contains("Learned MAC entries · applied state"),
+        "{table_text}"
+    );
     accounts_ui_click(&ctx, &mut a, |m| m.mac_settings);
     draw(&ctx, &mut a);
     assert!(!a.metrics.vlan_fields.is_empty());
@@ -488,8 +493,8 @@ fn mac_optional_port_typing_keeps_focus_identity_and_undo_in_the_same_section() 
         .unwrap()
         .mac_draft
         .clone();
-    let (field, rect) = a.metrics.vlan_fields[0];
-    click(&ctx, &mut a, rect);
+    let (field, _rect) = a.metrics.vlan_fields[0];
+    accounts_ui_click(&ctx, &mut a, |m| m.vlan_fields.first().map(|v| v.1));
     assert!(ctx.memory(|m| m.has_focus(field)));
     frame(
         &ctx,

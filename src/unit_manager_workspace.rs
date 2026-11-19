@@ -155,6 +155,9 @@ pub enum Requirement {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Fresh {
+    /// A source-owned second startup choice. Omitted for existing lessons.
+    #[serde(default, skip_serializing_if = "Option::is_none", deserialize_with = "optional_target")]
+    pub recovery_target: Option<String>,
     #[serde(deserialize_with = "requirements")]
     pub requirements: Vec<Requirement>,
     #[serde(deserialize_with = "core::names")]
@@ -162,6 +165,12 @@ pub struct Fresh {
     #[serde(deserialize_with = "orderings")]
     pub ordering: Vec<Ordering>,
 }
+fn optional_target<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<String>, D::Error> {
+    #[derive(Deserialize)]
+    struct BoundedTarget(#[serde(deserialize_with = "core::text128")] String);
+    Option::<BoundedTarget>::deserialize(deserializer).map(|target| target.map(|value| value.0))
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Preservation {
@@ -276,6 +285,10 @@ impl Draft {
 pub enum EditAction {
     Save { draft: Draft },
     Manager { action: Action },
+    Startup {
+        #[serde(default, deserialize_with = "optional_target")]
+        target: Option<String>,
+    },
 }
 /// Borrowed shape/scalar preflight for direct callers and teaching metadata.
 /// It deliberately does not execute a job or parse a future edited document.
@@ -286,6 +299,9 @@ pub(crate) fn valid_action(initial: &State, action: &EditAction) -> bool {
     let inventory = initial.inventory();
     match action {
         EditAction::Save { draft } => draft.same_shape(initial),
+        EditAction::Startup { target } => target.as_ref().is_none_or(|target| {
+            inventory.units.contains(target) && target.ends_with(".target")
+        }),
         EditAction::Manager { action } => match action {
             Action::SaveUnit { unit, text } => {
                 inventory.units.contains(unit) && text.len() <= core::MAX_UNIT_BYTES
@@ -318,6 +334,14 @@ pub fn apply(
             Ok(None)
         }
         EditAction::Manager { action } => state.apply(action).map(Some).map_err(|e| e.to_string()),
+        EditAction::Startup { target } => {
+            let (next, report, _) = match target {
+                None => state.fresh_session_inspected(),
+                Some(target) => state.fresh_session_at(target),
+            }.map_err(|error| error.to_string())?;
+            *state = next;
+            Ok(Some(report))
+        }
     }
 }
 fn link_present(state: &State, target: &str, unit: &str) -> bool {
@@ -470,6 +494,14 @@ impl Definition {
                 .requirements
                 .iter()
                 .any(|r| matches!(r, Requirement::SavedConfigurationValid {}))
+            || self.fresh.recovery_target.as_ref().is_some_and(|target| {
+                target == self.initial.default_target()
+                    || !target.ends_with(".target")
+                    || !self.initial.documents().get(target).is_some_and(|source| {
+                        core::parse_unit(i, target, source)
+                            .is_ok_and(|unit| matches!(unit.kind, core::UnitType::Target))
+                    })
+            })
             || self.fresh.started.len() > core::MAX_UNITS
             || self.fresh.ordering.len() > 16
             || self.fresh.started.iter().any(|s| !i.units.contains(s))
@@ -757,6 +789,41 @@ pub fn inspect_fresh(
         .map_err(|e| e.to_string())?;
     Ok((fresh, start, initialized, ordering))
 }
+
+fn ordinary_requirement(
+    state: &State,
+    requirement: &Requirement,
+    start: &core::Report,
+    initialized: &core::Report,
+) -> (bool, String) {
+    let (ok, message) = check_requirement(state, requirement);
+    let detail = match requirement {
+        Requirement::Runtime { unit, port, value, .. } if !ok => {
+            let job_error = start.jobs.iter().chain(&initialized.jobs).find_map(|job| {
+                match &job.result {
+                    core::JobResult::Failed { message, .. } if job.unit == *unit => Some(message),
+                    _ => None,
+                }
+            });
+            if let Some(error) = job_error {
+                format!("{unit} failed. {}. Check the saved input, then test again.", error.trim_end_matches('.'))
+            } else if let Ok(Some(result)) = state.result(unit) {
+                if let (Some(expected), Some(actual)) = (value, result.value.as_deref()) {
+                    format!("{unit} produced {actual:?}. Its saved configuration should produce {:?}.", expected.as_str())
+                } else if let (Some(expected), Some(actual)) = (port, result.port) {
+                    format!("{unit} used port {actual}. Its saved configuration should use {expected}.")
+                } else {
+                    message
+                }
+            } else {
+                message
+            }
+        }
+        _ => message,
+    };
+    (ok, format!("Ordinary startup: {detail}"))
+}
+
 pub fn checks(def: &Definition, state: &State, draft: &Draft) -> Vec<(bool, String)> {
     if !def.same_assignment(state) || !draft.same_shape(state) {
         return vec![(
@@ -771,10 +838,15 @@ pub fn checks(def: &Definition, state: &State, draft: &Draft) -> Vec<(bool, Stri
     out.extend(def.requirements.iter().map(|r| check_requirement(state, r)));
     out.extend(preservation_checks(def, state));
     match inspect_fresh(state) {
-        Ok((fresh, start, _initialized, ordering)) => {
+        Ok((fresh, start, initialized, ordering)) => {
+            let recovery_lesson = def.fresh.recovery_target.is_some();
             out.extend(def.fresh.requirements.iter().map(|r| {
-                let (ok, message) = check_requirement(&fresh, r);
-                (ok, format!("Fresh session: {message}"))
+                if recovery_lesson {
+                    ordinary_requirement(&fresh, r, &start, &initialized)
+                } else {
+                    let (ok, message) = check_requirement(&fresh, r);
+                    (ok, format!("Fresh session: {message}"))
+                }
             }));
             for unit in &def.fresh.started {
                 out.push((start.jobs.iter().any(|j|j.unit==*unit&&j.result.succeeded()),format!("Fresh session: {unit} must complete its start job; program outcomes are checked separately")));

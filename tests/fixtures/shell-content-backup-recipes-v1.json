@@ -1,0 +1,730 @@
+{
+  "schema_version": 1,
+  "projects": {
+    "snapshot": {
+      "source": "if test \"$#\" -eq 0 || test \"$#\" -gt 8; then\n    printf 'Usage: snapshot FILE...\\n' >&2\n    exit 2\nfi\nif test -f snapshot.index; then\n    printf 'Existing snapshot index\\n' >&2\n    exit 2\nfi\nnames=()\nfor name in \"$@\"; do\n    case \"$name\" in\n        ''|.|..|*/*|snapshot.index|copy-*) printf 'Invalid name\\n' >&2; exit 2 ;;\n    esac\n    names=(\"${names[@]}\" \"$name\")\ndone\nseen=()\nfor name in \"${names[@]}\"; do\n    for earlier in \"${seen[@]}\"; do\n        if test \"$name\" = \"$earlier\"; then\n            printf 'Duplicate request\\n' >&2\n            exit 2\n        fi\n    done\n    seen=(\"${seen[@]}\" \"$name\")\ndone\nfor name in \"${names[@]}\"; do\n    if test -f \"$name\"; then :; else\n        printf 'Missing source: %s\\n' \"$name\" >&2\n        exit 2\n    fi\n    if test -f \"copy-$name\"; then\n        printf 'Backup already exists: copy-%s\\n' \"$name\" >&2\n        exit 2\n    fi\ndone\nfor name in \"${names[@]}\"; do\n    cat < \"$name\" > \"copy-$name\"\ndone\nprintf '%s\\n' \"${names[@]}\" > snapshot.index\nprintf 'Saved: %s files\\n' \"${#names[@]}\"\n",
+      "alternate": "if test \"$#\" -eq 0 || test \"$#\" -gt 8; then printf 'Usage: snapshot FILE...\\n' >&2; exit 2; fi\nif test -f snapshot.index; then printf 'Existing snapshot index\\n' >&2; exit 2; fi\nfor name in \"$@\"; do\n    case \"$name\" in ''|.|..|*/*|snapshot.index|copy-*) printf 'Invalid name\\n' >&2; exit 2 ;; esac\ndone\nfor name in \"$@\"; do\n    matches=0\n    for other in \"$@\"; do\n        if test \"$other\" = \"$name\"; then matches=$((matches + 1)); fi\n    done\n    if test \"$matches\" -gt 1; then printf 'Duplicate request\\n' >&2; exit 2; fi\ndone\nfor name in \"$@\"; do\n    if test -f \"$name\"; then :; else printf 'Missing source: %s\\n' \"$name\" >&2; exit 2; fi\n    if test -f \"copy-$name\"; then printf 'Backup already exists: copy-%s\\n' \"$name\" >&2; exit 2; fi\ndone\nfor name in \"$@\"; do cat < \"$name\" > \"copy-$name\"; done\nprintf '%s\\n' \"$@\" > snapshot.index\nprintf 'Saved: %s files\\n' \"$#\"\n",
+      "cases": [
+        {
+          "name": "Preserve multiple final newlines and a non-LF tail",
+          "args": [
+            "alpha.txt",
+            "beta.txt"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/alpha.txt": "one\n\n",
+            "/work/beta.txt": "tail"
+          },
+          "stdout": "Saved: 2 files\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/alpha.txt": "one\n\n",
+            "/work/beta.txt": "tail",
+            "/work/copy-alpha.txt": "one\n\n",
+            "/work/copy-beta.txt": "tail",
+            "/work/snapshot.index": "alpha.txt\nbeta.txt\n"
+          }
+        },
+        {
+          "name": "Empty source is a valid copy",
+          "args": [
+            "blank"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/blank": ""
+          },
+          "stdout": "Saved: 1 files\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/blank": "",
+            "/work/copy-blank": "",
+            "/work/snapshot.index": "blank\n"
+          }
+        },
+        {
+          "name": "Literal special and padded filenames",
+          "args": [
+            "*",
+            "-n",
+            " pad name ",
+            "%done",
+            "-",
+            "back\\slash"
+          ],
+          "stdin": "This input is deliberately not the dash file.\n",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/*": "literal star\n",
+            "/work/-n": "not an option\n",
+            "/work/ pad name ": "keep spacing\n",
+            "/work/%done": "100% $literal \\n",
+            "/work/-": "Literal dash filename contents.\n",
+            "/work/back\\slash": "Keep literal backslash.\n"
+          },
+          "stdout": "Saved: 6 files\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/*": "literal star\n",
+            "/work/-n": "not an option\n",
+            "/work/ pad name ": "keep spacing\n",
+            "/work/%done": "100% $literal \\n",
+            "/work/copy-*": "literal star\n",
+            "/work/copy--n": "not an option\n",
+            "/work/copy- pad name ": "keep spacing\n",
+            "/work/copy-%done": "100% $literal \\n",
+            "/work/snapshot.index": "*\n-n\n pad name \n%done\n-\nback\\slash\n",
+            "/work/-": "Literal dash filename contents.\n",
+            "/work/copy--": "Literal dash filename contents.\n",
+            "/work/back\\slash": "Keep literal backslash.\n",
+            "/work/copy-back\\slash": "Keep literal backslash.\n"
+          }
+        },
+        {
+          "name": "Eight files, UTF-8 text and exact content copies",
+          "args": [
+            "rapport",
+            "part0",
+            "part1",
+            "part2",
+            "part3",
+            "part4",
+            "part5",
+            "part6"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/rapport": "Café λ\t$HOME * \\n\n",
+            "/work/part0": "piece0\n",
+            "/work/part1": "piece1\n",
+            "/work/part2": "piece2\n",
+            "/work/part3": "piece3\n",
+            "/work/part4": "piece4\n",
+            "/work/part5": "piece5\n",
+            "/work/part6": "piece6\n"
+          },
+          "stdout": "Saved: 8 files\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/rapport": "Café λ\t$HOME * \\n\n",
+            "/work/copy-rapport": "Café λ\t$HOME * \\n\n",
+            "/work/snapshot.index": "rapport\npart0\npart1\npart2\npart3\npart4\npart5\npart6\n",
+            "/work/part0": "piece0\n",
+            "/work/copy-part0": "piece0\n",
+            "/work/part1": "piece1\n",
+            "/work/copy-part1": "piece1\n",
+            "/work/part2": "piece2\n",
+            "/work/copy-part2": "piece2\n",
+            "/work/part3": "piece3\n",
+            "/work/copy-part3": "piece3\n",
+            "/work/part4": "piece4\n",
+            "/work/copy-part4": "piece4\n",
+            "/work/part5": "piece5\n",
+            "/work/copy-part5": "piece5\n",
+            "/work/part6": "piece6\n",
+            "/work/copy-part6": "piece6\n"
+          }
+        },
+        {
+          "name": "Require a request",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n"
+          },
+          "stdout": "",
+          "stderr": "Usage: snapshot FILE...\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n"
+          }
+        },
+        {
+          "name": "Reject oversized requests",
+          "args": [
+            "n0",
+            "n1",
+            "n2",
+            "n3",
+            "n4",
+            "n5",
+            "n6",
+            "n7",
+            "n8"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/n0": "0",
+            "/work/n1": "1",
+            "/work/n2": "2",
+            "/work/n3": "3",
+            "/work/n4": "4",
+            "/work/n5": "5",
+            "/work/n6": "6",
+            "/work/n7": "7",
+            "/work/n8": "8"
+          },
+          "stdout": "",
+          "stderr": "Usage: snapshot FILE...\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/n0": "0",
+            "/work/n1": "1",
+            "/work/n2": "2",
+            "/work/n3": "3",
+            "/work/n4": "4",
+            "/work/n5": "5",
+            "/work/n6": "6",
+            "/work/n7": "7",
+            "/work/n8": "8"
+          }
+        },
+        {
+          "name": "Never overwrite an existing snapshot index",
+          "args": [
+            "missing"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "previous\n"
+          },
+          "stdout": "",
+          "stderr": "Existing snapshot index\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "previous\n"
+          }
+        },
+        {
+          "name": "Validate a late path before opening any output",
+          "args": [
+            "alpha",
+            "../victim"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/alpha": "original\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid name\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/alpha": "original\n"
+          }
+        },
+        {
+          "name": "Duplicate rejection precedes source existence",
+          "args": [
+            "absent",
+            "absent"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n"
+          },
+          "stdout": "",
+          "stderr": "Duplicate request\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n"
+          }
+        },
+        {
+          "name": "Missing late source leaves no partial copies",
+          "args": [
+            "alpha",
+            "gone"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/alpha": "original\n"
+          },
+          "stdout": "",
+          "stderr": "Missing source: gone\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/alpha": "original\n"
+          }
+        },
+        {
+          "name": "Late backup collision preserves every existing file",
+          "args": [
+            "alpha",
+            "beta"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/alpha": "first\n",
+            "/work/beta": "second",
+            "/work/copy-beta": "older recovery text\n"
+          },
+          "stdout": "",
+          "stderr": "Backup already exists: copy-beta\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/alpha": "first\n",
+            "/work/beta": "second",
+            "/work/copy-beta": "older recovery text\n"
+          }
+        },
+        {
+          "name": "Reserved output namespace cannot be an input",
+          "args": [
+            "alpha",
+            "copy-beta"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/alpha": "first",
+            "/work/copy-beta": "retain\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid name\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/alpha": "first",
+            "/work/copy-beta": "retain\n"
+          }
+        }
+      ],
+      "example_source": "if test \"$#\" -eq 0 || test \"$#\" -gt 8; then\n    printf 'Usage: snapshot FILE...\\n' >&2\n    exit 2\nfi\nif test -f demo.index; then\n    printf 'Existing snapshot index\\n' >&2\n    exit 2\nfi\nnames=()\nfor name in \"$@\"; do\n    case \"$name\" in\n        ''|.|..|*/*|demo.index|saved-*) printf 'Invalid name\\n' >&2; exit 2 ;;\n    esac\n    names=(\"${names[@]}\" \"$name\")\ndone\nseen=()\nfor name in \"${names[@]}\"; do\n    for earlier in \"${seen[@]}\"; do\n        if test \"$name\" = \"$earlier\"; then\n            printf 'Duplicate request\\n' >&2\n            exit 2\n        fi\n    done\n    seen=(\"${seen[@]}\" \"$name\")\ndone\nfor name in \"${names[@]}\"; do\n    if test -f \"$name\"; then :; else\n        printf 'Missing source: %s\\n' \"$name\" >&2\n        exit 2\n    fi\n    if test -f \"saved-$name\"; then\n        printf 'Backup already exists: saved-%s\\n' \"$name\" >&2\n        exit 2\n    fi\ndone\nfor name in \"${names[@]}\"; do\n    cat < \"$name\" > \"saved-$name\"\ndone\nprintf '%s\\n' \"${names[@]}\" > demo.index\nprintf 'Saved: %s files\\n' \"${#names[@]}\"\n",
+      "example_case": {
+        "name": "Separate snapshot practice with different names and recovery files",
+        "args": [
+          "oak",
+          "fern"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/oak": "leaves\n\n",
+          "/work/fern": "tail",
+          "/work/practice.note": "Keep this separate example note.\n"
+        },
+        "stdout": "Saved: 2 files\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/oak": "leaves\n\n",
+          "/work/fern": "tail",
+          "/work/practice.note": "Keep this separate example note.\n",
+          "/work/saved-oak": "leaves\n\n",
+          "/work/saved-fern": "tail",
+          "/work/demo.index": "oak\nfern\n"
+        }
+      }
+    },
+    "restore": {
+      "source": "if test \"$#\" -ne 0; then\n    printf 'Usage: restore\\n' >&2\n    exit 2\nfi\nif test -f snapshot.index; then :; else\n    printf 'Missing snapshot index\\n' >&2\n    exit 2\nfi\nnames=()\nwhile IFS= read -r name || test -n \"$name\"; do\n    case \"$name\" in\n        ''|.|..|*/*|snapshot.index|copy-*) printf 'Invalid index entry\\n' >&2; exit 2 ;;\n    esac\n    for earlier in \"${names[@]}\"; do\n        if test \"$name\" = \"$earlier\"; then\n            printf 'Duplicate index entry: %s\\n' \"$name\" >&2\n            exit 2\n        fi\n    done\n    if test -f \"copy-$name\"; then :; else\n        printf 'Missing backup: copy-%s\\n' \"$name\" >&2\n        exit 2\n    fi\n    names=(\"${names[@]}\" \"$name\")\n    if test \"${#names[@]}\" -gt 8; then\n        printf 'Too many snapshot entries\\n' >&2\n        exit 2\n    fi\ndone < snapshot.index\nif test \"${#names[@]}\" -eq 0; then\n    printf 'Empty snapshot index\\n' >&2\n    exit 2\nfi\nfor name in \"${names[@]}\"; do\n    cat < \"copy-$name\" > \"$name\"\ndone\nprintf 'Restored: %s files\\n' \"${#names[@]}\"\n",
+      "alternate": "if test \"$#\" -ne 0; then\n    printf 'Usage: restore\\n' >&2\n    exit 2\nfi\nif test -f snapshot.index; then :; else\n    printf 'Missing snapshot index\\n' >&2\n    exit 2\nfi\nnames=()\nwhile IFS= read -r name || test -n \"$name\"; do\n    case \"$name\" in\n        ''|.|..|*/*|snapshot.index|copy-*) printf 'Invalid index entry\\n' >&2; exit 2 ;;\n    esac\n    for earlier in \"${names[@]}\"; do\n        if test \"$name\" = \"$earlier\"; then\n            printf 'Duplicate index entry: %s\\n' \"$name\" >&2\n            exit 2\n        fi\n    done\n    if test -f \"copy-$name\"; then :; else\n        printf 'Missing backup: copy-%s\\n' \"$name\" >&2\n        exit 2\n    fi\n    names=(\"${names[@]}\" \"$name\")\n    if test \"${#names[@]}\" -gt 8; then\n        printf 'Too many snapshot entries\\n' >&2\n        exit 2\n    fi\ndone < snapshot.index\nif test \"${#names[@]}\" -eq 0; then\n    printf 'Empty snapshot index\\n' >&2\n    exit 2\nfi\ncount=0\nwhile IFS= read -r name || test -n \"$name\"; do\n    cat < \"copy-$name\" > \"$name\"\n    count=$((count + 1))\ndone < snapshot.index\nprintf 'Restored: %s files\\n' \"$count\"\n",
+      "cases": [
+        {
+          "name": "Restore exact text with literal dash, backslash, padded and wildcard names",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "alpha\nbeta\n*\n-n\n pad name \n-\nback\\slash\n",
+            "/work/copy-alpha": "approved\n\n",
+            "/work/copy-beta": "tail",
+            "/work/alpha": "damaged\n",
+            "/work/copy-*": "star bytes\n",
+            "/work/copy--n": "flag bytes",
+            "/work/copy- pad name ": "space bytes\n",
+            "/work/*": "old",
+            "/work/-n": "old",
+            "/work/ pad name ": "old",
+            "/work/-": "old dash file",
+            "/work/copy--": "Correct dash file\n",
+            "/work/back\\slash": "old backslash contents",
+            "/work/copy-back\\slash": "Restored literal backslash filename.\n"
+          },
+          "stdout": "Restored: 7 files\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "alpha\nbeta\n*\n-n\n pad name \n-\nback\\slash\n",
+            "/work/copy-alpha": "approved\n\n",
+            "/work/copy-beta": "tail",
+            "/work/alpha": "approved\n\n",
+            "/work/beta": "tail",
+            "/work/copy-*": "star bytes\n",
+            "/work/copy--n": "flag bytes",
+            "/work/copy- pad name ": "space bytes\n",
+            "/work/*": "star bytes\n",
+            "/work/-n": "flag bytes",
+            "/work/ pad name ": "space bytes\n",
+            "/work/-": "Correct dash file\n",
+            "/work/copy--": "Correct dash file\n",
+            "/work/back\\slash": "Restored literal backslash filename.\n",
+            "/work/copy-back\\slash": "Restored literal backslash filename.\n"
+          }
+        },
+        {
+          "name": "Eight records include empty data and a final complete filename without LF",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "fern\nentry0\nentry1\nentry2\nentry3\nentry4\nentry5\nmoss",
+            "/work/copy-fern": "",
+            "/work/copy-moss": "correct\n\n",
+            "/work/fern": "old",
+            "/work/moss": "wrong",
+            "/work/copy-entry0": "kept0\n",
+            "/work/copy-entry1": "kept1\n",
+            "/work/copy-entry2": "kept2\n",
+            "/work/copy-entry3": "kept3\n",
+            "/work/copy-entry4": "kept4\n",
+            "/work/copy-entry5": "kept5\n"
+          },
+          "stdout": "Restored: 8 files\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "fern\nentry0\nentry1\nentry2\nentry3\nentry4\nentry5\nmoss",
+            "/work/copy-fern": "",
+            "/work/copy-moss": "correct\n\n",
+            "/work/fern": "",
+            "/work/moss": "correct\n\n",
+            "/work/copy-entry0": "kept0\n",
+            "/work/entry0": "kept0\n",
+            "/work/copy-entry1": "kept1\n",
+            "/work/entry1": "kept1\n",
+            "/work/copy-entry2": "kept2\n",
+            "/work/entry2": "kept2\n",
+            "/work/copy-entry3": "kept3\n",
+            "/work/entry3": "kept3\n",
+            "/work/copy-entry4": "kept4\n",
+            "/work/entry4": "kept4\n",
+            "/work/copy-entry5": "kept5\n",
+            "/work/entry5": "kept5\n"
+          }
+        },
+        {
+          "name": "Index cannot overwrite or consume recovery-copy names",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Keep operator note.\n",
+            "/work/snapshot.index": "copy-alpha\n",
+            "/work/copy-alpha": "Recovery source must remain.\n",
+            "/work/copy-copy-alpha": "Must not overwrite recovery source.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid index entry\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Keep operator note.\n",
+            "/work/snapshot.index": "copy-alpha\n",
+            "/work/copy-alpha": "Recovery source must remain.\n",
+            "/work/copy-copy-alpha": "Must not overwrite recovery source.\n"
+          }
+        },
+        {
+          "name": "Missing index cannot start restoration",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n"
+          },
+          "stdout": "",
+          "stderr": "Missing snapshot index\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n"
+          }
+        },
+        {
+          "name": "An empty index is not a successful recovery",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": ""
+          },
+          "stdout": "",
+          "stderr": "Empty snapshot index\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": ""
+          }
+        },
+        {
+          "name": "A late blank record prevents all writes",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "alpha\n\n",
+            "/work/copy-alpha": "approved",
+            "/work/alpha": "keep old"
+          },
+          "stdout": "",
+          "stderr": "Invalid index entry\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "alpha\n\n",
+            "/work/copy-alpha": "approved",
+            "/work/alpha": "keep old"
+          }
+        },
+        {
+          "name": "A late unsafe path prevents all writes",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "alpha\n../bad\n",
+            "/work/copy-alpha": "approved",
+            "/work/alpha": "keep old"
+          },
+          "stdout": "",
+          "stderr": "Invalid index entry\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "alpha\n../bad\n",
+            "/work/copy-alpha": "approved",
+            "/work/alpha": "keep old"
+          }
+        },
+        {
+          "name": "Duplicate entries are not restored twice",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "alpha\nalpha\n",
+            "/work/copy-alpha": "approved",
+            "/work/alpha": "keep old"
+          },
+          "stdout": "",
+          "stderr": "Duplicate index entry: alpha\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "alpha\nalpha\n",
+            "/work/copy-alpha": "approved",
+            "/work/alpha": "keep old"
+          }
+        },
+        {
+          "name": "Missing late backup prevents partial restoration",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "alpha\nmissing\n",
+            "/work/copy-alpha": "approved",
+            "/work/alpha": "keep old"
+          },
+          "stdout": "",
+          "stderr": "Missing backup: copy-missing\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "alpha\nmissing\n",
+            "/work/copy-alpha": "approved",
+            "/work/alpha": "keep old"
+          }
+        },
+        {
+          "name": "Index cannot authorize overwriting itself",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "snapshot.index\n",
+            "/work/copy-snapshot.index": "unsafe replacement"
+          },
+          "stdout": "",
+          "stderr": "Invalid index entry\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "snapshot.index\n",
+            "/work/copy-snapshot.index": "unsafe replacement"
+          }
+        },
+        {
+          "name": "A ninth entry exceeds this small project scope",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "n0\nn1\nn2\nn3\nn4\nn5\nn6\nn7\nn8\n",
+            "/work/copy-n0": "0",
+            "/work/copy-n1": "1",
+            "/work/copy-n2": "2",
+            "/work/copy-n3": "3",
+            "/work/copy-n4": "4",
+            "/work/copy-n5": "5",
+            "/work/copy-n6": "6",
+            "/work/copy-n7": "7",
+            "/work/copy-n8": "8"
+          },
+          "stdout": "",
+          "stderr": "Too many snapshot entries\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "n0\nn1\nn2\nn3\nn4\nn5\nn6\nn7\nn8\n",
+            "/work/copy-n0": "0",
+            "/work/copy-n1": "1",
+            "/work/copy-n2": "2",
+            "/work/copy-n3": "3",
+            "/work/copy-n4": "4",
+            "/work/copy-n5": "5",
+            "/work/copy-n6": "6",
+            "/work/copy-n7": "7",
+            "/work/copy-n8": "8"
+          }
+        },
+        {
+          "name": "Unexpected arguments fail before inspecting files",
+          "args": [
+            "apply"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "alpha\n",
+            "/work/copy-alpha": "approved"
+          },
+          "stdout": "",
+          "stderr": "Usage: restore\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated operator note.\n",
+            "/work/old.index": "Older independent record stays.\n",
+            "/work/snapshot.index": "alpha\n",
+            "/work/copy-alpha": "approved"
+          }
+        }
+      ],
+      "example_source": "if test \"$#\" -ne 0; then\n    printf 'Usage: restore\\n' >&2\n    exit 2\nfi\nif test -f demo.index; then :; else\n    printf 'Missing snapshot index\\n' >&2\n    exit 2\nfi\nnames=()\nwhile IFS= read -r name || test -n \"$name\"; do\n    case \"$name\" in\n        ''|.|..|*/*|demo.index|saved-*) printf 'Invalid index entry\\n' >&2; exit 2 ;;\n    esac\n    for earlier in \"${names[@]}\"; do\n        if test \"$name\" = \"$earlier\"; then\n            printf 'Duplicate index entry: %s\\n' \"$name\" >&2\n            exit 2\n        fi\n    done\n    if test -f \"saved-$name\"; then :; else\n        printf 'Missing backup: saved-%s\\n' \"$name\" >&2\n        exit 2\n    fi\n    names=(\"${names[@]}\" \"$name\")\n    if test \"${#names[@]}\" -gt 8; then\n        printf 'Too many snapshot entries\\n' >&2\n        exit 2\n    fi\ndone < demo.index\nif test \"${#names[@]}\" -eq 0; then\n    printf 'Empty snapshot index\\n' >&2\n    exit 2\nfi\nfor name in \"${names[@]}\"; do\n    cat < \"saved-$name\" > \"$name\"\ndone\nprintf 'Restored: %s files\\n' \"${#names[@]}\"\n",
+      "example_case": {
+        "name": "Separate restore practice with different names and recovery files",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/demo.index": "oak\n fern ",
+          "/work/saved-oak": "approved leaves\n\n",
+          "/work/saved- fern ": "exact tail",
+          "/work/oak": "old leaves",
+          "/work/practice.note": "Keep this separate example note.\n"
+        },
+        "stdout": "Restored: 2 files\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/demo.index": "oak\n fern ",
+          "/work/saved-oak": "approved leaves\n\n",
+          "/work/saved- fern ": "exact tail",
+          "/work/oak": "approved leaves\n\n",
+          "/work/practice.note": "Keep this separate example note.\n",
+          "/work/ fern ": "exact tail"
+        }
+      }
+    }
+  }
+}

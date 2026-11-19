@@ -1,0 +1,197 @@
+[
+  {
+    "id": "lpic1-xorg-keyboard-scope",
+    "goal": "Correct the language desk keyboard and keep the operator and spare keyboards on their existing layout.",
+    "context": "Builds on reading and editing a supplied file. The virtual host is already running a native Xorg session.",
+    "concepts": [
+      {
+        "title": "Identify the session",
+        "text": "A display manager starts a graphical session after login. In a native Xorg session the X server handles display and input for applications. DISPLAY=:0 names the local display in this exercise. A native Wayland session uses a different configuration path."
+      },
+      {
+        "title": "Read the matching rules",
+        "text": "Each InputClass applies to input devices matching its conditions. MatchIsKeyboard \"on\" requires a keyboard. MatchProduct \"Library desk\" matches that literal substring in the product name. More than one class can match the same device."
+      },
+      {
+        "title": "Apply the narrower override later",
+        "text": "A later matching class can override the layout set by a previous class. Verify that your targeted change takes effect and that the common setting remains active on the other keyboards."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Set the shared layout first",
+        "value": "Identifier \"Default keyboard\"\nMatchIsKeyboard \"on\"\nOption \"XkbLayout\" \"us\"",
+        "explanation": "This InputClass applies to each supplied keyboard. The operator and spare must keep this layout."
+      },
+      {
+        "label": "Target just one product in a later class",
+        "value": "Identifier \"Regional library desk\"\nMatchIsKeyboard \"on\"\nMatchProduct \"Library desk\"\nOption \"XkbLayout\" \"fr\"",
+        "explanation": "This InputClass overrides the layout only for the Library desk product."
+      },
+      {
+        "label": "Compare the same physical key",
+        "value": "Q position → a with fr\nQ position → q with us",
+        "explanation": "Changing the layout changes what a physical key produces. Test both the intended keyboard and the protected keyboards."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Read the supplied device names",
+        "action": "Find Training desk DE and Instructor keyboard in the inventory. Compare their names with the existing MatchProduct value.",
+        "observe": "The starter currently matches the instructor instead of the training desk."
+      },
+      {
+        "title": "Edit the product match",
+        "action": "In Virtual xorg.conf.d fragment, set the specific rule’s MatchProduct to \"Training desk DE\". Keep its de layout. Select Apply to virtual session.",
+        "observe": "The live session uses the new match. The other keyboards still use the common rule."
+      },
+      {
+        "title": "Use the physical key probe",
+        "action": "Select Physical Y. Confirm the training keyboard and the instructor produce different letters. Try the wider MatchProduct \"Workshop\", apply, and check. Restore the narrower match after observing the difference.",
+        "observe": "The German layout emits z at that position. A match on Workshop also changes the protected keyboards."
+      }
+    ],
+    "requirements": [
+      "Configure the supplied language desk for the French fr layout.",
+      "Keep the operator and spare keyboards on their US us layout.",
+      "Apply the configuration and verify the physical key probe for each device."
+    ],
+    "status": "updated",
+    "source": "scenarios/desktop-profile-lessons-v1.json",
+    "review": {
+      "introduction": "Teaches Literal Xorg InputClass matches, ordered layout precedence and a small physical position probe using a third sample.",
+      "example": "Shows the actual effect of separate edits with relevant supplies, actions and contrasting trials.",
+      "assignment": "Uses distinct virtual inputs and checks state-derived outcomes. The starter contains a real modeled failure."
+    }
+  },
+  {
+    "id": "lpic1-remote-desktop-arrangement",
+    "goal": "Let a staff observer view the existing demonstration and allow a separate employee to log in.",
+    "context": "Builds on identifying a graphical session. This activity supplies a GNOME remote desktop profile with fixed account grants.",
+    "concepts": [
+      {
+        "title": "Separate the desktop from the protocol",
+        "text": "GNOME, KDE and Xfce are desktop environments. A remote protocol tells client and service how to communicate. The supplied GNOME profile uses RDP. Its RDP listener cannot accept a VNC-only client."
+      },
+      {
+        "title": "Choose what the client should be allowed to do",
+        "text": "Desktop Sharing makes the existing desktop available. View only permits observation. Allow input control also lets that client interact. Remote Login is for a separate account to log in."
+      },
+      {
+        "title": "Check the port after changing the modes",
+        "text": "In this profile Remote Login uses TCP 3389. Desktop Sharing uses TCP 3389 when it is on by itself. With both services enabled, sharing moves to TCP 3390. The supplied identity grants determine who may use each service."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Choose the narrowest permission",
+        "value": "Desktop Sharing: View only\nRemote Login: Off",
+        "explanation": "A trainer can show a running demonstration with no remote input control. This example has no separate login request."
+      },
+      {
+        "label": "Connect the observer",
+        "value": "RDP client → TCP 3389 → View existing desktop",
+        "explanation": "The RDP client needs the port used by the active sharing service."
+      },
+      {
+        "label": "Compare a failed connection",
+        "value": "RDP client → TCP 3390 → No service",
+        "explanation": "The alternate port is unused in the sharing-only example. Choosing a different port does not add authorization."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Set the service modes",
+        "action": "Choose View only under Desktop Sharing. Turn off Remote Login for the single-observer requirement.",
+        "observe": "The line below the settings shows Desktop Sharing is now on TCP 3389."
+      },
+      {
+        "title": "Set up the observer client",
+        "action": "Choose the RDP-compatible observer and TCP 3389. Keep the employee login service off.",
+        "observe": "In this profile the observer can view. There is no active remote login grant in use."
+      },
+      {
+        "title": "Inspect and compare the trials",
+        "action": "Read the observer and employee results. Try TCP 3390 for the observer, then restore the working port. Select Check workspace.",
+        "observe": "The observer succeeds only on the listening sharing port. The unauthorized observer stays unable to connect."
+      }
+    ],
+    "requirements": [
+      "Allow the staff observer to view the existing demonstration without controlling it.",
+      "Allow the employee to log in to a separate session.",
+      "Use the compatible client and active port for each connection."
+    ],
+    "status": "updated",
+    "source": "scenarios/desktop-profile-lessons-v1.json",
+    "review": {
+      "introduction": "Teaches Existing-session sharing, view-only access, independent login and deterministic client endpoint diagnostics using a third sample.",
+      "example": "Shows the actual effect of separate edits with relevant supplies, actions and contrasting trials.",
+      "assignment": "Uses distinct virtual inputs and checks state-derived outcomes. The starter contains a real modeled failure."
+    }
+  },
+  {
+    "id": "lpic1-accessible-input-profile",
+    "goal": "Set up a virtual desk for readable text and reliable typing, then check the results on supplied samples.",
+    "context": "Builds on checking desktop input behavior. This desk simulates visual and key-event effects inside the lab.",
+    "concepts": [
+      {
+        "title": "Choose visual adjustments for the stated need",
+        "text": "Larger text and higher contrast are separate settings. Compare the reading sample with each active. A screen reader or refreshable Braille can provide access when the user needs to read without relying on the screen."
+      },
+      {
+        "title": "Press modifier keys one at a time",
+        "text": "Shift is a modifier that changes the next letter. In the simple Sticky Keys probe, tap and release Shift, then tap A. A following B is lowercase unless Shift is used again."
+      },
+      {
+        "title": "Match the typing filter to the mistake",
+        "text": "Slow Keys waits for each press to be held long enough. Bounce Keys can ignore rapid repeats of the same key. The probe shows the press time and duration so you can tell the two problems apart."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Preview a readable label",
+        "value": "Text size: Large\nHigh contrast: On",
+        "explanation": "The supplied sample shows each effect. User requirements determine which settings to keep."
+      },
+      {
+        "label": "Read a sequence with Sticky Keys",
+        "value": "Shift (released) → A (printed A) → B (printed b)",
+        "explanation": "Sticky Keys keeps Shift for the next letter in this simple probe."
+      },
+      {
+        "label": "Explain a repeated-letter filter",
+        "value": "A held 100 ms → A again 50 ms later → B\nBounce Keys keeps a then b.",
+        "explanation": "The second A was a quick repeat. The intentional B was a different key."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Preview the text adjustment",
+        "action": "In Reading sample settings, choose Large. Keep normal contrast for this example.",
+        "observe": "The sample grows while its normal contrast stays unchanged."
+      },
+      {
+        "title": "Compare the modifier sequence",
+        "action": "Read the trial once with Sticky Keys off. Turn it on and read Shift, A and B again.",
+        "observe": "A becomes uppercase even though Shift was released before the A press."
+      },
+      {
+        "title": "Filter very short taps",
+        "action": "For the supplied timing trial, choose Slow Keys · 300 ms. Compare the durations of the three presses. Select Check workspace.",
+        "observe": "The 55 ms tap is ignored and the two longer presses produce ba. Bounce Keys does not fix the initial short tap."
+      }
+    ],
+    "requirements": [
+      "Show the reading sample in large text and high contrast.",
+      "Allow a separate Shift tap to apply to the next letter.",
+      "Ignore the unintended rapid repeat while keeping short presses of different letters."
+    ],
+    "status": "updated",
+    "source": "scenarios/desktop-profile-lessons-v1.json",
+    "review": {
+      "introduction": "Teaches Simulated larger text and contrast, a one-use Shift modifier and separate short-press versus repeat timing probes using a third sample.",
+      "example": "Shows the actual effect of separate edits with relevant supplies, actions and contrasting trials.",
+      "assignment": "Uses distinct virtual inputs and checks state-derived outcomes. The starter contains a real modeled failure."
+    }
+  }
+]

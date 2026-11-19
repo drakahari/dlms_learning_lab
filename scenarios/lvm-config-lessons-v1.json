@@ -1,0 +1,1220 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-lvm-filter-policy",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM device selection",
+      "unit": "lvm-device-selection",
+      "title": "Repair a filter that hides application PVs",
+      "summary": "Repair filter ordering and exclude unrelated storage across two supplied inventories.",
+      "objective": "Allow /dev/data-main and /dev/data-spare whenever present in either supplied inventory. Exclude every other supplied device, including similar longer names and unrelated arrivals. Use the filter policy; no devices file is supplied in these checks. Save configuration, Run scan, then Check answers. Leave no unsaved edits. Keep all supplied virtual storage and metadata unchanged.",
+      "retry_guidance": "Read each failing inventory and path separately. Unsaved edits do not affect a scan. Save the repaired policy, Run scan again, and compare the actual selection mechanism and device results.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Inspect the supplied policy and inventories",
+        "Repair and save the configuration",
+        "Run the actual simulated scan",
+        "Check every requirement and repair any mistakes"
+      ],
+      "guide": [],
+      "explanation": "The leading catch-all rejection prevented later accept rules from being reached. Specific whole-path accept rules followed by a final rejection allow both required PVs when present. End anchors prevent longer lookalike names from passing, and the final rejection excludes unrelated arrivals instead of relying on the permissive unmatched default.",
+      "hints": [
+        "Read which rule matches first for a required PV. A later accept cannot undo an earlier rejection.",
+        "Each intended whole-path accept must appear before the catch-all rejection. The ^ and $ anchors distinguish exact names from longer lookalikes.",
+        "Unmatched paths are allowed. Keep an explicit final rejection and verify the supplied arrival check too."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/#rdp-we-204.3_Logical_Volume_Manager_(weight:_3)",
+        "https://man7.org/linux/man-pages/man5/lvm.conf.5.html",
+        "https://man7.org/linux/man-pages/man8/lvmdevices.8.html",
+        "https://raw.githubusercontent.com/lvmteam/lvm2/main/lib/filters/filter-regex.c"
+      ],
+      "simplifications": "Read-only in-process virtual inventories; no host LVM, devices or files. Supports one explicit devices section, use_devicesfile 0/1 and 1–8 bounded filter rules. The devices-file table models devname membership only, not real hardware IDs, PVIDs or serialization. No aliases, sysfs, udev, global_filter, config overrides, implicit defaults, activation or provisioning. These two authored tasks provide partial practice, not complete objective or real-equipment coverage. Sources checked2026-11-07.",
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/data-main": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "application"
+              },
+              "/dev/usb-copy": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/data-main-old": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "application": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "devices": {
+              "/dev/data-main": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "application"
+              },
+              "/dev/usb-copy": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/data-main-old": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "application": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "devices": {
+              "/dev/demo-fast": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "demodata"
+              },
+              "/dev/demo-usb": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/demo-fast-old": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "demodata": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "devices": {
+              "/dev/demo-fast": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "demodata"
+              },
+              "/dev/demo-usb": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/demo-fast-old": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "demodata": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0,
+          "config_scan_runtime": {
+            "version": 1,
+            "assignment": {
+              "draft": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"r|.*|\",\n    \"a|^/dev/data-main$|\",\n    \"a|^/dev/data-spare$|\"\n  ]\n}\n",
+              "saved": {
+                "config": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"r|.*|\",\n    \"a|^/dev/data-main$|\",\n    \"a|^/dev/data-spare$|\"\n  ]\n}\n",
+                "file": null
+              },
+              "draft_file": null,
+              "last_run": null
+            },
+            "example": {
+              "draft": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"r|.*|\",\n    \"a|^/dev/demo-fast$|\",\n    \"a|^/dev/demo-backup$|\"\n  ]\n}\n",
+              "saved": {
+                "config": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"r|.*|\",\n    \"a|^/dev/demo-fast$|\",\n    \"a|^/dev/demo-backup$|\"\n  ]\n}\n",
+                "file": null
+              },
+              "draft_file": null,
+              "last_run": null
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/data-main": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "application"
+              },
+              "/dev/usb-copy": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/data-main-old": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "application": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              }
+            }
+          },
+          "targets": [],
+          "config_scan_task": {
+            "context": {
+              "initial_config": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"r|.*|\",\n    \"a|^/dev/data-main$|\",\n    \"a|^/dev/data-spare$|\"\n  ]\n}\n",
+              "initial_file": null,
+              "selection_editable": false,
+              "required_mode": "filters",
+              "cases": [
+                {
+                  "label": "Current supplied inventory",
+                  "inventory": {
+                    "version": 1,
+                    "devices": {
+                      "/dev/data-main": {
+                        "bytes": 17825792,
+                        "role": "PhysicalVolume",
+                        "group": "application"
+                      },
+                      "/dev/usb-copy": {
+                        "bytes": 17825792,
+                        "role": "Foreign",
+                        "group": ""
+                      },
+                      "/dev/data-main-old": {
+                        "bytes": 17825792,
+                        "role": "Foreign",
+                        "group": ""
+                      }
+                    },
+                    "groups": {
+                      "application": {
+                        "extent_bytes": 4194304,
+                        "volumes": {}
+                      }
+                    }
+                  },
+                  "expected": [
+                    {
+                      "path": "/dev/data-main",
+                      "allowed": true
+                    },
+                    {
+                      "path": "/dev/usb-copy",
+                      "allowed": false
+                    },
+                    {
+                      "path": "/dev/data-main-old",
+                      "allowed": false
+                    }
+                  ]
+                },
+                {
+                  "label": "Supplied arrival check",
+                  "inventory": {
+                    "version": 1,
+                    "devices": {
+                      "/dev/data-main": {
+                        "bytes": 17825792,
+                        "role": "PhysicalVolume",
+                        "group": "application"
+                      },
+                      "/dev/data-spare": {
+                        "bytes": 17825792,
+                        "role": "PhysicalVolume",
+                        "group": "application"
+                      },
+                      "/dev/usb-copy": {
+                        "bytes": 17825792,
+                        "role": "Foreign",
+                        "group": ""
+                      },
+                      "/dev/data-main-old": {
+                        "bytes": 17825792,
+                        "role": "Foreign",
+                        "group": ""
+                      },
+                      "/dev/data-external": {
+                        "bytes": 17825792,
+                        "role": "Foreign",
+                        "group": ""
+                      }
+                    },
+                    "groups": {
+                      "application": {
+                        "extent_bytes": 4194304,
+                        "volumes": {}
+                      }
+                    }
+                  },
+                  "expected": [
+                    {
+                      "path": "/dev/data-main",
+                      "allowed": true
+                    },
+                    {
+                      "path": "/dev/data-spare",
+                      "allowed": true
+                    },
+                    {
+                      "path": "/dev/usb-copy",
+                      "allowed": false
+                    },
+                    {
+                      "path": "/dev/data-main-old",
+                      "allowed": false
+                    },
+                    {
+                      "path": "/dev/data-external",
+                      "allowed": false
+                    }
+                  ]
+                }
+              ]
+            },
+            "reference": [
+              {
+                "kind": "save_config",
+                "text": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"a|^/dev/data-main$|\",\n    \"a|^/dev/data-spare$|\",\n    \"r|.*|\"\n  ]\n}\n"
+              },
+              {
+                "kind": "scan"
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Build on the previous LVM inventory and application-reference lessons. A PV is storage prepared for LVM; this unit changes only which supplied virtual metadata is inspected. No storage is formatted, renamed or mounted.",
+            "concepts": [
+              {
+                "title": "Choose which devices LVM may inspect",
+                "text": "A physical volume, or PV, is a device prepared for LVM. This exercise reads only supplied virtual metadata. A filter selects paths before their PV labels are inspected; an allowed path may still contain no LVM label."
+              },
+              {
+                "title": "Read one filter rule",
+                "text": "The devices section contains a filter array: an ordered list in square brackets. Each quoted entry begins with a to accept or r to reject. In a|^/dev/demo-fast$|, the bars delimit the pattern. ^ means start and $ means end, so the whole supplied path must match. Separate accept entries are valid; you need not combine them into a complicated expression."
+              },
+              {
+                "title": "Put specific matches before the catch-all",
+                "text": "LVM uses the first matching rule for each supplied path. A leading r|.*| rejects every path before later accept entries can help. Put the specific accept rules first. A final r|.*| rejects everything else. Without a matching rule, paths are allowed, so leaving out the final rejection is a real policy mistake."
+              },
+              {
+                "title": "Check a second inventory",
+                "text": "The example scans its current inventory and a supplied arrival check. The second includes a backup PV and an unrelated device. A filter that handles only the first inventory is incomplete. No devices file is supplied, so this example uses filters; an enabled, present devices file would take precedence."
+              }
+            ],
+            "description": "Allow /dev/demo-fast and /dev/demo-backup when present. Exclude the USB device, the similar longer name and the unrelated arrival. The specific accept rules must win before the final rejection.",
+            "fixture": {
+              "version": 1,
+              "devices": {
+                "/dev/demo-fast": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "demodata"
+                },
+                "/dev/demo-usb": {
+                  "bytes": 17825792,
+                  "role": "Foreign",
+                  "group": ""
+                },
+                "/dev/demo-fast-old": {
+                  "bytes": 17825792,
+                  "role": "Foreign",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "demodata": {
+                  "extent_bytes": 4194304,
+                  "volumes": {}
+                }
+              }
+            },
+            "targets": [],
+            "worked": [],
+            "config_scan_practice": {
+              "context": {
+                "initial_config": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"r|.*|\",\n    \"a|^/dev/demo-fast$|\",\n    \"a|^/dev/demo-backup$|\"\n  ]\n}\n",
+                "initial_file": null,
+                "selection_editable": false,
+                "required_mode": "filters",
+                "cases": [
+                  {
+                    "label": "Current supplied inventory",
+                    "inventory": {
+                      "version": 1,
+                      "devices": {
+                        "/dev/demo-fast": {
+                          "bytes": 17825792,
+                          "role": "PhysicalVolume",
+                          "group": "demodata"
+                        },
+                        "/dev/demo-usb": {
+                          "bytes": 17825792,
+                          "role": "Foreign",
+                          "group": ""
+                        },
+                        "/dev/demo-fast-old": {
+                          "bytes": 17825792,
+                          "role": "Foreign",
+                          "group": ""
+                        }
+                      },
+                      "groups": {
+                        "demodata": {
+                          "extent_bytes": 4194304,
+                          "volumes": {}
+                        }
+                      }
+                    },
+                    "expected": [
+                      {
+                        "path": "/dev/demo-fast",
+                        "allowed": true
+                      },
+                      {
+                        "path": "/dev/demo-usb",
+                        "allowed": false
+                      },
+                      {
+                        "path": "/dev/demo-fast-old",
+                        "allowed": false
+                      }
+                    ]
+                  },
+                  {
+                    "label": "Supplied arrival check",
+                    "inventory": {
+                      "version": 1,
+                      "devices": {
+                        "/dev/demo-fast": {
+                          "bytes": 17825792,
+                          "role": "PhysicalVolume",
+                          "group": "demodata"
+                        },
+                        "/dev/demo-backup": {
+                          "bytes": 17825792,
+                          "role": "PhysicalVolume",
+                          "group": "demodata"
+                        },
+                        "/dev/demo-usb": {
+                          "bytes": 17825792,
+                          "role": "Foreign",
+                          "group": ""
+                        },
+                        "/dev/demo-fast-old": {
+                          "bytes": 17825792,
+                          "role": "Foreign",
+                          "group": ""
+                        },
+                        "/dev/demo-external": {
+                          "bytes": 17825792,
+                          "role": "Foreign",
+                          "group": ""
+                        }
+                      },
+                      "groups": {
+                        "demodata": {
+                          "extent_bytes": 4194304,
+                          "volumes": {}
+                        }
+                      }
+                    },
+                    "expected": [
+                      {
+                        "path": "/dev/demo-fast",
+                        "allowed": true
+                      },
+                      {
+                        "path": "/dev/demo-backup",
+                        "allowed": true
+                      },
+                      {
+                        "path": "/dev/demo-usb",
+                        "allowed": false
+                      },
+                      {
+                        "path": "/dev/demo-fast-old",
+                        "allowed": false
+                      },
+                      {
+                        "path": "/dev/demo-external",
+                        "allowed": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "worked": [
+                {
+                  "operation": {
+                    "kind": "save_config",
+                    "text": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"a|^/dev/demo-fast$|\",\n    \"a|^/dev/demo-backup$|\",\n    \"r|.*|\"\n  ]\n}\n"
+                  },
+                  "explanation": "Allow the two exact demo paths before the final rejection. The ^ and $ anchors exclude similar longer names."
+                },
+                {
+                  "operation": {
+                    "kind": "scan"
+                  },
+                  "explanation": "Expected after repair: both demo data PVs are allowed when present, and unrelated devices are excluded in each supplied inventory. Run scan shows actual results separately."
+                }
+              ],
+              "experiment": [
+                {
+                  "kind": "save_config",
+                  "text": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"a|^/dev/demo-fast$|\",\n    \"a|^/dev/demo-backup$|\"\n  ]\n}\n"
+                },
+                {
+                  "kind": "scan"
+                }
+              ],
+              "repair": [
+                {
+                  "kind": "save_config",
+                  "text": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"a|^/dev/demo-fast$|\",\n    \"a|^/dev/demo-backup$|\",\n    \"r|.*|\"\n  ]\n}\n"
+                },
+                {
+                  "kind": "scan"
+                }
+              ]
+            },
+            "try_change": "Remove the final rejection, Save configuration and Run scan. Unrelated paths now have no matching rule and are allowed by default. Read the failed checks, then restore the rejection and scan again.",
+            "experiment": "",
+            "repair": ""
+          }
+        }
+      },
+      "solution": [
+        "Save simulated LVM configuration",
+        "Run simulated device scan"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-reference-handover"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-devices-file",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM device selection",
+      "unit": "lvm-device-selection",
+      "title": "Restore a devices-file handover",
+      "summary": "Restore the required devices-file policy and repair its supplied device selection.",
+      "objective": "Keep the provided devices file enabled in both supplied inventories. List /dev/pool-a and /dev/pool-b, and exclude the imported copy and all other supplied devices. Use the simulated membership table; real hardware-ID serialization is outside this task. Save both configuration and device selection, then Run scan and Check answers. Keep every supplied storage device, group and metadata fact unchanged.",
+      "retry_guidance": "Read each failing inventory and path separately. Unsaved edits do not affect a scan. Save the repaired policy, Run scan again, and compare the actual selection mechanism and device results.",
+      "difficulty": "Intermediate",
+      "minutes": 26,
+      "steps": [
+        "Inspect the supplied policy and inventories",
+        "Repair and save the configuration and selection",
+        "Run the actual simulated scan",
+        "Check every requirement and repair any mistakes"
+      ],
+      "guide": [],
+      "explanation": "The handover needs two repairs: enabling the provided devices file and listing both intended original PV paths while excluding the imported copy. An apparently correct filter cannot replace the required file policy. After saving and scanning, both supplied inventories read only the requested PV metadata; changing the inactive filter does not change membership.",
+      "hints": [
+        "Read the actual scan mode. Is the saved configuration using the provided file or bypassing it?",
+        "With a provided file and use_devicesfile = 1, filters are ignored. Inspect membership rather than widening the filter.",
+        "Both application PVs must be listed. Remove the imported copy, save the selection, and scan again."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/#rdp-we-204.3_Logical_Volume_Manager_(weight:_3)",
+        "https://man7.org/linux/man-pages/man5/lvm.conf.5.html",
+        "https://man7.org/linux/man-pages/man8/lvmdevices.8.html",
+        "https://raw.githubusercontent.com/lvmteam/lvm2/main/lib/filters/filter-regex.c"
+      ],
+      "simplifications": "Read-only in-process virtual inventories; no host LVM, devices or files. Supports one explicit devices section, use_devicesfile 0/1 and 1–8 bounded filter rules. The devices-file table models devname membership only, not real hardware IDs, PVIDs or serialization. No aliases, sysfs, udev, global_filter, config overrides, implicit defaults, activation or provisioning. These two authored tasks provide partial practice, not complete objective or real-equipment coverage. Sources checked2026-11-07.",
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/pool-a": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "application"
+              },
+              "/dev/pool-b": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "application"
+              },
+              "/dev/import-copy": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "imported"
+              },
+              "/dev/removable": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "application": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              },
+              "imported": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "devices": {
+              "/dev/pool-a": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "application"
+              },
+              "/dev/pool-b": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "application"
+              },
+              "/dev/import-copy": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "imported"
+              },
+              "/dev/removable": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "application": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              },
+              "imported": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "devices": {
+              "/dev/lesson-primary": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "demodata"
+              },
+              "/dev/lesson-standby": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "demodata"
+              },
+              "/dev/lesson-copy": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "democopy"
+              },
+              "/dev/lesson-usb": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "demodata": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              },
+              "democopy": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "devices": {
+              "/dev/lesson-primary": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "demodata"
+              },
+              "/dev/lesson-standby": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "demodata"
+              },
+              "/dev/lesson-copy": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "democopy"
+              },
+              "/dev/lesson-usb": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "demodata": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              },
+              "democopy": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0,
+          "config_scan_runtime": {
+            "version": 1,
+            "assignment": {
+              "draft": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"a|^/dev/pool-a$|\",\n    \"a|^/dev/pool-b$|\",\n    \"r|.*|\"\n  ]\n}\n",
+              "saved": {
+                "config": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"a|^/dev/pool-a$|\",\n    \"a|^/dev/pool-b$|\",\n    \"r|.*|\"\n  ]\n}\n",
+                "file": {
+                  "entries": [
+                    "/dev/import-copy"
+                  ]
+                }
+              },
+              "draft_file": {
+                "entries": [
+                  "/dev/import-copy"
+                ]
+              },
+              "last_run": null
+            },
+            "example": {
+              "draft": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"a|^/dev/lesson-primary$|\",\n    \"a|^/dev/lesson-standby$|\",\n    \"r|.*|\"\n  ]\n}\n",
+              "saved": {
+                "config": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"a|^/dev/lesson-primary$|\",\n    \"a|^/dev/lesson-standby$|\",\n    \"r|.*|\"\n  ]\n}\n",
+                "file": {
+                  "entries": [
+                    "/dev/lesson-copy"
+                  ]
+                }
+              },
+              "draft_file": {
+                "entries": [
+                  "/dev/lesson-copy"
+                ]
+              },
+              "last_run": null
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/pool-a": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "application"
+              },
+              "/dev/pool-b": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "application"
+              },
+              "/dev/import-copy": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "imported"
+              },
+              "/dev/removable": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "application": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              },
+              "imported": {
+                "extent_bytes": 4194304,
+                "volumes": {}
+              }
+            }
+          },
+          "targets": [],
+          "config_scan_task": {
+            "context": {
+              "initial_config": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"a|^/dev/pool-a$|\",\n    \"a|^/dev/pool-b$|\",\n    \"r|.*|\"\n  ]\n}\n",
+              "initial_file": {
+                "entries": [
+                  "/dev/import-copy"
+                ]
+              },
+              "selection_editable": true,
+              "required_mode": "devices_file",
+              "cases": [
+                {
+                  "label": "Current supplied inventory",
+                  "inventory": {
+                    "version": 1,
+                    "devices": {
+                      "/dev/pool-a": {
+                        "bytes": 17825792,
+                        "role": "PhysicalVolume",
+                        "group": "application"
+                      },
+                      "/dev/pool-b": {
+                        "bytes": 17825792,
+                        "role": "PhysicalVolume",
+                        "group": "application"
+                      },
+                      "/dev/import-copy": {
+                        "bytes": 17825792,
+                        "role": "PhysicalVolume",
+                        "group": "imported"
+                      },
+                      "/dev/removable": {
+                        "bytes": 17825792,
+                        "role": "Foreign",
+                        "group": ""
+                      }
+                    },
+                    "groups": {
+                      "application": {
+                        "extent_bytes": 4194304,
+                        "volumes": {}
+                      },
+                      "imported": {
+                        "extent_bytes": 4194304,
+                        "volumes": {}
+                      }
+                    }
+                  },
+                  "expected": [
+                    {
+                      "path": "/dev/pool-a",
+                      "allowed": true
+                    },
+                    {
+                      "path": "/dev/pool-b",
+                      "allowed": true
+                    },
+                    {
+                      "path": "/dev/import-copy",
+                      "allowed": false
+                    },
+                    {
+                      "path": "/dev/removable",
+                      "allowed": false
+                    }
+                  ]
+                },
+                {
+                  "label": "Supplied arrival check",
+                  "inventory": {
+                    "version": 1,
+                    "devices": {
+                      "/dev/pool-a": {
+                        "bytes": 17825792,
+                        "role": "PhysicalVolume",
+                        "group": "application"
+                      },
+                      "/dev/pool-b": {
+                        "bytes": 17825792,
+                        "role": "PhysicalVolume",
+                        "group": "application"
+                      },
+                      "/dev/import-copy": {
+                        "bytes": 17825792,
+                        "role": "PhysicalVolume",
+                        "group": "imported"
+                      },
+                      "/dev/removable": {
+                        "bytes": 17825792,
+                        "role": "Foreign",
+                        "group": ""
+                      },
+                      "/dev/pool-a-old": {
+                        "bytes": 17825792,
+                        "role": "Foreign",
+                        "group": ""
+                      }
+                    },
+                    "groups": {
+                      "application": {
+                        "extent_bytes": 4194304,
+                        "volumes": {}
+                      },
+                      "imported": {
+                        "extent_bytes": 4194304,
+                        "volumes": {}
+                      }
+                    }
+                  },
+                  "expected": [
+                    {
+                      "path": "/dev/pool-a",
+                      "allowed": true
+                    },
+                    {
+                      "path": "/dev/pool-b",
+                      "allowed": true
+                    },
+                    {
+                      "path": "/dev/import-copy",
+                      "allowed": false
+                    },
+                    {
+                      "path": "/dev/removable",
+                      "allowed": false
+                    },
+                    {
+                      "path": "/dev/pool-a-old",
+                      "allowed": false
+                    }
+                  ]
+                }
+              ]
+            },
+            "reference": [
+              {
+                "kind": "save_config",
+                "text": "devices {\n  use_devicesfile = 1\n  filter = [\n    \"a|^/dev/pool-a$|\",\n    \"a|^/dev/pool-b$|\",\n    \"r|.*|\"\n  ]\n}\n"
+              },
+              {
+                "kind": "save_selection",
+                "selection": {
+                  "entries": [
+                    "/dev/pool-a",
+                    "/dev/pool-b"
+                  ]
+                }
+              },
+              {
+                "kind": "scan"
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Build on the previous LVM inventory and application-reference lessons. A PV is storage prepared for LVM; this unit changes only which supplied virtual metadata is inspected. No storage is formatted, renamed or mounted.",
+            "concepts": [
+              {
+                "title": "Two ways to choose devices",
+                "text": "A filter selects paths with ordered accept/reject rules. An enabled devices file instead lists the devices LVM may use. When that file is present and use_devicesfile = 1, its selection takes precedence and the filter is ignored. Do not disable the file merely to hide an incomplete handover."
+              },
+              {
+                "title": "Read the switch and the actual scan mode",
+                "text": "In devices { ... }, use_devicesfile = 0 explicitly selects filters. A value of 1 enables a provided devices file. This task supplies that file and requires it to remain in use. A missing file would fall back to filters; a present but empty file would select no devices."
+              },
+              {
+                "title": "Repair the provided selection",
+                "text": "The native table below models which supplied devnames are listed. Include the example primary and standby PVs; exclude its imported copy and USB device. Save configuration stores the switch. Save device selection stores membership. Typing or ticking a box alone does not change what a scan reads."
+              },
+              {
+                "title": "Separate selection from metadata",
+                "text": "Run scan reads the saved policy against two supplied inventories. Allowed means the selection permits inspection; PV label read describes the actual virtual metadata found. Real system.devices stores hardware IDs and is normally managed by lvmdevices. This table is a disclosed devname-only simulator, not that real file format."
+              }
+            ],
+            "description": "Keep the provided devices file enabled, include /dev/lesson-primary and /dev/lesson-standby, and exclude the imported copy and unrelated devices. Repair the switch and membership before scanning.",
+            "fixture": {
+              "version": 1,
+              "devices": {
+                "/dev/lesson-primary": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "demodata"
+                },
+                "/dev/lesson-standby": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "demodata"
+                },
+                "/dev/lesson-copy": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "democopy"
+                },
+                "/dev/lesson-usb": {
+                  "bytes": 17825792,
+                  "role": "Foreign",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "demodata": {
+                  "extent_bytes": 4194304,
+                  "volumes": {}
+                },
+                "democopy": {
+                  "extent_bytes": 4194304,
+                  "volumes": {}
+                }
+              }
+            },
+            "targets": [],
+            "worked": [],
+            "config_scan_practice": {
+              "context": {
+                "initial_config": "devices {\n  use_devicesfile = 0\n  filter = [\n    \"a|^/dev/lesson-primary$|\",\n    \"a|^/dev/lesson-standby$|\",\n    \"r|.*|\"\n  ]\n}\n",
+                "initial_file": {
+                  "entries": [
+                    "/dev/lesson-copy"
+                  ]
+                },
+                "selection_editable": true,
+                "required_mode": "devices_file",
+                "cases": [
+                  {
+                    "label": "Current supplied inventory",
+                    "inventory": {
+                      "version": 1,
+                      "devices": {
+                        "/dev/lesson-primary": {
+                          "bytes": 17825792,
+                          "role": "PhysicalVolume",
+                          "group": "demodata"
+                        },
+                        "/dev/lesson-standby": {
+                          "bytes": 17825792,
+                          "role": "PhysicalVolume",
+                          "group": "demodata"
+                        },
+                        "/dev/lesson-copy": {
+                          "bytes": 17825792,
+                          "role": "PhysicalVolume",
+                          "group": "democopy"
+                        },
+                        "/dev/lesson-usb": {
+                          "bytes": 17825792,
+                          "role": "Foreign",
+                          "group": ""
+                        }
+                      },
+                      "groups": {
+                        "demodata": {
+                          "extent_bytes": 4194304,
+                          "volumes": {}
+                        },
+                        "democopy": {
+                          "extent_bytes": 4194304,
+                          "volumes": {}
+                        }
+                      }
+                    },
+                    "expected": [
+                      {
+                        "path": "/dev/lesson-primary",
+                        "allowed": true
+                      },
+                      {
+                        "path": "/dev/lesson-standby",
+                        "allowed": true
+                      },
+                      {
+                        "path": "/dev/lesson-copy",
+                        "allowed": false
+                      },
+                      {
+                        "path": "/dev/lesson-usb",
+                        "allowed": false
+                      }
+                    ]
+                  },
+                  {
+                    "label": "Supplied arrival check",
+                    "inventory": {
+                      "version": 1,
+                      "devices": {
+                        "/dev/lesson-primary": {
+                          "bytes": 17825792,
+                          "role": "PhysicalVolume",
+                          "group": "demodata"
+                        },
+                        "/dev/lesson-standby": {
+                          "bytes": 17825792,
+                          "role": "PhysicalVolume",
+                          "group": "demodata"
+                        },
+                        "/dev/lesson-copy": {
+                          "bytes": 17825792,
+                          "role": "PhysicalVolume",
+                          "group": "democopy"
+                        },
+                        "/dev/lesson-usb": {
+                          "bytes": 17825792,
+                          "role": "Foreign",
+                          "group": ""
+                        },
+                        "/dev/lesson-old": {
+                          "bytes": 17825792,
+                          "role": "Foreign",
+                          "group": ""
+                        }
+                      },
+                      "groups": {
+                        "demodata": {
+                          "extent_bytes": 4194304,
+                          "volumes": {}
+                        },
+                        "democopy": {
+                          "extent_bytes": 4194304,
+                          "volumes": {}
+                        }
+                      }
+                    },
+                    "expected": [
+                      {
+                        "path": "/dev/lesson-primary",
+                        "allowed": true
+                      },
+                      {
+                        "path": "/dev/lesson-standby",
+                        "allowed": true
+                      },
+                      {
+                        "path": "/dev/lesson-copy",
+                        "allowed": false
+                      },
+                      {
+                        "path": "/dev/lesson-usb",
+                        "allowed": false
+                      },
+                      {
+                        "path": "/dev/lesson-old",
+                        "allowed": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "worked": [
+                {
+                  "operation": {
+                    "kind": "save_config",
+                    "text": "devices {\n  use_devicesfile = 1\n  filter = [\n    \"a|^/dev/lesson-primary$|\",\n    \"a|^/dev/lesson-standby$|\",\n    \"r|.*|\"\n  ]\n}\n"
+                  },
+                  "explanation": "Enable the provided example devices file. The filter remains valid, but it no longer chooses the allowed devices."
+                },
+                {
+                  "operation": {
+                    "kind": "save_selection",
+                    "selection": {
+                      "entries": [
+                        "/dev/lesson-primary",
+                        "/dev/lesson-standby"
+                      ]
+                    }
+                  },
+                  "explanation": "Include the example primary and standby PVs, and remove the imported copy. This is membership in the simulated file, not real system.devices syntax."
+                },
+                {
+                  "operation": {
+                    "kind": "scan"
+                  },
+                  "explanation": "Expected after repair: both demo data PVs are allowed when present, and unrelated devices are excluded in each supplied inventory. Run scan shows actual results separately."
+                }
+              ],
+              "experiment": [
+                {
+                  "kind": "save_selection",
+                  "selection": {
+                    "entries": [
+                      "/dev/lesson-primary"
+                    ]
+                  }
+                },
+                {
+                  "kind": "scan"
+                }
+              ],
+              "repair": [
+                {
+                  "kind": "save_config",
+                  "text": "devices {\n  use_devicesfile = 1\n  filter = [\n    \"a|^/dev/lesson-primary$|\",\n    \"a|^/dev/lesson-standby$|\",\n    \"r|.*|\"\n  ]\n}\n"
+                },
+                {
+                  "kind": "save_selection",
+                  "selection": {
+                    "entries": [
+                      "/dev/lesson-primary",
+                      "/dev/lesson-standby"
+                    ]
+                  }
+                },
+                {
+                  "kind": "scan"
+                }
+              ]
+            },
+            "try_change": "Remove only the example standby entry, Save device selection, Run scan and Check answers. Observe its missing access in both inventories, then restore the entry and scan again. Changing filters cannot repair missing membership while this file is enabled.",
+            "experiment": "",
+            "repair": ""
+          }
+        }
+      },
+      "solution": [
+        "Save simulated LVM configuration",
+        "Save simulated devices-file selection",
+        "Run simulated device scan"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-filter-policy"
+      ]
+    }
+  ]
+}

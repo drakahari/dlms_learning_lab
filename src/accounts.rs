@@ -2,6 +2,8 @@
 //! No host account, filesystem, process, authentication or clock APIs.
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
+mod skeletons;
+pub use skeletons::SkeletonLeaf;
 
 pub const MAX_USERS: usize = 32;
 pub const MAX_GROUPS: usize = 32;
@@ -451,6 +453,8 @@ pub struct Policy {
     pub skeletons: BTreeSet<String>,
     #[serde(deserialize_with = "strings")]
     pub shells: BTreeSet<String>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty", deserialize_with = "skeletons::leaves")]
+    pub editable_skeleton_leaves: BTreeMap<String,SkeletonLeaf>,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -504,6 +508,10 @@ impl State {
     pub fn valid(&self) -> bool {
         Self::valid_configuration(&self.policy, &self.configuration)
     }
+    /// Held source declaration gate, distinct from a valid runtime state after
+    /// an explicitly permitted template removal. It authenticates no policy by itself.
+    pub fn valid_initial(&self)->bool {self.valid() && skeletons::initial(self)}
+
     // Borrow first: directly constructed outcome data has not necessarily passed
     // any decoder and must not be cloned until these bounds are established.
     fn valid_configuration(p: &Policy, c: &Configuration) -> bool {
@@ -537,6 +545,7 @@ impl State {
             || c.groups.is_empty()
             || c.groups.len() > MAX_GROUPS
             || c.entries.len() > MAX_ENTRIES
+            || !skeletons::declarations(p,c)
         {
             return false;
         }
@@ -598,6 +607,7 @@ impl State {
     /// Imported policy is never authority: callers pin the original fixture.
     pub fn valid_against(&self, initial: &Self) -> bool {
         self.valid()
+            && initial.valid_initial()
             && self.policy == initial.policy
             && self.protected_same(initial)
             && initial.configuration.users.iter().all(|(n, u)| {
@@ -623,16 +633,7 @@ impl State {
             && p.protected_groups
                 .iter()
                 .all(|n| c.groups.get(n) == b.groups.get(n))
-            && b.entries
-                .iter()
-                .filter(|(s, _)| {
-                    p.protected_entries.contains(*s) || p.skeletons.iter().any(|r| within(s, r))
-                })
-                .all(|(s, e)| c.entries.get(s) == Some(e))
-            && c.entries
-                .keys()
-                .filter(|s| p.skeletons.iter().any(|r| within(s, r)))
-                .all(|s| b.entries.contains_key(s))
+            && skeletons::protected_entries_same(p,c,b)
     }
     fn mutable_user(&self, n: &str) -> Result<&User> {
         if self.policy.protected_users.contains(n) {
@@ -697,6 +698,8 @@ impl State {
     }
     fn change(&mut self, a: &Action) -> Result<()> {
         match a {
+            Action::SaveSkeletonLeaf {path,contents,mode} => skeletons::save(self,path,contents,*mode)?,
+            Action::RemoveSkeletonLeaf {path} => skeletons::remove(self,path)?,
             Action::AddGroup { name: n, gid } => {
                 if !name(n) || !human_id(*gid) {
                     return Err(invalid());
@@ -1197,6 +1200,9 @@ impl Output {
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Action {
+    /// Native simulation action only; there is no invented terminal command.
+    SaveSkeletonLeaf {path:String,contents:String,mode:u16},
+    RemoveSkeletonLeaf {path:String},
     AddGroup {
         name: String,
         gid: u32,
@@ -1617,7 +1623,7 @@ pub enum Requirement {
     },
 }
 pub fn valid_requirements(initial: &State, requirements: &[Requirement]) -> bool {
-    if !initial.valid() || requirements.is_empty() || requirements.len() > MAX_REQUIREMENTS {
+    if !initial.valid_initial() || requirements.is_empty() || requirements.len() > MAX_REQUIREMENTS {
         return false;
     }
     let possible_groups: BTreeSet<_> = initial
@@ -1712,6 +1718,7 @@ pub fn valid_requirements(initial: &State, requirements: &[Requirement]) -> bool
                     || initial.policy.skeletons.iter().any(|r| within(p, r))
                 {
                     initial.configuration.entries.get(p) == Some(expected)
+                        || (!initial.policy.protected_entries.contains(p) && skeletons::expected_entry(&initial.policy,p,expected))
                 } else {
                     true
                 }
@@ -1720,7 +1727,7 @@ pub fn valid_requirements(initial: &State, requirements: &[Requirement]) -> bool
             path(p)
                 && p != "/"
                 && !initial.policy.protected_entries.contains(p)
-                && !initial.policy.skeletons.iter().any(|r| within(p, r))
+                && (!initial.policy.skeletons.iter().any(|r| within(p,r)) || skeletons::expected_absence(&initial.policy,p))
         }
         Requirement::ExpiryRange {
             name: n,

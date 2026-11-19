@@ -1,0 +1,131 @@
+[
+  {
+    "id": "ccna-default-access-membership",
+    "context": "An access port attaches an ordinary station to one Ethernet group. An inter-switch trunk carries several VLANs between switches.",
+    "concepts": [
+      {
+        "title": "Read the access port’s effective membership",
+        "text": "A default access choice still assigns the port to VLAN 1 in this switch model. Clearing an explicit choice returns it to that default. A station normally sends its access port an untagged Ethernet frame."
+      },
+      {
+        "title": "Read the trunk’s native setting separately",
+        "text": "The native VLAN tells a trunk how to carry untagged frames between switches. Both ends of the supplied trunk agree on VLAN 88. This setting has no effect on the desk’s default access VLAN."
+      },
+      {
+        "title": "Test the intended and unintended neighbors",
+        "text": "An Ethernet connection may be up while a desk is in the wrong group. Use an Ethernet broadcast to see who can receive a frame. Check the legacy pair separately after making a change."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Clear the bench desk’s explicit choice",
+        "value": "Use switch default → Effective access VLAN 1",
+        "explanation": "The class counter still receives Ethernet broadcasts with that desk."
+      },
+      {
+        "label": "Read the floor uplink separately",
+        "value": "Native VLAN 88",
+        "explanation": "The two switches interpret untagged trunk frames as VLAN 88. The bench desk still uses VLAN 1."
+      },
+      {
+        "label": "Move the desk to the bench workgroup",
+        "value": "Explicit VLAN 30",
+        "explanation": "The bench peer now receives the desk’s broadcast. The legacy counter and monitor still work together."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Compare explicit and default membership",
+        "action": "Choose Use switch default in the New desk access VLAN row. Read the Effective access VLAN and the native setting above it.",
+        "observe": "The port still belongs to VLAN 1 while both trunk ends use native VLAN 88."
+      },
+      {
+        "title": "Follow the intended workgroup",
+        "action": "Choose Bench Desk and Class Counter in Ethernet endpoints. Select Test Ethernet. Change the desk’s access VLAN to match the Bench Peer’s port and test both pairs.",
+        "observe": "The counter loses visibility while the bench peer receives the desk frame."
+      },
+      {
+        "title": "Verify the existing legacy connection",
+        "action": "Select the two legacy devices in Ethernet endpoints and select Test Ethernet. Then select Check workspace.",
+        "observe": "The legacy connection still works after moving the desk."
+      }
+    ],
+    "requirements": [
+      "Move the Shipping Desk into the same Ethernet segment as the Shipping Peer.",
+      "Keep the two legacy devices working together, separate from the Shipping Desk."
+    ],
+    "goal": "Put a new desk in its workgroup while preserving the working default-VLAN devices.",
+    "source": "scenarios/ccna-vlan-gateway-lessons-v1.json",
+    "status": "updated",
+    "review": {
+      "introduction": "Gives the adjacent Ethernet and IP concept before the example and compares their distinct output.",
+      "example": "Learners use isolated switches to edit current settings and deliberately test an earlier failure.",
+      "assignment": "Uses independent fixed topology and validates actual Ethernet reachability, requirements and bounds."
+    }
+  },
+  {
+    "id": "ccna-switched-gateway-repair",
+    "context": "An Ethernet VLAN keeps local traffic in one group. A station sends traffic for another IP subnet to its default gateway. A switch can provide that gateway through a switch virtual interface (SVI).",
+    "concepts": [
+      {
+        "title": "Give each VLAN its own gateway",
+        "text": "An SVI is a switch’s IP interface for one VLAN. Choose a usable address that is not already assigned in that VLAN’s subnet. Enable the interface. Its line state requires an active local port carrying the VLAN."
+      },
+      {
+        "title": "Check the remote switch separately",
+        "text": "A local SVI can be up even when the far end of an active trunk does not admit that VLAN. Compare the far uplink’s allowed VLANs with the stations’ access memberships."
+      },
+      {
+        "title": "Check both delivery and replies",
+        "text": "Enable IPv4 routing and point each station at the gateway in its own subnet. Test delivery and a reply. The gateway can pass IPv4 traffic between VLANs while Ethernet broadcasts stay within each VLAN."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Bench gateway and default next hop",
+        "value": "192.0.2.1/24\nBench gateways: 192.0.2.1",
+        "explanation": "Use one unused address in the bench subnet as the SVI for VLAN 32."
+      },
+      {
+        "label": "Demo service gateway",
+        "value": "198.51.100.1/24\nDemo gateway: 198.51.100.1",
+        "explanation": "The server replies through its own switch virtual interface for VLAN 64."
+      },
+      {
+        "label": "Forwarding and far uplink",
+        "value": "IPv4 routing enabled\nVLAN 32 and 64 allowed",
+        "explanation": "A probe returns in both directions. An Ethernet broadcast still cannot reach the other VLAN."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Prepare the two routed interfaces",
+        "action": "Enter 198.51.100.1/24 in the VLAN 64 Gateway IPv4/prefix field. Enable IPv4 routing. Before editing the far uplink, scroll to Path endpoints, choose Bench A and Demo Server, then select Test IPv4.",
+        "observe": "The gateway interface can report Up even while the path to the demo server fails."
+      },
+      {
+        "title": "Connect the far VLAN and set the reply path",
+        "action": "Allow VLAN 64 on the far uplink. Set 198.51.100.1 as the Demo Server’s default gateway. Set 192.0.2.1 for both bench stations.",
+        "observe": "The trunk admits the traffic, and all three stations have a gateway in their own subnets."
+      },
+      {
+        "title": "Compare both tests",
+        "action": "In Path endpoints select each bench station with the demo server. Select Test IPv4 and Test Ethernet. Test Ethernet between the two benches, then select Check workspace.",
+        "observe": "Both IPv4 comparisons receive a reply. The demo server shares no Ethernet broadcast with the bench. The benches still share their own segment."
+      }
+    ],
+    "requirements": [
+      "Enable IPv4 routing and both VLAN gateway interfaces. Use distinct usable gateway addresses with the prefixes shown.",
+      "Give each of the three stations the default gateway for its VLAN and admit both VLANs at the far uplink.",
+      "Both studio stations need an IPv4 reply from the render server. Preserve studio Ethernet delivery and keep the server’s broadcasts separate."
+    ],
+    "goal": "Repair the VLAN gateways and restore IPv4 delivery and replies while keeping Ethernet traffic separated.",
+    "source": "scenarios/ccna-vlan-gateway-lessons-v1.json",
+    "status": "updated",
+    "review": {
+      "introduction": "Gives the adjacent Ethernet and IP concept before the example and compares their distinct output.",
+      "example": "Learners use isolated switches to edit current settings and deliberately test an earlier failure.",
+      "assignment": "Uses independent fixed topology and validates actual Ethernet reachability, requirements and bounds."
+    }
+  }
+]

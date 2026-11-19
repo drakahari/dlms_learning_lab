@@ -1,5 +1,7 @@
 //! Restricted, script-free RPM package observations and logical archive sets.
 //! No RPM/DNF process, archive parser, CLI alias, resolver or transaction rollback.
+mod metadata;
+pub use metadata::same_recorded_metadata;
 use serde::{
     Deserialize, Deserializer, Serialize,
     de::{DeserializeSeed, Error as _, MapAccess, SeqAccess, Visitor},

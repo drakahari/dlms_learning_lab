@@ -1,0 +1,1184 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-management-protocols",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Remote administration",
+      "unit": "management-policy-foundations",
+      "title": "Keep remote administration on SSH version 2",
+      "summary": "Repair incoming protocol and version policy consistently across supplied terminal lines.",
+      "objective": "Allow Admin (192.0.2.10) and Operator (192.0.2.11) to reach the supplied Branch management endpoint at 10.0.0.2 using SSH version 2 on every supplied VTY line, 0–15. Disable Telnet on those lines and reject the supplied legacy SSH version 1 trial. Keep the supplied IP routes and host identity unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Inspect the supplied management path, edit the complete policy and verify required access and rejection."
+      ],
+      "guide": [],
+      "explanation": "Restrict the complete supplied line range to SSH with transport input ssh and restrict the separate global version policy with ip ssh version 2. Keep both administrators reachable. Check configuration proves all lines against version 2, Telnet and legacy-version cases; an eligible policy is not a successful login.",
+      "hints": [
+        "The document must remain complete. Select the Telnet trial, then Inspect trial; it should report that the line protocol is disabled.",
+        "Version 2 remains eligible for authentication; version 1 is denied by the version policy. An IP path is still required for either trial.",
+        "The relevant case identifies the first inconsistent VTY line. Repair the document and retry; checking a single selected line alone does not complete the assignment."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/secure_shell_version_2_support.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_secure_shell__ssh_.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_ipv4_acls.html"
+      ],
+      "simplifications": "Checked2026-11-09 against CCNA200-301v1.1/4.8 and Catalyst9300 IOS XE Dublin17.12 guides updated2023-07-28. Bounded policy before authentication: existing virtual IPv4 forward/reply routes to an actual router-local address, supplied host-identity metadata and explicitly supplied VTY lines. No TCP handshake, SSH crypto, password authentication, AAA, privilege assignment, IOS session or real network access. Complete configuration documents support only the disclosed subset; unsupported commands are rejected. Numbered standard incoming terminal lists only (1–99 or1300–1999); no named VTY list, VRF, outbound terminal list or inferred platform defaults. Each case checks every supplied line; source-policy rejection is distinct from a broken route or disabled protocol. Limits:16supplied line records,6clients,8cases,64KiBdocument. Trial observations are transient and are not restored as execution evidence.",
+      "initial": {
+        "kind": "ManagementPolicy",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-management-protocols",
+          "view": "introduction",
+          "assignment": {
+            "draft": "no ip ssh version\nline vty 0 15\n transport input ssh telnet\nexit\n",
+            "applied": "no ip ssh version\nline vty 0 15\n transport input ssh telnet\nexit\n",
+            "checked": false,
+            "selected_case": 0,
+            "selected_line": 0
+          },
+          "practice": {
+            "draft": "no ip ssh version\nline vty 0 2\n transport input ssh telnet\nexit\n",
+            "applied": "no ip ssh version\nline vty 0 2\n transport input ssh telnet\nexit\n",
+            "checked": false,
+            "selected_case": 0,
+            "selected_line": 0
+          }
+        }
+      },
+      "goal": {
+        "kind": "ManagementPolicy",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "id": "ccna-management-protocols",
+            "instructions": "Allow Admin (192.0.2.10) and Operator (192.0.2.11) to reach the supplied Branch management endpoint at 10.0.0.2 using SSH version 2 on every supplied VTY line, 0–15. Disable Telnet on those lines and reject the supplied legacy SSH version 1 trial. Keep the supplied IP routes and host identity unchanged.",
+            "network": {
+              "version": 1,
+              "management": {
+                "device": "Branch",
+                "interface": "transit"
+              },
+              "clients": [
+                {
+                  "id": "admin",
+                  "binding": {
+                    "device": "Admin",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "operator",
+                  "binding": {
+                    "device": "Operator",
+                    "interface": "lan"
+                  }
+                }
+              ],
+              "topology": {
+                "devices": {
+                  "Admin": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Operator": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.11",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Edge": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.1",
+                          "prefix": 24
+                        }
+                      },
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.1",
+                          "prefix": 30
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Branch": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.2",
+                          "prefix": 30
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "192.0.2.0",
+                          "length": 24
+                        },
+                        "interface": "transit",
+                        "via": "10.0.0.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "supplied": {
+              "version": 1,
+              "host_identity": "supplied-branch-identity",
+              "versions": "version2_only",
+              "lines": [
+                {
+                  "number": 0,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 1,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 2,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 3,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 4,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 5,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 6,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 7,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 8,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 9,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 10,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 11,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 12,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 13,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 14,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 15,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                }
+              ]
+            },
+            "starter": "no ip ssh version\nline vty 0 15\n transport input ssh telnet\nexit\n",
+            "reference": "ip ssh version 2\nline vty 0 15\n transport input ssh\nexit\n",
+            "cases": [
+              {
+                "label": "Administrator uses SSH version 2",
+                "client": "admin",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Operator uses SSH version 2",
+                "client": "operator",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Telnet is unavailable",
+                "client": "admin",
+                "protocol": "telnet",
+                "expected": "protocol_denied"
+              },
+              {
+                "label": "Legacy SSH is unavailable",
+                "client": "admin",
+                "protocol": "ssh1",
+                "expected": "legacy_version_denied"
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "id": "ccna-management-protocols-example",
+            "instructions": "On the separate sample network, retain Admin 172.18.40.10 and Operator 172.18.40.11 on SSH version 2 across supplied VTY lines 0–2. Remove Telnet and legacy SSH access, then compare the actual trial feedback.",
+            "network": {
+              "version": 1,
+              "management": {
+                "device": "Branch",
+                "interface": "transit"
+              },
+              "clients": [
+                {
+                  "id": "admin",
+                  "binding": {
+                    "device": "Admin",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "operator",
+                  "binding": {
+                    "device": "Operator",
+                    "interface": "lan"
+                  }
+                }
+              ],
+              "topology": {
+                "devices": {
+                  "Admin": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Operator": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.11",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Edge": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.1",
+                          "prefix": 24
+                        }
+                      },
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.1",
+                          "prefix": 30
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Branch": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.2",
+                          "prefix": 30
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "172.18.40.0",
+                          "length": 24
+                        },
+                        "interface": "transit",
+                        "via": "10.0.0.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "supplied": {
+              "version": 1,
+              "host_identity": "supplied-practice-identity",
+              "versions": "version2_only",
+              "lines": [
+                {
+                  "number": 0,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 1,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 2,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                }
+              ]
+            },
+            "starter": "no ip ssh version\nline vty 0 2\n transport input ssh telnet\nexit\n",
+            "reference": "ip ssh version 2\nline vty 0 2\n transport input ssh\nexit\n",
+            "cases": [
+              {
+                "label": "Administrator uses SSH version 2",
+                "client": "admin",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Operator uses SSH version 2",
+                "client": "operator",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Telnet is unavailable",
+                "client": "admin",
+                "protocol": "telnet",
+                "expected": "protocol_denied"
+              },
+              {
+                "label": "Legacy SSH is unavailable",
+                "client": "admin",
+                "protocol": "ssh1",
+                "expected": "legacy_version_denied"
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "MANAGEMENT POLICY\nip ssh version 2\nline vty 0 15\n transport input ssh\nexit\n"
+      ],
+      "prerequisites": [
+        "ccna-transport-return-policy",
+        "ccna-acl-source-policy"
+      ]
+    },
+    {
+      "id": "ccna-management-source-policy",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Remote administration",
+      "unit": "management-policy-foundations",
+      "title": "Restrict management sources without locking out operators",
+      "summary": "Replace an overbroad incoming terminal list while retaining two approved administrators.",
+      "objective": "Allow Admin (192.0.2.10) and Operator (192.0.2.11) to reach Branch at 10.0.0.2 using SSH version 2 on every supplied VTY line, 0–15. Reject Guest (192.0.2.130) and Nearby (192.0.2.12) through an incoming source access list. Keep Telnet disabled and the supplied SSH version 1 trial rejected. Keep the supplied IP routes and host identity unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Inspect the supplied management path, edit the complete policy and verify required access and rejection."
+      ],
+      "guide": [],
+      "explanation": "Replace the early broad permit with ordered exact permits for both approved source addresses, and attach the numbered standard list with access-class NUMBER in on every supplied line. Keep the SSH-only transport and version 2 policy. Both approved clients must remain eligible; both other sources must fail at the source-list layer, not because the route or all protocols were disabled.",
+      "hints": [
+        "A first-match list must permit both .10 and .11. Unmatched clients are denied without adding a permit any.",
+        "Both approved sources remain eligible; each unapproved source is denied by the list. Actual trial output clears when the selection or draft changes.",
+        "The nearby workstation catches a rule that is too broad. Return to the narrow policy and verify every case before opening the independent assignment."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/secure_shell_version_2_support.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_secure_shell__ssh_.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_ipv4_acls.html"
+      ],
+      "simplifications": "Checked2026-11-09 against CCNA200-301v1.1/4.8 and Catalyst9300 IOS XE Dublin17.12 guides updated2023-07-28. Bounded policy before authentication: existing virtual IPv4 forward/reply routes to an actual router-local address, supplied host-identity metadata and explicitly supplied VTY lines. No TCP handshake, SSH crypto, password authentication, AAA, privilege assignment, IOS session or real network access. Complete configuration documents support only the disclosed subset; unsupported commands are rejected. Numbered standard incoming terminal lists only (1–99 or1300–1999); no named VTY list, VRF, outbound terminal list or inferred platform defaults. Each case checks every supplied line; source-policy rejection is distinct from a broken route or disabled protocol. Limits:16supplied line records,6clients,8cases,64KiBdocument. Trial observations are transient and are not restored as execution evidence.",
+      "initial": {
+        "kind": "ManagementPolicy",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-management-source-policy",
+          "view": "introduction",
+          "assignment": {
+            "draft": "ip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit any\n permit host 192.0.2.11\nexit\n",
+            "applied": "ip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit any\n permit host 192.0.2.11\nexit\n",
+            "checked": false,
+            "selected_case": 0,
+            "selected_line": 0
+          },
+          "practice": {
+            "draft": "ip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit any\n permit host 172.18.40.11\nexit\n",
+            "applied": "ip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit any\n permit host 172.18.40.11\nexit\n",
+            "checked": false,
+            "selected_case": 0,
+            "selected_line": 0
+          }
+        }
+      },
+      "goal": {
+        "kind": "ManagementPolicy",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "id": "ccna-management-source-policy",
+            "instructions": "Allow Admin (192.0.2.10) and Operator (192.0.2.11) to reach Branch at 10.0.0.2 using SSH version 2 on every supplied VTY line, 0–15. Reject Guest (192.0.2.130) and Nearby (192.0.2.12) through an incoming source access list. Keep Telnet disabled and the supplied SSH version 1 trial rejected. Keep the supplied IP routes and host identity unchanged.",
+            "network": {
+              "version": 1,
+              "management": {
+                "device": "Branch",
+                "interface": "transit"
+              },
+              "clients": [
+                {
+                  "id": "admin",
+                  "binding": {
+                    "device": "Admin",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "operator",
+                  "binding": {
+                    "device": "Operator",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "guest",
+                  "binding": {
+                    "device": "Guest",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "nearby",
+                  "binding": {
+                    "device": "Nearby",
+                    "interface": "lan"
+                  }
+                }
+              ],
+              "topology": {
+                "devices": {
+                  "Admin": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Operator": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.11",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Guest": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.130",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Nearby": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.12",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Edge": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.1",
+                          "prefix": 24
+                        }
+                      },
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.1",
+                          "prefix": 30
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Branch": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.2",
+                          "prefix": 30
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "192.0.2.0",
+                          "length": 24
+                        },
+                        "interface": "transit",
+                        "via": "10.0.0.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "supplied": {
+              "version": 1,
+              "host_identity": "supplied-branch-identity",
+              "versions": "version2_only",
+              "lines": [
+                {
+                  "number": 0,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 1,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 2,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 3,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 4,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 5,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 6,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 7,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 8,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 9,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 10,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 11,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 12,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 13,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 14,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 15,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                }
+              ]
+            },
+            "starter": "ip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit any\n permit host 192.0.2.11\nexit\n",
+            "reference": "ip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n",
+            "cases": [
+              {
+                "label": "Administrator uses SSH version 2",
+                "client": "admin",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Operator uses SSH version 2",
+                "client": "operator",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Telnet is unavailable",
+                "client": "admin",
+                "protocol": "telnet",
+                "expected": "protocol_denied"
+              },
+              {
+                "label": "Legacy SSH is unavailable",
+                "client": "admin",
+                "protocol": "ssh1",
+                "expected": "legacy_version_denied"
+              },
+              {
+                "label": "Guest is rejected by source policy",
+                "client": "guest",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              },
+              {
+                "label": "Nearby workstation is rejected by source policy",
+                "client": "nearby",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "id": "ccna-management-source-policy-example",
+            "instructions": "On the separate sample network, admit only Admin 172.18.40.10 and Operator 172.18.40.11 through the incoming source list across supplied VTY lines 0–2. Reject Guest 172.18.40.130 and Nearby 172.18.40.12, while retaining SSH version 2 and rejecting Telnet and legacy SSH.",
+            "network": {
+              "version": 1,
+              "management": {
+                "device": "Branch",
+                "interface": "transit"
+              },
+              "clients": [
+                {
+                  "id": "admin",
+                  "binding": {
+                    "device": "Admin",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "operator",
+                  "binding": {
+                    "device": "Operator",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "guest",
+                  "binding": {
+                    "device": "Guest",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "nearby",
+                  "binding": {
+                    "device": "Nearby",
+                    "interface": "lan"
+                  }
+                }
+              ],
+              "topology": {
+                "devices": {
+                  "Admin": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Operator": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.11",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Guest": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.130",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Nearby": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.12",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Edge": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.1",
+                          "prefix": 24
+                        }
+                      },
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.1",
+                          "prefix": 30
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Branch": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.2",
+                          "prefix": 30
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "172.18.40.0",
+                          "length": 24
+                        },
+                        "interface": "transit",
+                        "via": "10.0.0.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "supplied": {
+              "version": 1,
+              "host_identity": "supplied-practice-identity",
+              "versions": "version2_only",
+              "lines": [
+                {
+                  "number": 0,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 1,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 2,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                }
+              ]
+            },
+            "starter": "ip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit any\n permit host 172.18.40.11\nexit\n",
+            "reference": "ip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n",
+            "cases": [
+              {
+                "label": "Administrator uses SSH version 2",
+                "client": "admin",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Operator uses SSH version 2",
+                "client": "operator",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Telnet is unavailable",
+                "client": "admin",
+                "protocol": "telnet",
+                "expected": "protocol_denied"
+              },
+              {
+                "label": "Legacy SSH is unavailable",
+                "client": "admin",
+                "protocol": "ssh1",
+                "expected": "legacy_version_denied"
+              },
+              {
+                "label": "Guest is rejected by source policy",
+                "client": "guest",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              },
+              {
+                "label": "Nearby workstation is rejected by source policy",
+                "client": "nearby",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "MANAGEMENT POLICY\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n"
+      ],
+      "prerequisites": [
+        "ccna-management-protocols"
+      ]
+    }
+  ]
+}

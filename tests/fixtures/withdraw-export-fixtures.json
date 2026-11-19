@@ -1,0 +1,840 @@
+{
+  "example": {
+    "definition": {
+      "initial": {
+        "schema_version": 1,
+        "inventory": {
+          "fixture": "training-exports",
+          "servers": [
+            {
+              "id": "training-nfs",
+              "address": "192.0.2.10"
+            }
+          ],
+          "clients": [
+            {
+              "id": "training-retired",
+              "address": "192.0.2.20",
+              "mountpoints": [
+                "/mnt/training/demo-drop"
+              ],
+              "profiles": [
+                "training-regular"
+              ]
+            },
+            {
+              "id": "training-reader",
+              "address": "192.0.2.21",
+              "mountpoints": [
+                "/mnt/training/practice-guide"
+              ],
+              "profiles": [
+                "training-regular"
+              ]
+            },
+            {
+              "id": "training-archivist",
+              "address": "192.0.2.22",
+              "mountpoints": [
+                "/mnt/training/archive"
+              ],
+              "profiles": [
+                "training-regular"
+              ]
+            }
+          ],
+          "profiles": [
+            {
+              "id": "training-regular",
+              "label": "Approved reader",
+              "uid": 2001,
+              "gid": 3001,
+              "groups": []
+            }
+          ],
+          "roots": [
+            {
+              "server": "training-nfs",
+              "path": "/srv/demo-drop",
+              "directories": [
+                {
+                  "path": "/srv/demo-drop",
+                  "uid": 9001,
+                  "gid": 3001,
+                  "mode": 493
+                }
+              ],
+              "files": [
+                {
+                  "path": "/srv/demo-drop/notice.txt",
+                  "uid": 2001,
+                  "gid": 3001,
+                  "mode": 416
+                }
+              ]
+            },
+            {
+              "server": "training-nfs",
+              "path": "/srv/practice-guide",
+              "directories": [
+                {
+                  "path": "/srv/practice-guide",
+                  "uid": 9001,
+                  "gid": 3001,
+                  "mode": 493
+                }
+              ],
+              "files": [
+                {
+                  "path": "/srv/practice-guide/notice.txt",
+                  "uid": 2001,
+                  "gid": 3001,
+                  "mode": 416
+                }
+              ]
+            },
+            {
+              "server": "training-nfs",
+              "path": "/srv/archive",
+              "directories": [
+                {
+                  "path": "/srv/archive",
+                  "uid": 9001,
+                  "gid": 3001,
+                  "mode": 493
+                }
+              ],
+              "files": [
+                {
+                  "path": "/srv/archive/notice.txt",
+                  "uid": 2001,
+                  "gid": 3001,
+                  "mode": 416
+                }
+              ]
+            }
+          ]
+        },
+        "runtime": {
+          "servers": [
+            {
+              "server": "training-nfs",
+              "draft": "# Planned changes for training\n/srv/demo-drop 192.0.2.20(ro,root_squash)\n/srv/practice-guide 192.0.2.21(ro,root_squash)\n/srv/archive 192.0.2.22(ro,root_squash)\n",
+              "saved": "/srv/demo-drop 192.0.2.20(ro,root_squash)\n/srv/practice-guide 192.0.2.21(ro,root_squash)\n/srv/archive 192.0.2.22(ro,root_squash)\n",
+              "applied": [
+                {
+                  "root": "/srv/demo-drop",
+                  "clients": [
+                    {
+                      "selector": {
+                        "network": "192.0.2.20",
+                        "length": 32
+                      },
+                      "options": {
+                        "access": "ro",
+                        "root_squash": true,
+                        "anon_uid": 65534,
+                        "anon_gid": 65534
+                      }
+                    }
+                  ]
+                },
+                {
+                  "root": "/srv/practice-guide",
+                  "clients": [
+                    {
+                      "selector": {
+                        "network": "192.0.2.21",
+                        "length": 32
+                      },
+                      "options": {
+                        "access": "ro",
+                        "root_squash": true,
+                        "anon_uid": 65534,
+                        "anon_gid": 65534
+                      }
+                    }
+                  ]
+                },
+                {
+                  "root": "/srv/archive",
+                  "clients": [
+                    {
+                      "selector": {
+                        "network": "192.0.2.22",
+                        "length": 32
+                      },
+                      "options": {
+                        "access": "ro",
+                        "root_squash": true,
+                        "anon_uid": 65534,
+                        "anon_gid": 65534
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "clients": [
+            {
+              "client": "training-retired",
+              "draft": "192.0.2.10:/srv/demo-drop /mnt/training/demo-drop nfs vers=3,proto=tcp,sec=sys,ro 0 0\n",
+              "saved": "192.0.2.10:/srv/demo-drop /mnt/training/demo-drop nfs vers=3,proto=tcp,sec=sys,ro 0 0\n"
+            },
+            {
+              "client": "training-reader",
+              "draft": "192.0.2.10:/srv/practice-guide /mnt/training/practice-guide nfs vers=3,proto=tcp,sec=sys,ro 0 0\n",
+              "saved": "192.0.2.10:/srv/practice-guide /mnt/training/practice-guide nfs vers=3,proto=tcp,sec=sys,ro 0 0\n"
+            },
+            {
+              "client": "training-archivist",
+              "draft": "192.0.2.10:/srv/archive /mnt/training/archive nfs vers=3,proto=tcp,sec=sys,ro 0 0\n",
+              "saved": "192.0.2.10:/srv/archive /mnt/training/archive nfs vers=3,proto=tcp,sec=sys,ro 0 0\n"
+            }
+          ],
+          "mounts": [
+            {
+              "client": "training-retired",
+              "specification": {
+                "server": "training-nfs",
+                "root": "/srv/demo-drop",
+                "mountpoint": "/mnt/training/demo-drop",
+                "access": "ro"
+              },
+              "binding": {
+                "access": "ro",
+                "root_squash": true,
+                "anon_uid": 65534,
+                "anon_gid": 65534
+              }
+            },
+            {
+              "client": "training-archivist",
+              "specification": {
+                "server": "training-nfs",
+                "root": "/srv/archive",
+                "mountpoint": "/mnt/training/archive",
+                "access": "ro"
+              },
+              "binding": {
+                "access": "ro",
+                "root_squash": true,
+                "anon_uid": 65534,
+                "anon_gid": 65534
+              }
+            }
+          ],
+          "contents": [
+            {
+              "server": "training-nfs",
+              "path": "/srv/demo-drop/notice.txt",
+              "text": "training handover record 1\n"
+            },
+            {
+              "server": "training-nfs",
+              "path": "/srv/practice-guide/notice.txt",
+              "text": "training handover record 2\n"
+            },
+            {
+              "server": "training-nfs",
+              "path": "/srv/archive/notice.txt",
+              "text": "training handover record 3\n"
+            }
+          ]
+        }
+      },
+      "requirements": [
+        {
+          "kind": "NoCurrentMount",
+          "client": "training-retired",
+          "mountpoint": "/mnt/training/demo-drop"
+        },
+        {
+          "kind": "PreserveInitialMount",
+          "client": "training-archivist",
+          "mountpoint": "/mnt/training/archive"
+        },
+        {
+          "kind": "CurrentMount",
+          "client": "training-reader",
+          "specification": {
+            "server": "training-nfs",
+            "root": "/srv/practice-guide",
+            "mountpoint": "/mnt/training/practice-guide",
+            "access": "ro"
+          }
+        },
+        {
+          "kind": "CurrentAccess",
+          "request": {
+            "kind": "read",
+            "client": "training-reader",
+            "mountpoint": "/mnt/training/practice-guide",
+            "profile": "training-regular",
+            "relative": "notice.txt"
+          },
+          "expected": {
+            "kind": "read",
+            "text": "training handover record 2\n"
+          }
+        },
+        {
+          "kind": "ServerDocumentsCommitted",
+          "server": "training-nfs"
+        },
+        {
+          "kind": "PreserveInitialFile",
+          "server": "training-nfs",
+          "path": "/srv/demo-drop/notice.txt"
+        },
+        {
+          "kind": "PreserveInitialFile",
+          "server": "training-nfs",
+          "path": "/srv/practice-guide/notice.txt"
+        },
+        {
+          "kind": "PreserveInitialFile",
+          "server": "training-nfs",
+          "path": "/srv/archive/notice.txt"
+        }
+      ],
+      "fresh": [
+        {
+          "base": {
+            "kind": "saved",
+            "servers": [
+              "training-nfs"
+            ],
+            "client": "training-reader"
+          },
+          "steps": [
+            {
+              "action": {
+                "kind": "mount_saved",
+                "client": "training-reader",
+                "mountpoint": "/mnt/training/practice-guide"
+              },
+              "expected": {
+                "kind": "mounted"
+              }
+            },
+            {
+              "action": {
+                "kind": "read_existing",
+                "client": "training-reader",
+                "mountpoint": "/mnt/training/practice-guide",
+                "profile": "training-regular",
+                "relative": "notice.txt"
+              },
+              "expected": {
+                "kind": "read",
+                "text": "training handover record 2\n"
+              }
+            }
+          ]
+        },
+        {
+          "base": {
+            "kind": "applied"
+          },
+          "steps": [
+            {
+              "action": {
+                "kind": "mount_explicit",
+                "client": "training-retired",
+                "specification": {
+                  "server": "training-nfs",
+                  "root": "/srv/demo-drop",
+                  "mountpoint": "/mnt/training/demo-drop",
+                  "access": "ro"
+                }
+              },
+              "expected": {
+                "kind": "denied",
+                "stage": "export_admission"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "server": "training-nfs",
+    "withdrawn_root": "/srv/demo-drop",
+    "clients": [
+      {
+        "client": "training-retired",
+        "mountpoint": "/mnt/training/demo-drop",
+        "profile": "training-regular",
+        "relative": "notice.txt"
+      },
+      {
+        "client": "training-reader",
+        "mountpoint": "/mnt/training/practice-guide",
+        "profile": "training-regular",
+        "relative": "notice.txt"
+      }
+    ],
+    "labels": [
+      {
+        "title": "Retired client mount removed",
+        "retry": "Unmount only the retired client\u2019s current share."
+      },
+      {
+        "title": "Archive still mounted",
+        "retry": "Leave the archive client\u2019s current mount in place."
+      },
+      {
+        "title": "Approved client has its reference mount",
+        "retry": "Use the approved client\u2019s saved mount. A server listing alone cannot attach the share."
+      },
+      {
+        "title": "Approved client can read the reference file",
+        "retry": "Check that the approved client mounted the reference share and can read the supplied file."
+      },
+      {
+        "title": "Saved export rules are applied",
+        "retry": "Save the edited exports file. Re-export the saved policy before checking."
+      },
+      {
+        "title": "Preserve demo-drop file",
+        "retry": "Retain the contents of the existing demo-drop file."
+      },
+      {
+        "title": "Preserve practice-guide file",
+        "retry": "Retain the contents of the existing practice-guide file."
+      },
+      {
+        "title": "Preserve archive file",
+        "retry": "Retain the contents of the existing archive file."
+      },
+      {
+        "title": "A fresh approved client can mount and read",
+        "retry": "Keep the approved client admitted in the saved and applied rules. Verify it can mount and read."
+      },
+      {
+        "title": "A fresh retired client receives no mount",
+        "retry": "Keep the retired share out of the applied list. Test that a new request cannot mount it."
+      }
+    ]
+  },
+  "assignment": {
+    "definition": {
+      "initial": {
+        "schema_version": 1,
+        "inventory": {
+          "fixture": "handover-exports",
+          "servers": [
+            {
+              "id": "handover-nfs",
+              "address": "198.51.100.10"
+            }
+          ],
+          "clients": [
+            {
+              "id": "handover-retired",
+              "address": "198.51.100.20",
+              "mountpoints": [
+                "/mnt/handover/old-bundle"
+              ],
+              "profiles": [
+                "handover-regular"
+              ]
+            },
+            {
+              "id": "handover-reader",
+              "address": "198.51.100.21",
+              "mountpoints": [
+                "/mnt/handover/reference"
+              ],
+              "profiles": [
+                "handover-regular"
+              ]
+            },
+            {
+              "id": "handover-archivist",
+              "address": "198.51.100.22",
+              "mountpoints": [
+                "/mnt/handover/archive"
+              ],
+              "profiles": [
+                "handover-regular"
+              ]
+            }
+          ],
+          "profiles": [
+            {
+              "id": "handover-regular",
+              "label": "Approved reader",
+              "uid": 2001,
+              "gid": 3001,
+              "groups": []
+            }
+          ],
+          "roots": [
+            {
+              "server": "handover-nfs",
+              "path": "/srv/old-bundle",
+              "directories": [
+                {
+                  "path": "/srv/old-bundle",
+                  "uid": 9001,
+                  "gid": 3001,
+                  "mode": 493
+                }
+              ],
+              "files": [
+                {
+                  "path": "/srv/old-bundle/notice.txt",
+                  "uid": 2001,
+                  "gid": 3001,
+                  "mode": 416
+                }
+              ]
+            },
+            {
+              "server": "handover-nfs",
+              "path": "/srv/reference",
+              "directories": [
+                {
+                  "path": "/srv/reference",
+                  "uid": 9001,
+                  "gid": 3001,
+                  "mode": 493
+                }
+              ],
+              "files": [
+                {
+                  "path": "/srv/reference/notice.txt",
+                  "uid": 2001,
+                  "gid": 3001,
+                  "mode": 416
+                }
+              ]
+            },
+            {
+              "server": "handover-nfs",
+              "path": "/srv/archive",
+              "directories": [
+                {
+                  "path": "/srv/archive",
+                  "uid": 9001,
+                  "gid": 3001,
+                  "mode": 493
+                }
+              ],
+              "files": [
+                {
+                  "path": "/srv/archive/notice.txt",
+                  "uid": 2001,
+                  "gid": 3001,
+                  "mode": 416
+                }
+              ]
+            }
+          ]
+        },
+        "runtime": {
+          "servers": [
+            {
+              "server": "handover-nfs",
+              "draft": "# Planned changes for handover\n/srv/old-bundle 198.51.100.20(ro,root_squash)\n/srv/reference 198.51.100.21(ro,root_squash)\n/srv/archive 198.51.100.22(ro,root_squash)\n",
+              "saved": "/srv/old-bundle 198.51.100.20(ro,root_squash)\n/srv/reference 198.51.100.21(ro,root_squash)\n/srv/archive 198.51.100.22(ro,root_squash)\n",
+              "applied": [
+                {
+                  "root": "/srv/old-bundle",
+                  "clients": [
+                    {
+                      "selector": {
+                        "network": "198.51.100.20",
+                        "length": 32
+                      },
+                      "options": {
+                        "access": "ro",
+                        "root_squash": true,
+                        "anon_uid": 65534,
+                        "anon_gid": 65534
+                      }
+                    }
+                  ]
+                },
+                {
+                  "root": "/srv/reference",
+                  "clients": [
+                    {
+                      "selector": {
+                        "network": "198.51.100.21",
+                        "length": 32
+                      },
+                      "options": {
+                        "access": "ro",
+                        "root_squash": true,
+                        "anon_uid": 65534,
+                        "anon_gid": 65534
+                      }
+                    }
+                  ]
+                },
+                {
+                  "root": "/srv/archive",
+                  "clients": [
+                    {
+                      "selector": {
+                        "network": "198.51.100.22",
+                        "length": 32
+                      },
+                      "options": {
+                        "access": "ro",
+                        "root_squash": true,
+                        "anon_uid": 65534,
+                        "anon_gid": 65534
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "clients": [
+            {
+              "client": "handover-retired",
+              "draft": "198.51.100.10:/srv/old-bundle /mnt/handover/old-bundle nfs vers=3,proto=tcp,sec=sys,ro 0 0\n",
+              "saved": "198.51.100.10:/srv/old-bundle /mnt/handover/old-bundle nfs vers=3,proto=tcp,sec=sys,ro 0 0\n"
+            },
+            {
+              "client": "handover-reader",
+              "draft": "198.51.100.10:/srv/reference /mnt/handover/reference nfs vers=3,proto=tcp,sec=sys,ro 0 0\n",
+              "saved": "198.51.100.10:/srv/reference /mnt/handover/reference nfs vers=3,proto=tcp,sec=sys,ro 0 0\n"
+            },
+            {
+              "client": "handover-archivist",
+              "draft": "198.51.100.10:/srv/archive /mnt/handover/archive nfs vers=3,proto=tcp,sec=sys,ro 0 0\n",
+              "saved": "198.51.100.10:/srv/archive /mnt/handover/archive nfs vers=3,proto=tcp,sec=sys,ro 0 0\n"
+            }
+          ],
+          "mounts": [
+            {
+              "client": "handover-retired",
+              "specification": {
+                "server": "handover-nfs",
+                "root": "/srv/old-bundle",
+                "mountpoint": "/mnt/handover/old-bundle",
+                "access": "ro"
+              },
+              "binding": {
+                "access": "ro",
+                "root_squash": true,
+                "anon_uid": 65534,
+                "anon_gid": 65534
+              }
+            },
+            {
+              "client": "handover-archivist",
+              "specification": {
+                "server": "handover-nfs",
+                "root": "/srv/archive",
+                "mountpoint": "/mnt/handover/archive",
+                "access": "ro"
+              },
+              "binding": {
+                "access": "ro",
+                "root_squash": true,
+                "anon_uid": 65534,
+                "anon_gid": 65534
+              }
+            }
+          ],
+          "contents": [
+            {
+              "server": "handover-nfs",
+              "path": "/srv/old-bundle/notice.txt",
+              "text": "handover record 1\n"
+            },
+            {
+              "server": "handover-nfs",
+              "path": "/srv/reference/notice.txt",
+              "text": "handover record 2\n"
+            },
+            {
+              "server": "handover-nfs",
+              "path": "/srv/archive/notice.txt",
+              "text": "handover record 3\n"
+            }
+          ]
+        }
+      },
+      "requirements": [
+        {
+          "kind": "NoCurrentMount",
+          "client": "handover-retired",
+          "mountpoint": "/mnt/handover/old-bundle"
+        },
+        {
+          "kind": "PreserveInitialMount",
+          "client": "handover-archivist",
+          "mountpoint": "/mnt/handover/archive"
+        },
+        {
+          "kind": "CurrentMount",
+          "client": "handover-reader",
+          "specification": {
+            "server": "handover-nfs",
+            "root": "/srv/reference",
+            "mountpoint": "/mnt/handover/reference",
+            "access": "ro"
+          }
+        },
+        {
+          "kind": "CurrentAccess",
+          "request": {
+            "kind": "read",
+            "client": "handover-reader",
+            "mountpoint": "/mnt/handover/reference",
+            "profile": "handover-regular",
+            "relative": "notice.txt"
+          },
+          "expected": {
+            "kind": "read",
+            "text": "handover record 2\n"
+          }
+        },
+        {
+          "kind": "ServerDocumentsCommitted",
+          "server": "handover-nfs"
+        },
+        {
+          "kind": "PreserveInitialFile",
+          "server": "handover-nfs",
+          "path": "/srv/old-bundle/notice.txt"
+        },
+        {
+          "kind": "PreserveInitialFile",
+          "server": "handover-nfs",
+          "path": "/srv/reference/notice.txt"
+        },
+        {
+          "kind": "PreserveInitialFile",
+          "server": "handover-nfs",
+          "path": "/srv/archive/notice.txt"
+        }
+      ],
+      "fresh": [
+        {
+          "base": {
+            "kind": "saved",
+            "servers": [
+              "handover-nfs"
+            ],
+            "client": "handover-reader"
+          },
+          "steps": [
+            {
+              "action": {
+                "kind": "mount_saved",
+                "client": "handover-reader",
+                "mountpoint": "/mnt/handover/reference"
+              },
+              "expected": {
+                "kind": "mounted"
+              }
+            },
+            {
+              "action": {
+                "kind": "read_existing",
+                "client": "handover-reader",
+                "mountpoint": "/mnt/handover/reference",
+                "profile": "handover-regular",
+                "relative": "notice.txt"
+              },
+              "expected": {
+                "kind": "read",
+                "text": "handover record 2\n"
+              }
+            }
+          ]
+        },
+        {
+          "base": {
+            "kind": "applied"
+          },
+          "steps": [
+            {
+              "action": {
+                "kind": "mount_explicit",
+                "client": "handover-retired",
+                "specification": {
+                  "server": "handover-nfs",
+                  "root": "/srv/old-bundle",
+                  "mountpoint": "/mnt/handover/old-bundle",
+                  "access": "ro"
+                }
+              },
+              "expected": {
+                "kind": "denied",
+                "stage": "export_admission"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "server": "handover-nfs",
+    "withdrawn_root": "/srv/old-bundle",
+    "clients": [
+      {
+        "client": "handover-retired",
+        "mountpoint": "/mnt/handover/old-bundle",
+        "profile": "handover-regular",
+        "relative": "notice.txt"
+      },
+      {
+        "client": "handover-reader",
+        "mountpoint": "/mnt/handover/reference",
+        "profile": "handover-regular",
+        "relative": "notice.txt"
+      }
+    ],
+    "labels": [
+      {
+        "title": "Retired client mount removed",
+        "retry": "Unmount only the retired client\u2019s current share."
+      },
+      {
+        "title": "Archive still mounted",
+        "retry": "Leave the archive client\u2019s current mount in place."
+      },
+      {
+        "title": "Approved client has its reference mount",
+        "retry": "Use the approved client\u2019s saved mount. A server listing alone cannot attach the share."
+      },
+      {
+        "title": "Approved client can read the reference file",
+        "retry": "Check that the approved client mounted the reference share and can read the supplied file."
+      },
+      {
+        "title": "Saved export rules are applied",
+        "retry": "Save the edited exports file. Re-export the saved policy before checking."
+      },
+      {
+        "title": "Preserve old-bundle file",
+        "retry": "Retain the contents of the existing old-bundle file."
+      },
+      {
+        "title": "Preserve reference file",
+        "retry": "Retain the contents of the existing reference file."
+      },
+      {
+        "title": "Preserve archive file",
+        "retry": "Retain the contents of the existing archive file."
+      },
+      {
+        "title": "A fresh approved client can mount and read",
+        "retry": "Keep the approved client admitted in the saved and applied rules. Verify it can mount and read."
+      },
+      {
+        "title": "A fresh retired client receives no mount",
+        "retry": "Keep the retired share out of the applied list. Test that a new request cannot mount it."
+      }
+    ]
+  }
+}

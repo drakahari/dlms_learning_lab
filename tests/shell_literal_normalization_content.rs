@@ -70,7 +70,7 @@ fn catalog() -> &'static Vec<Scenario> {
     ALL.get_or_init(|| {
         assert_eq!(
             shell::EVALUATOR_REVISION,
-            15,
+            19,
             "No fallback to an older evaluator"
         );
         let current = normal199_predecessor();
@@ -416,13 +416,10 @@ fn actual_current_records_edit_invalidation_save_resume_and_selected_reset_prese
     assert_eq!(full(&p), caller);
     let mut resumed = progress::load(&path, all).unwrap();
     assert_eq!(value(&resumed), value(&p));
-    assert!(
-        resumed
-            .migration_receipts
-            .as_ref()
-            .unwrap()
-            .shell
-            .contains(&15)
+    assert_eq!(
+        resumed.migration_receipts.as_ref().unwrap().shell,
+        vec![19],
+        "A fresh current run records only the actual current evaluator; no invented historical receipt"
     );
     let before = full(&resumed);
     let mut fresh = Attempt::new(s, resumed.attempts[&s.id].visited);

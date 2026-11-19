@@ -1,0 +1,1557 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-nm-persistent-profile",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Persistent Ethernet profiles",
+      "unit": "linux-persistent-networking",
+      "title": "Prepare an Ethernet profile for the next startup",
+      "summary": "A connection profile is a named set of saved network settings. A UUID identifies that profile; interface-name binds it to an adapter. Editing a saved file does not rewrite the settings already in use.",
+      "objective": "Prepare the saved Application profile for the next simulated startup: bind it to enp1s0, enable automatic selection and give it 10.70.0.20/24. Reach 172.16.5.10 through enp1s0, the preferred default uplink, in both supplied cases. Re-reading saved profiles must preserve the current management settings. Retain supplied filenames and UUIDs.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Edit the saved virtual profiles, compare current and next-startup settings, inspect both test cases and retry."
+      ],
+      "guide": [],
+      "explanation": "The worked example binds Application to enp1s0, sets autoconnect=true and repairs its supplied /24 address. Existing current selections remain snapshots; next startup uses the edited saved profile.",
+      "hints": [
+        "Find the interface-name, autoconnect and address1 keys in Application; compare them with the supplied interface and task address.",
+        "A correct gateway alone cannot fix a profile bound to an absent adapter or excluded from automatic selection."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://networkmanager.dev/docs/api/latest/nm-settings-keyfile.html",
+        "https://networkmanager.dev/docs/api/latest/settings-connection.html",
+        "https://networkmanager.dev/docs/api/latest/settings-ipv4.html"
+      ],
+      "simplifications": "Bounded in-process static IPv4 Ethernet profile projection. No NetworkManager daemon, live profiles, host commands, packets or actual restart. Supported keyfiles are validated atomically; real per-file partial loading, activation failures, timestamp ties, Wi-Fi, DHCP, DNS merging, permissions and asynchronous lifecycle are not modeled. IPv6 disabled is a supplied exercise boundary, not host policy advice. Conventional interface /1\u201330 only; /31 and /32 remain excluded special cases. Automatic route metrics are explicit sample inputs, not universal OS defaults.",
+      "initial": {
+        "kind": "NmProfiles",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-nm-persistent-profile",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000070\ntype=ethernet\ninterface-name=enp9s0\nautoconnect=false\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.70.0.99/24\ngateway=10.70.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000071\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.71.0.20/24\ngateway=10.71.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "app.nmconnection"
+          },
+          "practice": {
+            "draft": {
+              "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000080\ntype=ethernet\ninterface-name=enp9s0\nautoconnect=false\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.80.0.99/24\ngateway=10.80.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000081\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.81.0.20/24\ngateway=10.81.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "app.nmconnection"
+          }
+        }
+      },
+      "goal": {
+        "kind": "NmProfiles",
+        "definition": {
+          "initial": {
+            "id": "lpic1-nm-persistent-profile",
+            "instructions": "Prepare the saved Application profile for the next simulated startup: bind it to enp1s0, enable automatic selection and give it 10.70.0.20/24. Reach 172.16.5.10 through enp1s0, the preferred default uplink, in both supplied cases. Re-reading saved profiles must preserve the current management settings. Retain supplied filenames and UUIDs.",
+            "starter": {
+              "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000070\ntype=ethernet\ninterface-name=enp9s0\nautoconnect=false\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.70.0.99/24\ngateway=10.70.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000071\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.71.0.20/24\ngateway=10.71.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "cases": [
+              {
+                "id": "lpic1-nm-persistent-profile-case-0",
+                "label": "Metric context A",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-persistent-profile",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.70.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.71.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.70.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.71.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          },
+                          {
+                            "address": "10.40.0.0",
+                            "length": 24
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.40.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000070\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.70.0.20/24\ngateway=10.70.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000071\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.71.0.20/24\ngateway=10.71.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000070",
+                  "00000000-0000-4000-8000-000000000071"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.70.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000070"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-nm-persistent-profile-case-1",
+                "label": "Metric context B",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-persistent-profile",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.70.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.71.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.70.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.71.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          },
+                          {
+                            "address": "10.40.0.0",
+                            "length": 24
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.40.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 600,
+                    "enp2s0": 100
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000070\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.70.0.20/24\ngateway=10.70.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000071\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.71.0.20/24\ngateway=10.71.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000070",
+                  "00000000-0000-4000-8000-000000000071"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.70.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000070"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "nm-practice-0",
+            "instructions": "Prepare the saved Application profile for the next simulated startup: bind it to enp1s0, enable automatic selection and give it 10.80.0.20/24. Reach 172.16.5.10 through enp1s0, the preferred default uplink, in both supplied cases. Re-reading saved profiles must preserve the current management settings. Retain supplied filenames and UUIDs.",
+            "starter": {
+              "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000080\ntype=ethernet\ninterface-name=enp9s0\nautoconnect=false\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.80.0.99/24\ngateway=10.80.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000081\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.81.0.20/24\ngateway=10.81.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "cases": [
+              {
+                "id": "nm-practice-0-case-0",
+                "label": "Metric context A",
+                "environment": {
+                  "physical": {
+                    "id": "nm-practice-0",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.80.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.81.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.80.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.81.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          },
+                          {
+                            "address": "10.40.0.0",
+                            "length": 24
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.40.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000080\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.80.0.20/24\ngateway=10.80.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000081\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.81.0.20/24\ngateway=10.81.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000080",
+                  "00000000-0000-4000-8000-000000000081"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.80.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000080"
+                  }
+                ]
+              },
+              {
+                "id": "nm-practice-0-case-1",
+                "label": "Metric context B",
+                "environment": {
+                  "physical": {
+                    "id": "nm-practice-0",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.80.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.81.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.80.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.81.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          },
+                          {
+                            "address": "10.40.0.0",
+                            "length": 24
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.40.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 600,
+                    "enp2s0": 100
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000080\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.80.0.20/24\ngateway=10.80.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000081\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.81.0.20/24\ngateway=10.81.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000080",
+                  "00000000-0000-4000-8000-000000000081"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.80.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000080"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000080\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.80.0.20/24\ngateway=10.80.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+            "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000081\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.81.0.20/24\ngateway=10.81.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+          }
+        }
+      },
+      "solution": [
+        "NM PROFILES\n{\"app.nmconnection\": \"[connection]\\nid=Application\\nuuid=00000000-0000-4000-8000-000000000070\\ntype=ethernet\\ninterface-name=enp1s0\\nautoconnect=true\\nautoconnect-priority=10\\n\\n[ipv4]\\nmethod=manual\\naddress1=10.70.0.20/24\\ngateway=10.70.0.1\\nroute-metric=100\\n\\n[ipv6]\\nmethod=disabled\\n\", \"management.nmconnection\": \"[connection]\\nid=Management\\nuuid=00000000-0000-4000-8000-000000000071\\ntype=ethernet\\ninterface-name=enp2s0\\nautoconnect=true\\nautoconnect-priority=10\\n\\n[ipv4]\\nmethod=manual\\naddress1=10.71.0.20/24\\ngateway=10.71.0.1\\nroute-metric=200\\n\\n[ipv6]\\nmethod=disabled\\n\"}"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "lpic1-nm-autoconnect-choice",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Persistent Ethernet profiles",
+      "unit": "linux-persistent-networking",
+      "title": "Retire a stale startup preference without interrupting the current link",
+      "summary": "Only one saved Ethernet profile is selected per supplied adapter at startup. A higher autoconnect-priority is preferred. A filename or friendly name does not decide which wins.",
+      "objective": "Make the supplied Replacement profile (00000000-0000-4000-8000-000000000074) win automatic selection on enp1s0 at the next startup. It must provide 10.72.0.20/24 and the usable application path to 172.16.5.10; enp1s0 remains the preferred default uplink. Re-reading files must keep BOTH current interface settings unchanged. Retain all supplied filenames and UUIDs. Do not rely on a priority tie.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Edit the saved virtual profiles, compare current and next-startup settings, inspect both test cases and retry."
+      ],
+      "guide": [],
+      "explanation": "The worked example raises Replacement above Old Application. Lowering the old priority or excluding the old profile from autoconnect also works. Re-reading the edited files must not replace either current selection.",
+      "hints": [
+        "Compare both application profiles\u2019 autoconnect-priority values. Higher is preferred; a tie is not a deterministic solution.",
+        "You may change eligibility or preference, while preserving the supplied UUIDs and current selections."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://networkmanager.dev/docs/api/latest/nm-settings-keyfile.html",
+        "https://networkmanager.dev/docs/api/latest/settings-connection.html",
+        "https://networkmanager.dev/docs/api/latest/settings-ipv4.html"
+      ],
+      "simplifications": "Bounded in-process static IPv4 Ethernet profile projection. No NetworkManager daemon, live profiles, host commands, packets or actual restart. Supported keyfiles are validated atomically; real per-file partial loading, activation failures, timestamp ties, Wi-Fi, DHCP, DNS merging, permissions and asynchronous lifecycle are not modeled. IPv6 disabled is a supplied exercise boundary, not host policy advice. Conventional interface /1\u201330 only; /31 and /32 remain excluded special cases. Automatic route metrics are explicit sample inputs, not universal OS defaults.",
+      "initial": {
+        "kind": "NmProfiles",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-nm-autoconnect-choice",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "app.nmconnection": "[connection]\nid=Old Application\nuuid=00000000-0000-4000-8000-000000000072\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=20\n\n[ipv4]\nmethod=manual\naddress1=10.72.0.99/24\ngateway=10.72.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000073\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.73.0.20/24\ngateway=10.73.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n",
+              "replacement.nmconnection": "[connection]\nid=Replacement\nuuid=00000000-0000-4000-8000-000000000074\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.72.0.20/24\ngateway=10.72.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "app.nmconnection"
+          },
+          "practice": {
+            "draft": {
+              "app.nmconnection": "[connection]\nid=Old Application\nuuid=00000000-0000-4000-8000-000000000082\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=20\n\n[ipv4]\nmethod=manual\naddress1=10.82.0.99/24\ngateway=10.82.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000083\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.83.0.20/24\ngateway=10.83.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n",
+              "replacement.nmconnection": "[connection]\nid=Replacement\nuuid=00000000-0000-4000-8000-000000000084\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.82.0.20/24\ngateway=10.82.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "app.nmconnection"
+          }
+        }
+      },
+      "goal": {
+        "kind": "NmProfiles",
+        "definition": {
+          "initial": {
+            "id": "lpic1-nm-autoconnect-choice",
+            "instructions": "Make the supplied Replacement profile (00000000-0000-4000-8000-000000000074) win automatic selection on enp1s0 at the next startup. It must provide 10.72.0.20/24 and the usable application path to 172.16.5.10; enp1s0 remains the preferred default uplink. Re-reading files must keep BOTH current interface settings unchanged. Retain all supplied filenames and UUIDs. Do not rely on a priority tie.",
+            "starter": {
+              "app.nmconnection": "[connection]\nid=Old Application\nuuid=00000000-0000-4000-8000-000000000072\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=20\n\n[ipv4]\nmethod=manual\naddress1=10.72.0.99/24\ngateway=10.72.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000073\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.73.0.20/24\ngateway=10.73.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n",
+              "replacement.nmconnection": "[connection]\nid=Replacement\nuuid=00000000-0000-4000-8000-000000000074\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.72.0.20/24\ngateway=10.72.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "cases": [
+              {
+                "id": "lpic1-nm-autoconnect-choice-case-0",
+                "label": "Metric context A",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-autoconnect-choice",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.72.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.73.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.72.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.73.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          },
+                          {
+                            "address": "10.40.0.0",
+                            "length": 24
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.40.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Old Application\nuuid=00000000-0000-4000-8000-000000000072\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=20\n\n[ipv4]\nmethod=manual\naddress1=10.72.0.20/24\ngateway=10.72.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000073\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.73.0.20/24\ngateway=10.73.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000072",
+                  "00000000-0000-4000-8000-000000000073"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.72.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000074"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-nm-autoconnect-choice-case-1",
+                "label": "Metric context B",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-autoconnect-choice",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.72.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.73.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.72.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.73.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          },
+                          {
+                            "address": "10.40.0.0",
+                            "length": 24
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.40.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 600,
+                    "enp2s0": 100
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Old Application\nuuid=00000000-0000-4000-8000-000000000072\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=20\n\n[ipv4]\nmethod=manual\naddress1=10.72.0.20/24\ngateway=10.72.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000073\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.73.0.20/24\ngateway=10.73.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000072",
+                  "00000000-0000-4000-8000-000000000073"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.72.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000074"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "nm-practice-1",
+            "instructions": "Make the supplied Replacement profile (00000000-0000-4000-8000-000000000084) win automatic selection on enp1s0 at the next startup. It must provide 10.82.0.20/24 and the usable application path to 172.16.5.10; enp1s0 remains the preferred default uplink. Re-reading files must keep BOTH current interface settings unchanged. Retain all supplied filenames and UUIDs. Do not rely on a priority tie.",
+            "starter": {
+              "app.nmconnection": "[connection]\nid=Old Application\nuuid=00000000-0000-4000-8000-000000000082\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=20\n\n[ipv4]\nmethod=manual\naddress1=10.82.0.99/24\ngateway=10.82.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000083\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.83.0.20/24\ngateway=10.83.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n",
+              "replacement.nmconnection": "[connection]\nid=Replacement\nuuid=00000000-0000-4000-8000-000000000084\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.82.0.20/24\ngateway=10.82.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "cases": [
+              {
+                "id": "nm-practice-1-case-0",
+                "label": "Metric context A",
+                "environment": {
+                  "physical": {
+                    "id": "nm-practice-1",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.82.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.83.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.82.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.83.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          },
+                          {
+                            "address": "10.40.0.0",
+                            "length": 24
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.40.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Old Application\nuuid=00000000-0000-4000-8000-000000000082\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=20\n\n[ipv4]\nmethod=manual\naddress1=10.82.0.20/24\ngateway=10.82.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000083\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.83.0.20/24\ngateway=10.83.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000082",
+                  "00000000-0000-4000-8000-000000000083"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.82.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000084"
+                  }
+                ]
+              },
+              {
+                "id": "nm-practice-1-case-1",
+                "label": "Metric context B",
+                "environment": {
+                  "physical": {
+                    "id": "nm-practice-1",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.82.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.83.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.82.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.83.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          },
+                          {
+                            "address": "10.40.0.0",
+                            "length": 24
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.40.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 600,
+                    "enp2s0": 100
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Old Application\nuuid=00000000-0000-4000-8000-000000000082\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=20\n\n[ipv4]\nmethod=manual\naddress1=10.82.0.20/24\ngateway=10.82.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000083\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.83.0.20/24\ngateway=10.83.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000082",
+                  "00000000-0000-4000-8000-000000000083"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.82.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "enp1s0",
+                    "uuid": "00000000-0000-4000-8000-000000000084"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "app.nmconnection": "[connection]\nid=Old Application\nuuid=00000000-0000-4000-8000-000000000082\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=20\n\n[ipv4]\nmethod=manual\naddress1=10.82.0.99/24\ngateway=10.82.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+            "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000083\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.83.0.20/24\ngateway=10.83.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n",
+            "replacement.nmconnection": "[connection]\nid=Replacement\nuuid=00000000-0000-4000-8000-000000000084\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=30\n\n[ipv4]\nmethod=manual\naddress1=10.82.0.20/24\ngateway=10.82.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n"
+          }
+        }
+      },
+      "solution": [
+        "NM PROFILES\n{\"app.nmconnection\": \"[connection]\\nid=Old Application\\nuuid=00000000-0000-4000-8000-000000000072\\ntype=ethernet\\ninterface-name=enp1s0\\nautoconnect=true\\nautoconnect-priority=20\\n\\n[ipv4]\\nmethod=manual\\naddress1=10.72.0.99/24\\ngateway=10.72.0.1\\nroute-metric=100\\n\\n[ipv6]\\nmethod=disabled\\n\", \"management.nmconnection\": \"[connection]\\nid=Management\\nuuid=00000000-0000-4000-8000-000000000073\\ntype=ethernet\\ninterface-name=enp2s0\\nautoconnect=true\\nautoconnect-priority=10\\n\\n[ipv4]\\nmethod=manual\\naddress1=10.73.0.20/24\\ngateway=10.73.0.1\\nroute-metric=200\\n\\n[ipv6]\\nmethod=disabled\\n\", \"replacement.nmconnection\": \"[connection]\\nid=Replacement\\nuuid=00000000-0000-4000-8000-000000000074\\ntype=ethernet\\ninterface-name=enp1s0\\nautoconnect=true\\nautoconnect-priority=30\\n\\n[ipv4]\\nmethod=manual\\naddress1=10.72.0.20/24\\ngateway=10.72.0.1\\nroute-metric=100\\n\\n[ipv6]\\nmethod=disabled\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic1-nm-persistent-profile"
+      ]
+    },
+    {
+      "id": "lpic1-nm-uplink-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Persistent Ethernet profiles",
+      "unit": "linux-persistent-networking",
+      "title": "Keep management access while changing the next default uplink",
+      "summary": "autoconnect-priority chooses a profile for one adapter. Once adapters are configured, routes choose where traffic leaves. The longest destination prefix wins; among equal-length routes, a lower route metric wins.",
+      "objective": "Prepare a two-uplink handover: at next startup enp1s0 (10.74.0.20/24) is the preferred default and reaches 172.16.5.10. Reach the management destination 10.40.0.50 through enp2s0 via its supplied gateway 10.75.0.1 in both metric contexts. Re-reading files must preserve current management settings. Retain supplied filenames and UUIDs; use supported explicit routes/metrics or never-default policy without metric ties.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Edit the saved virtual profiles, compare current and next-startup settings, inspect both test cases and retry."
+      ],
+      "guide": [],
+      "explanation": "The worked example gives Application an explicit metric 50, suppresses Management\u2019s default and adds its specific 10.40.0.0/24 route. Another supported solution can retain both defaults with explicit unequal metrics and the specific management route.",
+      "hints": [
+        "Separate the default destination from the specific management destination. Compare each chosen route, not only which adapters have addresses.",
+        "An explicit management route is still needed after selecting the application default. Test both supplied automatic-metric cases."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://networkmanager.dev/docs/api/latest/nm-settings-keyfile.html",
+        "https://networkmanager.dev/docs/api/latest/settings-connection.html",
+        "https://networkmanager.dev/docs/api/latest/settings-ipv4.html"
+      ],
+      "simplifications": "Bounded in-process static IPv4 Ethernet profile projection. No NetworkManager daemon, live profiles, host commands, packets or actual restart. Supported keyfiles are validated atomically; real per-file partial loading, activation failures, timestamp ties, Wi-Fi, DHCP, DNS merging, permissions and asynchronous lifecycle are not modeled. IPv6 disabled is a supplied exercise boundary, not host policy advice. Conventional interface /1\u201330 only; /31 and /32 remain excluded special cases. Automatic route metrics are explicit sample inputs, not universal OS defaults.",
+      "initial": {
+        "kind": "NmProfiles",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-nm-uplink-handover",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000074\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.74.0.20/24\ngateway=10.74.0.1\nroute-metric=600\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000075\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.75.0.20/24\ngateway=10.75.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "app.nmconnection"
+          },
+          "practice": {
+            "draft": {
+              "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000084\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.84.0.20/24\ngateway=10.84.0.1\nroute-metric=600\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000085\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.85.0.20/24\ngateway=10.85.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "app.nmconnection"
+          }
+        }
+      },
+      "goal": {
+        "kind": "NmProfiles",
+        "definition": {
+          "initial": {
+            "id": "lpic1-nm-uplink-handover",
+            "instructions": "Prepare a two-uplink handover: at next startup enp1s0 (10.74.0.20/24) is the preferred default and reaches 172.16.5.10. Reach the management destination 10.40.0.50 through enp2s0 via its supplied gateway 10.75.0.1 in both metric contexts. Re-reading files must preserve current management settings. Retain supplied filenames and UUIDs; use supported explicit routes/metrics or never-default policy without metric ties.",
+            "starter": {
+              "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000074\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.74.0.20/24\ngateway=10.74.0.1\nroute-metric=600\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000075\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.75.0.20/24\ngateway=10.75.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "cases": [
+              {
+                "id": "lpic1-nm-uplink-handover-case-0",
+                "label": "Metric context A",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-uplink-handover",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.74.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.75.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.74.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.75.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          },
+                          {
+                            "address": "10.40.0.0",
+                            "length": 24
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.40.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000074\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.74.0.20/24\ngateway=10.74.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000075\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.75.0.20/24\ngateway=10.75.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000074",
+                  "00000000-0000-4000-8000-000000000075"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.74.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.40.0.50",
+                    "interface": "enp2s0"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-nm-uplink-handover-case-1",
+                "label": "Metric context B",
+                "environment": {
+                  "physical": {
+                    "id": "lpic1-nm-uplink-handover",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.74.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.75.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.74.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.75.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          },
+                          {
+                            "address": "10.40.0.0",
+                            "length": 24
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.40.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 600,
+                    "enp2s0": 100
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000074\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.74.0.20/24\ngateway=10.74.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000075\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.75.0.20/24\ngateway=10.75.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000074",
+                  "00000000-0000-4000-8000-000000000075"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.74.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.40.0.50",
+                    "interface": "enp2s0"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "nm-practice-2",
+            "instructions": "Prepare a two-uplink handover: at next startup enp1s0 (10.84.0.20/24) is the preferred default and reaches 172.16.5.10. Reach the management destination 10.40.0.50 through enp2s0 via its supplied gateway 10.85.0.1 in both metric contexts. Re-reading files must preserve current management settings. Retain supplied filenames and UUIDs; use supported explicit routes/metrics or never-default policy without metric ties.",
+            "starter": {
+              "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000084\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.84.0.20/24\ngateway=10.84.0.1\nroute-metric=600\n\n[ipv6]\nmethod=disabled\n",
+              "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000085\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.85.0.20/24\ngateway=10.85.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n"
+            },
+            "cases": [
+              {
+                "id": "nm-practice-2-case-0",
+                "label": "Metric context A",
+                "environment": {
+                  "physical": {
+                    "id": "nm-practice-2",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.84.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.85.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.84.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.85.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          },
+                          {
+                            "address": "10.40.0.0",
+                            "length": 24
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.40.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 100,
+                    "enp2s0": 200
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000084\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.84.0.20/24\ngateway=10.84.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000085\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.85.0.20/24\ngateway=10.85.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000084",
+                  "00000000-0000-4000-8000-000000000085"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.84.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.40.0.50",
+                    "interface": "enp2s0"
+                  }
+                ]
+              },
+              {
+                "id": "nm-practice-2-case-1",
+                "label": "Metric context B",
+                "environment": {
+                  "physical": {
+                    "id": "nm-practice-2",
+                    "links": [
+                      {
+                        "name": "enp1s0",
+                        "network": {
+                          "address": "10.84.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "enp2s0",
+                        "network": {
+                          "address": "10.85.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.84.0.1",
+                        "device": "enp1s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.85.0.1",
+                        "device": "enp2s0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          },
+                          {
+                            "address": "10.40.0.0",
+                            "length": 24
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "172.16.5.10",
+                        "available": true
+                      },
+                      {
+                        "address": "10.40.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "enp1s0": 600,
+                    "enp2s0": 100
+                  }
+                },
+                "current_files": {
+                  "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000084\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.84.0.20/24\ngateway=10.84.0.1\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n",
+                  "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000085\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.85.0.20/24\ngateway=10.85.0.1\nroute-metric=200\n\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000084",
+                  "00000000-0000-4000-8000-000000000085"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "enp2s0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "enp1s0",
+                    "address": {
+                      "address": "10.84.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "172.16.5.10",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "DefaultOwner",
+                    "interface": "enp1s0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.40.0.50",
+                    "interface": "enp2s0"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "app.nmconnection": "[connection]\nid=Application\nuuid=00000000-0000-4000-8000-000000000084\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.84.0.20/24\ngateway=10.84.0.1\nroute-metric=50\n\n[ipv6]\nmethod=disabled\n",
+            "management.nmconnection": "[connection]\nid=Management\nuuid=00000000-0000-4000-8000-000000000085\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=true\nautoconnect-priority=10\n\n[ipv4]\nmethod=manual\naddress1=10.85.0.20/24\ngateway=10.85.0.1\nroute-metric=100\n\nnever-default=true\nroute1=10.40.0.0/24,10.85.0.1,100\n\n[ipv6]\nmethod=disabled\n"
+          }
+        }
+      },
+      "solution": [
+        "NM PROFILES\n{\"app.nmconnection\": \"[connection]\\nid=Application\\nuuid=00000000-0000-4000-8000-000000000074\\ntype=ethernet\\ninterface-name=enp1s0\\nautoconnect=true\\nautoconnect-priority=10\\n\\n[ipv4]\\nmethod=manual\\naddress1=10.74.0.20/24\\ngateway=10.74.0.1\\nroute-metric=50\\n\\n[ipv6]\\nmethod=disabled\\n\", \"management.nmconnection\": \"[connection]\\nid=Management\\nuuid=00000000-0000-4000-8000-000000000075\\ntype=ethernet\\ninterface-name=enp2s0\\nautoconnect=true\\nautoconnect-priority=10\\n\\n[ipv4]\\nmethod=manual\\naddress1=10.75.0.20/24\\ngateway=10.75.0.1\\nroute-metric=100\\n\\nnever-default=true\\nroute1=10.40.0.0/24,10.75.0.1,100\\n\\n[ipv6]\\nmethod=disabled\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic1-nm-autoconnect-choice"
+      ]
+    }
+  ]
+}

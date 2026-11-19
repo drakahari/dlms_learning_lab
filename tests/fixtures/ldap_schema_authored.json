@@ -1,0 +1,2513 @@
+{
+  "version": 1,
+  "initial": {
+    "id": "lpic2-ldap-schema-extension",
+    "instructions": "New schema entry: Add one training entry under cn=schema,cn=config. Use new numeric OIDs below 1.3.6.1.4.1.32473.220; leave the supplied base definitions unchanged. trainingBadge: Required text value, exactly one per trainingPerson; declare a compatible text equality rule. trainingPoints: Optional Integer values with integer equality. Several distinct values must work; invalid formats and equal duplicates must fail. trainingPerson: Inherit person, including cn and sn. Allow uid and trainingPoints, plus inherited optional description; reject unlisted fields. Verify and preserve data: Accept every valid Add/replacement and reject invalid data without changing stored entries. Check all three sample sets.",
+    "schema_name": "training",
+    "oid_branch": "1.3.6.1.4.1.32473.220",
+    "starter": "version: 1\n\ndn: cn=training,cn=schema,cn=config\nchangetype: add\nobjectClass: olcSchemaConfig\ncn: training\nolcAttributeTypes: (1.3.6.1.4.1.32473.220.1\n  NAME 'trainingBadge'\n  EQUALITY caseExactMatch\n  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15)\nolcAttributeTypes: (1.3.6.1.4.1.32473.220.2\n  NAME 'trainingPoints'\n  EQUALITY caseExactMatch\n  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15)\nolcObjectClasses: (1.3.6.1.4.1.32473.220.3\n  NAME 'trainingPerson'\n  SUP person STRUCTURAL\n  MAY (uid $ trainingBadge $ trainingPoints))\n",
+    "reference": "version: 1\n\ndn: cn=training,cn=schema,cn=config\nchangetype: add\nobjectClass: olcSchemaConfig\ncn: training\nolcAttributeTypes: (1.3.6.1.4.1.32473.220.1\n  NAME 'trainingBadge'\n  EQUALITY caseExactMatch\n  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15\n  SINGLE-VALUE)\nolcAttributeTypes: (1.3.6.1.4.1.32473.220.2\n  NAME 'trainingPoints'\n  EQUALITY integerMatch\n  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27)\nolcObjectClasses: (1.3.6.1.4.1.32473.220.3\n  NAME 'trainingPerson'\n  SUP person STRUCTURAL\n  MUST trainingBadge\n  MAY (uid $ trainingPoints))\n",
+    "cases": [
+      {
+        "id": "training-set-0",
+        "label": "Sample set 1",
+        "initial": [
+          {
+            "dn": "cn=Existing0,dc=registry,dc=test",
+            "classes": [
+              "trainingPerson"
+            ],
+            "fields": [
+              {
+                "name": "cn",
+                "values": [
+                  "Existing0"
+                ]
+              },
+              {
+                "name": "sn",
+                "values": [
+                  "Learner"
+                ]
+              },
+              {
+                "name": "trainingBadge",
+                "values": [
+                  "KEPT"
+                ]
+              }
+            ]
+          }
+        ],
+        "probes": [
+          {
+            "label": "Accept complete data",
+            "reason": "Optional points and identifiers may have multiple distinct values.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson",
+                "person"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                },
+                {
+                  "name": "trainingPoints",
+                  "values": [
+                    "7",
+                    "9"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "learner-one",
+                    "learner-two"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Enrolled learner"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Accept without optional fields",
+            "reason": "Only cn, sn and the badge are required.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Reject missing badge",
+            "reason": "The custom class requires its badge through MUST.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject two badges",
+            "reason": "The badge type is SINGLE-VALUE.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-A",
+                    "SECOND"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject words as points",
+            "reason": "Integer syntax accepts canonical whole-number text, not words.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                },
+                {
+                  "name": "trainingPoints",
+                  "values": [
+                    "many"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject missing inherited surname",
+            "reason": "SUP person inherits the sn requirement.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject an unlisted attribute",
+            "reason": "Attributes need permission through the class's inherited or local MUST/MAY sets.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                },
+                {
+                  "name": "name",
+                  "values": [
+                    "unexpected"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Update existing badge",
+            "reason": "A valid change must alter the actual stored entry.",
+            "operation": "replace",
+            "entry": {
+              "dn": "cn=Existing0,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Existing0"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "REVISED"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Keep data after a bad update",
+            "reason": "Removing every badge must fail without changing stored fields.",
+            "operation": "replace",
+            "entry": {
+              "dn": "cn=Existing0,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Existing0"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject duplicate points",
+            "reason": "Equal values cannot appear twice in one LDAP attribute.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                },
+                {
+                  "name": "trainingPoints",
+                  "values": [
+                    "7",
+                    "7"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject noncanonical integers",
+            "reason": "Do not silently convert a leading-zero number into valid LDAP Integer text.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                },
+                {
+                  "name": "trainingPoints",
+                  "values": [
+                    "0007"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          }
+        ]
+      },
+      {
+        "id": "training-set-1",
+        "label": "Sample set 2",
+        "initial": [
+          {
+            "dn": "cn=Existing1,dc=registry,dc=test",
+            "classes": [
+              "trainingPerson"
+            ],
+            "fields": [
+              {
+                "name": "cn",
+                "values": [
+                  "Existing1"
+                ]
+              },
+              {
+                "name": "sn",
+                "values": [
+                  "Learner"
+                ]
+              },
+              {
+                "name": "trainingBadge",
+                "values": [
+                  "KEPT"
+                ]
+              }
+            ]
+          }
+        ],
+        "probes": [
+          {
+            "label": "Accept complete data",
+            "reason": "Optional points and identifiers may have multiple distinct values.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson",
+                "person"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                },
+                {
+                  "name": "trainingPoints",
+                  "values": [
+                    "7",
+                    "9"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "learner-one",
+                    "learner-two"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Enrolled learner"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Accept without optional fields",
+            "reason": "Only cn, sn and the badge are required.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Reject missing badge",
+            "reason": "The custom class requires its badge through MUST.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject two badges",
+            "reason": "The badge type is SINGLE-VALUE.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-B",
+                    "SECOND"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject words as points",
+            "reason": "Integer syntax accepts canonical whole-number text, not words.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                },
+                {
+                  "name": "trainingPoints",
+                  "values": [
+                    "many"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject missing inherited surname",
+            "reason": "SUP person inherits the sn requirement.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject an unlisted attribute",
+            "reason": "Attributes need permission through the class's inherited or local MUST/MAY sets.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                },
+                {
+                  "name": "name",
+                  "values": [
+                    "unexpected"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Update existing badge",
+            "reason": "A valid change must alter the actual stored entry.",
+            "operation": "replace",
+            "entry": {
+              "dn": "cn=Existing1,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Existing1"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "REVISED"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Keep data after a bad update",
+            "reason": "Removing every badge must fail without changing stored fields.",
+            "operation": "replace",
+            "entry": {
+              "dn": "cn=Existing1,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Existing1"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject duplicate points",
+            "reason": "Equal values cannot appear twice in one LDAP attribute.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                },
+                {
+                  "name": "trainingPoints",
+                  "values": [
+                    "7",
+                    "7"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject noncanonical integers",
+            "reason": "Do not silently convert a leading-zero number into valid LDAP Integer text.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                },
+                {
+                  "name": "trainingPoints",
+                  "values": [
+                    "0007"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          }
+        ]
+      },
+      {
+        "id": "training-set-2",
+        "label": "Sample set 3",
+        "initial": [
+          {
+            "dn": "cn=Existing2,dc=registry,dc=test",
+            "classes": [
+              "trainingPerson"
+            ],
+            "fields": [
+              {
+                "name": "cn",
+                "values": [
+                  "Existing2"
+                ]
+              },
+              {
+                "name": "sn",
+                "values": [
+                  "Learner"
+                ]
+              },
+              {
+                "name": "trainingBadge",
+                "values": [
+                  "KEPT"
+                ]
+              }
+            ]
+          }
+        ],
+        "probes": [
+          {
+            "label": "Accept complete data",
+            "reason": "Optional points and identifiers may have multiple distinct values.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson",
+                "person"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                },
+                {
+                  "name": "trainingPoints",
+                  "values": [
+                    "7",
+                    "9"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "learner-one",
+                    "learner-two"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Enrolled learner"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Accept without optional fields",
+            "reason": "Only cn, sn and the badge are required.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Reject missing badge",
+            "reason": "The custom class requires its badge through MUST.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject two badges",
+            "reason": "The badge type is SINGLE-VALUE.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-C",
+                    "SECOND"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject words as points",
+            "reason": "Integer syntax accepts canonical whole-number text, not words.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                },
+                {
+                  "name": "trainingPoints",
+                  "values": [
+                    "many"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject missing inherited surname",
+            "reason": "SUP person inherits the sn requirement.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject an unlisted attribute",
+            "reason": "Attributes need permission through the class's inherited or local MUST/MAY sets.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                },
+                {
+                  "name": "name",
+                  "values": [
+                    "unexpected"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Update existing badge",
+            "reason": "A valid change must alter the actual stored entry.",
+            "operation": "replace",
+            "entry": {
+              "dn": "cn=Existing2,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Existing2"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "REVISED"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Keep data after a bad update",
+            "reason": "Removing every badge must fail without changing stored fields.",
+            "operation": "replace",
+            "entry": {
+              "dn": "cn=Existing2,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Existing2"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject duplicate points",
+            "reason": "Equal values cannot appear twice in one LDAP attribute.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                },
+                {
+                  "name": "trainingPoints",
+                  "values": [
+                    "7",
+                    "7"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject noncanonical integers",
+            "reason": "Do not silently convert a leading-zero number into valid LDAP Integer text.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=registry,dc=test",
+              "classes": [
+                "trainingPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "trainingBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                },
+                {
+                  "name": "trainingPoints",
+                  "values": [
+                    "0007"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          }
+        ]
+      }
+    ]
+  },
+  "example": {
+    "id": "lpic2-ldap-schema-workshop",
+    "instructions": "Extend the simulated directory with workshopPerson: one required text badge, optional distinct whole-number points and the inherited person fields. Repair the schema, then verify valid entries and rejected updates.",
+    "schema_name": "workshop",
+    "oid_branch": "1.3.6.1.4.1.32473.221",
+    "starter": "version: 1\n\ndn: cn=workshop,cn=schema,cn=config\nchangetype: add\nobjectClass: olcSchemaConfig\ncn: workshop\nolcAttributeTypes: (1.3.6.1.4.1.32473.221.1\n  NAME 'workshopBadge'\n  EQUALITY caseExactMatch\n  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15)\nolcAttributeTypes: (1.3.6.1.4.1.32473.221.2\n  NAME 'workshopPoints'\n  EQUALITY caseExactMatch\n  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15)\nolcObjectClasses: (1.3.6.1.4.1.32473.221.3\n  NAME 'workshopPerson'\n  SUP person STRUCTURAL\n  MAY (uid $ workshopBadge $ workshopPoints))\n",
+    "reference": "version: 1\n\ndn: cn=workshop,cn=schema,cn=config\nchangetype: add\nobjectClass: olcSchemaConfig\ncn: workshop\nolcAttributeTypes: (1.3.6.1.4.1.32473.221.1\n  NAME 'workshopBadge'\n  EQUALITY caseExactMatch\n  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15\n  SINGLE-VALUE)\nolcAttributeTypes: (1.3.6.1.4.1.32473.221.2\n  NAME 'workshopPoints'\n  EQUALITY integerMatch\n  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27)\nolcObjectClasses: (1.3.6.1.4.1.32473.221.3\n  NAME 'workshopPerson'\n  SUP person STRUCTURAL\n  MUST workshopBadge\n  MAY (uid $ workshopPoints))\n",
+    "cases": [
+      {
+        "id": "workshop-set-0",
+        "label": "Sample set 1",
+        "initial": [
+          {
+            "dn": "cn=Existing0,dc=classroom,dc=test",
+            "classes": [
+              "workshopPerson"
+            ],
+            "fields": [
+              {
+                "name": "cn",
+                "values": [
+                  "Existing0"
+                ]
+              },
+              {
+                "name": "sn",
+                "values": [
+                  "Learner"
+                ]
+              },
+              {
+                "name": "workshopBadge",
+                "values": [
+                  "KEPT"
+                ]
+              }
+            ]
+          }
+        ],
+        "probes": [
+          {
+            "label": "Accept complete data",
+            "reason": "Optional points and identifiers may have multiple distinct values.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson",
+                "person"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                },
+                {
+                  "name": "workshopPoints",
+                  "values": [
+                    "7",
+                    "9"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "learner-one",
+                    "learner-two"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Enrolled learner"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Accept without optional fields",
+            "reason": "Only cn, sn and the badge are required.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Reject missing badge",
+            "reason": "The custom class requires its badge through MUST.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject two badges",
+            "reason": "The badge type is SINGLE-VALUE.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-A",
+                    "SECOND"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject words as points",
+            "reason": "Integer syntax accepts canonical whole-number text, not words.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                },
+                {
+                  "name": "workshopPoints",
+                  "values": [
+                    "many"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject missing inherited surname",
+            "reason": "SUP person inherits the sn requirement.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject an unlisted attribute",
+            "reason": "Attributes need permission through the class's inherited or local MUST/MAY sets.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                },
+                {
+                  "name": "name",
+                  "values": [
+                    "unexpected"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Update existing badge",
+            "reason": "A valid change must alter the actual stored entry.",
+            "operation": "replace",
+            "entry": {
+              "dn": "cn=Existing0,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Existing0"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "REVISED"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Keep data after a bad update",
+            "reason": "Removing every badge must fail without changing stored fields.",
+            "operation": "replace",
+            "entry": {
+              "dn": "cn=Existing0,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Existing0"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject duplicate points",
+            "reason": "Equal values cannot appear twice in one LDAP attribute.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                },
+                {
+                  "name": "workshopPoints",
+                  "values": [
+                    "7",
+                    "7"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject noncanonical integers",
+            "reason": "Do not silently convert a leading-zero number into valid LDAP Integer text.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Mira,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Mira"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-A"
+                  ]
+                },
+                {
+                  "name": "workshopPoints",
+                  "values": [
+                    "0007"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          }
+        ]
+      },
+      {
+        "id": "workshop-set-1",
+        "label": "Sample set 2",
+        "initial": [
+          {
+            "dn": "cn=Existing1,dc=classroom,dc=test",
+            "classes": [
+              "workshopPerson"
+            ],
+            "fields": [
+              {
+                "name": "cn",
+                "values": [
+                  "Existing1"
+                ]
+              },
+              {
+                "name": "sn",
+                "values": [
+                  "Learner"
+                ]
+              },
+              {
+                "name": "workshopBadge",
+                "values": [
+                  "KEPT"
+                ]
+              }
+            ]
+          }
+        ],
+        "probes": [
+          {
+            "label": "Accept complete data",
+            "reason": "Optional points and identifiers may have multiple distinct values.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson",
+                "person"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                },
+                {
+                  "name": "workshopPoints",
+                  "values": [
+                    "7",
+                    "9"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "learner-one",
+                    "learner-two"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Enrolled learner"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Accept without optional fields",
+            "reason": "Only cn, sn and the badge are required.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Reject missing badge",
+            "reason": "The custom class requires its badge through MUST.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject two badges",
+            "reason": "The badge type is SINGLE-VALUE.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-B",
+                    "SECOND"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject words as points",
+            "reason": "Integer syntax accepts canonical whole-number text, not words.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                },
+                {
+                  "name": "workshopPoints",
+                  "values": [
+                    "many"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject missing inherited surname",
+            "reason": "SUP person inherits the sn requirement.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject an unlisted attribute",
+            "reason": "Attributes need permission through the class's inherited or local MUST/MAY sets.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                },
+                {
+                  "name": "name",
+                  "values": [
+                    "unexpected"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Update existing badge",
+            "reason": "A valid change must alter the actual stored entry.",
+            "operation": "replace",
+            "entry": {
+              "dn": "cn=Existing1,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Existing1"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "REVISED"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Keep data after a bad update",
+            "reason": "Removing every badge must fail without changing stored fields.",
+            "operation": "replace",
+            "entry": {
+              "dn": "cn=Existing1,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Existing1"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject duplicate points",
+            "reason": "Equal values cannot appear twice in one LDAP attribute.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                },
+                {
+                  "name": "workshopPoints",
+                  "values": [
+                    "7",
+                    "7"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject noncanonical integers",
+            "reason": "Do not silently convert a leading-zero number into valid LDAP Integer text.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Eli,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Eli"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-B"
+                  ]
+                },
+                {
+                  "name": "workshopPoints",
+                  "values": [
+                    "0007"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          }
+        ]
+      },
+      {
+        "id": "workshop-set-2",
+        "label": "Sample set 3",
+        "initial": [
+          {
+            "dn": "cn=Existing2,dc=classroom,dc=test",
+            "classes": [
+              "workshopPerson"
+            ],
+            "fields": [
+              {
+                "name": "cn",
+                "values": [
+                  "Existing2"
+                ]
+              },
+              {
+                "name": "sn",
+                "values": [
+                  "Learner"
+                ]
+              },
+              {
+                "name": "workshopBadge",
+                "values": [
+                  "KEPT"
+                ]
+              }
+            ]
+          }
+        ],
+        "probes": [
+          {
+            "label": "Accept complete data",
+            "reason": "Optional points and identifiers may have multiple distinct values.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson",
+                "person"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                },
+                {
+                  "name": "workshopPoints",
+                  "values": [
+                    "7",
+                    "9"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "learner-one",
+                    "learner-two"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Enrolled learner"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Accept without optional fields",
+            "reason": "Only cn, sn and the badge are required.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Reject missing badge",
+            "reason": "The custom class requires its badge through MUST.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject two badges",
+            "reason": "The badge type is SINGLE-VALUE.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-C",
+                    "SECOND"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject words as points",
+            "reason": "Integer syntax accepts canonical whole-number text, not words.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                },
+                {
+                  "name": "workshopPoints",
+                  "values": [
+                    "many"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject missing inherited surname",
+            "reason": "SUP person inherits the sn requirement.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject an unlisted attribute",
+            "reason": "Attributes need permission through the class's inherited or local MUST/MAY sets.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                },
+                {
+                  "name": "name",
+                  "values": [
+                    "unexpected"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Update existing badge",
+            "reason": "A valid change must alter the actual stored entry.",
+            "operation": "replace",
+            "entry": {
+              "dn": "cn=Existing2,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Existing2"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "REVISED"
+                  ]
+                }
+              ]
+            },
+            "accept": true
+          },
+          {
+            "label": "Keep data after a bad update",
+            "reason": "Removing every badge must fail without changing stored fields.",
+            "operation": "replace",
+            "entry": {
+              "dn": "cn=Existing2,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Existing2"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject duplicate points",
+            "reason": "Equal values cannot appear twice in one LDAP attribute.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                },
+                {
+                  "name": "workshopPoints",
+                  "values": [
+                    "7",
+                    "7"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          },
+          {
+            "label": "Reject noncanonical integers",
+            "reason": "Do not silently convert a leading-zero number into valid LDAP Integer text.",
+            "operation": "add",
+            "entry": {
+              "dn": "cn=Noor,dc=classroom,dc=test",
+              "classes": [
+                "workshopPerson"
+              ],
+              "fields": [
+                {
+                  "name": "cn",
+                  "values": [
+                    "Noor"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Learner"
+                  ]
+                },
+                {
+                  "name": "workshopBadge",
+                  "values": [
+                    "LAB-C"
+                  ]
+                },
+                {
+                  "name": "workshopPoints",
+                  "values": [
+                    "0007"
+                  ]
+                }
+              ]
+            },
+            "accept": false
+          }
+        ]
+      }
+    ]
+  }
+}

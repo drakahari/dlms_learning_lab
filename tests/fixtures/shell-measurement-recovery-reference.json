@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "source": "field() {\n    printf '%s\\n' \"$1\" | cut -d , -f \"$2\"\n}\nprevious=''\ncount=0\nwarnings=0\nrecords=('Measurement report')\nwhile IFS= read -r line || test -n \"$line\"; do\n    if printf '%s\\n' \"$line\" | grep -E -q '^[a-z][a-z0-9-]{0,15}(,(0|[1-9][0-9]{0,5})){11}$'; then\n        :\n    else\n        printf 'Skipped malformed record\\n' >&2\n        warnings=$((warnings+1))\n        previous=''\n        continue\n    fi\n    if test -z \"$previous\"; then\n        previous=$line\n        continue\n    fi\n    boot=$(field \"$line\" 1)\n    old_boot=$(field \"$previous\" 1)\n    time=$(field \"$line\" 2)\n    old_time=$(field \"$previous\" 2)\n    reason=''\n    if test \"$boot\" != \"$old_boot\"; then\n        reason='Different boot'\n    else\n        if test \"$time\" -le \"$old_time\"; then\n            reason='Time did not advance'\n        fi\n    fi\n    if test -z \"$reason\"; then\n        total=0\n        work=0\n        reset=0\n        for column in 3 4 5 6 7 8 9 10 11 12; do\n            first=$(field \"$previous\" \"$column\")\n            last=$(field \"$line\" \"$column\")\n            if test \"$last\" -lt \"$first\"; then reset=1; fi\n            change=$((last-first))\n            case \"$column\" in\n                3|4|5|6|7|8|9|10) total=$((total+change)) ;;\n            esac\n            case \"$column\" in\n                3|4|5|8|9) work=$((work+change)) ;;\n                11) rx_change=$change ;;\n                12) tx_change=$change ;;\n            esac\n        done\n        if test \"$reset\" -eq 1; then\n            reason='Counter decreased'\n        else\n            if test \"$total\" -eq 0; then reason='CPU counters did not advance'; fi\n        fi\n    fi\n    if test -n \"$reason\"; then\n        printf '%s at %s; new baseline\\n' \"$reason\" \"$time\" >&2\n        warnings=$((warnings+1))\n    else\n        elapsed=$((time-old_time))\n        pct=$((100*work/total))\n        rx=$((1000*rx_change/elapsed))\n        tx=$((1000*tx_change/elapsed))\n        entry=\"$boot@$time cpu=$pct% rx=$rx B/s tx=$tx B/s\"\n        records=(\"${records[@]}\" \"$entry\")\n        count=$((count+1))\n    fi\n    previous=$line\ndone < observations.csv\nprintf '%s\\n' \"${records[@]}\" > report.txt\nprintf 'Valid windows: %s\\nWarnings: %s\\n' \"$count\" \"$warnings\" >> report.txt\nprintf 'Report: %s valid windows, %s rejected records or intervals\\n' \"$count\" \"$warnings\"\nif test \"$count\" -eq 0; then\n    printf 'Not enough compatible observations\\n' >&2\n    exit 2\nfi\nif test \"$warnings\" -gt 0; then exit 1; fi\n",
+  "alternate": "field() {\n    printf '%s\\n' \"$1\" | cut -d , -f \"$2\"\n}\nprevious=''\ncount=0\nwarnings=0\nreport='Measurement report\n'\nwhile IFS= read -r line || test -n \"$line\"; do\n    if printf '%s\\n' \"$line\" | grep -E -q '^[a-z][a-z0-9-]{0,15}(,(0|[1-9][0-9]{0,5})){11}$'; then\n        :\n    else\n        printf 'Skipped malformed record\\n' >&2\n        warnings=$((warnings+1))\n        previous=''\n        continue\n    fi\n    if test -z \"$previous\"; then\n        previous=$line\n        continue\n    fi\n    boot=$(field \"$line\" 1)\n    old_boot=$(field \"$previous\" 1)\n    time=$(field \"$line\" 2)\n    old_time=$(field \"$previous\" 2)\n    reason=''\n    if test \"$boot\" != \"$old_boot\"; then\n        reason='Different boot'\n    else\n        if test \"$time\" -le \"$old_time\"; then\n            reason='Time did not advance'\n        fi\n    fi\n    if test -z \"$reason\"; then\n        total=0\n        work=0\n        reset=0\n        for column in 3 4 5 6 7 8 9 10 11 12; do\n            first=$(field \"$previous\" \"$column\")\n            last=$(field \"$line\" \"$column\")\n            if test \"$last\" -lt \"$first\"; then reset=1; fi\n            change=$((last-first))\n            case \"$column\" in\n                3|4|5|6|7|8|9|10) total=$((total+change)) ;;\n            esac\n            case \"$column\" in\n                3|4|5|8|9) work=$((work+change)) ;;\n                11) rx_change=$change ;;\n                12) tx_change=$change ;;\n            esac\n        done\n        if test \"$reset\" -eq 1; then\n            reason='Counter decreased'\n        else\n            if test \"$total\" -eq 0; then reason='CPU counters did not advance'; fi\n        fi\n    fi\n    if test -n \"$reason\"; then\n        printf '%s at %s; new baseline\\n' \"$reason\" \"$time\" >&2\n        warnings=$((warnings+1))\n    else\n        elapsed=$((time-old_time))\n        pct=$((100*work/total))\n        rx=$((1000*rx_change/elapsed))\n        tx=$((1000*tx_change/elapsed))\n        entry=\"$boot@$time cpu=$pct% rx=$rx B/s tx=$tx B/s\"\n        report=\"$report$entry\n\"\n        count=$((count+1))\n    fi\n    previous=$line\ndone < observations.csv\nprintf '%s' \"$report\" > report.txt\nprintf 'Valid windows: %s\\nWarnings: %s\\n' \"$count\" \"$warnings\" >> report.txt\nprintf 'Report: %s valid windows, %s rejected records or intervals\\n' \"$count\" \"$warnings\"\nif test \"$count\" -eq 0; then\n    printf 'Not enough compatible observations\\n' >&2\n    exit 2\nfi\nif test \"$warnings\" -gt 0; then exit 1; fi\n",
+  "cases": [
+    {
+      "name": "Complete pair and following window",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,4000,320,0,110,550,30,25,25,10,16000,21400\n",
+        "/work/keep.txt": "Preserve source note: Complete pair and following window.\n",
+        "/work/report.txt": "Previous report for Complete pair and following window.\n"
+      },
+      "stdout": "Report: 2 valid windows, 0 rejected records or intervals\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,4000,320,0,110,550,30,25,25,10,16000,21400\n",
+        "/work/keep.txt": "Preserve source note: Complete pair and following window.\n",
+        "/work/report.txt": "Measurement report\nalpha@3000 cpu=67% rx=2500 B/s tx=500 B/s\nalpha@4000 cpu=25% rx=1000 B/s tx=400 B/s\nValid windows: 2\nWarnings: 0\n"
+      }
+    },
+    {
+      "name": "Final record has no newline",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,4000,320,0,110,550,30,25,25,10,16000,21400",
+        "/work/keep.txt": "Preserve source note: Final record has no newline.\n",
+        "/work/report.txt": "Previous report for Final record has no newline.\n"
+      },
+      "stdout": "Report: 2 valid windows, 0 rejected records or intervals\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,4000,320,0,110,550,30,25,25,10,16000,21400",
+        "/work/keep.txt": "Preserve source note: Final record has no newline.\n",
+        "/work/report.txt": "Measurement report\nalpha@3000 cpu=67% rx=2500 B/s tx=500 B/s\nalpha@4000 cpu=25% rx=1000 B/s tx=400 B/s\nValid windows: 2\nWarnings: 0\n"
+      }
+    },
+    {
+      "name": "Reboot creates a new baseline",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nbeta,100,100,0,50,300,10,5,5,0,100,200\nbeta,1100,200,0,70,380,10,5,5,0,600,600\n",
+        "/work/keep.txt": "Preserve source note: Reboot creates a new baseline.\n",
+        "/work/report.txt": "Previous report for Reboot creates a new baseline.\n"
+      },
+      "stdout": "Report: 2 valid windows, 1 rejected records or intervals\n",
+      "stderr": "Different boot at 100; new baseline\n",
+      "status": 1,
+      "after": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nbeta,100,100,0,50,300,10,5,5,0,100,200\nbeta,1100,200,0,70,380,10,5,5,0,600,600\n",
+        "/work/keep.txt": "Preserve source note: Reboot creates a new baseline.\n",
+        "/work/report.txt": "Measurement report\nalpha@3000 cpu=67% rx=2500 B/s tx=500 B/s\nbeta@1100 cpu=60% rx=500 B/s tx=400 B/s\nValid windows: 2\nWarnings: 1\n"
+      }
+    },
+    {
+      "name": "Counter reset is followed by valid work",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,4000,320,0,110,550,30,25,25,10,5,21400\nalpha,5000,420,0,130,630,30,25,25,10,1005,21800\n",
+        "/work/keep.txt": "Preserve source note: Counter reset is followed by valid work.\n",
+        "/work/report.txt": "Previous report for Counter reset is followed by valid work.\n"
+      },
+      "stdout": "Report: 2 valid windows, 1 rejected records or intervals\n",
+      "stderr": "Counter decreased at 4000; new baseline\n",
+      "status": 1,
+      "after": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,4000,320,0,110,550,30,25,25,10,5,21400\nalpha,5000,420,0,130,630,30,25,25,10,1005,21800\n",
+        "/work/keep.txt": "Preserve source note: Counter reset is followed by valid work.\n",
+        "/work/report.txt": "Measurement report\nalpha@3000 cpu=67% rx=2500 B/s tx=500 B/s\nalpha@5000 cpu=60% rx=1000 B/s tx=400 B/s\nValid windows: 2\nWarnings: 1\n"
+      }
+    },
+    {
+      "name": "Malformed record breaks continuity",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nbroken,row\nbeta,100,100,0,50,300,10,5,5,0,100,200\nbeta,1100,200,0,70,380,10,5,5,0,600,600\n",
+        "/work/keep.txt": "Preserve source note: Malformed record breaks continuity.\n",
+        "/work/report.txt": "Previous report for Malformed record breaks continuity.\n"
+      },
+      "stdout": "Report: 2 valid windows, 1 rejected records or intervals\n",
+      "stderr": "Skipped malformed record\n",
+      "status": 1,
+      "after": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nbroken,row\nbeta,100,100,0,50,300,10,5,5,0,100,200\nbeta,1100,200,0,70,380,10,5,5,0,600,600\n",
+        "/work/keep.txt": "Preserve source note: Malformed record breaks continuity.\n",
+        "/work/report.txt": "Measurement report\nalpha@3000 cpu=67% rx=2500 B/s tx=500 B/s\nbeta@1100 cpu=60% rx=500 B/s tx=400 B/s\nValid windows: 2\nWarnings: 1\n"
+      }
+    },
+    {
+      "name": "Invalid decimal is rejected before arithmetic",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,01000,100,0,50,300,10,5,5,0,10000,20000\nbeta,100,100,0,50,300,10,5,5,0,100,200\nbeta,1100,200,0,70,380,10,5,5,0,600,600\n",
+        "/work/keep.txt": "Preserve source note: Invalid decimal is rejected before arithmetic.\n",
+        "/work/report.txt": "Previous report for Invalid decimal is rejected before arithmetic.\n"
+      },
+      "stdout": "Report: 2 valid windows, 1 rejected records or intervals\n",
+      "stderr": "Skipped malformed record\n",
+      "status": 1,
+      "after": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,01000,100,0,50,300,10,5,5,0,10000,20000\nbeta,100,100,0,50,300,10,5,5,0,100,200\nbeta,1100,200,0,70,380,10,5,5,0,600,600\n",
+        "/work/keep.txt": "Preserve source note: Invalid decimal is rejected before arithmetic.\n",
+        "/work/report.txt": "Measurement report\nalpha@3000 cpu=67% rx=2500 B/s tx=500 B/s\nbeta@1100 cpu=60% rx=500 B/s tx=400 B/s\nValid windows: 2\nWarnings: 1\n"
+      }
+    },
+    {
+      "name": "Repeated timestamp is not a zero rate",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,3000,320,0,100,400,30,15,15,10,15100,21000\nalpha,4000,320,0,110,550,30,25,25,10,16000,21400\n",
+        "/work/keep.txt": "Preserve source note: Repeated timestamp is not a zero rate.\n",
+        "/work/report.txt": "Previous report for Repeated timestamp is not a zero rate.\n"
+      },
+      "stdout": "Report: 2 valid windows, 1 rejected records or intervals\n",
+      "stderr": "Time did not advance at 3000; new baseline\n",
+      "status": 1,
+      "after": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,3000,320,0,100,400,30,15,15,10,15100,21000\nalpha,4000,320,0,110,550,30,25,25,10,16000,21400\n",
+        "/work/keep.txt": "Preserve source note: Repeated timestamp is not a zero rate.\n",
+        "/work/report.txt": "Measurement report\nalpha@3000 cpu=67% rx=2500 B/s tx=500 B/s\nalpha@4000 cpu=16% rx=900 B/s tx=400 B/s\nValid windows: 2\nWarnings: 1\n"
+      }
+    },
+    {
+      "name": "Stationary CPU is not reported as idle",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,4000,300,0,100,400,30,15,15,10,15500,21200\nalpha,5000,310,0,120,570,30,15,15,10,17500,22200\n",
+        "/work/keep.txt": "Preserve source note: Stationary CPU is not reported as idle.\n",
+        "/work/report.txt": "Previous report for Stationary CPU is not reported as idle.\n"
+      },
+      "stdout": "Report: 2 valid windows, 1 rejected records or intervals\n",
+      "stderr": "CPU counters did not advance at 4000; new baseline\n",
+      "status": 1,
+      "after": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,4000,300,0,100,400,30,15,15,10,15500,21200\nalpha,5000,310,0,120,570,30,15,15,10,17500,22200\n",
+        "/work/keep.txt": "Preserve source note: Stationary CPU is not reported as idle.\n",
+        "/work/report.txt": "Measurement report\nalpha@3000 cpu=67% rx=2500 B/s tx=500 B/s\nalpha@5000 cpu=15% rx=2000 B/s tx=1000 B/s\nValid windows: 2\nWarnings: 1\n"
+      }
+    },
+    {
+      "name": "Decreasing wait accounting is not clamped",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,4000,300,0,100,400,1,15,15,10,15100,21000\nalpha,5000,420,0,130,630,30,25,25,10,1005,21800\n",
+        "/work/keep.txt": "Preserve source note: Decreasing wait accounting is not clamped.\n",
+        "/work/report.txt": "Previous report for Decreasing wait accounting is not clamped.\n"
+      },
+      "stdout": "Report: 1 valid windows, 2 rejected records or intervals\n",
+      "stderr": "Counter decreased at 4000; new baseline\nCounter decreased at 5000; new baseline\n",
+      "status": 1,
+      "after": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\nalpha,3000,300,0,100,400,30,15,15,10,15000,21000\nalpha,4000,300,0,100,400,1,15,15,10,15100,21000\nalpha,5000,420,0,130,630,30,25,25,10,1005,21800\n",
+        "/work/keep.txt": "Preserve source note: Decreasing wait accounting is not clamped.\n",
+        "/work/report.txt": "Measurement report\nalpha@3000 cpu=67% rx=2500 B/s tx=500 B/s\nValid windows: 1\nWarnings: 2\n"
+      }
+    },
+    {
+      "name": "Only one observation cannot form a window",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\n",
+        "/work/keep.txt": "Preserve source note: Only one observation cannot form a window.\n",
+        "/work/report.txt": "Previous report for Only one observation cannot form a window.\n"
+      },
+      "stdout": "Report: 0 valid windows, 0 rejected records or intervals\n",
+      "stderr": "Not enough compatible observations\n",
+      "status": 2,
+      "after": {
+        "/work/observations.csv": "alpha,1000,100,0,50,300,10,5,5,0,10000,20000\n",
+        "/work/keep.txt": "Preserve source note: Only one observation cannot form a window.\n",
+        "/work/report.txt": "Measurement report\nValid windows: 0\nWarnings: 0\n"
+      }
+    },
+    {
+      "name": "Empty input does not retain a stale report",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/observations.csv": "",
+        "/work/keep.txt": "Preserve source note: Empty input does not retain a stale report.\n",
+        "/work/report.txt": "Previous report for Empty input does not retain a stale report.\n"
+      },
+      "stdout": "Report: 0 valid windows, 0 rejected records or intervals\n",
+      "stderr": "Not enough compatible observations\n",
+      "status": 2,
+      "after": {
+        "/work/observations.csv": "",
+        "/work/keep.txt": "Preserve source note: Empty input does not retain a stale report.\n",
+        "/work/report.txt": "Measurement report\nValid windows: 0\nWarnings: 0\n"
+      }
+    },
+    {
+      "name": "Only malformed input is rejected",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/observations.csv": "not,a,measurement\n",
+        "/work/keep.txt": "Preserve source note: Only malformed input is rejected.\n",
+        "/work/report.txt": "Previous report for Only malformed input is rejected.\n"
+      },
+      "stdout": "Report: 0 valid windows, 1 rejected records or intervals\n",
+      "stderr": "Skipped malformed record\nNot enough compatible observations\n",
+      "status": 2,
+      "after": {
+        "/work/observations.csv": "not,a,measurement\n",
+        "/work/keep.txt": "Preserve source note: Only malformed input is rejected.\n",
+        "/work/report.txt": "Measurement report\nValid windows: 0\nWarnings: 1\n"
+      }
+    }
+  ],
+  "example_source": "field() {\n    printf '%s\\n' \"$1\" | cut -d , -f \"$2\"\n}\nprevious=''\ncount=0\nwarnings=0\nrecords=('Measurement report')\nwhile IFS= read -r line || test -n \"$line\"; do\n    if printf '%s\\n' \"$line\" | grep -E -q '^[a-z][a-z0-9-]{0,15}(,(0|[1-9][0-9]{0,5})){11}$'; then\n        :\n    else\n        printf 'Skipped malformed record\\n' >&2\n        warnings=$((warnings+1))\n        previous=''\n        continue\n    fi\n    if test -z \"$previous\"; then\n        previous=$line\n        continue\n    fi\n    boot=$(field \"$line\" 1)\n    old_boot=$(field \"$previous\" 1)\n    time=$(field \"$line\" 2)\n    old_time=$(field \"$previous\" 2)\n    reason=''\n    if test \"$boot\" != \"$old_boot\"; then\n        reason='Different boot'\n    else\n        if test \"$time\" -le \"$old_time\"; then\n            reason='Time did not advance'\n        fi\n    fi\n    if test -z \"$reason\"; then\n        total=0\n        work=0\n        reset=0\n        for column in 3 4 5 6 7 8 9 10 11 12; do\n            first=$(field \"$previous\" \"$column\")\n            last=$(field \"$line\" \"$column\")\n            if test \"$last\" -lt \"$first\"; then reset=1; fi\n            change=$((last-first))\n            case \"$column\" in\n                3|4|5|6|7|8|9|10) total=$((total+change)) ;;\n            esac\n            case \"$column\" in\n                3|4|5|8|9) work=$((work+change)) ;;\n                11) rx_change=$change ;;\n                12) tx_change=$change ;;\n            esac\n        done\n        if test \"$reset\" -eq 1; then\n            reason='Counter decreased'\n        else\n            if test \"$total\" -eq 0; then reason='CPU counters did not advance'; fi\n        fi\n    fi\n    if test -n \"$reason\"; then\n        printf '%s at %s; new baseline\\n' \"$reason\" \"$time\" >&2\n        warnings=$((warnings+1))\n    else\n        elapsed=$((time-old_time))\n        pct=$((100*work/total))\n        rx=$((1000*rx_change/elapsed))\n        tx=$((1000*tx_change/elapsed))\n        entry=\"$boot@$time cpu=$pct% rx=$rx B/s tx=$tx B/s\"\n        records=(\"${records[@]}\" \"$entry\")\n        count=$((count+1))\n    fi\n    previous=$line\ndone < practice.csv\nprintf '%s\\n' \"${records[@]}\" > report.txt\nprintf 'Valid windows: %s\\nWarnings: %s\\n' \"$count\" \"$warnings\" >> report.txt\nprintf 'Report: %s valid windows, %s rejected records or intervals\\n' \"$count\" \"$warnings\"\nif test \"$count\" -eq 0; then\n    printf 'Not enough compatible observations\\n' >&2\n    exit 2\nfi\nif test \"$warnings\" -gt 0; then exit 1; fi\n",
+  "example_case": {
+    "name": "Worked recovery example",
+    "args": [],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/practice.csv": "demo,200,20,0,10,70,0,0,0,0,100,200\ndemo,1200,40,0,20,140,0,0,0,0,2100,1200\nnext,100,10,0,10,80,0,0,0,0,10,20\nnext,1100,30,0,20,150,0,0,0,0,1010,520\n",
+      "/work/keep.txt": "Preserve source note: Worked recovery example.\n",
+      "/work/report.txt": "Previous report for Worked recovery example.\n"
+    },
+    "stdout": "Report: 2 valid windows, 1 rejected records or intervals\n",
+    "stderr": "Different boot at 100; new baseline\n",
+    "status": 1,
+    "after": {
+      "/work/practice.csv": "demo,200,20,0,10,70,0,0,0,0,100,200\ndemo,1200,40,0,20,140,0,0,0,0,2100,1200\nnext,100,10,0,10,80,0,0,0,0,10,20\nnext,1100,30,0,20,150,0,0,0,0,1010,520\n",
+      "/work/keep.txt": "Preserve source note: Worked recovery example.\n",
+      "/work/report.txt": "Measurement report\ndemo@1200 cpu=30% rx=2000 B/s tx=1000 B/s\nnext@1100 cpu=30% rx=1000 B/s tx=500 B/s\nValid windows: 2\nWarnings: 1\n"
+    }
+  }
+}

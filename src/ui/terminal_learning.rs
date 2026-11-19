@@ -33,6 +33,16 @@ impl LabApp {
     }
     pub(super) fn terminal_learning_workspace(&mut self, ui: &mut egui::Ui, i: usize) {
         let s = self.scenarios[i].clone();
+        if dlms_learning_lab::command_location_workspace::relevant(
+            &self.progress.attempts[&s.id],
+            &s,
+        ) && let Err(error) = dlms_learning_lab::command_location_workspace::context(
+            &self.progress.attempts[&s.id],
+            &s,
+        ) {
+            ui.colored_label(palette(ui).error, error);
+            return;
+        }
         let lesson = s.terminal_teaching.as_ref().unwrap();
         let view = self.terminal_view(i);
         if !self.progress.attempts[&s.id].challenge {
@@ -52,17 +62,22 @@ impl LabApp {
         }
         match view {
             teaching::View::Introduction => {
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for concept in &lesson.concepts {
-                    ui.label(RichText::new(&concept.title).strong());
-                    ui.label(&concept.text);
+                lesson_presentation::concepts(
+                    ui,
+                    &s,
+                    &lesson.prerequisite_note,
+                    lesson
+                        .concepts
+                        .iter()
+                        .map(|c| (c.title.clone(), c.text.clone())),
+                );
+                lesson_presentation::worked(ui, &lesson.inputs);
+                if matches!(&s.goal,engine::Goal::Filesystem{requirements}if requirements.iter().any(|r|matches!(r,dlms_learning_lab::filesystem::Requirement::WhereisDeployment{..})))
+                {
+                    lesson_presentation::wrapped_worked_commands(ui, &s);
+                } else {
+                    lesson_presentation::worked_rows(ui, &s);
                 }
-                ui.label(RichText::new("A small example to try").strong());
-                for command in &lesson.example {
-                    ui.add(egui::Label::new(RichText::new(command).monospace()).wrap());
-                }
-                ui.label(&lesson.inputs);
-                ui.label(format!("Try a change: {}", lesson.try_change));
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -77,8 +92,7 @@ impl LabApp {
                 });
             }
             teaching::View::Example => {
-                ui.label("Practice example · Not graded; your assignment stays separate.");
-                ui.label(&lesson.inputs);
+                lesson_presentation::practice_step(ui, &s, 0);
                 let learning = self
                     .progress
                     .attempts
@@ -140,8 +154,9 @@ impl LabApp {
                 if before != learning.example_command {
                     self.dirty = true;
                 }
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                lesson_presentation::practice_step(ui, &s, 1);
                 self.practice_terminal(ui, i);
+                lesson_presentation::practice_step(ui, &s, 2);
                 ui.horizontal_wrapped(|ui| {
                     if ui.add(button("Reset example only")).clicked() {
                         let mut learning = terminal_teaching::Learning::new(lesson);
@@ -164,7 +179,7 @@ impl LabApp {
                 });
             }
             teaching::View::Assignment => {
-                ui.label(&s.objective);
+                lesson_presentation::assignment(ui, &s);
                 self.terminal(ui, i);
                 self.check_terminal_work(ui, i);
             }
@@ -264,7 +279,14 @@ impl LabApp {
             run |= run_control.clicked();
         });
         if run && active {
-            l.execute();
+            let lesson = self.scenarios[i].terminal_teaching.as_ref().unwrap();
+            if lesson.fixture.command_location.is_some() {
+                if let Err(error) = l.execute_for(lesson) {
+                    self.notice = Some(error);
+                }
+            } else {
+                l.execute();
+            }
             self.dirty = true;
             self.focus_input = true;
         }

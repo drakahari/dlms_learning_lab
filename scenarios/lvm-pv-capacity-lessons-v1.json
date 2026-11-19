@@ -1,0 +1,1324 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-lvm-pv-capacity",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM capacity layers",
+      "unit": "lvm-pv-capacity",
+      "title": "Recover device space before growing the application",
+      "summary": "Recognize an already-enlarged PV, then grow the intended LV and filesystem while protecting a neighbor and another pool.",
+      "objective": "Make /dev/vaulta recognize its full supplied 65 MiB device. Grow vault/index and its filesystem to at least 24 MiB, with the filesystem using the full resulting LV. Keep vault/reference and every original file unchanged. Keep the hold pool’s device, recognized PV size, allocations and data in their supplied state. Do not add devices, rename, remove, recreate, format or mount storage; physical device geometry is already supplied and must remain unchanged. Verify PV, LV, filesystem and retained data.",
+      "retry_guidance": "Identify which capacity layer still fails. A larger physical device does not automatically enlarge its PV, LV or filesystem. Compare the supplied device/PV facts and current pvs/lvs values, change only the intended layer, and preserve the hold pool. A refused command retains previous state.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "pv_capacity": "MetadataSize",
+            "devices": {
+              "/dev/vaulta": {
+                "bytes": 68157440,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "vault"
+              },
+              "/dev/holda": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "hold"
+              }
+            },
+            "groups": {
+              "vault": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "index": {
+                    "extents": [
+                      {
+                        "pv": "/dev/vaulta",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/vaulta",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "vault/index: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/vaulta",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/vaulta",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "vault/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "hold": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/holda",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/holda",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "hold/ledger: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "pv_capacity": "MetadataSize",
+            "devices": {
+              "/dev/vaulta": {
+                "bytes": 68157440,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "vault"
+              },
+              "/dev/holda": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "hold"
+              }
+            },
+            "groups": {
+              "vault": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "index": {
+                    "extents": [
+                      {
+                        "pv": "/dev/vaulta",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/vaulta",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "vault/index: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/vaulta",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/vaulta",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "vault/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "hold": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/holda",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/holda",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "hold/ledger: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "pv_capacity": "MetadataSize",
+            "devices": {
+              "/dev/aspena": {
+                "bytes": 51380224,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "aspen"
+              },
+              "/dev/bencha": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "bench"
+              }
+            },
+            "groups": {
+              "aspen": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "sample": {
+                    "extents": [
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "aspen/sample: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "aspen/neighbor: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "bench": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bencha",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/bencha",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "bench/ledger: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "pv_capacity": "MetadataSize",
+            "devices": {
+              "/dev/aspena": {
+                "bytes": 51380224,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "aspen"
+              },
+              "/dev/bencha": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "bench"
+              }
+            },
+            "groups": {
+              "aspen": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "sample": {
+                    "extents": [
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "aspen/sample: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "aspen/neighbor: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "bench": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bencha",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/bencha",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "bench/ledger: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "pv_capacity": "MetadataSize",
+            "devices": {
+              "/dev/vaulta": {
+                "bytes": 68157440,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "vault"
+              },
+              "/dev/holda": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "hold"
+              }
+            },
+            "groups": {
+              "vault": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "index": {
+                    "extents": [
+                      {
+                        "pv": "/dev/vaulta",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/vaulta",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "vault/index: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/vaulta",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/vaulta",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "vault/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "hold": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/holda",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/holda",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "hold/ledger: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "targets": [
+            {
+              "volume": "vault/index",
+              "minimum_lv": 25165824,
+              "minimum_filesystem": 25165824,
+              "fill_lv": true,
+              "pv_sizes": [
+                {
+                  "device": "/dev/vaulta",
+                  "bytes": 68157440
+                }
+              ],
+              "preserve_volume": false
+            }
+          ],
+          "lesson": {
+            "prerequisite_note": "Complete LVM growth and storage names first. You should recognize VG/LV paths, binary MiB, whole extents and the difference between LV and filesystem capacity. This lesson adds the PV’s recognized end inside an already-enlarged supplied device.",
+            "concepts": [
+              {
+                "title": "A larger device can still have a smaller recognized PV",
+                "text": "A physical device supplies bytes. LVM records how far its physical volume (PV) extends inside those bytes; its volume group allocates whole physical extents (PEs) from that recognized area. Enlarging the supplied device does not itself give an LV or filesystem more capacity. Read Supplied device facts and pvs before choosing which layer needs a change."
+              },
+              {
+                "title": "Compare device, PV, LV and filesystem separately",
+                "text": "In the worked example, /dev/aspena is 49 MiB but its PV still recognizes 17 MiB. This exercise reserves 1 MiB before data: (17 − 1) ÷ 4 = 4 physical extents, all already allocated. After recognizing 49 MiB, (49 − 1) ÷ 4 = 12 extents in total are available to the group. pvs reports the whole-extent data capacity, so its size is 16 MiB before and 48 MiB afterward. Real metadata arrangements can differ."
+              },
+              {
+                "title": "Refresh the PV, then grow the intended allocation",
+                "text": "pvresize /dev/aspena recognizes the already-supplied device size; it does not edit a partition or change an LV. After that, lvextend -L 16M aspen/sample allocates enough extents for a 16 MiB LV. M is binary MiB here. Keep the neighbor and bench pool unchanged; adding replacement storage does not repair the intended PV metadata."
+              },
+              {
+                "title": "Grow the filesystem and verify the retained data",
+                "text": "resize2fs /dev/aspen/sample grows the separate modeled filesystem to the current LV size. Inspect all four layers, then open Inspect retained files and exact byte capacities to read the original record. PV, LV and filesystem size changes are different operations; a successful command in one layer does not prove the others meet the task. Actual disk/partition, mount and kernel operations are outside this simulation."
+              }
+            ],
+            "description": "The aspen/sample application needs an LV and filesystem of at least 16 MiB. Its device is already 49 MiB, but the PV still recognizes only 17 MiB. Retain neighbor and bench, recognize the full existing device, then grow the application layers.",
+            "fixture": {
+              "version": 1,
+              "pv_capacity": "MetadataSize",
+              "devices": {
+                "/dev/aspena": {
+                  "bytes": 51380224,
+                  "role": "PhysicalVolume",
+                  "pv_bytes": 17825792,
+                  "group": "aspen"
+                },
+                "/dev/bencha": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "pv_bytes": 17825792,
+                  "group": "bench"
+                }
+              },
+              "groups": {
+                "aspen": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "sample": {
+                      "extents": [
+                        {
+                          "pv": "/dev/aspena",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/aspena",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "aspen/sample: retain this original record.\n"
+                          }
+                        }
+                      }
+                    },
+                    "neighbor": {
+                      "extents": [
+                        {
+                          "pv": "/dev/aspena",
+                          "index": 2
+                        },
+                        {
+                          "pv": "/dev/aspena",
+                          "index": 3
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "aspen/neighbor: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "bench": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "ledger": {
+                      "extents": [
+                        {
+                          "pv": "/dev/bencha",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/bencha",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "bench/ledger: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [
+              {
+                "volume": "aspen/sample",
+                "minimum_lv": 16777216,
+                "minimum_filesystem": 16777216,
+                "fill_lv": true,
+                "pv_sizes": [
+                  {
+                    "device": "/dev/aspena",
+                    "bytes": 51380224
+                  }
+                ],
+                "preserve_volume": false
+              }
+            ],
+            "worked": [
+              {
+                "text": "pvs",
+                "explanation": "Compare this current whole-extent PV report with the read-only device and recognized-PV facts."
+              },
+              {
+                "text": "pvresize /dev/aspena",
+                "explanation": "Recognize the existing 49 MiB device. In the starting example the LV and filesystem are 8 MiB; this command alone does not change their current capacities."
+              },
+              {
+                "text": "lvextend -L 16M aspen/sample",
+                "explanation": "Use available group extents to grow only sample; this does not grow its filesystem."
+              },
+              {
+                "text": "resize2fs /dev/aspen/sample",
+                "explanation": "Grow the separate filesystem to the LV and keep the supplied record. Inspect sizes and retained files before checking."
+              }
+            ],
+            "try_change": "Run the worked commands individually using Insert selected command and Run simulated command; then Check separate example. Open Experiment commands, type/run the smaller 33M recognized end and check again. It still fits the existing allocations, but no longer recognizes the requested full device. Type/run the repair and check; the LV, filesystem and original record should remain intact.",
+            "experiment": "pvresize --setphysicalvolumesize 33M /dev/aspena",
+            "repair": "pvresize /dev/aspena"
+          }
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Compare physical device and recognized PV capacity",
+        "Recognize the intended supplied PV end",
+        "Grow the application LV and separate filesystem",
+        "Verify original data and protected storage"
+      ],
+      "hints": [
+        "Supplied device facts show two different sizes. pvs reports whole-extent PV data capacity, not the physical device size.",
+        "Use the named intended PV to recognize the already-enlarged device. Changing the hold PV instead changes protected metadata and cannot satisfy vault’s requirement.",
+        "After PV recognition, allocate at least the requested LV capacity, then grow the filesystem to that LV. Verify all layers and retained files rather than trusting a command’s success message."
+      ],
+      "explanation": "The supplied vault device was already larger; only its recognized PV end was stale. Recognizing 65 MiB provides 64 MiB of whole-extent data after this exercise’s 1 MiB reserved start. The existing index LV and its filesystem then grow separately while reference, hold and all original files remain unchanged. Equivalent supported growth sizes at or above the requirement pass when the filesystem fills the resulting LV.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/pvresize.8.html",
+        "https://man7.org/linux/man-pages/man8/lvextend.8.html",
+        "https://man7.org/linux/man-pages/man8/resize2fs.8.html"
+      ],
+      "simplifications": "Source-enabled recognized PV metadata size, separate from immutable supplied device geometry, linear LV extents and modeled ext4 capacity. This exercise reserves 1 MiB before data; group extent size is 4 MiB. Real LVM metadata layouts vary. pvresize supports named supplied labeled PVs, automatic supplied size or --setphysicalvolumesize with integer binary M/G (suffixless MiB); other options/units, fractions, force, pvmove and real partition/device/kernel/mount changes are unsupported. A reduced end cannot exclude allocated physical extents. Existing growth forms remain; this profile is disjoint from provisioning/retirement/availability/rename extensions. Fixed byte-column reports and derived highest-allocated-PE facts are simulator facilities, not complete LVM report/device discovery. No real block writes, kernel metadata, snapshot/COW, LV/filesystem shrink or actual partition resize. Candidate refusal is not real LVM transaction rollback or a real-system safety guarantee. All learner input stays in process.",
+      "solution": [
+        "pvs",
+        "pvresize /dev/vaulta",
+        "lvextend -L 24M vault/index",
+        "resize2fs /dev/vault/index",
+        "lvs"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-rename-handover"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-pv-end",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM physical extent placement",
+      "unit": "lvm-pv-capacity",
+      "title": "Reduce a recognized PV end without excluding data",
+      "summary": "Set a smaller recognized PV end while preserving separated physical allocations and every existing capacity layer.",
+      "objective": "Set /dev/storea’s recognized PV size to 25 MiB without excluding any existing allocated physical extent. Keep its supplied 33 MiB device unchanged. Keep the exact original store/report and store/reference LV allocations, filesystem capacities and files. Keep the reserve pool’s device, recognized PV size, allocations and data unchanged. Do not move extents, grow or shrink LVs/filesystems, rename, remove, recreate, format, mount or alter a real disk or partition. Verify physical placement, recognized size and retained data.",
+      "retry_guidance": "A free-space total does not prove that a smaller PV end includes the highest occupied physical extent. Compare the requested end with the supplied PE size and zero-based highest allocated position. Change only PV metadata; do not resize the LV or filesystem to force a fit. A refusal leaves the previous state intact.",
+      "difficulty": "Advanced",
+      "minutes": 25,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "pv_capacity": "MetadataSize",
+            "devices": {
+              "/dev/storea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "pv_bytes": 34603008,
+                "group": "store"
+              },
+              "/dev/reservea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "store": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/storea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/storea",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "store/report: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/storea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "store/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "reserve/ledger: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "pv_capacity": "MetadataSize",
+            "devices": {
+              "/dev/storea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "pv_bytes": 34603008,
+                "group": "store"
+              },
+              "/dev/reservea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "store": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/storea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/storea",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "store/report: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/storea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "store/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "reserve/ledger: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "pv_capacity": "MetadataSize",
+            "devices": {
+              "/dev/cedara": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "pv_bytes": 42991616,
+                "group": "cedar"
+              },
+              "/dev/shelfa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "shelf"
+              }
+            },
+            "groups": {
+              "cedar": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "sample": {
+                    "extents": [
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "cedar/sample: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "cedar/neighbor: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "shelf": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/shelfa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/shelfa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "shelf/ledger: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "pv_capacity": "MetadataSize",
+            "devices": {
+              "/dev/cedara": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "pv_bytes": 42991616,
+                "group": "cedar"
+              },
+              "/dev/shelfa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "shelf"
+              }
+            },
+            "groups": {
+              "cedar": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "sample": {
+                    "extents": [
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "cedar/sample: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "cedar/neighbor: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "shelf": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/shelfa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/shelfa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "shelf/ledger: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "pv_capacity": "MetadataSize",
+            "devices": {
+              "/dev/storea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "pv_bytes": 34603008,
+                "group": "store"
+              },
+              "/dev/reservea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "pv_bytes": 17825792,
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "store": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/storea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/storea",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "store/report: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/storea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "store/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "reserve/ledger: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "targets": [
+            {
+              "volume": "store/report",
+              "minimum_lv": 8388608,
+              "minimum_filesystem": 8388608,
+              "fill_lv": true,
+              "pv_sizes": [
+                {
+                  "device": "/dev/storea",
+                  "bytes": 26214400
+                }
+              ],
+              "preserve_volume": true
+            }
+          ],
+          "lesson": {
+            "prerequisite_note": "Complete the capacity-layer lesson first. You should know how PV metadata differs from the supplied physical device, and how to keep LV and filesystem sizes separate. This lesson adds physical placement and a smaller recognized PV end.",
+            "concepts": [
+              {
+                "title": "Free capacity does not describe physical placement",
+                "text": "An LV’s logical extents can occupy separated physical positions. The worked cedar/sample uses physical extents 0 and 5; neighbor uses 1. There are only three allocated extents, but the PV must still include position 5. Read the derived highest allocated PE in Supplied device facts; numbering begins at 0."
+              },
+              {
+                "title": "Check which numbered extents the new end retains",
+                "text": "This exercise reserves 1 MiB before data and uses 4 MiB PEs. A 33 MiB recognized PV gives (33 − 1) ÷ 4 = 8 PEs, numbered 0 through 7; physical extent 5 still fits. A 17 MiB end gives only 4 PEs, numbered 0 through 3, so it would exclude an allocation even though three total allocations sound small. The simulator refuses that end without moving data."
+              },
+              {
+                "title": "Change the PV metadata without shrinking other layers",
+                "text": "pvresize --setphysicalvolumesize 33M /dev/cedara records the smaller recognized PV end. M means binary MiB; automatic pvresize without this option would recognize the full supplied 41 MiB device again. Neither form shrinks the device, LV or filesystem. No relocation, real partition editing or LV/filesystem reduction is implemented here."
+              },
+              {
+                "title": "Verify the end and unchanged data independently",
+                "text": "After the change, pvs reports 32 MiB of whole-extent data in this example; the device remains 41 MiB. Check that the original LV allocation, filesystem capacity, files and unrelated pool stay exactly as supplied. Inspect retained files through the simulated reader. This bounded metadata exercise does not establish that shrinking a real disk, partition or filesystem would be safe."
+              }
+            ],
+            "description": "Set /dev/cedara’s recognized PV size to 33 MiB while keeping its 41 MiB device, sample/neighbor allocations, filesystem sizes, files and shelf pool unchanged. Its highest occupied physical extent is 5, so the required 8-extent recognized area still includes every original allocation.",
+            "fixture": {
+              "version": 1,
+              "pv_capacity": "MetadataSize",
+              "devices": {
+                "/dev/cedara": {
+                  "bytes": 42991616,
+                  "role": "PhysicalVolume",
+                  "pv_bytes": 42991616,
+                  "group": "cedar"
+                },
+                "/dev/shelfa": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "pv_bytes": 17825792,
+                  "group": "shelf"
+                }
+              },
+              "groups": {
+                "cedar": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "sample": {
+                      "extents": [
+                        {
+                          "pv": "/dev/cedara",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/cedara",
+                          "index": 5
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "cedar/sample: retain this original record.\n"
+                          }
+                        }
+                      }
+                    },
+                    "neighbor": {
+                      "extents": [
+                        {
+                          "pv": "/dev/cedara",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "cedar/neighbor: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "shelf": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "ledger": {
+                      "extents": [
+                        {
+                          "pv": "/dev/shelfa",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/shelfa",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "shelf/ledger: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [
+              {
+                "volume": "cedar/sample",
+                "minimum_lv": 8388608,
+                "minimum_filesystem": 8388608,
+                "fill_lv": true,
+                "pv_sizes": [
+                  {
+                    "device": "/dev/cedara",
+                    "bytes": 34603008
+                  }
+                ],
+                "preserve_volume": true
+              }
+            ],
+            "worked": [
+              {
+                "text": "pvs",
+                "explanation": "Compare current whole-extent size with device/recognized sizes and highest allocated physical extent in Supplied device facts."
+              },
+              {
+                "text": "pvresize --setphysicalvolumesize 33M /dev/cedara",
+                "explanation": "Set only the recognized PV end; eight whole PEs still include physical position 5. Keep the LV, filesystem and device unchanged."
+              },
+              {
+                "text": "pvs",
+                "explanation": "Observe the smaller PV data capacity. Inspect unchanged LV/filesystem sizes and retained data before checking."
+              }
+            ],
+            "try_change": "Run the worked commands individually and Check separate example. To investigate refusal, type pvresize --setphysicalvolumesize 17M /dev/cedara and Run simulated command; read why physical extent 5 does not fit and confirm no state changed. Open Experiment commands, type/run the automatic refresh, then check: the data still exists but the recognized end is now too large. Type/run the repair and check again.",
+            "experiment": "pvresize /dev/cedara",
+            "repair": "pvresize --setphysicalvolumesize 33M /dev/cedara"
+          }
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect recognized size and highest allocated physical extent",
+        "Choose the supported explicit PV metadata end",
+        "Retain original LV/filesystem/device capacity and data",
+        "Verify the requested end and protected pool"
+      ],
+      "hints": [
+        "The supplied store/report extents are separated physically. Read highest allocated PE; do not use only the total number of used or free extents.",
+        "For this exercise, subtract the 1 MiB reserved start from the proposed recognized size, divide by the 4 MiB PE size, and number resulting PEs from zero. Every original physical position must remain inside.",
+        "Use the explicit recognized-size form for the intended PV. Automatic refresh recognizes the full device instead. The existing LV and filesystem must remain exactly unchanged."
+      ],
+      "explanation": "The 25 MiB recognized end contains 24 MiB of PE data: six 4 MiB extents numbered 0 through 5. The highest original allocation is physical extent 4, which still fits; shrinking to 17 MiB would leave only 0 through 3 and is refused. The physical device remains 33 MiB, and the original LV mappings, filesystem capacities, files and reserve metadata are unchanged. No real partition or filesystem was reduced.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/pvresize.8.html"
+      ],
+      "simplifications": "Source-enabled recognized PV metadata size, separate from immutable supplied device geometry, linear LV extents and modeled ext4 capacity. This exercise reserves 1 MiB before data; group extent size is 4 MiB. Real LVM metadata layouts vary. pvresize supports named supplied labeled PVs, automatic supplied size or --setphysicalvolumesize with integer binary M/G (suffixless MiB); other options/units, fractions, force, pvmove and real partition/device/kernel/mount changes are unsupported. A reduced end cannot exclude allocated physical extents. Existing growth forms remain; this profile is disjoint from provisioning/retirement/availability/rename extensions. Fixed byte-column reports and derived highest-allocated-PE facts are simulator facilities, not complete LVM report/device discovery. No real block writes, kernel metadata, snapshot/COW, LV/filesystem shrink or actual partition resize. Candidate refusal is not real LVM transaction rollback or a real-system safety guarantee. All learner input stays in process.",
+      "solution": [
+        "pvs",
+        "pvresize --setphysicalvolumesize 25M /dev/storea",
+        "pvs",
+        "lvs"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-pv-capacity"
+      ]
+    }
+  ]
+}

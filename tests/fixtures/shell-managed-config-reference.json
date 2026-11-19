@@ -1,0 +1,295 @@
+{
+  "schema_version": 1,
+  "source": "if test \"$#\" -ne 3; then\n    printf 'Usage: configure preview-or-apply LEVEL FORMAT\\n' >&2\n    exit 2\nfi\nmode=$1\nlevel=$2\nformat=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: configure preview-or-apply LEVEL FORMAT\\n' >&2; exit 2 ;; esac\ncase \"$level\" in error|info|debug) : ;; *) printf 'Invalid level\\n' >&2; exit 2 ;; esac\ncase \"$format\" in text|json) : ;; *) printf 'Invalid format\\n' >&2; exit 2 ;; esac\nif test -f service.conf; then :; else printf 'Missing configuration\\n' >&2; exit 2; fi\n# A non-newline marker prevents command capture from deleting final newlines.\nbefore=$(cat service.conf; printf '.')\nbody=''\n# This is the specifically supported empty-IFS read idiom, not default read.\n# The redirected loop runs in the caller, so body survives the loop.\nwhile IFS= read -r line || test -n \"$line\"; do\n    case \"$line\" in\n        log_level=*|format=*) : ;;\n        *) body=$body$line'\n' ;;\n    esac\ndone < service.conf\ncandidate=$body'log_level='$level'\nformat='$format'\n'\nif test \"$before\" = \"${candidate}.\"; then\n    printf 'Unchanged\\n'\n    exit 0\nfi\nif test \"$mode\" = preview; then\n    printf 'Would update\\n%s' \"$candidate\"\nelse\n    printf '%s' \"$candidate\" > service.conf\n    printf 'Updated\\n'\nfi\n",
+  "alternate": "if test \"$#\" -ne 3; then\n    printf 'Usage: configure preview-or-apply LEVEL FORMAT\\n' >&2\n    exit 2\nfi\nmode=$1\nlevel=$2\nformat=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: configure preview-or-apply LEVEL FORMAT\\n' >&2; exit 2 ;; esac\ncase \"$level\" in error|info|debug) : ;; *) printf 'Invalid level\\n' >&2; exit 2 ;; esac\ncase \"$format\" in text|json) : ;; *) printf 'Invalid format\\n' >&2; exit 2 ;; esac\nif test -f service.conf; then :; else printf 'Missing configuration\\n' >&2; exit 2; fi\n# A non-newline marker prevents command capture from deleting final newlines.\nbefore=$(cat service.conf; printf '.')\nprefix=$(grep -E -v '^(log_level|format)=' service.conf; printf '.')\ncandidate=${prefix%.}'log_level='$level'\nformat='$format'\n'\nif test \"$before\" = \"${candidate}.\"; then\n    printf 'Unchanged\\n'\n    exit 0\nfi\nif test \"$mode\" = preview; then\n    printf 'Would update\\n%s' \"$candidate\"\nelse\n    printf '%s' \"$candidate\" > service.conf\n    printf 'Updated\\n'\nfi\n",
+  "cases": [
+    {
+      "name": "Collapse duplicates while preserving operator lines",
+      "args": [
+        "apply",
+        "info",
+        "json"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "# local site\nlog_level=error\n  keep padded  \n\nformat=text\nlog_level=debug\n"
+      },
+      "stdout": "Updated\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "# local site\n  keep padded  \n\nlog_level=info\nformat=json\n"
+      }
+    },
+    {
+      "name": "Already current exact bytes",
+      "args": [
+        "apply",
+        "info",
+        "json"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "# local site\nlog_level=info\nformat=json\n"
+      },
+      "stdout": "Unchanged\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "# local site\nlog_level=info\nformat=json\n"
+      }
+    },
+    {
+      "name": "Empty configuration preview",
+      "args": [
+        "preview",
+        "debug",
+        "text"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": ""
+      },
+      "stdout": "Would update\nlog_level=debug\nformat=text\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": ""
+      }
+    },
+    {
+      "name": "Missing managed key",
+      "args": [
+        "apply",
+        "error",
+        "text"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "owner=operations\nformat=json\n"
+      },
+      "stdout": "Updated\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "owner=operations\nlog_level=error\nformat=text\n"
+      }
+    },
+    {
+      "name": "Preserve padded EOF and literal text",
+      "args": [
+        "apply",
+        "debug",
+        "json"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "log_level=info\n# price 100% $HOME * \\ literal\n\t keep this final row  "
+      },
+      "stdout": "Updated\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "# price 100% $HOME * \\ literal\n\t keep this final row  \nlog_level=debug\nformat=json\n"
+      }
+    },
+    {
+      "name": "Lookalike prefixes stay unmanaged",
+      "args": [
+        "preview",
+        "info",
+        "text"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": " log_level=keep\nLog_level=keep\nlog_level = keep\nformat=old\nlog_level=old\n"
+      },
+      "stdout": "Would update\n log_level=keep\nLog_level=keep\nlog_level = keep\nlog_level=info\nformat=text\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": " log_level=keep\nLog_level=keep\nlog_level = keep\nformat=old\nlog_level=old\n"
+      }
+    },
+    {
+      "name": "Different values and late duplicate",
+      "args": [
+        "apply",
+        "error",
+        "text"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "format=json\n# preserve order\nlog_level=info\nformat=csv\nowner=night\n"
+      },
+      "stdout": "Updated\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "# preserve order\nowner=night\nlog_level=error\nformat=text\n"
+      }
+    },
+    {
+      "name": "No arguments preserve configuration",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "log_level=info\n"
+      },
+      "stdout": "",
+      "stderr": "Usage: configure preview-or-apply LEVEL FORMAT\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "log_level=info\n"
+      }
+    },
+    {
+      "name": "Invalid mode precedes other validation",
+      "args": [
+        "force",
+        "bad",
+        "bad"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "do not truncate\n"
+      },
+      "stdout": "",
+      "stderr": "Usage: configure preview-or-apply LEVEL FORMAT\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "do not truncate\n"
+      }
+    },
+    {
+      "name": "Invalid level",
+      "args": [
+        "apply",
+        "trace",
+        "json"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "keep exact\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid level\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "keep exact\n"
+      }
+    },
+    {
+      "name": "Invalid format",
+      "args": [
+        "preview",
+        "info",
+        "yaml"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "keep final EOF"
+      },
+      "stdout": "",
+      "stderr": "Invalid format\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n",
+        "/work/service.conf": "keep final EOF"
+      }
+    },
+    {
+      "name": "Missing configuration",
+      "args": [
+        "apply",
+        "debug",
+        "json"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n"
+      },
+      "stdout": "",
+      "stderr": "Missing configuration\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Private unrelated note.\n",
+        "/work/service.conf.old": "Retain old independent archive.\n"
+      }
+    }
+  ],
+  "example_source": "# Apply twice in this Run. A new Run starts with its own sample files.\nconfigure_report() {\n    style=$1\n    layout=$2\n    before=$(cat report.conf; printf '.')\n    body=''\n    while IFS= read -r line || test -n \"$line\"; do\n        case \"$line\" in\n            style=*|layout=*) : ;;\n            *) body=$body$line'\n' ;;\n        esac\n    done < report.conf\n    candidate=$body'style='$style'\nlayout='$layout'\n'\n    if test \"$before\" = \"${candidate}.\"; then\n        printf 'Unchanged\\n'\n    else\n        printf '%s' \"$candidate\" > report.conf\n        printf 'Updated\\n'\n    fi\n}\nconfigure_report compact columns\nconfigure_report compact columns\n",
+  "example_case": {
+    "name": "Apply report settings twice in one separate example run",
+    "args": [],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/report.conf": "# weekly report\n  retain this spacing  \nstyle=verbose\nlayout=plain\nstyle=old\n",
+      "/work/keep.txt": "Separate example note.\n"
+    },
+    "stdout": "Updated\nUnchanged\n",
+    "stderr": "",
+    "status": 0,
+    "after": {
+      "/work/report.conf": "# weekly report\n  retain this spacing  \nstyle=compact\nlayout=columns\n",
+      "/work/keep.txt": "Separate example note.\n"
+    }
+  }
+}

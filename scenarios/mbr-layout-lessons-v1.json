@@ -1,0 +1,3302 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-mbr-primary-plan",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "MBR primary partitions",
+      "unit": "mbr-layouts",
+      "title": "Prepare MBR primary payloads and their contents",
+      "summary": "Allocate a data partition and swap on blank media, keeping every supplied record untouched.",
+      "objective": "Create an MBR on the blank /dev/vda. Allocate a primary Linux data payload of 8–12 MiB, aligned to 2048 sectors, then initialize it as ext4 labeled reports. Allocate a separate primary Linux swap payload of 2–4 MiB, also aligned, and initialize it as swap labeled scratch. Keep every other disk, supplied record and unrequested allocation unchanged. Inspect the actual table and signatures; no swap activation or host disk work is required.",
+      "retry_guidance": "Read the failed requirement beside the applied table. Editing fields alone does not change a partition. If you created an extra allocation or initialized the wrong content, this preparation-only exercise cannot delete or overwrite it: reset the selected assignment and replay the intended layout. Reset practice affects only the separate example.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Inspect the supplied table, protection facts and requirements.",
+        "Use the role, sector and content controls to apply the intended layout.",
+        "Check the current configuration and retained records."
+      ],
+      "guide": [],
+      "explanation": "Two primary table entries reserve separate ranges. Their hints and initialized signatures agree, labels identify the requested contents, and every protected disk stays exact. Native fields are drafts until an explicit action applies them. Real partition tools can be destructive; this exercise does not operate on disks.",
+      "hints": [
+        "An MBR table and a payload are different things. Choose the supplied blank disk, not the read-only evidence disk.",
+        "Count both endpoints and use an aligned start. Both required payloads must fit without overlap and use separate primary slots.",
+        "Inspect actual content: Linux data does not itself mean ext4, and Linux swap does not itself mean an initialized swap area. Verify labels and the preservation result."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/s/parted/manual/html_node/mkpart.html",
+        "https://man7.org/linux/man-pages/man8/fdisk.8.html"
+      ],
+      "simplifications": "Opt-in virtual MBR geometry, fixed 512-byte sectors, at most 2 TiB per MBR disk and 16 total modeled slots. Primary/extended slots 1–4; logical payloads start at 5. One explicit sector per logical partition is reserved for modeled EBR space; this is not raw EBR bytes/chains or actual parted placement. No CHS/boot code, disk replacement, delete/resize, force, other filesystem types, actual mkfs/parted/fdisk, devices, kernel, paging or host shell. ext4 capacity/signatures and retained flat files are an abstract model, not a real filesystem. Native configuration and the separately documented bounded literal forms are not full utility emulation. No actual partition-tool conformance was run. All activity stays in process; refusal is not real-system protection. LPIC-1 objectives v5.0 and technical references checked 2026-11-07. No complete objective or exam claim.",
+      "initial": {
+        "kind": "PartitionFs",
+        "simulation": {
+          "version": 1,
+          "origin": {
+            "initial": {
+              "version": 1,
+              "mbr_profile": "Dos512",
+              "next_uuid": 100,
+              "disks": {
+                "/dev/vda": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdb": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "evidence",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "evidence",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "evidence: retain this original record.\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdc": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdd": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [],
+              "mbr": {
+                "targets": [
+                  {
+                    "purpose": "reports",
+                    "eligible_disks": [
+                      "/dev/vda"
+                    ],
+                    "role": "primary",
+                    "minimum_bytes": 8388608,
+                    "maximum_bytes": 12582912,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "ext4",
+                      "label": "reports"
+                    }
+                  },
+                  {
+                    "purpose": "paging",
+                    "eligible_disks": [
+                      "/dev/vda"
+                    ],
+                    "role": "primary",
+                    "minimum_bytes": 2097152,
+                    "maximum_bytes": 4194304,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "swap",
+                      "label": "scratch"
+                    }
+                  }
+                ]
+              }
+            },
+            "example_initial": {
+              "version": 1,
+              "mbr_profile": "Dos512",
+              "next_uuid": 100,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdf": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "evidence",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "evidence",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "evidence: retain this original record.\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdg": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "example_plan": {
+              "targets": [],
+              "mbr": {
+                "targets": [
+                  {
+                    "purpose": "sample",
+                    "eligible_disks": [
+                      "/dev/vde"
+                    ],
+                    "role": "primary",
+                    "minimum_bytes": 4194304,
+                    "maximum_bytes": 4194304,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "ext4",
+                      "label": "sample"
+                    }
+                  },
+                  {
+                    "purpose": "sample_paging",
+                    "eligible_disks": [
+                      "/dev/vde"
+                    ],
+                    "role": "primary",
+                    "minimum_bytes": 2097152,
+                    "maximum_bytes": 2097152,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "swap",
+                      "label": "sample_swap"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "mbr_profile": "Dos512",
+            "next_uuid": 100,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "evidence",
+                      "start": 2048,
+                      "end": 10239,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "evidence",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "evidence: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "mbr_profile": "Dos512",
+            "next_uuid": 100,
+            "disks": {
+              "/dev/vde": {
+                "sectors": 98304,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdf": {
+                "sectors": 98304,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "evidence",
+                      "start": 2048,
+                      "end": 10239,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "evidence",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "evidence: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdg": {
+                "sectors": 98304,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdh": {
+                "sectors": 98304,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "assignment_editor": {
+            "selected": "/dev/vda",
+            "drafts": {
+              "/dev/vda": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdb": {
+                "mbr_role": "primary",
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdc": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdd": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "example_editor": {
+            "selected": "/dev/vde",
+            "drafts": {
+              "/dev/vde": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdf": {
+                "mbr_role": "primary",
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdg": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdh": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "view": "introduction",
+          "selected_example": 0,
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false
+        }
+      },
+      "goal": {
+        "kind": "PartitionFs",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "mbr_profile": "Dos512",
+            "next_uuid": 100,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "evidence",
+                      "start": 2048,
+                      "end": 10239,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "evidence",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "evidence: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "plan": {
+            "targets": [],
+            "mbr": {
+              "targets": [
+                {
+                  "purpose": "reports",
+                  "eligible_disks": [
+                    "/dev/vda"
+                  ],
+                  "role": "primary",
+                  "minimum_bytes": 8388608,
+                  "maximum_bytes": 12582912,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "reports"
+                  }
+                },
+                {
+                  "purpose": "paging",
+                  "eligible_disks": [
+                    "/dev/vda"
+                  ],
+                  "role": "primary",
+                  "minimum_bytes": 2097152,
+                  "maximum_bytes": 4194304,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "swap",
+                    "label": "scratch"
+                  }
+                }
+              ]
+            }
+          },
+          "reference": [
+            {
+              "kind": "mbr",
+              "operation": {
+                "kind": "create",
+                "disk": "/dev/vda"
+              }
+            },
+            {
+              "kind": "mbr",
+              "operation": {
+                "kind": "add",
+                "disk": "/dev/vda",
+                "role": "primary",
+                "start": 2048,
+                "end": 18431,
+                "type_hint": "linux_data"
+              }
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda1",
+              "format": "ext4",
+              "label": "reports",
+              "uuid": null
+            },
+            {
+              "kind": "mbr",
+              "operation": {
+                "kind": "add",
+                "disk": "/dev/vda",
+                "role": "primary",
+                "start": 20480,
+                "end": 24575,
+                "type_hint": "linux_swap"
+              }
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda2",
+              "format": "swap",
+              "label": "scratch",
+              "uuid": null
+            }
+          ],
+          "lesson": {
+            "prerequisite_note": "Complete native disk preparation first: read inclusive sector ranges, keep supplied data unchanged, and distinguish a partition type hint from actual ext4 or swap content. This unit adds MBR slots and extended/logical layout.",
+            "concepts": [
+              {
+                "title": "A table entry is not a filesystem",
+                "text": "An MBR describes regions of a disk. Its main table has four slots. A primary partition uses one slot directly; its Linux data or swap hint describes intended use, but does not create those contents. This task uses two primary payloads."
+              },
+              {
+                "title": "Read both ends of a range",
+                "text": "Ranges include Start and End. With 512-byte sectors, capacity is (End − Start + 1) × 512. In the worked example, sectors 4096–12287 contain 8192 sectors: 4 MiB. An aligned start is a multiple of the supplied 2048-sector alignment."
+              },
+              {
+                "title": "Apply allocation before initialization",
+                "text": "Choose the Role and numeric Start/End fields, choose the type hint, then Add partition using draft. The table now shows a real modeled slot. Choose that applied payload, choose ext4 or swap and a content label, then Initialize selected blank partition. A label belongs to the contents; MBR has no GPT-style partition-name field."
+              },
+              {
+                "title": "Verify state rather than a successful click",
+                "text": "The worked example creates sample ext4 and sample_swap swap content. Check current disk configuration inspects role, capacity, alignment and actual signatures, plus all protected media. A command or action succeeding does not mean every task requirement passes."
+              }
+            ],
+            "description": "On the separate blank /dev/vde, prepare primary ext4 labeled sample (4 MiB) and primary swap labeled sample_swap (2 MiB). The worked ranges and labels differ from the assignment.",
+            "fixture": {
+              "version": 1,
+              "mbr_profile": "Dos512",
+              "next_uuid": 100,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdf": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "evidence",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "evidence",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "evidence: retain this original record.\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdg": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [],
+              "mbr": {
+                "targets": [
+                  {
+                    "purpose": "sample",
+                    "eligible_disks": [
+                      "/dev/vde"
+                    ],
+                    "role": "primary",
+                    "minimum_bytes": 4194304,
+                    "maximum_bytes": 4194304,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "ext4",
+                      "label": "sample"
+                    }
+                  },
+                  {
+                    "purpose": "sample_paging",
+                    "eligible_disks": [
+                      "/dev/vde"
+                    ],
+                    "role": "primary",
+                    "minimum_bytes": 2097152,
+                    "maximum_bytes": 2097152,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "swap",
+                      "label": "sample_swap"
+                    }
+                  }
+                ]
+              }
+            },
+            "worked": [
+              {
+                "operation": {
+                  "kind": "mbr",
+                  "operation": {
+                    "kind": "create",
+                    "disk": "/dev/vde"
+                  }
+                },
+                "explanation": "Choose /dev/vde and Create MBR on blank disk. The new empty table has no filesystem yet."
+              },
+              {
+                "operation": {
+                  "kind": "mbr",
+                  "operation": {
+                    "kind": "add",
+                    "disk": "/dev/vde",
+                    "role": "primary",
+                    "start": 4096,
+                    "end": 12287,
+                    "type_hint": "linux_data"
+                  }
+                },
+                "explanation": "Fill selected step · does not apply populates Role primary, Start 4096, End 12287 and Linux data. Use Add partition using draft; inspect the resulting slot 1."
+              },
+              {
+                "operation": {
+                  "kind": "format",
+                  "partition": "/dev/vde1",
+                  "format": "ext4",
+                  "label": "sample",
+                  "uuid": null
+                },
+                "explanation": "Fill this step, then Initialize selected blank partition. It creates ext4 labeled sample in the applied /dev/vde1 payload."
+              },
+              {
+                "operation": {
+                  "kind": "mbr",
+                  "operation": {
+                    "kind": "add",
+                    "disk": "/dev/vde",
+                    "role": "primary",
+                    "start": 16384,
+                    "end": 20479,
+                    "type_hint": "linux_swap"
+                  }
+                },
+                "explanation": "Add a separate primary Linux swap range, 16384–20479. It is 2 MiB and still unformatted after allocation."
+              },
+              {
+                "operation": {
+                  "kind": "format",
+                  "partition": "/dev/vde2",
+                  "format": "swap",
+                  "label": "sample_swap",
+                  "uuid": null
+                },
+                "explanation": "Initialize actual /dev/vde2 as swap labeled sample_swap. Check current disk configuration; inspect both signatures and the retained peer record."
+              }
+            ],
+            "try_change": "After the worked example passes, add an extra primary Linux data range at 24576–28671, then check. Allocation is legal but the unrequested third payload fails preservation. Use Reset practice and replay the five worked steps to repair; do not overwrite a signature.",
+            "experiment": {
+              "kind": "mbr",
+              "operation": {
+                "kind": "add",
+                "disk": "/dev/vde",
+                "role": "primary",
+                "start": 24576,
+                "end": 28671,
+                "type_hint": "linux_data"
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "Use native disk controls. Supplied objects, capacity, role, alignment, actual content and preservation are graded; supported alternate layouts and operation order can pass."
+      ],
+      "prerequisites": [
+        "lpic1-disk-delivery"
+      ]
+    },
+    {
+      "id": "lpic1-mbr-logical-space",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "MBR extended and logical partitions",
+      "unit": "mbr-layouts",
+      "title": "Use the fourth slot to hold logical payloads",
+      "summary": "Solve a table-slot shortage without replacing three retained primary partitions.",
+      "objective": "Keep /dev/vda primary slots 1, 2 and 3 and every original record unchanged. Use the remaining primary table slot for one extended container. Inside it, allocate a logical Linux data payload of 8–12 MiB with an aligned start and initialize ext4 labeled reports; allocate a separate aligned logical Linux swap payload of 2–4 MiB and initialize swap labeled scratch. Keep every other disk and unrequested allocation unchanged. Inspect payload ranges and the modeled EBR reservations.",
+      "retry_guidance": "Read the failed requirement beside the applied table. Editing fields alone does not change a partition. If you created an extra allocation or initialized the wrong content, this preparation-only exercise cannot delete or overwrite it: reset the selected assignment and replay the intended layout. Reset practice affects only the separate example.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Inspect the supplied table, protection facts and requirements.",
+        "Use the role, sector and content controls to apply the intended layout.",
+        "Check the current configuration and retained records."
+      ],
+      "guide": [],
+      "explanation": "The fourth main-table entry is an extended container, so it can hold the two separate logical payloads without replacing any primary. Each data range and its modeled metadata reservation fits inside the container. Correct contents and original-data preservation are checked separately.",
+      "hints": [
+        "Count occupied main-table slots before choosing the next role. A container occupies one main-table slot; logical payloads are inside it.",
+        "Keep the three existing primaries exact. Choose container bounds in free space, then use logical payload ranges inside those bounds with aligned starts.",
+        "Check actual numbers before initializing. The container is not a data or swap payload, and a type hint is not initialized content."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/s/parted/manual/html_node/mkpart.html",
+        "https://man7.org/linux/man-pages/man8/fdisk.8.html"
+      ],
+      "simplifications": "Opt-in virtual MBR geometry, fixed 512-byte sectors, at most 2 TiB per MBR disk and 16 total modeled slots. Primary/extended slots 1–4; logical payloads start at 5. One explicit sector per logical partition is reserved for modeled EBR space; this is not raw EBR bytes/chains or actual parted placement. No CHS/boot code, disk replacement, delete/resize, force, other filesystem types, actual mkfs/parted/fdisk, devices, kernel, paging or host shell. ext4 capacity/signatures and retained flat files are an abstract model, not a real filesystem. Native configuration and the separately documented bounded literal forms are not full utility emulation. No actual partition-tool conformance was run. All activity stays in process; refusal is not real-system protection. LPIC-1 objectives v5.0 and technical references checked 2026-11-07. No complete objective or exam claim.",
+      "initial": {
+        "kind": "PartitionFs",
+        "simulation": {
+          "version": 1,
+          "origin": {
+            "initial": {
+              "version": 1,
+              "mbr_profile": "Dos512",
+              "next_uuid": 100,
+              "disks": {
+                "/dev/vda": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null,
+                  "mbr": {
+                    "entries": [
+                      {
+                        "kind": "primary",
+                        "partition": {
+                          "number": 1,
+                          "name": "mbr1",
+                          "start": 2048,
+                          "end": 10239,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "keep1",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                            "blocks": 1024,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "keep1: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": null
+                      },
+                      {
+                        "kind": "primary",
+                        "partition": {
+                          "number": 2,
+                          "name": "mbr2",
+                          "start": 12288,
+                          "end": 20479,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "keep2",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+                            "blocks": 1024,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "keep2: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": null
+                      },
+                      {
+                        "kind": "primary",
+                        "partition": {
+                          "number": 3,
+                          "name": "mbr3",
+                          "start": 22528,
+                          "end": 30719,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "keep3",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000003",
+                            "blocks": 1024,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "keep3: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": null
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdb": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "evidence",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "evidence",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "evidence: retain this original record.\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdc": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdd": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [],
+              "mbr": {
+                "targets": [
+                  {
+                    "purpose": "reports",
+                    "eligible_disks": [
+                      "/dev/vda"
+                    ],
+                    "role": "logical",
+                    "minimum_bytes": 8388608,
+                    "maximum_bytes": 12582912,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "ext4",
+                      "label": "reports"
+                    }
+                  },
+                  {
+                    "purpose": "paging",
+                    "eligible_disks": [
+                      "/dev/vda"
+                    ],
+                    "role": "logical",
+                    "minimum_bytes": 2097152,
+                    "maximum_bytes": 4194304,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "swap",
+                      "label": "scratch"
+                    }
+                  }
+                ]
+              }
+            },
+            "example_initial": {
+              "version": 1,
+              "mbr_profile": "Dos512",
+              "next_uuid": 100,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null,
+                  "mbr": {
+                    "entries": [
+                      {
+                        "kind": "primary",
+                        "partition": {
+                          "number": 1,
+                          "name": "mbr1",
+                          "start": 2048,
+                          "end": 6143,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "keep1",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                            "blocks": 512,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "keep1: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": null
+                      },
+                      {
+                        "kind": "primary",
+                        "partition": {
+                          "number": 2,
+                          "name": "mbr2",
+                          "start": 8192,
+                          "end": 12287,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "keep2",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+                            "blocks": 512,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "keep2: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": null
+                      },
+                      {
+                        "kind": "primary",
+                        "partition": {
+                          "number": 3,
+                          "name": "mbr3",
+                          "start": 14336,
+                          "end": 18431,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "keep3",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000003",
+                            "blocks": 512,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "keep3: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": null
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdf": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "evidence",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "evidence",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "evidence: retain this original record.\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdg": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "example_plan": {
+              "targets": [],
+              "mbr": {
+                "targets": [
+                  {
+                    "purpose": "sample",
+                    "eligible_disks": [
+                      "/dev/vde"
+                    ],
+                    "role": "logical",
+                    "minimum_bytes": 4194304,
+                    "maximum_bytes": 4194304,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "ext4",
+                      "label": "sample"
+                    }
+                  },
+                  {
+                    "purpose": "sample_paging",
+                    "eligible_disks": [
+                      "/dev/vde"
+                    ],
+                    "role": "logical",
+                    "minimum_bytes": 2097152,
+                    "maximum_bytes": 2097152,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "swap",
+                      "label": "sample_swap"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "mbr_profile": "Dos512",
+            "next_uuid": 100,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null,
+                "mbr": {
+                  "entries": [
+                    {
+                      "kind": "primary",
+                      "partition": {
+                        "number": 1,
+                        "name": "mbr1",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "keep1",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "keep1: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": null
+                    },
+                    {
+                      "kind": "primary",
+                      "partition": {
+                        "number": 2,
+                        "name": "mbr2",
+                        "start": 12288,
+                        "end": 20479,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "keep2",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "keep2: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": null
+                    },
+                    {
+                      "kind": "primary",
+                      "partition": {
+                        "number": 3,
+                        "name": "mbr3",
+                        "start": 22528,
+                        "end": 30719,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "keep3",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000003",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "keep3: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": null
+                    }
+                  ]
+                }
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "evidence",
+                      "start": 2048,
+                      "end": 10239,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "evidence",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "evidence: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "mbr_profile": "Dos512",
+            "next_uuid": 100,
+            "disks": {
+              "/dev/vde": {
+                "sectors": 98304,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null,
+                "mbr": {
+                  "entries": [
+                    {
+                      "kind": "primary",
+                      "partition": {
+                        "number": 1,
+                        "name": "mbr1",
+                        "start": 2048,
+                        "end": 6143,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "keep1",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                          "blocks": 512,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "keep1: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": null
+                    },
+                    {
+                      "kind": "primary",
+                      "partition": {
+                        "number": 2,
+                        "name": "mbr2",
+                        "start": 8192,
+                        "end": 12287,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "keep2",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+                          "blocks": 512,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "keep2: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": null
+                    },
+                    {
+                      "kind": "primary",
+                      "partition": {
+                        "number": 3,
+                        "name": "mbr3",
+                        "start": 14336,
+                        "end": 18431,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "keep3",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000003",
+                          "blocks": 512,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "keep3: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": null
+                    }
+                  ]
+                }
+              },
+              "/dev/vdf": {
+                "sectors": 98304,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "evidence",
+                      "start": 2048,
+                      "end": 10239,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "evidence",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "evidence: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdg": {
+                "sectors": 98304,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdh": {
+                "sectors": 98304,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "assignment_editor": {
+            "selected": "/dev/vda",
+            "drafts": {
+              "/dev/vda": {
+                "mbr_role": "primary",
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdb": {
+                "mbr_role": "primary",
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdc": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdd": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "example_editor": {
+            "selected": "/dev/vde",
+            "drafts": {
+              "/dev/vde": {
+                "mbr_role": "primary",
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdf": {
+                "mbr_role": "primary",
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdg": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdh": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "view": "introduction",
+          "selected_example": 0,
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false
+        }
+      },
+      "goal": {
+        "kind": "PartitionFs",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "mbr_profile": "Dos512",
+            "next_uuid": 100,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null,
+                "mbr": {
+                  "entries": [
+                    {
+                      "kind": "primary",
+                      "partition": {
+                        "number": 1,
+                        "name": "mbr1",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "keep1",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "keep1: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": null
+                    },
+                    {
+                      "kind": "primary",
+                      "partition": {
+                        "number": 2,
+                        "name": "mbr2",
+                        "start": 12288,
+                        "end": 20479,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "keep2",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "keep2: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": null
+                    },
+                    {
+                      "kind": "primary",
+                      "partition": {
+                        "number": 3,
+                        "name": "mbr3",
+                        "start": 22528,
+                        "end": 30719,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "keep3",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000003",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "keep3: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": null
+                    }
+                  ]
+                }
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "evidence",
+                      "start": 2048,
+                      "end": 10239,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "evidence",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "evidence: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "plan": {
+            "targets": [],
+            "mbr": {
+              "targets": [
+                {
+                  "purpose": "reports",
+                  "eligible_disks": [
+                    "/dev/vda"
+                  ],
+                  "role": "logical",
+                  "minimum_bytes": 8388608,
+                  "maximum_bytes": 12582912,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "reports"
+                  }
+                },
+                {
+                  "purpose": "paging",
+                  "eligible_disks": [
+                    "/dev/vda"
+                  ],
+                  "role": "logical",
+                  "minimum_bytes": 2097152,
+                  "maximum_bytes": 4194304,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "swap",
+                    "label": "scratch"
+                  }
+                }
+              ]
+            }
+          },
+          "reference": [
+            {
+              "kind": "mbr",
+              "operation": {
+                "kind": "add",
+                "disk": "/dev/vda",
+                "role": "extended",
+                "start": 32768,
+                "end": 131071,
+                "type_hint": "linux_data"
+              }
+            },
+            {
+              "kind": "mbr",
+              "operation": {
+                "kind": "add",
+                "disk": "/dev/vda",
+                "role": "logical",
+                "start": 34816,
+                "end": 51199,
+                "type_hint": "linux_data"
+              }
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda5",
+              "format": "ext4",
+              "label": "reports",
+              "uuid": null
+            },
+            {
+              "kind": "mbr",
+              "operation": {
+                "kind": "add",
+                "disk": "/dev/vda",
+                "role": "logical",
+                "start": 55296,
+                "end": 59391,
+                "type_hint": "linux_swap"
+              }
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda6",
+              "format": "swap",
+              "label": "scratch",
+              "uuid": null
+            }
+          ],
+          "lesson": {
+            "prerequisite_note": "Complete native disk preparation first: read inclusive sector ranges, keep supplied data unchanged, and distinguish a partition type hint from actual ext4 or swap content. This unit adds MBR slots and extended/logical layout.",
+            "concepts": [
+              {
+                "title": "Free space is not another primary slot",
+                "text": "The supplied MBR already uses primary slots 1, 2 and 3. Even when many sectors are free, only slot 4 remains in the main table. Two additional primary entries will not fit. One extended entry can use slot 4 as a container for logical payloads."
+              },
+              {
+                "title": "Put logical payloads inside one container",
+                "text": "An extended container describes a region; do not format it. Logical payloads inside it start at partition number 5 and have their own ranges and contents. A logical payload cannot extend beyond its container or overlap another payload."
+              },
+              {
+                "title": "Leave space for layout metadata",
+                "text": "This exercise reserves one explicit sector for each logical payload before its data, inside the container. Current reservations are shown under the table. This is a disclosed EBR teaching model, not raw chains or actual parted placement. The worked aligned starts leave room for metadata; simply packing all data sectors together can fail."
+              },
+              {
+                "title": "Inspect every layer and retained record",
+                "text": "The worked /dev/vde uses 20480–98303 for the container, 22528–30719 for a 4 MiB data payload and 34816–38911 for 2 MiB swap. Only the payloads are initialized. Primary records remain untouched; check actual roles, signatures and protected files afterward."
+              }
+            ],
+            "description": "The separate /dev/vde already has three retained primary entries. Use its last main-table slot for a container, then create sample ext4 and sample_swap logical payloads inside it.",
+            "fixture": {
+              "version": 1,
+              "mbr_profile": "Dos512",
+              "next_uuid": 100,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null,
+                  "mbr": {
+                    "entries": [
+                      {
+                        "kind": "primary",
+                        "partition": {
+                          "number": 1,
+                          "name": "mbr1",
+                          "start": 2048,
+                          "end": 6143,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "keep1",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                            "blocks": 512,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "keep1: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": null
+                      },
+                      {
+                        "kind": "primary",
+                        "partition": {
+                          "number": 2,
+                          "name": "mbr2",
+                          "start": 8192,
+                          "end": 12287,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "keep2",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+                            "blocks": 512,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "keep2: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": null
+                      },
+                      {
+                        "kind": "primary",
+                        "partition": {
+                          "number": 3,
+                          "name": "mbr3",
+                          "start": 14336,
+                          "end": 18431,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "keep3",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000003",
+                            "blocks": 512,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "keep3: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": null
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdf": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "evidence",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "evidence",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "evidence: retain this original record.\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdg": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [],
+              "mbr": {
+                "targets": [
+                  {
+                    "purpose": "sample",
+                    "eligible_disks": [
+                      "/dev/vde"
+                    ],
+                    "role": "logical",
+                    "minimum_bytes": 4194304,
+                    "maximum_bytes": 4194304,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "ext4",
+                      "label": "sample"
+                    }
+                  },
+                  {
+                    "purpose": "sample_paging",
+                    "eligible_disks": [
+                      "/dev/vde"
+                    ],
+                    "role": "logical",
+                    "minimum_bytes": 2097152,
+                    "maximum_bytes": 2097152,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "swap",
+                      "label": "sample_swap"
+                    }
+                  }
+                ]
+              }
+            },
+            "worked": [
+              {
+                "operation": {
+                  "kind": "mbr",
+                  "operation": {
+                    "kind": "add",
+                    "disk": "/dev/vde",
+                    "role": "extended",
+                    "start": 20480,
+                    "end": 98303,
+                    "type_hint": "linux_data"
+                  }
+                },
+                "explanation": "Choose extended, fill Start 20480 and End 98303, then Add partition using draft. This allocates slot 4 as a container; its content says Container only."
+              },
+              {
+                "operation": {
+                  "kind": "mbr",
+                  "operation": {
+                    "kind": "add",
+                    "disk": "/dev/vde",
+                    "role": "logical",
+                    "start": 22528,
+                    "end": 30719,
+                    "type_hint": "linux_data"
+                  }
+                },
+                "explanation": "Choose logical with Linux data and add 22528–30719. The table assigns actual payload number 5 and shows its separate modeled EBR reservation."
+              },
+              {
+                "operation": {
+                  "kind": "format",
+                  "partition": "/dev/vde5",
+                  "format": "ext4",
+                  "label": "sample",
+                  "uuid": null
+                },
+                "explanation": "Select /dev/vde5, then initialize ext4 labeled sample. Do not select the extended container for initialization."
+              },
+              {
+                "operation": {
+                  "kind": "mbr",
+                  "operation": {
+                    "kind": "add",
+                    "disk": "/dev/vde",
+                    "role": "logical",
+                    "start": 34816,
+                    "end": 38911,
+                    "type_hint": "linux_swap"
+                  }
+                },
+                "explanation": "Add the second logical payload with Linux swap hint. Check that both endpoints lie inside the container and no prior payload is covered."
+              },
+              {
+                "operation": {
+                  "kind": "format",
+                  "partition": "/dev/vde6",
+                  "format": "swap",
+                  "label": "sample_swap",
+                  "uuid": null
+                },
+                "explanation": "Initialize /dev/vde6 as swap labeled sample_swap, then Check current disk configuration and inspect the retained primary records."
+              }
+            ],
+            "try_change": "After the worked layout passes, add an extra logical Linux data payload at 40960–45055. Check the failure: being inside the container does not make unrequested work correct. Reset practice and replay the five intended steps.",
+            "experiment": {
+              "kind": "mbr",
+              "operation": {
+                "kind": "add",
+                "disk": "/dev/vde",
+                "role": "logical",
+                "start": 40960,
+                "end": 45055,
+                "type_hint": "linux_data"
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "Use native disk controls. Supplied objects, capacity, role, alignment, actual content and preservation are graded; supported alternate layouts and operation order can pass."
+      ],
+      "prerequisites": [
+        "lpic1-mbr-primary-plan"
+      ]
+    },
+    {
+      "id": "lpic1-mbr-storage-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Protected MBR handover",
+      "unit": "mbr-layouts",
+      "title": "Finish a protected mixed MBR handover",
+      "summary": "Initialize the supplied blank logical payload and add paging without disturbing an existing archive.",
+      "objective": "Initialize the supplied blank /dev/vda6 as ext4 labeled deliver, keeping its exact 8 MiB allocation and Linux data hint. Add a separate aligned logical Linux swap payload of 2–4 MiB inside the existing extended container and initialize swap labeled ready_swap. Keep the supplied record in the primary partition, extended-container bounds, logical archive, every original file, other media and all unrequested allocations unchanged. Verify actual signatures and retained records before handover; no real boot or swap activation is performed.",
+      "retry_guidance": "Read the failed requirement beside the applied table. Editing fields alone does not change a partition. If you created an extra allocation or initialized the wrong content, this preparation-only exercise cannot delete or overwrite it: reset the selected assignment and replay the intended layout. Reset practice affects only the separate example.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Inspect the supplied table, protection facts and requirements.",
+        "Use the role, sector and content controls to apply the intended layout.",
+        "Check the current configuration and retained records."
+      ],
+      "guide": [],
+      "explanation": "The supplied slot is initialized without replacing its allocation, paging is a distinct new logical payload, and every existing record and container boundary stays exact. The grader identifies the original supplied object and separately checks geometry, content and all protected data.",
+      "hints": [
+        "Find the blank supplied logical payload in the current table. An extended container and an existing archive are not the blank target.",
+        "Initialize the required existing slot; do not create a substitute elsewhere. For paging, inspect free space inside the unchanged container and use a logical role with Linux swap hint.",
+        "Check every row, including supplied object identity, actual signatures, preserved allocations and original files. Draft fields and successful actions alone do not prove a correct handover."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/s/parted/manual/html_node/mkpart.html",
+        "https://man7.org/linux/man-pages/man8/fdisk.8.html"
+      ],
+      "simplifications": "Opt-in virtual MBR geometry, fixed 512-byte sectors, at most 2 TiB per MBR disk and 16 total modeled slots. Primary/extended slots 1–4; logical payloads start at 5. One explicit sector per logical partition is reserved for modeled EBR space; this is not raw EBR bytes/chains or actual parted placement. No CHS/boot code, disk replacement, delete/resize, force, other filesystem types, actual mkfs/parted/fdisk, devices, kernel, paging or host shell. ext4 capacity/signatures and retained flat files are an abstract model, not a real filesystem. Native configuration and the separately documented bounded literal forms are not full utility emulation. No actual partition-tool conformance was run. All activity stays in process; refusal is not real-system protection. LPIC-1 objectives v5.0 and technical references checked 2026-11-07. No complete objective or exam claim.",
+      "initial": {
+        "kind": "PartitionFs",
+        "simulation": {
+          "version": 1,
+          "origin": {
+            "initial": {
+              "version": 1,
+              "mbr_profile": "Dos512",
+              "next_uuid": 100,
+              "disks": {
+                "/dev/vda": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null,
+                  "mbr": {
+                    "entries": [
+                      {
+                        "kind": "primary",
+                        "partition": {
+                          "number": 1,
+                          "name": "mbr1",
+                          "start": 2048,
+                          "end": 10239,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "system_record",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                            "blocks": 1024,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "system_record: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": null
+                      },
+                      {
+                        "kind": "extended",
+                        "partition": {
+                          "number": 2,
+                          "name": "mbr2",
+                          "start": 12288,
+                          "end": 131071,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "blank"
+                          }
+                        },
+                        "ebr": null
+                      },
+                      {
+                        "kind": "logical",
+                        "partition": {
+                          "number": 5,
+                          "name": "mbr5",
+                          "start": 14336,
+                          "end": 30719,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "archive",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000005",
+                            "blocks": 2048,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "archive: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": 12288
+                      },
+                      {
+                        "kind": "logical",
+                        "partition": {
+                          "number": 6,
+                          "name": "mbr6",
+                          "start": 32768,
+                          "end": 49151,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "blank"
+                          }
+                        },
+                        "ebr": 12289
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdb": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "evidence",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "evidence",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "evidence: retain this original record.\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdc": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdd": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [],
+              "mbr": {
+                "targets": [
+                  {
+                    "purpose": "supplied_delivery",
+                    "eligible_disks": [
+                      "/dev/vda"
+                    ],
+                    "role": "logical",
+                    "minimum_bytes": 8388608,
+                    "maximum_bytes": 8388608,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "ext4",
+                      "label": "deliver"
+                    },
+                    "supplied_slot": 6
+                  },
+                  {
+                    "purpose": "paging",
+                    "eligible_disks": [
+                      "/dev/vda"
+                    ],
+                    "role": "logical",
+                    "minimum_bytes": 2097152,
+                    "maximum_bytes": 4194304,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "swap",
+                      "label": "ready_swap"
+                    }
+                  }
+                ]
+              }
+            },
+            "example_initial": {
+              "version": 1,
+              "mbr_profile": "Dos512",
+              "next_uuid": 100,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null,
+                  "mbr": {
+                    "entries": [
+                      {
+                        "kind": "primary",
+                        "partition": {
+                          "number": 1,
+                          "name": "mbr1",
+                          "start": 2048,
+                          "end": 6143,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "system_record",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                            "blocks": 512,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "system_record: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": null
+                      },
+                      {
+                        "kind": "extended",
+                        "partition": {
+                          "number": 2,
+                          "name": "mbr2",
+                          "start": 8192,
+                          "end": 98303,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "blank"
+                          }
+                        },
+                        "ebr": null
+                      },
+                      {
+                        "kind": "logical",
+                        "partition": {
+                          "number": 5,
+                          "name": "mbr5",
+                          "start": 10240,
+                          "end": 18431,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "archive",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000005",
+                            "blocks": 1024,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "archive: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": 8192
+                      },
+                      {
+                        "kind": "logical",
+                        "partition": {
+                          "number": 6,
+                          "name": "mbr6",
+                          "start": 20480,
+                          "end": 28671,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "blank"
+                          }
+                        },
+                        "ebr": 8193
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdf": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "evidence",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "evidence",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "evidence: retain this original record.\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdg": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "example_plan": {
+              "targets": [],
+              "mbr": {
+                "targets": [
+                  {
+                    "purpose": "supplied_sample",
+                    "eligible_disks": [
+                      "/dev/vde"
+                    ],
+                    "role": "logical",
+                    "minimum_bytes": 4194304,
+                    "maximum_bytes": 4194304,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "ext4",
+                      "label": "publish"
+                    },
+                    "supplied_slot": 6
+                  },
+                  {
+                    "purpose": "sample_paging",
+                    "eligible_disks": [
+                      "/dev/vde"
+                    ],
+                    "role": "logical",
+                    "minimum_bytes": 2097152,
+                    "maximum_bytes": 2097152,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "swap",
+                      "label": "sample_swap"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "mbr_profile": "Dos512",
+            "next_uuid": 100,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null,
+                "mbr": {
+                  "entries": [
+                    {
+                      "kind": "primary",
+                      "partition": {
+                        "number": 1,
+                        "name": "mbr1",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "system_record",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "system_record: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": null
+                    },
+                    {
+                      "kind": "extended",
+                      "partition": {
+                        "number": 2,
+                        "name": "mbr2",
+                        "start": 12288,
+                        "end": 131071,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      "ebr": null
+                    },
+                    {
+                      "kind": "logical",
+                      "partition": {
+                        "number": 5,
+                        "name": "mbr5",
+                        "start": 14336,
+                        "end": 30719,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "archive",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000005",
+                          "blocks": 2048,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "archive: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": 12288
+                    },
+                    {
+                      "kind": "logical",
+                      "partition": {
+                        "number": 6,
+                        "name": "mbr6",
+                        "start": 32768,
+                        "end": 49151,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      "ebr": 12289
+                    }
+                  ]
+                }
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "evidence",
+                      "start": 2048,
+                      "end": 10239,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "evidence",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "evidence: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "mbr_profile": "Dos512",
+            "next_uuid": 100,
+            "disks": {
+              "/dev/vde": {
+                "sectors": 98304,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null,
+                "mbr": {
+                  "entries": [
+                    {
+                      "kind": "primary",
+                      "partition": {
+                        "number": 1,
+                        "name": "mbr1",
+                        "start": 2048,
+                        "end": 6143,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "system_record",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                          "blocks": 512,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "system_record: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": null
+                    },
+                    {
+                      "kind": "extended",
+                      "partition": {
+                        "number": 2,
+                        "name": "mbr2",
+                        "start": 8192,
+                        "end": 98303,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      "ebr": null
+                    },
+                    {
+                      "kind": "logical",
+                      "partition": {
+                        "number": 5,
+                        "name": "mbr5",
+                        "start": 10240,
+                        "end": 18431,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "archive",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000005",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "archive: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": 8192
+                    },
+                    {
+                      "kind": "logical",
+                      "partition": {
+                        "number": 6,
+                        "name": "mbr6",
+                        "start": 20480,
+                        "end": 28671,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      "ebr": 8193
+                    }
+                  ]
+                }
+              },
+              "/dev/vdf": {
+                "sectors": 98304,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "evidence",
+                      "start": 2048,
+                      "end": 10239,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "evidence",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "evidence: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdg": {
+                "sectors": 98304,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdh": {
+                "sectors": 98304,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "assignment_editor": {
+            "selected": "/dev/vda",
+            "drafts": {
+              "/dev/vda": {
+                "mbr_role": "primary",
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdb": {
+                "mbr_role": "primary",
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdc": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdd": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "example_editor": {
+            "selected": "/dev/vde",
+            "drafts": {
+              "/dev/vde": {
+                "mbr_role": "primary",
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdf": {
+                "mbr_role": "primary",
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdg": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdh": {
+                "mbr_role": "primary",
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "view": "introduction",
+          "selected_example": 0,
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false
+        }
+      },
+      "goal": {
+        "kind": "PartitionFs",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "mbr_profile": "Dos512",
+            "next_uuid": 100,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null,
+                "mbr": {
+                  "entries": [
+                    {
+                      "kind": "primary",
+                      "partition": {
+                        "number": 1,
+                        "name": "mbr1",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "system_record",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "system_record: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": null
+                    },
+                    {
+                      "kind": "extended",
+                      "partition": {
+                        "number": 2,
+                        "name": "mbr2",
+                        "start": 12288,
+                        "end": 131071,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      "ebr": null
+                    },
+                    {
+                      "kind": "logical",
+                      "partition": {
+                        "number": 5,
+                        "name": "mbr5",
+                        "start": 14336,
+                        "end": 30719,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "archive",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000005",
+                          "blocks": 2048,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "archive: retain this original record.\n"
+                            }
+                          }
+                        }
+                      },
+                      "ebr": 12288
+                    },
+                    {
+                      "kind": "logical",
+                      "partition": {
+                        "number": 6,
+                        "name": "mbr6",
+                        "start": 32768,
+                        "end": 49151,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      "ebr": 12289
+                    }
+                  ]
+                }
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "evidence",
+                      "start": 2048,
+                      "end": 10239,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "evidence",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "evidence: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "plan": {
+            "targets": [],
+            "mbr": {
+              "targets": [
+                {
+                  "purpose": "supplied_delivery",
+                  "eligible_disks": [
+                    "/dev/vda"
+                  ],
+                  "role": "logical",
+                  "minimum_bytes": 8388608,
+                  "maximum_bytes": 8388608,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "deliver"
+                  },
+                  "supplied_slot": 6
+                },
+                {
+                  "purpose": "paging",
+                  "eligible_disks": [
+                    "/dev/vda"
+                  ],
+                  "role": "logical",
+                  "minimum_bytes": 2097152,
+                  "maximum_bytes": 4194304,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "swap",
+                    "label": "ready_swap"
+                  }
+                }
+              ]
+            }
+          },
+          "reference": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda6",
+              "format": "ext4",
+              "label": "deliver",
+              "uuid": null
+            },
+            {
+              "kind": "mbr",
+              "operation": {
+                "kind": "add",
+                "disk": "/dev/vda",
+                "role": "logical",
+                "start": 51200,
+                "end": 55295,
+                "type_hint": "linux_swap"
+              }
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda7",
+              "format": "swap",
+              "label": "ready_swap",
+              "uuid": null
+            }
+          ],
+          "lesson": {
+            "prerequisite_note": "Complete native disk preparation first: read inclusive sector ranges, keep supplied data unchanged, and distinguish a partition type hint from actual ext4 or swap content. This unit adds MBR slots and extended/logical layout.",
+            "concepts": [
+              {
+                "title": "Investigate a mixed table before changing it",
+                "text": "The supplied primary record and logical archive already contain data. The extended entry contains logical payloads, not the primary record, and is not another filesystem. /dev/vda6 is an existing blank logical payload: this task requires that exact object, not a matching filesystem created somewhere else."
+              },
+              {
+                "title": "Initialization and allocation solve different needs",
+                "text": "Do not allocate a replacement for the supplied blank payload. Initialize it in place. Paging needs a new logical range within the existing container; choose free aligned sectors while leaving all supplied allocations and metadata reservations intact."
+              },
+              {
+                "title": "Worked handover on a different disk",
+                "text": "In the separate example, /dev/vde6 is already a blank 4 MiB logical payload. Initialize it as ext4 labeled publish. Add logical Linux swap at 32768–36863, then initialize the actual newly allocated /dev/vde7 as sample_swap. The archive at /dev/vde5 remains unchanged."
+              },
+              {
+                "title": "Prove preservation as well as the new contents",
+                "text": "Open Inspect protected files and action history to read original records, then check the complete configuration. A correct new filesystem does not excuse replacing the supplied object, changing an archive, growing a container or adding extra payloads. Refused operations and current outcome feedback explain different problems."
+              }
+            ],
+            "description": "Finish the separate mixed /dev/vde handover: use the existing blank slot 6, add one new logical swap payload, and retain the original primary and archive records.",
+            "fixture": {
+              "version": 1,
+              "mbr_profile": "Dos512",
+              "next_uuid": 100,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null,
+                  "mbr": {
+                    "entries": [
+                      {
+                        "kind": "primary",
+                        "partition": {
+                          "number": 1,
+                          "name": "mbr1",
+                          "start": 2048,
+                          "end": 6143,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "system_record",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                            "blocks": 512,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "system_record: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": null
+                      },
+                      {
+                        "kind": "extended",
+                        "partition": {
+                          "number": 2,
+                          "name": "mbr2",
+                          "start": 8192,
+                          "end": 98303,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "blank"
+                          }
+                        },
+                        "ebr": null
+                      },
+                      {
+                        "kind": "logical",
+                        "partition": {
+                          "number": 5,
+                          "name": "mbr5",
+                          "start": 10240,
+                          "end": 18431,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "ext4",
+                            "label": "archive",
+                            "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000005",
+                            "blocks": 1024,
+                            "files": {
+                              "/keep.txt": {
+                                "text": "archive: retain this original record.\n"
+                              }
+                            }
+                          }
+                        },
+                        "ebr": 8192
+                      },
+                      {
+                        "kind": "logical",
+                        "partition": {
+                          "number": 6,
+                          "name": "mbr6",
+                          "start": 20480,
+                          "end": 28671,
+                          "type_hint": "linux_data",
+                          "content": {
+                            "kind": "blank"
+                          }
+                        },
+                        "ebr": 8193
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdf": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "evidence",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "evidence",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-00000000005a",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "evidence: retain this original record.\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdg": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 98304,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [],
+              "mbr": {
+                "targets": [
+                  {
+                    "purpose": "supplied_sample",
+                    "eligible_disks": [
+                      "/dev/vde"
+                    ],
+                    "role": "logical",
+                    "minimum_bytes": 4194304,
+                    "maximum_bytes": 4194304,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "ext4",
+                      "label": "publish"
+                    },
+                    "supplied_slot": 6
+                  },
+                  {
+                    "purpose": "sample_paging",
+                    "eligible_disks": [
+                      "/dev/vde"
+                    ],
+                    "role": "logical",
+                    "minimum_bytes": 2097152,
+                    "maximum_bytes": 2097152,
+                    "aligned_start": true,
+                    "content": {
+                      "kind": "swap",
+                      "label": "sample_swap"
+                    }
+                  }
+                ]
+              }
+            },
+            "worked": [
+              {
+                "operation": {
+                  "kind": "format",
+                  "partition": "/dev/vde6",
+                  "format": "ext4",
+                  "label": "publish",
+                  "uuid": null
+                },
+                "explanation": "Fill this step, inspect that it selects the supplied blank /dev/vde6, then Initialize selected blank partition as ext4 labeled publish. Leave the archive at slot 5 alone."
+              },
+              {
+                "operation": {
+                  "kind": "mbr",
+                  "operation": {
+                    "kind": "add",
+                    "disk": "/dev/vde",
+                    "role": "logical",
+                    "start": 32768,
+                    "end": 36863,
+                    "type_hint": "linux_swap"
+                  }
+                },
+                "explanation": "Choose logical, Start 32768, End 36863 and Linux swap, then Add partition using draft. Inspect the actual new number 7 before choosing content."
+              },
+              {
+                "operation": {
+                  "kind": "format",
+                  "partition": "/dev/vde7",
+                  "format": "swap",
+                  "label": "sample_swap",
+                  "uuid": null
+                },
+                "explanation": "Initialize /dev/vde7 as swap labeled sample_swap. Inspect protected files, then Check current disk configuration; both the supplied-object and preservation results must pass."
+              }
+            ],
+            "try_change": "After handover passes, add an extra logical Linux data payload at 40960–45055 and check the preservation failure. Reset practice and replay only the three intended worked steps. Inspecting a protected signature is safe; attempting to initialize it is refused, not a repair.",
+            "experiment": {
+              "kind": "mbr",
+              "operation": {
+                "kind": "add",
+                "disk": "/dev/vde",
+                "role": "logical",
+                "start": 40960,
+                "end": 45055,
+                "type_hint": "linux_data"
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "Use native disk controls. Supplied objects, capacity, role, alignment, actual content and preservation are graded; supported alternate layouts and operation order can pass."
+      ],
+      "prerequisites": [
+        "lpic1-mbr-logical-space"
+      ]
+    }
+  ]
+}

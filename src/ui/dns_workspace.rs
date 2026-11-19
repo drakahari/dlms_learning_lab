@@ -1,5 +1,6 @@
 //! Native record editing and explicit in-memory publication/lookup, no terminal shell.
 use super::*;
+mod lookup_controls;
 use dlms_learning_lab::{
     dns::{self, QueryType, Server},
     dns_teaching,
@@ -58,14 +59,20 @@ impl LabApp {
         match view {
             teaching::View::Introduction => {
                 let lesson = scenario.dns_teaching.as_ref().unwrap();
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for concept in &lesson.concepts {
-                    ui.label(RichText::new(&concept.title).strong());
-                    ui.label(&concept.text);
-                }
-                ui.label(RichText::new("A different example to try").strong());
-                ui.label(&lesson.example_description);
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                lesson_presentation::concepts(
+                    ui,
+                    &scenario,
+                    &lesson.prerequisite_note,
+                    lesson
+                        .concepts
+                        .iter()
+                        .map(|c| (c.title.clone(), c.text.clone())),
+                );
+                lesson_presentation::worked(ui, &lesson.example_description);
+                lesson_presentation::worked_rows(ui, &scenario);
+                controls::collapsing_header(ui, "Explore after practice").show(ui, |ui| {
+                    lesson_presentation::practice_step(ui, &scenario, 2);
+                });
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -81,8 +88,7 @@ impl LabApp {
             }
             teaching::View::Example => {
                 let lesson = scenario.dns_teaching.as_ref().unwrap();
-                ui.label("Practice example · Ungraded; your assignment stays saved separately.");
-                ui.label(&lesson.example_description);
+                lesson_presentation::practice_step(ui, &scenario, 0);
                 let mut learning = self.progress.attempts[&scenario.id]
                     .workspace
                     .as_ref()
@@ -105,6 +111,7 @@ impl LabApp {
                     }
                 });
                 let secondary = needs_secondary(&lesson.outcomes);
+                lesson_presentation::practice_step(ui, &scenario, 1);
                 ui.push_id(("dns-example", &scenario.id), |ui| {
                     let changed = configuration(
                         ui,
@@ -113,6 +120,7 @@ impl LabApp {
                         secondary,
                         &mut self.metrics,
                         &mut self.focus_input,
+                        lesson.lookup.as_ref().map(|l|&l.example),
                     );
                     if changed {
                         learning.checked = false;
@@ -126,8 +134,7 @@ impl LabApp {
                         let checks = learning.checks(lesson);
                         if checks.iter().all(|c| c.0) {
                             let r = ui.label(
-                                RichText::new("Example checks pass · No assignment credit")
-                                    .color(palette(ui).success),
+                                RichText::new("Example checks pass").color(palette(ui).success),
                             );
                             self.metrics.dns_result = Some(r.rect);
                         } else {
@@ -141,7 +148,7 @@ impl LabApp {
                         }
                     }
                 });
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                lesson_presentation::practice_step(ui, &scenario, 2);
                 let r = ui.add(button("Open full assignment"));
                 self.metrics.assignment_action = Some(r.rect);
                 if r.clicked() {
@@ -161,7 +168,7 @@ impl LabApp {
                     .dns_learning = Some(learning);
             }
             teaching::View::Assignment => {
-                ui.label(&scenario.objective);
+                lesson_presentation::assignment(ui, &scenario);
                 let engine::State::AuthoritativeDns { mut server } =
                     self.progress.attempts[&scenario.id].state.clone()
                 else {
@@ -188,6 +195,7 @@ impl LabApp {
                             needs_secondary(requirements),
                             &mut self.metrics,
                             &mut self.focus_input,
+                            scenario.dns_teaching.as_ref().and_then(|l|l.lookup.as_ref()).map(|l|&l.assignment),
                         )
                     })
                     .inner;
@@ -313,6 +321,7 @@ fn configuration(
     secondary: bool,
     metrics: &mut Metrics,
     focus: &mut bool,
+    lookup: Option<&dlms_learning_lab::dns_query_tools::Plan>,
 ) -> bool {
     let previous = (draft.serial.clone(), draft.text.clone(), server.clone());
     ui.horizontal_wrapped(|ui| {
@@ -392,6 +401,10 @@ fn configuration(
     ui.label(RichText::new("Inspect a served answer").strong());
     let query_before = (draft.query_name.clone(), draft.query_type, draft.query_copy);
     let mut queried = false;
+    let commands=lookup_controls::enabled(ui,draft,lookup,metrics);
+    if commands{
+        queried=lookup_controls::draw(ui,server,draft,lookup.expect("enabled source plan"),metrics);
+    }else{
     let wide = ui.available_width() >= 700.;
     let field_width = if wide {
         300.
@@ -518,6 +531,7 @@ fn configuration(
             });
             ui.end_row();
         });
+    }
     if !queried
         && (query_before != (draft.query_name.clone(), draft.query_type, draft.query_copy)
             || previous.2 != *server)
@@ -527,8 +541,8 @@ fn configuration(
     if !draft.output.is_empty() {
         let r = egui::ScrollArea::both()
             .id_salt("dns-lookup-output")
-            .min_scrolled_height(ui.text_style_height(&egui::TextStyle::Monospace) * 3. + 16.)
-            .max_height(ui.text_style_height(&egui::TextStyle::Monospace) * 6. + 16.)
+            .min_scrolled_height(ui.text_style_height(&egui::TextStyle::Monospace) * if commands { draft.output.lines().count().clamp(3, 10) as f32 } else { 3. } + 16.)
+            .max_height(ui.text_style_height(&egui::TextStyle::Monospace) * if commands { 10. } else { 6. } + 16.)
             .show(ui, |ui| {
                 ui.add(egui::Label::new(RichText::new(&draft.output).monospace()).selectable(true))
             });

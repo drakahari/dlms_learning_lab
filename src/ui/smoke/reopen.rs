@@ -1,7 +1,14 @@
 //! Fixed developer-only two-process reopen. Normal startup does all persistence.
 use super::*;
 mod dhcpv4;
+mod environment;
+mod editor_handover;
 mod nfs;
+mod samba;
+mod virtual_isolation;
+mod smtp;
+mod guest_driver;
+mod user_mounts;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::BTreeMap,
@@ -25,12 +32,70 @@ enum Role {
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 enum Case {
+    #[serde(rename="initramfs")]
+    Initramfs,
+    #[serde(rename="dkms")]
+    Dkms,
+    #[serde(rename="kernel-build")]
+    KernelBuild,
+    #[serde(rename="poe")]
+    Poe,
+    #[serde(rename="ids-rule")]
+    IdsRule,
+    #[serde(rename="auth-filter")]
+    AuthFilter,
+    #[serde(rename="rpm-patch")]
+    RpmPatch,
+    #[serde(rename="vpn-point")]
+    VpnPoint,
+    #[serde(rename="service-exposure")]
+    ServiceExposure,
+    #[serde(rename="ftp-identity")]
+    FtpIdentity,
+    #[serde(rename="services-router")]
+    ServiceRouter,
+    #[serde(rename="v6-admin")]
+    V6Admin,
+    #[serde(rename="v6-startup")]
+    V6Startup,
+    #[serde(rename="linux-v6")]
+    LinuxV6,
+    #[serde(rename = "linux-flow")]
+    LinuxFlow,
+    #[serde(rename = "linux-router")]
+    LinuxRouter,
+    #[serde(rename = "mailbox-administration")]
+    MailboxAdministration,
+    #[serde(rename = "mailbox-access")]
+    MailboxAccess,
+    #[serde(rename = "sieve-vacation")]
+    SieveVacation,
+    #[serde(rename = "sieve-delivery")]
+    SieveDelivery,
+    #[serde(rename = "sieve-addresses")]
+    SieveAddresses,
+    #[serde(rename = "sieve-filters")]
+    SieveFilters,
+    #[serde(rename = "smtp-routing")]
+    SmtpRouting,
+    #[serde(rename = "guest-drivers")]
+    GuestDrivers,
+    #[serde(rename = "virtual")]
+    VirtualIsolation,
+    #[serde(rename = "samba")]
+    Samba,
     #[serde(rename = "script")]
     Script,
     #[serde(rename = "dhcpv4")]
     DhcpV4,
     #[serde(rename = "nfs")]
     Nfs,
+    #[serde(rename = "environment")]
+    Environment,
+    #[serde(rename = "user-mounts")]
+    UserMounts,
+    #[serde(rename = "editor-handover")]
+    EditorHandover,
 }
 #[derive(Clone)]
 pub(crate) struct Session {
@@ -579,10 +644,51 @@ impl LabApp {
             return;
         }
         let session = self.reopen.as_ref().unwrap().clone();
+        if session.case == Case::EditorHandover {
+            self.editor_handover_cold_tick(ctx, session.role == Role::Read);
+            return;
+        }
         if session.case == Case::DhcpV4 {
             self.reopen_dhcpv4_tick(ctx, &session);
             return;
         }
+        if session.case == Case::UserMounts {
+            self.reopen_user_mounts_tick(ctx, &session);
+            return;
+        }
+        if session.case == Case::Environment {
+            self.reopen_environment_tick(ctx, &session);
+            return;
+        }
+        if session.case == Case::IdsRule {self.reopen_ids_rule_tick(ctx,&session);return;}
+        if session.case == Case::AuthFilter {self.reopen_auth_filter_tick(ctx,&session);return;}
+        if session.case == Case::RpmPatch {self.reopen_rpm_patch_tick(ctx,&session);return;}
+        if session.case == Case::VpnPoint {self.reopen_vpn_point_tick(ctx,&session);return;}
+        if session.case == Case::Dkms {self.reopen_dkms_tick(ctx,&session);return;}
+        if session.case == Case::Initramfs {self.reopen_initramfs_tick(ctx,&session);return;}
+        if session.case == Case::KernelBuild {self.reopen_kernel_build_tick(ctx,&session);return;}
+        if session.case == Case::Poe {self.reopen_poe_tick(ctx,&session);return;}
+        if session.case == Case::ServiceExposure {self.reopen_service_exposure_tick(ctx,&session);return;}
+        if session.case == Case::FtpIdentity {self.reopen_ftp_identity_tick(ctx,&session);return;}
+        if session.case == Case::V6Startup { self.reopen_v6_startup_tick(ctx, &session); return; }
+        if session.case == Case::V6Admin { self.reopen_v6_admin_tick(ctx, &session); return; }
+        if session.case == Case::ServiceRouter { self.reopen_services_router_tick(ctx, &session); return; }
+        if session.case == Case::LinuxV6 { self.reopen_v6_tick(ctx, &session); return; }
+        if session.case == Case::LinuxFlow { self.reopen_flow_tick(ctx, &session); return; }
+        if session.case == Case::LinuxRouter { self.reopen_router_tick(ctx, &session); return; }
+        if session.case == Case::MailboxAdministration { self.reopen_mail_admin_tick(ctx, &session); return; }
+        if session.case == Case::MailboxAccess { self.reopen_mailbox_tick(ctx, &session); return; }
+        if session.case == Case::SieveVacation {self.reopen_sieve_vacation_tick(ctx,&session);return;}
+        if session.case == Case::SieveDelivery {self.reopen_sieve_delivery_tick(ctx,&session);return;}
+        if session.case == Case::SieveAddresses {self.reopen_sieve_addresses_tick(ctx,&session);return;}
+        if session.case == Case::SieveFilters {self.reopen_sieve_tick(ctx,&session);return;}
+        if session.case == Case::SmtpRouting {self.reopen_smtp_tick(ctx,&session);return;}
+        if session.case == Case::GuestDrivers {self.reopen_guest_tick(ctx,&session);return;}
+        if session.case == Case::VirtualIsolation {
+            self.reopen_virtual_tick(ctx, &session);
+            return;
+        }
+        if session.case == Case::Samba {self.reopen_samba_tick(ctx,&session);return;}
         if session.case == Case::Nfs {
             self.reopen_nfs_tick(ctx, &session);
             return;
@@ -910,9 +1016,38 @@ impl LabApp {
                     .expect("fixed private capture name");
                 let session = self.reopen.as_ref().unwrap();
                 assert!(match session.case {
+                    Case::EditorHandover => modal_lessons::handover_cold_capture_allowed(name),
                     Case::Script => NAMES.contains(&name.as_str()),
                     Case::DhcpV4 => dhcpv4::CAPTURES.contains(&name.as_str()),
                     Case::Nfs => nfs::CAPTURES.contains(&name.as_str()),
+                    Case::V6Admin => linux_v6_admin::CAPTURES.contains(&name.as_str()),
+                    Case::IdsRule=>ids_rule::CAPTURES.contains(&name.as_str()),
+                    Case::AuthFilter=>auth_filter::CAPTURES.contains(&name.as_str()),
+                    Case::RpmPatch=>rpm_patch::CAPTURES.contains(&name.as_str()),
+                    Case::VpnPoint=>vpn_point::CAPTURES.contains(&name.as_str()),
+                    Case::Dkms=>dkms::CAPTURES.contains(&name.as_str()),
+                    Case::Initramfs=>initramfs::CAPTURES.contains(&name.as_str()),
+                    Case::KernelBuild=>kernel_build::CAPTURES.contains(&name.as_str()),
+                    Case::Poe=>poe::CAPTURES.contains(&name.as_str()),
+                    Case::ServiceExposure=>service_exposure::CAPTURES.contains(&name.as_str()),
+                    Case::FtpIdentity=>ftp_identity::CAPTURES.contains(&name.as_str()),
+                    Case::V6Startup => linux_v6_startup::CAPTURES.contains(&name.as_str()),
+                    Case::ServiceRouter => linux_service_router::CAPTURES.contains(&name.as_str()),
+                    Case::LinuxV6 => linux_v6::CAPTURES.contains(&name.as_str()),
+                    Case::LinuxFlow => linux_flow::CAPTURES.contains(&name.as_str()),
+                    Case::LinuxRouter => linux_router::CAPTURES.contains(&name.as_str()),
+                    Case::MailboxAdministration => mailbox_admin::CAPTURES.contains(&name.as_str()),
+                    Case::MailboxAccess => mailbox::CAPTURES.contains(&name.as_str()),
+                    Case::SieveVacation => sieve_vacation::CAPTURES.contains(&name.as_str()),
+                    Case::SieveDelivery => sieve_delivery::CAPTURES.contains(&name.as_str()),
+                    Case::SieveAddresses => sieve_addresses::CAPTURES.contains(&name.as_str()),
+                    Case::SieveFilters => sieve::CAPTURES.contains(&name.as_str()),
+                    Case::SmtpRouting => smtp::CAPTURES.contains(&name.as_str()),
+                    Case::GuestDrivers => guest_driver::CAPTURES.contains(&name.as_str()),
+                    Case::VirtualIsolation => virtual_isolation::CAPTURES.contains(&name.as_str()),
+                    Case::Samba => samba::CAPTURES.contains(&name.as_str()),
+                    Case::Environment => environment::CAPTURES.contains(&name.as_str()),
+                    Case::UserMounts => user_mounts::CAPTURES.contains(&name.as_str()),
                 });
                 assert!(
                     image
@@ -1734,3 +1869,52 @@ mod observation_tests {
         assert!(!root.path().join("over-limit").exists());
     }
 }
+
+mod sieve;
+
+mod sieve_addresses;
+mod sieve_delivery;
+mod sieve_vacation;
+mod mailbox;
+impl LabApp {
+ pub(in crate::ui) fn finish_filter_reopen(&mut self,ctx:&egui::Context){
+   match self.reopen.as_ref().expect("Closed filter reopen session").case {
+     Case::SieveFilters=>self.finish_sieve_reopen(ctx),
+     Case::SieveVacation=>self.finish_sieve_vacation_reopen(ctx),
+     Case::SieveDelivery=>self.finish_sieve_delivery_reopen(ctx),
+     Case::SieveAddresses=>self.finish_sieve_addresses_reopen(ctx),
+     _=>panic!("A filter finish requires its fixed filter session"),
+   }
+ }
+}
+
+mod mailbox_admin;
+
+mod linux_router;
+mod linux_flow;
+mod linux_v6;
+
+mod linux_service_router;
+
+mod linux_v6_admin;
+
+mod linux_v6_startup;
+
+mod ftp_identity;
+
+mod service_exposure;
+
+mod vpn_point;
+
+mod rpm_patch;
+
+mod auth_filter;
+
+mod ids_rule;
+
+mod poe;
+
+mod kernel_build;
+
+mod dkms;
+mod initramfs;

@@ -1,0 +1,1029 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-management-change-evidence",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-security-investigation",
+      "topic": "Evidence and proportionate security controls",
+      "title": "Triage a suspicious network change",
+      "summary": "Correlate the approved change and the observed behavior, then restore the relay’s management boundary.",
+      "objective": "Use the affected relay’s journal to identify the approved revision, applied revision and post-change restricted-client observation. Record whether the supplied journal establishes a successful sign-in for the same restricted client. Restore access only for the two approved systems and verify the four supplied client trials.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "retry_guidance": "Read the specific failed trial and compare its actual result with the stated requirement.",
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A threat is something that could harm the network. A vulnerability is a weakness that could make that possible. An exploit uses a weakness to cause an unauthorized result. Here the broadened management rule is the weakness. The journal and virtual client probes show what was observed.",
+          "action": "Read the worked example.",
+          "commands": []
+        },
+        {
+          "title": "Try the separate example",
+          "why": "Compare the approved revision, the revision that was applied and a later probe on the affected relay. A probe that reaches the sign-in boundary does not establish that the client successfully signed in. Look for a separate sign-in record for that client.",
+          "action": "Test the separate practice inputs.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "Restore the approved access boundary. Verify that approved systems still reach the sign-in prompt. Check the restricted clients as well. A broad permit and a blanket block both fail part of the job.",
+          "action": "Check the independent task.",
+          "commands": []
+        }
+      ],
+      "explanation": "The evidence report ties the approval and the changed revision to the observed restricted client. The repaired policy preserves both allowed clients and restores the two expected denials.",
+      "hints": [
+        "Read device name and minute together. The journal includes entries for a different device.",
+        "A reached sign-in prompt is an admission outcome. Only the separate sign-in record describes successful access.",
+        "Compare the approved client addresses with the line’s standard source list. Apply an edit before checking the probes."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf"
+      ],
+      "simplifications": "Supplied event chronology, evidence selection and virtual routed management admission. A small IOS-style policy subset is used over fixed topology. No real network, credentials, attack activity, logs, authentication or system changes occur. The simulated probe can report the sign-in boundary only.",
+      "prerequisites": [
+        "ccna-management-source-policy",
+        "ccna-syslog-policy-handover"
+      ],
+      "initial": {
+        "kind": "SecurityInvestigation",
+        "simulation": {
+          "version": 1,
+          "source_id": "ccna-management-change-evidence",
+          "view": "introduction",
+          "assignment": {
+            "source": "{\"activity\":\"change\",\"supplied\":{\"network\":{\"version\":1,\"topology\":{\"devices\":{\"campus-aggregation\":{\"forwarding\":true,\"interfaces\":{\"office\":{\"link\":\"operators\",\"up\":true,\"address\":{\"address\":\"198.51.100.1\",\"prefix\":28}},\"public\":{\"link\":\"visitor\",\"up\":true,\"address\":{\"address\":\"198.51.100.17\",\"prefix\":28}},\"transit\":{\"link\":\"management-backbone\",\"up\":true,\"address\":{\"address\":\"203.0.113.1\",\"prefix\":30}}},\"routes\":[]},\"campus-field\":{\"forwarding\":false,\"interfaces\":{\"lan\":{\"link\":\"operators\",\"up\":true,\"address\":{\"address\":\"198.51.100.6\",\"prefix\":28}}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"interface\":\"lan\",\"via\":\"198.51.100.1\",\"distance\":1}]},\"campus-operations\":{\"forwarding\":false,\"interfaces\":{\"lan\":{\"link\":\"operators\",\"up\":true,\"address\":{\"address\":\"198.51.100.5\",\"prefix\":28}}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"interface\":\"lan\",\"via\":\"198.51.100.1\",\"distance\":1}]},\"campus-relay\":{\"forwarding\":true,\"interfaces\":{\"transit\":{\"link\":\"management-backbone\",\"up\":true,\"address\":{\"address\":\"203.0.113.2\",\"prefix\":30}}},\"routes\":[{\"destination\":{\"address\":\"198.51.100.0\",\"length\":28},\"interface\":\"transit\",\"via\":\"203.0.113.1\",\"distance\":1},{\"destination\":{\"address\":\"198.51.100.16\",\"length\":28},\"interface\":\"transit\",\"via\":\"203.0.113.1\",\"distance\":1}]},\"campus-shared-desk\":{\"forwarding\":false,\"interfaces\":{\"lan\":{\"link\":\"operators\",\"up\":true,\"address\":{\"address\":\"198.51.100.7\",\"prefix\":28}}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"interface\":\"lan\",\"via\":\"198.51.100.1\",\"distance\":1}]},\"campus-visitor\":{\"forwarding\":false,\"interfaces\":{\"lan\":{\"link\":\"visitor\",\"up\":true,\"address\":{\"address\":\"198.51.100.21\",\"prefix\":28}}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"interface\":\"lan\",\"via\":\"198.51.100.17\",\"distance\":1}]}}},\"management\":{\"device\":\"campus-relay\",\"interface\":\"transit\"},\"clients\":[{\"id\":\"operations\",\"binding\":{\"device\":\"campus-operations\",\"interface\":\"lan\"}},{\"id\":\"field\",\"binding\":{\"device\":\"campus-field\",\"interface\":\"lan\"}},{\"id\":\"visitor\",\"binding\":{\"device\":\"campus-visitor\",\"interface\":\"lan\"}},{\"id\":\"shared-desk\",\"binding\":{\"device\":\"campus-shared-desk\",\"interface\":\"lan\"}}]},\"supplied\":{\"version\":1,\"host_identity\":\"campus-lab-identity\",\"versions\":\"version2_only\",\"lines\":[{\"number\":0,\"ssh\":true,\"telnet\":false,\"source_list\":null},{\"number\":1,\"ssh\":true,\"telnet\":false,\"source_list\":null}]},\"starter\":\"ip ssh version 2\\nline vty 0 1\\n transport input ssh\\n access-class 21 in\\nexit\\nip access-list standard 21\\n permit any\\nexit\\n\",\"journal\":[{\"id\":213,\"minute\":1,\"device\":\"campus-aggregation\",\"kind\":{\"kind\":\"ticket_approved\",\"revision\":19}},{\"id\":214,\"minute\":2,\"device\":\"campus-relay\",\"kind\":{\"kind\":\"ticket_approved\",\"revision\":42}},{\"id\":215,\"minute\":4,\"device\":\"campus-aggregation\",\"kind\":{\"kind\":\"unrelated_maintenance\"}},{\"id\":216,\"minute\":7,\"device\":\"campus-relay\",\"kind\":{\"kind\":\"revision_applied\",\"revision\":44}},{\"id\":217,\"minute\":8,\"device\":\"campus-relay\",\"kind\":{\"kind\":\"admission_observed\",\"trial\":\"Operations SSH on line 0\",\"admitted\":true}},{\"id\":218,\"minute\":9,\"device\":\"campus-relay\",\"kind\":{\"kind\":\"admission_observed\",\"trial\":\"Visitor before sign-in\",\"admitted\":true}},{\"id\":219,\"minute\":10,\"device\":\"campus-relay\",\"kind\":{\"kind\":\"successful_signin\",\"trial\":\"Operations SSH on line 0\"}}],\"trials\":[{\"name\":\"Operations SSH on line 0\",\"client\":\"operations\",\"line\":0,\"protocol\":\"ssh2\",\"intended_admission\":true},{\"name\":\"Field support SSH on line 1\",\"client\":\"field\",\"line\":1,\"protocol\":\"ssh2\",\"intended_admission\":true},{\"name\":\"Visitor before sign-in\",\"client\":\"visitor\",\"line\":1,\"protocol\":\"ssh2\",\"intended_admission\":false},{\"name\":\"Shared desk before sign-in\",\"client\":\"shared-desk\",\"line\":1,\"protocol\":\"ssh2\",\"intended_admission\":false}],\"affected_trial\":\"Visitor before sign-in\"}}",
+            "work": {
+              "current": {
+                "activity": "change",
+                "draft": "ip ssh version 2\nline vty 0 1\n transport input ssh\n access-class 21 in\nexit\nip access-list standard 21\n permit any\nexit\n",
+                "applied": "ip ssh version 2\nline vty 0 1\n transport input ssh\n access-class 21 in\nexit\nip access-list standard 21\n permit any\nexit\n",
+                "report": {
+                  "approval": null,
+                  "application": null,
+                  "observed_extra_access": null,
+                  "successful_use_recorded": null
+                }
+              },
+              "checked": false
+            }
+          },
+          "example": {
+            "source": "{\"activity\":\"change\",\"supplied\":{\"network\":{\"version\":1,\"topology\":{\"devices\":{\"training-aggregation\":{\"forwarding\":true,\"interfaces\":{\"office\":{\"link\":\"operators\",\"up\":true,\"address\":{\"address\":\"192.0.2.49\",\"prefix\":28}},\"public\":{\"link\":\"visitor\",\"up\":true,\"address\":{\"address\":\"192.0.2.65\",\"prefix\":28}},\"transit\":{\"link\":\"practice-backbone\",\"up\":true,\"address\":{\"address\":\"203.0.113.17\",\"prefix\":30}}},\"routes\":[]},\"training-field\":{\"forwarding\":false,\"interfaces\":{\"lan\":{\"link\":\"operators\",\"up\":true,\"address\":{\"address\":\"192.0.2.54\",\"prefix\":28}}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"interface\":\"lan\",\"via\":\"192.0.2.49\",\"distance\":1}]},\"training-operations\":{\"forwarding\":false,\"interfaces\":{\"lan\":{\"link\":\"operators\",\"up\":true,\"address\":{\"address\":\"192.0.2.53\",\"prefix\":28}}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"interface\":\"lan\",\"via\":\"192.0.2.49\",\"distance\":1}]},\"training-relay\":{\"forwarding\":true,\"interfaces\":{\"transit\":{\"link\":\"practice-backbone\",\"up\":true,\"address\":{\"address\":\"203.0.113.18\",\"prefix\":30}}},\"routes\":[{\"destination\":{\"address\":\"192.0.2.48\",\"length\":28},\"interface\":\"transit\",\"via\":\"203.0.113.17\",\"distance\":1},{\"destination\":{\"address\":\"192.0.2.64\",\"length\":28},\"interface\":\"transit\",\"via\":\"203.0.113.17\",\"distance\":1}]},\"training-shared-desk\":{\"forwarding\":false,\"interfaces\":{\"lan\":{\"link\":\"operators\",\"up\":true,\"address\":{\"address\":\"192.0.2.55\",\"prefix\":28}}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"interface\":\"lan\",\"via\":\"192.0.2.49\",\"distance\":1}]},\"training-visitor\":{\"forwarding\":false,\"interfaces\":{\"lan\":{\"link\":\"visitor\",\"up\":true,\"address\":{\"address\":\"192.0.2.69\",\"prefix\":28}}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"interface\":\"lan\",\"via\":\"192.0.2.65\",\"distance\":1}]}}},\"management\":{\"device\":\"training-relay\",\"interface\":\"transit\"},\"clients\":[{\"id\":\"operations\",\"binding\":{\"device\":\"training-operations\",\"interface\":\"lan\"}},{\"id\":\"field\",\"binding\":{\"device\":\"training-field\",\"interface\":\"lan\"}},{\"id\":\"visitor\",\"binding\":{\"device\":\"training-visitor\",\"interface\":\"lan\"}},{\"id\":\"shared-desk\",\"binding\":{\"device\":\"training-shared-desk\",\"interface\":\"lan\"}}]},\"supplied\":{\"version\":1,\"host_identity\":\"training-lab-identity\",\"versions\":\"version2_only\",\"lines\":[{\"number\":0,\"ssh\":true,\"telnet\":false,\"source_list\":null},{\"number\":1,\"ssh\":true,\"telnet\":false,\"source_list\":null}]},\"starter\":\"ip ssh version 2\\nline vty 0 1\\n transport input ssh\\n access-class 21 in\\nexit\\nip access-list standard 21\\n permit 192.0.2.48 0.0.0.15\\nexit\\n\",\"journal\":[{\"id\":101,\"minute\":1,\"device\":\"training-aggregation\",\"kind\":{\"kind\":\"ticket_approved\",\"revision\":19}},{\"id\":102,\"minute\":2,\"device\":\"training-relay\",\"kind\":{\"kind\":\"ticket_approved\",\"revision\":26}},{\"id\":103,\"minute\":4,\"device\":\"training-aggregation\",\"kind\":{\"kind\":\"unrelated_maintenance\"}},{\"id\":104,\"minute\":7,\"device\":\"training-relay\",\"kind\":{\"kind\":\"revision_applied\",\"revision\":27}},{\"id\":105,\"minute\":8,\"device\":\"training-relay\",\"kind\":{\"kind\":\"admission_observed\",\"trial\":\"Operations SSH on line 0\",\"admitted\":true}},{\"id\":106,\"minute\":9,\"device\":\"training-relay\",\"kind\":{\"kind\":\"admission_observed\",\"trial\":\"Shared desk before sign-in\",\"admitted\":true}},{\"id\":107,\"minute\":10,\"device\":\"training-relay\",\"kind\":{\"kind\":\"successful_signin\",\"trial\":\"Shared desk before sign-in\"}}],\"trials\":[{\"name\":\"Operations SSH on line 0\",\"client\":\"operations\",\"line\":0,\"protocol\":\"ssh2\",\"intended_admission\":true},{\"name\":\"Field support SSH on line 1\",\"client\":\"field\",\"line\":1,\"protocol\":\"ssh2\",\"intended_admission\":true},{\"name\":\"Visitor before sign-in\",\"client\":\"visitor\",\"line\":1,\"protocol\":\"ssh2\",\"intended_admission\":false},{\"name\":\"Shared desk before sign-in\",\"client\":\"shared-desk\",\"line\":1,\"protocol\":\"ssh2\",\"intended_admission\":false}],\"affected_trial\":\"Shared desk before sign-in\"}}",
+            "work": {
+              "current": {
+                "activity": "change",
+                "draft": "ip ssh version 2\nline vty 0 1\n transport input ssh\n access-class 21 in\nexit\nip access-list standard 21\n permit 192.0.2.48 0.0.0.15\nexit\n",
+                "applied": "ip ssh version 2\nline vty 0 1\n transport input ssh\n access-class 21 in\nexit\nip access-list standard 21\n permit 192.0.2.48 0.0.0.15\nexit\n",
+                "report": {
+                  "approval": null,
+                  "application": null,
+                  "observed_extra_access": null,
+                  "successful_use_recorded": null
+                }
+              },
+              "checked": false
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "SecurityInvestigation",
+        "definition": {
+          "version": 1,
+          "source_id": "ccna-management-change-evidence",
+          "assignment": {
+            "activity": "change",
+            "supplied": {
+              "network": {
+                "version": 1,
+                "topology": {
+                  "devices": {
+                    "campus-aggregation": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "office": {
+                          "link": "operators",
+                          "up": true,
+                          "address": {
+                            "address": "198.51.100.1",
+                            "prefix": 28
+                          }
+                        },
+                        "public": {
+                          "link": "visitor",
+                          "up": true,
+                          "address": {
+                            "address": "198.51.100.17",
+                            "prefix": 28
+                          }
+                        },
+                        "transit": {
+                          "link": "management-backbone",
+                          "up": true,
+                          "address": {
+                            "address": "203.0.113.1",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": []
+                    },
+                    "campus-field": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "lan": {
+                          "link": "operators",
+                          "up": true,
+                          "address": {
+                            "address": "198.51.100.6",
+                            "prefix": 28
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "lan",
+                          "via": "198.51.100.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "campus-operations": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "lan": {
+                          "link": "operators",
+                          "up": true,
+                          "address": {
+                            "address": "198.51.100.5",
+                            "prefix": 28
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "lan",
+                          "via": "198.51.100.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "campus-relay": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "transit": {
+                          "link": "management-backbone",
+                          "up": true,
+                          "address": {
+                            "address": "203.0.113.2",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "198.51.100.0",
+                            "length": 28
+                          },
+                          "interface": "transit",
+                          "via": "203.0.113.1",
+                          "distance": 1
+                        },
+                        {
+                          "destination": {
+                            "address": "198.51.100.16",
+                            "length": 28
+                          },
+                          "interface": "transit",
+                          "via": "203.0.113.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "campus-shared-desk": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "lan": {
+                          "link": "operators",
+                          "up": true,
+                          "address": {
+                            "address": "198.51.100.7",
+                            "prefix": 28
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "lan",
+                          "via": "198.51.100.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "campus-visitor": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "lan": {
+                          "link": "visitor",
+                          "up": true,
+                          "address": {
+                            "address": "198.51.100.21",
+                            "prefix": 28
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "lan",
+                          "via": "198.51.100.17",
+                          "distance": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                "management": {
+                  "device": "campus-relay",
+                  "interface": "transit"
+                },
+                "clients": [
+                  {
+                    "id": "operations",
+                    "binding": {
+                      "device": "campus-operations",
+                      "interface": "lan"
+                    }
+                  },
+                  {
+                    "id": "field",
+                    "binding": {
+                      "device": "campus-field",
+                      "interface": "lan"
+                    }
+                  },
+                  {
+                    "id": "visitor",
+                    "binding": {
+                      "device": "campus-visitor",
+                      "interface": "lan"
+                    }
+                  },
+                  {
+                    "id": "shared-desk",
+                    "binding": {
+                      "device": "campus-shared-desk",
+                      "interface": "lan"
+                    }
+                  }
+                ]
+              },
+              "supplied": {
+                "version": 1,
+                "host_identity": "campus-lab-identity",
+                "versions": "version2_only",
+                "lines": [
+                  {
+                    "number": 0,
+                    "ssh": true,
+                    "telnet": false,
+                    "source_list": null
+                  },
+                  {
+                    "number": 1,
+                    "ssh": true,
+                    "telnet": false,
+                    "source_list": null
+                  }
+                ]
+              },
+              "starter": "ip ssh version 2\nline vty 0 1\n transport input ssh\n access-class 21 in\nexit\nip access-list standard 21\n permit any\nexit\n",
+              "journal": [
+                {
+                  "id": 213,
+                  "minute": 1,
+                  "device": "campus-aggregation",
+                  "kind": {
+                    "kind": "ticket_approved",
+                    "revision": 19
+                  }
+                },
+                {
+                  "id": 214,
+                  "minute": 2,
+                  "device": "campus-relay",
+                  "kind": {
+                    "kind": "ticket_approved",
+                    "revision": 42
+                  }
+                },
+                {
+                  "id": 215,
+                  "minute": 4,
+                  "device": "campus-aggregation",
+                  "kind": {
+                    "kind": "unrelated_maintenance"
+                  }
+                },
+                {
+                  "id": 216,
+                  "minute": 7,
+                  "device": "campus-relay",
+                  "kind": {
+                    "kind": "revision_applied",
+                    "revision": 44
+                  }
+                },
+                {
+                  "id": 217,
+                  "minute": 8,
+                  "device": "campus-relay",
+                  "kind": {
+                    "kind": "admission_observed",
+                    "trial": "Operations SSH on line 0",
+                    "admitted": true
+                  }
+                },
+                {
+                  "id": 218,
+                  "minute": 9,
+                  "device": "campus-relay",
+                  "kind": {
+                    "kind": "admission_observed",
+                    "trial": "Visitor before sign-in",
+                    "admitted": true
+                  }
+                },
+                {
+                  "id": 219,
+                  "minute": 10,
+                  "device": "campus-relay",
+                  "kind": {
+                    "kind": "successful_signin",
+                    "trial": "Operations SSH on line 0"
+                  }
+                }
+              ],
+              "trials": [
+                {
+                  "name": "Operations SSH on line 0",
+                  "client": "operations",
+                  "line": 0,
+                  "protocol": "ssh2",
+                  "intended_admission": true
+                },
+                {
+                  "name": "Field support SSH on line 1",
+                  "client": "field",
+                  "line": 1,
+                  "protocol": "ssh2",
+                  "intended_admission": true
+                },
+                {
+                  "name": "Visitor before sign-in",
+                  "client": "visitor",
+                  "line": 1,
+                  "protocol": "ssh2",
+                  "intended_admission": false
+                },
+                {
+                  "name": "Shared desk before sign-in",
+                  "client": "shared-desk",
+                  "line": 1,
+                  "protocol": "ssh2",
+                  "intended_admission": false
+                }
+              ],
+              "affected_trial": "Visitor before sign-in"
+            }
+          },
+          "example": {
+            "activity": "change",
+            "supplied": {
+              "network": {
+                "version": 1,
+                "topology": {
+                  "devices": {
+                    "training-aggregation": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "office": {
+                          "link": "operators",
+                          "up": true,
+                          "address": {
+                            "address": "192.0.2.49",
+                            "prefix": 28
+                          }
+                        },
+                        "public": {
+                          "link": "visitor",
+                          "up": true,
+                          "address": {
+                            "address": "192.0.2.65",
+                            "prefix": 28
+                          }
+                        },
+                        "transit": {
+                          "link": "practice-backbone",
+                          "up": true,
+                          "address": {
+                            "address": "203.0.113.17",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": []
+                    },
+                    "training-field": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "lan": {
+                          "link": "operators",
+                          "up": true,
+                          "address": {
+                            "address": "192.0.2.54",
+                            "prefix": 28
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "lan",
+                          "via": "192.0.2.49",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "training-operations": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "lan": {
+                          "link": "operators",
+                          "up": true,
+                          "address": {
+                            "address": "192.0.2.53",
+                            "prefix": 28
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "lan",
+                          "via": "192.0.2.49",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "training-relay": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "transit": {
+                          "link": "practice-backbone",
+                          "up": true,
+                          "address": {
+                            "address": "203.0.113.18",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "192.0.2.48",
+                            "length": 28
+                          },
+                          "interface": "transit",
+                          "via": "203.0.113.17",
+                          "distance": 1
+                        },
+                        {
+                          "destination": {
+                            "address": "192.0.2.64",
+                            "length": 28
+                          },
+                          "interface": "transit",
+                          "via": "203.0.113.17",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "training-shared-desk": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "lan": {
+                          "link": "operators",
+                          "up": true,
+                          "address": {
+                            "address": "192.0.2.55",
+                            "prefix": 28
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "lan",
+                          "via": "192.0.2.49",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "training-visitor": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "lan": {
+                          "link": "visitor",
+                          "up": true,
+                          "address": {
+                            "address": "192.0.2.69",
+                            "prefix": 28
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "lan",
+                          "via": "192.0.2.65",
+                          "distance": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                "management": {
+                  "device": "training-relay",
+                  "interface": "transit"
+                },
+                "clients": [
+                  {
+                    "id": "operations",
+                    "binding": {
+                      "device": "training-operations",
+                      "interface": "lan"
+                    }
+                  },
+                  {
+                    "id": "field",
+                    "binding": {
+                      "device": "training-field",
+                      "interface": "lan"
+                    }
+                  },
+                  {
+                    "id": "visitor",
+                    "binding": {
+                      "device": "training-visitor",
+                      "interface": "lan"
+                    }
+                  },
+                  {
+                    "id": "shared-desk",
+                    "binding": {
+                      "device": "training-shared-desk",
+                      "interface": "lan"
+                    }
+                  }
+                ]
+              },
+              "supplied": {
+                "version": 1,
+                "host_identity": "training-lab-identity",
+                "versions": "version2_only",
+                "lines": [
+                  {
+                    "number": 0,
+                    "ssh": true,
+                    "telnet": false,
+                    "source_list": null
+                  },
+                  {
+                    "number": 1,
+                    "ssh": true,
+                    "telnet": false,
+                    "source_list": null
+                  }
+                ]
+              },
+              "starter": "ip ssh version 2\nline vty 0 1\n transport input ssh\n access-class 21 in\nexit\nip access-list standard 21\n permit 192.0.2.48 0.0.0.15\nexit\n",
+              "journal": [
+                {
+                  "id": 101,
+                  "minute": 1,
+                  "device": "training-aggregation",
+                  "kind": {
+                    "kind": "ticket_approved",
+                    "revision": 19
+                  }
+                },
+                {
+                  "id": 102,
+                  "minute": 2,
+                  "device": "training-relay",
+                  "kind": {
+                    "kind": "ticket_approved",
+                    "revision": 26
+                  }
+                },
+                {
+                  "id": 103,
+                  "minute": 4,
+                  "device": "training-aggregation",
+                  "kind": {
+                    "kind": "unrelated_maintenance"
+                  }
+                },
+                {
+                  "id": 104,
+                  "minute": 7,
+                  "device": "training-relay",
+                  "kind": {
+                    "kind": "revision_applied",
+                    "revision": 27
+                  }
+                },
+                {
+                  "id": 105,
+                  "minute": 8,
+                  "device": "training-relay",
+                  "kind": {
+                    "kind": "admission_observed",
+                    "trial": "Operations SSH on line 0",
+                    "admitted": true
+                  }
+                },
+                {
+                  "id": 106,
+                  "minute": 9,
+                  "device": "training-relay",
+                  "kind": {
+                    "kind": "admission_observed",
+                    "trial": "Shared desk before sign-in",
+                    "admitted": true
+                  }
+                },
+                {
+                  "id": 107,
+                  "minute": 10,
+                  "device": "training-relay",
+                  "kind": {
+                    "kind": "successful_signin",
+                    "trial": "Shared desk before sign-in"
+                  }
+                }
+              ],
+              "trials": [
+                {
+                  "name": "Operations SSH on line 0",
+                  "client": "operations",
+                  "line": 0,
+                  "protocol": "ssh2",
+                  "intended_admission": true
+                },
+                {
+                  "name": "Field support SSH on line 1",
+                  "client": "field",
+                  "line": 1,
+                  "protocol": "ssh2",
+                  "intended_admission": true
+                },
+                {
+                  "name": "Visitor before sign-in",
+                  "client": "visitor",
+                  "line": 1,
+                  "protocol": "ssh2",
+                  "intended_admission": false
+                },
+                {
+                  "name": "Shared desk before sign-in",
+                  "client": "shared-desk",
+                  "line": 1,
+                  "protocol": "ssh2",
+                  "intended_admission": false
+                }
+              ],
+              "affected_trial": "Shared desk before sign-in"
+            }
+          }
+        }
+      },
+      "solution": [
+        "security-investigation-workspace {\"op\":\"Report\",\"report\":{\"approval\":214,\"application\":216,\"observed_extra_access\":218,\"successful_use_recorded\":false}}",
+        "security-investigation-workspace {\"op\":\"Draft\",\"contents\":\"ip ssh version 2\\nline vty 0 1\\n transport input ssh\\n access-class 21 in\\nexit\\nip access-list standard 21\\n permit host 198.51.100.5\\n permit host 198.51.100.6\\nexit\\n\"}",
+        "security-investigation-workspace {\"op\":\"Apply\"}",
+        "security-investigation-workspace {\"op\":\"Check\"}"
+      ]
+    },
+    {
+      "id": "ccna-facility-access-plan",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-security-investigation",
+      "topic": "Evidence and proportionate security controls",
+      "title": "Choose a proportionate protection control",
+      "summary": "Set a virtual facility policy that keeps necessary work possible while limiting and recording access to the network room.",
+      "objective": "Keep on-call operator access for the supplied after-hours fault. Allow technician access during staffed hours and allow a registered visitor only with an escort during staffed hours. Keep the denied-event records and route the supplied staff report to the security desk.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "retry_guidance": "Read the specific failed trial and compare its actual result with the stated requirement.",
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Assign permissions for routine work and on-call faults separately. Restrict when maintenance can happen. A full block can stop needed work, while broadly available access exposes the room.",
+          "action": "Read the worked example.",
+          "commands": []
+        },
+        {
+          "title": "Try the separate example",
+          "why": "Registration identifies a visitor in the supplied profile. In the default policy for the example, a visit also needs a present escort and a staffed time window. Check a legitimate visit as well as the failed case.",
+          "action": "Test the separate practice inputs.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "An awareness procedure tells staff how to report an unexpected access request. Configure the destination, then inspect whether the supplied report reaches the security desk. Record denied access events for review.",
+          "action": "Check the independent task.",
+          "commands": []
+        }
+      ],
+      "explanation": "The role, time and escort decisions admit the needed visits and reject the other trials. The policy retains denied-event records and routes the supplied staff report to security.",
+      "hints": [
+        "Separate the on-call operator’s need from planned technician maintenance.",
+        "Check the same visitor with and without an escort and at the two supplied times.",
+        "The report can reach security directly or through both listed desks."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf"
+      ],
+      "simplifications": "Virtual role, time, registration and escort decisions with in-app audit evidence and a local report route. No actual facility, controls, credentials, access tokens, detection service or report delivery is used. The lesson covers the declared policy examples.",
+      "prerequisites": [
+        "ccna-management-change-evidence"
+      ],
+      "initial": {
+        "kind": "SecurityInvestigation",
+        "simulation": {
+          "version": 1,
+          "source_id": "ccna-facility-access-plan",
+          "view": "introduction",
+          "assignment": {
+            "source": "{\"activity\":\"facility\",\"supplied\":{\"starter\":{\"operator\":\"staffed_only\",\"technician\":\"any_window\",\"visitor\":\"any_window\",\"record_denials\":false,\"suspicious_contact_reports\":\"facility_desk\"},\"trials\":[{\"label\":\"On-call operator during a fault\",\"trial\":{\"role\":\"network_operator\",\"window\":\"after_hours\",\"approved_identity\":true,\"escort_present\":false},\"intended\":true,\"require_log\":true},{\"label\":\"Technician during routine maintenance\",\"trial\":{\"role\":\"facilities_technician\",\"window\":\"staffed\",\"approved_identity\":true,\"escort_present\":false},\"intended\":true,\"require_log\":true},{\"label\":\"Technician outside the approved window\",\"trial\":{\"role\":\"facilities_technician\",\"window\":\"after_hours\",\"approved_identity\":true,\"escort_present\":false},\"intended\":false,\"require_log\":true},{\"label\":\"Escorted registered contractor\",\"trial\":{\"role\":\"registered_visitor\",\"window\":\"staffed\",\"approved_identity\":true,\"escort_present\":true},\"intended\":true,\"require_log\":true},{\"label\":\"Registered contractor without escort\",\"trial\":{\"role\":\"registered_visitor\",\"window\":\"staffed\",\"approved_identity\":true,\"escort_present\":false},\"intended\":false,\"require_log\":true},{\"label\":\"Escorted visitor after hours\",\"trial\":{\"role\":\"registered_visitor\",\"window\":\"after_hours\",\"approved_identity\":true,\"escort_present\":true},\"intended\":false,\"require_log\":true},{\"label\":\"Unverified visitor\",\"trial\":{\"role\":\"registered_visitor\",\"window\":\"staffed\",\"approved_identity\":false,\"escort_present\":true},\"intended\":false,\"require_log\":true}]}}",
+            "work": {
+              "current": {
+                "activity": "facility",
+                "plan": {
+                  "operator": "staffed_only",
+                  "technician": "any_window",
+                  "visitor": "any_window",
+                  "record_denials": false,
+                  "suspicious_contact_reports": "facility_desk"
+                }
+              },
+              "checked": false
+            }
+          },
+          "example": {
+            "source": "{\"activity\":\"facility\",\"supplied\":{\"starter\":{\"operator\":\"staffed_only\",\"technician\":\"denied\",\"visitor\":\"any_window\",\"record_denials\":false,\"suspicious_contact_reports\":\"facility_desk\"},\"trials\":[{\"label\":\"Workshop operator during staffed hours\",\"trial\":{\"role\":\"network_operator\",\"window\":\"staffed\",\"approved_identity\":true,\"escort_present\":false},\"intended\":true,\"require_log\":true},{\"label\":\"Workshop operator after hours\",\"trial\":{\"role\":\"network_operator\",\"window\":\"after_hours\",\"approved_identity\":true,\"escort_present\":false},\"intended\":false,\"require_log\":true},{\"label\":\"Facilities inspection during staffed hours\",\"trial\":{\"role\":\"facilities_technician\",\"window\":\"staffed\",\"approved_identity\":true,\"escort_present\":false},\"intended\":true,\"require_log\":true},{\"label\":\"Escorted classroom visitor\",\"trial\":{\"role\":\"registered_visitor\",\"window\":\"staffed\",\"approved_identity\":true,\"escort_present\":true},\"intended\":true,\"require_log\":true},{\"label\":\"Unescorted classroom visitor\",\"trial\":{\"role\":\"registered_visitor\",\"window\":\"staffed\",\"approved_identity\":true,\"escort_present\":false},\"intended\":false,\"require_log\":true},{\"label\":\"Unverified visitor\",\"trial\":{\"role\":\"registered_visitor\",\"window\":\"staffed\",\"approved_identity\":false,\"escort_present\":true},\"intended\":false,\"require_log\":true}]}}",
+            "work": {
+              "current": {
+                "activity": "facility",
+                "plan": {
+                  "operator": "staffed_only",
+                  "technician": "denied",
+                  "visitor": "any_window",
+                  "record_denials": false,
+                  "suspicious_contact_reports": "facility_desk"
+                }
+              },
+              "checked": false
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "SecurityInvestigation",
+        "definition": {
+          "version": 1,
+          "source_id": "ccna-facility-access-plan",
+          "assignment": {
+            "activity": "facility",
+            "supplied": {
+              "starter": {
+                "operator": "staffed_only",
+                "technician": "any_window",
+                "visitor": "any_window",
+                "record_denials": false,
+                "suspicious_contact_reports": "facility_desk"
+              },
+              "trials": [
+                {
+                  "label": "On-call operator during a fault",
+                  "trial": {
+                    "role": "network_operator",
+                    "window": "after_hours",
+                    "approved_identity": true,
+                    "escort_present": false
+                  },
+                  "intended": true,
+                  "require_log": true
+                },
+                {
+                  "label": "Technician during routine maintenance",
+                  "trial": {
+                    "role": "facilities_technician",
+                    "window": "staffed",
+                    "approved_identity": true,
+                    "escort_present": false
+                  },
+                  "intended": true,
+                  "require_log": true
+                },
+                {
+                  "label": "Technician outside the approved window",
+                  "trial": {
+                    "role": "facilities_technician",
+                    "window": "after_hours",
+                    "approved_identity": true,
+                    "escort_present": false
+                  },
+                  "intended": false,
+                  "require_log": true
+                },
+                {
+                  "label": "Escorted registered contractor",
+                  "trial": {
+                    "role": "registered_visitor",
+                    "window": "staffed",
+                    "approved_identity": true,
+                    "escort_present": true
+                  },
+                  "intended": true,
+                  "require_log": true
+                },
+                {
+                  "label": "Registered contractor without escort",
+                  "trial": {
+                    "role": "registered_visitor",
+                    "window": "staffed",
+                    "approved_identity": true,
+                    "escort_present": false
+                  },
+                  "intended": false,
+                  "require_log": true
+                },
+                {
+                  "label": "Escorted visitor after hours",
+                  "trial": {
+                    "role": "registered_visitor",
+                    "window": "after_hours",
+                    "approved_identity": true,
+                    "escort_present": true
+                  },
+                  "intended": false,
+                  "require_log": true
+                },
+                {
+                  "label": "Unverified visitor",
+                  "trial": {
+                    "role": "registered_visitor",
+                    "window": "staffed",
+                    "approved_identity": false,
+                    "escort_present": true
+                  },
+                  "intended": false,
+                  "require_log": true
+                }
+              ]
+            }
+          },
+          "example": {
+            "activity": "facility",
+            "supplied": {
+              "starter": {
+                "operator": "staffed_only",
+                "technician": "denied",
+                "visitor": "any_window",
+                "record_denials": false,
+                "suspicious_contact_reports": "facility_desk"
+              },
+              "trials": [
+                {
+                  "label": "Workshop operator during staffed hours",
+                  "trial": {
+                    "role": "network_operator",
+                    "window": "staffed",
+                    "approved_identity": true,
+                    "escort_present": false
+                  },
+                  "intended": true,
+                  "require_log": true
+                },
+                {
+                  "label": "Workshop operator after hours",
+                  "trial": {
+                    "role": "network_operator",
+                    "window": "after_hours",
+                    "approved_identity": true,
+                    "escort_present": false
+                  },
+                  "intended": false,
+                  "require_log": true
+                },
+                {
+                  "label": "Facilities inspection during staffed hours",
+                  "trial": {
+                    "role": "facilities_technician",
+                    "window": "staffed",
+                    "approved_identity": true,
+                    "escort_present": false
+                  },
+                  "intended": true,
+                  "require_log": true
+                },
+                {
+                  "label": "Escorted classroom visitor",
+                  "trial": {
+                    "role": "registered_visitor",
+                    "window": "staffed",
+                    "approved_identity": true,
+                    "escort_present": true
+                  },
+                  "intended": true,
+                  "require_log": true
+                },
+                {
+                  "label": "Unescorted classroom visitor",
+                  "trial": {
+                    "role": "registered_visitor",
+                    "window": "staffed",
+                    "approved_identity": true,
+                    "escort_present": false
+                  },
+                  "intended": false,
+                  "require_log": true
+                },
+                {
+                  "label": "Unverified visitor",
+                  "trial": {
+                    "role": "registered_visitor",
+                    "window": "staffed",
+                    "approved_identity": false,
+                    "escort_present": true
+                  },
+                  "intended": false,
+                  "require_log": true
+                }
+              ]
+            }
+          }
+        }
+      },
+      "solution": [
+        "security-investigation-workspace {\"op\":\"Facility\",\"plan\":{\"operator\":\"any_window\",\"technician\":\"staffed_only\",\"visitor\":\"staffed_with_escort\",\"record_denials\":true,\"suspicious_contact_reports\":\"security_desk\"}}",
+        "security-investigation-workspace {\"op\":\"Check\"}"
+      ]
+    }
+  ]
+}

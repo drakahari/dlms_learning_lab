@@ -86,10 +86,13 @@ impl Learning {
 pub fn prepare(a: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
     if matches!(
         a.state,
-        crate::engine::State::PartitionFs { .. }
+        crate::engine::State::UserMounts { .. }
+            | crate::engine::State::Environment { .. }
+            | crate::engine::State::PartitionFs { .. }
             | crate::engine::State::Lvm { .. }
             | crate::engine::State::Ntp { .. }
             | crate::engine::State::Hsrp { .. }
+            | crate::engine::State::Syslog { .. }
     ) || crate::workspace::is_physical_workspace(a)
     {
         return;

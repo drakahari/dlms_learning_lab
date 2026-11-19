@@ -1,0 +1,378 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-ipv6-modified-eui64",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ipv6-interface-identifiers",
+      "topic": "IPv6 addressing",
+      "title": "Connect a workstation using modified EUI-64",
+      "summary": "Build an IPv6 interface identifier from a supplied MAC, repair the next hop and verify the reply.",
+      "objective": "Address: Client/lan uses modified EUI-64 from the supplied MAC 06:25:96:ab:cd:ef inside 2001:db8:74::/64. Enter the full IPv6 address; keep /64 and mark the prefix on-link. Routing: Restore Client’s default path through the office router on lan. Verify the remote server 2001:db8:75::20 and its reply, as well as R1 at 2001:db8:74::1. Preservation: Keep every supplied interface address and prefix on R1 and Server. Do not replace their configuration to make an incorrect Client address appear correct.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Configure and investigate",
+        "Verify the complete path"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "The supplied MAC defines an identifier, while the /64 defines the office network. They serve different roles.",
+          "action": "Read the supplied address/routing requirements, then select Client. Use Addresses & interfaces for its derived full address and Static routes for its default next hop.",
+          "commands": []
+        },
+        {
+          "title": "Configure the address and route",
+          "why": "Toggling the bit and inserting ff:fe produce the interface half. A remote server still needs a real neighbouring router.",
+          "action": "Enter the derived address with /64 and on-link enabled. Repair Client’s ::/0 next hop on lan without changing R1 or Server.",
+          "commands": []
+        },
+        {
+          "title": "Verify both directions",
+          "why": "A plausible-looking identifier or a local-router reply alone is insufficient.",
+          "action": "Use Check configuration, then Inspect applied forwarding paths. Read which address, preservation or request/reply requirement needs attention and retry.",
+          "commands": []
+        }
+      ],
+      "explanation": "The first MAC byte 06 has its 0x02 bit set, so toggling it gives 04. Inserting ff:fe produces 04:25:96:ff:fe:ab:cd:ef, grouped as 0425:96ff:feab:cdef. Attached to the supplied /64, Client uses 2001:db8:74:0:425:96ff:feab:cdef. A default route via the real office router on lan then reaches the server; the unchanged server route provides the reply.",
+      "hints": [
+        "Keep the supplied /64 network half. The MAC determines only the final 64 bits of this explicitly MAC-derived address.",
+        "Six MAC bytes become eight identifier bytes by inserting ff:fe between bytes three and four. Then toggle the first byte’s 0x02 bit, including when that bit starts as 1.",
+        "After addressing, inspect Client’s ::/0 next hop. The configured fe80::99 is not the office router; use the actual neighbouring router on lan."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc4291.txt",
+        "https://www.rfc-editor.org/rfc/rfc7136",
+        "https://www.rfc-editor.org/rfc/rfc8064"
+      ],
+      "simplifications": "Explicit legacy modified EUI-64 arithmetic from a supplied nonzero unicast 48-bit MAC and canonical global/ULA /64. Native manual address/static-route editing and bounded request/reply forwarding; no MAC discovery, SLAAC/RA/ND/DAD packets, privacy-IID generation, real NIC, host commands or external networking. Modern hosts need not use MAC-derived IIDs. This is partial CCNA1.9.d and supporting1.8 practice, not full-objective coverage.",
+      "initial": {
+        "kind": "Ipv6",
+        "topology": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": null
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::99",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:74::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "server": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:75::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": {
+                    "address": "2001:db8:75::20",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv6",
+        "requirements": [
+          {
+            "kind": "ModifiedEui64",
+            "device": "Client",
+            "interface": "lan",
+            "mac": "06:25:96:ab:cd:ef",
+            "network": {
+              "address": "2001:db8:74::",
+              "length": 64
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "2001:db8:74::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "server",
+            "assignment": {
+              "address": "2001:db8:75::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "2001:db8:75::20",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Remote server and reply",
+            "from": "Client",
+            "target": "2001:db8:75::20",
+            "scope": null,
+            "first_hop": null,
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "Office router and reply",
+            "from": "Client",
+            "target": "2001:db8:74::1",
+            "scope": null,
+            "first_hop": null,
+            "when": []
+          }
+        ]
+      },
+      "solution": [
+        "address Client lan 2001:db8:74:0:425:96ff:feab:cdef/64",
+        "remove-route Client 0",
+        "route Client ::/0 lan fe80::1 1"
+      ],
+      "prerequisites": [
+        "ccna-ipv6-workstation"
+      ],
+      "ipv6_teaching": {
+        "start_with_routes": false,
+        "prerequisite_note": "Builds on IPv6 workstation addressing, /64 prefixes, link-local next hops and the native address/route editor. The introduction explains the additional hexadecimal-byte and bit-toggle ideas.",
+        "concepts": [
+          {
+            "title": "Separate the network half from the interface half",
+            "text": "For the /64 used here, the first four IPv6 groups name the network and the final four identify an interface. A group holds four hexadecimal digits: 0–9 and a–f. Two digits make one byte (8 bits). A six-byte MAC contains 48 bits; this legacy method turns it into a 64-bit interface identifier."
+          },
+          {
+            "title": "Insert two bytes, then toggle one bit",
+            "text": "Split the MAC after its third byte and insert ff:fe. Next invert the bit with value 2 (second from the right) in the first original byte. 0x02 means hexadecimal 02; XOR 02 flips only that bit. Toggle means 0 becomes 1 and 1 becomes 0: it does not mean always add 2. For example 00 becomes 02, while 0a becomes 08. The other seven identifier bytes stay in order."
+          },
+          {
+            "title": "Regroup and attach the supplied /64",
+            "text": "Pair the eight resulting bytes into four IPv6 groups, then place those groups after the supplied network’s first four groups. Leading zeros may be omitted within a group. This changes the interface identifier, not the supplied network half. The worked table below shows every stage with separate practice values."
+          },
+          {
+            "title": "A correct address still needs a working route",
+            "text": "An address inside the office /64 reaches local neighbours directly. A different network needs a route through the actual office router. Use its link-local address with the outgoing interface, or a reachable global address of the same neighbour. Check configuration verifies replies too; computing the interface identifier alone does not repair an unreachable default next hop."
+          },
+          {
+            "title": "Recognize the method without assuming every host uses it",
+            "text": "This task explicitly chooses the legacy MAC-derived method. Many modern IPv6 interfaces use identifiers created without embedding a permanent MAC. Do not infer a device’s MAC or universal/local status from arbitrary IPv6 bits. Here you enter the address manually and test it in the simulated network."
+          }
+        ],
+        "example_description": "Practice values: Client MAC 00:16:3e:12:34:56; office prefix fd64:7::/64; server fd64:7:20::20. Build Client’s MAC-derived address and replace its unreachable default next hop. Keep R1 and Server addresses.",
+        "fixture": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": null
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::99",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd64:7::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "server": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd64:7:20::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": {
+                    "address": "fd64:7:20::20",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "example_solution": [
+          "address Client lan fd64:7::216:3eff:fe12:3456/64",
+          "remove-route Client 0",
+          "route Client ::/0 lan fe80::1 1"
+        ],
+        "outcomes": [
+          {
+            "kind": "ModifiedEui64",
+            "device": "Client",
+            "interface": "lan",
+            "mac": "00:16:3e:12:34:56",
+            "network": {
+              "address": "fd64:7::",
+              "length": 64
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "fd64:7::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "server",
+            "assignment": {
+              "address": "fd64:7:20::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "fd64:7:20::20",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Remote server and reply",
+            "from": "Client",
+            "target": "fd64:7:20::20",
+            "scope": null,
+            "first_hop": null,
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "Office router and reply",
+            "from": "Client",
+            "target": "fd64:7::1",
+            "scope": null,
+            "first_hop": null,
+            "when": []
+          }
+        ],
+        "try_change": "After the worked repair passes, restore the original first MAC byte in the interface identifier and check again. Observe the specific bit-toggle feedback; a working route alone must not pass the address requirement."
+      }
+    }
+  ]
+}

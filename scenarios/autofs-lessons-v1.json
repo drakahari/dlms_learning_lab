@@ -1,0 +1,1296 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-autofs-indirect-repair",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "AutoFS local-file maps",
+      "unit": "autofs-local-maps",
+      "title": "Repair demand-mounted reports and audit data",
+      "summary": "Connect directory keys to their intended virtual filesystems and distinguish saved maps from existing mounts.",
+      "objective": "Repair the indirect map under /srv/teams using single-directory keys in /etc/auto.teams and the supplied 30-second idle timeout. Connect /srv/teams/reports to original /dev/ledger/reports with read/write access, and /srv/teams/audit to original /dev/ledger/audit with read-only access. After saving all edits and applying any required refresh or idle check, read keep.txt at both paths. Current mounts and a new lookup after expiry must select the intended original data. Keep the supplied storage and file data unchanged. Save every edited file, then choose Check work.",
+      "retry_guidance": "Read the failed saved-policy, active-policy, current-mount and new-lookup checks separately. A correct saved file does not refresh a direct map or replace a current backing mount.",
+      "difficulty": "Intermediate",
+      "minutes": 28,
+      "initial": {
+        "kind": "Autofs",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-autofs-indirect-repair",
+          "view": "introduction",
+          "example_step": 0,
+          "assignment": {
+            "runtime": {
+              "version": 1,
+              "saved": {
+                "master": "/srv/teams /etc/auto.teams --timeout=30\n",
+                "maps": [
+                  {
+                    "name": "/etc/auto.teams",
+                    "text": "reports -fstype=ext4,rw :/dev/ledger/audit\naudit -fstype=ext4,ro :/dev/ledger/reports\n"
+                  }
+                ]
+              },
+              "loaded": {
+                "master": "/srv/teams /etc/auto.teams --timeout=30\n",
+                "direct": []
+              },
+              "mounted": {
+                "version": 1,
+                "storage": {
+                  "inventory": {
+                    "volumes": {
+                      "lvm-4": {
+                        "uuid": "84f50925-0000-4000-8000-000000000001",
+                        "filesystem": "ext4"
+                      },
+                      "lvm-5": {
+                        "uuid": "84f50925-0000-4000-8000-000000000002",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/ledger/reports": "lvm-4",
+                      "/dev/ledger/audit": "lvm-5"
+                    },
+                    "mountpoints": [
+                      "/srv/teams/reports",
+                      "/srv/teams/audit"
+                    ]
+                  },
+                  "configuration": "/dev/ledger/audit /srv/teams/reports ext4 rw 0 2\n",
+                  "live": {
+                    "/srv/teams/reports": {
+                      "volume": "lvm-5",
+                      "read_only": false
+                    }
+                  }
+                }
+              },
+              "clock": 0,
+              "leases": [
+                {
+                  "target": "/srv/teams/reports",
+                  "root": "/srv/teams",
+                  "map": "/etc/auto.teams",
+                  "last_used": 0
+                }
+              ]
+            },
+            "drafts": {
+              "master": "/srv/teams /etc/auto.teams --timeout=30\n",
+              "maps": [
+                {
+                  "name": "/etc/auto.teams",
+                  "text": "reports -fstype=ext4,rw :/dev/ledger/audit\naudit -fstype=ext4,ro :/dev/ledger/reports\n"
+                }
+              ]
+            },
+            "history": [],
+            "transcript": [],
+            "selected": "/etc/auto.master",
+            "command": "",
+            "checked": false
+          },
+          "practice": {
+            "runtime": {
+              "version": 1,
+              "saved": {
+                "master": "/training/team /etc/auto.demo --timeout=30\n",
+                "maps": [
+                  {
+                    "name": "/etc/auto.demo",
+                    "text": "reports -fstype=ext4,rw :/dev/demo-indirect/audit\naudit -fstype=ext4,ro :/dev/demo-indirect/reports\n"
+                  }
+                ]
+              },
+              "loaded": {
+                "master": "/training/team /etc/auto.demo --timeout=30\n",
+                "direct": []
+              },
+              "mounted": {
+                "version": 1,
+                "storage": {
+                  "inventory": {
+                    "volumes": {
+                      "lvm-4": {
+                        "uuid": "84f50925-0000-4000-8000-000000000001",
+                        "filesystem": "ext4"
+                      },
+                      "lvm-5": {
+                        "uuid": "84f50925-0000-4000-8000-000000000002",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/demo-indirect/reports": "lvm-4",
+                      "/dev/demo-indirect/audit": "lvm-5"
+                    },
+                    "mountpoints": [
+                      "/training/team/reports",
+                      "/training/team/audit"
+                    ]
+                  },
+                  "configuration": "/dev/demo-indirect/audit /training/team/reports ext4 rw 0 2\n",
+                  "live": {
+                    "/training/team/reports": {
+                      "volume": "lvm-5",
+                      "read_only": false
+                    }
+                  }
+                }
+              },
+              "clock": 0,
+              "leases": [
+                {
+                  "target": "/training/team/reports",
+                  "root": "/training/team",
+                  "map": "/etc/auto.demo",
+                  "last_used": 0
+                }
+              ]
+            },
+            "drafts": {
+              "master": "/training/team /etc/auto.demo --timeout=30\n",
+              "maps": [
+                {
+                  "name": "/etc/auto.demo",
+                  "text": "reports -fstype=ext4,rw :/dev/demo-indirect/audit\naudit -fstype=ext4,ro :/dev/demo-indirect/reports\n"
+                }
+              ]
+            },
+            "history": [],
+            "transcript": [],
+            "selected": "/etc/auto.master",
+            "command": "",
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "Autofs",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-autofs-indirect-repair",
+          "assignment": {
+            "world": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/ledgera": {
+                  "bytes": 42991616,
+                  "role": "PhysicalVolume",
+                  "group": "ledger"
+                },
+                "/dev/ledger-unuseda": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "ledger-unused"
+                }
+              },
+              "groups": {
+                "ledger": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "reports": {
+                      "extents": [
+                        {
+                          "pv": "/dev/ledgera",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/ledgera",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "ledger/reports: daily service reports, original dataset.\n"
+                          }
+                        }
+                      }
+                    },
+                    "audit": {
+                      "extents": [
+                        {
+                          "pv": "/dev/ledgera",
+                          "index": 2
+                        },
+                        {
+                          "pv": "/dev/ledgera",
+                          "index": 3
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "ledger/audit: protected audit history, original dataset.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "ledger-unused": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "spare": {
+                      "extents": [
+                        {
+                          "pv": "/dev/ledger-unuseda",
+                          "index": 0
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              },
+              "activation": {
+                "active": {
+                  "ledger/reports": true,
+                  "ledger/audit": true,
+                  "ledger-unused/spare": false
+                },
+                "open": []
+              },
+              "identity": {
+                "groups": {
+                  "ledger-unused": 1,
+                  "ledger": 2
+                },
+                "volumes": {
+                  "ledger-unused/spare": 3,
+                  "ledger/reports": 4,
+                  "ledger/audit": 5
+                },
+                "next": 6
+              }
+            },
+            "context": {
+              "inventory": {
+                "filesystems": [
+                  {
+                    "original_volume": 4,
+                    "uuid": "84f50925-0000-4000-8000-000000000001"
+                  },
+                  {
+                    "original_volume": 5,
+                    "uuid": "84f50925-0000-4000-8000-000000000002"
+                  }
+                ],
+                "mountpoints": [
+                  "/srv/teams/reports",
+                  "/srv/teams/audit"
+                ]
+              },
+              "map_files": [
+                "/etc/auto.teams"
+              ]
+            },
+            "active": {
+              "master": "/srv/teams /etc/auto.teams --timeout=30\n",
+              "maps": [
+                {
+                  "name": "/etc/auto.teams",
+                  "text": "reports -fstype=ext4,rw :/dev/ledger/audit\naudit -fstype=ext4,ro :/dev/ledger/reports\n"
+                }
+              ]
+            },
+            "saved": {
+              "master": "/srv/teams /etc/auto.teams --timeout=30\n",
+              "maps": [
+                {
+                  "name": "/etc/auto.teams",
+                  "text": "reports -fstype=ext4,rw :/dev/ledger/audit\naudit -fstype=ext4,ro :/dev/ledger/reports\n"
+                }
+              ]
+            },
+            "warm": [
+              "/srv/teams/reports/keep.txt"
+            ],
+            "targets": [
+              {
+                "point": "/srv/teams/reports",
+                "original_volume": 4,
+                "file": "/keep.txt",
+                "read_only": false,
+                "style": "Indirect",
+                "timeout": 30
+              },
+              {
+                "point": "/srv/teams/audit",
+                "original_volume": 5,
+                "file": "/keep.txt",
+                "read_only": true,
+                "style": "Indirect",
+                "timeout": 30
+              }
+            ]
+          },
+          "example": {
+            "world": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/demo-indirecta": {
+                  "bytes": 42991616,
+                  "role": "PhysicalVolume",
+                  "group": "demo-indirect"
+                },
+                "/dev/demo-indirect-unuseda": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "demo-indirect-unused"
+                }
+              },
+              "groups": {
+                "demo-indirect": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "reports": {
+                      "extents": [
+                        {
+                          "pv": "/dev/demo-indirecta",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/demo-indirecta",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "demo-indirect/reports: daily service reports, original dataset.\n"
+                          }
+                        }
+                      }
+                    },
+                    "audit": {
+                      "extents": [
+                        {
+                          "pv": "/dev/demo-indirecta",
+                          "index": 2
+                        },
+                        {
+                          "pv": "/dev/demo-indirecta",
+                          "index": 3
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "demo-indirect/audit: protected audit history, original dataset.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "demo-indirect-unused": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "spare": {
+                      "extents": [
+                        {
+                          "pv": "/dev/demo-indirect-unuseda",
+                          "index": 0
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              },
+              "activation": {
+                "active": {
+                  "demo-indirect/reports": true,
+                  "demo-indirect/audit": true,
+                  "demo-indirect-unused/spare": false
+                },
+                "open": []
+              },
+              "identity": {
+                "groups": {
+                  "demo-indirect-unused": 1,
+                  "demo-indirect": 2
+                },
+                "volumes": {
+                  "demo-indirect-unused/spare": 3,
+                  "demo-indirect/reports": 4,
+                  "demo-indirect/audit": 5
+                },
+                "next": 6
+              }
+            },
+            "context": {
+              "inventory": {
+                "filesystems": [
+                  {
+                    "original_volume": 4,
+                    "uuid": "84f50925-0000-4000-8000-000000000001"
+                  },
+                  {
+                    "original_volume": 5,
+                    "uuid": "84f50925-0000-4000-8000-000000000002"
+                  }
+                ],
+                "mountpoints": [
+                  "/training/team/reports",
+                  "/training/team/audit"
+                ]
+              },
+              "map_files": [
+                "/etc/auto.demo"
+              ]
+            },
+            "active": {
+              "master": "/training/team /etc/auto.demo --timeout=30\n",
+              "maps": [
+                {
+                  "name": "/etc/auto.demo",
+                  "text": "reports -fstype=ext4,rw :/dev/demo-indirect/audit\naudit -fstype=ext4,ro :/dev/demo-indirect/reports\n"
+                }
+              ]
+            },
+            "saved": {
+              "master": "/training/team /etc/auto.demo --timeout=30\n",
+              "maps": [
+                {
+                  "name": "/etc/auto.demo",
+                  "text": "reports -fstype=ext4,rw :/dev/demo-indirect/audit\naudit -fstype=ext4,ro :/dev/demo-indirect/reports\n"
+                }
+              ]
+            },
+            "warm": [
+              "/training/team/reports/keep.txt"
+            ],
+            "targets": [
+              {
+                "point": "/training/team/reports",
+                "original_volume": 4,
+                "file": "/keep.txt",
+                "read_only": false,
+                "style": "Indirect",
+                "timeout": 30
+              },
+              {
+                "point": "/training/team/audit",
+                "original_volume": 5,
+                "file": "/keep.txt",
+                "read_only": true,
+                "style": "Indirect",
+                "timeout": 30
+              }
+            ]
+          },
+          "reference": [
+            {
+              "operation": {
+                "kind": "save",
+                "file": "/etc/auto.teams",
+                "text": "reports -fstype=ext4,rw :/dev/ledger/reports\naudit -fstype=ext4,ro :/dev/ledger/audit\n"
+              },
+              "explanation": "An indirect key is the single directory name below the master directory. Correct the two sources and retain the access options. Fill this example, then Save file.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /srv/teams/reports/keep.txt"
+              },
+              "explanation": "The old backing mount still returns the audit dataset even after saving a correct indirect map. Saving does not replace an existing mount.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "idle",
+                "seconds": 30
+              },
+              "explanation": "Choose Run idle check (30 s). This advances only the simulator clock and expires the supplied nonbusy old backing mount. No Linux command or real waiting is involved.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /srv/teams/reports/keep.txt"
+              },
+              "explanation": "This new lookup should return the original reports dataset. cat both triggers the mount and reads the actual simulated file.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /srv/teams/audit/keep.txt"
+              },
+              "explanation": "Verify the second path independently: it should return the audit dataset with read-only backing access.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "findmnt -t ext4"
+              },
+              "explanation": "Compare actual current backing sources and rw/ro options. This supported filter lists only the provided ext4 mounts, not the separate autofs trigger filesystem.",
+              "status": 0
+            }
+          ],
+          "example_steps": [
+            {
+              "operation": {
+                "kind": "save",
+                "file": "/etc/auto.demo",
+                "text": "reports -fstype=ext4,rw :/dev/demo-indirect/reports\naudit -fstype=ext4,ro :/dev/demo-indirect/audit\n"
+              },
+              "explanation": "An indirect key is the single directory name below the master directory. Correct the two sources and retain the access options. Fill this example, then Save file.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /training/team/reports/keep.txt"
+              },
+              "explanation": "The old backing mount still returns the audit dataset even after saving a correct indirect map. Saving does not replace an existing mount.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "idle",
+                "seconds": 30
+              },
+              "explanation": "Choose Run idle check (30 s). This advances only the simulator clock and expires the supplied nonbusy old backing mount. No Linux command or real waiting is involved.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /training/team/reports/keep.txt"
+              },
+              "explanation": "This new lookup should return the original reports dataset. cat both triggers the mount and reads the actual simulated file.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /training/team/audit/keep.txt"
+              },
+              "explanation": "Verify the second path independently: it should return the audit dataset with read-only backing access.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "findmnt -t ext4"
+              },
+              "explanation": "Compare actual current backing sources and rw/ro options. This supported filter lists only the provided ext4 mounts, not the separate autofs trigger filesystem.",
+              "status": 0
+            }
+          ],
+          "experiment": {
+            "operation": {
+              "kind": "save",
+              "file": "/etc/auto.demo",
+              "text": "reports -fstype=ext4,rw :/dev/demo-indirect/audit\naudit -fstype=ext4,ro :/dev/demo-indirect/audit\n"
+            },
+            "explanation": "Try a wrong reports source: fill this example file and Save file, then Check example. Existing data can still be readable while a future lookup is wrong.",
+            "status": 0
+          },
+          "repair": [
+            {
+              "operation": {
+                "kind": "save",
+                "file": "/etc/auto.demo",
+                "text": "reports -fstype=ext4,rw :/dev/demo-indirect/reports\naudit -fstype=ext4,ro :/dev/demo-indirect/audit\n"
+              },
+              "explanation": "Restore the intended reports source and Save file.",
+              "status": 0
+            }
+          ]
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect the supplied maps and actual backing data",
+        "Repair and save the required configuration",
+        "Apply the needed refresh or idle check and verify both data paths",
+        "Check work and repair remaining mismatches"
+      ],
+      "hints": [
+        "Compare the managed directory in the master with the path you are trying to read. Is its key one directory name or a full path?",
+        "Keep the leading dash on fstype=ext4 options and the colon before each local /dev source. ro and rw describe backing filesystem access.",
+        "Indirect edits are consulted on a new lookup. Master/direct changes need systemctl reload autofs here. Existing mounts keep their association until the simulator idle check expires them."
+      ],
+      "explanation": "An indirect master directory combines with each single-component key. Correcting a saved indirect map affects the next new lookup without a reload, but an already mounted filesystem retains its old association until expiry. Verify both the present data and the future policy.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man5/autofs.5.html",
+        "https://man7.org/linux/man-pages/man5/auto.master.5.html"
+      ],
+      "simplifications": "Bounded local ext4 FILE maps over supplied in-memory storage only. The already-running automounter and explicit nonbusy idle checks are simulated; no host shell, daemon, mounts, files, clock or network. Only supplied cat paths, findmnt -t ext4 [provided point], and systemctl reload autofs are supported. One backing mount per filesystem, no busy handles, at most two master rows and four trigger points. Changing root/timeout/direct-key structure while mounted requires expiry first in this simulator; that is not a universal Linux rule. NFS/program/NSS maps, includes, substitution, wildcards and other options are unsupported. Sources checked2026-11-07; no full objective coverage claimed.",
+      "solution": [
+        "Save /etc/auto.teams",
+        "cat /srv/teams/reports/keep.txt",
+        "Simulator idle check \u00b7 30s",
+        "cat /srv/teams/reports/keep.txt",
+        "cat /srv/teams/audit/keep.txt",
+        "findmnt -t ext4",
+        "Check work"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-mount-repair"
+      ]
+    },
+    {
+      "id": "lpic2-autofs-direct-conversion",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "AutoFS local-file maps",
+      "unit": "autofs-local-maps",
+      "title": "Convert indirect directories to direct AutoFS paths",
+      "summary": "Move a local map to direct full-path triggers and verify that saved edits reach active lookup policy.",
+      "objective": "Convert the supplied configuration to a direct map: /- in the master, full mountpoint paths in /etc/auto.direct, and a 30-second idle timeout. Connect /srv/direct/reports to original /dev/handover/reports with read/write access, and /srv/direct/audit to original /dev/handover/audit with read-only access. After saving all edits and applying any required refresh or idle check, read keep.txt at both paths. Current mounts and a new lookup after expiry must select the intended original data. Keep the supplied storage and file data unchanged. Save every edited file, then choose Check work.",
+      "retry_guidance": "Read the failed saved-policy, active-policy, current-mount and new-lookup checks separately. A correct saved file does not refresh a direct map or replace a current backing mount.",
+      "difficulty": "Intermediate",
+      "minutes": 32,
+      "initial": {
+        "kind": "Autofs",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-autofs-direct-conversion",
+          "view": "introduction",
+          "example_step": 0,
+          "assignment": {
+            "runtime": {
+              "version": 1,
+              "saved": {
+                "master": "/srv/direct /etc/auto.direct --timeout=30\n",
+                "maps": [
+                  {
+                    "name": "/etc/auto.direct",
+                    "text": "reports -fstype=ext4,rw :/dev/handover/reports\naudit -fstype=ext4,ro :/dev/handover/audit\n"
+                  }
+                ]
+              },
+              "loaded": {
+                "master": "/srv/direct /etc/auto.direct --timeout=30\n",
+                "direct": []
+              },
+              "mounted": {
+                "version": 1,
+                "storage": {
+                  "inventory": {
+                    "volumes": {
+                      "lvm-4": {
+                        "uuid": "84f50925-0000-4000-8000-000000000001",
+                        "filesystem": "ext4"
+                      },
+                      "lvm-5": {
+                        "uuid": "84f50925-0000-4000-8000-000000000002",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/handover/reports": "lvm-4",
+                      "/dev/handover/audit": "lvm-5"
+                    },
+                    "mountpoints": [
+                      "/srv/direct/reports",
+                      "/srv/direct/audit"
+                    ]
+                  },
+                  "configuration": "",
+                  "live": {}
+                }
+              },
+              "clock": 0,
+              "leases": []
+            },
+            "drafts": {
+              "master": "/srv/direct /etc/auto.direct --timeout=30\n",
+              "maps": [
+                {
+                  "name": "/etc/auto.direct",
+                  "text": "reports -fstype=ext4,rw :/dev/handover/reports\naudit -fstype=ext4,ro :/dev/handover/audit\n"
+                }
+              ]
+            },
+            "history": [],
+            "transcript": [],
+            "selected": "/etc/auto.master",
+            "command": "",
+            "checked": false
+          },
+          "practice": {
+            "runtime": {
+              "version": 1,
+              "saved": {
+                "master": "/training/direct /etc/auto.demo --timeout=30\n",
+                "maps": [
+                  {
+                    "name": "/etc/auto.demo",
+                    "text": "reports -fstype=ext4,rw :/dev/demo-direct/reports\naudit -fstype=ext4,ro :/dev/demo-direct/audit\n"
+                  }
+                ]
+              },
+              "loaded": {
+                "master": "/training/direct /etc/auto.demo --timeout=30\n",
+                "direct": []
+              },
+              "mounted": {
+                "version": 1,
+                "storage": {
+                  "inventory": {
+                    "volumes": {
+                      "lvm-4": {
+                        "uuid": "84f50925-0000-4000-8000-000000000001",
+                        "filesystem": "ext4"
+                      },
+                      "lvm-5": {
+                        "uuid": "84f50925-0000-4000-8000-000000000002",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/demo-direct/reports": "lvm-4",
+                      "/dev/demo-direct/audit": "lvm-5"
+                    },
+                    "mountpoints": [
+                      "/training/direct/reports",
+                      "/training/direct/audit"
+                    ]
+                  },
+                  "configuration": "",
+                  "live": {}
+                }
+              },
+              "clock": 0,
+              "leases": []
+            },
+            "drafts": {
+              "master": "/training/direct /etc/auto.demo --timeout=30\n",
+              "maps": [
+                {
+                  "name": "/etc/auto.demo",
+                  "text": "reports -fstype=ext4,rw :/dev/demo-direct/reports\naudit -fstype=ext4,ro :/dev/demo-direct/audit\n"
+                }
+              ]
+            },
+            "history": [],
+            "transcript": [],
+            "selected": "/etc/auto.master",
+            "command": "",
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "Autofs",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-autofs-direct-conversion",
+          "assignment": {
+            "world": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/handovera": {
+                  "bytes": 42991616,
+                  "role": "PhysicalVolume",
+                  "group": "handover"
+                },
+                "/dev/handover-unuseda": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "handover-unused"
+                }
+              },
+              "groups": {
+                "handover": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "reports": {
+                      "extents": [
+                        {
+                          "pv": "/dev/handovera",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/handovera",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "handover/reports: daily service reports, original dataset.\n"
+                          }
+                        }
+                      }
+                    },
+                    "audit": {
+                      "extents": [
+                        {
+                          "pv": "/dev/handovera",
+                          "index": 2
+                        },
+                        {
+                          "pv": "/dev/handovera",
+                          "index": 3
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "handover/audit: protected audit history, original dataset.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "handover-unused": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "spare": {
+                      "extents": [
+                        {
+                          "pv": "/dev/handover-unuseda",
+                          "index": 0
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              },
+              "activation": {
+                "active": {
+                  "handover/reports": true,
+                  "handover/audit": true,
+                  "handover-unused/spare": false
+                },
+                "open": []
+              },
+              "identity": {
+                "groups": {
+                  "handover-unused": 1,
+                  "handover": 2
+                },
+                "volumes": {
+                  "handover-unused/spare": 3,
+                  "handover/reports": 4,
+                  "handover/audit": 5
+                },
+                "next": 6
+              }
+            },
+            "context": {
+              "inventory": {
+                "filesystems": [
+                  {
+                    "original_volume": 4,
+                    "uuid": "84f50925-0000-4000-8000-000000000001"
+                  },
+                  {
+                    "original_volume": 5,
+                    "uuid": "84f50925-0000-4000-8000-000000000002"
+                  }
+                ],
+                "mountpoints": [
+                  "/srv/direct/reports",
+                  "/srv/direct/audit"
+                ]
+              },
+              "map_files": [
+                "/etc/auto.direct"
+              ]
+            },
+            "active": {
+              "master": "/srv/direct /etc/auto.direct --timeout=30\n",
+              "maps": [
+                {
+                  "name": "/etc/auto.direct",
+                  "text": "reports -fstype=ext4,rw :/dev/handover/reports\naudit -fstype=ext4,ro :/dev/handover/audit\n"
+                }
+              ]
+            },
+            "saved": {
+              "master": "/srv/direct /etc/auto.direct --timeout=30\n",
+              "maps": [
+                {
+                  "name": "/etc/auto.direct",
+                  "text": "reports -fstype=ext4,rw :/dev/handover/reports\naudit -fstype=ext4,ro :/dev/handover/audit\n"
+                }
+              ]
+            },
+            "warm": [],
+            "targets": [
+              {
+                "point": "/srv/direct/reports",
+                "original_volume": 4,
+                "file": "/keep.txt",
+                "read_only": false,
+                "style": "Direct",
+                "timeout": 30
+              },
+              {
+                "point": "/srv/direct/audit",
+                "original_volume": 5,
+                "file": "/keep.txt",
+                "read_only": true,
+                "style": "Direct",
+                "timeout": 30
+              }
+            ]
+          },
+          "example": {
+            "world": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/demo-directa": {
+                  "bytes": 42991616,
+                  "role": "PhysicalVolume",
+                  "group": "demo-direct"
+                },
+                "/dev/demo-direct-unuseda": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "demo-direct-unused"
+                }
+              },
+              "groups": {
+                "demo-direct": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "reports": {
+                      "extents": [
+                        {
+                          "pv": "/dev/demo-directa",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/demo-directa",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "demo-direct/reports: daily service reports, original dataset.\n"
+                          }
+                        }
+                      }
+                    },
+                    "audit": {
+                      "extents": [
+                        {
+                          "pv": "/dev/demo-directa",
+                          "index": 2
+                        },
+                        {
+                          "pv": "/dev/demo-directa",
+                          "index": 3
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "demo-direct/audit: protected audit history, original dataset.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "demo-direct-unused": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "spare": {
+                      "extents": [
+                        {
+                          "pv": "/dev/demo-direct-unuseda",
+                          "index": 0
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              },
+              "activation": {
+                "active": {
+                  "demo-direct/reports": true,
+                  "demo-direct/audit": true,
+                  "demo-direct-unused/spare": false
+                },
+                "open": []
+              },
+              "identity": {
+                "groups": {
+                  "demo-direct-unused": 1,
+                  "demo-direct": 2
+                },
+                "volumes": {
+                  "demo-direct-unused/spare": 3,
+                  "demo-direct/reports": 4,
+                  "demo-direct/audit": 5
+                },
+                "next": 6
+              }
+            },
+            "context": {
+              "inventory": {
+                "filesystems": [
+                  {
+                    "original_volume": 4,
+                    "uuid": "84f50925-0000-4000-8000-000000000001"
+                  },
+                  {
+                    "original_volume": 5,
+                    "uuid": "84f50925-0000-4000-8000-000000000002"
+                  }
+                ],
+                "mountpoints": [
+                  "/training/direct/reports",
+                  "/training/direct/audit"
+                ]
+              },
+              "map_files": [
+                "/etc/auto.demo"
+              ]
+            },
+            "active": {
+              "master": "/training/direct /etc/auto.demo --timeout=30\n",
+              "maps": [
+                {
+                  "name": "/etc/auto.demo",
+                  "text": "reports -fstype=ext4,rw :/dev/demo-direct/reports\naudit -fstype=ext4,ro :/dev/demo-direct/audit\n"
+                }
+              ]
+            },
+            "saved": {
+              "master": "/training/direct /etc/auto.demo --timeout=30\n",
+              "maps": [
+                {
+                  "name": "/etc/auto.demo",
+                  "text": "reports -fstype=ext4,rw :/dev/demo-direct/reports\naudit -fstype=ext4,ro :/dev/demo-direct/audit\n"
+                }
+              ]
+            },
+            "warm": [],
+            "targets": [
+              {
+                "point": "/training/direct/reports",
+                "original_volume": 4,
+                "file": "/keep.txt",
+                "read_only": false,
+                "style": "Direct",
+                "timeout": 30
+              },
+              {
+                "point": "/training/direct/audit",
+                "original_volume": 5,
+                "file": "/keep.txt",
+                "read_only": true,
+                "style": "Direct",
+                "timeout": 30
+              }
+            ]
+          },
+          "reference": [
+            {
+              "operation": {
+                "kind": "save",
+                "file": "/etc/auto.master",
+                "text": "/- /etc/auto.direct --timeout=30\n"
+              },
+              "explanation": "A direct map uses /- in the master. Fill this example file, then Save file. Saving does not refresh the active master.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "save",
+                "file": "/etc/auto.direct",
+                "text": "/srv/direct/reports -fstype=ext4,rw :/dev/handover/reports\n/srv/direct/audit -fstype=ext4,ro :/dev/handover/audit\n"
+              },
+              "explanation": "Use full absolute paths as direct keys. Keep the leading option dash and the colon before each local device. Save file, then refresh after both files are ready.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /srv/direct/reports/keep.txt"
+              },
+              "explanation": "Expected failure: the old active master still treats this as an indirect map, but its saved keys are now full paths. Read the diagnostic before refreshing.",
+              "status": 1
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "systemctl reload autofs"
+              },
+              "explanation": "Refresh the supplied already-running simulated automounter after editing the master/direct map. A successful reload has no command output. This is not a host service change.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /srv/direct/reports/keep.txt"
+              },
+              "explanation": "This new lookup should return the original reports dataset. cat both triggers the mount and reads the actual simulated file.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /srv/direct/audit/keep.txt"
+              },
+              "explanation": "Verify the second path independently: it should return the audit dataset with read-only backing access.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "findmnt -t ext4"
+              },
+              "explanation": "Compare actual current backing sources and rw/ro options. This supported filter lists only the provided ext4 mounts, not the separate autofs trigger filesystem.",
+              "status": 0
+            }
+          ],
+          "example_steps": [
+            {
+              "operation": {
+                "kind": "save",
+                "file": "/etc/auto.master",
+                "text": "/- /etc/auto.demo --timeout=30\n"
+              },
+              "explanation": "A direct map uses /- in the master. Fill this example file, then Save file. Saving does not refresh the active master.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "save",
+                "file": "/etc/auto.demo",
+                "text": "/training/direct/reports -fstype=ext4,rw :/dev/demo-direct/reports\n/training/direct/audit -fstype=ext4,ro :/dev/demo-direct/audit\n"
+              },
+              "explanation": "Use full absolute paths as direct keys. Keep the leading option dash and the colon before each local device. Save file, then refresh after both files are ready.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /training/direct/reports/keep.txt"
+              },
+              "explanation": "Expected failure: the old active master still treats this as an indirect map, but its saved keys are now full paths. Read the diagnostic before refreshing.",
+              "status": 1
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "systemctl reload autofs"
+              },
+              "explanation": "Refresh the supplied already-running simulated automounter after editing the master/direct map. A successful reload has no command output. This is not a host service change.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /training/direct/reports/keep.txt"
+              },
+              "explanation": "This new lookup should return the original reports dataset. cat both triggers the mount and reads the actual simulated file.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /training/direct/audit/keep.txt"
+              },
+              "explanation": "Verify the second path independently: it should return the audit dataset with read-only backing access.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "findmnt -t ext4"
+              },
+              "explanation": "Compare actual current backing sources and rw/ro options. This supported filter lists only the provided ext4 mounts, not the separate autofs trigger filesystem.",
+              "status": 0
+            }
+          ],
+          "experiment": {
+            "operation": {
+              "kind": "save",
+              "file": "/etc/auto.demo",
+              "text": "/training/direct/reports -fstype=ext4,rw :/dev/demo-direct/audit\n/training/direct/audit -fstype=ext4,ro :/dev/demo-direct/audit\n"
+            },
+            "explanation": "Try a wrong reports source: fill this example file and Save file, then Check example. Existing data can still be readable while a future lookup is wrong.",
+            "status": 0
+          },
+          "repair": [
+            {
+              "operation": {
+                "kind": "save",
+                "file": "/etc/auto.demo",
+                "text": "/training/direct/reports -fstype=ext4,rw :/dev/demo-direct/reports\n/training/direct/audit -fstype=ext4,ro :/dev/demo-direct/audit\n"
+              },
+              "explanation": "Restore the intended reports source and Save file.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "systemctl reload autofs"
+              },
+              "explanation": "Refresh the corrected direct map before checking again.",
+              "status": 0
+            }
+          ]
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect the supplied maps and actual backing data",
+        "Repair and save the required configuration",
+        "Apply the needed refresh or idle check and verify both data paths",
+        "Check work and repair remaining mismatches"
+      ],
+      "hints": [
+        "Compare the managed directory in the master with the path you are trying to read. Is its key one directory name or a full path?",
+        "Keep the leading dash on fstype=ext4 options and the colon before each local /dev source. ro and rw describe backing filesystem access.",
+        "Indirect edits are consulted on a new lookup. Master/direct changes need systemctl reload autofs here. Existing mounts keep their association until the simulator idle check expires them."
+      ],
+      "explanation": "The master selects direct or indirect path interpretation. Direct keys are full paths and master/direct edits need a refresh. Saving a file alone is insufficient. Each lookup must select its intended original data with the required access, both now and after expiry.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man5/autofs.5.html",
+        "https://man7.org/linux/man-pages/man5/auto.master.5.html"
+      ],
+      "simplifications": "Bounded local ext4 FILE maps over supplied in-memory storage only. The already-running automounter and explicit nonbusy idle checks are simulated; no host shell, daemon, mounts, files, clock or network. Only supplied cat paths, findmnt -t ext4 [provided point], and systemctl reload autofs are supported. One backing mount per filesystem, no busy handles, at most two master rows and four trigger points. Changing root/timeout/direct-key structure while mounted requires expiry first in this simulator; that is not a universal Linux rule. NFS/program/NSS maps, includes, substitution, wildcards and other options are unsupported. Sources checked2026-11-07; no full objective coverage claimed.",
+      "solution": [
+        "Save /etc/auto.master",
+        "Save /etc/auto.direct",
+        "cat /srv/direct/reports/keep.txt",
+        "systemctl reload autofs",
+        "cat /srv/direct/reports/keep.txt",
+        "cat /srv/direct/audit/keep.txt",
+        "findmnt -t ext4",
+        "Check work"
+      ],
+      "prerequisites": [
+        "lpic2-autofs-indirect-repair"
+      ]
+    }
+  ]
+}

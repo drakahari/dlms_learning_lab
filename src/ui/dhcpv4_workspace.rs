@@ -94,14 +94,28 @@ impl LabApp {
         match self.dhcpv4_view(i) {
             teaching::View::Introduction => {
                 let lesson = s.dhcpv4_teaching.as_ref().unwrap();
-                ui.label(&lesson.prerequisite_note);
-                for c in &lesson.concepts {
-                    ui.label(RichText::new(&c.title).strong());
-                    ui.label(&c.text);
+                if ccna_presentation::enabled(&s) {
+                    ccna_presentation::concepts(
+                        ui,
+                        &s,
+                        &lesson.prerequisite_note,
+                        lesson
+                            .concepts
+                            .iter()
+                            .map(|c| (c.title.clone(), c.text.clone())),
+                    );
+                } else {
+                    ui.label(&lesson.prerequisite_note);
+                    for c in &lesson.concepts {
+                        ui.label(RichText::new(&c.title).strong());
+                        ui.label(&c.text);
+                    }
                 }
-                ui.label(RichText::new("A different example to try").strong());
-                ui.label(&lesson.example_description);
-                ui.label(format!("Try a change: {}", lesson.try_change.description));
+                lesson_presentation::worked(ui, &lesson.example_description);
+                lesson_presentation::worked_rows(ui, &s);
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change.description));
+                }
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -116,9 +130,14 @@ impl LabApp {
                 });
             }
             teaching::View::Example => {
+                ccna_presentation::example(ui, &s, true);
                 let lesson = s.dhcpv4_teaching.as_ref().unwrap();
-                ui.label("Practice example · Ungraded; assignment policy, leases and draft stay separate.");
-                ui.label(&lesson.example_description);
+                if !ccna_presentation::enabled(&s) {
+                    ui.label("Practice example · Ungraded; assignment policy, leases and draft stay separate.");
+                }
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(&lesson.example_description);
+                }
                 let mut l = self.progress.attempts[&s.id]
                     .workspace
                     .as_ref()
@@ -209,7 +228,7 @@ impl LabApp {
                     }
                     l.checked = false;
                 }
-                let r = ui.add(primary(ui, "Check example · ungraded"));
+                let r = ui.add(primary(ui, "Check example"));
                 self.metrics.check = Some(r.rect);
                 let requested = r.clicked() || check_key(ui, &self.metrics);
                 if requested && ui.is_enabled() {
@@ -223,16 +242,15 @@ impl LabApp {
                     if l.checked {
                         let checks = l.checks(lesson);
                         if checks.iter().all(|c| c.0) {
-                            ui.colored_label(
-                                palette(ui).success,
-                                "Example checks pass · No assignment credit",
-                            );
+                            ui.colored_label(palette(ui).success, "Example checks pass");
                         }
                         self.metrics.dhcp_result_summary = Some(result_rows(ui, &checks));
                     }
                 });
                 self.metrics.feedback = Some(results.response.rect);
-                ui.label(format!("Try a change: {}", lesson.try_change.description));
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change.description));
+                }
                 let r = ui.add(button("Open full assignment"));
                 self.metrics.assignment_action = Some(r.rect);
                 let assignment = r.clicked();
@@ -250,7 +268,7 @@ impl LabApp {
                 }
             }
             teaching::View::Assignment => {
-                ui.label(&s.objective);
+                ccna_presentation::assignment(ui, &s);
                 let engine::Goal::DhcpV4 { initial, .. } = &s.goal else {
                     unreachable!()
                 };

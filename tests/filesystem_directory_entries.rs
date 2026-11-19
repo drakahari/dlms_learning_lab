@@ -35,6 +35,7 @@ fn tree() -> Tree {
         umask: 0o077,
         clock: 0,
         modified: BTreeMap::new(),
+        command_location: None,
     };
     for path in [
         "/",

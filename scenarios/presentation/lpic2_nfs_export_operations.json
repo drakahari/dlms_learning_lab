@@ -1,0 +1,67 @@
+[
+  {
+    "id": "lpic2-withdraw-obsolete-nfs-export",
+    "context": "Builds on saving NFS export options and testing approved client access. Here an existing old mount affects when you can publish the saved policy in the simulator.",
+    "goal": "Remove an obsolete share from the server’s current export list while preserving the archive mount and approved reference access.",
+    "concepts": [
+      {
+        "title": "Read the current export list",
+        "text": "The virtual /etc/exports file holds saved settings. Saving an edit does not publish it. On the server, exportfs -v reports which paths and access options are applied now."
+      },
+      {
+        "title": "Re-export after checking current mounts",
+        "text": "Use exportfs -r or exportfs -ra to publish the saved settings in this exercise. This simulator refuses to change an export when a conflicting current mount depends on it. Unmount only the retired client. Preserve independent working shares."
+      },
+      {
+        "title": "Verify the client experience",
+        "text": "showmount -e with the server address shows what the supplied NFSv3 server advertises. A client must still mount the right path and have permission to read its file. Try a fresh mount for the retired client as well."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Compare saved and applied",
+        "value": "exportfs -v\nshowmount -e 192.0.2.10",
+        "explanation": "The old /srv/demo-drop export is still visible while the current rules remain applied."
+      },
+      {
+        "label": "Resolve a conflicting mount",
+        "value": "exportfs -ra",
+        "explanation": "Remove only the demo-drop rule and select Save export file. Select Unmount retired client, then run the command. Leave the archive mount in place."
+      },
+      {
+        "label": "Verify the current list and actual access",
+        "value": "showmount -e 192.0.2.10",
+        "explanation": "The old path is absent. Select Mount approved share and Read reference file to verify that approved access still works."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Save one retirement",
+        "action": "Check the draft in Server file. Remove only the line for /srv/demo-drop and select Save export file.",
+        "observe": "The display marks your changes saved. The current server still uses its earlier export list."
+      },
+      {
+        "title": "Compare and try to re-export",
+        "action": "Run exportfs -v and showmount -e 192.0.2.10. Try exportfs -ra while the old client mount is still present.",
+        "observe": "The old path remains visible and the simulator refuses the conflicting re-export. Your saved changes stay in place."
+      },
+      {
+        "title": "Remove the old mount and verify",
+        "action": "Select Unmount retired client, then run exportfs -ra and repeat showmount -e. Select Test retired mount, Mount approved share, and Read reference file. Finish with Check workspace.",
+        "observe": "The retired client receives no mount. The approved client can read the file and the archive mount is preserved."
+      }
+    ],
+    "requirements": [
+      "Save a revised export file that removes the old-bundle share. Keep both remaining export rules unchanged and re-export without disturbing the archive mount.",
+      "Confirm a fresh retired client cannot mount the old share. The approved client should mount the reference share and read its supplied file.",
+      "Keep the contents of all the existing files intact."
+    ],
+    "source": "scenarios/nfs-export-operations-v1.json",
+    "status": "updated",
+    "review": {
+      "introduction": "Distinguishes saved file, applied server output, advertised share and actual client access before practice.",
+      "example": "Checks one intended virtual retirement and the simulator’s active-mount refusal with typed commands and a separate known source.",
+      "assignment": "Keeps independent meaningful configuration, mount, file-preservation and denied fresh request checks in an isolated typed workspace."
+    }
+  }
+]

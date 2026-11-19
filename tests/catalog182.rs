@@ -24,7 +24,7 @@ fn recipe() -> Value {
 }
 #[test]
 fn old180_fullspecs_all55scripts420cases55examples_and_original45packs_are_immutable() {
-    assert_eq!(shell::EVALUATOR_REVISION, 15);
+    assert_eq!(shell::EVALUATOR_REVISION, 19);
     let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();

@@ -1,0 +1,1194 @@
+{
+  "schema_version": 1,
+  "lessons": [
+    {
+      "scenario": {
+        "id": "lpic1-editor-handover",
+        "version": 1,
+        "track": "LPIC-1",
+        "unit": "standard-editor-handover",
+        "topic": "Default editor and saved-file handover",
+        "title": "Configure an inherited editor and complete a handover",
+        "summary": "Repair the editor setting across sample environments, then use its actual inherited choice to maintain a virtual handover file.",
+        "objective": "Configure inherited EDITOR from each supplied PREFERRED_EDITOR without changing TEAM or printing setup output. Open the handover file with that choice, replace OWNER legacy with exactly one OWNER platform record and add exactly one REVIEW ready record. Preserve all other complete lines and the operator note, save the file and check the handover.",
+        "difficulty": "Intermediate",
+        "minutes": 20,
+        "steps": [
+          "Understand the task, run the setup against its sample environments, open the simulated editor, repair the handover and check saved outcomes."
+        ],
+        "guide": [],
+        "explanation": "An exported EDITOR reaches the application's child environment; an ordinary private value does not. The samples with no existing export catch a setup that only happens to work when EDITOR was inherited. The application reads its actual inherited choice, then the saved handover must contain the required records without losing other lines. Editing the buffer alone is not enough: write it before checking.",
+        "hints": [
+          "PREFERRED_EDITOR and TEAM are supplied by each sample. EDITOR is the setting your setup creates or replaces; a fixed choice will not satisfy every sample.",
+          "A value can be correct in the setup but missing in the child. Inspect each actual result and the export attribute rather than printing a look-alike report.",
+          "After opening the handover, search for the complete OWNER record before removing it. Add the requested records while preserving the ticket and safety note, then :w and Enter."
+        ],
+        "sources": [
+          "https://www.lpi.org/our-certifications/exam-101-102-objectives/#103.8",
+          "https://man7.org/linux/man-pages/man1/bash.1.html#ENVIRONMENT",
+          "https://man7.org/linux/man-pages/man1/crontab.1.html",
+          "https://vimhelp.org/intro.txt.html",
+          "https://vimhelp.org/editing.txt.html",
+          "https://nano-editor.org/dist/latest/nano.html"
+        ],
+        "simplifications": "Existing bounded in-process shell and vi-style editor, not a host shell or editor. The simulated handover application consults EDITOR only and accepts the exact supplied names vi and vim; other programs can use VISUAL or different defaults. No flags, editor paths, host programs or profile edits. Nano/Emacs are supporting awareness only, not emulated editors. Setup samples have separate environments; the supplied handover virtual files are edited separately. Full vi syntax and other LPIC objectives remain outside this activity.",
+        "prerequisites": []
+      },
+      "definition": {
+        "id": "lpic1-editor-handover",
+        "version": 1,
+        "setup": {
+          "id": "lpic1-editor-handover-setup",
+          "assignment": {
+            "id": "lpic1-editor-handover-assignment",
+            "instructions": "Set EDITOR from each sample's supplied PREFERRED_EDITOR, mark it for inheritance, preserve the other supplied values and leave setup output empty.",
+            "starter": "# Configure the editor for the simulated handover application.\n",
+            "child_source": "printf 'editor=%s\\nteam=%s\\n' \"$EDITOR\" \"$TEAM\"",
+            "cases": [
+              {
+                "input": {
+                  "name": "No inherited editor",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PREFERRED_EDITOR": "vi",
+                    "TEAM": "operations"
+                  },
+                  "files": {},
+                  "after": {},
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                "parent": {
+                  "EDITOR": {
+                    "value": "vi",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "No inherited editor",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PREFERRED_EDITOR": "vi",
+                    "TEAM": "operations",
+                    "EDITOR": "vi"
+                  },
+                  "files": {},
+                  "after": {},
+                  "stdout": "editor=vi\nteam=operations\n",
+                  "stderr": "",
+                  "status": 0
+                }
+              },
+              {
+                "input": {
+                  "name": "Existing inherited editor",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PREFERRED_EDITOR": "vim",
+                    "TEAM": "operations",
+                    "EDITOR": "nano"
+                  },
+                  "files": {},
+                  "after": {},
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                "parent": {
+                  "EDITOR": {
+                    "value": "vim",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Existing inherited editor",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PREFERRED_EDITOR": "vim",
+                    "TEAM": "operations",
+                    "EDITOR": "vim"
+                  },
+                  "files": {},
+                  "after": {},
+                  "stdout": "editor=vim\nteam=operations\n",
+                  "stderr": "",
+                  "status": 0
+                }
+              },
+              {
+                "input": {
+                  "name": "Empty inherited editor",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PREFERRED_EDITOR": "vi",
+                    "TEAM": "operations",
+                    "EDITOR": ""
+                  },
+                  "files": {},
+                  "after": {},
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                "parent": {
+                  "EDITOR": {
+                    "value": "vi",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Empty inherited editor",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PREFERRED_EDITOR": "vi",
+                    "TEAM": "operations",
+                    "EDITOR": "vi"
+                  },
+                  "files": {},
+                  "after": {},
+                  "stdout": "editor=vi\nteam=operations\n",
+                  "stderr": "",
+                  "status": 0
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic1-editor-handover-example",
+            "instructions": "Set EDITOR from each sample's supplied PREFERRED_EDITOR, mark it for inheritance, preserve the other supplied values and leave setup output empty.",
+            "starter": "EDITOR=\"$PREFERRED_EDITOR\"\n",
+            "child_source": "printf 'editor=%s\\nteam=%s\\n' \"$EDITOR\" \"$TEAM\"",
+            "cases": [
+              {
+                "input": {
+                  "name": "No inherited editor",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PREFERRED_EDITOR": "vim",
+                    "TEAM": "training team"
+                  },
+                  "files": {},
+                  "after": {},
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                "parent": {
+                  "EDITOR": {
+                    "value": "vim",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "No inherited editor",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PREFERRED_EDITOR": "vim",
+                    "TEAM": "training team",
+                    "EDITOR": "vim"
+                  },
+                  "files": {},
+                  "after": {},
+                  "stdout": "editor=vim\nteam=training team\n",
+                  "stderr": "",
+                  "status": 0
+                }
+              },
+              {
+                "input": {
+                  "name": "Existing inherited editor",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PREFERRED_EDITOR": "vi",
+                    "TEAM": "training team",
+                    "EDITOR": "nano"
+                  },
+                  "files": {},
+                  "after": {},
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                "parent": {
+                  "EDITOR": {
+                    "value": "vi",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Existing inherited editor",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PREFERRED_EDITOR": "vi",
+                    "TEAM": "training team",
+                    "EDITOR": "vi"
+                  },
+                  "files": {},
+                  "after": {},
+                  "stdout": "editor=vi\nteam=training team\n",
+                  "stderr": "",
+                  "status": 0
+                }
+              },
+              {
+                "input": {
+                  "name": "Empty inherited editor",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PREFERRED_EDITOR": "vim",
+                    "TEAM": "training team",
+                    "EDITOR": ""
+                  },
+                  "files": {},
+                  "after": {},
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                "parent": {
+                  "EDITOR": {
+                    "value": "vim",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Empty inherited editor",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PREFERRED_EDITOR": "vim",
+                    "TEAM": "training team",
+                    "EDITOR": "vim"
+                  },
+                  "files": {},
+                  "after": {},
+                  "stdout": "editor=vim\nteam=training team\n",
+                  "stderr": "",
+                  "status": 0
+                }
+              }
+            ]
+          }
+        },
+        "editing": {
+          "id": "lpic1-editor-handover",
+          "version": 1,
+          "initial": {
+            "files": {
+              "/lab/handover.txt": {
+                "text": "TICKET PL-42\nOWNER legacy\nKEEP safety-note\n",
+                "writable": true,
+                "draft": null
+              },
+              "/lab/operator-note.txt": {
+                "text": "Preserve note for PL-42.\n",
+                "writable": false,
+                "draft": null
+              }
+            },
+            "start": "/lab/handover.txt",
+            "requirements": [
+              {
+                "kind": "Records",
+                "path": "/lab/handover.txt",
+                "counts": {
+                  "OWNER legacy": 0,
+                  "OWNER platform": 1,
+                  "REVIEW ready": 1
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "path": "/lab/operator-note.txt"
+              }
+            ]
+          },
+          "example": {
+            "files": {
+              "/lab/handover.txt": {
+                "text": "TICKET DEMO-8\nOWNER temporary\nKEEP safety-note\n",
+                "writable": true,
+                "draft": null
+              },
+              "/lab/operator-note.txt": {
+                "text": "Preserve note for DEMO-8.\n",
+                "writable": false,
+                "draft": null
+              }
+            },
+            "start": "/lab/handover.txt",
+            "requirements": [
+              {
+                "kind": "Records",
+                "path": "/lab/handover.txt",
+                "counts": {
+                  "OWNER temporary": 0,
+                  "OWNER training": 1,
+                  "REVIEW practice": 1
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "path": "/lab/operator-note.txt"
+              }
+            ]
+          },
+          "example_solution": [
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "/"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "O"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "W"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "N"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "E"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "R"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Enter"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "d"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "d"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "G"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "o"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "O"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "W"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "N"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "E"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "R"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": " "
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "t"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "r"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "a"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "i"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "n"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "i"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "n"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "g"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Enter"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "R"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "E"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "V"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "I"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "E"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "W"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": " "
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "p"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "r"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "a"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "c"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "t"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "i"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "c"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "e"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Escape"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": ":"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Character",
+                "value": "w"
+              }
+            },
+            {
+              "kind": "Key",
+              "key": {
+                "kind": "Enter"
+              }
+            }
+          ]
+        },
+        "example_setup": "export EDITOR=\"$PREFERRED_EDITOR\"\n"
+      },
+      "presentation": {
+        "id": "lpic1-editor-handover",
+        "context": "Builds on the shell-environment unit and modal-file editing: variables, quotes, export, NORMAL/INSERT, search and :w. This task combines setup and a real saved-file repair.",
+        "concepts": [
+          {
+            "title": "A value in one shell is not automatically shared",
+            "text": "EDITOR names a preferred editor for applications that consult it. EDITOR=vi sets a shell value. If EDITOR was not already exported, a subsequently started child does not receive it. A value inherited at shell startup already has its export attribute, which can make the same incomplete setup seem to work on one machine."
+          },
+          {
+            "title": "Pass the requested setting to the child",
+            "text": "export marks a variable for inheritance. For example, export EDITOR=vi both sets the value and marks it. In this activity PREFERRED_EDITOR and TEAM are supplied separately for every test; your setup creates or replaces EDITOR from the supplied preference. Keep TEAM unchanged. The supplied child prints the report, so your setup should not print a replacement report."
+          },
+          {
+            "title": "An editor choice is an application convention",
+            "text": "Vim is a vi-style editor that uses modes. GNU nano and Emacs are other common editors, with their own controls. Applications choose which setting they honor: for example, crontab documents VISUAL or EDITOR. This exercise's handover application reads only EDITOR and supports vi or vim through the same bounded native editor. It never runs those names on your computer."
+          },
+          {
+            "title": "Configure, open, edit and verify",
+            "text": "Run setup first and inspect all sample results. Once they pass, Open handover file with selected editor uses the actual child value. Change the supplied virtual file using the editing skills you already practiced. :w writes that file; Check handover verifies both the setup behavior and the saved records. Changing setup invalidates its earlier launch and check while retaining your file draft."
+          }
+        ],
+        "worked": [
+          {
+            "label": "Supplied editor",
+            "value": "PREFERRED_EDITOR=vim",
+            "explanation": "The example supplies this preference; the setup reads it."
+          },
+          {
+            "label": "Supplied team",
+            "value": "TEAM=\"training team\"",
+            "explanation": "Preserve this supplied value when passing the editor choice to the child."
+          },
+          {
+            "label": "Incomplete setup",
+            "value": "EDITOR=\"$PREFERRED_EDITOR\"",
+            "explanation": "A sample with no inherited EDITOR reveals the missing export; an already exported value can conceal it."
+          },
+          {
+            "label": "Worked setup",
+            "value": "export EDITOR=\"$PREFERRED_EDITOR\"",
+            "explanation": "The child receives the actual requested editor in every sample; equivalent supported assignments followed by export also work."
+          },
+          {
+            "label": "Expected child report",
+            "value": "editor=vim\nteam=training team",
+            "explanation": "This is expected output for the first training sample, not an actual run result. Run setup creates the actual results."
+          },
+          {
+            "label": "Training file change",
+            "value": "OWNER temporary \u2192 OWNER training\nadd REVIEW practice",
+            "explanation": "Keep TICKET DEMO-8, KEEP safety-note and the supplied operator note. The independent assignment uses different records."
+          }
+        ],
+        "practice": [
+          {
+            "title": "Run the incomplete example setup",
+            "action": "Select Run setup without changing the example script. Open Actual setup results and compare No inherited editor with Existing inherited editor.",
+            "observe": "The missing export is exposed by a sample where EDITOR was absent. An inherited value can keep its export attribute and make another sample pass."
+          },
+          {
+            "title": "Repair the setup and inspect the actual choice",
+            "action": "Mark EDITOR for inheritance, or select Fill worked setup to insert the demonstrated code without running it. Select Run setup, then inspect the actual child EDITOR values.",
+            "observe": "All three samples should pass. vi and vim are supplied preferences; a fixed choice fails a sample with the other preference. Actual child reports appear only after a run."
+          },
+          {
+            "title": "Use the selected editor for a saved-file change",
+            "action": "Select Open handover file with selected editor. Click its editor, type /OWNER and Enter, then dd. Use G and o to append OWNER training and a new line REVIEW practice; Escape returns to NORMAL. Type :w and Enter, then Check example.",
+            "observe": "The saved file keeps its ticket and safety note, replaces only the temporary owner and adds the review record. Unsaved edits or missing/duplicate records receive separate feedback."
+          }
+        ],
+        "requirements": [
+          "Configure inherited EDITOR from each supplied PREFERRED_EDITOR without changing TEAM or printing setup output.",
+          "Open the handover file with that choice, replace OWNER legacy with exactly one OWNER platform record and add exactly one REVIEW ready record.",
+          "Preserve all other complete lines and the operator note, save the file and check the handover."
+        ],
+        "source": "scenarios/editor-handover-lessons-v1.json",
+        "status": "updated",
+        "review": {
+          "introduction": "Reviewed export inheritance, supplied versus created variables, application conventions and the separate training handover. R24 actual Introduction/worked originals inspected; split supplied values remain readable in aligned rows. Supporting editor awareness is not nano/Emacs emulation or independent novice acceptance.",
+          "example": "Reviewed incomplete setup, inert Fill worked setup, actual bounded runs and inherited-choice/editor handover. R24 actual61-action flow passes; practice and actual comparison originals inspected with one failing case and two genuine passed cases. Independent drafts remain untouched; no physical keyboard or independent novice acceptance.",
+          "assignment": "Reviewed dynamic editor preference, preserved TEAM, independent record maintenance and saved-file requirements. R24 actual typing, wrong/partial/unsaved work, retry, stale launch invalidation, save/readback and reset pass; assignment/editor/feedback/completion plus light150/dark200 originals inspected. Window actual sizes recorded, not inferred; no two-process cold reopen, screen-reader or independent novice acceptance."
+        },
+        "goal": "Configure an editor preference that reaches the handover application, then update and save its handover record."
+      },
+      "assignment_events": [
+        {
+          "kind": "Setup",
+          "source": "export EDITOR=\"$PREFERRED_EDITOR\"\n"
+        },
+        {
+          "kind": "RunSetup"
+        },
+        {
+          "kind": "OpenEditor"
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "/"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "O"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "W"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "N"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "E"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "R"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Enter"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "d"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "d"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "G"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "o"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "O"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "W"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "N"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "E"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "R"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": " "
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "p"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "l"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "a"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "t"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "f"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "o"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "r"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "m"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Enter"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "R"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "E"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "V"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "I"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "E"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "W"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": " "
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "r"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "e"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "a"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "d"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "y"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Escape"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": ":"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "w"
+            }
+          }
+        },
+        {
+          "kind": "File",
+          "event": {
+            "kind": "Key",
+            "key": {
+              "kind": "Enter"
+            }
+          }
+        },
+        {
+          "kind": "Check"
+        }
+      ]
+    }
+  ],
+  "unit": {
+    "id": "standard-editor-handover",
+    "track": "LPIC-1",
+    "title": "Choose an editor and complete a file handover",
+    "prerequisites": [
+      "modal-file-editing",
+      "linux-shell-environment"
+    ],
+    "labs": [
+      "lpic1-editor-handover"
+    ],
+    "summary": "Combine inherited settings, editor selection and an independent saved-file repair."
+  }
+}

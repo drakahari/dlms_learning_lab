@@ -1,0 +1,752 @@
+{
+  "ccna-diverse-branch-paths": {
+    "example": {
+      "topology": {
+        "nodes": [
+          {
+            "label": "Training desk",
+            "role": "workstation",
+            "location": "branch"
+          },
+          {
+            "label": "Branch edge",
+            "role": "gateway",
+            "location": "branch"
+          },
+          {
+            "label": "Ferry carrier",
+            "role": "provider_transit",
+            "location": "service_provider"
+          },
+          {
+            "label": "Hill carrier",
+            "role": "provider_transit",
+            "location": "service_provider"
+          },
+          {
+            "label": "Distribution site edge",
+            "role": "gateway",
+            "location": "worksite"
+          },
+          {
+            "label": "Training stock app",
+            "role": "local_service",
+            "location": "worksite"
+          },
+          {
+            "label": "Visitor device",
+            "role": "workstation",
+            "location": "branch"
+          }
+        ],
+        "links": [
+          {
+            "label": "Training desk to branch edge",
+            "ends": [
+              0,
+              1
+            ],
+            "circuit_group": null
+          },
+          {
+            "label": "Ferry to distribution site",
+            "ends": [
+              2,
+              4
+            ],
+            "circuit_group": 1
+          },
+          {
+            "label": "Hill to distribution site",
+            "ends": [
+              3,
+              4
+            ],
+            "circuit_group": 2
+          },
+          {
+            "label": "Site edge to application",
+            "ends": [
+              4,
+              5
+            ],
+            "circuit_group": null
+          },
+          {
+            "label": "Ferry connection A",
+            "ends": [
+              1,
+              2
+            ],
+            "circuit_group": 1
+          },
+          {
+            "label": "Ferry connection B",
+            "ends": [
+              1,
+              2
+            ],
+            "circuit_group": 1
+          },
+          {
+            "label": "Hill connection A",
+            "ends": [
+              1,
+              3
+            ],
+            "circuit_group": 2
+          },
+          {
+            "label": "Hill connection B",
+            "ends": [
+              1,
+              3
+            ],
+            "circuit_group": 2
+          },
+          {
+            "label": "Visitor to branch edge",
+            "ends": [
+              6,
+              1
+            ],
+            "circuit_group": null
+          }
+        ]
+      },
+      "trials": [
+        {
+          "label": "Desk reaches application in ordinary operation",
+          "from": 0,
+          "to": 5,
+          "reachable": true,
+          "outage": {
+            "kind": "none"
+          },
+          "retry": "Follow the path from the branch edge to a carrier that reaches the application site."
+        },
+        {
+          "label": "Application remains reachable when Ferry is unavailable",
+          "from": 0,
+          "to": 5,
+          "reachable": true,
+          "outage": {
+            "kind": "circuit_group",
+            "id": 1
+          },
+          "retry": "Both Ferry connections fail together. Look for a path using another carrier."
+        },
+        {
+          "label": "Application remains reachable when Hill is unavailable",
+          "from": 0,
+          "to": 5,
+          "reachable": true,
+          "outage": {
+            "kind": "circuit_group",
+            "id": 2
+          },
+          "retry": "Keep a working Ferry path as well as an independent second path."
+        },
+        {
+          "label": "Visitor stays separate in ordinary operation",
+          "from": 6,
+          "to": 5,
+          "reachable": false,
+          "outage": {
+            "kind": "none"
+          },
+          "retry": "The visitor connection can also join the forwarding path. Leave that connection separate."
+        },
+        {
+          "label": "Application can reach desk when Ferry is unavailable",
+          "from": 5,
+          "to": 0,
+          "reachable": true,
+          "outage": {
+            "kind": "circuit_group",
+            "id": 1
+          },
+          "retry": "The same links must let a reply follow the surviving carrier path."
+        }
+      ],
+      "initial": 63,
+      "fixed": 15,
+      "choices": 496,
+      "max_choices": 2
+    },
+    "assignment": {
+      "topology": {
+        "nodes": [
+          {
+            "label": "Branch desk",
+            "role": "workstation",
+            "location": "branch"
+          },
+          {
+            "label": "Branch edge",
+            "role": "gateway",
+            "location": "branch"
+          },
+          {
+            "label": "Ferry carrier",
+            "role": "provider_transit",
+            "location": "service_provider"
+          },
+          {
+            "label": "Hill carrier",
+            "role": "provider_transit",
+            "location": "service_provider"
+          },
+          {
+            "label": "Distribution site edge",
+            "role": "gateway",
+            "location": "worksite"
+          },
+          {
+            "label": "Dispatch application",
+            "role": "local_service",
+            "location": "worksite"
+          },
+          {
+            "label": "Visitor device",
+            "role": "workstation",
+            "location": "branch"
+          }
+        ],
+        "links": [
+          {
+            "label": "Branch desk to branch edge",
+            "ends": [
+              0,
+              1
+            ],
+            "circuit_group": null
+          },
+          {
+            "label": "Ferry to distribution site",
+            "ends": [
+              2,
+              4
+            ],
+            "circuit_group": 1
+          },
+          {
+            "label": "Hill to distribution site",
+            "ends": [
+              3,
+              4
+            ],
+            "circuit_group": 2
+          },
+          {
+            "label": "Site edge to application",
+            "ends": [
+              4,
+              5
+            ],
+            "circuit_group": null
+          },
+          {
+            "label": "Ferry connection A",
+            "ends": [
+              1,
+              2
+            ],
+            "circuit_group": 1
+          },
+          {
+            "label": "Ferry connection B",
+            "ends": [
+              1,
+              2
+            ],
+            "circuit_group": 1
+          },
+          {
+            "label": "Hill connection A",
+            "ends": [
+              1,
+              3
+            ],
+            "circuit_group": 2
+          },
+          {
+            "label": "Hill connection B",
+            "ends": [
+              1,
+              3
+            ],
+            "circuit_group": 2
+          },
+          {
+            "label": "Visitor to branch edge",
+            "ends": [
+              6,
+              1
+            ],
+            "circuit_group": null
+          }
+        ]
+      },
+      "trials": [
+        {
+          "label": "Desk reaches application in ordinary operation",
+          "from": 0,
+          "to": 5,
+          "reachable": true,
+          "outage": {
+            "kind": "none"
+          },
+          "retry": "Follow the path from the branch edge to a carrier that reaches the application site."
+        },
+        {
+          "label": "Application remains reachable when Ferry is unavailable",
+          "from": 0,
+          "to": 5,
+          "reachable": true,
+          "outage": {
+            "kind": "circuit_group",
+            "id": 1
+          },
+          "retry": "Both Ferry connections fail together. Look for a path using another carrier."
+        },
+        {
+          "label": "Application remains reachable when Hill is unavailable",
+          "from": 0,
+          "to": 5,
+          "reachable": true,
+          "outage": {
+            "kind": "circuit_group",
+            "id": 2
+          },
+          "retry": "Keep a working Ferry path as well as an independent second path."
+        },
+        {
+          "label": "Visitor stays separate in ordinary operation",
+          "from": 6,
+          "to": 5,
+          "reachable": false,
+          "outage": {
+            "kind": "none"
+          },
+          "retry": "The visitor connection can also join the forwarding path. Leave that connection separate."
+        },
+        {
+          "label": "Application can reach desk when Ferry is unavailable",
+          "from": 5,
+          "to": 0,
+          "reachable": true,
+          "outage": {
+            "kind": "circuit_group",
+            "id": 1
+          },
+          "retry": "The same links must let a reply follow the surviving carrier path."
+        }
+      ],
+      "initial": 287,
+      "fixed": 15,
+      "choices": 496,
+      "max_choices": 2
+    }
+  },
+  "ccna-local-and-hosted-connectivity": {
+    "example": {
+      "topology": {
+        "nodes": [
+          {
+            "label": "Workshop laptop",
+            "role": "workstation",
+            "location": "worksite"
+          },
+          {
+            "label": "Office gateway",
+            "role": "gateway",
+            "location": "worksite"
+          },
+          {
+            "label": "Workshop printer",
+            "role": "local_service",
+            "location": "worksite"
+          },
+          {
+            "label": "Fixed carrier",
+            "role": "provider_transit",
+            "location": "service_provider"
+          },
+          {
+            "label": "Backup carrier",
+            "role": "provider_transit",
+            "location": "service_provider"
+          },
+          {
+            "label": "Hosted edge",
+            "role": "gateway",
+            "location": "hosted_site"
+          },
+          {
+            "label": "Workshop agenda",
+            "role": "hosted_service",
+            "location": "hosted_site"
+          },
+          {
+            "label": "Visitor kiosk",
+            "role": "workstation",
+            "location": "worksite"
+          }
+        ],
+        "links": [
+          {
+            "label": "Workshop laptop to office gateway",
+            "ends": [
+              0,
+              1
+            ],
+            "circuit_group": null
+          },
+          {
+            "label": "Fixed carrier to hosted edge",
+            "ends": [
+              3,
+              5
+            ],
+            "circuit_group": 1
+          },
+          {
+            "label": "Backup carrier to hosted edge",
+            "ends": [
+              4,
+              5
+            ],
+            "circuit_group": 2
+          },
+          {
+            "label": "Hosted edge to hosted service",
+            "ends": [
+              5,
+              6
+            ],
+            "circuit_group": null
+          },
+          {
+            "label": "Local printer connection A",
+            "ends": [
+              1,
+              2
+            ],
+            "circuit_group": null
+          },
+          {
+            "label": "Local printer connection B",
+            "ends": [
+              1,
+              2
+            ],
+            "circuit_group": null
+          },
+          {
+            "label": "Office to fixed carrier",
+            "ends": [
+              1,
+              3
+            ],
+            "circuit_group": 1
+          },
+          {
+            "label": "Office to backup carrier",
+            "ends": [
+              1,
+              4
+            ],
+            "circuit_group": 2
+          },
+          {
+            "label": "Visitor to office gateway",
+            "ends": [
+              7,
+              1
+            ],
+            "circuit_group": null
+          }
+        ]
+      },
+      "trials": [
+        {
+          "label": "Laptop reaches local printer",
+          "from": 0,
+          "to": 2,
+          "reachable": true,
+          "outage": {
+            "kind": "none"
+          },
+          "retry": "Provide a path from the laptop and gateway to the printer at this site."
+        },
+        {
+          "label": "Laptop reaches hosted service normally",
+          "from": 0,
+          "to": 6,
+          "reachable": true,
+          "outage": {
+            "kind": "none"
+          },
+          "retry": "The hosted service sits at a different site. Connect a working carrier path."
+        },
+        {
+          "label": "Local print remains available without the office uplink",
+          "from": 0,
+          "to": 2,
+          "reachable": true,
+          "outage": {
+            "kind": "link",
+            "index": 6
+          },
+          "retry": "The printer should stay on the office side when the office gateway loses its fixed carrier."
+        },
+        {
+          "label": "Hosted service is reachable without the fixed carrier",
+          "from": 0,
+          "to": 6,
+          "reachable": true,
+          "outage": {
+            "kind": "node",
+            "index": 3
+          },
+          "retry": "The fixed carrier is unavailable. Use the supplied backup path for the hosted service."
+        },
+        {
+          "label": "Hosted service remains reachable without the backup carrier",
+          "from": 0,
+          "to": 6,
+          "reachable": true,
+          "outage": {
+            "kind": "node",
+            "index": 4
+          },
+          "retry": "Keep the working fixed carrier path as well as the backup."
+        },
+        {
+          "label": "Visitor cannot use local printing",
+          "from": 7,
+          "to": 2,
+          "reachable": false,
+          "outage": {
+            "kind": "none"
+          },
+          "retry": "Keep the visitor off the office links that lead to the printer."
+        },
+        {
+          "label": "Visitor cannot reach the hosted service through the office",
+          "from": 7,
+          "to": 6,
+          "reachable": false,
+          "outage": {
+            "kind": "none"
+          },
+          "retry": "The same visitor connection would also offer a path to the hosted service."
+        }
+      ],
+      "initial": 95,
+      "fixed": 15,
+      "choices": 496,
+      "max_choices": 3
+    },
+    "assignment": {
+      "topology": {
+        "nodes": [
+          {
+            "label": "Studio laptop",
+            "role": "workstation",
+            "location": "worksite"
+          },
+          {
+            "label": "Office gateway",
+            "role": "gateway",
+            "location": "worksite"
+          },
+          {
+            "label": "Studio printer",
+            "role": "local_service",
+            "location": "worksite"
+          },
+          {
+            "label": "Fixed carrier",
+            "role": "provider_transit",
+            "location": "service_provider"
+          },
+          {
+            "label": "Backup carrier",
+            "role": "provider_transit",
+            "location": "service_provider"
+          },
+          {
+            "label": "Hosted edge",
+            "role": "gateway",
+            "location": "hosted_site"
+          },
+          {
+            "label": "Hosted order desk",
+            "role": "hosted_service",
+            "location": "hosted_site"
+          },
+          {
+            "label": "Visitor kiosk",
+            "role": "workstation",
+            "location": "worksite"
+          }
+        ],
+        "links": [
+          {
+            "label": "Studio laptop to office gateway",
+            "ends": [
+              0,
+              1
+            ],
+            "circuit_group": null
+          },
+          {
+            "label": "Fixed carrier to hosted edge",
+            "ends": [
+              3,
+              5
+            ],
+            "circuit_group": 1
+          },
+          {
+            "label": "Backup carrier to hosted edge",
+            "ends": [
+              4,
+              5
+            ],
+            "circuit_group": 2
+          },
+          {
+            "label": "Hosted edge to hosted service",
+            "ends": [
+              5,
+              6
+            ],
+            "circuit_group": null
+          },
+          {
+            "label": "Local printer connection A",
+            "ends": [
+              1,
+              2
+            ],
+            "circuit_group": null
+          },
+          {
+            "label": "Local printer connection B",
+            "ends": [
+              1,
+              2
+            ],
+            "circuit_group": null
+          },
+          {
+            "label": "Office to fixed carrier",
+            "ends": [
+              1,
+              3
+            ],
+            "circuit_group": 1
+          },
+          {
+            "label": "Office to backup carrier",
+            "ends": [
+              1,
+              4
+            ],
+            "circuit_group": 2
+          },
+          {
+            "label": "Visitor to office gateway",
+            "ends": [
+              7,
+              1
+            ],
+            "circuit_group": null
+          }
+        ]
+      },
+      "trials": [
+        {
+          "label": "Laptop reaches local printer",
+          "from": 0,
+          "to": 2,
+          "reachable": true,
+          "outage": {
+            "kind": "none"
+          },
+          "retry": "Provide a path from the laptop and gateway to the printer at this site."
+        },
+        {
+          "label": "Laptop reaches hosted service normally",
+          "from": 0,
+          "to": 6,
+          "reachable": true,
+          "outage": {
+            "kind": "none"
+          },
+          "retry": "The hosted service sits at a different site. Connect a working carrier path."
+        },
+        {
+          "label": "Local print remains available without the office uplink",
+          "from": 0,
+          "to": 2,
+          "reachable": true,
+          "outage": {
+            "kind": "link",
+            "index": 6
+          },
+          "retry": "The printer should stay on the office side when the office gateway loses its fixed carrier."
+        },
+        {
+          "label": "Hosted service is reachable without the fixed carrier",
+          "from": 0,
+          "to": 6,
+          "reachable": true,
+          "outage": {
+            "kind": "node",
+            "index": 3
+          },
+          "retry": "The fixed carrier is unavailable. Use the supplied backup path for the hosted service."
+        },
+        {
+          "label": "Hosted service remains reachable without the backup carrier",
+          "from": 0,
+          "to": 6,
+          "reachable": true,
+          "outage": {
+            "kind": "node",
+            "index": 4
+          },
+          "retry": "Keep the working fixed carrier path as well as the backup."
+        },
+        {
+          "label": "Visitor cannot use local printing",
+          "from": 7,
+          "to": 2,
+          "reachable": false,
+          "outage": {
+            "kind": "none"
+          },
+          "retry": "Keep the visitor off the office links that lead to the printer."
+        },
+        {
+          "label": "Visitor cannot reach the hosted service through the office",
+          "from": 7,
+          "to": 6,
+          "reachable": false,
+          "outage": {
+            "kind": "none"
+          },
+          "retry": "The same visitor connection would also offer a path to the hosted service."
+        }
+      ],
+      "initial": 335,
+      "fixed": 15,
+      "choices": 496,
+      "max_choices": 3
+    }
+  }
+}

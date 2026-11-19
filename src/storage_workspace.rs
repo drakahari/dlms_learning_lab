@@ -1,4 +1,5 @@
 //! Current storage outcomes, saved drafts and in-memory investigation commands.
+pub mod swap;
 use crate::storage::{self, Inventory, Mount, MountOutcome, State};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -6,10 +7,14 @@ use std::collections::{BTreeMap, BTreeSet};
 pub const MAX_DRAFT_BYTES: usize = storage::MAX_CONFIG_BYTES * 4;
 pub const MAX_OUTPUT: usize = 32_768;
 pub const HELP: &str = "blkid [DEVICE] • cat /etc/fstab • mount • mount TARGET • umount TARGET • help. Literal paths from this activity only; no shell expansion, pipelines, redirection, remount, -a or host access. Edit saved configuration in the native editor. Validate configuration and Test fresh session are simulator actions, not Linux commands.";
+pub const HELP_WITH_SWAP: &str = "Existing literal mount forms: blkid [DEVICE]; cat /etc/fstab; mount; mount TARGET; umount TARGET; help. Edit and save the native configuration file. Mount -a, pipelines, redirection and shell expansion remain unsupported. Additional swap forms: swapon --show --bytes; swapon -a; swapon -p N DEVICE; swapon -p N -U UUID; swapoff DEVICE; swapoff -U UUID. Priorities are explicit0–32767. Saving does not activate or reprioritize an area. No actual swap, paging, memory policy or system change occurs. Validate configuration and fresh-policy tests are native simulator actions.";
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Requirement {
+    Swap {
+        requirement: swap::Requirement,
+    },
     Configured {
         target: String,
         volume: String,
@@ -39,6 +44,7 @@ pub enum Requirement {
 impl Requirement {
     fn check(&self, state: &State, requirements: &[Requirement]) -> (bool, String) {
         match self {
+            Self::Swap { requirement } => requirement.check(state),
             Self::Configured {
                 target,
                 volume,
@@ -47,7 +53,7 @@ impl Requirement {
                 dump,
                 pass,
             } => {
-                let entries = match storage::parse(state.configuration()) {
+                let entries = match state.entries() {
                     Ok(e) => e,
                     Err(e) => return (false, format!("Saved configuration: {e}")),
                 };
@@ -119,7 +125,7 @@ impl Requirement {
                 )
             }
             Self::Unconfigured { target } => {
-                let entries = match storage::parse(state.configuration()) {
+                let entries = match state.entries() {
                     Ok(e) => e,
                     Err(e) => return (false, format!("Saved configuration: {e}")),
                 };
@@ -224,8 +230,10 @@ pub fn valid_requirements(requirements: &[Requirement], inventory: &Inventory) -
     let mut saved = BTreeSet::new();
     let mut live = BTreeSet::new();
     let mut sessions = BTreeSet::new();
+    let mut swap_requirements = vec![];
     for r in requirements {
         match r {
+            Requirement::Swap { requirement } => swap_requirements.push(requirement),
             Requirement::Configured { target, volume, .. } => {
                 if !inventory.mountpoints().contains(target)
                     || !inventory.volumes().contains_key(volume)
@@ -280,7 +288,8 @@ pub fn valid_requirements(requirements: &[Requirement], inventory: &Inventory) -
             }
         }
     }
-    saved == *inventory.mountpoints()
+    swap::valid(inventory, &swap_requirements)
+        && saved == *inventory.mountpoints()
         && live == *inventory.mountpoints()
         && !sessions.is_empty()
         && requirements
@@ -347,7 +356,7 @@ impl Draft {
     pub fn save(&mut self, state: &mut State) -> bool {
         match state.save_configuration(self.text.clone()) {
             Ok(()) => {
-                self.notice=Some("Configuration saved. Existing live mounts keep their current volumes and policies.".into());
+                self.notice=Some(if state.inventory().swap().is_some(){"Storage policy saved. Current mounts and active swap priorities are unchanged; use supported commands to apply the intended active state."}else{"Configuration saved. Existing live mounts keep their current volumes and policies."}.into());
                 true
             }
             Err(e) => {
@@ -403,10 +412,26 @@ pub fn command(state: &mut State, input: &str) -> Result<String, String> {
         return Err("Command exceeds this simulator's 4KiB input limit.".into());
     }
     let parts = input.split_whitespace().collect::<Vec<_>>();
+    if matches!(parts.first(), Some(&"swapon" | &"swapoff")) && state.inventory().swap().is_some() {
+        return swap::command(state, &parts);
+    }
     match parts.as_slice() {
+        ["help"] if state.inventory().swap().is_some() => Ok(HELP_WITH_SWAP.into()),
         ["help"] => Ok(HELP.into()),
         ["blkid"] => Ok(state.inventory().blkid()),
         ["blkid", device] => {
+            if let Some(facts) = state.inventory().swap()
+                && let Some(area) = facts.areas.iter().find(|a| a.device == *device)
+            {
+                return if area.available && area.prepared {
+                    Ok(format!("{device}: UUID=\"{}\" TYPE=\"swap\"", area.uuid))
+                } else {
+                    Err(
+                        "blkid: no available prepared swap signature at that supplied device"
+                            .into(),
+                    )
+                };
+            }
             let Some(id) = state.inventory().devices().get(*device) else {
                 return Err("blkid: no matching virtual inventory device. Use blkid to inspect the available devices.".into());
             };
@@ -434,7 +459,12 @@ pub fn command(state: &mut State, input: &str) -> Result<String, String> {
             .map(|()| String::new())
             .map_err(|e| format!("umount: {e}")),
         _ => Err(format!(
-            "Unsupported command or arguments in this storage simulator. {HELP}"
+            "Unsupported command or arguments in this storage simulator. {}",
+            if state.inventory().swap().is_some() {
+                HELP_WITH_SWAP
+            } else {
+                HELP
+            }
         )),
     }
 }
@@ -451,7 +481,14 @@ impl Action {
         match self {
             Self::Save { text } => state
                 .save_configuration(text.clone())
-                .map(|()| "Saved simulated mount configuration; live mounts unchanged.".into())
+                .map(|()| {
+                    if state.inventory().swap().is_some() {
+                        "Saved simulated storage policy; live mounts and active swap unchanged."
+                    } else {
+                        "Saved simulated mount configuration; live mounts unchanged."
+                    }
+                    .into()
+                })
                 .map_err(|e| e.to_string()),
             Self::Mount { target } => state
                 .mount(target)

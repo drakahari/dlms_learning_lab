@@ -1,0 +1,1587 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-local-account-setup",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Local device access",
+      "unit": "local-access-foundations",
+      "title": "Set up named local accounts and their access levels",
+      "summary": "Configure explicit local identity checks, retain two different access levels and diagnose failed training logins.",
+      "objective": "Keep only LeadAdmin and Observer as local accounts, using an explicit case-sensitive local login method and local EXEC authorization. LeadAdmin must authenticate with training word Lab-Lead-42 and receive privileged EXEC level 15; Observer must authenticate with Lab-Observe-93 and receive user EXEC level 1. Reject wrong training words, unknown accounts, and the supplied differently cased account name. Preserve every supplied incoming SSH version 2, Telnet, legacy-version and source-policy requirement on VTY lines 0–15.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Edit the complete account document, inspect supplied login trials and verify every required outcome."
+      ],
+      "guide": [],
+      "explanation": "Explicit default local-case login and local EXEC authorization select the local record check and its access level. Create only the two required records with their supplied training words; preserve their letter case and levels. Inspect both correct identities, wrong/case-varied inputs and the unchanged incoming policy. Training words are lesson data, not generated hashes.",
+      "hints": [
+        "An incomplete method or record gets a document diagnostic. Creating one account alone does not complete the task.",
+        "The actual result names the matched account and level, or explains the failed comparison. A policy block is different from a wrong credential.",
+        "The valid word still matches, but the required level fails. Edits clear old checks; retry after repairing the document."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/controlling_switch_access_with_passwords_and_privilege_levels.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_local_authentication_and_authorization.html",
+        "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/security/a1/sec-a1-cr-book/sec-cr-a1.html"
+      ],
+      "simplifications": "Checked2026-11-09: bounded CCNA200-301v1.1/5.3practice; Catalyst9300 IOS XE Dublin17.12 guides updated2023-07-28 and IOS AAA command reference. Explicit local-case login/local EXEC authorization only; case-sensitive named training records and levels1/15. Training words are saved lesson text, not real credentials or Cisco password hashes. No KDF, encoded secret, crypto, SSH session, host authentication, remote AAA/accounting, method fallback, non-AAA defaults, arbitrary command privileges or device conformance. Complete-document editing supports declared simple training words and preserves the existing virtual IPv4/incoming policy; it is not an incremental IOS session. Every check evaluates the source-held permitted account list and all incoming/login cases on each supplied line. Unsupported settings/failed paths cannot satisfy credential-rejection requirements. Practice has separate addresses, names, words and three supplied lines; assignment has sixteen. At most16records,8cases per category,64KiBdocument,2MiBsession. Trial observations are transient and never imported as execution evidence.",
+      "initial": {
+        "kind": "LocalAccess",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-local-account-setup",
+          "view": "introduction",
+          "assignment": {
+            "draft": "ip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n",
+            "applied": "ip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n",
+            "checked": false,
+            "selected_case": 0,
+            "selected_line": 0
+          },
+          "practice": {
+            "draft": "ip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n",
+            "applied": "ip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n",
+            "checked": false,
+            "selected_case": 0,
+            "selected_line": 0
+          }
+        }
+      },
+      "goal": {
+        "kind": "LocalAccess",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "id": "ccna-local-account-setup",
+            "instructions": "Keep only LeadAdmin and Observer as local accounts, using an explicit case-sensitive local login method and local EXEC authorization. LeadAdmin must authenticate with training word Lab-Lead-42 and receive privileged EXEC level 15; Observer must authenticate with Lab-Observe-93 and receive user EXEC level 1. Reject wrong training words, unknown accounts, and the supplied differently cased account name. Preserve every supplied incoming SSH version 2, Telnet, legacy-version and source-policy requirement on VTY lines 0–15.",
+            "network": {
+              "version": 1,
+              "management": {
+                "device": "Branch",
+                "interface": "transit"
+              },
+              "clients": [
+                {
+                  "id": "admin",
+                  "binding": {
+                    "device": "Admin",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "operator",
+                  "binding": {
+                    "device": "Operator",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "guest",
+                  "binding": {
+                    "device": "Guest",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "nearby",
+                  "binding": {
+                    "device": "Nearby",
+                    "interface": "lan"
+                  }
+                }
+              ],
+              "topology": {
+                "devices": {
+                  "Admin": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Operator": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.11",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Guest": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.130",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Nearby": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.12",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Edge": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.1",
+                          "prefix": 24
+                        }
+                      },
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.1",
+                          "prefix": 30
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Branch": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.2",
+                          "prefix": 30
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "192.0.2.0",
+                          "length": 24
+                        },
+                        "interface": "transit",
+                        "via": "10.0.0.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "supplied": {
+              "version": 1,
+              "host_identity": "supplied-branch-identity",
+              "versions": "version2_only",
+              "lines": [
+                {
+                  "number": 0,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 1,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 2,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 3,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 4,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 5,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 6,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 7,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 8,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 9,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 10,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 11,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 12,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 13,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 14,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 15,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                }
+              ]
+            },
+            "permitted_users": [
+              "LeadAdmin",
+              "Observer"
+            ],
+            "entry_cases": [
+              {
+                "label": "Administrator uses SSH version 2",
+                "client": "admin",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Operator uses SSH version 2",
+                "client": "operator",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Telnet is unavailable",
+                "client": "admin",
+                "protocol": "telnet",
+                "expected": "protocol_denied"
+              },
+              {
+                "label": "Legacy SSH is unavailable",
+                "client": "admin",
+                "protocol": "ssh1",
+                "expected": "legacy_version_denied"
+              },
+              {
+                "label": "Guest is rejected by source policy",
+                "client": "guest",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              },
+              {
+                "label": "Nearby workstation is rejected by source policy",
+                "client": "nearby",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              }
+            ],
+            "cases": [
+              {
+                "label": "Required privileged account",
+                "client": "admin",
+                "username": "LeadAdmin",
+                "training_token": "Lab-Lead-42",
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "LeadAdmin",
+                  "privilege": "administrator"
+                }
+              },
+              {
+                "label": "Required user-level account",
+                "client": "operator",
+                "username": "Observer",
+                "training_token": "Lab-Observe-93",
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "Observer",
+                  "privilege": "user"
+                }
+              },
+              {
+                "label": "Wrong privileged training word",
+                "client": "admin",
+                "username": "LeadAdmin",
+                "training_token": "Wrong-Training",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              },
+              {
+                "label": "Unrecognized account name",
+                "client": "operator",
+                "username": "Stranger",
+                "training_token": "Lab-Unknown-37",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              },
+              {
+                "label": "Account name letter case",
+                "client": "admin",
+                "username": "leadadmin",
+                "training_token": "Lab-Lead-42",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              },
+              {
+                "label": "Former or unapproved account",
+                "client": "admin",
+                "username": "FormerMaintainer",
+                "training_token": "Lab-Former-51",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              }
+            ],
+            "starter": "ip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n",
+            "reference": "aaa new-model\naaa authentication login default local-case\naaa authorization exec default local\nusername LeadAdmin privilege 15 secret Lab-Lead-42\nusername Observer privilege 1 secret Lab-Observe-93\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n"
+          },
+          "example": {
+            "version": 1,
+            "id": "ccna-local-account-setup-example",
+            "instructions": "On the separate sample network, create SampleAdmin (Sample-Lead-37, level 15) and SampleReader (Sample-Read-62, level 1). Select explicit local-case login and local EXEC authorization, keep the sample incoming policy, and compare correct and wrong login trials on VTY lines 0–2.",
+            "network": {
+              "version": 1,
+              "management": {
+                "device": "Branch",
+                "interface": "transit"
+              },
+              "clients": [
+                {
+                  "id": "admin",
+                  "binding": {
+                    "device": "Admin",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "operator",
+                  "binding": {
+                    "device": "Operator",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "guest",
+                  "binding": {
+                    "device": "Guest",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "nearby",
+                  "binding": {
+                    "device": "Nearby",
+                    "interface": "lan"
+                  }
+                }
+              ],
+              "topology": {
+                "devices": {
+                  "Admin": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Operator": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.11",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Guest": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.130",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Nearby": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.12",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Edge": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.1",
+                          "prefix": 24
+                        }
+                      },
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.1",
+                          "prefix": 30
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Branch": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.2",
+                          "prefix": 30
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "172.18.40.0",
+                          "length": 24
+                        },
+                        "interface": "transit",
+                        "via": "10.0.0.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "supplied": {
+              "version": 1,
+              "host_identity": "supplied-practice-identity",
+              "versions": "version2_only",
+              "lines": [
+                {
+                  "number": 0,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 1,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 2,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                }
+              ]
+            },
+            "permitted_users": [
+              "SampleAdmin",
+              "SampleReader"
+            ],
+            "entry_cases": [
+              {
+                "label": "Administrator uses SSH version 2",
+                "client": "admin",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Operator uses SSH version 2",
+                "client": "operator",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Telnet is unavailable",
+                "client": "admin",
+                "protocol": "telnet",
+                "expected": "protocol_denied"
+              },
+              {
+                "label": "Legacy SSH is unavailable",
+                "client": "admin",
+                "protocol": "ssh1",
+                "expected": "legacy_version_denied"
+              },
+              {
+                "label": "Guest is rejected by source policy",
+                "client": "guest",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              },
+              {
+                "label": "Nearby workstation is rejected by source policy",
+                "client": "nearby",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              }
+            ],
+            "cases": [
+              {
+                "label": "Required privileged account",
+                "client": "admin",
+                "username": "SampleAdmin",
+                "training_token": "Sample-Lead-37",
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "SampleAdmin",
+                  "privilege": "administrator"
+                }
+              },
+              {
+                "label": "Required user-level account",
+                "client": "operator",
+                "username": "SampleReader",
+                "training_token": "Sample-Read-62",
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "SampleReader",
+                  "privilege": "user"
+                }
+              },
+              {
+                "label": "Wrong privileged training word",
+                "client": "admin",
+                "username": "SampleAdmin",
+                "training_token": "Wrong-Training",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              },
+              {
+                "label": "Unrecognized account name",
+                "client": "operator",
+                "username": "Stranger",
+                "training_token": "Lab-Unknown-37",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              },
+              {
+                "label": "Account name letter case",
+                "client": "admin",
+                "username": "sampleadmin",
+                "training_token": "Sample-Lead-37",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              },
+              {
+                "label": "Former or unapproved account",
+                "client": "admin",
+                "username": "SampleFormer",
+                "training_token": "Sample-Former-51",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              }
+            ],
+            "starter": "ip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n",
+            "reference": "aaa new-model\naaa authentication login default local-case\naaa authorization exec default local\nusername SampleAdmin privilege 15 secret Sample-Lead-37\nusername SampleReader privilege 1 secret Sample-Read-62\nip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n"
+          }
+        }
+      },
+      "solution": [
+        "LOCAL ACCOUNT DOCUMENT\naaa new-model\naaa authentication login default local-case\naaa authorization exec default local\nusername LeadAdmin privilege 15 secret Lab-Lead-42\nusername Observer privilege 1 secret Lab-Observe-93\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n"
+      ],
+      "prerequisites": [
+        "ccna-management-source-policy"
+      ]
+    },
+    {
+      "id": "ccna-local-account-handover",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Local device access",
+      "unit": "local-access-foundations",
+      "title": "Hand over privileged access without leaving an old account",
+      "summary": "Create the new maintainer, retain a restricted observer and retire the old account without weakening incoming access.",
+      "objective": "Hand over privileged access to NewMaintainer with training word Lab-Maintain-68 and privileged EXEC level 15. Keep Observer working with Lab-Observe-93 at user EXEC level 1. Remove FormerMaintainer from the complete account document; only NewMaintainer and Observer may remain. Rotating or renaming a surplus account does not retire it. Retain explicit local-case login and local EXEC authorization. Reject wrong training words, unknown names and the supplied differently cased name, while preserving all supplied incoming-access requirements on VTY lines 0–15.",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "steps": [
+        "Edit the complete account document, inspect supplied login trials and verify every required outcome."
+      ],
+      "guide": [],
+      "explanation": "Create the required maintainer at level15, retain Observer at level1 with its required word, and remove FormerMaintainer’s record. Changing a surplus record’s word or name still leaves an extra account. Keep local-case/local EXEC and the incoming-policy requirements. Correct credentials and correct access levels must both pass.",
+      "hints": [
+        "Retirement concerns the record itself. Changing the old word or name is not equivalent to removing the extra account.",
+        "Both required identities should match with different levels. The former name should have no matching record after the handover.",
+        "Individual trial words may pass while an unexpected account remains. The account-list requirement catches that mistake alongside the incoming-policy checks."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/controlling_switch_access_with_passwords_and_privilege_levels.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_local_authentication_and_authorization.html",
+        "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/security/a1/sec-a1-cr-book/sec-cr-a1.html"
+      ],
+      "simplifications": "Checked2026-11-09: bounded CCNA200-301v1.1/5.3practice; Catalyst9300 IOS XE Dublin17.12 guides updated2023-07-28 and IOS AAA command reference. Explicit local-case login/local EXEC authorization only; case-sensitive named training records and levels1/15. Training words are saved lesson text, not real credentials or Cisco password hashes. No KDF, encoded secret, crypto, SSH session, host authentication, remote AAA/accounting, method fallback, non-AAA defaults, arbitrary command privileges or device conformance. Complete-document editing supports declared simple training words and preserves the existing virtual IPv4/incoming policy; it is not an incremental IOS session. Every check evaluates the source-held permitted account list and all incoming/login cases on each supplied line. Unsupported settings/failed paths cannot satisfy credential-rejection requirements. Practice has separate addresses, names, words and three supplied lines; assignment has sixteen. At most16records,8cases per category,64KiBdocument,2MiBsession. Trial observations are transient and never imported as execution evidence.",
+      "initial": {
+        "kind": "LocalAccess",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-local-account-handover",
+          "view": "introduction",
+          "assignment": {
+            "draft": "aaa new-model\naaa authentication login default local-case\naaa authorization exec default local\nusername FormerMaintainer privilege 15 secret Lab-Former-51\nusername Observer privilege 15 secret Lab-Observe-93\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n",
+            "applied": "aaa new-model\naaa authentication login default local-case\naaa authorization exec default local\nusername FormerMaintainer privilege 15 secret Lab-Former-51\nusername Observer privilege 15 secret Lab-Observe-93\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n",
+            "checked": false,
+            "selected_case": 0,
+            "selected_line": 0
+          },
+          "practice": {
+            "draft": "aaa new-model\naaa authentication login default local-case\naaa authorization exec default local\nusername SampleFormer privilege 15 secret Sample-Former-51\nusername SampleReader privilege 15 secret Sample-Read-62\nip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n",
+            "applied": "aaa new-model\naaa authentication login default local-case\naaa authorization exec default local\nusername SampleFormer privilege 15 secret Sample-Former-51\nusername SampleReader privilege 15 secret Sample-Read-62\nip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n",
+            "checked": false,
+            "selected_case": 0,
+            "selected_line": 0
+          }
+        }
+      },
+      "goal": {
+        "kind": "LocalAccess",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "id": "ccna-local-account-handover",
+            "instructions": "Hand over privileged access to NewMaintainer with training word Lab-Maintain-68 and privileged EXEC level 15. Keep Observer working with Lab-Observe-93 at user EXEC level 1. Remove FormerMaintainer from the complete account document; only NewMaintainer and Observer may remain. Rotating or renaming a surplus account does not retire it. Retain explicit local-case login and local EXEC authorization. Reject wrong training words, unknown names and the supplied differently cased name, while preserving all supplied incoming-access requirements on VTY lines 0–15.",
+            "network": {
+              "version": 1,
+              "management": {
+                "device": "Branch",
+                "interface": "transit"
+              },
+              "clients": [
+                {
+                  "id": "admin",
+                  "binding": {
+                    "device": "Admin",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "operator",
+                  "binding": {
+                    "device": "Operator",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "guest",
+                  "binding": {
+                    "device": "Guest",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "nearby",
+                  "binding": {
+                    "device": "Nearby",
+                    "interface": "lan"
+                  }
+                }
+              ],
+              "topology": {
+                "devices": {
+                  "Admin": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Operator": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.11",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Guest": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.130",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Nearby": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.12",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Edge": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.1",
+                          "prefix": 24
+                        }
+                      },
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.1",
+                          "prefix": 30
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Branch": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.2",
+                          "prefix": 30
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "192.0.2.0",
+                          "length": 24
+                        },
+                        "interface": "transit",
+                        "via": "10.0.0.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "supplied": {
+              "version": 1,
+              "host_identity": "supplied-branch-identity",
+              "versions": "version2_only",
+              "lines": [
+                {
+                  "number": 0,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 1,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 2,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 3,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 4,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 5,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 6,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 7,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 8,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 9,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 10,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 11,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 12,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 13,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 14,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 15,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                }
+              ]
+            },
+            "permitted_users": [
+              "NewMaintainer",
+              "Observer"
+            ],
+            "entry_cases": [
+              {
+                "label": "Administrator uses SSH version 2",
+                "client": "admin",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Operator uses SSH version 2",
+                "client": "operator",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Telnet is unavailable",
+                "client": "admin",
+                "protocol": "telnet",
+                "expected": "protocol_denied"
+              },
+              {
+                "label": "Legacy SSH is unavailable",
+                "client": "admin",
+                "protocol": "ssh1",
+                "expected": "legacy_version_denied"
+              },
+              {
+                "label": "Guest is rejected by source policy",
+                "client": "guest",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              },
+              {
+                "label": "Nearby workstation is rejected by source policy",
+                "client": "nearby",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              }
+            ],
+            "cases": [
+              {
+                "label": "Required privileged account",
+                "client": "admin",
+                "username": "NewMaintainer",
+                "training_token": "Lab-Maintain-68",
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "NewMaintainer",
+                  "privilege": "administrator"
+                }
+              },
+              {
+                "label": "Required user-level account",
+                "client": "operator",
+                "username": "Observer",
+                "training_token": "Lab-Observe-93",
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "Observer",
+                  "privilege": "user"
+                }
+              },
+              {
+                "label": "Wrong privileged training word",
+                "client": "admin",
+                "username": "NewMaintainer",
+                "training_token": "Wrong-Training",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              },
+              {
+                "label": "Unrecognized account name",
+                "client": "operator",
+                "username": "Stranger",
+                "training_token": "Lab-Unknown-37",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              },
+              {
+                "label": "Account name letter case",
+                "client": "admin",
+                "username": "newmaintainer",
+                "training_token": "Lab-Maintain-68",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              },
+              {
+                "label": "Former or unapproved account",
+                "client": "admin",
+                "username": "FormerMaintainer",
+                "training_token": "Lab-Former-51",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              }
+            ],
+            "starter": "aaa new-model\naaa authentication login default local-case\naaa authorization exec default local\nusername FormerMaintainer privilege 15 secret Lab-Former-51\nusername Observer privilege 15 secret Lab-Observe-93\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n",
+            "reference": "aaa new-model\naaa authentication login default local-case\naaa authorization exec default local\nusername NewMaintainer privilege 15 secret Lab-Maintain-68\nusername Observer privilege 1 secret Lab-Observe-93\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n"
+          },
+          "example": {
+            "version": 1,
+            "id": "ccna-local-account-handover-example",
+            "instructions": "Hand the sample network to SampleMaintainer (Sample-Maintain-68, level 15), keep SampleReader (Sample-Read-62, level 1), and remove SampleFormer. Preserve the sample incoming policy and compare required, wrong and retired-account trials on VTY lines 0–2.",
+            "network": {
+              "version": 1,
+              "management": {
+                "device": "Branch",
+                "interface": "transit"
+              },
+              "clients": [
+                {
+                  "id": "admin",
+                  "binding": {
+                    "device": "Admin",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "operator",
+                  "binding": {
+                    "device": "Operator",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "guest",
+                  "binding": {
+                    "device": "Guest",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "nearby",
+                  "binding": {
+                    "device": "Nearby",
+                    "interface": "lan"
+                  }
+                }
+              ],
+              "topology": {
+                "devices": {
+                  "Admin": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Operator": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.11",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Guest": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.130",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Nearby": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.12",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Edge": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.1",
+                          "prefix": 24
+                        }
+                      },
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.1",
+                          "prefix": 30
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Branch": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.2",
+                          "prefix": 30
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "172.18.40.0",
+                          "length": 24
+                        },
+                        "interface": "transit",
+                        "via": "10.0.0.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "supplied": {
+              "version": 1,
+              "host_identity": "supplied-practice-identity",
+              "versions": "version2_only",
+              "lines": [
+                {
+                  "number": 0,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 1,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 2,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                }
+              ]
+            },
+            "permitted_users": [
+              "SampleMaintainer",
+              "SampleReader"
+            ],
+            "entry_cases": [
+              {
+                "label": "Administrator uses SSH version 2",
+                "client": "admin",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Operator uses SSH version 2",
+                "client": "operator",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Telnet is unavailable",
+                "client": "admin",
+                "protocol": "telnet",
+                "expected": "protocol_denied"
+              },
+              {
+                "label": "Legacy SSH is unavailable",
+                "client": "admin",
+                "protocol": "ssh1",
+                "expected": "legacy_version_denied"
+              },
+              {
+                "label": "Guest is rejected by source policy",
+                "client": "guest",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              },
+              {
+                "label": "Nearby workstation is rejected by source policy",
+                "client": "nearby",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              }
+            ],
+            "cases": [
+              {
+                "label": "Required privileged account",
+                "client": "admin",
+                "username": "SampleMaintainer",
+                "training_token": "Sample-Maintain-68",
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "SampleMaintainer",
+                  "privilege": "administrator"
+                }
+              },
+              {
+                "label": "Required user-level account",
+                "client": "operator",
+                "username": "SampleReader",
+                "training_token": "Sample-Read-62",
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "SampleReader",
+                  "privilege": "user"
+                }
+              },
+              {
+                "label": "Wrong privileged training word",
+                "client": "admin",
+                "username": "SampleMaintainer",
+                "training_token": "Wrong-Training",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              },
+              {
+                "label": "Unrecognized account name",
+                "client": "operator",
+                "username": "Stranger",
+                "training_token": "Lab-Unknown-37",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              },
+              {
+                "label": "Account name letter case",
+                "client": "admin",
+                "username": "samplemaintainer",
+                "training_token": "Sample-Maintain-68",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              },
+              {
+                "label": "Former or unapproved account",
+                "client": "admin",
+                "username": "SampleFormer",
+                "training_token": "Sample-Former-51",
+                "expected": {
+                  "kind": "rejected_credential"
+                }
+              }
+            ],
+            "starter": "aaa new-model\naaa authentication login default local-case\naaa authorization exec default local\nusername SampleFormer privilege 15 secret Sample-Former-51\nusername SampleReader privilege 15 secret Sample-Read-62\nip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n",
+            "reference": "aaa new-model\naaa authentication login default local-case\naaa authorization exec default local\nusername SampleMaintainer privilege 15 secret Sample-Maintain-68\nusername SampleReader privilege 1 secret Sample-Read-62\nip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n"
+          }
+        }
+      },
+      "solution": [
+        "LOCAL ACCOUNT DOCUMENT\naaa new-model\naaa authentication login default local-case\naaa authorization exec default local\nusername NewMaintainer privilege 15 secret Lab-Maintain-68\nusername Observer privilege 1 secret Lab-Observe-93\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n"
+      ],
+      "prerequisites": [
+        "ccna-local-account-setup"
+      ]
+    }
+  ]
+}

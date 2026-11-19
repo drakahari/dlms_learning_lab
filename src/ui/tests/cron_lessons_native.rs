@@ -103,12 +103,54 @@ fn frame(ctx: &egui::Context, a: &mut LabApp, w: &mut Witness, drive: bool) -> e
                         .unwrap();
                     assert!(!a.settings_open && !a.reset_pending);
                     assert!(a.selected.is_some());
-                    if name.contains("introduction") || name.contains("challenge-full-task") {
+                    if name.contains("introduction") {
+                        let source = &a.scenarios[a.selected.unwrap()];
+                        let entry = lesson_presentation::entry(source);
+                        let objective = entry.map_or(source.summary.as_str(), |e| e.goal.as_str());
+                        let (recorded_text, recorded) = &a.metrics.cron.labels[0];
+                        assert_eq!(recorded_text, objective);
+                        fn actual_goal(
+                            shape: &egui::Shape,
+                            wanted: &str,
+                            recorded: egui::Rect,
+                            clip: egui::Rect,
+                        ) -> bool {
+                            match shape {
+                                egui::Shape::Vec(items) => {
+                                    items.iter().any(|s| actual_goal(s, wanted, recorded, clip))
+                                }
+                                egui::Shape::Text(t) if t.galley.text() == wanted => {
+                                    t.opacity_factor > 0.
+                                        && !t.galley.elided
+                                        && recorded
+                                            .expand(0.5)
+                                            .contains_rect(t.visual_bounding_rect())
+                                        && clip.expand(0.5).contains_rect(t.visual_bounding_rect())
+                                        && t.galley.rows.iter().any(|row| {
+                                            !row.visuals.mesh.vertices
+                                                [row.visuals.glyph_vertex_range.clone()]
+                                            .is_empty()
+                                        })
+                                }
+                                _ => false,
+                            }
+                        }
+                        assert!(
+                            out.shapes.iter().any(|s| actual_goal(
+                                &s.shape,
+                                objective,
+                                *recorded,
+                                s.clip_rect.intersect(ctx.content_rect())
+                            )),
+                            "Actual Introduction capture paints its current recorded learning objective"
+                        );
+                    }
+                    if name.contains("challenge-full-task") {
                         assert!(
                             out.shapes
                                 .iter()
                                 .any(|s| text(&s.shape, &a.scenarios[a.selected.unwrap()].title)),
-                            "Actual capture paints current task heading"
+                            "Actual Challenge capture paints current task heading"
                         );
                     }
                     if name.contains("cron-alignment") {
@@ -313,4 +355,45 @@ fn cron_capture_phase_waits_for_measured_geometry_instead_of_assuming_requested_
         source
     ));
     assert!(!a.capture_pending);
+    // The capture target must be the exact response of actual painted text,
+    // not an enclosing scope or geometry reconstructed from the expected string.
+    let source = a.scenarios[a.selected.unwrap()].clone();
+    let entry = lesson_presentation::entry(&source);
+    let expected = [
+        entry.map_or(source.summary.as_str(), |e| e.goal.as_str()),
+        entry.filter(|e| !e.context.is_empty()).map_or(
+            source
+                .cron_teaching
+                .as_ref()
+                .unwrap()
+                .prerequisite_note
+                .as_str(),
+            |e| e.context.as_str(),
+        ),
+    ];
+    let output = frame(&ctx, &mut a, &mut w, false);
+    fn actual_text_rect(shape: &egui::Shape, wanted: &str) -> Option<egui::Rect> {
+        match shape {
+            egui::Shape::Text(text) if text.galley.text() == wanted => {
+                Some(egui::Rect::from_min_size(text.pos, text.galley.size()))
+            }
+            egui::Shape::Vec(items) => items.iter().find_map(|s| actual_text_rect(s, wanted)),
+            _ => None,
+        }
+    }
+    for (n, wanted) in expected.into_iter().enumerate() {
+        let (actual_text, recorded) = &a.metrics.cron.labels[n];
+        assert_eq!(actual_text, wanted);
+        let (painted, clip) = output
+            .shapes
+            .iter()
+            .find_map(|shape| {
+                actual_text_rect(&shape.shape, wanted).map(|rect| (rect, shape.clip_rect))
+            })
+            .expect("Current learning objective and prerequisite context really paint");
+        assert!(recorded.expand(0.5).contains_rect(painted));
+        assert!(painted.expand(0.5).contains_rect(*recorded));
+        assert!(clip.expand(0.5).contains_rect(painted));
+        assert!(ctx.content_rect().expand(0.5).contains_rect(painted));
+    }
 }

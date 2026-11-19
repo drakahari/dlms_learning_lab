@@ -581,7 +581,9 @@ fn apache_native_header_ids_and_order_remain_stable_and_legacy_workspace_unchang
             a.scenarios.iter().position(|s| s.id == id).unwrap()
         };
         a.launch(i);
-        draw(&ctx, &mut a);
+        for _ in 0..8 {
+            draw(&ctx, &mut a);
+        }
         let first = a.metrics.workspace_header_controls.clone();
         assert_eq!(
             first.iter().map(|(k, _, _)| k.as_str()).collect::<Vec<_>>(),

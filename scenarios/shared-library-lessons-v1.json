@@ -1,0 +1,2642 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-library-search",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-shared-library-resolution",
+      "topic": "Shared-library dependencies and search",
+      "title": "Repair library search for two applications",
+      "summary": "Diagnose missing dependencies and apply scoped application search settings without changing the global cache.",
+      "objective": "The report application must find its supplied site report and formatting libraries, including their complete dependencies. The audit application must find its supplied site audit library and complete dependencies. Keep the viewer working with its original library choices; do not alter its simulated application settings. Apply suitable simulated library search settings to each target application. Choose directories from the supplied inventory. Keep the original global search configuration and cache entries unchanged. A one-off env inspection is diagnostic; it does not save application settings. Check the current configuration after applying the settings. Keep pending editor and launch-setting drafts consistent with the applied work.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair the supplied settings",
+        "Check current outcomes and protected applications"
+      ],
+      "guide": [],
+      "explanation": "A dependency is a requested library name. Search selects supplied metadata through the application environment, virtual cache and default directories; a selected library can need further libraries. One-off env inspection does not save a simulated application setting. A successful top-level match cannot replace checking the full chain.",
+      "hints": [
+        "Read the requested library name and the directory where its supplied matching link lives. A filename and a directory are different inputs.",
+        "A direct library can depend on another one. Check the complete actual report, not only its first line.",
+        "The assignment protects the global configuration and cache. Apply per-application settings; the one-off env diagnostic does not save them."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man8/ld.so.8.html",
+        "https://man7.org/linux/man-pages/man8/ldconfig.8.html",
+        "https://man7.org/linux/man-pages/man1/ldd.1.html",
+        "https://raw.githubusercontent.com/bminor/glibc/glibc-2.42/elf/dl-load.c",
+        "https://raw.githubusercontent.com/bminor/glibc/glibc-2.42/elf/ldconfig.c"
+      ],
+      "simplifications": "Checked2026-11-05: LPIC-1 v5.0 (101-500/102-500), partial102.3. Linux man-pages6.19 and documented glibc2.42 source rules; no executed host-loader comparison. Metadata-only library resolution on a declared virtual little-endian x86-64 platform. No ELF execution or parsing, symbol/relocation/ABI verification, installation, link repair, real cache bytes, RPATH/RUNPATH, secure execution, hwcaps, preload, dlopen or arbitrary host files. /etc/ld.so.conf supports only supplied explicit directory lines and comments; includes and globs are unsupported. Per-application launch recipes are clearly labeled simulator controls, not a real Linux configuration file.",
+      "retry_guidance": "Read the named failed application or preservation requirement. Compare pending edits, applied launch settings, clean inspection and current cache before retrying.",
+      "prerequisites": [
+        "lpic1-env-child-settings",
+        "lpic1-links-handover"
+      ],
+      "initial": {
+        "kind": "SharedLibraries",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "catalog": {
+              "version": 1,
+              "directories": [
+                "/lib64",
+                "/usr/lib64",
+                "/opt/site/lib",
+                "/opt/common/lib",
+                "/opt/keep/lib",
+                "/opt/old/lib"
+              ],
+              "trusted": [
+                "/lib64",
+                "/usr/lib64"
+              ],
+              "objects": [
+                {
+                  "identity": "platform-core",
+                  "path": "/lib64/libcore.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libcore.so.1",
+                  "needed": []
+                },
+                {
+                  "identity": "site-report",
+                  "path": "/opt/site/lib/libreport.so.1.4",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libreport.so.1",
+                  "needed": [
+                    "libformat.so.1"
+                  ]
+                },
+                {
+                  "identity": "site-format",
+                  "path": "/opt/common/lib/libformat.so.1.2",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libformat.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "site-audit",
+                  "path": "/opt/common/lib/libaudit.so.1.8",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libaudit.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "kept-archive",
+                  "path": "/opt/keep/lib/libarchive.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libarchive.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "old-report",
+                  "path": "/opt/old/lib/libreport.so.0.9",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libreport.so.0",
+                  "needed": []
+                }
+              ],
+              "programs": [
+                {
+                  "path": "/usr/bin/report",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libreport.so.1"
+                  ]
+                },
+                {
+                  "path": "/usr/bin/audit",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libaudit.so.1"
+                  ]
+                },
+                {
+                  "path": "/usr/bin/viewer",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libarchive.so.1"
+                  ]
+                }
+              ],
+              "aliases": [
+                {
+                  "path": "/opt/site/lib/libreport.so.1",
+                  "object": "/opt/site/lib/libreport.so.1.4"
+                },
+                {
+                  "path": "/opt/common/lib/libformat.so.1",
+                  "object": "/opt/common/lib/libformat.so.1.2"
+                },
+                {
+                  "path": "/opt/common/lib/libaudit.so.1",
+                  "object": "/opt/common/lib/libaudit.so.1.8"
+                },
+                {
+                  "path": "/opt/old/lib/libreport.so.0",
+                  "object": "/opt/old/lib/libreport.so.0.9"
+                }
+              ]
+            },
+            "configuration": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+            "library_path": null,
+            "cache": {
+              "generation": 1,
+              "source_configuration": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+              "directories": [
+                "/opt/keep/lib",
+                "/lib64",
+                "/usr/lib64"
+              ],
+              "entries": [
+                {
+                  "name": "libarchive.so.1",
+                  "path": "/opt/keep/lib/libarchive.so.1",
+                  "object": "/opt/keep/lib/libarchive.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  }
+                },
+                {
+                  "name": "libcore.so.1",
+                  "path": "/lib64/libcore.so.1",
+                  "object": "/lib64/libcore.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  }
+                }
+              ]
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "catalog": {
+              "version": 1,
+              "directories": [
+                "/lib64",
+                "/usr/lib64",
+                "/opt/demo/lib",
+                "/opt/demo/keep"
+              ],
+              "trusted": [
+                "/lib64",
+                "/usr/lib64"
+              ],
+              "objects": [
+                {
+                  "identity": "platform-core",
+                  "path": "/lib64/libcore.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libcore.so.1",
+                  "needed": []
+                },
+                {
+                  "identity": "demo-page",
+                  "path": "/opt/demo/lib/libpage.so.1.3",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libpage.so.1",
+                  "needed": [
+                    "libword.so.1"
+                  ]
+                },
+                {
+                  "identity": "demo-word",
+                  "path": "/opt/demo/lib/libword.so.1.2",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libword.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "demo-preview",
+                  "path": "/opt/demo/keep/libpreview.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libpreview.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                }
+              ],
+              "programs": [
+                {
+                  "path": "/usr/bin/brief",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libpage.so.1"
+                  ]
+                },
+                {
+                  "path": "/usr/bin/preview",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libpreview.so.1"
+                  ]
+                }
+              ],
+              "aliases": [
+                {
+                  "path": "/opt/demo/lib/libpage.so.1",
+                  "object": "/opt/demo/lib/libpage.so.1.3"
+                },
+                {
+                  "path": "/opt/demo/lib/libword.so.1",
+                  "object": "/opt/demo/lib/libword.so.1.2"
+                }
+              ]
+            },
+            "configuration": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+            "library_path": null,
+            "cache": {
+              "generation": 1,
+              "source_configuration": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+              "directories": [
+                "/opt/demo/keep",
+                "/lib64",
+                "/usr/lib64"
+              ],
+              "entries": [
+                {
+                  "name": "libcore.so.1",
+                  "path": "/lib64/libcore.so.1",
+                  "object": "/lib64/libcore.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  }
+                },
+                {
+                  "name": "libpreview.so.1",
+                  "path": "/opt/demo/keep/libpreview.so.1",
+                  "object": "/opt/demo/keep/libpreview.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  }
+                }
+              ]
+            }
+          },
+          "initial_recipes": [],
+          "example_initial_recipes": [],
+          "assignment_plan": {
+            "launches": [
+              {
+                "program": "/usr/bin/report",
+                "mode": "saved_recipe",
+                "selections": [
+                  {
+                    "needed": "libreport.so.1",
+                    "allowed_identities": [
+                      "site-report"
+                    ]
+                  },
+                  {
+                    "needed": "libformat.so.1",
+                    "allowed_identities": [
+                      "site-format"
+                    ]
+                  },
+                  {
+                    "needed": "libcore.so.1",
+                    "allowed_identities": [
+                      "platform-core"
+                    ]
+                  }
+                ]
+              },
+              {
+                "program": "/usr/bin/audit",
+                "mode": "saved_recipe",
+                "selections": [
+                  {
+                    "needed": "libaudit.so.1",
+                    "allowed_identities": [
+                      "site-audit"
+                    ]
+                  },
+                  {
+                    "needed": "libcore.so.1",
+                    "allowed_identities": [
+                      "platform-core"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "protected_programs": [
+              "/usr/bin/viewer"
+            ],
+            "require_current_cache": false,
+            "require_clean_recipes": false,
+            "preserve_configuration_and_cache": true
+          },
+          "example_plan": {
+            "launches": [
+              {
+                "program": "/usr/bin/brief",
+                "mode": "saved_recipe",
+                "selections": [
+                  {
+                    "needed": "libpage.so.1",
+                    "allowed_identities": [
+                      "demo-page"
+                    ]
+                  },
+                  {
+                    "needed": "libword.so.1",
+                    "allowed_identities": [
+                      "demo-word"
+                    ]
+                  },
+                  {
+                    "needed": "libcore.so.1",
+                    "allowed_identities": [
+                      "platform-core"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "protected_programs": [
+              "/usr/bin/preview"
+            ],
+            "require_current_cache": false,
+            "require_clean_recipes": false,
+            "preserve_configuration_and_cache": true
+          },
+          "assignment": {
+            "state": {
+              "version": 1,
+              "catalog": {
+                "version": 1,
+                "directories": [
+                  "/lib64",
+                  "/usr/lib64",
+                  "/opt/site/lib",
+                  "/opt/common/lib",
+                  "/opt/keep/lib",
+                  "/opt/old/lib"
+                ],
+                "trusted": [
+                  "/lib64",
+                  "/usr/lib64"
+                ],
+                "objects": [
+                  {
+                    "identity": "platform-core",
+                    "path": "/lib64/libcore.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libcore.so.1",
+                    "needed": []
+                  },
+                  {
+                    "identity": "site-report",
+                    "path": "/opt/site/lib/libreport.so.1.4",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libreport.so.1",
+                    "needed": [
+                      "libformat.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "site-format",
+                    "path": "/opt/common/lib/libformat.so.1.2",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libformat.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "site-audit",
+                    "path": "/opt/common/lib/libaudit.so.1.8",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libaudit.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "kept-archive",
+                    "path": "/opt/keep/lib/libarchive.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libarchive.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "old-report",
+                    "path": "/opt/old/lib/libreport.so.0.9",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libreport.so.0",
+                    "needed": []
+                  }
+                ],
+                "programs": [
+                  {
+                    "path": "/usr/bin/report",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libreport.so.1"
+                    ]
+                  },
+                  {
+                    "path": "/usr/bin/audit",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libaudit.so.1"
+                    ]
+                  },
+                  {
+                    "path": "/usr/bin/viewer",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libarchive.so.1"
+                    ]
+                  }
+                ],
+                "aliases": [
+                  {
+                    "path": "/opt/site/lib/libreport.so.1",
+                    "object": "/opt/site/lib/libreport.so.1.4"
+                  },
+                  {
+                    "path": "/opt/common/lib/libformat.so.1",
+                    "object": "/opt/common/lib/libformat.so.1.2"
+                  },
+                  {
+                    "path": "/opt/common/lib/libaudit.so.1",
+                    "object": "/opt/common/lib/libaudit.so.1.8"
+                  },
+                  {
+                    "path": "/opt/old/lib/libreport.so.0",
+                    "object": "/opt/old/lib/libreport.so.0.9"
+                  }
+                ]
+              },
+              "configuration": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+              "library_path": null,
+              "cache": {
+                "generation": 1,
+                "source_configuration": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+                "directories": [
+                  "/opt/keep/lib",
+                  "/lib64",
+                  "/usr/lib64"
+                ],
+                "entries": [
+                  {
+                    "name": "libarchive.so.1",
+                    "path": "/opt/keep/lib/libarchive.so.1",
+                    "object": "/opt/keep/lib/libarchive.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    }
+                  },
+                  {
+                    "name": "libcore.so.1",
+                    "path": "/lib64/libcore.so.1",
+                    "object": "/lib64/libcore.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    }
+                  }
+                ]
+              }
+            },
+            "configuration_draft": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+            "recipes": [
+              {
+                "program": "/usr/bin/report",
+                "environment": null
+              },
+              {
+                "program": "/usr/bin/audit",
+                "environment": null
+              },
+              {
+                "program": "/usr/bin/viewer",
+                "environment": null
+              }
+            ],
+            "launch_drafts": [
+              {
+                "program": "/usr/bin/report",
+                "value": ""
+              },
+              {
+                "program": "/usr/bin/audit",
+                "value": ""
+              },
+              {
+                "program": "/usr/bin/viewer",
+                "value": ""
+              }
+            ],
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "example": {
+            "state": {
+              "version": 1,
+              "catalog": {
+                "version": 1,
+                "directories": [
+                  "/lib64",
+                  "/usr/lib64",
+                  "/opt/demo/lib",
+                  "/opt/demo/keep"
+                ],
+                "trusted": [
+                  "/lib64",
+                  "/usr/lib64"
+                ],
+                "objects": [
+                  {
+                    "identity": "platform-core",
+                    "path": "/lib64/libcore.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libcore.so.1",
+                    "needed": []
+                  },
+                  {
+                    "identity": "demo-page",
+                    "path": "/opt/demo/lib/libpage.so.1.3",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libpage.so.1",
+                    "needed": [
+                      "libword.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "demo-word",
+                    "path": "/opt/demo/lib/libword.so.1.2",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libword.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "demo-preview",
+                    "path": "/opt/demo/keep/libpreview.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libpreview.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  }
+                ],
+                "programs": [
+                  {
+                    "path": "/usr/bin/brief",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libpage.so.1"
+                    ]
+                  },
+                  {
+                    "path": "/usr/bin/preview",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libpreview.so.1"
+                    ]
+                  }
+                ],
+                "aliases": [
+                  {
+                    "path": "/opt/demo/lib/libpage.so.1",
+                    "object": "/opt/demo/lib/libpage.so.1.3"
+                  },
+                  {
+                    "path": "/opt/demo/lib/libword.so.1",
+                    "object": "/opt/demo/lib/libword.so.1.2"
+                  }
+                ]
+              },
+              "configuration": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+              "library_path": null,
+              "cache": {
+                "generation": 1,
+                "source_configuration": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+                "directories": [
+                  "/opt/demo/keep",
+                  "/lib64",
+                  "/usr/lib64"
+                ],
+                "entries": [
+                  {
+                    "name": "libcore.so.1",
+                    "path": "/lib64/libcore.so.1",
+                    "object": "/lib64/libcore.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    }
+                  },
+                  {
+                    "name": "libpreview.so.1",
+                    "path": "/opt/demo/keep/libpreview.so.1",
+                    "object": "/opt/demo/keep/libpreview.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    }
+                  }
+                ]
+              }
+            },
+            "configuration_draft": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+            "recipes": [
+              {
+                "program": "/usr/bin/brief",
+                "environment": null
+              },
+              {
+                "program": "/usr/bin/preview",
+                "environment": null
+              }
+            ],
+            "launch_drafts": [
+              {
+                "program": "/usr/bin/brief",
+                "value": ""
+              },
+              {
+                "program": "/usr/bin/preview",
+                "value": ""
+              }
+            ],
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "view": "introduction",
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "SharedLibraries",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "catalog": {
+              "version": 1,
+              "directories": [
+                "/lib64",
+                "/usr/lib64",
+                "/opt/site/lib",
+                "/opt/common/lib",
+                "/opt/keep/lib",
+                "/opt/old/lib"
+              ],
+              "trusted": [
+                "/lib64",
+                "/usr/lib64"
+              ],
+              "objects": [
+                {
+                  "identity": "platform-core",
+                  "path": "/lib64/libcore.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libcore.so.1",
+                  "needed": []
+                },
+                {
+                  "identity": "site-report",
+                  "path": "/opt/site/lib/libreport.so.1.4",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libreport.so.1",
+                  "needed": [
+                    "libformat.so.1"
+                  ]
+                },
+                {
+                  "identity": "site-format",
+                  "path": "/opt/common/lib/libformat.so.1.2",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libformat.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "site-audit",
+                  "path": "/opt/common/lib/libaudit.so.1.8",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libaudit.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "kept-archive",
+                  "path": "/opt/keep/lib/libarchive.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libarchive.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "old-report",
+                  "path": "/opt/old/lib/libreport.so.0.9",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libreport.so.0",
+                  "needed": []
+                }
+              ],
+              "programs": [
+                {
+                  "path": "/usr/bin/report",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libreport.so.1"
+                  ]
+                },
+                {
+                  "path": "/usr/bin/audit",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libaudit.so.1"
+                  ]
+                },
+                {
+                  "path": "/usr/bin/viewer",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libarchive.so.1"
+                  ]
+                }
+              ],
+              "aliases": [
+                {
+                  "path": "/opt/site/lib/libreport.so.1",
+                  "object": "/opt/site/lib/libreport.so.1.4"
+                },
+                {
+                  "path": "/opt/common/lib/libformat.so.1",
+                  "object": "/opt/common/lib/libformat.so.1.2"
+                },
+                {
+                  "path": "/opt/common/lib/libaudit.so.1",
+                  "object": "/opt/common/lib/libaudit.so.1.8"
+                },
+                {
+                  "path": "/opt/old/lib/libreport.so.0",
+                  "object": "/opt/old/lib/libreport.so.0.9"
+                }
+              ]
+            },
+            "configuration": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+            "library_path": null,
+            "cache": {
+              "generation": 1,
+              "source_configuration": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+              "directories": [
+                "/opt/keep/lib",
+                "/lib64",
+                "/usr/lib64"
+              ],
+              "entries": [
+                {
+                  "name": "libarchive.so.1",
+                  "path": "/opt/keep/lib/libarchive.so.1",
+                  "object": "/opt/keep/lib/libarchive.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  }
+                },
+                {
+                  "name": "libcore.so.1",
+                  "path": "/lib64/libcore.so.1",
+                  "object": "/lib64/libcore.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  }
+                }
+              ]
+            }
+          },
+          "plan": {
+            "launches": [
+              {
+                "program": "/usr/bin/report",
+                "mode": "saved_recipe",
+                "selections": [
+                  {
+                    "needed": "libreport.so.1",
+                    "allowed_identities": [
+                      "site-report"
+                    ]
+                  },
+                  {
+                    "needed": "libformat.so.1",
+                    "allowed_identities": [
+                      "site-format"
+                    ]
+                  },
+                  {
+                    "needed": "libcore.so.1",
+                    "allowed_identities": [
+                      "platform-core"
+                    ]
+                  }
+                ]
+              },
+              {
+                "program": "/usr/bin/audit",
+                "mode": "saved_recipe",
+                "selections": [
+                  {
+                    "needed": "libaudit.so.1",
+                    "allowed_identities": [
+                      "site-audit"
+                    ]
+                  },
+                  {
+                    "needed": "libcore.so.1",
+                    "allowed_identities": [
+                      "platform-core"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "protected_programs": [
+              "/usr/bin/viewer"
+            ],
+            "require_current_cache": false,
+            "require_clean_recipes": false,
+            "preserve_configuration_and_cache": true
+          },
+          "lesson": {
+            "prerequisite_note": "Builds on navigating Linux paths, relative and symbolic links, and the difference between a command environment and a saved configuration. The virtual inventory supplies every program, directory and library used here.",
+            "description": "The separate brief application demonstrates finding a directory before you configure report and audit.",
+            "concepts": [
+              {
+                "title": "A program can share code with other programs",
+                "text": "A shared library is a file containing reusable program code. When an application starts, a loader finds the libraries it asks for. A library can need another library too. This activity follows supplied dependency information; it never executes the program or library code."
+              },
+              {
+                "title": "A requested name and a file location are different",
+                "text": "The program asks for a name such as libpage.so.1. A search directory such as /opt/demo/lib can contain a link with that name pointing to a versioned file. Enter a directory when choosing where to search, not the full library filename. Inspect the supplied inventory rather than guessing a location."
+              },
+              {
+                "title": "A temporary search setting affects one command",
+                "text": "env LD_LIBRARY_PATH=/opt/demo/lib ldd /usr/bin/brief asks the simulated lookup to search that directory for this one inspection. A colon separates several directories. It does not edit a system configuration file, rebuild the cache or change later commands. A clean lookup has no temporary search override: plain ldd uses the saved cache and default directories in this activity."
+              },
+              {
+                "title": "Keep a scoped repair separate from a global change",
+                "text": "This assignment asks you to save per-application launch settings in the simulator. Apply launch settings records the chosen search directories for that supplied application; Inspect launch settings tests them. These controls represent an application environment, not an actual Linux configuration file. The clean terminal lookup and the saved application setting are intentionally separate. The cache is a saved list of library locations shared by these applications."
+              },
+              {
+                "title": "Read the complete dependency chain",
+                "text": "A path can find the first library while a library it depends on is still missing. Read each needed name in the actual report, add the missing supplied directory and retry. Check configuration tests both target applications and the protected viewer; a successful inspection of only one application is partial progress."
+              }
+            ],
+            "initial": {
+              "version": 1,
+              "catalog": {
+                "version": 1,
+                "directories": [
+                  "/lib64",
+                  "/usr/lib64",
+                  "/opt/demo/lib",
+                  "/opt/demo/keep"
+                ],
+                "trusted": [
+                  "/lib64",
+                  "/usr/lib64"
+                ],
+                "objects": [
+                  {
+                    "identity": "platform-core",
+                    "path": "/lib64/libcore.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libcore.so.1",
+                    "needed": []
+                  },
+                  {
+                    "identity": "demo-page",
+                    "path": "/opt/demo/lib/libpage.so.1.3",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libpage.so.1",
+                    "needed": [
+                      "libword.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "demo-word",
+                    "path": "/opt/demo/lib/libword.so.1.2",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libword.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "demo-preview",
+                    "path": "/opt/demo/keep/libpreview.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libpreview.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  }
+                ],
+                "programs": [
+                  {
+                    "path": "/usr/bin/brief",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libpage.so.1"
+                    ]
+                  },
+                  {
+                    "path": "/usr/bin/preview",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libpreview.so.1"
+                    ]
+                  }
+                ],
+                "aliases": [
+                  {
+                    "path": "/opt/demo/lib/libpage.so.1",
+                    "object": "/opt/demo/lib/libpage.so.1.3"
+                  },
+                  {
+                    "path": "/opt/demo/lib/libword.so.1",
+                    "object": "/opt/demo/lib/libword.so.1.2"
+                  }
+                ]
+              },
+              "configuration": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+              "library_path": null,
+              "cache": {
+                "generation": 1,
+                "source_configuration": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+                "directories": [
+                  "/opt/demo/keep",
+                  "/lib64",
+                  "/usr/lib64"
+                ],
+                "entries": [
+                  {
+                    "name": "libcore.so.1",
+                    "path": "/lib64/libcore.so.1",
+                    "object": "/lib64/libcore.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    }
+                  },
+                  {
+                    "name": "libpreview.so.1",
+                    "path": "/opt/demo/keep/libpreview.so.1",
+                    "object": "/opt/demo/keep/libpreview.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    }
+                  }
+                ]
+              }
+            },
+            "plan": {
+              "launches": [
+                {
+                  "program": "/usr/bin/brief",
+                  "mode": "saved_recipe",
+                  "selections": [
+                    {
+                      "needed": "libpage.so.1",
+                      "allowed_identities": [
+                        "demo-page"
+                      ]
+                    },
+                    {
+                      "needed": "libword.so.1",
+                      "allowed_identities": [
+                        "demo-word"
+                      ]
+                    },
+                    {
+                      "needed": "libcore.so.1",
+                      "allowed_identities": [
+                        "platform-core"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "protected_programs": [
+                "/usr/bin/preview"
+              ],
+              "require_current_cache": false,
+              "require_clean_recipes": false,
+              "preserve_configuration_and_cache": true
+            },
+            "worked": [
+              {
+                "title": "Inspect the missing dependency",
+                "explanation": "Run this command in the practice terminal. The actual report should identify libpage.so.1 as not found; no application code runs.",
+                "action": {
+                  "kind": "inspect",
+                  "command": "ldd /usr/bin/brief"
+                }
+              },
+              {
+                "title": "Try a directory for one inspection",
+                "explanation": "Run the supplied env command. Observe that the page, word and core dependencies are all found. This command alone does not save application settings.",
+                "action": {
+                  "kind": "inspect",
+                  "command": "env LD_LIBRARY_PATH=/opt/demo/lib ldd /usr/bin/brief"
+                }
+              },
+              {
+                "title": "Save the scoped application setting",
+                "explanation": "Select brief, enter /opt/demo/lib in its library search directories and apply the launch settings. Inspect those saved settings, then Check configuration. Keep the global configuration and cache unchanged.",
+                "action": {
+                  "kind": "launch_recipe",
+                  "program": "/usr/bin/brief",
+                  "environment": "/opt/demo/lib"
+                }
+              }
+            ],
+            "initial_recipes": []
+          },
+          "initial_recipes": []
+        }
+      },
+      "solution": [
+        "shared-libraries {\"action\":\"edit_launch\",\"program\":\"/usr/bin/report\",\"value\":\"/opt/site/lib:/opt/common/lib\"}",
+        "shared-libraries {\"action\":\"save_launch\",\"program\":\"/usr/bin/report\"}",
+        "shared-libraries {\"action\":\"edit_launch\",\"program\":\"/usr/bin/audit\",\"value\":\"/opt/common/lib\"}",
+        "shared-libraries {\"action\":\"save_launch\",\"program\":\"/usr/bin/audit\"}",
+        "shared-libraries {\"action\":\"check\"}"
+      ]
+    },
+    {
+      "id": "lpic1-library-cache-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-shared-library-resolution",
+      "topic": "Shared-library dependencies and search",
+      "title": "Hand over library search without temporary overrides",
+      "summary": "Repair the virtual library cache and verify clean launches while preserving a working viewer.",
+      "objective": "The handover includes a wrong report override and a working temporary audit override. Replace that partial workaround with verified clean library resolution. The report application must find its supplied site report and formatting libraries, including their complete dependencies. The audit application must find its supplied site audit library and complete dependencies. Keep the viewer working with its original library choices; do not alter its simulated application settings. Add the required supplied search directories without losing the existing entry needed by the viewer. Save the virtual configuration, then explicitly rebuild its cache. Both target applications must resolve in a clean environment; clear their temporary simulated launch settings. Configuration, cache and current verification must agree. An old successful report or an unsaved editor draft is not a completed repair.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair the supplied settings",
+        "Check current outcomes and protected applications"
+      ],
+      "guide": [],
+      "explanation": "Saving directory text and rebuilding the cache are separate actions. Clean ldd inspections do not inherit saved simulated application overrides. A working temporary inspection is not a clean handover: remove overrides, retain the unrelated viewer’s directory and verify all required dependency chains.",
+      "hints": [
+        "Read the requested library name and the directory where its supplied matching link lives. A filename and a directory are different inputs.",
+        "A direct library can depend on another one. Check the complete actual report, not only its first line.",
+        "Rebuilding replaces the cache using every saved scan entry. Keep the entry the viewer needs, then verify a clean lookup."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man8/ld.so.8.html",
+        "https://man7.org/linux/man-pages/man8/ldconfig.8.html",
+        "https://man7.org/linux/man-pages/man1/ldd.1.html",
+        "https://raw.githubusercontent.com/bminor/glibc/glibc-2.42/elf/dl-load.c",
+        "https://raw.githubusercontent.com/bminor/glibc/glibc-2.42/elf/ldconfig.c"
+      ],
+      "simplifications": "Checked2026-11-05: LPIC-1 v5.0 (101-500/102-500), partial102.3. Linux man-pages6.19 and documented glibc2.42 source rules; no executed host-loader comparison. Metadata-only library resolution on a declared virtual little-endian x86-64 platform. No ELF execution or parsing, symbol/relocation/ABI verification, installation, link repair, real cache bytes, RPATH/RUNPATH, secure execution, hwcaps, preload, dlopen or arbitrary host files. /etc/ld.so.conf supports only supplied explicit directory lines and comments; includes and globs are unsupported. Per-application launch recipes are clearly labeled simulator controls, not a real Linux configuration file.",
+      "retry_guidance": "Read the named failed application or preservation requirement. Compare pending edits, applied launch settings, clean inspection and current cache before retrying.",
+      "prerequisites": [
+        "lpic1-library-search"
+      ],
+      "initial": {
+        "kind": "SharedLibraries",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "catalog": {
+              "version": 1,
+              "directories": [
+                "/lib64",
+                "/usr/lib64",
+                "/opt/site/lib",
+                "/opt/common/lib",
+                "/opt/keep/lib",
+                "/opt/old/lib"
+              ],
+              "trusted": [
+                "/lib64",
+                "/usr/lib64"
+              ],
+              "objects": [
+                {
+                  "identity": "platform-core",
+                  "path": "/lib64/libcore.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libcore.so.1",
+                  "needed": []
+                },
+                {
+                  "identity": "site-report",
+                  "path": "/opt/site/lib/libreport.so.1.4",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libreport.so.1",
+                  "needed": [
+                    "libformat.so.1"
+                  ]
+                },
+                {
+                  "identity": "site-format",
+                  "path": "/opt/common/lib/libformat.so.1.2",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libformat.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "site-audit",
+                  "path": "/opt/common/lib/libaudit.so.1.8",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libaudit.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "kept-archive",
+                  "path": "/opt/keep/lib/libarchive.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libarchive.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "old-report",
+                  "path": "/opt/old/lib/libreport.so.0.9",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libreport.so.0",
+                  "needed": []
+                }
+              ],
+              "programs": [
+                {
+                  "path": "/usr/bin/report",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libreport.so.1"
+                  ]
+                },
+                {
+                  "path": "/usr/bin/audit",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libaudit.so.1"
+                  ]
+                },
+                {
+                  "path": "/usr/bin/viewer",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libarchive.so.1"
+                  ]
+                }
+              ],
+              "aliases": [
+                {
+                  "path": "/opt/site/lib/libreport.so.1",
+                  "object": "/opt/site/lib/libreport.so.1.4"
+                },
+                {
+                  "path": "/opt/common/lib/libformat.so.1",
+                  "object": "/opt/common/lib/libformat.so.1.2"
+                },
+                {
+                  "path": "/opt/common/lib/libaudit.so.1",
+                  "object": "/opt/common/lib/libaudit.so.1.8"
+                },
+                {
+                  "path": "/opt/old/lib/libreport.so.0",
+                  "object": "/opt/old/lib/libreport.so.0.9"
+                }
+              ]
+            },
+            "configuration": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+            "library_path": null,
+            "cache": {
+              "generation": 1,
+              "source_configuration": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+              "directories": [
+                "/opt/keep/lib",
+                "/lib64",
+                "/usr/lib64"
+              ],
+              "entries": [
+                {
+                  "name": "libarchive.so.1",
+                  "path": "/opt/keep/lib/libarchive.so.1",
+                  "object": "/opt/keep/lib/libarchive.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  }
+                },
+                {
+                  "name": "libcore.so.1",
+                  "path": "/lib64/libcore.so.1",
+                  "object": "/lib64/libcore.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  }
+                }
+              ]
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "catalog": {
+              "version": 1,
+              "directories": [
+                "/lib64",
+                "/usr/lib64",
+                "/opt/demo/lib",
+                "/opt/demo/keep"
+              ],
+              "trusted": [
+                "/lib64",
+                "/usr/lib64"
+              ],
+              "objects": [
+                {
+                  "identity": "platform-core",
+                  "path": "/lib64/libcore.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libcore.so.1",
+                  "needed": []
+                },
+                {
+                  "identity": "demo-page",
+                  "path": "/opt/demo/lib/libpage.so.1.3",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libpage.so.1",
+                  "needed": [
+                    "libword.so.1"
+                  ]
+                },
+                {
+                  "identity": "demo-word",
+                  "path": "/opt/demo/lib/libword.so.1.2",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libword.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "demo-preview",
+                  "path": "/opt/demo/keep/libpreview.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libpreview.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                }
+              ],
+              "programs": [
+                {
+                  "path": "/usr/bin/brief",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libpage.so.1"
+                  ]
+                },
+                {
+                  "path": "/usr/bin/preview",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libpreview.so.1"
+                  ]
+                }
+              ],
+              "aliases": [
+                {
+                  "path": "/opt/demo/lib/libpage.so.1",
+                  "object": "/opt/demo/lib/libpage.so.1.3"
+                },
+                {
+                  "path": "/opt/demo/lib/libword.so.1",
+                  "object": "/opt/demo/lib/libword.so.1.2"
+                }
+              ]
+            },
+            "configuration": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+            "library_path": null,
+            "cache": {
+              "generation": 1,
+              "source_configuration": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+              "directories": [
+                "/opt/demo/keep",
+                "/lib64",
+                "/usr/lib64"
+              ],
+              "entries": [
+                {
+                  "name": "libcore.so.1",
+                  "path": "/lib64/libcore.so.1",
+                  "object": "/lib64/libcore.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  }
+                },
+                {
+                  "name": "libpreview.so.1",
+                  "path": "/opt/demo/keep/libpreview.so.1",
+                  "object": "/opt/demo/keep/libpreview.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  }
+                }
+              ]
+            }
+          },
+          "initial_recipes": [
+            {
+              "program": "/usr/bin/report",
+              "environment": "/opt/old/lib"
+            },
+            {
+              "program": "/usr/bin/audit",
+              "environment": "/opt/common/lib"
+            }
+          ],
+          "example_initial_recipes": [
+            {
+              "program": "/usr/bin/brief",
+              "environment": "/opt/demo/lib"
+            }
+          ],
+          "assignment_plan": {
+            "launches": [
+              {
+                "program": "/usr/bin/report",
+                "mode": "clean",
+                "selections": [
+                  {
+                    "needed": "libreport.so.1",
+                    "allowed_identities": [
+                      "site-report"
+                    ]
+                  },
+                  {
+                    "needed": "libformat.so.1",
+                    "allowed_identities": [
+                      "site-format"
+                    ]
+                  },
+                  {
+                    "needed": "libcore.so.1",
+                    "allowed_identities": [
+                      "platform-core"
+                    ]
+                  }
+                ]
+              },
+              {
+                "program": "/usr/bin/audit",
+                "mode": "clean",
+                "selections": [
+                  {
+                    "needed": "libaudit.so.1",
+                    "allowed_identities": [
+                      "site-audit"
+                    ]
+                  },
+                  {
+                    "needed": "libcore.so.1",
+                    "allowed_identities": [
+                      "platform-core"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "protected_programs": [
+              "/usr/bin/viewer"
+            ],
+            "require_current_cache": true,
+            "require_clean_recipes": true,
+            "preserve_configuration_and_cache": false
+          },
+          "example_plan": {
+            "launches": [
+              {
+                "program": "/usr/bin/brief",
+                "mode": "clean",
+                "selections": [
+                  {
+                    "needed": "libpage.so.1",
+                    "allowed_identities": [
+                      "demo-page"
+                    ]
+                  },
+                  {
+                    "needed": "libword.so.1",
+                    "allowed_identities": [
+                      "demo-word"
+                    ]
+                  },
+                  {
+                    "needed": "libcore.so.1",
+                    "allowed_identities": [
+                      "platform-core"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "protected_programs": [
+              "/usr/bin/preview"
+            ],
+            "require_current_cache": true,
+            "require_clean_recipes": true,
+            "preserve_configuration_and_cache": false
+          },
+          "assignment": {
+            "state": {
+              "version": 1,
+              "catalog": {
+                "version": 1,
+                "directories": [
+                  "/lib64",
+                  "/usr/lib64",
+                  "/opt/site/lib",
+                  "/opt/common/lib",
+                  "/opt/keep/lib",
+                  "/opt/old/lib"
+                ],
+                "trusted": [
+                  "/lib64",
+                  "/usr/lib64"
+                ],
+                "objects": [
+                  {
+                    "identity": "platform-core",
+                    "path": "/lib64/libcore.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libcore.so.1",
+                    "needed": []
+                  },
+                  {
+                    "identity": "site-report",
+                    "path": "/opt/site/lib/libreport.so.1.4",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libreport.so.1",
+                    "needed": [
+                      "libformat.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "site-format",
+                    "path": "/opt/common/lib/libformat.so.1.2",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libformat.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "site-audit",
+                    "path": "/opt/common/lib/libaudit.so.1.8",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libaudit.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "kept-archive",
+                    "path": "/opt/keep/lib/libarchive.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libarchive.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "old-report",
+                    "path": "/opt/old/lib/libreport.so.0.9",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libreport.so.0",
+                    "needed": []
+                  }
+                ],
+                "programs": [
+                  {
+                    "path": "/usr/bin/report",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libreport.so.1"
+                    ]
+                  },
+                  {
+                    "path": "/usr/bin/audit",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libaudit.so.1"
+                    ]
+                  },
+                  {
+                    "path": "/usr/bin/viewer",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libarchive.so.1"
+                    ]
+                  }
+                ],
+                "aliases": [
+                  {
+                    "path": "/opt/site/lib/libreport.so.1",
+                    "object": "/opt/site/lib/libreport.so.1.4"
+                  },
+                  {
+                    "path": "/opt/common/lib/libformat.so.1",
+                    "object": "/opt/common/lib/libformat.so.1.2"
+                  },
+                  {
+                    "path": "/opt/common/lib/libaudit.so.1",
+                    "object": "/opt/common/lib/libaudit.so.1.8"
+                  },
+                  {
+                    "path": "/opt/old/lib/libreport.so.0",
+                    "object": "/opt/old/lib/libreport.so.0.9"
+                  }
+                ]
+              },
+              "configuration": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+              "library_path": null,
+              "cache": {
+                "generation": 1,
+                "source_configuration": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+                "directories": [
+                  "/opt/keep/lib",
+                  "/lib64",
+                  "/usr/lib64"
+                ],
+                "entries": [
+                  {
+                    "name": "libarchive.so.1",
+                    "path": "/opt/keep/lib/libarchive.so.1",
+                    "object": "/opt/keep/lib/libarchive.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    }
+                  },
+                  {
+                    "name": "libcore.so.1",
+                    "path": "/lib64/libcore.so.1",
+                    "object": "/lib64/libcore.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    }
+                  }
+                ]
+              }
+            },
+            "configuration_draft": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+            "recipes": [
+              {
+                "program": "/usr/bin/report",
+                "environment": "/opt/old/lib"
+              },
+              {
+                "program": "/usr/bin/audit",
+                "environment": "/opt/common/lib"
+              },
+              {
+                "program": "/usr/bin/viewer",
+                "environment": null
+              }
+            ],
+            "launch_drafts": [
+              {
+                "program": "/usr/bin/report",
+                "value": "/opt/old/lib"
+              },
+              {
+                "program": "/usr/bin/audit",
+                "value": "/opt/common/lib"
+              },
+              {
+                "program": "/usr/bin/viewer",
+                "value": ""
+              }
+            ],
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "example": {
+            "state": {
+              "version": 1,
+              "catalog": {
+                "version": 1,
+                "directories": [
+                  "/lib64",
+                  "/usr/lib64",
+                  "/opt/demo/lib",
+                  "/opt/demo/keep"
+                ],
+                "trusted": [
+                  "/lib64",
+                  "/usr/lib64"
+                ],
+                "objects": [
+                  {
+                    "identity": "platform-core",
+                    "path": "/lib64/libcore.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libcore.so.1",
+                    "needed": []
+                  },
+                  {
+                    "identity": "demo-page",
+                    "path": "/opt/demo/lib/libpage.so.1.3",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libpage.so.1",
+                    "needed": [
+                      "libword.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "demo-word",
+                    "path": "/opt/demo/lib/libword.so.1.2",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libword.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "demo-preview",
+                    "path": "/opt/demo/keep/libpreview.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libpreview.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  }
+                ],
+                "programs": [
+                  {
+                    "path": "/usr/bin/brief",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libpage.so.1"
+                    ]
+                  },
+                  {
+                    "path": "/usr/bin/preview",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libpreview.so.1"
+                    ]
+                  }
+                ],
+                "aliases": [
+                  {
+                    "path": "/opt/demo/lib/libpage.so.1",
+                    "object": "/opt/demo/lib/libpage.so.1.3"
+                  },
+                  {
+                    "path": "/opt/demo/lib/libword.so.1",
+                    "object": "/opt/demo/lib/libword.so.1.2"
+                  }
+                ]
+              },
+              "configuration": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+              "library_path": null,
+              "cache": {
+                "generation": 1,
+                "source_configuration": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+                "directories": [
+                  "/opt/demo/keep",
+                  "/lib64",
+                  "/usr/lib64"
+                ],
+                "entries": [
+                  {
+                    "name": "libcore.so.1",
+                    "path": "/lib64/libcore.so.1",
+                    "object": "/lib64/libcore.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    }
+                  },
+                  {
+                    "name": "libpreview.so.1",
+                    "path": "/opt/demo/keep/libpreview.so.1",
+                    "object": "/opt/demo/keep/libpreview.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    }
+                  }
+                ]
+              }
+            },
+            "configuration_draft": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+            "recipes": [
+              {
+                "program": "/usr/bin/brief",
+                "environment": "/opt/demo/lib"
+              },
+              {
+                "program": "/usr/bin/preview",
+                "environment": null
+              }
+            ],
+            "launch_drafts": [
+              {
+                "program": "/usr/bin/brief",
+                "value": "/opt/demo/lib"
+              },
+              {
+                "program": "/usr/bin/preview",
+                "value": ""
+              }
+            ],
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "view": "introduction",
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "SharedLibraries",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "catalog": {
+              "version": 1,
+              "directories": [
+                "/lib64",
+                "/usr/lib64",
+                "/opt/site/lib",
+                "/opt/common/lib",
+                "/opt/keep/lib",
+                "/opt/old/lib"
+              ],
+              "trusted": [
+                "/lib64",
+                "/usr/lib64"
+              ],
+              "objects": [
+                {
+                  "identity": "platform-core",
+                  "path": "/lib64/libcore.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libcore.so.1",
+                  "needed": []
+                },
+                {
+                  "identity": "site-report",
+                  "path": "/opt/site/lib/libreport.so.1.4",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libreport.so.1",
+                  "needed": [
+                    "libformat.so.1"
+                  ]
+                },
+                {
+                  "identity": "site-format",
+                  "path": "/opt/common/lib/libformat.so.1.2",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libformat.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "site-audit",
+                  "path": "/opt/common/lib/libaudit.so.1.8",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libaudit.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "kept-archive",
+                  "path": "/opt/keep/lib/libarchive.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libarchive.so.1",
+                  "needed": [
+                    "libcore.so.1"
+                  ]
+                },
+                {
+                  "identity": "old-report",
+                  "path": "/opt/old/lib/libreport.so.0.9",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "soname": "libreport.so.0",
+                  "needed": []
+                }
+              ],
+              "programs": [
+                {
+                  "path": "/usr/bin/report",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libreport.so.1"
+                  ]
+                },
+                {
+                  "path": "/usr/bin/audit",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libaudit.so.1"
+                  ]
+                },
+                {
+                  "path": "/usr/bin/viewer",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  },
+                  "needed": [
+                    "libarchive.so.1"
+                  ]
+                }
+              ],
+              "aliases": [
+                {
+                  "path": "/opt/site/lib/libreport.so.1",
+                  "object": "/opt/site/lib/libreport.so.1.4"
+                },
+                {
+                  "path": "/opt/common/lib/libformat.so.1",
+                  "object": "/opt/common/lib/libformat.so.1.2"
+                },
+                {
+                  "path": "/opt/common/lib/libaudit.so.1",
+                  "object": "/opt/common/lib/libaudit.so.1.8"
+                },
+                {
+                  "path": "/opt/old/lib/libreport.so.0",
+                  "object": "/opt/old/lib/libreport.so.0.9"
+                }
+              ]
+            },
+            "configuration": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+            "library_path": null,
+            "cache": {
+              "generation": 1,
+              "source_configuration": "# Keep the supplied search entry.\n/opt/keep/lib\n",
+              "directories": [
+                "/opt/keep/lib",
+                "/lib64",
+                "/usr/lib64"
+              ],
+              "entries": [
+                {
+                  "name": "libarchive.so.1",
+                  "path": "/opt/keep/lib/libarchive.so.1",
+                  "object": "/opt/keep/lib/libarchive.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  }
+                },
+                {
+                  "name": "libcore.so.1",
+                  "path": "/lib64/libcore.so.1",
+                  "object": "/lib64/libcore.so.1",
+                  "abi": {
+                    "class": "elf64",
+                    "machine": "x86_64",
+                    "byte_order": "little"
+                  }
+                }
+              ]
+            }
+          },
+          "plan": {
+            "launches": [
+              {
+                "program": "/usr/bin/report",
+                "mode": "clean",
+                "selections": [
+                  {
+                    "needed": "libreport.so.1",
+                    "allowed_identities": [
+                      "site-report"
+                    ]
+                  },
+                  {
+                    "needed": "libformat.so.1",
+                    "allowed_identities": [
+                      "site-format"
+                    ]
+                  },
+                  {
+                    "needed": "libcore.so.1",
+                    "allowed_identities": [
+                      "platform-core"
+                    ]
+                  }
+                ]
+              },
+              {
+                "program": "/usr/bin/audit",
+                "mode": "clean",
+                "selections": [
+                  {
+                    "needed": "libaudit.so.1",
+                    "allowed_identities": [
+                      "site-audit"
+                    ]
+                  },
+                  {
+                    "needed": "libcore.so.1",
+                    "allowed_identities": [
+                      "platform-core"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "protected_programs": [
+              "/usr/bin/viewer"
+            ],
+            "require_current_cache": true,
+            "require_clean_recipes": true,
+            "preserve_configuration_and_cache": false
+          },
+          "lesson": {
+            "prerequisite_note": "Builds on navigating Linux paths, relative and symbolic links, and the difference between a command environment and a saved configuration. The virtual inventory supplies every program, directory and library used here.",
+            "description": "The separate brief application already works with a temporary saved search setting. Compare its saved-setting inspection with a clean lookup, then repair the cache and remove that workaround while keeping preview working.",
+            "concepts": [
+              {
+                "title": "A program can share code with other programs",
+                "text": "A shared library is a file containing reusable program code. When an application starts, a loader finds the libraries it asks for. A library can need another library too. This activity follows supplied dependency information; it never executes the program or library code."
+              },
+              {
+                "title": "A requested name and a file location are different",
+                "text": "The program asks for a name such as libpage.so.1. A search directory such as /opt/demo/lib can contain a link with that name pointing to a versioned file. Enter a directory when choosing where to search, not the full library filename. Inspect the supplied inventory rather than guessing a location."
+              },
+              {
+                "title": "A cache records locations found during a scan",
+                "text": "The loader cache is a saved list of library locations. In this activity the supplied environment has no embedded search paths or other advanced loader modes, so a clean lookup checks the cache and then its declared default directories. Real Linux has additional rules, described in optional scope help."
+              },
+              {
+                "title": "Saving configuration and rebuilding are separate actions",
+                "text": "The virtual /etc/ld.so.conf lists extra directories to scan. Keep existing entries and add one supplied absolute directory per line; comments begin with #. Save configuration changes that file only. Run ldconfig to rebuild the simulated cache, then use ldconfig -p to inspect what was recorded."
+              },
+              {
+                "title": "Verify without relying on a temporary fix",
+                "text": "A directory passed through env affects only that inspection. Saved simulated launch settings can also conceal a missing cache repair. For this handover, clear temporary application settings and verify both programs with plain ldd. The viewer must keep its original library choices after the cache is rebuilt."
+              }
+            ],
+            "initial": {
+              "version": 1,
+              "catalog": {
+                "version": 1,
+                "directories": [
+                  "/lib64",
+                  "/usr/lib64",
+                  "/opt/demo/lib",
+                  "/opt/demo/keep"
+                ],
+                "trusted": [
+                  "/lib64",
+                  "/usr/lib64"
+                ],
+                "objects": [
+                  {
+                    "identity": "platform-core",
+                    "path": "/lib64/libcore.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libcore.so.1",
+                    "needed": []
+                  },
+                  {
+                    "identity": "demo-page",
+                    "path": "/opt/demo/lib/libpage.so.1.3",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libpage.so.1",
+                    "needed": [
+                      "libword.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "demo-word",
+                    "path": "/opt/demo/lib/libword.so.1.2",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libword.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  },
+                  {
+                    "identity": "demo-preview",
+                    "path": "/opt/demo/keep/libpreview.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "soname": "libpreview.so.1",
+                    "needed": [
+                      "libcore.so.1"
+                    ]
+                  }
+                ],
+                "programs": [
+                  {
+                    "path": "/usr/bin/brief",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libpage.so.1"
+                    ]
+                  },
+                  {
+                    "path": "/usr/bin/preview",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    },
+                    "needed": [
+                      "libpreview.so.1"
+                    ]
+                  }
+                ],
+                "aliases": [
+                  {
+                    "path": "/opt/demo/lib/libpage.so.1",
+                    "object": "/opt/demo/lib/libpage.so.1.3"
+                  },
+                  {
+                    "path": "/opt/demo/lib/libword.so.1",
+                    "object": "/opt/demo/lib/libword.so.1.2"
+                  }
+                ]
+              },
+              "configuration": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+              "library_path": null,
+              "cache": {
+                "generation": 1,
+                "source_configuration": "# Keep the supplied search entry.\n/opt/demo/keep\n",
+                "directories": [
+                  "/opt/demo/keep",
+                  "/lib64",
+                  "/usr/lib64"
+                ],
+                "entries": [
+                  {
+                    "name": "libcore.so.1",
+                    "path": "/lib64/libcore.so.1",
+                    "object": "/lib64/libcore.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    }
+                  },
+                  {
+                    "name": "libpreview.so.1",
+                    "path": "/opt/demo/keep/libpreview.so.1",
+                    "object": "/opt/demo/keep/libpreview.so.1",
+                    "abi": {
+                      "class": "elf64",
+                      "machine": "x86_64",
+                      "byte_order": "little"
+                    }
+                  }
+                ]
+              }
+            },
+            "plan": {
+              "launches": [
+                {
+                  "program": "/usr/bin/brief",
+                  "mode": "clean",
+                  "selections": [
+                    {
+                      "needed": "libpage.so.1",
+                      "allowed_identities": [
+                        "demo-page"
+                      ]
+                    },
+                    {
+                      "needed": "libword.so.1",
+                      "allowed_identities": [
+                        "demo-word"
+                      ]
+                    },
+                    {
+                      "needed": "libcore.so.1",
+                      "allowed_identities": [
+                        "platform-core"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "protected_programs": [
+                "/usr/bin/preview"
+              ],
+              "require_current_cache": true,
+              "require_clean_recipes": true,
+              "preserve_configuration_and_cache": false
+            },
+            "worked": [
+              {
+                "title": "Inspect the clean starting lookup",
+                "explanation": "Choose brief and Inspect launch settings: its existing temporary setting finds the dependencies. Then run plain ldd in the practice terminal. That clean lookup is missing libpage.so.1, so a working workaround has not repaired the cache.",
+                "action": {
+                  "kind": "inspect",
+                  "command": "ldd /usr/bin/brief"
+                }
+              },
+              {
+                "title": "Save an extra scan directory",
+                "explanation": "Keep /opt/demo/keep, which the preview application needs, and append /opt/demo/lib in the virtual editor. Save configuration. Before rebuilding, plain ldd still uses the old cache.",
+                "action": {
+                  "kind": "configuration",
+                  "text": "# Keep the supplied search entry.\n/opt/demo/keep\n/opt/demo/lib\n"
+                }
+              },
+              {
+                "title": "Rebuild the virtual cache",
+                "explanation": "Run ldconfig. This scans the admitted directories and atomically replaces the virtual cache; saving the file alone did not do that. Existing supplied links need no repair.",
+                "action": {
+                  "kind": "rebuild_cache"
+                }
+              },
+              {
+                "title": "Inspect the recorded names",
+                "explanation": "Run ldconfig -p and compare its actual locations with the supplied inventory. A library name identifies a requested dependency, not proof that arbitrary binaries are compatible.",
+                "action": {
+                  "kind": "inspect",
+                  "command": "ldconfig -p"
+                }
+              },
+              {
+                "title": "Remove the temporary application workaround",
+                "explanation": "Clear brief's library search directories, then Apply launch settings. Inspect launch settings now uses the repaired clean cache. This clears a simulated application setting, not a Linux environment file.",
+                "action": {
+                  "kind": "launch_recipe",
+                  "program": "/usr/bin/brief",
+                  "environment": null
+                }
+              },
+              {
+                "title": "Verify the clean lookup",
+                "explanation": "Run plain ldd again. All three dependencies should be found; Check configuration also verifies the protected preview application.",
+                "action": {
+                  "kind": "inspect",
+                  "command": "ldd /usr/bin/brief"
+                }
+              }
+            ],
+            "initial_recipes": [
+              {
+                "program": "/usr/bin/brief",
+                "environment": "/opt/demo/lib"
+              }
+            ]
+          },
+          "initial_recipes": [
+            {
+              "program": "/usr/bin/report",
+              "environment": "/opt/old/lib"
+            },
+            {
+              "program": "/usr/bin/audit",
+              "environment": "/opt/common/lib"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "shared-libraries {\"action\":\"edit_configuration\",\"value\":\"/opt/keep/lib\\n/opt/site/lib\\n/opt/common/lib\\n\"}",
+        "shared-libraries {\"action\":\"save_configuration\"}",
+        "shared-libraries {\"action\":\"run\",\"command\":\"ldconfig\"}",
+        "shared-libraries {\"action\":\"edit_launch\",\"program\":\"/usr/bin/report\",\"value\":\"\"}",
+        "shared-libraries {\"action\":\"save_launch\",\"program\":\"/usr/bin/report\"}",
+        "shared-libraries {\"action\":\"edit_launch\",\"program\":\"/usr/bin/audit\",\"value\":\"\"}",
+        "shared-libraries {\"action\":\"save_launch\",\"program\":\"/usr/bin/audit\"}",
+        "shared-libraries {\"action\":\"check\"}"
+      ]
+    }
+  ]
+}

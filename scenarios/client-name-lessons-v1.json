@@ -1,0 +1,681 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-local-host-alias",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Local names and aliases",
+      "unit": "linux-client-name-sources",
+      "title": "Repair a local host name and retire its old alias",
+      "summary": "Repair local address-book records and inspect real simulated source/status/action traces.",
+      "objective": "Give dispatch.office.lab.test and the short alias dispatch the supplied local address 192.0.2.55. Remove the retired alias old-dispatch. Preserve localhost at 127.0.0.1 and printer.office.lab.test at 192.0.2.60. Prove these local answers work with DNS available and unavailable.",
+      "difficulty": "Beginner",
+      "minutes": 18,
+      "prerequisites": [
+        "lpic1-host-resolver"
+      ],
+      "steps": [
+        "Edit the virtual files, run the supplied lookups and inspect each source trace before retrying."
+      ],
+      "guide": [],
+      "hints": [
+        "A row can resolve successfully to an outdated address. Compare the actual address, not just SUCCESS.",
+        "The short alias belongs after the main name on the same row; keep each name unique.",
+        "Preserve the peer and localhost rows. Remove only the retired alias from the dispatch row."
+      ],
+      "explanation": "The supplied dispatch address belongs at the beginning of its hosts row. Keeping dispatch.office.lab.test and dispatch on that row provides both names; removing old-dispatch retires only that alias. The existing localhost and printer records remain. A successful files lookup returns before DNS, so these local answers remain available in the outage sample. Supported formatting/comments and an equivalent unambiguous ordering of rows also work.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://sourceware.org/glibc/manual/latest/html_node/Actions-in-the-NSS-configuration.html",
+        "https://man7.org/linux/man-pages/man5/hosts.5.html"
+      ],
+      "simplifications": "In-process IPv4 name-source simulation: editable hosts and hosts-only nsswitch.conf excerpt, files/dns sources, finite supplied DNS A/status snapshots and explicit source/status/action traces. At most16KiB/128lines per file,64host rows/128names/eight names per row,64DNS records, four samples/twelve lookups each. Default actions and explicit NOTFOUND/UNAVAIL/TRYAGAIN return/continue plus SUCCESS=return only. Other NSS modules/databases, SUCCESS=continue, negation/merge, ambiguous duplicate host names, real OS files/modules/resolvers, DNS packets/server routing, search/ndots, multiple A/IPv6/reverse/CNAME/cache and systemd-resolved are outside this subset. No host operation. Full109.4 remains incomplete.",
+      "initial": {
+        "kind": "ClientNames",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-local-host-alias",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "hosts": "127.0.0.1 localhost\n192.0.2.9 dispatch.office.lab.test old-dispatch\n192.0.2.60 printer.office.lab.test\n",
+              "nsswitch.conf": "hosts: files dns\n"
+            },
+            "tested": null,
+            "selected": "hosts"
+          },
+          "practice": {
+            "draft": {
+              "hosts": "127.0.0.1 localhost\n192.0.2.9 studio.workshop.lab.test old-studio\n198.51.100.40 camera.workshop.lab.test\n",
+              "nsswitch.conf": "hosts: files dns\n"
+            },
+            "tested": null,
+            "selected": "hosts"
+          }
+        }
+      },
+      "goal": {
+        "kind": "ClientNames",
+        "definition": {
+          "initial": {
+            "id": "lpic1-local-host-alias",
+            "instructions": "Give dispatch.office.lab.test and the short alias dispatch the supplied local address 192.0.2.55. Remove the retired alias old-dispatch. Preserve localhost at 127.0.0.1 and printer.office.lab.test at 192.0.2.60. Prove these local answers work with DNS available and unavailable.",
+            "starter": {
+              "hosts": "127.0.0.1 localhost\n192.0.2.9 dispatch.office.lab.test old-dispatch\n192.0.2.60 printer.office.lab.test\n",
+              "nsswitch.conf": "hosts: files dns\n"
+            },
+            "cases": [
+              {
+                "id": "dns-available",
+                "label": "DNS available: local records still take precedence",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "dispatch.office.lab.test": "192.0.2.200"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "dispatch.office.lab.test",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "dispatch",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "old-dispatch",
+                    "address": null,
+                    "status": null,
+                    "via": null
+                  },
+                  {
+                    "query": "localhost",
+                    "address": "127.0.0.1",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "printer.office.lab.test",
+                    "address": "192.0.2.60",
+                    "status": "Success",
+                    "via": "Files"
+                  }
+                ]
+              },
+              {
+                "id": "dns-unavailable",
+                "label": "DNS unavailable: local records still work",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Unavailable",
+                    "records": {}
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "dispatch.office.lab.test",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "dispatch",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "old-dispatch",
+                    "address": null,
+                    "status": null,
+                    "via": null
+                  },
+                  {
+                    "query": "localhost",
+                    "address": "127.0.0.1",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "printer.office.lab.test",
+                    "address": "192.0.2.60",
+                    "status": "Success",
+                    "via": "Files"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "practice-lpic1-local-host-alias",
+            "instructions": "Give studio.workshop.lab.test and the short alias studio the supplied local address 198.51.100.35. Remove the retired alias old-studio. Preserve localhost at 127.0.0.1 and camera.workshop.lab.test at 198.51.100.40. Prove these local answers work with DNS available and unavailable.",
+            "starter": {
+              "hosts": "127.0.0.1 localhost\n192.0.2.9 studio.workshop.lab.test old-studio\n198.51.100.40 camera.workshop.lab.test\n",
+              "nsswitch.conf": "hosts: files dns\n"
+            },
+            "cases": [
+              {
+                "id": "dns-available",
+                "label": "DNS available: local records still take precedence",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "studio.workshop.lab.test": "192.0.2.200"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "studio.workshop.lab.test",
+                    "address": "198.51.100.35",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "studio",
+                    "address": "198.51.100.35",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "old-studio",
+                    "address": null,
+                    "status": null,
+                    "via": null
+                  },
+                  {
+                    "query": "localhost",
+                    "address": "127.0.0.1",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "camera.workshop.lab.test",
+                    "address": "198.51.100.40",
+                    "status": "Success",
+                    "via": "Files"
+                  }
+                ]
+              },
+              {
+                "id": "dns-unavailable",
+                "label": "DNS unavailable: local records still work",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Unavailable",
+                    "records": {}
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "studio.workshop.lab.test",
+                    "address": "198.51.100.35",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "studio",
+                    "address": "198.51.100.35",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "old-studio",
+                    "address": null,
+                    "status": null,
+                    "via": null
+                  },
+                  {
+                    "query": "localhost",
+                    "address": "127.0.0.1",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "camera.workshop.lab.test",
+                    "address": "198.51.100.40",
+                    "status": "Success",
+                    "via": "Files"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "hosts": "127.0.0.1 localhost\n198.51.100.35 studio.workshop.lab.test studio\n198.51.100.40 camera.workshop.lab.test\n",
+            "nsswitch.conf": "hosts: files dns\n"
+          }
+        }
+      },
+      "solution": [
+        "NAME SOURCES\n{\"hosts\":\"127.0.0.1 localhost\\n192.0.2.55 dispatch.office.lab.test dispatch\\n192.0.2.60 printer.office.lab.test\\n\",\"nsswitch.conf\":\"hosts: files dns\\n\"}"
+      ]
+    },
+    {
+      "id": "lpic1-name-source-fallback",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Name-source order and fallback",
+      "unit": "linux-client-name-sources",
+      "title": "Keep local overrides while allowing DNS fallback",
+      "summary": "Diagnose competing name sources and preserve useful fallback across four supplied availability snapshots.",
+      "objective": "Prefer the local override rescue.office.lab.test and alias rescue at 192.0.2.55; preserve printer.office.lab.test at 192.0.2.60. Resolve catalog.office.lab.test through the supplied DNS snapshot, not a copied local address. Let a missing local name continue to DNS. Keep the override working during a DNS outage. If the local table is unavailable, use the supplied DNS backup for the override and report the peer honestly as unresolved.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "prerequisites": [
+        "lpic1-local-host-alias"
+      ],
+      "steps": [
+        "Edit the virtual files, run the supplied lookups and inspect each source trace before retrying."
+      ],
+      "guide": [],
+      "hints": [
+        "Read the source trace for a failed catalog lookup: did it actually reach dns?",
+        "Bracket actions belong to the preceding source. Returning on a miss can stop fallback.",
+        "A local answer normally stops the search. Keep files before dns for the requested override and preserve default continuation on missing/unavailable sources."
+      ],
+      "explanation": "files before dns retains the deliberate local rescue override. The default NOTFOUND and UNAVAIL actions continue, so changing catalog records can come from DNS and the supplied DNS backup can be used when the local table is unavailable. A DNS outage does not erase local records. Explicit equivalent default rules are accepted; static catalog copies fail when the DNS sample changes. This finite trace is not a live DNS or glibc conformance test.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://sourceware.org/glibc/manual/latest/html_node/Actions-in-the-NSS-configuration.html",
+        "https://man7.org/linux/man-pages/man5/hosts.5.html"
+      ],
+      "simplifications": "In-process IPv4 name-source simulation: editable hosts and hosts-only nsswitch.conf excerpt, files/dns sources, finite supplied DNS A/status snapshots and explicit source/status/action traces. At most16KiB/128lines per file,64host rows/128names/eight names per row,64DNS records, four samples/twelve lookups each. Default actions and explicit NOTFOUND/UNAVAIL/TRYAGAIN return/continue plus SUCCESS=return only. Other NSS modules/databases, SUCCESS=continue, negation/merge, ambiguous duplicate host names, real OS files/modules/resolvers, DNS packets/server routing, search/ndots, multiple A/IPv6/reverse/CNAME/cache and systemd-resolved are outside this subset. No host operation. Full109.4 remains incomplete.",
+      "initial": {
+        "kind": "ClientNames",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-name-source-fallback",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "hosts": "127.0.0.1 localhost\n192.0.2.55 rescue.office.lab.test rescue\n192.0.2.60 printer.office.lab.test\n",
+              "nsswitch.conf": "hosts: dns [NOTFOUND=return UNAVAIL=return] files\n"
+            },
+            "tested": null,
+            "selected": "hosts"
+          },
+          "practice": {
+            "draft": {
+              "hosts": "127.0.0.1 localhost\n198.51.100.35 studio.workshop.lab.test studio\n198.51.100.40 camera.workshop.lab.test\n",
+              "nsswitch.conf": "hosts: dns [NOTFOUND=return UNAVAIL=return] files\n"
+            },
+            "tested": null,
+            "selected": "hosts"
+          }
+        }
+      },
+      "goal": {
+        "kind": "ClientNames",
+        "definition": {
+          "initial": {
+            "id": "lpic1-name-source-fallback",
+            "instructions": "Prefer the local override rescue.office.lab.test and alias rescue at 192.0.2.55; preserve printer.office.lab.test at 192.0.2.60. Resolve catalog.office.lab.test through the supplied DNS snapshot, not a copied local address. Let a missing local name continue to DNS. Keep the override working during a DNS outage. If the local table is unavailable, use the supplied DNS backup for the override and report the peer honestly as unresolved.",
+            "starter": {
+              "hosts": "127.0.0.1 localhost\n192.0.2.55 rescue.office.lab.test rescue\n192.0.2.60 printer.office.lab.test\n",
+              "nsswitch.conf": "hosts: dns [NOTFOUND=return UNAVAIL=return] files\n"
+            },
+            "cases": [
+              {
+                "id": "dns-0",
+                "label": "DNS snapshot 1: remote catalog changes",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "rescue.office.lab.test": "192.0.2.200",
+                      "catalog.office.lab.test": "198.51.100.70"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "rescue.office.lab.test",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "rescue",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "printer.office.lab.test",
+                    "address": "192.0.2.60",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "catalog.office.lab.test",
+                    "address": "198.51.100.70",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "unknown.office.lab.test",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              },
+              {
+                "id": "dns-1",
+                "label": "DNS snapshot 2: remote catalog changes",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "rescue.office.lab.test": "192.0.2.200",
+                      "catalog.office.lab.test": "198.51.100.71"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "rescue.office.lab.test",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "rescue",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "printer.office.lab.test",
+                    "address": "192.0.2.60",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "catalog.office.lab.test",
+                    "address": "198.51.100.71",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "unknown.office.lab.test",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              },
+              {
+                "id": "dns-outage",
+                "label": "DNS unavailable: retain the local override",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Unavailable",
+                    "records": {}
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "rescue.office.lab.test",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "rescue",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "printer.office.lab.test",
+                    "address": "192.0.2.60",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "catalog.office.lab.test",
+                    "address": null,
+                    "status": "Unavailable",
+                    "via": "Dns"
+                  }
+                ]
+              },
+              {
+                "id": "files-unavailable",
+                "label": "Local table unavailable: supplied DNS backup",
+                "context": {
+                  "files_available": false,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "rescue.office.lab.test": "192.0.2.55",
+                      "catalog.office.lab.test": "198.51.100.72"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "rescue.office.lab.test",
+                    "address": "192.0.2.55",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "catalog.office.lab.test",
+                    "address": "198.51.100.72",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "printer.office.lab.test",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "practice-lpic1-name-source-fallback",
+            "instructions": "Prefer the local override studio.workshop.lab.test and alias studio at 198.51.100.35; preserve camera.workshop.lab.test at 198.51.100.40. Resolve catalog.workshop.lab.test through the supplied DNS snapshot, not a copied local address. Let a missing local name continue to DNS. Keep the override working during a DNS outage. If the local table is unavailable, use the supplied DNS backup for the override and report the peer honestly as unresolved.",
+            "starter": {
+              "hosts": "127.0.0.1 localhost\n198.51.100.35 studio.workshop.lab.test studio\n198.51.100.40 camera.workshop.lab.test\n",
+              "nsswitch.conf": "hosts: dns [NOTFOUND=return UNAVAIL=return] files\n"
+            },
+            "cases": [
+              {
+                "id": "dns-0",
+                "label": "DNS snapshot 1: remote catalog changes",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "studio.workshop.lab.test": "192.0.2.200",
+                      "catalog.workshop.lab.test": "198.51.100.70"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "studio.workshop.lab.test",
+                    "address": "198.51.100.35",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "studio",
+                    "address": "198.51.100.35",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "camera.workshop.lab.test",
+                    "address": "198.51.100.40",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "catalog.workshop.lab.test",
+                    "address": "198.51.100.70",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "unknown.workshop.lab.test",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              },
+              {
+                "id": "dns-1",
+                "label": "DNS snapshot 2: remote catalog changes",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "studio.workshop.lab.test": "192.0.2.200",
+                      "catalog.workshop.lab.test": "198.51.100.71"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "studio.workshop.lab.test",
+                    "address": "198.51.100.35",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "studio",
+                    "address": "198.51.100.35",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "camera.workshop.lab.test",
+                    "address": "198.51.100.40",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "catalog.workshop.lab.test",
+                    "address": "198.51.100.71",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "unknown.workshop.lab.test",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              },
+              {
+                "id": "dns-outage",
+                "label": "DNS unavailable: retain the local override",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Unavailable",
+                    "records": {}
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "studio.workshop.lab.test",
+                    "address": "198.51.100.35",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "studio",
+                    "address": "198.51.100.35",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "camera.workshop.lab.test",
+                    "address": "198.51.100.40",
+                    "status": "Success",
+                    "via": "Files"
+                  },
+                  {
+                    "query": "catalog.workshop.lab.test",
+                    "address": null,
+                    "status": "Unavailable",
+                    "via": "Dns"
+                  }
+                ]
+              },
+              {
+                "id": "files-unavailable",
+                "label": "Local table unavailable: supplied DNS backup",
+                "context": {
+                  "files_available": false,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "studio.workshop.lab.test": "198.51.100.35",
+                      "catalog.workshop.lab.test": "198.51.100.72"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "studio.workshop.lab.test",
+                    "address": "198.51.100.35",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "catalog.workshop.lab.test",
+                    "address": "198.51.100.72",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "camera.workshop.lab.test",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "hosts": "127.0.0.1 localhost\n198.51.100.35 studio.workshop.lab.test studio\n198.51.100.40 camera.workshop.lab.test\n",
+            "nsswitch.conf": "hosts: files dns\n"
+          }
+        }
+      },
+      "solution": [
+        "NAME SOURCES\n{\"hosts\":\"127.0.0.1 localhost\\n192.0.2.55 rescue.office.lab.test rescue\\n192.0.2.60 printer.office.lab.test\\n\",\"nsswitch.conf\":\"hosts: files dns\\n\"}"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,848 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-echo-path-diagnosis",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "IPv4 Echo and route diagnosis",
+      "unit": "linux-echo-diagnosis",
+      "title": "Repair a path when nearby replies are misleading",
+      "summary": "Compare a nearby reply, a remote failure and a silent control; repair the actual mask and routing faults without losing management.",
+      "objective": "Configure ens3 with an unused conventional address in the supplied 10.96.16.0/20 LAN and keep it up. Use 10.96.16.1 on ens3 for the preferred default and the application path to 172.22.40.20, including any more-specific route. Restore matching Echo replies from 10.96.16.1, 10.96.30.20, 172.22.40.20 and the management peer 10.45.0.20. Preserve the complete ens4 configuration and every 10.45.0.0/24 route. 172.22.40.99 is a deliberately silent Echo control; a missing reply from it is not a repair requirement.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Compare evidence before changing the network",
+        "Repair only the broken application path"
+      ],
+      "guide": [],
+      "explanation": "The initial /24 reaches the nearby 10.96.19.x peer but treats the other parts of the supplied /20 LAN as remote. The /20 mask is 255.255.240.0: its third-octet block spans16–31. Restoring that prefix makes the supplied gateway and farther LAN peer local. The correct default cannot override the stale /32 application route; remove or repair that more-specific entry. Preserve the separate ens4 management path. A correctly reflected Echo reply shows this virtual round trip, not a running application service. The silent control intentionally produces no reply even after the repair; treating every missing reply as proof of a bad local route would lead to unnecessary changes.",
+      "hints": [
+        "Compare ip -4 address show with ens3’s supplied LAN; a nearby reply does not prove the entire prefix is correct. A /20 uses mask255.255.240.0, with third-octet blocks of16.",
+        "Read every entry in ip -4 route show. The longest matching prefix is chosen before metric; a /32 can override a corrected default. Remove gateway routes on an interface before changing its address if required by this bounded command subset.",
+        "Use the separate worked example to see address deletion/addition, a default replacement and removal of a stale more-specific route. Choose Check network for all outcomes; preserve ens4 and the management route. The silent control is deliberately ungraded."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man8/ping.8.html",
+        "https://www.rfc-editor.org/rfc/rfc792.html",
+        "https://man7.org/linux/man-pages/man8/ip-route.8.html"
+      ],
+      "simplifications": "Finite in-process IPv4 Echo and existing virtual interface/main-route model only. ping -c 1 ADDRESS and ping -4 -c 1 ADDRESS accept supplied numeric IPv4 peers only; output explicitly identifies simulated queries and no measured RTT/TTL. Source-owned peer response and return-prefix facts are separate from the existing outward path inspection. No host command/network, real packets, DNS names in ping, other counts/options, IPv6 Echo, ICMP errors, retries, timers, checksums, loss statistics or application-service verification. Conventional /1–/30 workstation addressing only; /31-/32 host configurations excluded. /32 here is a destination route, not a workstation prefix. No automatic addressing, kernel neighbor tables or full Linux behavior. Source check2026-11-12.",
+      "initial": {
+        "kind": "HostNetwork",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_action": 0,
+          "assignment": {
+            "world": {
+              "version": 1,
+              "profile": {
+                "id": "echo-diagnosis",
+                "links": [
+                  {
+                    "name": "ens3",
+                    "network": {
+                      "address": "10.96.16.0",
+                      "length": 20
+                    },
+                    "carrier": true
+                  },
+                  {
+                    "name": "ens4",
+                    "network": {
+                      "address": "192.0.2.0",
+                      "length": 24
+                    },
+                    "carrier": true
+                  }
+                ],
+                "gateways": [
+                  {
+                    "address": "10.96.16.1",
+                    "device": "ens3",
+                    "available": true,
+                    "exports": [
+                      {
+                        "address": "172.22.40.0",
+                        "length": 24
+                      }
+                    ]
+                  },
+                  {
+                    "address": "192.0.2.1",
+                    "device": "ens4",
+                    "available": true,
+                    "exports": [
+                      {
+                        "address": "10.45.0.0",
+                        "length": 24
+                      }
+                    ]
+                  }
+                ],
+                "nodes": [
+                  {
+                    "address": "10.96.19.20",
+                    "available": true
+                  },
+                  {
+                    "address": "10.96.30.20",
+                    "available": true
+                  },
+                  {
+                    "address": "172.22.40.20",
+                    "available": true
+                  },
+                  {
+                    "address": "172.22.40.99",
+                    "available": true
+                  },
+                  {
+                    "address": "10.45.0.20",
+                    "available": true
+                  }
+                ],
+                "resolvers": []
+              },
+              "configuration": {
+                "interfaces": [
+                  {
+                    "name": "ens3",
+                    "up": true,
+                    "address": {
+                      "address": "10.96.19.10",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "name": "ens4",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.10",
+                      "prefix": 24
+                    }
+                  }
+                ],
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "via": "192.0.2.1",
+                    "device": "ens4",
+                    "metric": 5
+                  },
+                  {
+                    "destination": {
+                      "address": "172.22.40.20",
+                      "length": 32
+                    },
+                    "via": "192.0.2.1",
+                    "device": "ens4",
+                    "metric": 1
+                  },
+                  {
+                    "destination": {
+                      "address": "10.45.0.0",
+                      "length": 24
+                    },
+                    "via": "192.0.2.1",
+                    "device": "ens4",
+                    "metric": 20
+                  }
+                ],
+                "nameservers": []
+              },
+              "generation": 0
+            },
+            "history": [],
+            "command": "",
+            "transcript": [],
+            "resolver_draft": "",
+            "resolver_applied": "",
+            "probe_input": "",
+            "probe_result": "",
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "profile": {
+                "id": "echo-diagnosis-example",
+                "links": [
+                  {
+                    "name": "ens3",
+                    "network": {
+                      "address": "10.110.64.0",
+                      "length": 20
+                    },
+                    "carrier": true
+                  },
+                  {
+                    "name": "ens4",
+                    "network": {
+                      "address": "198.51.100.0",
+                      "length": 24
+                    },
+                    "carrier": true
+                  }
+                ],
+                "gateways": [
+                  {
+                    "address": "10.110.64.1",
+                    "device": "ens3",
+                    "available": true,
+                    "exports": [
+                      {
+                        "address": "10.111.8.0",
+                        "length": 24
+                      }
+                    ]
+                  },
+                  {
+                    "address": "198.51.100.1",
+                    "device": "ens4",
+                    "available": true,
+                    "exports": [
+                      {
+                        "address": "10.112.0.0",
+                        "length": 24
+                      }
+                    ]
+                  }
+                ],
+                "nodes": [
+                  {
+                    "address": "10.110.67.20",
+                    "available": true
+                  },
+                  {
+                    "address": "10.110.78.20",
+                    "available": true
+                  },
+                  {
+                    "address": "10.111.8.20",
+                    "available": true
+                  },
+                  {
+                    "address": "10.111.8.99",
+                    "available": true
+                  },
+                  {
+                    "address": "10.112.0.20",
+                    "available": true
+                  }
+                ],
+                "resolvers": []
+              },
+              "configuration": {
+                "interfaces": [
+                  {
+                    "name": "ens3",
+                    "up": true,
+                    "address": {
+                      "address": "10.110.67.10",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "name": "ens4",
+                    "up": true,
+                    "address": {
+                      "address": "198.51.100.10",
+                      "prefix": 24
+                    }
+                  }
+                ],
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "via": "198.51.100.1",
+                    "device": "ens4",
+                    "metric": 5
+                  },
+                  {
+                    "destination": {
+                      "address": "10.111.8.20",
+                      "length": 32
+                    },
+                    "via": "198.51.100.1",
+                    "device": "ens4",
+                    "metric": 1
+                  },
+                  {
+                    "destination": {
+                      "address": "10.112.0.0",
+                      "length": 24
+                    },
+                    "via": "198.51.100.1",
+                    "device": "ens4",
+                    "metric": 20
+                  }
+                ],
+                "nameservers": []
+              },
+              "generation": 0
+            },
+            "history": [],
+            "command": "",
+            "transcript": [],
+            "resolver_draft": "",
+            "resolver_applied": "",
+            "probe_input": "",
+            "probe_result": "",
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "HostNetwork",
+        "definition": {
+          "echo": {
+            "initial": {
+              "plan": {
+                "peers": [
+                  {
+                    "address": "10.96.16.1",
+                    "responds": true,
+                    "return_sources": [
+                      {
+                        "address": "10.96.16.0",
+                        "length": 20
+                      }
+                    ]
+                  },
+                  {
+                    "address": "10.96.19.20",
+                    "responds": true,
+                    "return_sources": [
+                      {
+                        "address": "10.96.16.0",
+                        "length": 20
+                      }
+                    ]
+                  },
+                  {
+                    "address": "10.96.30.20",
+                    "responds": true,
+                    "return_sources": [
+                      {
+                        "address": "10.96.16.0",
+                        "length": 20
+                      }
+                    ]
+                  },
+                  {
+                    "address": "172.22.40.20",
+                    "responds": true,
+                    "return_sources": [
+                      {
+                        "address": "10.96.16.0",
+                        "length": 20
+                      }
+                    ]
+                  },
+                  {
+                    "address": "172.22.40.99",
+                    "responds": false,
+                    "return_sources": []
+                  },
+                  {
+                    "address": "10.45.0.20",
+                    "responds": true,
+                    "return_sources": [
+                      {
+                        "address": "192.0.2.0",
+                        "length": 24
+                      }
+                    ]
+                  }
+                ]
+              },
+              "required_replies": [
+                "10.96.16.1",
+                "10.96.30.20",
+                "172.22.40.20",
+                "10.45.0.20"
+              ]
+            },
+            "example": {
+              "plan": {
+                "peers": [
+                  {
+                    "address": "10.110.64.1",
+                    "responds": true,
+                    "return_sources": [
+                      {
+                        "address": "10.110.64.0",
+                        "length": 20
+                      }
+                    ]
+                  },
+                  {
+                    "address": "10.110.67.20",
+                    "responds": true,
+                    "return_sources": [
+                      {
+                        "address": "10.110.64.0",
+                        "length": 20
+                      }
+                    ]
+                  },
+                  {
+                    "address": "10.110.78.20",
+                    "responds": true,
+                    "return_sources": [
+                      {
+                        "address": "10.110.64.0",
+                        "length": 20
+                      }
+                    ]
+                  },
+                  {
+                    "address": "10.111.8.20",
+                    "responds": true,
+                    "return_sources": [
+                      {
+                        "address": "10.110.64.0",
+                        "length": 20
+                      }
+                    ]
+                  },
+                  {
+                    "address": "10.111.8.99",
+                    "responds": false,
+                    "return_sources": []
+                  },
+                  {
+                    "address": "10.112.0.20",
+                    "responds": true,
+                    "return_sources": [
+                      {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      }
+                    ]
+                  }
+                ]
+              },
+              "required_replies": [
+                "10.110.64.1",
+                "10.110.78.20",
+                "10.111.8.20",
+                "10.112.0.20"
+              ]
+            }
+          },
+          "initial": {
+            "version": 1,
+            "profile": {
+              "id": "echo-diagnosis",
+              "links": [
+                {
+                  "name": "ens3",
+                  "network": {
+                    "address": "10.96.16.0",
+                    "length": 20
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "ens4",
+                  "network": {
+                    "address": "192.0.2.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "10.96.16.1",
+                  "device": "ens3",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "172.22.40.0",
+                      "length": 24
+                    }
+                  ]
+                },
+                {
+                  "address": "192.0.2.1",
+                  "device": "ens4",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "10.45.0.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "10.96.19.20",
+                  "available": true
+                },
+                {
+                  "address": "10.96.30.20",
+                  "available": true
+                },
+                {
+                  "address": "172.22.40.20",
+                  "available": true
+                },
+                {
+                  "address": "172.22.40.99",
+                  "available": true
+                },
+                {
+                  "address": "10.45.0.20",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "ens3",
+                  "up": true,
+                  "address": {
+                    "address": "10.96.19.10",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "ens4",
+                  "up": true,
+                  "address": {
+                    "address": "192.0.2.10",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "192.0.2.1",
+                  "device": "ens4",
+                  "metric": 5
+                },
+                {
+                  "destination": {
+                    "address": "172.22.40.20",
+                    "length": 32
+                  },
+                  "via": "192.0.2.1",
+                  "device": "ens4",
+                  "metric": 1
+                },
+                {
+                  "destination": {
+                    "address": "10.45.0.0",
+                    "length": 24
+                  },
+                  "via": "192.0.2.1",
+                  "device": "ens4",
+                  "metric": 20
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "example": {
+            "version": 1,
+            "profile": {
+              "id": "echo-diagnosis-example",
+              "links": [
+                {
+                  "name": "ens3",
+                  "network": {
+                    "address": "10.110.64.0",
+                    "length": 20
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "ens4",
+                  "network": {
+                    "address": "198.51.100.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "10.110.64.1",
+                  "device": "ens3",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "10.111.8.0",
+                      "length": 24
+                    }
+                  ]
+                },
+                {
+                  "address": "198.51.100.1",
+                  "device": "ens4",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "10.112.0.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "10.110.67.20",
+                  "available": true
+                },
+                {
+                  "address": "10.110.78.20",
+                  "available": true
+                },
+                {
+                  "address": "10.111.8.20",
+                  "available": true
+                },
+                {
+                  "address": "10.111.8.99",
+                  "available": true
+                },
+                {
+                  "address": "10.112.0.20",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "ens3",
+                  "up": true,
+                  "address": {
+                    "address": "10.110.67.10",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "ens4",
+                  "up": true,
+                  "address": {
+                    "address": "198.51.100.10",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "198.51.100.1",
+                  "device": "ens4",
+                  "metric": 5
+                },
+                {
+                  "destination": {
+                    "address": "10.111.8.20",
+                    "length": 32
+                  },
+                  "via": "198.51.100.1",
+                  "device": "ens4",
+                  "metric": 1
+                },
+                {
+                  "destination": {
+                    "address": "10.112.0.0",
+                    "length": 24
+                  },
+                  "via": "198.51.100.1",
+                  "device": "ens4",
+                  "metric": 20
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "requirements": [
+            {
+              "kind": "Address",
+              "device": "ens3",
+              "network": {
+                "address": "10.96.16.0",
+                "length": 20
+              }
+            },
+            {
+              "kind": "Up",
+              "device": "ens3"
+            },
+            {
+              "kind": "Default",
+              "device": "ens3",
+              "via": "10.96.16.1"
+            },
+            {
+              "kind": "Reach",
+              "target": "10.96.30.20",
+              "device": "ens3"
+            },
+            {
+              "kind": "Reach",
+              "target": "172.22.40.20",
+              "device": "ens3"
+            },
+            {
+              "kind": "PreserveInterface",
+              "device": "ens4"
+            },
+            {
+              "kind": "PreserveRoutes",
+              "destination": {
+                "address": "10.45.0.0",
+                "length": 24
+              }
+            },
+            {
+              "kind": "Reach",
+              "target": "10.45.0.20",
+              "device": "ens4"
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "Address",
+              "device": "ens3",
+              "network": {
+                "address": "10.110.64.0",
+                "length": 20
+              }
+            },
+            {
+              "kind": "Up",
+              "device": "ens3"
+            },
+            {
+              "kind": "Default",
+              "device": "ens3",
+              "via": "10.110.64.1"
+            },
+            {
+              "kind": "Reach",
+              "target": "10.110.78.20",
+              "device": "ens3"
+            },
+            {
+              "kind": "Reach",
+              "target": "10.111.8.20",
+              "device": "ens3"
+            },
+            {
+              "kind": "PreserveInterface",
+              "device": "ens4"
+            },
+            {
+              "kind": "PreserveRoutes",
+              "destination": {
+                "address": "10.112.0.0",
+                "length": 24
+              }
+            },
+            {
+              "kind": "Reach",
+              "target": "10.112.0.20",
+              "device": "ens4"
+            }
+          ],
+          "example_actions": [
+            {
+              "kind": "Command",
+              "input": "ip link show"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -4 address show"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -4 route show"
+            },
+            {
+              "kind": "Command",
+              "input": "ping -c 1 10.110.67.20"
+            },
+            {
+              "kind": "Command",
+              "input": "ping -c 1 10.110.78.20"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -4 address del 10.110.67.10/24 dev ens3"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -4 address add 10.110.67.10/20 dev ens3"
+            },
+            {
+              "kind": "Command",
+              "input": "ping -c 1 10.110.78.20"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -4 route replace default via 10.110.64.1 dev ens3 metric 5"
+            },
+            {
+              "kind": "Command",
+              "input": "ping -c 1 10.111.8.20"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -4 route del 10.111.8.20/32 via 198.51.100.1 dev ens4 metric 1"
+            },
+            {
+              "kind": "Command",
+              "input": "ping -c 1 10.111.8.20"
+            },
+            {
+              "kind": "Command",
+              "input": "ping -c 1 10.111.8.99"
+            },
+            {
+              "kind": "Command",
+              "input": "ping -c 1 10.112.0.20"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "host-action {\"kind\":\"Command\",\"input\":\"ip -4 address del 10.96.19.10/24 dev ens3\"}",
+        "host-action {\"kind\":\"Command\",\"input\":\"ip -4 address add 10.96.19.10/20 dev ens3\"}",
+        "host-action {\"kind\":\"Command\",\"input\":\"ip -4 route replace default via 10.96.16.1 dev ens3 metric 5\"}",
+        "host-action {\"kind\":\"Command\",\"input\":\"ip -4 route del 172.22.40.20/32 via 192.0.2.1 dev ens4 metric 1\"}"
+      ],
+      "prerequisites": [],
+      "retry_guidance": "Compare the first failing outcome with the selected source and route. A nearby reply alone does not prove the wider LAN prefix or remote path. Repair one cause, retry, and keep management intact; the silent control is not a required reply."
+    }
+  ]
+}

@@ -1,0 +1,263 @@
+{
+  "snapshot": [
+    {
+      "name": "Reject reserved or empty name ''",
+      "args": [
+        ""
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Retain this note.\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid name\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Retain this note.\n"
+      }
+    },
+    {
+      "name": "Reject reserved or empty name '.'",
+      "args": [
+        "."
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Retain this note.\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid name\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Retain this note.\n"
+      }
+    },
+    {
+      "name": "Reject reserved or empty name '..'",
+      "args": [
+        ".."
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Retain this note.\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid name\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Retain this note.\n"
+      }
+    },
+    {
+      "name": "Reject reserved or empty name 'snapshot.index'",
+      "args": [
+        "snapshot.index"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Retain this note.\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid name\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Retain this note.\n"
+      }
+    },
+    {
+      "name": "Reject reserved or empty name 'copy-'",
+      "args": [
+        "copy-"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Retain this note.\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid name\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Retain this note.\n"
+      }
+    },
+    {
+      "name": "Invalid names are checked before duplicates",
+      "args": [
+        "absent",
+        "absent",
+        "../bad"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Retain this note.\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid name\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Retain this note.\n"
+      }
+    },
+    {
+      "name": "Missing source is checked before its existing copy",
+      "args": [
+        "gone"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Retain this note.\n",
+        "/work/copy-gone": "prior"
+      },
+      "stdout": "",
+      "stderr": "Missing source: gone\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Retain this note.\n",
+        "/work/copy-gone": "prior"
+      }
+    },
+    {
+      "name": "Existing index wins before invalid names",
+      "args": [
+        "../bad"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Retain this note.\n",
+        "/work/snapshot.index": "prior"
+      },
+      "stdout": "",
+      "stderr": "Existing snapshot index\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Retain this note.\n",
+        "/work/snapshot.index": "prior"
+      }
+    }
+  ],
+  "restore": [
+    {
+      "name": "Retain spaces and literal wildcard/dash filenames",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Unrelated operator note.\n",
+        "/work/old.index": "Older independent record stays.\n",
+        "/work/snapshot.index": "*\n-n\n pad name \n",
+        "/work/copy-*": "star bytes\n",
+        "/work/copy--n": "flag bytes",
+        "/work/copy- pad name ": "space bytes\n",
+        "/work/*": "old",
+        "/work/-n": "old",
+        "/work/ pad name ": "old"
+      },
+      "stdout": "Restored: 3 files\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Unrelated operator note.\n",
+        "/work/old.index": "Older independent record stays.\n",
+        "/work/snapshot.index": "*\n-n\n pad name \n",
+        "/work/copy-*": "star bytes\n",
+        "/work/copy--n": "flag bytes",
+        "/work/copy- pad name ": "space bytes\n",
+        "/work/*": "star bytes\n",
+        "/work/-n": "flag bytes",
+        "/work/ pad name ": "space bytes\n"
+      }
+    },
+    {
+      "name": "Reject unsafe index record '.'",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Retain this note.\n",
+        "/work/snapshot.index": ".\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid index entry\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Retain this note.\n",
+        "/work/snapshot.index": ".\n"
+      }
+    },
+    {
+      "name": "Reject unsafe index record '..'",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Retain this note.\n",
+        "/work/snapshot.index": "..\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid index entry\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Retain this note.\n",
+        "/work/snapshot.index": "..\n"
+      }
+    },
+    {
+      "name": "Reject unsafe index record 'copy-'",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Retain this note.\n",
+        "/work/snapshot.index": "copy-\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid index entry\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Retain this note.\n",
+        "/work/snapshot.index": "copy-\n"
+      }
+    },
+    {
+      "name": "Missing backup takes precedence at ninth record",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Retain this note.\n",
+        "/work/snapshot.index": "n0\nn1\nn2\nn3\nn4\nn5\nn6\nn7\nn8\n",
+        "/work/copy-n0": "valid",
+        "/work/copy-n1": "valid",
+        "/work/copy-n2": "valid",
+        "/work/copy-n3": "valid",
+        "/work/copy-n4": "valid",
+        "/work/copy-n5": "valid",
+        "/work/copy-n6": "valid",
+        "/work/copy-n7": "valid"
+      },
+      "stdout": "",
+      "stderr": "Missing backup: copy-n8\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Retain this note.\n",
+        "/work/snapshot.index": "n0\nn1\nn2\nn3\nn4\nn5\nn6\nn7\nn8\n",
+        "/work/copy-n0": "valid",
+        "/work/copy-n1": "valid",
+        "/work/copy-n2": "valid",
+        "/work/copy-n3": "valid",
+        "/work/copy-n4": "valid",
+        "/work/copy-n5": "valid",
+        "/work/copy-n6": "valid",
+        "/work/copy-n7": "valid"
+      }
+    }
+  ]
+}

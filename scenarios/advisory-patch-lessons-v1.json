@@ -1,0 +1,2104 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-vendor-backport",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Vendor advisories and configuration-preserving patches",
+      "unit": "linux-advisory-patching",
+      "title": "Choose the vendor fix without losing site settings",
+      "summary": "Read supplied vendor/release facts, apply compatible local fixes, preserve site text and verify the actual installed outcome.",
+      "objective": "Apply the supplied fictional TRAINING advisories for Training Enterprise Linux release 8. Keep relay-agent installed at a compatible fixed build (1.0-4 or later in the supplied release-8 set). Preserve the original site text in /srv/relay/agent.conf. Keep relay-notes and its supplied file unchanged. Leave declared package requirements healthy. Keep the installed fixed agent\u2019s ordinary file at /srv/relay/agent.txt identical to its installed archive record, including text and recorded attributes. Use only supplied local archives; an artifact for release 9 does not meet this incident, regardless of its version number.",
+      "retry_guidance": "Read the failing outcome. A higher package version for another system release is not the required fix. If dependencies refuse the update, inspect the incoming requires and installed provides, then plan the complete set. Preserve the site file and unrequested package; reset only this attempt if you need to restart.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Understand the task",
+        "Apply a compatible package set",
+        "Verify installed data and retained settings"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Vendor target release and full package build both matter. Query headers before applying the local package set.",
+          "action": "Read the supplied advisory and archive origins. Insert a query, then Run command; use the read-only inspector to compare current site text.",
+          "commands": [
+            {
+              "command": "rpm -q relay-agent",
+              "explanation": "Read the installed version.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Apply a compatible package set",
+          "why": "A completed transaction can still target the wrong system or omit a required dependency.",
+          "action": "Choose supplied local archives using the advisory and dependency data. Enter the update in the simulated command field and select Run command.",
+          "commands": []
+        },
+        {
+          "title": "Verify installed data and retained settings",
+          "why": "Package version, compatible target release, retained local configuration and healthy dependencies all contribute to completion.",
+          "action": "Choose Check work, read any failing outcome and investigate that package or file. Retry after a precise repair.",
+          "commands": []
+        }
+      ],
+      "initial": {
+        "kind": "RpmPackages",
+        "simulation": {
+          "schema_version": 1,
+          "catalog": {
+            "fixture": "relay-patch-incident",
+            "target": "x86_64",
+            "published": "current",
+            "archives": {
+              "relay-agent-old": {
+                "identity": {
+                  "name": "relay-agent",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/relay/agent.conf": {
+                    "file": {
+                      "contents": "zone=vendor-v1\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "config_noreplace"
+                  },
+                  "/srv/relay/agent.txt": {
+                    "file": {
+                      "contents": "agent 1.0-1\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "relay-agent-fixed": {
+                "identity": {
+                  "name": "relay-agent",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-4",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/relay/agent.conf": {
+                    "file": {
+                      "contents": "zone=vendor-v2\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "config_noreplace"
+                  },
+                  "/srv/relay/agent.txt": {
+                    "file": {
+                      "contents": "agent 1.0-4\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "relay-agent-other": {
+                "identity": {
+                  "name": "relay-agent",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-5",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/relay/agent.conf": {
+                    "file": {
+                      "contents": "zone=vendor-v2\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "config_noreplace"
+                  },
+                  "/srv/relay/agent.txt": {
+                    "file": {
+                      "contents": "agent 1.0-5\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "relay-notes-original": {
+                "identity": {
+                  "name": "relay-notes",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/relay/notes.txt": {
+                    "file": {
+                      "contents": "Keep the operations handover.\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              }
+            },
+            "snapshots": {
+              "current": {
+                "archives": [
+                  "relay-agent-fixed",
+                  "relay-agent-other",
+                  "relay-notes-original"
+                ]
+              }
+            },
+            "allowed_paths": [
+              "/srv/relay/agent.conf",
+              "/srv/relay/agent.txt",
+              "/srv/relay/notes.txt",
+              "/srv/relay/agent.conf.rpmnew",
+              "/srv/relay/agent.conf.rpmsave"
+            ]
+          },
+          "runtime": {
+            "installed": [
+              {
+                "identity": {
+                  "name": "relay-agent",
+                  "arch": "noarch"
+                },
+                "archive": "relay-agent-old"
+              },
+              {
+                "identity": {
+                  "name": "relay-notes",
+                  "arch": "noarch"
+                },
+                "archive": "relay-notes-original"
+              }
+            ],
+            "available": [
+              "relay-agent-old",
+              "relay-agent-fixed",
+              "relay-agent-other",
+              "relay-notes-original"
+            ],
+            "cached": "current",
+            "files": {
+              "/srv/relay/agent.conf": {
+                "contents": "zone=site-east\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 1700000100
+              },
+              "/srv/relay/agent.txt": {
+                "contents": "agent 1.0-1\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 1700000000
+              },
+              "/srv/relay/notes.txt": {
+                "contents": "Keep the operations handover.\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 1700000000
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "RpmPackages",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "relay-patch-incident",
+              "target": "x86_64",
+              "published": "current",
+              "archives": {
+                "relay-agent-old": {
+                  "identity": {
+                    "name": "relay-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/relay/agent.conf": {
+                      "file": {
+                        "contents": "zone=vendor-v1\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/relay/agent.txt": {
+                      "file": {
+                        "contents": "agent 1.0-1\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "relay-agent-fixed": {
+                  "identity": {
+                    "name": "relay-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-4",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/relay/agent.conf": {
+                      "file": {
+                        "contents": "zone=vendor-v2\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/relay/agent.txt": {
+                      "file": {
+                        "contents": "agent 1.0-4\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "relay-agent-other": {
+                  "identity": {
+                    "name": "relay-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-5",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/relay/agent.conf": {
+                      "file": {
+                        "contents": "zone=vendor-v2\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/relay/agent.txt": {
+                      "file": {
+                        "contents": "agent 1.0-5\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "relay-notes-original": {
+                  "identity": {
+                    "name": "relay-notes",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/relay/notes.txt": {
+                      "file": {
+                        "contents": "Keep the operations handover.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "current": {
+                  "archives": [
+                    "relay-agent-fixed",
+                    "relay-agent-other",
+                    "relay-notes-original"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/srv/relay/agent.conf",
+                "/srv/relay/agent.txt",
+                "/srv/relay/notes.txt",
+                "/srv/relay/agent.conf.rpmnew",
+                "/srv/relay/agent.conf.rpmsave"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "relay-agent",
+                    "arch": "noarch"
+                  },
+                  "archive": "relay-agent-old"
+                },
+                {
+                  "identity": {
+                    "name": "relay-notes",
+                    "arch": "noarch"
+                  },
+                  "archive": "relay-notes-original"
+                }
+              ],
+              "available": [
+                "relay-agent-old",
+                "relay-agent-fixed",
+                "relay-agent-other",
+                "relay-notes-original"
+              ],
+              "cached": "current",
+              "files": {
+                "/srv/relay/agent.conf": {
+                  "contents": "zone=site-east\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000100
+                },
+                "/srv/relay/agent.txt": {
+                  "contents": "agent 1.0-1\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                },
+                "/srv/relay/notes.txt": {
+                  "contents": "Keep the operations handover.\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/media/relay/relay-agent-1.0-1.train8.noarch.rpm": "relay-agent-old",
+            "/media/relay/relay-agent-1.0-4.train8.noarch.rpm": "relay-agent-fixed",
+            "/media/relay/relay-agent-1.0-5.train9.noarch.rpm": "relay-agent-other",
+            "/media/relay/relay-notes-1.0-1.train8.noarch.rpm": "relay-notes-original"
+          },
+          "requirements": [
+            {
+              "kind": "AdvisoryFixed",
+              "advisory": "TRAINING-RELAY-A"
+            },
+            {
+              "kind": "PreserveInitialContents",
+              "path": "/srv/relay/agent.conf"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "relay-notes",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "relay-agent",
+                "arch": "noarch"
+              },
+              "path": "/srv/relay/agent.txt"
+            }
+          ],
+          "patch_policy": {
+            "advisories": [
+              {
+                "id": "TRAINING-RELAY-A",
+                "package": {
+                  "name": "relay-agent",
+                  "arch": "noarch"
+                },
+                "product": "Training Enterprise Linux",
+                "release": "8",
+                "fixed_in": "1.0-4"
+              }
+            ],
+            "origins": {
+              "relay-agent-old": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "relay-agent-fixed": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "relay-agent-other": {
+                "product": "Training Enterprise Linux",
+                "release": "9"
+              },
+              "relay-notes-original": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "rpm -U /media/relay/relay-agent-1.0-4.train8.noarch.rpm"
+      ],
+      "prerequisites": [
+        "lpic1-rpm-metadata-preserve",
+        "lpic1-rpm-provider"
+      ],
+      "explanation": "Use the supplied target-system and full package-build facts; upstream version alone cannot establish patch status. The compatible update changes installed data and preserves config_noreplace site text while staging .rpmnew. Verify every requested package and dependency. No running-process, signature, exploit or real CVE result is inferred.",
+      "hints": [
+        "Compare the target product/release first, then the whole fixed-in build. The other-system archive is deliberately unsuitable.",
+        "The configuration is intentional site data. Inspect its current text; replacing it with a vendor default would not satisfy preservation.",
+        "Choose the compatible release-8 fixed archive. A whole-package downgrade from the wrong-release build is outside this subset; reset only this attempt if needed."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://rpm.org/docs/6.0.x/man/rpm.8",
+        "https://rpm.org/docs/6.0.x/manual/spec.html",
+        "https://access.redhat.com/solutions/57665"
+      ],
+      "simplifications": "Fictional immutable advisory/origin facts and script-free noarch regular-text RPM archives. Whole-database declared dependency checks; no real repository, signatures, scripts, crypto, CVE feeds, exploit, running process, service restart or host RPM execution. Config update behavior is limited to same path/flag/attributes; undeclared or colliding sidecars and other unsupported behavior refuse atomically.",
+      "rpm_packages_teaching": {
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "atrium-patch-incident",
+              "target": "x86_64",
+              "published": "current",
+              "archives": {
+                "atrium-agent-old": {
+                  "identity": {
+                    "name": "atrium-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/atrium/agent.conf": {
+                      "file": {
+                        "contents": "zone=vendor-v1\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/atrium/agent.txt": {
+                      "file": {
+                        "contents": "agent 1.0-1\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "atrium-agent-fixed": {
+                  "identity": {
+                    "name": "atrium-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-4",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/atrium/agent.conf": {
+                      "file": {
+                        "contents": "zone=vendor-v2\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/atrium/agent.txt": {
+                      "file": {
+                        "contents": "agent 1.0-4\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "atrium-agent-other": {
+                  "identity": {
+                    "name": "atrium-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-5",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/atrium/agent.conf": {
+                      "file": {
+                        "contents": "zone=vendor-v2\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/atrium/agent.txt": {
+                      "file": {
+                        "contents": "agent 1.0-5\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "atrium-notes-original": {
+                  "identity": {
+                    "name": "atrium-notes",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/atrium/notes.txt": {
+                      "file": {
+                        "contents": "Keep the operations handover.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "current": {
+                  "archives": [
+                    "atrium-agent-fixed",
+                    "atrium-agent-other",
+                    "atrium-notes-original"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/srv/atrium/agent.conf",
+                "/srv/atrium/agent.txt",
+                "/srv/atrium/notes.txt",
+                "/srv/atrium/agent.conf.rpmnew",
+                "/srv/atrium/agent.conf.rpmsave"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "atrium-agent",
+                    "arch": "noarch"
+                  },
+                  "archive": "atrium-agent-old"
+                },
+                {
+                  "identity": {
+                    "name": "atrium-notes",
+                    "arch": "noarch"
+                  },
+                  "archive": "atrium-notes-original"
+                }
+              ],
+              "available": [
+                "atrium-agent-old",
+                "atrium-agent-fixed",
+                "atrium-agent-other",
+                "atrium-notes-original"
+              ],
+              "cached": "current",
+              "files": {
+                "/srv/atrium/agent.conf": {
+                  "contents": "zone=site-east\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000100
+                },
+                "/srv/atrium/agent.txt": {
+                  "contents": "agent 1.0-1\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                },
+                "/srv/atrium/notes.txt": {
+                  "contents": "Keep the operations handover.\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/media/atrium/atrium-agent-1.0-1.train8.noarch.rpm": "atrium-agent-old",
+            "/media/atrium/atrium-agent-1.0-4.train8.noarch.rpm": "atrium-agent-fixed",
+            "/media/atrium/atrium-agent-1.0-5.train9.noarch.rpm": "atrium-agent-other",
+            "/media/atrium/atrium-notes-1.0-1.train8.noarch.rpm": "atrium-notes-original"
+          },
+          "requirements": [
+            {
+              "kind": "AdvisoryFixed",
+              "advisory": "TRAINING-ATRIUM-A"
+            },
+            {
+              "kind": "PreserveInitialContents",
+              "path": "/srv/atrium/agent.conf"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "atrium-notes",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "atrium-agent",
+                "arch": "noarch"
+              },
+              "path": "/srv/atrium/agent.txt"
+            }
+          ],
+          "patch_policy": {
+            "advisories": [
+              {
+                "id": "TRAINING-ATRIUM-A",
+                "package": {
+                  "name": "atrium-agent",
+                  "arch": "noarch"
+                },
+                "product": "Training Enterprise Linux",
+                "release": "8",
+                "fixed_in": "1.0-4"
+              }
+            ],
+            "origins": {
+              "atrium-agent-old": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "atrium-agent-fixed": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "atrium-agent-other": {
+                "product": "Training Enterprise Linux",
+                "release": "9"
+              },
+              "atrium-notes-original": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              }
+            }
+          }
+        },
+        "prerequisite_note": "Builds on installed versus local RPM records, package version ordering and declared provides/requires. You will investigate fixed vendor facts, choose supplied archives and verify retained configuration. No host package manager or service is run.",
+        "concepts": [
+          {
+            "title": "Read the advisory before choosing a version",
+            "text": "A security advisory identifies the affected product, release, package and the first vendor build containing a fix. A vendor can backport a security change into an older upstream version. Compare the full package version and release against the supplied advisory; do not assume the largest upstream number is the right package. These TRAINING notices and packages are fictional, not current real-world security advice."
+          },
+          {
+            "title": "Separate target release from package release",
+            "text": "Training Enterprise Linux 8 is the target system release. In 1.0-4, 1.0 is the upstream version and 4 is the package release. The supplied origin table says which target system each archive belongs to. A 1.0-5 archive for system release 9 is not the stated release-8 fix."
+          },
+          {
+            "title": "Preserve deliberate site configuration",
+            "text": "The current configuration contains site-specific settings. RPM marks it as %config(noreplace). When the archived default changes and local text differs from both defaults, this activity keeps the site file and stages the new default as .rpmnew. Inspect the site text before and after updating. A .rpmnew file is an incoming default to review, not proof that a running service has reloaded it."
+          },
+          {
+            "title": "Check the installed file as well as its version",
+            "text": "A fixed version header does not repair damaged application files. Compare the actual ordinary file with the installed archive in the read-only inspector. Exact reinstall restores that archive\u2019s ordinary payload; this activity preserves the intentional configuration text separately. This checks supplied file data, not a real executable or vulnerability."
+          },
+          {
+            "title": "Choose a useful alert source",
+            "text": "Use the affected vendor\u2019s advisory for product-specific fixed builds. CERT coordination notices can provide cross-vendor context and links to affected suppliers. A port scan alone does not establish a vulnerable or fixed version. This offline lab supplies fictional notices instead of subscribing to live feeds. Bugtraq is a historical alert-source name still listed in the current LPI objectives, not a promise of an active service."
+          },
+          {
+            "title": "Verify the whole requested outcome",
+            "text": "Run the selected local update, inspect actual installed headers and retained file text, then Check example or Check work. Installed fixes, correct target release, healthy dependencies and retained site data are separate outcomes. Changing a package after a passing check makes the current result unchecked. Running queries or the separate example does not complete the assignment."
+          }
+        ],
+        "example_description": "atrium-agent is 1.0-1 on Training Enterprise Linux 8. Its fictional advisory first fixes the issue at 1.0-4. The 1.0-4 archive targets system release 8; the 1.0-5 archive targets release 9. Choose the compatible fixed agent, keep /srv/atrium/agent.conf at zone=site-east, and retain atrium-notes.",
+        "example_commands": [
+          {
+            "command": "rpm -q atrium-agent",
+            "explanation": "Read the actual installed package version before changing anything."
+          },
+          {
+            "command": "rpm -qp /media/atrium/atrium-agent-1.0-4.train8.noarch.rpm",
+            "explanation": "Read the proposed fixed archive header, then compare its origin and build with the supplied advisory."
+          },
+          {
+            "command": "rpm -U /media/atrium/atrium-agent-1.0-4.train8.noarch.rpm",
+            "explanation": "Apply the compatible fixed package while retaining the configured site text."
+          }
+        ],
+        "try_change": {
+          "description": "After a passing check, remove only the example notes package. Check example: the installed fixes remain correct but preserving the operations handover is also required. Reinstall its exact supplied archive and check again.",
+          "commands": [
+            {
+              "command": "rpm -e atrium-notes",
+              "explanation": "Deliberately break the retained handover requirement in this separate practice; the installed fixes remain in place."
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            false,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "command": "rpm -i /media/atrium/atrium-notes-1.0-1.train8.noarch.rpm",
+            "explanation": "Restore the retained handover package without changing the fixed application or its site settings."
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic2-vendor-patch-set",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Vendor advisories and configuration-preserving patches",
+      "unit": "linux-advisory-patching",
+      "title": "Repair a coordinated security package update",
+      "summary": "Read supplied vendor/release facts, apply compatible local fixes, preserve site text and verify a coordinated dependency set.",
+      "objective": "Apply the supplied fictional TRAINING advisories for Training Enterprise Linux release 8. Keep dispatch-agent installed at a compatible fixed build (1.0-4 or later in the supplied release-8 set). Keep dispatch-codec installed at its compatible fixed build (3.0-2 or later) and satisfy the declared dispatch-codec-api dependency. Preserve the original site text in /srv/dispatch/agent.conf. Keep dispatch-notes and its supplied file unchanged. Leave declared package requirements healthy. Keep the installed fixed agent\u2019s ordinary file at /srv/dispatch/agent.txt identical to its installed archive record, including text and recorded attributes. Keep the installed codec\u2019s ordinary file at /srv/dispatch/codec.txt identical to its installed archive record, including text and recorded attributes. Use only supplied local archives; an artifact for release 9 does not meet this incident, regardless of its version number.",
+      "retry_guidance": "Read the failing outcome. A higher package version for another system release is not the required fix. If dependencies refuse the update, inspect the incoming requires and installed provides, then plan the complete set. Preserve the site file and unrequested package; reset only this attempt if you need to restart.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Understand the task",
+        "Apply a compatible package set",
+        "Verify installed data and retained settings"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Vendor target release and full package build both matter. Query headers before applying the local package set.",
+          "action": "Read the supplied advisory and archive origins. Insert a query, then Run command; use the read-only inspector to compare current site text.",
+          "commands": [
+            {
+              "command": "rpm -q dispatch-agent",
+              "explanation": "Read the installed version.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Apply a compatible package set",
+          "why": "A completed transaction can still target the wrong system or omit a required dependency.",
+          "action": "Choose supplied local archives using the advisory and dependency data. Enter the update in the simulated command field and select Run command.",
+          "commands": []
+        },
+        {
+          "title": "Verify installed data and retained settings",
+          "why": "Package version, compatible target release, retained local configuration and healthy dependencies all contribute to completion.",
+          "action": "Choose Check work, read any failing outcome and investigate that package or file. Retry after a precise repair.",
+          "commands": []
+        }
+      ],
+      "initial": {
+        "kind": "RpmPackages",
+        "simulation": {
+          "schema_version": 1,
+          "catalog": {
+            "fixture": "dispatch-patch-incident",
+            "target": "x86_64",
+            "published": "current",
+            "archives": {
+              "dispatch-agent-old": {
+                "identity": {
+                  "name": "dispatch-agent",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [
+                  {
+                    "capability": "dispatch-codec-api",
+                    "constraint": {
+                      "relation": "Ge",
+                      "evr": "1.0-1"
+                    }
+                  }
+                ],
+                "provides": {},
+                "files": {
+                  "/srv/dispatch/agent.conf": {
+                    "file": {
+                      "contents": "zone=vendor-v1\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "config_noreplace"
+                  },
+                  "/srv/dispatch/agent.txt": {
+                    "file": {
+                      "contents": "agent 1.0-1\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "dispatch-agent-fixed": {
+                "identity": {
+                  "name": "dispatch-agent",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-4",
+                "requires": [
+                  {
+                    "capability": "dispatch-codec-api",
+                    "constraint": {
+                      "relation": "Ge",
+                      "evr": "2.0-1"
+                    }
+                  }
+                ],
+                "provides": {},
+                "files": {
+                  "/srv/dispatch/agent.conf": {
+                    "file": {
+                      "contents": "zone=vendor-v2\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "config_noreplace"
+                  },
+                  "/srv/dispatch/agent.txt": {
+                    "file": {
+                      "contents": "agent 1.0-4\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "dispatch-agent-other": {
+                "identity": {
+                  "name": "dispatch-agent",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-5",
+                "requires": [
+                  {
+                    "capability": "dispatch-codec-api",
+                    "constraint": {
+                      "relation": "Ge",
+                      "evr": "2.0-1"
+                    }
+                  }
+                ],
+                "provides": {},
+                "files": {
+                  "/srv/dispatch/agent.conf": {
+                    "file": {
+                      "contents": "zone=vendor-v2\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "config_noreplace"
+                  },
+                  "/srv/dispatch/agent.txt": {
+                    "file": {
+                      "contents": "agent 1.0-5\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "dispatch-codec-old": {
+                "identity": {
+                  "name": "dispatch-codec",
+                  "arch": "noarch"
+                },
+                "evr": "3.0-1",
+                "requires": [],
+                "provides": {
+                  "dispatch-codec-api": "1.0-1"
+                },
+                "files": {
+                  "/srv/dispatch/codec.txt": {
+                    "file": {
+                      "contents": "codec 3.0-1\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "dispatch-codec-fixed": {
+                "identity": {
+                  "name": "dispatch-codec",
+                  "arch": "noarch"
+                },
+                "evr": "3.0-2",
+                "requires": [],
+                "provides": {
+                  "dispatch-codec-api": "2.0-1"
+                },
+                "files": {
+                  "/srv/dispatch/codec.txt": {
+                    "file": {
+                      "contents": "codec 3.0-2\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "dispatch-codec-later": {
+                "identity": {
+                  "name": "dispatch-codec",
+                  "arch": "noarch"
+                },
+                "evr": "3.0-4",
+                "requires": [],
+                "provides": {
+                  "dispatch-codec-api": "2.0-1"
+                },
+                "files": {
+                  "/srv/dispatch/codec.txt": {
+                    "file": {
+                      "contents": "codec 3.0-4\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "dispatch-notes-original": {
+                "identity": {
+                  "name": "dispatch-notes",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/dispatch/notes.txt": {
+                    "file": {
+                      "contents": "Keep the operations handover.\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              }
+            },
+            "snapshots": {
+              "current": {
+                "archives": [
+                  "dispatch-agent-fixed",
+                  "dispatch-agent-other",
+                  "dispatch-codec-fixed",
+                  "dispatch-codec-later",
+                  "dispatch-notes-original"
+                ]
+              }
+            },
+            "allowed_paths": [
+              "/srv/dispatch/agent.conf",
+              "/srv/dispatch/agent.txt",
+              "/srv/dispatch/codec.txt",
+              "/srv/dispatch/notes.txt",
+              "/srv/dispatch/agent.conf.rpmnew",
+              "/srv/dispatch/agent.conf.rpmsave"
+            ]
+          },
+          "runtime": {
+            "installed": [
+              {
+                "identity": {
+                  "name": "dispatch-agent",
+                  "arch": "noarch"
+                },
+                "archive": "dispatch-agent-old"
+              },
+              {
+                "identity": {
+                  "name": "dispatch-codec",
+                  "arch": "noarch"
+                },
+                "archive": "dispatch-codec-old"
+              },
+              {
+                "identity": {
+                  "name": "dispatch-notes",
+                  "arch": "noarch"
+                },
+                "archive": "dispatch-notes-original"
+              }
+            ],
+            "available": [
+              "dispatch-agent-old",
+              "dispatch-agent-fixed",
+              "dispatch-agent-other",
+              "dispatch-codec-old",
+              "dispatch-codec-fixed",
+              "dispatch-codec-later",
+              "dispatch-notes-original"
+            ],
+            "cached": "current",
+            "files": {
+              "/srv/dispatch/agent.conf": {
+                "contents": "zone=site-east\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 1700000100
+              },
+              "/srv/dispatch/agent.txt": {
+                "contents": "agent 1.0-1\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 1700000000
+              },
+              "/srv/dispatch/codec.txt": {
+                "contents": "codec 3.0-1\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 1700000000
+              },
+              "/srv/dispatch/notes.txt": {
+                "contents": "Keep the operations handover.\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 1700000000
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "RpmPackages",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "dispatch-patch-incident",
+              "target": "x86_64",
+              "published": "current",
+              "archives": {
+                "dispatch-agent-old": {
+                  "identity": {
+                    "name": "dispatch-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [
+                    {
+                      "capability": "dispatch-codec-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "1.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/srv/dispatch/agent.conf": {
+                      "file": {
+                        "contents": "zone=vendor-v1\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/dispatch/agent.txt": {
+                      "file": {
+                        "contents": "agent 1.0-1\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "dispatch-agent-fixed": {
+                  "identity": {
+                    "name": "dispatch-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-4",
+                  "requires": [
+                    {
+                      "capability": "dispatch-codec-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "2.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/srv/dispatch/agent.conf": {
+                      "file": {
+                        "contents": "zone=vendor-v2\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/dispatch/agent.txt": {
+                      "file": {
+                        "contents": "agent 1.0-4\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "dispatch-agent-other": {
+                  "identity": {
+                    "name": "dispatch-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-5",
+                  "requires": [
+                    {
+                      "capability": "dispatch-codec-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "2.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/srv/dispatch/agent.conf": {
+                      "file": {
+                        "contents": "zone=vendor-v2\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/dispatch/agent.txt": {
+                      "file": {
+                        "contents": "agent 1.0-5\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "dispatch-codec-old": {
+                  "identity": {
+                    "name": "dispatch-codec",
+                    "arch": "noarch"
+                  },
+                  "evr": "3.0-1",
+                  "requires": [],
+                  "provides": {
+                    "dispatch-codec-api": "1.0-1"
+                  },
+                  "files": {
+                    "/srv/dispatch/codec.txt": {
+                      "file": {
+                        "contents": "codec 3.0-1\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "dispatch-codec-fixed": {
+                  "identity": {
+                    "name": "dispatch-codec",
+                    "arch": "noarch"
+                  },
+                  "evr": "3.0-2",
+                  "requires": [],
+                  "provides": {
+                    "dispatch-codec-api": "2.0-1"
+                  },
+                  "files": {
+                    "/srv/dispatch/codec.txt": {
+                      "file": {
+                        "contents": "codec 3.0-2\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "dispatch-codec-later": {
+                  "identity": {
+                    "name": "dispatch-codec",
+                    "arch": "noarch"
+                  },
+                  "evr": "3.0-4",
+                  "requires": [],
+                  "provides": {
+                    "dispatch-codec-api": "2.0-1"
+                  },
+                  "files": {
+                    "/srv/dispatch/codec.txt": {
+                      "file": {
+                        "contents": "codec 3.0-4\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "dispatch-notes-original": {
+                  "identity": {
+                    "name": "dispatch-notes",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/dispatch/notes.txt": {
+                      "file": {
+                        "contents": "Keep the operations handover.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "current": {
+                  "archives": [
+                    "dispatch-agent-fixed",
+                    "dispatch-agent-other",
+                    "dispatch-codec-fixed",
+                    "dispatch-codec-later",
+                    "dispatch-notes-original"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/srv/dispatch/agent.conf",
+                "/srv/dispatch/agent.txt",
+                "/srv/dispatch/codec.txt",
+                "/srv/dispatch/notes.txt",
+                "/srv/dispatch/agent.conf.rpmnew",
+                "/srv/dispatch/agent.conf.rpmsave"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "dispatch-agent",
+                    "arch": "noarch"
+                  },
+                  "archive": "dispatch-agent-old"
+                },
+                {
+                  "identity": {
+                    "name": "dispatch-codec",
+                    "arch": "noarch"
+                  },
+                  "archive": "dispatch-codec-old"
+                },
+                {
+                  "identity": {
+                    "name": "dispatch-notes",
+                    "arch": "noarch"
+                  },
+                  "archive": "dispatch-notes-original"
+                }
+              ],
+              "available": [
+                "dispatch-agent-old",
+                "dispatch-agent-fixed",
+                "dispatch-agent-other",
+                "dispatch-codec-old",
+                "dispatch-codec-fixed",
+                "dispatch-codec-later",
+                "dispatch-notes-original"
+              ],
+              "cached": "current",
+              "files": {
+                "/srv/dispatch/agent.conf": {
+                  "contents": "zone=site-east\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000100
+                },
+                "/srv/dispatch/agent.txt": {
+                  "contents": "agent 1.0-1\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                },
+                "/srv/dispatch/codec.txt": {
+                  "contents": "codec 3.0-1\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                },
+                "/srv/dispatch/notes.txt": {
+                  "contents": "Keep the operations handover.\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/media/dispatch/dispatch-agent-1.0-1.train8.noarch.rpm": "dispatch-agent-old",
+            "/media/dispatch/dispatch-agent-1.0-4.train8.noarch.rpm": "dispatch-agent-fixed",
+            "/media/dispatch/dispatch-agent-1.0-5.train9.noarch.rpm": "dispatch-agent-other",
+            "/media/dispatch/dispatch-codec-3.0-1.train8.noarch.rpm": "dispatch-codec-old",
+            "/media/dispatch/dispatch-codec-3.0-2.train8.noarch.rpm": "dispatch-codec-fixed",
+            "/media/dispatch/dispatch-codec-3.0-4.train8.noarch.rpm": "dispatch-codec-later",
+            "/media/dispatch/dispatch-notes-1.0-1.train8.noarch.rpm": "dispatch-notes-original"
+          },
+          "requirements": [
+            {
+              "kind": "AdvisoryFixed",
+              "advisory": "TRAINING-DISPATCH-A"
+            },
+            {
+              "kind": "AdvisoryFixed",
+              "advisory": "TRAINING-DISPATCH-C"
+            },
+            {
+              "kind": "PreserveInitialContents",
+              "path": "/srv/dispatch/agent.conf"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "dispatch-notes",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "dispatch-agent",
+                "arch": "noarch"
+              },
+              "path": "/srv/dispatch/agent.txt"
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "dispatch-codec",
+                "arch": "noarch"
+              },
+              "path": "/srv/dispatch/codec.txt"
+            }
+          ],
+          "patch_policy": {
+            "advisories": [
+              {
+                "id": "TRAINING-DISPATCH-A",
+                "package": {
+                  "name": "dispatch-agent",
+                  "arch": "noarch"
+                },
+                "product": "Training Enterprise Linux",
+                "release": "8",
+                "fixed_in": "1.0-4"
+              },
+              {
+                "id": "TRAINING-DISPATCH-C",
+                "package": {
+                  "name": "dispatch-codec",
+                  "arch": "noarch"
+                },
+                "product": "Training Enterprise Linux",
+                "release": "8",
+                "fixed_in": "3.0-2"
+              }
+            ],
+            "origins": {
+              "dispatch-agent-old": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "dispatch-agent-fixed": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "dispatch-agent-other": {
+                "product": "Training Enterprise Linux",
+                "release": "9"
+              },
+              "dispatch-codec-old": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "dispatch-codec-fixed": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "dispatch-codec-later": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "dispatch-notes-original": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "rpm -U /media/dispatch/dispatch-agent-1.0-4.train8.noarch.rpm /media/dispatch/dispatch-codec-3.0-2.train8.noarch.rpm"
+      ],
+      "prerequisites": [
+        "lpic2-vendor-backport",
+        "lpic1-rpm-provider"
+      ],
+      "explanation": "Use the supplied target-system and full package-build facts; upstream version alone cannot establish patch status. The compatible update changes installed data and preserves config_noreplace site text while staging .rpmnew. Verify every requested package and dependency. No running-process, signature, exploit or real CVE result is inferred.",
+      "hints": [
+        "Compare the target product/release first, then the whole fixed-in build. The other-system archive is deliberately unsuitable.",
+        "The configuration is intentional site data. Inspect its current text; replacing it with a vendor default would not satisfy preservation.",
+        "Read the incoming agent requires and installed codec provides. Supply both compatible archives to one rpm -U command, or update the codec before the agent."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://rpm.org/docs/6.0.x/man/rpm.8",
+        "https://rpm.org/docs/6.0.x/manual/spec.html",
+        "https://access.redhat.com/solutions/57665"
+      ],
+      "simplifications": "Fictional immutable advisory/origin facts and script-free noarch regular-text RPM archives. Whole-database declared dependency checks; no real repository, signatures, scripts, crypto, CVE feeds, exploit, running process, service restart or host RPM execution. Config update behavior is limited to same path/flag/attributes; undeclared or colliding sidecars and other unsupported behavior refuse atomically.",
+      "rpm_packages_teaching": {
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "gallery-patch-incident",
+              "target": "x86_64",
+              "published": "current",
+              "archives": {
+                "gallery-agent-old": {
+                  "identity": {
+                    "name": "gallery-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [
+                    {
+                      "capability": "gallery-codec-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "1.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/srv/gallery/agent.conf": {
+                      "file": {
+                        "contents": "zone=vendor-v1\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/gallery/agent.txt": {
+                      "file": {
+                        "contents": "agent 1.0-1\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-agent-fixed": {
+                  "identity": {
+                    "name": "gallery-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-4",
+                  "requires": [
+                    {
+                      "capability": "gallery-codec-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "2.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/srv/gallery/agent.conf": {
+                      "file": {
+                        "contents": "zone=vendor-v2\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/gallery/agent.txt": {
+                      "file": {
+                        "contents": "agent 1.0-4\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-agent-other": {
+                  "identity": {
+                    "name": "gallery-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-5",
+                  "requires": [
+                    {
+                      "capability": "gallery-codec-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "2.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/srv/gallery/agent.conf": {
+                      "file": {
+                        "contents": "zone=vendor-v2\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/gallery/agent.txt": {
+                      "file": {
+                        "contents": "agent 1.0-5\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-codec-old": {
+                  "identity": {
+                    "name": "gallery-codec",
+                    "arch": "noarch"
+                  },
+                  "evr": "3.0-1",
+                  "requires": [],
+                  "provides": {
+                    "gallery-codec-api": "1.0-1"
+                  },
+                  "files": {
+                    "/srv/gallery/codec.txt": {
+                      "file": {
+                        "contents": "codec 3.0-1\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-codec-fixed": {
+                  "identity": {
+                    "name": "gallery-codec",
+                    "arch": "noarch"
+                  },
+                  "evr": "3.0-2",
+                  "requires": [],
+                  "provides": {
+                    "gallery-codec-api": "2.0-1"
+                  },
+                  "files": {
+                    "/srv/gallery/codec.txt": {
+                      "file": {
+                        "contents": "codec 3.0-2\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-codec-later": {
+                  "identity": {
+                    "name": "gallery-codec",
+                    "arch": "noarch"
+                  },
+                  "evr": "3.0-4",
+                  "requires": [],
+                  "provides": {
+                    "gallery-codec-api": "2.0-1"
+                  },
+                  "files": {
+                    "/srv/gallery/codec.txt": {
+                      "file": {
+                        "contents": "codec 3.0-4\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-notes-original": {
+                  "identity": {
+                    "name": "gallery-notes",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/gallery/notes.txt": {
+                      "file": {
+                        "contents": "Keep the operations handover.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "current": {
+                  "archives": [
+                    "gallery-agent-fixed",
+                    "gallery-agent-other",
+                    "gallery-codec-fixed",
+                    "gallery-codec-later",
+                    "gallery-notes-original"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/srv/gallery/agent.conf",
+                "/srv/gallery/agent.txt",
+                "/srv/gallery/codec.txt",
+                "/srv/gallery/notes.txt",
+                "/srv/gallery/agent.conf.rpmnew",
+                "/srv/gallery/agent.conf.rpmsave"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "gallery-agent",
+                    "arch": "noarch"
+                  },
+                  "archive": "gallery-agent-old"
+                },
+                {
+                  "identity": {
+                    "name": "gallery-codec",
+                    "arch": "noarch"
+                  },
+                  "archive": "gallery-codec-old"
+                },
+                {
+                  "identity": {
+                    "name": "gallery-notes",
+                    "arch": "noarch"
+                  },
+                  "archive": "gallery-notes-original"
+                }
+              ],
+              "available": [
+                "gallery-agent-old",
+                "gallery-agent-fixed",
+                "gallery-agent-other",
+                "gallery-codec-old",
+                "gallery-codec-fixed",
+                "gallery-codec-later",
+                "gallery-notes-original"
+              ],
+              "cached": "current",
+              "files": {
+                "/srv/gallery/agent.conf": {
+                  "contents": "zone=site-east\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000100
+                },
+                "/srv/gallery/agent.txt": {
+                  "contents": "agent 1.0-1\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                },
+                "/srv/gallery/codec.txt": {
+                  "contents": "codec 3.0-1\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                },
+                "/srv/gallery/notes.txt": {
+                  "contents": "Keep the operations handover.\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/media/gallery/gallery-agent-1.0-1.train8.noarch.rpm": "gallery-agent-old",
+            "/media/gallery/gallery-agent-1.0-4.train8.noarch.rpm": "gallery-agent-fixed",
+            "/media/gallery/gallery-agent-1.0-5.train9.noarch.rpm": "gallery-agent-other",
+            "/media/gallery/gallery-codec-3.0-1.train8.noarch.rpm": "gallery-codec-old",
+            "/media/gallery/gallery-codec-3.0-2.train8.noarch.rpm": "gallery-codec-fixed",
+            "/media/gallery/gallery-codec-3.0-4.train8.noarch.rpm": "gallery-codec-later",
+            "/media/gallery/gallery-notes-1.0-1.train8.noarch.rpm": "gallery-notes-original"
+          },
+          "requirements": [
+            {
+              "kind": "AdvisoryFixed",
+              "advisory": "TRAINING-GALLERY-A"
+            },
+            {
+              "kind": "AdvisoryFixed",
+              "advisory": "TRAINING-GALLERY-C"
+            },
+            {
+              "kind": "PreserveInitialContents",
+              "path": "/srv/gallery/agent.conf"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "gallery-notes",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "gallery-agent",
+                "arch": "noarch"
+              },
+              "path": "/srv/gallery/agent.txt"
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "gallery-codec",
+                "arch": "noarch"
+              },
+              "path": "/srv/gallery/codec.txt"
+            }
+          ],
+          "patch_policy": {
+            "advisories": [
+              {
+                "id": "TRAINING-GALLERY-A",
+                "package": {
+                  "name": "gallery-agent",
+                  "arch": "noarch"
+                },
+                "product": "Training Enterprise Linux",
+                "release": "8",
+                "fixed_in": "1.0-4"
+              },
+              {
+                "id": "TRAINING-GALLERY-C",
+                "package": {
+                  "name": "gallery-codec",
+                  "arch": "noarch"
+                },
+                "product": "Training Enterprise Linux",
+                "release": "8",
+                "fixed_in": "3.0-2"
+              }
+            ],
+            "origins": {
+              "gallery-agent-old": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "gallery-agent-fixed": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "gallery-agent-other": {
+                "product": "Training Enterprise Linux",
+                "release": "9"
+              },
+              "gallery-codec-old": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "gallery-codec-fixed": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "gallery-codec-later": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              },
+              "gallery-notes-original": {
+                "product": "Training Enterprise Linux",
+                "release": "8"
+              }
+            }
+          }
+        },
+        "prerequisite_note": "Builds on installed versus local RPM records, package version ordering and declared provides/requires. You will investigate fixed vendor facts, choose supplied archives and verify retained configuration. No host package manager or service is run.",
+        "concepts": [
+          {
+            "title": "Read the advisory before choosing a version",
+            "text": "A security advisory identifies the affected product, release, package and the first vendor build containing a fix. A vendor can backport a security change into an older upstream version. Compare the full package version and release against the supplied advisory; do not assume the largest upstream number is the right package. These TRAINING notices and packages are fictional, not current real-world security advice."
+          },
+          {
+            "title": "Separate target release from package release",
+            "text": "Training Enterprise Linux 8 is the target system release. In 1.0-4, 1.0 is the upstream version and 4 is the package release. The supplied origin table says which target system each archive belongs to. A 1.0-5 archive for system release 9 is not the stated release-8 fix."
+          },
+          {
+            "title": "Preserve deliberate site configuration",
+            "text": "The current configuration contains site-specific settings. RPM marks it as %config(noreplace). When the archived default changes and local text differs from both defaults, this activity keeps the site file and stages the new default as .rpmnew. Inspect the site text before and after updating. A .rpmnew file is an incoming default to review, not proof that a running service has reloaded it."
+          },
+          {
+            "title": "Plan the dependency set before applying it",
+            "text": "The repaired agent requires gallery-codec-api version 2 or newer in the separate example. Read rpm -qp --requires ARCHIVE and compare rpm -q --provides INSTALLED_NAME. rpm -U can take more than one supplied archive: the simulator validates the whole proposed final package set before changing anything. Updating the agent alone is refused while only API 1 is installed. Updating the codec first, then the agent, is another valid route."
+          },
+          {
+            "title": "Check the installed file as well as its version",
+            "text": "A fixed version header does not repair damaged application files. Compare the actual ordinary file with the installed archive in the read-only inspector. Exact reinstall restores that archive\u2019s ordinary payload; this activity preserves the intentional configuration text separately. This checks supplied file data, not a real executable or vulnerability."
+          },
+          {
+            "title": "Choose a useful alert source",
+            "text": "Use the affected vendor\u2019s advisory for product-specific fixed builds. CERT coordination notices can provide cross-vendor context and links to affected suppliers. A port scan alone does not establish a vulnerable or fixed version. This offline lab supplies fictional notices instead of subscribing to live feeds. Bugtraq is a historical alert-source name still listed in the current LPI objectives, not a promise of an active service."
+          },
+          {
+            "title": "Verify the whole requested outcome",
+            "text": "Run the selected local update, inspect actual installed headers and retained file text, then Check example or Check work. Installed fixes, correct target release, healthy dependencies and retained site data are separate outcomes. Changing a package after a passing check makes the current result unchecked. Running queries or the separate example does not complete the assignment."
+          }
+        ],
+        "example_description": "gallery-agent is 1.0-1 on Training Enterprise Linux 8. Its fictional advisory first fixes the issue at 1.0-4. The 1.0-4 archive targets system release 8; the 1.0-5 archive targets release 9. Choose the compatible fixed agent and API-2 codec together, keep /srv/gallery/agent.conf at zone=site-east, and retain gallery-notes.",
+        "example_commands": [
+          {
+            "command": "rpm -q gallery-agent",
+            "explanation": "Read the actual installed package version before changing anything."
+          },
+          {
+            "command": "rpm -qp /media/gallery/gallery-agent-1.0-4.train8.noarch.rpm",
+            "explanation": "Read the proposed fixed archive header, then compare its origin and build with the supplied advisory."
+          },
+          {
+            "command": "rpm -qp --requires /media/gallery/gallery-agent-1.0-4.train8.noarch.rpm",
+            "explanation": "The new agent requires API 2. Compare that with the installed codec before planning the update."
+          },
+          {
+            "command": "rpm -q --provides gallery-codec",
+            "explanation": "Observe that the currently installed codec provides only API 1."
+          },
+          {
+            "command": "rpm -U /media/gallery/gallery-agent-1.0-4.train8.noarch.rpm /media/gallery/gallery-codec-3.0-2.train8.noarch.rpm",
+            "explanation": "Apply the compatible fixed package pair in one transaction."
+          }
+        ],
+        "try_change": {
+          "description": "After a passing check, remove only the example notes package. Check example: the installed fixes remain correct but preserving the operations handover is also required. Reinstall its exact supplied archive and check again.",
+          "commands": [
+            {
+              "command": "rpm -e gallery-notes",
+              "explanation": "Deliberately break the retained handover requirement in this separate practice; the installed fixes remain in place."
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "command": "rpm -i /media/gallery/gallery-notes-1.0-1.train8.noarch.rpm",
+            "explanation": "Restore the retained handover package without changing the fixed application or its site settings."
+          }
+        ]
+      }
+    }
+  ]
+}

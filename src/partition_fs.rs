@@ -1,5 +1,7 @@
-//! Virtual GPT allocation and blank-partition preparation. No disk I/O.
+//! Virtual GPT and opt-in bounded MBR allocation/preparation. No disk I/O.
 //! Fixed 512-byte sectors and 128-entry GPT geometry, not raw GPT images.
+pub mod fat;
+pub mod mbr;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -196,6 +198,8 @@ fn split_partition(s: &str) -> Result<(&str, u8)> {
 #[serde(deny_unknown_fields)]
 pub struct State {
     pub version: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mbr_profile: Option<mbr::Profile>,
     /// Simulator identity sequence; not entropy or a real-disk UUID generator.
     pub next_uuid: u64,
     #[serde(deserialize_with = "map::<_,Disk,MAX_DISKS>")]
@@ -212,6 +216,29 @@ pub struct Disk {
     /// Opaque pre-existing unpartitioned data; never erased by this subset.
     pub occupied_without_table: bool,
     pub table: Option<Gpt>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mbr: Option<mbr::Table>,
+}
+impl Disk {
+    pub fn partitions(&self) -> impl Iterator<Item = &Partition> {
+        self.table.iter().flat_map(|t| &t.partitions).chain(
+            self.mbr
+                .iter()
+                .flat_map(|t| t.entries.iter().map(|e| &e.partition)),
+        )
+    }
+    fn partition_mut(&mut self, number: u8) -> Option<&mut Partition> {
+        if let Some(t) = &mut self.table {
+            t.partitions.iter_mut().find(|p| p.number == number)
+        } else {
+            self.mbr.as_mut().and_then(|t| {
+                t.entries
+                    .iter_mut()
+                    .find(|e| e.partition.number == number)
+                    .map(|e| &mut e.partition)
+            })
+        }
+    }
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -224,6 +251,7 @@ pub struct Gpt {
 pub enum TypeHint {
     LinuxData,
     LinuxSwap,
+    EfiSystem,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -249,6 +277,9 @@ impl Partition {
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Content {
     Blank,
+    Fat32 {
+        volume: fat::Volume,
+    },
     Foreign {
         #[serde(deserialize_with = "text::<_,64>")]
         description: String,
@@ -278,6 +309,7 @@ pub struct File {
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Action {
+    Mbr(mbr::Action),
     CreateGpt {
         disk: String,
     },
@@ -355,6 +387,15 @@ impl State {
                     "Supplied disks need128 sectors through16TiB,512-byte logical sectors and bounded power-of-two alignment",
                 ));
             }
+            if d.mbr.is_some() && self.mbr_profile.is_none() {
+                return Err(invalid("MBR data requires the explicit source profile"));
+            }
+            if let Some(t) = &d.mbr {
+                mbr::validate_geometry(d, t)?;
+                for e in &t.entries {
+                    validate_partition_content(&e.partition, &mut identities, &mut total)?;
+                }
+            }
             if let Some(t) = &d.table {
                 if d.occupied_without_table || t.partitions.len() > MAX_PARTITIONS {
                     return Err(invalid(
@@ -379,74 +420,18 @@ impl State {
                     {
                         return Err(err(ErrorKind::Overlap, "GPT partition ranges overlap"));
                     }
-                    let bytes = p.bytes()?;
-                    match &p.content {
-                        Content::Blank => {}
-                        Content::Foreign { description } => {
-                            if description.is_empty()
-                                || description.len() > 64
-                                || !description
-                                    .bytes()
-                                    .all(|b| b.is_ascii_graphic() || b == b' ')
-                            {
-                                return Err(invalid("Invalid opaque content description"));
-                            }
-                        }
-                        Content::Ext4 {
-                            label: l,
-                            uuid: u,
-                            blocks,
-                            files,
-                        } => {
-                            if !label(l)
-                                || !uuid(u)
-                                || !identities.insert(u.as_str())
-                                || *blocks != bytes / BLOCK_BYTES
-                                || bytes < 1024 * 1024
-                                || files.len() > MAX_FILES
-                            {
-                                return Err(invalid("Invalid ext4 identity/capacity/file count"));
-                            }
-                            let mut used = 0u64;
-                            for (path, f) in files {
-                                if !path.strip_prefix('/').is_some_and(|s| name(s, 63))
-                                    || f.text.len() > MAX_FILE_BYTES
-                                    || f.text.contains('\0')
-                                {
-                                    return Err(invalid("Invalid retained flat file path/text"));
-                                }
-                                total = total
-                                    .checked_add(f.text.len())
-                                    .ok_or_else(|| limited("File byte overflow"))?;
-                                used = used
-                                    .checked_add(f.text.len() as u64)
-                                    .ok_or_else(|| limited("File byte overflow"))?;
-                                if total > MAX_TOTAL_FILE_BYTES || used > blocks * BLOCK_BYTES {
-                                    return Err(limited(
-                                        "Retained file bytes exceed bounded modeled capacity",
-                                    ));
-                                }
-                            }
-                        }
-                        Content::Swap {
-                            label: l,
-                            uuid: u,
-                            usable_pages,
-                        } => {
-                            if !label(l)
-                                || !uuid(u)
-                                || !identities.insert(u.as_str())
-                                || bytes / BLOCK_BYTES < 10
-                                || *usable_pages != bytes / BLOCK_BYTES - 1
-                            {
-                                return Err(invalid("Invalid swap identity/page capacity"));
-                            }
-                        }
-                    }
+                    validate_partition_content(p, &mut identities, &mut total)?;
                 }
             }
         }
         wire_size(self)
+    }
+    pub fn command_help(&self) -> &'static str {
+        if self.mbr_profile.is_some() {
+            mbr::HELP
+        } else {
+            HELP
+        }
     }
     pub fn from_json(raw: &str) -> Result<Self> {
         if raw.len() > MAX_STATE_BYTES {
@@ -464,6 +449,7 @@ impl State {
     pub fn environment_matches(&self, source: &Self) -> bool {
         self.validate().is_ok()
             && source.validate().is_ok()
+            && self.mbr_profile == source.mbr_profile
             && self.disks.len() == source.disks.len()
             && self.disks.iter().all(|(id, d)| {
                 source.disks.get(id).is_some_and(|s| {
@@ -497,9 +483,8 @@ impl State {
         let (disk, n) = split_partition(id)?;
         let d = self.disk(disk)?;
         let p = d
-            .table
-            .as_ref()
-            .and_then(|t| t.partitions.iter().find(|p| p.number == n))
+            .partitions()
+            .find(|p| p.number == n)
             .ok_or_else(|| err(ErrorKind::Unknown, "No such supplied virtual partition"))?;
         Ok((d, p))
     }
@@ -516,8 +501,7 @@ impl State {
     fn uuid_exists(&self, u: &str) -> bool {
         self.disks
             .values()
-            .filter_map(|d| d.table.as_ref())
-            .flat_map(|t| &t.partitions)
+            .flat_map(|d| d.partitions())
             .any(|p| matches!(&p.content,Content::Ext4{uuid,..}|Content::Swap{uuid,..} if uuid==u))
     }
     fn new_uuid(&self, given: &Option<String>) -> Result<(String, u64)> {
@@ -548,10 +532,11 @@ impl State {
     }
     fn preflight(&self, a: &Action) -> Result<Option<(String, u64)>> {
         match a {
+            Action::Mbr(_) => return Err(invalid("Use the separate MBR admission path")),
             Action::CreateGpt { disk } => {
                 let d = self.disk(disk)?;
                 Self::writable(d)?;
-                if d.table.is_some() || d.occupied_without_table {
+                if d.table.is_some() || d.mbr.is_some() || d.occupied_without_table {
                     return Err(err(
                         ErrorKind::Occupied,
                         "Preparation-only model refuses replacement of any table or existing data",
@@ -601,6 +586,15 @@ impl State {
             } => {
                 let (d, p) = self.partition(partition)?;
                 Self::writable(d)?;
+                if d.mbr.as_ref().is_some_and(|t| {
+                    t.entries
+                        .iter()
+                        .any(|e| e.partition.number == p.number && e.kind == mbr::Kind::Extended)
+                }) {
+                    return Err(invalid(
+                        "An extended partition is a container, not a filesystem or swap payload",
+                    ));
+                }
                 if p.content != Content::Blank {
                     return Err(err(
                         ErrorKind::Occupied,
@@ -627,9 +621,14 @@ impl State {
     }
     pub fn apply(&mut self, a: Action) -> Result<Output> {
         self.validate()?;
+        let a = match a {
+            Action::Mbr(operation) => return mbr::apply(self, operation),
+            other => other,
+        };
         let identity = self.preflight(&a)?; // Admission before copying current state.
         let mut next = self.clone();
         match a {
+            Action::Mbr(_) => return Err(invalid("MBR operation was not admitted")),
             Action::CreateGpt { disk } => {
                 next.disks.get_mut(&disk).expect("preflight disk").table = Some(Gpt {
                     partitions: Vec::new(),
@@ -679,12 +678,7 @@ impl State {
                     .disks
                     .get_mut(disk)
                     .expect("preflight disk")
-                    .table
-                    .as_mut()
-                    .expect("preflight table")
-                    .partitions
-                    .iter_mut()
-                    .find(|p| p.number == n)
+                    .partition_mut(n)
                     .expect("preflight partition");
                 let blocks = p.bytes()? / BLOCK_BYTES;
                 p.content = if swap {
@@ -724,6 +718,56 @@ impl State {
         }
         let v: Vec<&str> = input.split_ascii_whitespace().collect();
         match v.as_slice() {
+            ["parted", "-s", d, "mklabel", "msdos"] => {
+                self.apply(Action::Mbr(mbr::Action::Create { disk: (*d).into() }))
+            }
+            [
+                "parted",
+                "-s",
+                d,
+                "unit",
+                "s",
+                "mkpart",
+                "extended",
+                start,
+                end,
+            ] => self.apply(Action::Mbr(mbr::Action::Add {
+                disk: (*d).into(),
+                role: mbr::Kind::Extended,
+                start: sector(start)?,
+                end: sector(end)?,
+                type_hint: TypeHint::LinuxData,
+            })),
+            [
+                "parted",
+                "-s",
+                d,
+                "unit",
+                "s",
+                "mkpart",
+                role,
+                t,
+                start,
+                end,
+            ] if self.mbr_profile.is_some() && self.disk(d)?.mbr.is_some() => {
+                let role = match *role {
+                    "primary" => mbr::Kind::Primary,
+                    "logical" => mbr::Kind::Logical,
+                    _ => return Err(err(ErrorKind::Unsupported, self.command_help())),
+                };
+                let type_hint = match *t {
+                    "ext4" => TypeHint::LinuxData,
+                    "linux-swap" => TypeHint::LinuxSwap,
+                    _ => return Err(err(ErrorKind::Unsupported, self.command_help())),
+                };
+                self.apply(Action::Mbr(mbr::Action::Add {
+                    disk: (*d).into(),
+                    role,
+                    start: sector(start)?,
+                    end: sector(end)?,
+                    type_hint,
+                }))
+            }
             ["parted", "-s", d, "mklabel", "gpt"] => {
                 self.apply(Action::CreateGpt { disk: (*d).into() })
             }
@@ -731,7 +775,7 @@ impl State {
                 let type_hint = match *t {
                     "ext4" => TypeHint::LinuxData,
                     "linux-swap" => TypeHint::LinuxSwap,
-                    _ => return Err(err(ErrorKind::Unsupported, HELP)),
+                    _ => return Err(err(ErrorKind::Unsupported, self.command_help())),
                 };
                 self.apply(Action::AddPartition {
                     disk: (*d).into(),
@@ -746,9 +790,8 @@ impl State {
                 let disk = self.disk(d)?;
                 let number = integer(n)?;
                 let p = disk
-                    .table
-                    .as_ref()
-                    .and_then(|t| t.partitions.iter().find(|p| u64::from(p.number) == number))
+                    .partitions()
+                    .find(|p| u64::from(p.number) == number)
                     .ok_or_else(|| err(ErrorKind::Unknown, "Unknown partition number"))?;
                 Ok(Output {
                     stdout: String::new(),
@@ -762,7 +805,7 @@ impl State {
                     ["mkfs.ext4", rest @ ..] => (false, rest),
                     ["mkfs" | "mke2fs", "-t", "ext4", rest @ ..] => (false, rest),
                     ["mkswap", rest @ ..] => (true, rest),
-                    _ => return Err(err(ErrorKind::Unsupported, HELP)),
+                    _ => return Err(err(ErrorKind::Unsupported, self.command_help())),
                 };
                 let (partition, label, uuid) = format_options(options, swap)?;
                 self.apply(if swap {
@@ -784,6 +827,20 @@ impl State {
     pub fn report_disk(&self, id: &str) -> Result<Output> {
         self.validate()?;
         let d = self.disk(id)?;
+        if let Some(table) = &d.mbr {
+            return Ok(Output::success(mbr::report(id, d, table)));
+        }
+        if self.mbr_profile.is_some() && d.table.is_none() {
+            return Ok(Output::success(format!(
+                "SIMULATOR disk report: {id}; {} sectors; logical512B; no table; {}\n",
+                d.sectors,
+                if d.occupied_without_table {
+                    "opaque existing data"
+                } else {
+                    "blank supplied disk"
+                }
+            )));
+        }
         let mut s = format!(
             "SIMULATOR GPT report: {id}; {} sectors; logical512B; optimal{} sectors\n",
             d.sectors, d.optimal_alignment
@@ -822,28 +879,33 @@ impl State {
         let mut s = String::from("SIMULATOR signature inventory (not host blkid output)\n");
         let mut found = false;
         for (id, d) in &self.disks {
-            if let Some(t) = &d.table {
-                for p in &t.partitions {
-                    let path = format!("{id}{}", p.number);
-                    if only.is_some_and(|n| n != path) {
-                        continue;
+            for p in d.partitions() {
+                let path = format!("{id}{}", p.number);
+                if only.is_some_and(|n| n != path) {
+                    continue;
+                }
+                match &p.content {
+                    Content::Ext4 { uuid, label, .. } | Content::Swap { uuid, label, .. } => {
+                        found = true;
+                        s.push_str(&format!(
+                            "{path}: UUID=\"{uuid}\" LABEL=\"{label}\" TYPE=\"{}\"\n",
+                            content_type(&p.content)
+                        ));
                     }
-                    match &p.content {
-                        Content::Ext4 { uuid, label, .. } | Content::Swap { uuid, label, .. } => {
-                            found = true;
-                            s.push_str(&format!(
-                                "{path}: UUID=\"{uuid}\" LABEL=\"{label}\" TYPE=\"{}\"\n",
-                                content_type(&p.content)
-                            ));
-                        }
-                        Content::Foreign { description } => {
-                            found = true;
-                            s.push_str(&format!(
-                                "{path}: opaque supplied content ({description})\n"
-                            ));
-                        }
-                        Content::Blank => {}
+                    Content::Foreign { description } => {
+                        found = true;
+                        s.push_str(&format!(
+                            "{path}: opaque supplied content ({description})\n"
+                        ));
                     }
+                    Content::Fat32 { volume } => {
+                        found = true;
+                        s.push_str(&format!(
+                            "{path}: UUID=\"{}\" LABEL=\"{}\" TYPE=\"vfat\"\n",
+                            volume.serial, volume.label
+                        ));
+                    }
+                    Content::Blank => {}
                 }
             }
         }
@@ -853,9 +915,85 @@ impl State {
         })
     }
 }
+fn validate_partition_content<'a>(
+    p: &'a Partition,
+    identities: &mut BTreeSet<&'a str>,
+    total: &mut usize,
+) -> Result<()> {
+    let bytes = p.bytes()?;
+    match &p.content {
+        Content::Blank => {}
+        Content::Fat32 { volume } => {
+            volume.validate(bytes / SECTOR_BYTES).map_err(|e| invalid(&e))?;
+        }
+        Content::Foreign { description } => {
+            if description.is_empty()
+                || description.len() > 64
+                || !description
+                    .bytes()
+                    .all(|b| b.is_ascii_graphic() || b == b' ')
+            {
+                return Err(invalid("Invalid opaque content description"));
+            }
+        }
+        Content::Ext4 {
+            label: l,
+            uuid: u,
+            blocks,
+            files,
+        } => {
+            if !label(l)
+                || !uuid(u)
+                || !identities.insert(u.as_str())
+                || *blocks != bytes / BLOCK_BYTES
+                || bytes < 1024 * 1024
+                || files.len() > MAX_FILES
+            {
+                return Err(invalid("Invalid ext4 identity/capacity/file count"));
+            }
+            let mut used = 0u64;
+            for (path, f) in files {
+                if !path.strip_prefix('/').is_some_and(|s| name(s, 63))
+                    || f.text.len() > MAX_FILE_BYTES
+                    || f.text.contains('\0')
+                {
+                    return Err(invalid("Invalid retained flat file path/text"));
+                }
+                *total = total
+                    .checked_add(f.text.len())
+                    .ok_or_else(|| limited("File byte overflow"))?;
+                used = used
+                    .checked_add(f.text.len() as u64)
+                    .ok_or_else(|| limited("File byte overflow"))?;
+                if *total > MAX_TOTAL_FILE_BYTES || used > blocks * BLOCK_BYTES {
+                    return Err(limited(
+                        "Retained file bytes exceed bounded modeled capacity",
+                    ));
+                }
+            }
+        }
+        Content::Swap {
+            label: l,
+            uuid: u,
+            usable_pages,
+        } => {
+            if !label(l)
+                || !uuid(u)
+                || !identities.insert(u.as_str())
+                || bytes / BLOCK_BYTES < 10
+                || *usable_pages != bytes / BLOCK_BYTES - 1
+            {
+                return Err(invalid("Invalid swap identity/page capacity"));
+            }
+        }
+    }
+    Ok(())
+}
+
 fn content_type(c: &Content) -> &'static str {
     match c {
         Content::Blank => "none",
+        Content::Fat32 { .. } => "vfat",
         Content::Foreign { .. } => "foreign",
         Content::Ext4 { .. } => "ext4",
         Content::Swap { .. } => "swap",

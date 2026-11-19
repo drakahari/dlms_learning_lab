@@ -1,0 +1,1249 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-module-device-driver",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-module-foundations",
+      "topic": "Supplied devices and loadable drivers",
+      "title": "Activate a supplied device driver without removing another provider",
+      "summary": "Inspect a candidate driver, resolve its dependencies and preserve another provider.",
+      "objective": "Activate the supplied teaching sensor controller using its candidate loadable driver with the default queue count of 1. Keep the audit provider and its effective settings unchanged; shared dependencies must remain valid. Keep the supplied saved options unchanged. Verify the resulting module state, not only a command’s lack of output.",
+      "retry_guidance": "Read the failed outcome and actual command diagnostic. Inspect the loaded module, saved options or current index it names, repair that state and check again.",
+      "difficulty": "Beginner",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair",
+        "Verify the handover"
+      ],
+      "guide": [
+        {
+          "title": "Separate the device from its driver",
+          "why": "The kernel is the core of Linux that manages hardware. A device is the supplied controller; its driver is code that lets the kernel work with it. In this simulation the controller needs a loadable module. lspci -k distinguishes a possible module from a driver currently in use. Real Linux also has built-in drivers, which this exercise does not model.",
+          "action": "Insert lspci -k and modinfo example_reader, then Run each. Read the difference between a candidate and a driver in use.",
+          "commands": [
+            {
+              "command": "lspci -k",
+              "explanation": "Separate possible from active drivers.",
+              "simulator_only": false
+            },
+            {
+              "command": "modinfo example_reader",
+              "explanation": "Inspect the object and required reader_bus.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Read dependencies before loading",
+          "why": "A dependency is another module that must be loaded first. lsmod lists loaded modules. modinfo shows the supplied module object and its hard dependencies. insmod inserts one object and requires those dependencies already loaded; modprobe uses the current lookup index to load them in order. Use the module name with modprobe, an exact supplied object path with insmod.",
+          "action": "Run insmod /lib/modules/6.9.0-example/kernel/drivers/example_reader.ko and read the failure, then Run dmesg. Use modprobe example_reader and inspect lsmod and lspci -k.",
+          "commands": [
+            {
+              "command": "insmod /lib/modules/6.9.0-example/kernel/drivers/example_reader.ko",
+              "explanation": "Expected failure: reader_bus is not loaded yet.",
+              "simulator_only": false
+            },
+            {
+              "command": "dmesg",
+              "explanation": "Observe the retained unresolved-dependency diagnostic.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify and preserve other providers",
+          "why": "Successful insertion normally prints nothing. Use lspci -k and lsmod to inspect actual state. A module used by another cannot be removed normally. Do not dismantle the audit provider to activate the controller; shared dependencies can serve both.",
+          "action": "Run modprobe -r example_reader, then Check example. Reload example_reader and check again.",
+          "commands": [
+            {
+              "command": "modprobe example_reader",
+              "explanation": "Resolve indexed prerequisites and insert the driver.",
+              "simulator_only": false
+            },
+            {
+              "command": "lsmod",
+              "explanation": "Observe both providers and their shared prerequisite.",
+              "simulator_only": false
+            },
+            {
+              "command": "lspci -k",
+              "explanation": "The controller now has a driver in use.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The kernel is the core of Linux that manages hardware. A device is the supplied controller; its driver is code that lets the kernel work with it. In this simulation the controller needs a loadable module. lspci -k distinguishes a possible module from a driver currently in use. Real Linux also has built-in drivers, which this exercise does not model. A dependency is another module that must be loaded first. lsmod lists loaded modules. modinfo shows the supplied module object and its hard dependencies. insmod inserts one object and requires those dependencies already loaded; modprobe uses the current lookup index to load them in order. Use the module name with modprobe, an exact supplied object path with insmod. Successful insertion normally prints nothing. Use lspci -k and lsmod to inspect actual state. A module used by another cannot be removed normally. Do not dismantle the audit provider to activate the controller; shared dependencies can serve both.",
+      "hints": [
+        "Start with lspci -k, lsmod and the supplied module’s metadata; a candidate is not the same as an active driver.",
+        "Preserve the audit provider. Load missing dependencies automatically by name or insert compatible prerequisite objects in order.",
+        "Check saved and effective state separately. A repeated load is a no-op; a missing index needs a rebuild, not just a direct insertion."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://github.com/kmod-project/kmod/blob/v34/man/modprobe.8.scd",
+        "https://github.com/kmod-project/kmod/blob/v34/man/insmod.8.scd",
+        "https://github.com/kmod-project/kmod/blob/v34/man/modprobe.d.5.scd"
+      ],
+      "simplifications": "Finite supplied loadable modules and virtual object/config/sysfs paths only. No host kernel, hardware, built-in driver, ELF, firmware, alias, automatic udev, blacklist, force, script directive or full kmod behavior. Dependency refs and integer parameters are explicit teaching data. Unknown syntax is refused; successful insertions normally print nothing. Operational insertion failures may retain dependencies already loaded and diagnostics. Tests are not real hardware acceptance.",
+      "initial": {
+        "kind": "KernelModules",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-module-device-driver",
+          "view": "introduction",
+          "example_step": 0,
+          "assignment": {
+            "role": "assignment",
+            "runtime": {
+              "index": [
+                "audit_link",
+                "bus_core",
+                "lab_sensor",
+                "sensor_bus"
+              ],
+              "loaded": {
+                "bus_core": {
+                  "parameters": {}
+                },
+                "audit_link": {
+                  "parameters": {}
+                }
+              },
+              "config": "",
+              "diagnostics": []
+            },
+            "config_draft": "",
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "practice": {
+            "role": "practice",
+            "runtime": {
+              "index": [
+                "example_audit",
+                "example_reader",
+                "reader_bus",
+                "reader_core"
+              ],
+              "loaded": {
+                "reader_core": {
+                  "parameters": {}
+                },
+                "example_audit": {
+                  "parameters": {}
+                }
+              },
+              "config": "",
+              "diagnostics": []
+            },
+            "config_draft": "",
+            "command": "",
+            "transcript": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "KernelModules",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic1-module-device-driver",
+          "assignment": {
+            "catalogue": {
+              "kernel_release": "6.8.0-lab",
+              "modules": {
+                "bus_core": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/bus_core.ko",
+                  "description": "Supplied bus_core teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "sensor_bus": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/sensor_bus.ko",
+                  "description": "Supplied sensor_bus teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [
+                    "bus_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "lab_sensor": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/lab_sensor.ko",
+                  "description": "Supplied lab_sensor teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [
+                    "sensor_bus"
+                  ],
+                  "parameters": {
+                    "queues": {
+                      "description": "Number of supplied queues",
+                      "minimum": 1,
+                      "maximum": 8,
+                      "default": 1
+                    }
+                  },
+                  "external_users": 0
+                },
+                "audit_link": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/audit_link.ko",
+                  "description": "Supplied audit_link teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [
+                    "bus_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "old_sensor": {
+                  "path": "/lib/modules/6.7.0-lab/kernel/drivers/old_sensor.ko",
+                  "description": "Supplied old_sensor teaching module",
+                  "kernel_release": "6.7.0-lab",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                }
+              },
+              "devices": [
+                {
+                  "slot": "00:05.0",
+                  "description": "Teaching sensor controller",
+                  "driver": "lab_sensor"
+                }
+              ]
+            },
+            "initial": {
+              "index": [
+                "audit_link",
+                "bus_core",
+                "lab_sensor",
+                "sensor_bus"
+              ],
+              "loaded": {
+                "bus_core": {
+                  "parameters": {}
+                },
+                "audit_link": {
+                  "parameters": {}
+                }
+              },
+              "config": "",
+              "diagnostics": []
+            },
+            "target": {
+              "module": "lab_sensor",
+              "parameters": {
+                "queues": 1
+              },
+              "saved_options": false,
+              "current_index": false
+            }
+          },
+          "example": {
+            "catalogue": {
+              "kernel_release": "6.9.0-example",
+              "modules": {
+                "reader_core": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/reader_core.ko",
+                  "description": "Supplied reader_core teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "reader_bus": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/reader_bus.ko",
+                  "description": "Supplied reader_bus teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [
+                    "reader_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "example_reader": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/example_reader.ko",
+                  "description": "Supplied example_reader teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [
+                    "reader_bus"
+                  ],
+                  "parameters": {
+                    "queues": {
+                      "description": "Number of supplied queues",
+                      "minimum": 1,
+                      "maximum": 8,
+                      "default": 1
+                    }
+                  },
+                  "external_users": 0
+                },
+                "example_audit": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/example_audit.ko",
+                  "description": "Supplied example_audit teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [
+                    "reader_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "old_reader": {
+                  "path": "/lib/modules/6.8.0-example/kernel/drivers/old_reader.ko",
+                  "description": "Supplied old_reader teaching module",
+                  "kernel_release": "6.8.0-example",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                }
+              },
+              "devices": [
+                {
+                  "slot": "00:05.0",
+                  "description": "Teaching sensor controller",
+                  "driver": "example_reader"
+                }
+              ]
+            },
+            "initial": {
+              "index": [
+                "example_audit",
+                "example_reader",
+                "reader_bus",
+                "reader_core"
+              ],
+              "loaded": {
+                "reader_core": {
+                  "parameters": {}
+                },
+                "example_audit": {
+                  "parameters": {}
+                }
+              },
+              "config": "",
+              "diagnostics": []
+            },
+            "target": {
+              "module": "example_reader",
+              "parameters": {
+                "queues": 1
+              },
+              "saved_options": false,
+              "current_index": false
+            }
+          },
+          "reference": [
+            {
+              "kind": "command",
+              "text": "modprobe lab_sensor"
+            }
+          ],
+          "example_steps": [
+            {
+              "kind": "command",
+              "text": "lspci -k"
+            },
+            {
+              "kind": "command",
+              "text": "modinfo example_reader"
+            },
+            {
+              "kind": "expected_failure",
+              "text": "insmod /lib/modules/6.9.0-example/kernel/drivers/example_reader.ko"
+            },
+            {
+              "kind": "command",
+              "text": "dmesg"
+            },
+            {
+              "kind": "command",
+              "text": "modprobe example_reader"
+            },
+            {
+              "kind": "command",
+              "text": "lsmod"
+            },
+            {
+              "kind": "command",
+              "text": "lspci -k"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "modprobe lab_sensor",
+        "@module-check"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "lpic1-module-index-repair",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-module-foundations",
+      "topic": "Supplied devices and loadable drivers",
+      "title": "Repair a new driver’s missing lookup index",
+      "summary": "Distinguish missing lookup data from a missing object, then repair the driver handover.",
+      "objective": "The compatible sensor object is supplied at /lib/modules/6.8.0-lab/kernel/drivers/lab_sensor.ko, but its name is missing from lookup. Activate the teaching sensor controller at the default queue count of 1. Rebuild the complete lookup index for the current simulated kernel release; a one-off direct insertion alone is insufficient. Preserve the audit provider, dependency settings and saved options. Objects for the older release must remain unloaded.",
+      "retry_guidance": "Read the failed outcome and actual command diagnostic. Inspect the loaded module, saved options or current index it names, repair that state and check again.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair",
+        "Verify the handover"
+      ],
+      "guide": [
+        {
+          "title": "Distinguish an object from its lookup entry",
+          "why": "The lookup index is the list modprobe uses to find modules by name and resolve their dependencies. A supplied module object may exist even when its name is absent from the current lookup index. A failing modprobe is not proof that the object was never supplied. Use uname -r and inspect the exact supplied object with modinfo to compare its declared kernel release and dependencies.",
+          "action": "Run uname -r, then modprobe example_reader. Inspect modinfo /lib/modules/6.9.0-example/kernel/drivers/example_reader.ko.",
+          "commands": [
+            {
+              "command": "uname -r",
+              "explanation": "Use the simulated release, not the host kernel.",
+              "simulator_only": false
+            },
+            {
+              "command": "modprobe example_reader",
+              "explanation": "Expected failure: the name is missing from this index.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Rebuild the correct index",
+          "why": "depmod -a rebuilds dependency lookup information for the current simulated release. It does not activate a module. Then modprobe can resolve the supplied driver name and dependencies. In this model, objects for a different kernel release are excluded from that rebuilt index.",
+          "action": "Run depmod -a. Then Run modprobe example_reader, lspci -k and lsmod. Choose Check example.",
+          "commands": [
+            {
+              "command": "modinfo /lib/modules/6.9.0-example/kernel/drivers/example_reader.ko",
+              "explanation": "Confirm the object release and dependency without name lookup.",
+              "simulator_only": false
+            },
+            {
+              "command": "depmod -a",
+              "explanation": "Rebuild current-release entries without loading modules.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Prove a durable handover",
+          "why": "Direct insmod can load a compatible object after its dependencies without repairing name lookup. That is useful investigation, but this assignment also needs a rebuilt current-release index. Keep the audit provider running. Do not force an object from the older supplied release; its declared format is incompatible.",
+          "action": "Run insmod /lib/modules/6.8.0-example/kernel/drivers/old_reader.ko, then dmesg.",
+          "commands": [
+            {
+              "command": "modprobe example_reader",
+              "explanation": "Now resolve dependencies and insert the driver.",
+              "simulator_only": false
+            },
+            {
+              "command": "lspci -k",
+              "explanation": "Observe the controller’s active driver.",
+              "simulator_only": false
+            },
+            {
+              "command": "lsmod",
+              "explanation": "Confirm the audit provider remains loaded.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The lookup index is the list modprobe uses to find modules by name and resolve their dependencies. A supplied module object may exist even when its name is absent from the current lookup index. A failing modprobe is not proof that the object was never supplied. Use uname -r and inspect the exact supplied object with modinfo to compare its declared kernel release and dependencies. depmod -a rebuilds dependency lookup information for the current simulated release. It does not activate a module. Then modprobe can resolve the supplied driver name and dependencies. In this model, objects for a different kernel release are excluded from that rebuilt index. Direct insmod can load a compatible object after its dependencies without repairing name lookup. That is useful investigation, but this assignment also needs a rebuilt current-release index. Keep the audit provider running. Do not force an object from the older supplied release; its declared format is incompatible.",
+      "hints": [
+        "Start with lspci -k, lsmod and the supplied module’s metadata; a candidate is not the same as an active driver.",
+        "Preserve the audit provider. Load missing dependencies automatically by name or insert compatible prerequisite objects in order.",
+        "Check saved and effective state separately. A repeated load is a no-op; a missing index needs a rebuild, not just a direct insertion."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://github.com/kmod-project/kmod/blob/v34/man/modprobe.8.scd",
+        "https://github.com/kmod-project/kmod/blob/v34/man/insmod.8.scd",
+        "https://github.com/kmod-project/kmod/blob/v34/man/modprobe.d.5.scd"
+      ],
+      "simplifications": "Finite supplied loadable modules and virtual object/config/sysfs paths only. No host kernel, hardware, built-in driver, ELF, firmware, alias, automatic udev, blacklist, force, script directive or full kmod behavior. Dependency refs and integer parameters are explicit teaching data. Unknown syntax is refused; successful insertions normally print nothing. Operational insertion failures may retain dependencies already loaded and diagnostics. Tests are not real hardware acceptance.",
+      "initial": {
+        "kind": "KernelModules",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-module-index-repair",
+          "view": "introduction",
+          "example_step": 0,
+          "assignment": {
+            "role": "assignment",
+            "runtime": {
+              "index": [
+                "audit_link",
+                "bus_core",
+                "sensor_bus"
+              ],
+              "loaded": {
+                "bus_core": {
+                  "parameters": {}
+                },
+                "audit_link": {
+                  "parameters": {}
+                }
+              },
+              "config": "",
+              "diagnostics": []
+            },
+            "config_draft": "",
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "practice": {
+            "role": "practice",
+            "runtime": {
+              "index": [
+                "example_audit",
+                "reader_bus",
+                "reader_core"
+              ],
+              "loaded": {
+                "reader_core": {
+                  "parameters": {}
+                },
+                "example_audit": {
+                  "parameters": {}
+                }
+              },
+              "config": "",
+              "diagnostics": []
+            },
+            "config_draft": "",
+            "command": "",
+            "transcript": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "KernelModules",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic1-module-index-repair",
+          "assignment": {
+            "catalogue": {
+              "kernel_release": "6.8.0-lab",
+              "modules": {
+                "bus_core": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/bus_core.ko",
+                  "description": "Supplied bus_core teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "sensor_bus": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/sensor_bus.ko",
+                  "description": "Supplied sensor_bus teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [
+                    "bus_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "lab_sensor": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/lab_sensor.ko",
+                  "description": "Supplied lab_sensor teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [
+                    "sensor_bus"
+                  ],
+                  "parameters": {
+                    "queues": {
+                      "description": "Number of supplied queues",
+                      "minimum": 1,
+                      "maximum": 8,
+                      "default": 1
+                    }
+                  },
+                  "external_users": 0
+                },
+                "audit_link": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/audit_link.ko",
+                  "description": "Supplied audit_link teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [
+                    "bus_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "old_sensor": {
+                  "path": "/lib/modules/6.7.0-lab/kernel/drivers/old_sensor.ko",
+                  "description": "Supplied old_sensor teaching module",
+                  "kernel_release": "6.7.0-lab",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                }
+              },
+              "devices": [
+                {
+                  "slot": "00:05.0",
+                  "description": "Teaching sensor controller",
+                  "driver": "lab_sensor"
+                }
+              ]
+            },
+            "initial": {
+              "index": [
+                "audit_link",
+                "bus_core",
+                "sensor_bus"
+              ],
+              "loaded": {
+                "bus_core": {
+                  "parameters": {}
+                },
+                "audit_link": {
+                  "parameters": {}
+                }
+              },
+              "config": "",
+              "diagnostics": []
+            },
+            "target": {
+              "module": "lab_sensor",
+              "parameters": {
+                "queues": 1
+              },
+              "saved_options": false,
+              "current_index": true
+            }
+          },
+          "example": {
+            "catalogue": {
+              "kernel_release": "6.9.0-example",
+              "modules": {
+                "reader_core": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/reader_core.ko",
+                  "description": "Supplied reader_core teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "reader_bus": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/reader_bus.ko",
+                  "description": "Supplied reader_bus teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [
+                    "reader_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "example_reader": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/example_reader.ko",
+                  "description": "Supplied example_reader teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [
+                    "reader_bus"
+                  ],
+                  "parameters": {
+                    "queues": {
+                      "description": "Number of supplied queues",
+                      "minimum": 1,
+                      "maximum": 8,
+                      "default": 1
+                    }
+                  },
+                  "external_users": 0
+                },
+                "example_audit": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/example_audit.ko",
+                  "description": "Supplied example_audit teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [
+                    "reader_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "old_reader": {
+                  "path": "/lib/modules/6.8.0-example/kernel/drivers/old_reader.ko",
+                  "description": "Supplied old_reader teaching module",
+                  "kernel_release": "6.8.0-example",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                }
+              },
+              "devices": [
+                {
+                  "slot": "00:05.0",
+                  "description": "Teaching sensor controller",
+                  "driver": "example_reader"
+                }
+              ]
+            },
+            "initial": {
+              "index": [
+                "example_audit",
+                "reader_bus",
+                "reader_core"
+              ],
+              "loaded": {
+                "reader_core": {
+                  "parameters": {}
+                },
+                "example_audit": {
+                  "parameters": {}
+                }
+              },
+              "config": "",
+              "diagnostics": []
+            },
+            "target": {
+              "module": "example_reader",
+              "parameters": {
+                "queues": 1
+              },
+              "saved_options": false,
+              "current_index": true
+            }
+          },
+          "reference": [
+            {
+              "kind": "command",
+              "text": "depmod -a"
+            },
+            {
+              "kind": "command",
+              "text": "modprobe lab_sensor"
+            }
+          ],
+          "example_steps": [
+            {
+              "kind": "command",
+              "text": "uname -r"
+            },
+            {
+              "kind": "expected_failure",
+              "text": "modprobe example_reader"
+            },
+            {
+              "kind": "command",
+              "text": "modinfo /lib/modules/6.9.0-example/kernel/drivers/example_reader.ko"
+            },
+            {
+              "kind": "command",
+              "text": "depmod -a"
+            },
+            {
+              "kind": "command",
+              "text": "modprobe example_reader"
+            },
+            {
+              "kind": "command",
+              "text": "lspci -k"
+            },
+            {
+              "kind": "command",
+              "text": "lsmod"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "depmod -a",
+        "modprobe lab_sensor",
+        "@module-check"
+      ],
+      "prerequisites": [
+        "lpic1-module-device-driver"
+      ]
+    },
+    {
+      "id": "lpic2-module-options-reload",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-module-options",
+      "topic": "Saved and effective module options",
+      "title": "Repair saved driver options and the running instance",
+      "summary": "Repair future driver options and verify the currently loaded instance independently.",
+      "objective": "Keep the teaching sensor controller active with 4 effective queues. Save valid options so its next modprobe insertion also uses 4 queues; repairing only the running instance is insufficient. Preserve the audit provider, shared dependency settings and every unrelated saved option. Save or revert any outstanding editor draft before checking.",
+      "retry_guidance": "Read the failed outcome and actual command diagnostic. Inspect the loaded module, saved options or current index it names, repair that state and check again.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair",
+        "Verify the handover"
+      ],
+      "guide": [
+        {
+          "title": "Distinguish saved and effective values",
+          "why": "The supplied sensor is already loaded with one queue. The options file holds settings for future modprobe insertions; editing it does not change that running instance. A repeated modprobe on an already loaded module normally does nothing. Inspect the current value through its supplied /sys/module/.../parameters/queues file.",
+          "action": "Run the effective-parameter cat command and modinfo example_reader. Read the supplied options editor: its saved value is invalid.",
+          "commands": [
+            {
+              "command": "cat /sys/module/example_reader/parameters/queues",
+              "explanation": "This loaded instance currently uses one queue.",
+              "simulator_only": false
+            },
+            {
+              "command": "modinfo example_reader",
+              "explanation": "The supported range is 1 through 8.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Diagnose before retrying",
+          "why": "modinfo describes the supported queues range, 1 through 8. dmesg retains simulated insertion diagnostics after a failure. The native editor changes only the virtual options file: use options MODULE queues=VALUE. This file is configuration, not a shell script. An invalid saved integer value can remain unnoticed while an older valid instance stays loaded.",
+          "action": "Choose Edit and save the practice options file, then Fill practice editor. Read queues=3 in the editor and click Save options. Run modprobe example_reader and the effective-parameter cat command again.",
+          "commands": [
+            {
+              "command": "options example_reader queues=3",
+              "explanation": "Editor contents, not a terminal command; click Save options afterward.",
+              "simulator_only": false
+            },
+            {
+              "command": "modprobe example_reader",
+              "explanation": "An existing instance does not acquire new settings.",
+              "simulator_only": false
+            },
+            {
+              "command": "cat /sys/module/example_reader/parameters/queues",
+              "explanation": "The value remains 1 until reinserted.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Apply a safe two-part repair",
+          "why": "Save the requested options and remove only the target module before loading it again. modprobe -r also tries unused dependencies, but keeps those still used by the audit provider. Check both saved and effective values; a one-off explicit insmod value alone cannot repair future insertions.",
+          "action": "Run modprobe -r example_reader, then modprobe example_reader. Read the effective value, inspect lsmod and choose Check example.",
+          "commands": [
+            {
+              "command": "modprobe -r example_reader",
+              "explanation": "Retain dependencies still used by the audit provider.",
+              "simulator_only": false
+            },
+            {
+              "command": "modprobe example_reader",
+              "explanation": "Read the repaired file during actual insertion.",
+              "simulator_only": false
+            },
+            {
+              "command": "cat /sys/module/example_reader/parameters/queues",
+              "explanation": "The instance now uses 3 queues.",
+              "simulator_only": false
+            },
+            {
+              "command": "lsmod",
+              "explanation": "The audit provider stays loaded throughout.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The supplied sensor is already loaded with one queue. The options file holds settings for future modprobe insertions; editing it does not change that running instance. A repeated modprobe on an already loaded module normally does nothing. Inspect the current value through its supplied /sys/module/.../parameters/queues file. modinfo describes the supported queues range, 1 through 8. dmesg retains simulated insertion diagnostics after a failure. The native editor changes only the virtual options file: use options MODULE queues=VALUE. This file is configuration, not a shell script. An invalid saved integer value can remain unnoticed while an older valid instance stays loaded. Save the requested options and remove only the target module before loading it again. modprobe -r also tries unused dependencies, but keeps those still used by the audit provider. Check both saved and effective values; a one-off explicit insmod value alone cannot repair future insertions.",
+      "hints": [
+        "Start with lspci -k, lsmod and the supplied module’s metadata; a candidate is not the same as an active driver.",
+        "Preserve the audit provider. Load missing dependencies automatically by name or insert compatible prerequisite objects in order.",
+        "Check saved and effective state separately. A repeated load is a no-op; a missing index needs a rebuild, not just a direct insertion."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://github.com/kmod-project/kmod/blob/v34/man/modprobe.8.scd",
+        "https://github.com/kmod-project/kmod/blob/v34/man/insmod.8.scd",
+        "https://github.com/kmod-project/kmod/blob/v34/man/modprobe.d.5.scd"
+      ],
+      "simplifications": "Finite supplied loadable modules and virtual object/config/sysfs paths only. No host kernel, hardware, built-in driver, ELF, firmware, alias, automatic udev, blacklist, force, script directive or full kmod behavior. Dependency refs and integer parameters are explicit teaching data. Unknown syntax is refused; successful insertions normally print nothing. Operational insertion failures may retain dependencies already loaded and diagnostics. Tests are not real hardware acceptance.",
+      "initial": {
+        "kind": "KernelModules",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-module-options-reload",
+          "view": "introduction",
+          "example_step": 0,
+          "assignment": {
+            "role": "assignment",
+            "runtime": {
+              "index": [
+                "audit_link",
+                "bus_core",
+                "lab_sensor",
+                "sensor_bus"
+              ],
+              "loaded": {
+                "bus_core": {
+                  "parameters": {}
+                },
+                "audit_link": {
+                  "parameters": {}
+                },
+                "sensor_bus": {
+                  "parameters": {}
+                },
+                "lab_sensor": {
+                  "parameters": {
+                    "queues": 1
+                  }
+                }
+              },
+              "config": "# Repair only the target module\noptions lab_sensor queues=99\n",
+              "diagnostics": []
+            },
+            "config_draft": "# Repair only the target module\noptions lab_sensor queues=99\n",
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "practice": {
+            "role": "practice",
+            "runtime": {
+              "index": [
+                "example_audit",
+                "example_reader",
+                "reader_bus",
+                "reader_core"
+              ],
+              "loaded": {
+                "reader_core": {
+                  "parameters": {}
+                },
+                "example_audit": {
+                  "parameters": {}
+                },
+                "reader_bus": {
+                  "parameters": {}
+                },
+                "example_reader": {
+                  "parameters": {
+                    "queues": 1
+                  }
+                }
+              },
+              "config": "# Repair only the target module\noptions example_reader queues=99\n",
+              "diagnostics": []
+            },
+            "config_draft": "# Repair only the target module\noptions example_reader queues=99\n",
+            "command": "",
+            "transcript": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "KernelModules",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-module-options-reload",
+          "assignment": {
+            "catalogue": {
+              "kernel_release": "6.8.0-lab",
+              "modules": {
+                "bus_core": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/bus_core.ko",
+                  "description": "Supplied bus_core teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "sensor_bus": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/sensor_bus.ko",
+                  "description": "Supplied sensor_bus teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [
+                    "bus_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "lab_sensor": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/lab_sensor.ko",
+                  "description": "Supplied lab_sensor teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [
+                    "sensor_bus"
+                  ],
+                  "parameters": {
+                    "queues": {
+                      "description": "Number of supplied queues",
+                      "minimum": 1,
+                      "maximum": 8,
+                      "default": 1
+                    }
+                  },
+                  "external_users": 0
+                },
+                "audit_link": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/audit_link.ko",
+                  "description": "Supplied audit_link teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [
+                    "bus_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "old_sensor": {
+                  "path": "/lib/modules/6.7.0-lab/kernel/drivers/old_sensor.ko",
+                  "description": "Supplied old_sensor teaching module",
+                  "kernel_release": "6.7.0-lab",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                }
+              },
+              "devices": [
+                {
+                  "slot": "00:05.0",
+                  "description": "Teaching sensor controller",
+                  "driver": "lab_sensor"
+                }
+              ]
+            },
+            "initial": {
+              "index": [
+                "audit_link",
+                "bus_core",
+                "lab_sensor",
+                "sensor_bus"
+              ],
+              "loaded": {
+                "bus_core": {
+                  "parameters": {}
+                },
+                "audit_link": {
+                  "parameters": {}
+                },
+                "sensor_bus": {
+                  "parameters": {}
+                },
+                "lab_sensor": {
+                  "parameters": {
+                    "queues": 1
+                  }
+                }
+              },
+              "config": "# Repair only the target module\noptions lab_sensor queues=99\n",
+              "diagnostics": []
+            },
+            "target": {
+              "module": "lab_sensor",
+              "parameters": {
+                "queues": 4
+              },
+              "saved_options": true,
+              "current_index": false
+            }
+          },
+          "example": {
+            "catalogue": {
+              "kernel_release": "6.9.0-example",
+              "modules": {
+                "reader_core": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/reader_core.ko",
+                  "description": "Supplied reader_core teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "reader_bus": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/reader_bus.ko",
+                  "description": "Supplied reader_bus teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [
+                    "reader_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "example_reader": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/example_reader.ko",
+                  "description": "Supplied example_reader teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [
+                    "reader_bus"
+                  ],
+                  "parameters": {
+                    "queues": {
+                      "description": "Number of supplied queues",
+                      "minimum": 1,
+                      "maximum": 8,
+                      "default": 1
+                    }
+                  },
+                  "external_users": 0
+                },
+                "example_audit": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/example_audit.ko",
+                  "description": "Supplied example_audit teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [
+                    "reader_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "old_reader": {
+                  "path": "/lib/modules/6.8.0-example/kernel/drivers/old_reader.ko",
+                  "description": "Supplied old_reader teaching module",
+                  "kernel_release": "6.8.0-example",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                }
+              },
+              "devices": [
+                {
+                  "slot": "00:05.0",
+                  "description": "Teaching sensor controller",
+                  "driver": "example_reader"
+                }
+              ]
+            },
+            "initial": {
+              "index": [
+                "example_audit",
+                "example_reader",
+                "reader_bus",
+                "reader_core"
+              ],
+              "loaded": {
+                "reader_core": {
+                  "parameters": {}
+                },
+                "example_audit": {
+                  "parameters": {}
+                },
+                "reader_bus": {
+                  "parameters": {}
+                },
+                "example_reader": {
+                  "parameters": {
+                    "queues": 1
+                  }
+                }
+              },
+              "config": "# Repair only the target module\noptions example_reader queues=99\n",
+              "diagnostics": []
+            },
+            "target": {
+              "module": "example_reader",
+              "parameters": {
+                "queues": 3
+              },
+              "saved_options": true,
+              "current_index": false
+            }
+          },
+          "reference": [
+            {
+              "kind": "save_config",
+              "text": "options lab_sensor queues=4\n"
+            },
+            {
+              "kind": "command",
+              "text": "modprobe -r lab_sensor"
+            },
+            {
+              "kind": "command",
+              "text": "modprobe lab_sensor"
+            }
+          ],
+          "example_steps": [
+            {
+              "kind": "command",
+              "text": "cat /sys/module/example_reader/parameters/queues"
+            },
+            {
+              "kind": "command",
+              "text": "modinfo example_reader"
+            },
+            {
+              "kind": "save_config",
+              "text": "options example_reader queues=3\n"
+            },
+            {
+              "kind": "command",
+              "text": "modprobe example_reader"
+            },
+            {
+              "kind": "command",
+              "text": "cat /sys/module/example_reader/parameters/queues"
+            },
+            {
+              "kind": "command",
+              "text": "modprobe -r example_reader"
+            },
+            {
+              "kind": "command",
+              "text": "modprobe example_reader"
+            },
+            {
+              "kind": "command",
+              "text": "cat /sys/module/example_reader/parameters/queues"
+            },
+            {
+              "kind": "command",
+              "text": "lsmod"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "@module-save \"options lab_sensor queues=4\\n\"",
+        "modprobe -r lab_sensor",
+        "modprobe lab_sensor",
+        "@module-check"
+      ],
+      "prerequisites": [
+        "lpic1-module-index-repair"
+      ]
+    }
+  ]
+}

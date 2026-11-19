@@ -1,0 +1,960 @@
+[
+  {
+    "initial": {
+      "version": 1,
+      "id": "lpic2-cache-shared-privacy",
+      "resources": [
+        {
+          "path": "/handbook",
+          "label": "Public reading document",
+          "initial": "no-store",
+          "reference": "public, max-age=60",
+          "keep_max_age": null
+        },
+        {
+          "path": "/account-card",
+          "label": "Per-user card",
+          "initial": "public, max-age=600",
+          "reference": "private",
+          "keep_max_age": null
+        }
+      ],
+      "traces": [
+        {
+          "id": "public-repeat",
+          "label": "Public repeat and an unavailable origin",
+          "steps": [
+            {
+              "path": "/handbook",
+              "request_time": 0,
+              "request_control": "",
+              "origin": {
+                "response_time": 0,
+                "date": 0,
+                "age": 0,
+                "etag": "doc1",
+                "body": "Public document"
+              }
+            },
+            {
+              "path": "/handbook",
+              "request_time": 10,
+              "request_control": "",
+              "origin": {
+                "response_time": 10,
+                "date": 10,
+                "age": 0,
+                "etag": "doc1",
+                "body": "Public document"
+              }
+            },
+            {
+              "path": "/handbook",
+              "request_time": 20,
+              "request_control": "",
+              "origin": null
+            }
+          ],
+          "expected": [
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "doc1",
+                "body": "Public document"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Cached"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "doc1",
+                "body": "Public document"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Cached"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "doc1",
+                "body": "Public document"
+              },
+              "storage": "Required"
+            }
+          ]
+        },
+        {
+          "id": "two-people",
+          "label": "Two people request their own card",
+          "steps": [
+            {
+              "path": "/account-card",
+              "request_time": 0,
+              "request_control": "",
+              "origin": {
+                "response_time": 0,
+                "date": 0,
+                "age": 0,
+                "etag": "person-a",
+                "body": "Card A"
+              }
+            },
+            {
+              "path": "/account-card",
+              "request_time": 1,
+              "request_control": "",
+              "origin": {
+                "response_time": 1,
+                "date": 1,
+                "age": 0,
+                "etag": "person-b",
+                "body": "Card B"
+              }
+            }
+          ],
+          "expected": [
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "person-a",
+                "body": "Card A"
+              },
+              "storage": "Forbidden"
+            },
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "person-b",
+                "body": "Card B"
+              },
+              "storage": "Forbidden"
+            }
+          ]
+        },
+        {
+          "id": "personal-offline",
+          "label": "Personal content has no stored fallback",
+          "steps": [
+            {
+              "path": "/account-card",
+              "request_time": 0,
+              "request_control": "",
+              "origin": {
+                "response_time": 0,
+                "date": 0,
+                "age": 0,
+                "etag": "person-a",
+                "body": "Card A"
+              }
+            },
+            {
+              "path": "/account-card",
+              "request_time": 1,
+              "request_control": "",
+              "origin": null
+            }
+          ],
+          "expected": [
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "person-a",
+                "body": "Card A"
+              },
+              "storage": "Forbidden"
+            },
+            {
+              "delivery": [
+                "Unavailable"
+              ],
+              "body": {
+                "kind": "Unavailable"
+              },
+              "storage": "Forbidden"
+            }
+          ]
+        }
+      ]
+    },
+    "example": {
+      "version": 1,
+      "id": "lpic2-cache-shared-privacy-workshop",
+      "resources": [
+        {
+          "path": "/workshop-notes",
+          "label": "Public reading document",
+          "initial": "no-store",
+          "reference": "max-age=45",
+          "keep_max_age": null
+        },
+        {
+          "path": "/workshop-card",
+          "label": "Per-user card",
+          "initial": "public, max-age=600",
+          "reference": "private",
+          "keep_max_age": null
+        }
+      ],
+      "traces": [
+        {
+          "id": "public-repeat",
+          "label": "Public repeat and an unavailable origin",
+          "steps": [
+            {
+              "path": "/workshop-notes",
+              "request_time": 0,
+              "request_control": "",
+              "origin": {
+                "response_time": 0,
+                "date": 0,
+                "age": 0,
+                "etag": "doc1",
+                "body": "Public document"
+              }
+            },
+            {
+              "path": "/workshop-notes",
+              "request_time": 8,
+              "request_control": "",
+              "origin": {
+                "response_time": 8,
+                "date": 8,
+                "age": 0,
+                "etag": "doc1",
+                "body": "Public document"
+              }
+            },
+            {
+              "path": "/workshop-notes",
+              "request_time": 20,
+              "request_control": "",
+              "origin": null
+            }
+          ],
+          "expected": [
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "doc1",
+                "body": "Public document"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Cached"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "doc1",
+                "body": "Public document"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Cached"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "doc1",
+                "body": "Public document"
+              },
+              "storage": "Required"
+            }
+          ]
+        },
+        {
+          "id": "two-people",
+          "label": "Two people request their own card",
+          "steps": [
+            {
+              "path": "/workshop-card",
+              "request_time": 0,
+              "request_control": "",
+              "origin": {
+                "response_time": 0,
+                "date": 0,
+                "age": 0,
+                "etag": "person-a",
+                "body": "Card A"
+              }
+            },
+            {
+              "path": "/workshop-card",
+              "request_time": 1,
+              "request_control": "",
+              "origin": {
+                "response_time": 1,
+                "date": 1,
+                "age": 0,
+                "etag": "person-b",
+                "body": "Card B"
+              }
+            }
+          ],
+          "expected": [
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "person-a",
+                "body": "Card A"
+              },
+              "storage": "Forbidden"
+            },
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "person-b",
+                "body": "Card B"
+              },
+              "storage": "Forbidden"
+            }
+          ]
+        },
+        {
+          "id": "personal-offline",
+          "label": "Personal content has no stored fallback",
+          "steps": [
+            {
+              "path": "/workshop-card",
+              "request_time": 0,
+              "request_control": "",
+              "origin": {
+                "response_time": 0,
+                "date": 0,
+                "age": 0,
+                "etag": "person-a",
+                "body": "Card A"
+              }
+            },
+            {
+              "path": "/workshop-card",
+              "request_time": 1,
+              "request_control": "",
+              "origin": null
+            }
+          ],
+          "expected": [
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "person-a",
+                "body": "Card A"
+              },
+              "storage": "Forbidden"
+            },
+            {
+              "delivery": [
+                "Unavailable"
+              ],
+              "body": {
+                "kind": "Unavailable"
+              },
+              "storage": "Forbidden"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "initial": {
+      "version": 1,
+      "id": "lpic2-cache-freshness-handover",
+      "resources": [
+        {
+          "path": "/release-notes",
+          "label": "Changing public bulletin",
+          "initial": "max-age=600, s-maxage=3600",
+          "reference": "max-age=600, s-maxage=40",
+          "keep_max_age": 600
+        }
+      ],
+      "traces": [
+        {
+          "id": "shared-age",
+          "label": "Already-aged response and a missing origin",
+          "steps": [
+            {
+              "path": "/release-notes",
+              "request_time": 10,
+              "request_control": "",
+              "origin": {
+                "response_time": 10,
+                "date": 0,
+                "age": 10,
+                "etag": "r1",
+                "body": "Revision 1"
+              }
+            },
+            {
+              "path": "/release-notes",
+              "request_time": 25,
+              "request_control": "",
+              "origin": {
+                "response_time": 25,
+                "date": 25,
+                "age": 0,
+                "etag": "r1",
+                "body": "Revision 1"
+              }
+            },
+            {
+              "path": "/release-notes",
+              "request_time": 50,
+              "request_control": "",
+              "origin": null
+            },
+            {
+              "path": "/release-notes",
+              "request_time": 70,
+              "request_control": "",
+              "origin": {
+                "response_time": 70,
+                "date": 70,
+                "age": 0,
+                "etag": "r2",
+                "body": "Revision 2"
+              }
+            }
+          ],
+          "expected": [
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r1",
+                "body": "Revision 1"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Cached"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r1",
+                "body": "Revision 1"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Unavailable"
+              ],
+              "body": {
+                "kind": "Unavailable"
+              },
+              "storage": "Any"
+            },
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r2",
+                "body": "Revision 2"
+              },
+              "storage": "Required"
+            }
+          ]
+        },
+        {
+          "id": "validation",
+          "label": "Validate once, then reuse renewed metadata",
+          "steps": [
+            {
+              "path": "/release-notes",
+              "request_time": 10,
+              "request_control": "",
+              "origin": {
+                "response_time": 10,
+                "date": 10,
+                "age": 0,
+                "etag": "r1",
+                "body": "Revision 1"
+              }
+            },
+            {
+              "path": "/release-notes",
+              "request_time": 70,
+              "request_control": "",
+              "origin": {
+                "response_time": 70,
+                "date": 70,
+                "age": 0,
+                "etag": "r1",
+                "body": "Revision 1"
+              }
+            },
+            {
+              "path": "/release-notes",
+              "request_time": 85,
+              "request_control": "",
+              "origin": {
+                "response_time": 85,
+                "date": 85,
+                "age": 0,
+                "etag": "r2",
+                "body": "Revision 2"
+              }
+            },
+            {
+              "path": "/release-notes",
+              "request_time": 130,
+              "request_control": "",
+              "origin": {
+                "response_time": 130,
+                "date": 130,
+                "age": 0,
+                "etag": "r2",
+                "body": "Revision 2"
+              }
+            }
+          ],
+          "expected": [
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r1",
+                "body": "Revision 1"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Validated"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r1",
+                "body": "Revision 1"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Cached"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r1",
+                "body": "Revision 1"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r2",
+                "body": "Revision 2"
+              },
+              "storage": "Required"
+            }
+          ]
+        },
+        {
+          "id": "request-validation",
+          "label": "A request asks for an origin check",
+          "steps": [
+            {
+              "path": "/release-notes",
+              "request_time": 10,
+              "request_control": "",
+              "origin": {
+                "response_time": 10,
+                "date": 10,
+                "age": 0,
+                "etag": "r1",
+                "body": "Revision 1"
+              }
+            },
+            {
+              "path": "/release-notes",
+              "request_time": 15,
+              "request_control": "no-cache",
+              "origin": {
+                "response_time": 15,
+                "date": 15,
+                "age": 0,
+                "etag": "r2",
+                "body": "Revision 2"
+              }
+            },
+            {
+              "path": "/release-notes",
+              "request_time": 20,
+              "request_control": "",
+              "origin": {
+                "response_time": 20,
+                "date": 20,
+                "age": 0,
+                "etag": "r2",
+                "body": "Revision 2"
+              }
+            }
+          ],
+          "expected": [
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r1",
+                "body": "Revision 1"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r2",
+                "body": "Revision 2"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Cached"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r2",
+                "body": "Revision 2"
+              },
+              "storage": "Required"
+            }
+          ]
+        }
+      ]
+    },
+    "example": {
+      "version": 1,
+      "id": "lpic2-cache-freshness-handover-workshop",
+      "resources": [
+        {
+          "path": "/workshop-bulletin",
+          "label": "Changing public bulletin",
+          "initial": "max-age=900, s-maxage=3600",
+          "reference": "max-age=900, s-maxage=20",
+          "keep_max_age": 900
+        }
+      ],
+      "traces": [
+        {
+          "id": "shared-age",
+          "label": "Already-aged response and a missing origin",
+          "steps": [
+            {
+              "path": "/workshop-bulletin",
+              "request_time": 5,
+              "request_control": "",
+              "origin": {
+                "response_time": 5,
+                "date": 0,
+                "age": 5,
+                "etag": "r1",
+                "body": "Revision 1"
+              }
+            },
+            {
+              "path": "/workshop-bulletin",
+              "request_time": 12,
+              "request_control": "",
+              "origin": {
+                "response_time": 12,
+                "date": 12,
+                "age": 0,
+                "etag": "r1",
+                "body": "Revision 1"
+              }
+            },
+            {
+              "path": "/workshop-bulletin",
+              "request_time": 25,
+              "request_control": "",
+              "origin": null
+            },
+            {
+              "path": "/workshop-bulletin",
+              "request_time": 35,
+              "request_control": "",
+              "origin": {
+                "response_time": 35,
+                "date": 35,
+                "age": 0,
+                "etag": "r2",
+                "body": "Revision 2"
+              }
+            }
+          ],
+          "expected": [
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r1",
+                "body": "Revision 1"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Cached"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r1",
+                "body": "Revision 1"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Unavailable"
+              ],
+              "body": {
+                "kind": "Unavailable"
+              },
+              "storage": "Any"
+            },
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r2",
+                "body": "Revision 2"
+              },
+              "storage": "Required"
+            }
+          ]
+        },
+        {
+          "id": "validation",
+          "label": "Validate once, then reuse renewed metadata",
+          "steps": [
+            {
+              "path": "/workshop-bulletin",
+              "request_time": 5,
+              "request_control": "",
+              "origin": {
+                "response_time": 5,
+                "date": 5,
+                "age": 0,
+                "etag": "r1",
+                "body": "Revision 1"
+              }
+            },
+            {
+              "path": "/workshop-bulletin",
+              "request_time": 35,
+              "request_control": "",
+              "origin": {
+                "response_time": 35,
+                "date": 35,
+                "age": 0,
+                "etag": "r1",
+                "body": "Revision 1"
+              }
+            },
+            {
+              "path": "/workshop-bulletin",
+              "request_time": 42,
+              "request_control": "",
+              "origin": {
+                "response_time": 42,
+                "date": 42,
+                "age": 0,
+                "etag": "r2",
+                "body": "Revision 2"
+              }
+            },
+            {
+              "path": "/workshop-bulletin",
+              "request_time": 65,
+              "request_control": "",
+              "origin": {
+                "response_time": 65,
+                "date": 65,
+                "age": 0,
+                "etag": "r2",
+                "body": "Revision 2"
+              }
+            }
+          ],
+          "expected": [
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r1",
+                "body": "Revision 1"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Validated"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r1",
+                "body": "Revision 1"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Cached"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r1",
+                "body": "Revision 1"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r2",
+                "body": "Revision 2"
+              },
+              "storage": "Required"
+            }
+          ]
+        },
+        {
+          "id": "request-validation",
+          "label": "A request asks for an origin check",
+          "steps": [
+            {
+              "path": "/workshop-bulletin",
+              "request_time": 5,
+              "request_control": "",
+              "origin": {
+                "response_time": 5,
+                "date": 5,
+                "age": 0,
+                "etag": "r1",
+                "body": "Revision 1"
+              }
+            },
+            {
+              "path": "/workshop-bulletin",
+              "request_time": 7,
+              "request_control": "no-cache",
+              "origin": {
+                "response_time": 7,
+                "date": 7,
+                "age": 0,
+                "etag": "r2",
+                "body": "Revision 2"
+              }
+            },
+            {
+              "path": "/workshop-bulletin",
+              "request_time": 10,
+              "request_control": "",
+              "origin": {
+                "response_time": 10,
+                "date": 10,
+                "age": 0,
+                "etag": "r2",
+                "body": "Revision 2"
+              }
+            }
+          ],
+          "expected": [
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r1",
+                "body": "Revision 1"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Downloaded"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r2",
+                "body": "Revision 2"
+              },
+              "storage": "Required"
+            },
+            {
+              "delivery": [
+                "Cached"
+              ],
+              "body": {
+                "kind": "Version",
+                "etag": "r2",
+                "body": "Revision 2"
+              },
+              "storage": "Required"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

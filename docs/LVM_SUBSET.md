@@ -1,3 +1,35 @@
+Current opt-in configuration lessons additionally use the separately bounded
+[device-selection profile](LVM_CONFIG_SCAN_SUBSET.md). It reads supplied metadata;
+it does not add lvmconfig/lvmdevices or mutate storage through this command subset.
+General LVM configuration and mounted-filesystem integration remain incomplete.
+
+Source-enabled recognized PV capacity is documented separately in [LVM_PV_CAPACITY_SUBSET.md](LVM_PV_CAPACITY_SUBSET.md); old profiles retain the bounds below.
+
+Source-enabled existing-object names are documented separately in [LVM_RENAME_SUBSET.md](LVM_RENAME_SUBSET.md); old profiles retain the bounds below.
+
+## Source-enabled availability extension
+
+Only the new availability lessons add per-LV active states, supplied open-consumer
+facts and named-group vgchange y/n. Old growth/Linear/Lifecycle worlds with absent
+fields retain their original behavior. See [precise subset](LVM_ACTIVATION_SUBSET.md)
+and [two authored tasks](LVM_ACTIVATION_LESSONS.md). This is not real kernel,
+mount/boot policy or process discovery; no host LVM/device operation runs.
+
+## Source-enabled raw retirement extension
+
+The separate optional Lifecycle profile adds empty-group removal and unowned-PV
+label clearing after raw-LV retirement. Existing growth-only and Linear profiles
+retain their old behavior. See [precise boundary](LVM_RETIREMENT_SUBSET.md) and
+[authored lessons](LVM_RETIREMENT_LESSONS.md). No host device or LVM process runs.
+
+# Current extension boundary
+
+The original absent-profile growth subset below stays unchanged for all existing
+lessons/progress. Source315 adds a separately source-enabled raw provisioning
+profile: see [linear provisioning](LVM_PROVISIONING_SUBSET.md). New VG/LV creation
+and raw-only removal do not imply snapshots, formatting, mounts, activation or
+full LVM behavior. Earlier growth proof below is not new-profile acceptance.
+
 # Virtual LVM growth foundation
 
 Foundation implemented and checked2026-10-29. No authored scenario, native workspace or
@@ -139,3 +171,11 @@ fifteen outcome assertions remain. All-target Clippy passes with warnings
 denied. These checks do not run real LVM and do not establish a lesson, native
 workspace, full-suite milestone or real-device equivalence. Authored teaching
 and learner interaction remain subsequent work.
+
+## Separate application-reference lessons
+
+The new opt-in application-reference workspace resolves bounded canonical/current
+simple mapper names through virtual readers and preserves separate saved config
+and drafts. It does not expand the terminal into dmsetup, mounts or host access.
+See [reference model](LVM_DEVICE_PATH_MODEL.md) and [lessons](LVM_REFERENCE_LESSONS.md).
+Existing source profiles, commands and old wire remain unchanged.

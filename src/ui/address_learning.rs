@@ -72,73 +72,124 @@ impl LabApp {
         }
         match view {
             teaching::View::Introduction => {
+                if s.id == "ccna-ipv4" {
+                    self.ipv4_readable_introduction(ui, i);
+                    return;
+                }
                 ui.heading(&s.title);
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for concept in &lesson.concepts {
-                    ui.label(RichText::new(&concept.title).strong());
-                    ui.label(&concept.text);
-                }
-                if let engine::State::Subnet { ip, prefix, .. } = lesson.fixture {
-                    self.metrics.address_diagram = Some(block_visual(ui, ip, prefix));
+                let concepts = |ui: &mut egui::Ui| {
+                    if ccna_presentation::enabled(&s) {
+                        ccna_presentation::concepts(
+                            ui,
+                            &s,
+                            &lesson.prerequisite_note,
+                            lesson
+                                .concepts
+                                .iter()
+                                .map(|c| (c.title.clone(), c.text.clone())),
+                        );
+                    } else {
+                        ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
+                        for concept in &lesson.concepts {
+                            ui.label(RichText::new(&concept.title).strong());
+                            ui.label(&concept.text);
+                        }
+                    }
+                };
+                if ccna_presentation::enabled(&s) && ui.available_width() >= 920. {
+                    ui.columns(2, |columns| {
+                        concepts(&mut columns[0]);
+                        self.address_intro_example(&mut columns[1], i);
+                    });
                 } else {
-                    egui::Grid::new("capacity-example")
-                        .spacing([20., 6.])
-                        .show(ui, |ui| {
-                            for text in ["Prefix", "All addresses", "Usable hosts"] {
-                                ui.label(RichText::new(text).strong());
-                            }
-                            ui.end_row();
-                            for (p, total, usable) in [(29, 8, 6), (28, 16, 14), (27, 32, 30)] {
-                                ui.label(format!("/{p}"));
-                                ui.label(total.to_string());
-                                ui.label(usable.to_string());
-                                ui.end_row();
-                            }
-                        });
+                    concepts(ui);
+                    self.address_intro_example(ui, i);
                 }
-                ui.label(RichText::new("A different example to try").strong());
-                ui.label(&lesson.example_description);
-                ui.horizontal_wrapped(|ui| {
-                    let r = ui.add(primary(ui, "Try this example"));
-                    self.metrics.example_action = Some(r.rect);
-                    if r.clicked() {
-                        self.set_address_view(i, teaching::View::Example);
-                    }
-                    let r = ui.add(button("Go straight to assignment"));
-                    self.metrics.assignment_action = Some(r.rect);
-                    if r.clicked() {
-                        self.set_address_view(i, teaching::View::Assignment);
-                    }
-                });
             }
             teaching::View::Example => {
-                ui.push_id(("address-example", &s.id), |ui| {
-                    self.address_example_workspace(ui, i)
-                });
+                let width = ui.available_width();
+                if ccna_presentation::enabled(&s) && width >= 920. {
+                    ui.horizontal_top(|ui| {
+                        ui.allocate_ui_with_layout(
+                            egui::vec2(300., 0.),
+                            egui::Layout::top_down(egui::Align::Min),
+                            |ui| {
+                                ui.set_width(300.);
+                                self.address_practice_actions(ui, i, false);
+                            },
+                        );
+                        ui.allocate_ui_with_layout(
+                            egui::vec2(width - 312., 0.),
+                            egui::Layout::top_down(egui::Align::Min),
+                            |ui| {
+                                ui.set_width(width - 312.);
+                                ui.strong("Practice workspace");
+                                ui.push_id(("address-example", &s.id), |ui| {
+                                    self.address_example_workspace(ui, i)
+                                });
+                            },
+                        );
+                    });
+                } else {
+                    self.address_practice_actions(ui, i, true);
+                    ui.push_id(("address-example", &s.id), |ui| {
+                        self.address_example_workspace(ui, i)
+                    });
+                }
             }
             teaching::View::Assignment => {
                 if matches!(s.initial, engine::State::Subnet { .. }) {
                     self.ipv4_assignment(ui, i);
                 } else {
                     ui.heading(&s.title);
-                    ui.label(&s.objective);
+                    ccna_presentation::assignment(ui, &s);
                     self.allocations(ui, i);
                     self.check_terminal_work(ui, i);
                 }
             }
         }
     }
+    fn address_intro_example(&mut self, ui: &mut egui::Ui, i: usize) {
+        let s = self.scenarios[i].clone();
+        let lesson = s.address_teaching.as_ref().unwrap();
+        if let engine::State::Subnet { ip, prefix, .. } = lesson.fixture {
+            self.metrics.address_diagram = Some(block_visual(ui, ip, prefix));
+        } else {
+            egui::Grid::new("capacity-example")
+                .spacing([20., 6.])
+                .show(ui, |ui| {
+                    for text in ["Prefix", "All addresses", "Usable hosts"] {
+                        ui.label(RichText::new(text).strong());
+                    }
+                    ui.end_row();
+                    for (p, total, usable) in [(29, 8, 6), (28, 16, 14), (27, 32, 30)] {
+                        ui.label(format!("/{p}"));
+                        ui.label(total.to_string());
+                        ui.label(usable.to_string());
+                        ui.end_row();
+                    }
+                });
+        }
+        lesson_presentation::worked(ui, &lesson.example_description);
+        lesson_presentation::worked_rows(ui, &s);
+        ui.horizontal_wrapped(|ui| {
+            let r = ui.add(primary(ui, "Try this example"));
+            self.metrics.example_action = Some(r.rect);
+            if r.clicked() {
+                self.set_address_view(i, teaching::View::Example);
+            }
+            let r = ui.add(button("Go straight to assignment"));
+            self.metrics.assignment_action = Some(r.rect);
+            if r.clicked() {
+                self.set_address_view(i, teaching::View::Assignment);
+            }
+        });
+    }
     fn address_example_workspace(&mut self, ui: &mut egui::Ui, i: usize) {
         let s = self.scenarios[i].clone();
         let lesson = s.address_teaching.as_ref().unwrap();
 
-        ui.label(
-            RichText::new(
-                "Practice example · No assignment credit; your original work stays saved.",
-            )
-            .color(palette(ui).accent),
-        );
-        if matches!(lesson.fixture, engine::State::Vlsm { .. }) {
+        if matches!(lesson.fixture, engine::State::Vlsm { .. }) && !ccna_presentation::enabled(&s) {
             ui.label(&lesson.example_description);
         }
         let mut reload = false;
@@ -186,7 +237,18 @@ impl LabApp {
             }
         });
         if let Some(explanation) = self.address_worked.get(&s.id) {
-            ui.label(explanation);
+            if let engine::State::Subnet { prefix, .. } = lesson.fixture {
+                ccna_presentation::prose(
+                    ui,
+                    &format!(
+                        "Worked example: ungraded values filled. /{prefix} leaves {} host bits, giving {} addresses.",
+                        32 - prefix,
+                        1u64 << (32 - prefix)
+                    ),
+                );
+            } else {
+                ui.label(explanation);
+            }
         }
         if reload {
             self.load_address_example(i);
@@ -233,7 +295,7 @@ impl LabApp {
             if l.solved() {
                 ui.colored_label(
                     palette(ui).success,
-                    "Example verified · All allocations fit; no assignment credit.",
+                    "Example verified · All allocations fit.",
                 );
             }
             if checked
@@ -249,7 +311,9 @@ impl LabApp {
         }
         self.dirty |= before != *l;
         // An example never sets completion or assignment-check metadata.
-        ui.label(format!("Try a change: {}", lesson.try_change));
+        if !ccna_presentation::enabled(&s) {
+            ui.label(format!("Try a change: {}", lesson.try_change));
+        }
         let r = ui.add(button("Open full assignment"));
         self.metrics.assignment_action = Some(r.rect);
         if r.clicked() {

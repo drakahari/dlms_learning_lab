@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "source": "field() {\n    printf '%s\\n' \"$1\" | cut -d , -f \"$2\"\n}\nbefore=$(cat before.csv)\nafter=$(cat after.csv)\nfirst_boot=$(field \"$before\" 1)\nfirst_name=$(field \"$before\" 2)\nfirst_time=$(field \"$before\" 3)\nfirst_rx=$(field \"$before\" 4)\nfirst_tx=$(field \"$before\" 5)\nlast_boot=$(field \"$after\" 1)\nlast_name=$(field \"$after\" 2)\nlast_time=$(field \"$after\" 3)\nlast_rx=$(field \"$after\" 4)\nlast_tx=$(field \"$after\" 5)\nif test \"$first_boot\" != \"$last_boot\" || test \"$first_name\" != \"$last_name\"; then\n    printf 'Different source\\n' >&2\n    exit 2\nfi\nelapsed=$((last_time - first_time))\nif test \"$elapsed\" -le 0; then\n    printf 'Invalid interval\\n' >&2\n    exit 2\nfi\nif test \"$last_rx\" -lt \"$first_rx\" || test \"$last_tx\" -lt \"$first_tx\"; then\n    printf 'Counter reset\\n' >&2\n    exit 2\nfi\nrx=$(((last_rx - first_rx) * 1000 / elapsed))\ntx=$(((last_tx - first_tx) * 1000 / elapsed))\nprintf '%s rx=%s B/s tx=%s B/s\\n' \"$last_name\" \"$rx\" \"$tx\"\n",
+  "alternate": "field() {\n    printf '%s\\n' \"$1\" | cut -d , -f \"$2\"\n}\nbefore=$(cat before.csv)\nafter=$(cat after.csv)\nfirst_boot=$(field \"$before\" 1)\nfirst_name=$(field \"$before\" 2)\nfirst_time=$(field \"$before\" 3)\nfirst_rx=$(field \"$before\" 4)\nfirst_tx=$(field \"$before\" 5)\nlast_boot=$(field \"$after\" 1)\nlast_name=$(field \"$after\" 2)\nlast_time=$(field \"$after\" 3)\nlast_rx=$(field \"$after\" 4)\nlast_tx=$(field \"$after\" 5)\nif test \"$first_boot\" != \"$last_boot\" || test \"$first_name\" != \"$last_name\"; then\n    printf 'Different source\\n' >&2\n    exit 2\nfi\nelapsed=$((last_time - first_time))\nif test \"$elapsed\" -le 0; then\n    printf 'Invalid interval\\n' >&2\n    exit 2\nfi\nif test \"$last_rx\" -lt \"$first_rx\" || test \"$last_tx\" -lt \"$first_tx\"; then\n    printf 'Counter reset\\n' >&2\n    exit 2\nfi\nrx_change=$((last_rx-first_rx))\ntx_change=$((last_tx-first_tx))\nbytes_per_second() { printf '%s\\n' \"$(( $1 * 1000 / $2 ))\"; }\nrx=$(bytes_per_second \"$rx_change\" \"$elapsed\")\ntx=$(bytes_per_second \"$tx_change\" \"$elapsed\")\nprintf '%s rx=%s B/s tx=%s B/s\\n' \"$last_name\" \"$rx\" \"$tx\"\n",
+  "cases": [
+    {
+      "name": "Two-second interval",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "boot-a,eth0,3000,14000,21000\n",
+        "/work/keep.txt": "Retain supplied note: Two-second interval.\n"
+      },
+      "stdout": "eth0 rx=2000 B/s tx=500 B/s\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "boot-a,eth0,3000,14000,21000\n",
+        "/work/keep.txt": "Retain supplied note: Two-second interval.\n"
+      }
+    },
+    {
+      "name": "Half-second interval",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "boot-b,lan2,100,500,800\n",
+        "/work/after.csv": "boot-b,lan2,600,1750,1050\n",
+        "/work/keep.txt": "Retain supplied note: Half-second interval.\n"
+      },
+      "stdout": "lan2 rx=2500 B/s tx=500 B/s\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "boot-b,lan2,100,500,800\n",
+        "/work/after.csv": "boot-b,lan2,600,1750,1050\n",
+        "/work/keep.txt": "Retain supplied note: Half-second interval.\n"
+      }
+    },
+    {
+      "name": "Fractional rates round down",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "boot-c,eth7,0,300,100\n",
+        "/work/after.csv": "boot-c,eth7,333,1300,200\n",
+        "/work/keep.txt": "Retain supplied note: Fractional rates round down.\n"
+      },
+      "stdout": "eth7 rx=3003 B/s tx=300 B/s\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "boot-c,eth7,0,300,100\n",
+        "/work/after.csv": "boot-c,eth7,333,1300,200\n",
+        "/work/keep.txt": "Retain supplied note: Fractional rates round down.\n"
+      }
+    },
+    {
+      "name": "No traffic is a measured zero",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "idle,lan0,100,450,650\n",
+        "/work/after.csv": "idle,lan0,2100,450,650\n",
+        "/work/keep.txt": "Retain supplied note: No traffic is a measured zero.\n"
+      },
+      "stdout": "lan0 rx=0 B/s tx=0 B/s\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "idle,lan0,100,450,650\n",
+        "/work/after.csv": "idle,lan0,2100,450,650\n",
+        "/work/keep.txt": "Retain supplied note: No traffic is a measured zero.\n"
+      }
+    },
+    {
+      "name": "Longer interval uses its elapsed time",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "long,uplink,0,0,0\n",
+        "/work/after.csv": "long,uplink,25000,999999,150000\n",
+        "/work/keep.txt": "Retain supplied note: Longer interval uses its elapsed time.\n"
+      },
+      "stdout": "uplink rx=39999 B/s tx=6000 B/s\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "long,uplink,0,0,0\n",
+        "/work/after.csv": "long,uplink,25000,999999,150000\n",
+        "/work/keep.txt": "Retain supplied note: Longer interval uses its elapsed time.\n"
+      }
+    },
+    {
+      "name": "Read the supplied interface label",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "other,wan1,3000,2500,1000\n",
+        "/work/after.csv": "other,wan1,5000,7000,1500\n",
+        "/work/keep.txt": "Retain supplied note: Read the supplied interface label.\n"
+      },
+      "stdout": "wan1 rx=2250 B/s tx=250 B/s\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "other,wan1,3000,2500,1000\n",
+        "/work/after.csv": "other,wan1,5000,7000,1500\n",
+        "/work/keep.txt": "Retain supplied note: Read the supplied interface label.\n"
+      }
+    },
+    {
+      "name": "Repeated timestamp is rejected",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "boot-a,eth0,1000,14000,21000\n",
+        "/work/keep.txt": "Retain supplied note: Repeated timestamp is rejected.\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid interval\n",
+      "status": 2,
+      "after": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "boot-a,eth0,1000,14000,21000\n",
+        "/work/keep.txt": "Retain supplied note: Repeated timestamp is rejected.\n"
+      }
+    },
+    {
+      "name": "Received counter reset is rejected",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "boot-a,eth0,3000,500,21000\n",
+        "/work/keep.txt": "Retain supplied note: Received counter reset is rejected.\n"
+      },
+      "stdout": "",
+      "stderr": "Counter reset\n",
+      "status": 2,
+      "after": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "boot-a,eth0,3000,500,21000\n",
+        "/work/keep.txt": "Retain supplied note: Received counter reset is rejected.\n"
+      }
+    },
+    {
+      "name": "Transmitted counter reset is rejected",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "boot-a,eth0,3000,14000,100\n",
+        "/work/keep.txt": "Retain supplied note: Transmitted counter reset is rejected.\n"
+      },
+      "stdout": "",
+      "stderr": "Counter reset\n",
+      "status": 2,
+      "after": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "boot-a,eth0,3000,14000,100\n",
+        "/work/keep.txt": "Retain supplied note: Transmitted counter reset is rejected.\n"
+      }
+    },
+    {
+      "name": "Different boots cannot be subtracted",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "new-boot,eth0,3000,14000,21000\n",
+        "/work/keep.txt": "Retain supplied note: Different boots cannot be subtracted.\n"
+      },
+      "stdout": "",
+      "stderr": "Different source\n",
+      "status": 2,
+      "after": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "new-boot,eth0,3000,14000,21000\n",
+        "/work/keep.txt": "Retain supplied note: Different boots cannot be subtracted.\n"
+      }
+    },
+    {
+      "name": "Different interfaces cannot be paired",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "boot-a,eth1,3000,14000,21000\n",
+        "/work/keep.txt": "Retain supplied note: Different interfaces cannot be paired.\n"
+      },
+      "stdout": "",
+      "stderr": "Different source\n",
+      "status": 2,
+      "after": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "boot-a,eth1,3000,14000,21000\n",
+        "/work/keep.txt": "Retain supplied note: Different interfaces cannot be paired.\n"
+      }
+    },
+    {
+      "name": "Reversed time is rejected",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "boot-a,eth0,500,14000,21000\n",
+        "/work/keep.txt": "Retain supplied note: Reversed time is rejected.\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid interval\n",
+      "status": 2,
+      "after": {
+        "/work/before.csv": "boot-a,eth0,1000,10000,20000\n",
+        "/work/after.csv": "boot-a,eth0,500,14000,21000\n",
+        "/work/keep.txt": "Retain supplied note: Reversed time is rejected.\n"
+      }
+    }
+  ],
+  "example_source": "field() {\n    printf '%s\\n' \"$1\" | cut -d , -f \"$2\"\n}\nbefore=$(cat sample-before.csv)\nafter=$(cat sample-after.csv)\nfirst_boot=$(field \"$before\" 1)\nfirst_name=$(field \"$before\" 2)\nfirst_time=$(field \"$before\" 3)\nfirst_rx=$(field \"$before\" 4)\nfirst_tx=$(field \"$before\" 5)\nlast_boot=$(field \"$after\" 1)\nlast_name=$(field \"$after\" 2)\nlast_time=$(field \"$after\" 3)\nlast_rx=$(field \"$after\" 4)\nlast_tx=$(field \"$after\" 5)\nif test \"$first_boot\" != \"$last_boot\" || test \"$first_name\" != \"$last_name\"; then\n    printf 'Different source\\n' >&2\n    exit 2\nfi\nelapsed=$((last_time - first_time))\nif test \"$elapsed\" -le 0; then\n    printf 'Invalid interval\\n' >&2\n    exit 2\nfi\nif test \"$last_rx\" -lt \"$first_rx\" || test \"$last_tx\" -lt \"$first_tx\"; then\n    printf 'Counter reset\\n' >&2\n    exit 2\nfi\nrx=$(((last_rx - first_rx) * 1000 / elapsed))\ntx=$(((last_tx - first_tx) * 1000 / elapsed))\nprintf '%s rx=%s B/s tx=%s B/s\\n' \"$last_name\" \"$rx\" \"$tx\"\n",
+  "example_case": {
+    "name": "Worked rate example",
+    "args": [],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/sample-before.csv": "practice,lab0,500,600,300\n",
+      "/work/sample-after.csv": "practice,lab0,3000,3600,1800\n",
+      "/work/keep.txt": "Retain supplied note: Worked rate example.\n"
+    },
+    "stdout": "lab0 rx=1200 B/s tx=600 B/s\n",
+    "stderr": "",
+    "status": 0,
+    "after": {
+      "/work/sample-before.csv": "practice,lab0,500,600,300\n",
+      "/work/sample-after.csv": "practice,lab0,3000,3600,1800\n",
+      "/work/keep.txt": "Retain supplied note: Worked rate example.\n"
+    }
+  }
+}

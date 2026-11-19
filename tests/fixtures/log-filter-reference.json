@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "literal-and-classes",
+      "filter": "[Definition]\nfailregex = ^portal rejected user=[a-z]+ from <HOST> port [0-9]+$\n",
+      "lines": [
+        "portal rejected user=alex from 192.0.2.9 port 53142",
+        "portal accepted user=mira from 203.0.113.5 port 122",
+        "portal rejected user=probe from 198.51.100.11 port 9000",
+        "ordinary notice"
+      ]
+    },
+    {
+      "id": "equivalent-repetition",
+      "filter": "[Definition]\nfailregex = ^portal (rejected) user=[a-z][a-z]* from <HOST> port [0-9][0-9]*$\n",
+      "lines": [
+        "portal rejected user=alex from 192.0.2.9 port 53142",
+        "portal accepted user=mira from 203.0.113.5 port 122",
+        "portal rejected user=probe from 198.51.100.11 port 9000",
+        "ordinary notice"
+      ]
+    },
+    {
+      "id": "overbroad-events",
+      "filter": "[Definition]\nfailregex = ^portal .* from <HOST> port [0-9]+$\n",
+      "lines": [
+        "portal rejected user=alex from 192.0.2.9 port 53142",
+        "portal accepted user=mira from 203.0.113.5 port 122",
+        "portal rejected user=probe from 198.51.100.11 port 9000",
+        "ordinary notice"
+      ]
+    },
+    {
+      "id": "explicit-exception",
+      "filter": "[Definition]\nfailregex = ^portal rejected user=[a-z]+ from <HOST> port [0-9]+$\nignoreregex = ^portal rejected user=probe \n",
+      "lines": [
+        "portal rejected user=alex from 192.0.2.9 port 53142",
+        "portal accepted user=mira from 203.0.113.5 port 122",
+        "portal rejected user=probe from 198.51.100.11 port 9000",
+        "ordinary notice"
+      ]
+    },
+    {
+      "id": "overbroad-exception",
+      "filter": "[Definition]\nfailregex = ^portal rejected user=[a-z]+ from <HOST> port [0-9]+$\nignoreregex = ^.*$\n",
+      "lines": [
+        "portal rejected user=alex from 192.0.2.9 port 53142",
+        "portal accepted user=mira from 203.0.113.5 port 122",
+        "portal rejected user=probe from 198.51.100.11 port 9000",
+        "ordinary notice"
+      ]
+    },
+    {
+      "id": "empty-exception",
+      "filter": "[Definition]\nfailregex = ^portal rejected user=[a-z]+ from <HOST> port [0-9]+$\nignoreregex = \n",
+      "lines": [
+        "portal rejected user=alex from 192.0.2.9 port 53142",
+        "portal accepted user=mira from 203.0.113.5 port 122",
+        "portal rejected user=probe from 198.51.100.11 port 9000",
+        "ordinary notice"
+      ]
+    },
+    {
+      "id": "event-alternative",
+      "filter": "[Definition]\nfailregex = ^portal (rejected|denied) user=[a-z]+ from <HOST> port [0-9]+$\n",
+      "lines": [
+        "portal rejected user=alex from 192.0.2.9 port 53142",
+        "portal denied user=alex from 192.0.2.9 port 53142",
+        "portal accepted user=mira from 203.0.113.5 port 122",
+        "ordinary notice"
+      ]
+    },
+    {
+      "id": "mixed-usernames",
+      "filter": "[Definition]\nfailregex = ^portal rejected user=[A-Za-z0-9_-]+ from <HOST> port [0-9]+$\n",
+      "lines": [
+        "portal rejected user=Ops_1 from 192.0.2.9 port 53142",
+        "portal rejected user=web-team from 192.0.2.9 port 53142",
+        "portal accepted user=mira from 203.0.113.5 port 122",
+        "ordinary notice"
+      ]
+    },
+    {
+      "id": "bounded-repetition",
+      "filter": "[Definition]\nfailregex = ^portal rejected user=[a-z]{1,12} from <HOST> port [0-9]{1,5}$\n",
+      "lines": [
+        "portal rejected user=alex from 192.0.2.9 port 53142",
+        "portal accepted user=mira from 203.0.113.5 port 122",
+        "portal rejected user=probe from 198.51.100.11 port 9000",
+        "ordinary notice"
+      ]
+    },
+    {
+      "id": "no-ending-anchor",
+      "filter": "[Definition]\nfailregex = ^portal rejected user=[a-z]+ from <HOST> \n",
+      "lines": [
+        "portal rejected user=alex from 192.0.2.9 port 53142",
+        "portal accepted user=mira from 203.0.113.5 port 122",
+        "portal rejected user=probe from 198.51.100.11 port 9000",
+        "ordinary notice"
+      ]
+    },
+    {
+      "id": "literal-punctuation",
+      "filter": "[Definition]\nfailregex = ^portal \\[denied\\] user=[a-z]+ from <HOST> port [0-9]+$\n",
+      "lines": [
+        "portal [denied] user=alex from 192.0.2.9 port 53142",
+        "portal accepted user=mira from 203.0.113.5 port 122",
+        "portal [denied] user=probe from 198.51.100.11 port 9000",
+        "ordinary notice"
+      ]
+    },
+    {
+      "id": "optional-non-address-field",
+      "filter": "[Definition]\nfailregex = ^portal rejected user=[a-z]+( tag=[a-z]+)? from <HOST> port [0-9]+$\n",
+      "lines": [
+        "portal rejected user=alex from 192.0.2.9 port 53142",
+        "portal rejected user=alex tag=ops from 192.0.2.9 port 53142",
+        "portal accepted user=mira from 203.0.113.5 port 122",
+        "ordinary notice"
+      ]
+    }
+  ]
+}

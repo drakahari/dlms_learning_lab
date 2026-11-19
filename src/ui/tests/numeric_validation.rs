@@ -51,7 +51,7 @@ fn tick_with_output(
     let mut provider = ctx
         .data(|d| d.get_temp::<WindowProvider>(provider_key))
         .unwrap_or_default();
-    let (width, height) = if (105..=176).contains(&phase) {
+    let (width, height) = if (105..=180).contains(&phase) {
         if provider.fullscreen {
             (1920., 1080.)
         } else {
@@ -78,8 +78,18 @@ fn tick_with_output(
         .get_mut(&egui::ViewportId::ROOT)
         .unwrap()
         .fullscreen = Some(provider.fullscreen);
+    let mut assignment_layout = None;
     let output = ctx.run(input, |ctx| {
         a.render(ctx);
+        if let Some(i) = a.selected
+            && let Some(viewport) = a.metrics.main_viewport
+        {
+            assignment_layout = lesson_presentation::paint::collect(
+                ctx,
+                &a.scenarios[i],
+                viewport.intersect(ctx.content_rect()),
+            );
+        }
         a.save();
         let (advance, capture) = a.numeric_validation_lessons_native(ctx, a.smoke_stage);
         if advance {
@@ -96,59 +106,27 @@ fn tick_with_output(
         }
     }
     ctx.data_mut(|d| d.insert_temp(provider_key, provider));
-    if shot
-        .as_deref()
-        .is_some_and(|name| name.contains("-goal200-") && name.ends_with("-bottom"))
-    {
-        // Inspect the actual captured frame, independently of the controller's
-        // row-union cache. The old narrow endpoint passed clip containment but
-        // left the final line behind a floating horizontal scrollbar.
-        let objective = &a.scenarios[a.selected.unwrap()].objective;
-        let viewport = a
-            .metrics
-            .main_viewport
-            .unwrap()
-            .intersect(ctx.content_rect());
-        fn rows(shape: &egui::Shape, objective: &str) -> Option<Vec<egui::Rect>> {
-            match shape {
-                egui::Shape::Text(text) if text.galley.text() == objective => Some(
-                    text.galley
-                        .rows
-                        .iter()
-                        .filter(|row| !row.text().trim().is_empty())
-                        .map(|row| row.rect().translate(text.pos.to_vec2()))
-                        .collect(),
-                ),
-                egui::Shape::Vec(shapes) => shapes.iter().find_map(|s| rows(s, objective)),
-                _ => None,
-            }
-        }
-        let (actual_rows, clip) = output
-            .shapes
-            .iter()
-            .find_map(|shape| {
-                rows(&shape.shape, objective)
-                    .map(|rows| (rows, shape.clip_rect.intersect(viewport)))
-            })
-            .expect("The actual bottom capture must paint its task galley");
-        let tolerance = 1. / ctx.pixels_per_point();
-        let fully_visible = actual_rows
-            .iter()
-            .all(|row| clip.expand(tolerance).contains_rect(*row));
-        let last = *actual_rows.last().unwrap();
-        assert!(clip.expand(tolerance).contains_rect(last));
-        assert!(
-            last.bottom() + last.height() <= clip.bottom() + tolerance,
-            "The actual final row needs a full painted text-row clearance above edge scrollbars"
+    if let Some(name) = shot.as_deref().filter(|name| name.contains("-goal200-")) {
+        let source = &a.scenarios[a.selected.unwrap()];
+        let rows = assignment_layout
+            .as_ref()
+            .expect("Actual capture retains current-pass complete task label layouts");
+        let actual = if name.ends_with("-bottom") {
+            lesson_presentation::paint::assert_output_edge(ctx, source, rows, &output, true, true)
+        } else if name.ends_with("-top") {
+            lesson_presentation::paint::assert_output_edge(ctx, source, rows, &output, false, false)
+        } else {
+            lesson_presentation::paint::output_evidence(ctx, source, rows, &output)
+        };
+        let proof = lesson_presentation::paint::observe(
+            ctx,
+            lesson_presentation::paint::output_proof_key(ctx, source),
+            &actual,
         );
-        if !fully_visible {
+        if name.ends_with("-bottom") {
             assert!(
-                (last.center().y - clip.center().y).abs() <= tolerance,
-                "The long-task final row must be centered, not merely inside its clip edge"
-            );
-            assert!(
-                last.height() * 2. < clip.height(),
-                "The final row needs observed clearance from edge scrollbar overpaint"
+                proof.complete(),
+                "Every separate goal/requirement row must actually paint within the bounded captured-slice union"
             );
         }
     }
@@ -390,7 +368,7 @@ fn full_actual_flow_warm_raw_receipts_continue_reset_and_asynchronous_finish_hol
     assert_eq!(shots.iter().filter(|s| s.contains("-layout-")).count(), 20);
     assert_eq!(
         shots.len(),
-        101,
+        105,
         "All declared capture-phase actions must actually execute"
     );
     assert_eq!(
@@ -398,19 +376,19 @@ fn full_actual_flow_warm_raw_receipts_continue_reset_and_asynchronous_finish_hol
             .iter()
             .collect::<std::collections::BTreeSet<_>>()
             .len(),
-        101
+        105
     );
     assert!(shots.len() <= 128);
     let goals = shots
         .iter()
         .filter(|s| s.contains("-goal200-"))
         .collect::<Vec<_>>();
-    assert_eq!(goals.len(), 12);
+    assert_eq!(goals.len(), 16);
     let provider = ctx
         .data(|d| d.get_temp::<WindowProvider>(egui::Id::new("numeric-observed-window-provider")))
         .unwrap();
     for setting in 0usize..4 {
-        let stage = BASE + 2 * STRIDE + 165 + 3 * setting;
+        let stage = BASE + 2 * STRIDE + 165 + 4 * setting;
         assert_eq!(
             provider
                 .requests
@@ -425,7 +403,7 @@ fn full_actual_flow_warm_raw_receipts_continue_reset_and_asynchronous_finish_hol
 
     for theme in ["light", "dark"] {
         for width in ["wide", "narrow"] {
-            for slice in ["top", "middle", "bottom"] {
+            for slice in ["top", "middle-one", "middle-two", "bottom"] {
                 assert!(
                     goals
                         .iter()
@@ -580,47 +558,6 @@ fn numeric_validation_immediate_stop_and_capture_budgets_are_scoped() {
 
 #[test]
 fn capstone_essential_assignment_rows_remain_reachable_with_real_bounded_scrolling_at200() {
-    fn visible_rows(
-        shape: &egui::Shape,
-        clip: egui::Rect,
-        task: &str,
-        seen: &mut std::collections::BTreeSet<usize>,
-        total: &mut Option<usize>,
-    ) {
-        match shape {
-            egui::Shape::Text(text) if text.galley.text() == task => {
-                let rows = text
-                    .galley
-                    .rows
-                    .iter()
-                    .filter(|r| !r.text().trim().is_empty())
-                    .count();
-                if let Some(previous) = total {
-                    assert_eq!(*previous, rows);
-                } else {
-                    *total = Some(rows);
-                }
-                for (i, row) in text
-                    .galley
-                    .rows
-                    .iter()
-                    .filter(|r| !r.text().trim().is_empty())
-                    .enumerate()
-                {
-                    let rect = row.rect().translate(text.pos.to_vec2());
-                    if clip.expand(0.5).contains_rect(rect) {
-                        seen.insert(i);
-                    }
-                }
-            }
-            egui::Shape::Vec(shapes) => {
-                for s in shapes {
-                    visible_rows(s, clip, task, seen, total);
-                }
-            }
-            _ => {}
-        }
-    }
     for width in [850., 1280.] {
         for theme_id in ["dlms-light", "dlms-dark"] {
             let (ctx, mut a) = native_app();
@@ -633,9 +570,24 @@ fn capstone_essential_assignment_rows_remain_reachable_with_real_bounded_scrolli
             let id = IDS[2];
             let i = a.selected.unwrap();
             let task = a.scenarios[i].objective.clone();
+            let source = a.scenarios[i].clone();
+            lesson_presentation::paint::request(&ctx, &source);
             let before =
                 serde_json::to_value((&a.progress.attempts, &a.progress.migration_receipts))
                     .unwrap();
+            // Settle the real font/viewport change before counting wrapped rows.
+            for _ in 0..8 {
+                let _ = ctx.run(
+                    egui::RawInput {
+                        screen_rect: Some(egui::Rect::from_min_size(
+                            egui::Pos2::ZERO,
+                            egui::vec2(width / a.scale, 850. / a.scale),
+                        )),
+                        ..Default::default()
+                    },
+                    |ctx| a.render(ctx),
+                );
+            }
             let mut total = None;
             let mut seen = std::collections::BTreeSet::new();
             // Twenty real wheel pulses, with ordinary settling frames. No ScrollArea state writes.
@@ -654,7 +606,8 @@ fn capstone_essential_assignment_rows_remain_reachable_with_real_bounded_scrolli
                             modifiers: Default::default(),
                         });
                     }
-                    let out = ctx.run(
+                    let mut observed = None;
+                    let _ = ctx.run(
                         egui::RawInput {
                             screen_rect: Some(egui::Rect::from_min_size(
                                 egui::Pos2::ZERO,
@@ -663,10 +616,27 @@ fn capstone_essential_assignment_rows_remain_reachable_with_real_bounded_scrolli
                             events,
                             ..Default::default()
                         },
-                        |ctx| a.render(ctx),
+                        |ctx| {
+                            a.render(ctx);
+                            let clip = a
+                                .metrics
+                                .main_viewport
+                                .unwrap()
+                                .intersect(ctx.content_rect());
+                            observed = lesson_presentation::paint::collect(ctx, &source, clip);
+                        },
                     );
-                    for shape in out.shapes {
-                        visible_rows(&shape.shape, shape.clip_rect, &task, &mut seen, &mut total);
+                    if let Some(rows) = observed {
+                        if let Some(previous) = total {
+                            assert_eq!(previous, rows.keys.len());
+                        } else {
+                            total = Some(rows.keys.len());
+                        }
+                        for (key, painted) in rows.keys.iter().zip(&rows.witnessed) {
+                            if *painted {
+                                seen.insert(*key);
+                            }
+                        }
                     }
                 }
                 if total.is_some_and(|n| n == seen.len()) {
@@ -679,6 +649,14 @@ fn capstone_essential_assignment_rows_remain_reachable_with_real_bounded_scrolli
                 "Every essential task row must actually paint inside a clip at200% {width}/{theme_id}"
             );
             assert!(total.is_some_and(|n| n > 0));
+            assert_eq!(
+                seen.iter()
+                    .map(|(piece, _)| *piece)
+                    .collect::<std::collections::BTreeSet<_>>()
+                    .len(),
+                lesson_presentation::assignment_texts(&source).len(),
+                "Every goal/requirement label must contribute actual witnessed glyph rows"
+            );
             assert_eq!(
                 serde_json::to_value((&a.progress.attempts, &a.progress.migration_receipts))
                     .unwrap(),

@@ -1,0 +1,486 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "dev-syslog-policy-workspace",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Syslog policy development fixture",
+      "unit": "",
+      "title": "Syslog native workspace development fixture",
+      "summary": "Private capability fixture, not a registered curriculum lab.",
+      "objective": "Send the supplied warning event to Operations using facility23 (local7), keep debug detail out of the local and remote logs, and retain local warnings.",
+      "retry_guidance": "Inspect the selected event severity, source export facility and collector selector. Apply pending settings before Check configuration. Old accepted log records do not settle the current check.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "steps": [
+        "Inspect the supplied event and policy",
+        "Edit and apply native source or collector settings",
+        "Generate simulated evidence if useful",
+        "Check the whole current configuration"
+      ],
+      "guide": [],
+      "explanation": "Facility23 and a remote threshold4 meet the assignment. A remote threshold7 also works when the collector threshold4 rejects debug. Different correct thresholds and extra unused selectors are accepted when both positive and negative event cases pass.",
+      "hints": [
+        "The LINK label is not the exported RFC facility; inspect both labels.",
+        "A lower numeric threshold admits fewer less-urgent messages. Keep the warning while filtering debug."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc5424.html#section-6.2.1"
+      ],
+      "simplifications": "Private offline capability fixture only. Native policy controls over supplied events and delivery facts; no real IOS CLI, packets, authentication, clock, syslog service or host changes. Current-policy probes grade behavior, not historical receipts.",
+      "initial": {
+        "kind": "Syslog",
+        "simulation": {
+          "version": 1,
+          "current": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.92.0.10": {
+                  "name": "Access switch",
+                  "history_capacity": 8
+                }
+              },
+              "collectors": {
+                "10.92.0.100": {
+                  "name": "Operations",
+                  "history_capacity": 8
+                }
+              },
+              "events": {
+                "port_fault": {
+                  "subsystem": "LINK",
+                  "severity": "warning",
+                  "mnemonic": "CHANGED",
+                  "text": "Supplied interface failure"
+                },
+                "debug_detail": {
+                  "subsystem": "SYS",
+                  "severity": "debug",
+                  "mnemonic": "DETAIL",
+                  "text": "Verbose diagnostic detail"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.92.0.10",
+                  "collector": "10.92.0.100",
+                  "available": true
+                }
+              ]
+            },
+            "devices": {
+              "10.92.0.10": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "debug",
+                "export_facility": 22,
+                "hosts": [
+                  "10.92.0.100"
+                ]
+              }
+            },
+            "collectors": {
+              "10.92.0.100": {
+                "selectors": {
+                  "23": "warning"
+                }
+              }
+            },
+            "local": {
+              "10.92.0.10": []
+            },
+            "remote": {
+              "10.92.0.100": []
+            },
+            "next_sequence": 1
+          },
+          "example": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.93.0.20": {
+                  "name": "Practice switch",
+                  "history_capacity": 8
+                }
+              },
+              "collectors": {
+                "10.93.0.200": {
+                  "name": "Practice collector",
+                  "history_capacity": 8
+                }
+              },
+              "events": {
+                "printer_fault": {
+                  "subsystem": "SYS",
+                  "severity": "error",
+                  "mnemonic": "FAULT",
+                  "text": "Supplied printer fault"
+                },
+                "printer_debug": {
+                  "subsystem": "SYS",
+                  "severity": "debug",
+                  "mnemonic": "DETAIL",
+                  "text": "Verbose diagnostic detail"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.93.0.20",
+                  "collector": "10.93.0.200",
+                  "available": true
+                }
+              ]
+            },
+            "devices": {
+              "10.93.0.20": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "debug",
+                "export_facility": 17,
+                "hosts": [
+                  "10.93.0.200"
+                ]
+              }
+            },
+            "collectors": {
+              "10.93.0.200": {
+                "selectors": {
+                  "20": "warning"
+                }
+              }
+            },
+            "local": {
+              "10.93.0.20": []
+            },
+            "remote": {
+              "10.93.0.200": []
+            },
+            "next_sequence": 1
+          },
+          "editor": {
+            "selected": {
+              "kind": "source",
+              "address": "10.92.0.10"
+            },
+            "event": "port_fault",
+            "sources": {
+              "10.92.0.10": {
+                "enabled": true,
+                "buffer": "warning",
+                "remote": "debug",
+                "facility": 22,
+                "hosts": [
+                  "10.92.0.100"
+                ]
+              }
+            },
+            "collectors": {
+              "10.92.0.100": {
+                "rows": [
+                  {
+                    "facility": 23,
+                    "threshold": "warning"
+                  }
+                ]
+              }
+            }
+          },
+          "example_editor": {
+            "selected": {
+              "kind": "source",
+              "address": "10.93.0.20"
+            },
+            "event": "printer_fault",
+            "sources": {
+              "10.93.0.20": {
+                "enabled": true,
+                "buffer": "warning",
+                "remote": "debug",
+                "facility": 17,
+                "hosts": [
+                  "10.93.0.200"
+                ]
+              }
+            },
+            "collectors": {
+              "10.93.0.200": {
+                "rows": [
+                  {
+                    "facility": 20,
+                    "threshold": "warning"
+                  }
+                ]
+              }
+            }
+          },
+          "view": "introduction",
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Syslog",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "environment": {
+              "devices": {
+                "10.92.0.10": {
+                  "name": "Access switch",
+                  "history_capacity": 8
+                }
+              },
+              "collectors": {
+                "10.92.0.100": {
+                  "name": "Operations",
+                  "history_capacity": 8
+                }
+              },
+              "events": {
+                "port_fault": {
+                  "subsystem": "LINK",
+                  "severity": "warning",
+                  "mnemonic": "CHANGED",
+                  "text": "Supplied interface failure"
+                },
+                "debug_detail": {
+                  "subsystem": "SYS",
+                  "severity": "debug",
+                  "mnemonic": "DETAIL",
+                  "text": "Verbose diagnostic detail"
+                }
+              },
+              "deliveries": [
+                {
+                  "device": "10.92.0.10",
+                  "collector": "10.92.0.100",
+                  "available": true
+                }
+              ]
+            },
+            "devices": {
+              "10.92.0.10": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "debug",
+                "export_facility": 22,
+                "hosts": [
+                  "10.92.0.100"
+                ]
+              }
+            },
+            "collectors": {
+              "10.92.0.100": {
+                "selectors": {
+                  "23": "warning"
+                }
+              }
+            },
+            "local": {
+              "10.92.0.10": []
+            },
+            "remote": {
+              "10.92.0.100": []
+            },
+            "next_sequence": 1
+          },
+          "targets": [
+            {
+              "device": "10.92.0.10",
+              "event": "port_fault",
+              "local": true,
+              "remote": {
+                "10.92.0.100": {
+                  "accept": true,
+                  "facilities": [
+                    23
+                  ]
+                }
+              }
+            },
+            {
+              "device": "10.92.0.10",
+              "event": "debug_detail",
+              "local": false,
+              "remote": {
+                "10.92.0.100": {
+                  "accept": false,
+                  "facilities": []
+                }
+              }
+            }
+          ],
+          "protected_sources": [],
+          "protected_collectors": [],
+          "lesson": {
+            "prerequisite_note": "No IOS command knowledge is required. Read severity as urgency and use the native policy controls. This is an offline simulation, not a real logging service.",
+            "concepts": [
+              {
+                "title": "An event is something that happened",
+                "text": "A switch can produce an event when a port changes state. A local buffer stores accepted events on that source; a remote collector stores accepted events sent to it. Generate simulated event creates only the selected supplied example event."
+              },
+              {
+                "title": "Smaller severity numbers are more urgent",
+                "text": "Severity0 is most urgent and7 is debug detail. A threshold of4 accepts0 through4, including error3. It filters out5 through7. Local and remote thresholds are separate; the collector can filter again."
+              },
+              {
+                "title": "Two different meanings of facility",
+                "text": "LINK in %LINK-4-CHANGED identifies the message subsystem. The exported RFC facility is a separate number, such as20 (local4). A collector selector uses that exported facility, not the LINK label."
+              },
+              {
+                "title": "Edit, apply, then check",
+                "text": "Choose a component and edit its native settings. Apply settings commits the complete selected editor. Check configuration tests current acceptance and rejection, including events you have not generated. Historical log entries do not prove that the current settings still work."
+              }
+            ],
+            "description": "On the separate Practice switch, send error3 events to the Practice collector with facility20 (local4), while keeping debug7 out of both logs. The event and addresses differ from the assignment.",
+            "fixture": {
+              "version": 1,
+              "environment": {
+                "devices": {
+                  "10.93.0.20": {
+                    "name": "Practice switch",
+                    "history_capacity": 8
+                  }
+                },
+                "collectors": {
+                  "10.93.0.200": {
+                    "name": "Practice collector",
+                    "history_capacity": 8
+                  }
+                },
+                "events": {
+                  "printer_fault": {
+                    "subsystem": "SYS",
+                    "severity": "error",
+                    "mnemonic": "FAULT",
+                    "text": "Supplied printer fault"
+                  },
+                  "printer_debug": {
+                    "subsystem": "SYS",
+                    "severity": "debug",
+                    "mnemonic": "DETAIL",
+                    "text": "Verbose diagnostic detail"
+                  }
+                },
+                "deliveries": [
+                  {
+                    "device": "10.93.0.20",
+                    "collector": "10.93.0.200",
+                    "available": true
+                  }
+                ]
+              },
+              "devices": {
+                "10.93.0.20": {
+                  "process_enabled": true,
+                  "buffer_threshold": "warning",
+                  "remote_threshold": "debug",
+                  "export_facility": 17,
+                  "hosts": [
+                    "10.93.0.200"
+                  ]
+                }
+              },
+              "collectors": {
+                "10.93.0.200": {
+                  "selectors": {
+                    "20": "warning"
+                  }
+                }
+              },
+              "local": {
+                "10.93.0.20": []
+              },
+              "remote": {
+                "10.93.0.200": []
+              },
+              "next_sequence": 1
+            },
+            "targets": [
+              {
+                "device": "10.93.0.20",
+                "event": "printer_fault",
+                "local": true,
+                "remote": {
+                  "10.93.0.200": {
+                    "accept": true,
+                    "facilities": [
+                      20
+                    ]
+                  }
+                }
+              },
+              {
+                "device": "10.93.0.20",
+                "event": "printer_debug",
+                "local": false,
+                "remote": {
+                  "10.93.0.200": {
+                    "accept": false,
+                    "facilities": []
+                  }
+                }
+              }
+            ],
+            "protected_sources": [],
+            "protected_collectors": [],
+            "worked": [
+              {
+                "action": {
+                  "action": "apply_source",
+                  "device": "10.93.0.20",
+                  "policy": {
+                    "process_enabled": true,
+                    "buffer_threshold": "warning",
+                    "remote_threshold": "error",
+                    "export_facility": 20,
+                    "hosts": [
+                      "10.93.0.200"
+                    ]
+                  }
+                },
+                "explanation": "Use the collector facility20 and remote threshold3. This accepts error3 and more urgent messages. The local threshold4 already accepts error3 and filters debug7. Fill changes only practice drafts; Apply settings is still explicit."
+              }
+            ],
+            "try_change": "After applying the worked settings, turn the local buffer Off and Check configuration. The error can still reach the collector, but its local requirement fails. Restore the local threshold4 and retry.",
+            "experiment": {
+              "action": "apply_source",
+              "device": "10.93.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": null,
+                "remote_threshold": "error",
+                "export_facility": 20,
+                "hosts": [
+                  "10.93.0.200"
+                ]
+              }
+            },
+            "repair": {
+              "action": "apply_source",
+              "device": "10.93.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "error",
+                "export_facility": 20,
+                "hosts": [
+                  "10.93.0.200"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "{\"action\":\"apply_source\",\"device\":\"10.92.0.10\",\"policy\":{\"process_enabled\":true,\"buffer_threshold\":\"warning\",\"remote_threshold\":\"warning\",\"export_facility\":23,\"hosts\":[\"10.92.0.100\"]}}"
+      ],
+      "prerequisites": []
+    }
+  ]
+}

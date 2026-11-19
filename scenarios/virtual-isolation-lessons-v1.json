@@ -1,0 +1,1604 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-virtual-host-resilience",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-virtual-isolation",
+      "topic": "VMs, containers and host placement",
+      "title": "Keep virtual workloads ready after a host failure",
+      "summary": "Repair placement so both services stay ready when any one physical host is unavailable.",
+      "objective": "Place every supplied workload on a compatible host within the stated planning budgets; keep all workloads ready with all hosts available. During every single-host outage, retain at least one ledger replica and one portal replica ready on another compatible host. Linux containers need a Linux kernel and runtime. Listed VM images are supported by every supplied hypervisor; no real guest or process is launched.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the concept and worked example",
+        "Try the separate guide equipment",
+        "Repair and verify the full independent assignment"
+      ],
+      "guide": [],
+      "hints": [
+        "Inspect each workload\u2019s environment and the kernel/runtime facts on its host. A VM guest kernel need not equal its host kernel; these supplied hypervisors support the listed images.",
+        "Run each single-host outage. A service with all its replicas on that host disappears even when normal operation is healthy.",
+        "A Linux container needs a Linux host with its runtime. Spread each service\u2019s replicas across compatible hosts and recheck the stated budgets."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/site/us/en/learn/topics/computing/what-is-a-virtual-machine.html",
+        "https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/"
+      ],
+      "simplifications": "Sources checked 2026-11-13: current CCNA v1.1 objective1.12 and official VM/container concept references. Hosts, kernels, compatible guest images, runtimes, budgets and outages are represented facts. No VM, container, OS, service, process or network actually starts. CPU units and memory are a conservative exercise planning policy, not universal hypervisor admission or overcommit behavior. No hardware, boot, scheduling, live migration, escape-resistance or performance is tested.",
+      "explanation": "VMs have their own guest kernels; a Linux container shares its Linux host kernel. Both still depend on the physical host underneath them. Normal readiness is only the first check: replicas of each service must span hosts so one remains ready in every single-host outage. Any compatible placement satisfying all stated budgets and outcomes passes; host names are not the answer.",
+      "retry_guidance": "Read the named failed outcome, change the relevant setting and check again. A working normal case alone does not prove the whole task.",
+      "initial": {
+        "kind": "VirtualIsolation",
+        "simulation": {
+          "schema_version": 1,
+          "id": "ccna-virtual-host-resilience",
+          "version": 1,
+          "view": "introduction",
+          "assignment": {
+            "configuration": {
+              "kind": "Workloads",
+              "configuration": {
+                "placements": [
+                  {
+                    "workload": "ledger-a",
+                    "host": "north",
+                    "up": true
+                  },
+                  {
+                    "workload": "ledger-b",
+                    "host": "north",
+                    "up": true
+                  },
+                  {
+                    "workload": "portal-a",
+                    "host": "archive",
+                    "up": true
+                  },
+                  {
+                    "workload": "portal-b",
+                    "host": "north",
+                    "up": true
+                  }
+                ]
+              }
+            },
+            "selection": {
+              "kind": "Workloads",
+              "experiment": {
+                "kind": "Normal"
+              }
+            },
+            "checked": false
+          },
+          "practice": {
+            "configuration": {
+              "kind": "Workloads",
+              "configuration": {
+                "placements": [
+                  {
+                    "workload": "archive-a",
+                    "host": "alpha",
+                    "up": true
+                  },
+                  {
+                    "workload": "archive-b",
+                    "host": "alpha",
+                    "up": true
+                  },
+                  {
+                    "workload": "status-a",
+                    "host": "spare",
+                    "up": true
+                  },
+                  {
+                    "workload": "status-b",
+                    "host": "alpha",
+                    "up": true
+                  }
+                ]
+              }
+            },
+            "selection": {
+              "kind": "Workloads",
+              "experiment": {
+                "kind": "Normal"
+              }
+            },
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "VirtualIsolation",
+        "definition": {
+          "id": "ccna-virtual-host-resilience",
+          "version": 1,
+          "assignment": {
+            "id": "independent-host-placement",
+            "exercise": {
+              "kind": "Workloads",
+              "facts": {
+                "hosts": [
+                  {
+                    "id": "north",
+                    "kernel": "Linux",
+                    "hypervisor": true,
+                    "container_runtime": true,
+                    "memory_mib": 6144,
+                    "cpu_units": 6,
+                    "up": true
+                  },
+                  {
+                    "id": "south",
+                    "kernel": "Linux",
+                    "hypervisor": true,
+                    "container_runtime": true,
+                    "memory_mib": 6144,
+                    "cpu_units": 6,
+                    "up": true
+                  },
+                  {
+                    "id": "archive",
+                    "kernel": "FreeBsd",
+                    "hypervisor": true,
+                    "container_runtime": false,
+                    "memory_mib": 6144,
+                    "cpu_units": 6,
+                    "up": true
+                  }
+                ],
+                "workloads": [
+                  {
+                    "id": "ledger-a",
+                    "environment": {
+                      "kind": "VirtualMachine",
+                      "kernel": "Windows"
+                    },
+                    "memory_mib": 2048,
+                    "cpu_units": 2,
+                    "service": "ledger"
+                  },
+                  {
+                    "id": "ledger-b",
+                    "environment": {
+                      "kind": "VirtualMachine",
+                      "kernel": "Windows"
+                    },
+                    "memory_mib": 2048,
+                    "cpu_units": 2,
+                    "service": "ledger"
+                  },
+                  {
+                    "id": "portal-a",
+                    "environment": {
+                      "kind": "LinuxContainer"
+                    },
+                    "memory_mib": 512,
+                    "cpu_units": 1,
+                    "service": "portal"
+                  },
+                  {
+                    "id": "portal-b",
+                    "environment": {
+                      "kind": "LinuxContainer"
+                    },
+                    "memory_mib": 512,
+                    "cpu_units": 1,
+                    "service": "portal"
+                  }
+                ]
+              },
+              "initial": {
+                "placements": [
+                  {
+                    "workload": "ledger-a",
+                    "host": "north",
+                    "up": true
+                  },
+                  {
+                    "workload": "ledger-b",
+                    "host": "north",
+                    "up": true
+                  },
+                  {
+                    "workload": "portal-a",
+                    "host": "archive",
+                    "up": true
+                  },
+                  {
+                    "workload": "portal-b",
+                    "host": "north",
+                    "up": true
+                  }
+                ]
+              },
+              "reference": {
+                "placements": [
+                  {
+                    "workload": "ledger-a",
+                    "host": "north",
+                    "up": true
+                  },
+                  {
+                    "workload": "ledger-b",
+                    "host": "archive",
+                    "up": true
+                  },
+                  {
+                    "workload": "portal-a",
+                    "host": "north",
+                    "up": true
+                  },
+                  {
+                    "workload": "portal-b",
+                    "host": "south",
+                    "up": true
+                  }
+                ]
+              },
+              "services": [
+                {
+                  "id": "ledger"
+                },
+                {
+                  "id": "portal"
+                }
+              ]
+            }
+          },
+          "example": {
+            "id": "guide-host-placement",
+            "exercise": {
+              "kind": "Workloads",
+              "facts": {
+                "hosts": [
+                  {
+                    "id": "alpha",
+                    "kernel": "Linux",
+                    "hypervisor": true,
+                    "container_runtime": true,
+                    "memory_mib": 4096,
+                    "cpu_units": 4,
+                    "up": true
+                  },
+                  {
+                    "id": "beta",
+                    "kernel": "Linux",
+                    "hypervisor": true,
+                    "container_runtime": true,
+                    "memory_mib": 4096,
+                    "cpu_units": 4,
+                    "up": true
+                  },
+                  {
+                    "id": "spare",
+                    "kernel": "Windows",
+                    "hypervisor": true,
+                    "container_runtime": false,
+                    "memory_mib": 4096,
+                    "cpu_units": 4,
+                    "up": true
+                  }
+                ],
+                "workloads": [
+                  {
+                    "id": "archive-a",
+                    "environment": {
+                      "kind": "VirtualMachine",
+                      "kernel": "FreeBsd"
+                    },
+                    "memory_mib": 1024,
+                    "cpu_units": 1,
+                    "service": "archive"
+                  },
+                  {
+                    "id": "archive-b",
+                    "environment": {
+                      "kind": "VirtualMachine",
+                      "kernel": "FreeBsd"
+                    },
+                    "memory_mib": 1024,
+                    "cpu_units": 1,
+                    "service": "archive"
+                  },
+                  {
+                    "id": "status-a",
+                    "environment": {
+                      "kind": "LinuxContainer"
+                    },
+                    "memory_mib": 256,
+                    "cpu_units": 1,
+                    "service": "status"
+                  },
+                  {
+                    "id": "status-b",
+                    "environment": {
+                      "kind": "LinuxContainer"
+                    },
+                    "memory_mib": 256,
+                    "cpu_units": 1,
+                    "service": "status"
+                  }
+                ]
+              },
+              "initial": {
+                "placements": [
+                  {
+                    "workload": "archive-a",
+                    "host": "alpha",
+                    "up": true
+                  },
+                  {
+                    "workload": "archive-b",
+                    "host": "alpha",
+                    "up": true
+                  },
+                  {
+                    "workload": "status-a",
+                    "host": "spare",
+                    "up": true
+                  },
+                  {
+                    "workload": "status-b",
+                    "host": "alpha",
+                    "up": true
+                  }
+                ]
+              },
+              "reference": {
+                "placements": [
+                  {
+                    "workload": "archive-a",
+                    "host": "alpha",
+                    "up": true
+                  },
+                  {
+                    "workload": "archive-b",
+                    "host": "spare",
+                    "up": true
+                  },
+                  {
+                    "workload": "status-a",
+                    "host": "alpha",
+                    "up": true
+                  },
+                  {
+                    "workload": "status-b",
+                    "host": "beta",
+                    "up": true
+                  }
+                ]
+              },
+              "services": [
+                {
+                  "id": "archive"
+                },
+                {
+                  "id": "status"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "solution": [
+        "virtual-net {\"kind\":\"Edit\",\"configuration\":{\"kind\":\"Workloads\",\"configuration\":{\"placements\":[{\"workload\":\"ledger-a\",\"host\":\"north\",\"up\":true},{\"workload\":\"ledger-b\",\"host\":\"archive\",\"up\":true},{\"workload\":\"portal-a\",\"host\":\"north\",\"up\":true},{\"workload\":\"portal-b\",\"host\":\"south\",\"up\":true}]}}}",
+        "virtual-net {\"kind\":\"Check\"}"
+      ]
+    },
+    {
+      "id": "ccna-virtual-switch-uplink",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-virtual-isolation",
+      "topic": "Virtual NICs and uplinks",
+      "title": "Reconnect virtual NICs across two physical hosts",
+      "summary": "Repair a virtual port and an uplink without merging tenant networks.",
+      "objective": "Keep accounting VM ports in VLAN 10 and visitor VM ports in VLAN 20. Restore bidirectional broadcast delivery within each group across both represented physical hosts. Keep accounting and visitors separate locally and across hosts; preserve the supplied hosts/cables and keep working ports up.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand virtual NICs and physical uplinks",
+        "Repair the separate guide network",
+        "Restore both groups without merging them"
+      ],
+      "guide": [],
+      "hints": [
+        "Follow the supplied VM vNIC into its host\u2019s virtual switch, then its uplink through the physical switch.",
+        "A correct VM port alone cannot carry a VLAN missing from its host uplink. Inspect both settings on Host South.",
+        "Keep the stated group numbers and verify positive cross-host delivery as well as both directions of separation."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/solutions/Enterprise/Data_Center/vmware/vmware/VMware.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-18/configuration_guide/vlan/b_1718_vlan_9300_cg/configuring_vlan_trunks.html"
+      ],
+      "simplifications": "Sources checked 2026-11-13. The older official Cisco VMware architecture reference supplies terminology, not current product instructions. This is a generic virtual-switch arrangement using the existing finite Ethernet broadcast/VLAN engine, not ESXi or another vendor implementation. VM placement, supplied vNIC cables and host availability are fixed here. No guest boot, hypervisor/runtime, port-group manager, real packet, MAC lifecycle, STP, teaming or performance is simulated. Native VLAN 99 is unused by guests; all modeled platforms retain the existing declared trunk educational profile. No full virtualization objective or vendor-equipment acceptance is claimed.",
+      "explanation": "A VM\u2019s virtual network adapter joins a virtual switch inside its host. Local switching and cross-host uplinks are separate parts of the path. Host South needs the correct accounting access VLAN and must carry that VLAN on its uplink; visitor service and separation must remain working. The grade uses actual in-memory bidirectional broadcast paths and fixed group requirements, not an expected command string.",
+      "retry_guidance": "Inspect broadcast delivery from each named VM. Repair the port or uplink identified by the path while preserving the other group.",
+      "initial": {
+        "kind": "Switching",
+        "fabric": {
+          "switches": {
+            "north-vswitch": {
+              "label": "Host North \u00b7 virtual switch",
+              "vlans": [
+                10,
+                20,
+                99
+              ],
+              "ports": {
+                "accounting": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 10
+                  }
+                },
+                "visitor": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 99,
+                    "allowed": [
+                      10,
+                      20,
+                      99
+                    ]
+                  }
+                }
+              }
+            },
+            "south-vswitch": {
+              "label": "Host South \u00b7 virtual switch",
+              "vlans": [
+                10,
+                20,
+                99
+              ],
+              "ports": {
+                "accounting": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "visitor": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 99,
+                    "allowed": [
+                      20,
+                      99
+                    ]
+                  }
+                }
+              }
+            },
+            "physical-switch": {
+              "label": "Physical switch \u00b7 between hosts",
+              "vlans": [
+                10,
+                20,
+                99
+              ],
+              "ports": {
+                "north": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 99,
+                    "allowed": [
+                      10,
+                      20,
+                      99
+                    ]
+                  }
+                },
+                "south": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 99,
+                    "allowed": [
+                      10,
+                      20,
+                      99
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "hosts": {
+            "accounting-north": {
+              "label": "Accounting VM \u00b7 north",
+              "up": true
+            },
+            "visitor-north": {
+              "label": "Visitor VM \u00b7 north",
+              "up": true
+            },
+            "accounting-south": {
+              "label": "Accounting VM \u00b7 south",
+              "up": true
+            },
+            "visitor-south": {
+              "label": "Visitor VM \u00b7 south",
+              "up": true
+            }
+          },
+          "cables": [
+            {
+              "id": "vnic-accounting-north",
+              "a": {
+                "kind": "host",
+                "host": "accounting-north"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "north-vswitch",
+                "port": "accounting"
+              },
+              "up": true
+            },
+            {
+              "id": "vnic-visitor-north",
+              "a": {
+                "kind": "host",
+                "host": "visitor-north"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "north-vswitch",
+                "port": "visitor"
+              },
+              "up": true
+            },
+            {
+              "id": "physical-north",
+              "a": {
+                "kind": "switch",
+                "switch": "north-vswitch",
+                "port": "uplink"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "physical-switch",
+                "port": "north"
+              },
+              "up": true
+            },
+            {
+              "id": "vnic-accounting-south",
+              "a": {
+                "kind": "host",
+                "host": "accounting-south"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "south-vswitch",
+                "port": "accounting"
+              },
+              "up": true
+            },
+            {
+              "id": "vnic-visitor-south",
+              "a": {
+                "kind": "host",
+                "host": "visitor-south"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "south-vswitch",
+                "port": "visitor"
+              },
+              "up": true
+            },
+            {
+              "id": "physical-south",
+              "a": {
+                "kind": "switch",
+                "switch": "south-vswitch",
+                "port": "uplink"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "physical-switch",
+                "port": "south"
+              },
+              "up": true
+            }
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Switching",
+        "requirements": [
+          {
+            "kind": "access_vlan",
+            "switch": "north-vswitch",
+            "port": "accounting",
+            "vlan": 10
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "north-vswitch",
+            "port": "visitor",
+            "vlan": 20
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "south-vswitch",
+            "port": "accounting",
+            "vlan": 10
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "south-vswitch",
+            "port": "visitor",
+            "vlan": 20
+          },
+          {
+            "kind": "visibility",
+            "label": "Accounting between hosts",
+            "to": "accounting-south",
+            "visible": true,
+            "from": "accounting-north"
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor between hosts",
+            "to": "visitor-south",
+            "visible": true,
+            "from": "visitor-north"
+          },
+          {
+            "kind": "visibility",
+            "label": "Accounting / visitor separation north",
+            "to": "visitor-north",
+            "visible": false,
+            "from": "accounting-north"
+          },
+          {
+            "kind": "visibility",
+            "label": "Accounting / visitor separation south",
+            "to": "visitor-south",
+            "visible": false,
+            "from": "accounting-north"
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor / accounting separation north",
+            "to": "accounting-north",
+            "visible": false,
+            "from": "visitor-north"
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor / accounting separation south",
+            "to": "accounting-south",
+            "visible": false,
+            "from": "visitor-north"
+          }
+        ]
+      },
+      "solution": [
+        "access south-vswitch accounting 10",
+        "trunk south-vswitch uplink 99 10,20,99"
+      ],
+      "switching_teaching": {
+        "prerequisite_note": "Use the existing VLAN foundation first. A virtual switch provides Layer 2 forwarding inside a represented host; its uplink joins the physical network. No VM or hypervisor is required on your computer.",
+        "concepts": [
+          {
+            "title": "A virtual NIC is the VM\u2019s network adapter",
+            "text": "A VM sees a network adapter even though its switching connection can be software inside the physical host. In this lesson each supplied VM is cabled to a named virtual-switch port."
+          },
+          {
+            "title": "Local and cross-host paths are different",
+            "text": "A virtual switch can join local virtual adapters. To reach a VM on another host, traffic also crosses its host uplink, the supplied physical switch and the other host\u2019s uplink. A missing allowed VLAN breaks that longer path."
+          },
+          {
+            "title": "Keep service and separation together",
+            "text": "Repairing a path must not merge accounting and visitor groups. Verify that each intended pair can exchange broadcasts and that unwanted pairs remain separated. Stopping a port is not a valid substitute."
+          }
+        ],
+        "example_description": "Separate guide hosts use studio VLAN 30, visitor VLAN 40 and an unused native VLAN 90. The studio pair is broken by a wrong virtual port and missing uplink VLAN.",
+        "fixture": {
+          "switches": {
+            "guide-north-vswitch": {
+              "label": "Host North \u00b7 virtual switch",
+              "vlans": [
+                30,
+                40,
+                90
+              ],
+              "ports": {
+                "studio": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 30
+                  }
+                },
+                "visitor": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 40
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 90,
+                    "allowed": [
+                      30,
+                      40,
+                      90
+                    ]
+                  }
+                }
+              }
+            },
+            "guide-south-vswitch": {
+              "label": "Host South \u00b7 virtual switch",
+              "vlans": [
+                30,
+                40,
+                90
+              ],
+              "ports": {
+                "studio": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 40
+                  }
+                },
+                "visitor": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 40
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 90,
+                    "allowed": [
+                      40,
+                      90
+                    ]
+                  }
+                }
+              }
+            },
+            "guide-physical-switch": {
+              "label": "Physical switch \u00b7 between hosts",
+              "vlans": [
+                30,
+                40,
+                90
+              ],
+              "ports": {
+                "north": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 90,
+                    "allowed": [
+                      30,
+                      40,
+                      90
+                    ]
+                  }
+                },
+                "south": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 90,
+                    "allowed": [
+                      30,
+                      40,
+                      90
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "hosts": {
+            "studio-north": {
+              "label": "Studio VM \u00b7 north",
+              "up": true
+            },
+            "visitor-north": {
+              "label": "Visitor VM \u00b7 north",
+              "up": true
+            },
+            "studio-south": {
+              "label": "Studio VM \u00b7 south",
+              "up": true
+            },
+            "visitor-south": {
+              "label": "Visitor VM \u00b7 south",
+              "up": true
+            }
+          },
+          "cables": [
+            {
+              "id": "vnic-studio-north",
+              "a": {
+                "kind": "host",
+                "host": "studio-north"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "guide-north-vswitch",
+                "port": "studio"
+              },
+              "up": true
+            },
+            {
+              "id": "vnic-visitor-north",
+              "a": {
+                "kind": "host",
+                "host": "visitor-north"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "guide-north-vswitch",
+                "port": "visitor"
+              },
+              "up": true
+            },
+            {
+              "id": "physical-north",
+              "a": {
+                "kind": "switch",
+                "switch": "guide-north-vswitch",
+                "port": "uplink"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "guide-physical-switch",
+                "port": "north"
+              },
+              "up": true
+            },
+            {
+              "id": "vnic-studio-south",
+              "a": {
+                "kind": "host",
+                "host": "studio-south"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "guide-south-vswitch",
+                "port": "studio"
+              },
+              "up": true
+            },
+            {
+              "id": "vnic-visitor-south",
+              "a": {
+                "kind": "host",
+                "host": "visitor-south"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "guide-south-vswitch",
+                "port": "visitor"
+              },
+              "up": true
+            },
+            {
+              "id": "physical-south",
+              "a": {
+                "kind": "switch",
+                "switch": "guide-south-vswitch",
+                "port": "uplink"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "guide-physical-switch",
+                "port": "south"
+              },
+              "up": true
+            }
+          ]
+        },
+        "example_solution": [
+          "access guide-south-vswitch studio 30",
+          "trunk guide-south-vswitch uplink 90 30,40,90"
+        ],
+        "outcomes": [
+          {
+            "kind": "access_vlan",
+            "switch": "guide-north-vswitch",
+            "port": "studio",
+            "vlan": 30
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "guide-north-vswitch",
+            "port": "visitor",
+            "vlan": 40
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "guide-south-vswitch",
+            "port": "studio",
+            "vlan": 30
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "guide-south-vswitch",
+            "port": "visitor",
+            "vlan": 40
+          },
+          {
+            "kind": "visibility",
+            "label": "Studio between hosts",
+            "to": "studio-south",
+            "visible": true,
+            "from": "studio-north"
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor between hosts",
+            "to": "visitor-south",
+            "visible": true,
+            "from": "visitor-north"
+          },
+          {
+            "kind": "visibility",
+            "label": "Studio / visitor separation north",
+            "to": "visitor-north",
+            "visible": false,
+            "from": "studio-north"
+          },
+          {
+            "kind": "visibility",
+            "label": "Studio / visitor separation south",
+            "to": "visitor-south",
+            "visible": false,
+            "from": "studio-north"
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor / studio separation north",
+            "to": "studio-north",
+            "visible": false,
+            "from": "visitor-north"
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor / studio separation south",
+            "to": "studio-south",
+            "visible": false,
+            "from": "visitor-north"
+          }
+        ],
+        "try_change": "After repairing the guide network, remove 30 only from guide-south-vswitch uplink and select Apply and test example. Observe the failed studio path while its VM port remains in VLAN 30, then restore 30 and recheck."
+      }
+    },
+    {
+      "id": "ccna-vrf-overlap-repair",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-virtual-isolation",
+      "topic": "VRF routing isolation",
+      "title": "Keep overlapping tenants in separate routing tables",
+      "summary": "Repair interface membership and identify which same-numbered endpoint actually replied.",
+      "objective": "Keep the router available and each tenant\u2019s client/server pair able to reach its intended partner and reply. Keep east and west in separate routing contexts on shared-edge while preserving their supplied, overlapping addresses. Either supplied context name can serve either tenant. A same-numbered reply from the wrong endpoint does not count as the requested path.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the concept and worked example",
+        "Try the separate guide equipment",
+        "Repair and verify the full independent assignment"
+      ],
+      "guide": [],
+      "hints": [
+        "Trace each interface\u2019s fixed link to its named endpoint. Compare the context on the client side with the context on its intended server side.",
+        "The two tenants reuse addresses. Combining both copies in one context causes duplicates; swapping server-side membership can send an address to the wrong tenant.",
+        "Keep both interfaces of each tenant together and separate the tenants. Either context can serve either tenant; verify intended destinations and replies."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9600/software/release/17-17/configuration_guide/rtng/b_1717_rtng_9600_cg/configuring_vrf_lite.html"
+      ],
+      "simplifications": "Sources checked 2026-11-13: current CCNA v1.1 objective1.12 and Cisco Catalyst9600 IOS XE17.17.x VRF-Lite documentation. One represented physical router is projected into separate connected-route instances of the existing bounded IPv4 forwarder. These instances are not extra physical routers. No packets, IOS CLI, dynamic routing, MPLS/BGP, route targets, route leaking or kernel VRFs are run. Addresses are supplied and remain fixed when a native selector changes context; some real IOS VRF commands remove an interface address and require reconfiguration. Conventional interfaces retain the existing /31-/32 exclusion.",
+      "explanation": "One physical router can hold separate routing tables. Each supplied interface belongs to one context, and its connected route appears only there. The two tenants can therefore reuse the same address plan. Pair the interfaces of each tenant in one context and keep the other tenant in the other context; the context names are interchangeable. Observe the actual destination identity as well as the address: an echo-like reply with the same number can come from the wrong tenant.",
+      "retry_guidance": "Read the named failed outcome, change the relevant setting and check again. A working normal case alone does not prove the whole task.",
+      "initial": {
+        "kind": "VirtualIsolation",
+        "simulation": {
+          "schema_version": 1,
+          "id": "ccna-vrf-overlap-repair",
+          "version": 1,
+          "view": "introduction",
+          "assignment": {
+            "configuration": {
+              "kind": "Routing",
+              "configuration": {
+                "bindings": [
+                  {
+                    "interface": "east-in",
+                    "context": "blue"
+                  },
+                  {
+                    "interface": "east-out",
+                    "context": "green"
+                  },
+                  {
+                    "interface": "west-in",
+                    "context": "green"
+                  },
+                  {
+                    "interface": "west-out",
+                    "context": "blue"
+                  }
+                ],
+                "router_up": true
+              }
+            },
+            "selection": {
+              "kind": "Routing",
+              "from": "east-client",
+              "to": "east-server"
+            },
+            "checked": false
+          },
+          "practice": {
+            "configuration": {
+              "kind": "Routing",
+              "configuration": {
+                "bindings": [
+                  {
+                    "interface": "studio-in",
+                    "context": "cedar"
+                  },
+                  {
+                    "interface": "studio-out",
+                    "context": "cedar"
+                  },
+                  {
+                    "interface": "visitor-in",
+                    "context": "cedar"
+                  },
+                  {
+                    "interface": "visitor-out",
+                    "context": "cedar"
+                  }
+                ],
+                "router_up": true
+              }
+            },
+            "selection": {
+              "kind": "Routing",
+              "from": "studio-client",
+              "to": "studio-server"
+            },
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "VirtualIsolation",
+        "definition": {
+          "id": "ccna-vrf-overlap-repair",
+          "version": 1,
+          "assignment": {
+            "id": "independent-routing-contexts",
+            "exercise": {
+              "kind": "Routing",
+              "facts": {
+                "router": "shared-edge",
+                "contexts": [
+                  {
+                    "id": "blue"
+                  },
+                  {
+                    "id": "green"
+                  }
+                ],
+                "network": {
+                  "devices": {
+                    "east-client": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "nic": {
+                          "link": "east-client",
+                          "up": true,
+                          "address": {
+                            "address": "10.40.1.10",
+                            "prefix": 24
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "nic",
+                          "via": "10.40.1.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "east-server": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "nic": {
+                          "link": "east-server",
+                          "up": true,
+                          "address": {
+                            "address": "10.40.2.20",
+                            "prefix": 24
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "nic",
+                          "via": "10.40.2.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "west-client": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "nic": {
+                          "link": "west-client",
+                          "up": true,
+                          "address": {
+                            "address": "10.40.1.10",
+                            "prefix": 24
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "nic",
+                          "via": "10.40.1.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "west-server": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "nic": {
+                          "link": "west-server",
+                          "up": true,
+                          "address": {
+                            "address": "10.40.2.20",
+                            "prefix": 24
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "nic",
+                          "via": "10.40.2.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "shared-edge": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "east-in": {
+                          "link": "east-client",
+                          "up": true,
+                          "address": {
+                            "address": "10.40.1.1",
+                            "prefix": 24
+                          }
+                        },
+                        "east-out": {
+                          "link": "east-server",
+                          "up": true,
+                          "address": {
+                            "address": "10.40.2.1",
+                            "prefix": 24
+                          }
+                        },
+                        "west-in": {
+                          "link": "west-client",
+                          "up": true,
+                          "address": {
+                            "address": "10.40.1.1",
+                            "prefix": 24
+                          }
+                        },
+                        "west-out": {
+                          "link": "west-server",
+                          "up": true,
+                          "address": {
+                            "address": "10.40.2.1",
+                            "prefix": 24
+                          }
+                        }
+                      },
+                      "routes": []
+                    }
+                  }
+                }
+              },
+              "initial": {
+                "bindings": [
+                  {
+                    "interface": "east-in",
+                    "context": "blue"
+                  },
+                  {
+                    "interface": "east-out",
+                    "context": "green"
+                  },
+                  {
+                    "interface": "west-in",
+                    "context": "green"
+                  },
+                  {
+                    "interface": "west-out",
+                    "context": "blue"
+                  }
+                ],
+                "router_up": true
+              },
+              "reference": {
+                "bindings": [
+                  {
+                    "interface": "east-in",
+                    "context": "blue"
+                  },
+                  {
+                    "interface": "east-out",
+                    "context": "blue"
+                  },
+                  {
+                    "interface": "west-in",
+                    "context": "green"
+                  },
+                  {
+                    "interface": "west-out",
+                    "context": "green"
+                  }
+                ],
+                "router_up": true
+              },
+              "pairs": [
+                {
+                  "to": "east-server",
+                  "reachable": true,
+                  "from": "east-client"
+                },
+                {
+                  "to": "east-client",
+                  "reachable": true,
+                  "from": "east-server"
+                },
+                {
+                  "to": "west-server",
+                  "reachable": false,
+                  "from": "east-client"
+                },
+                {
+                  "to": "west-client",
+                  "reachable": false,
+                  "from": "east-server"
+                },
+                {
+                  "to": "east-server",
+                  "reachable": false,
+                  "from": "west-client"
+                },
+                {
+                  "to": "east-client",
+                  "reachable": false,
+                  "from": "west-server"
+                },
+                {
+                  "to": "west-server",
+                  "reachable": true,
+                  "from": "west-client"
+                },
+                {
+                  "to": "west-client",
+                  "reachable": true,
+                  "from": "west-server"
+                }
+              ]
+            }
+          },
+          "example": {
+            "id": "guide-routing-contexts",
+            "exercise": {
+              "kind": "Routing",
+              "facts": {
+                "router": "guide-edge",
+                "contexts": [
+                  {
+                    "id": "cedar"
+                  },
+                  {
+                    "id": "birch"
+                  }
+                ],
+                "network": {
+                  "devices": {
+                    "studio-client": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "nic": {
+                          "link": "studio-client",
+                          "up": true,
+                          "address": {
+                            "address": "172.22.1.10",
+                            "prefix": 24
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "nic",
+                          "via": "172.22.1.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "studio-server": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "nic": {
+                          "link": "studio-server",
+                          "up": true,
+                          "address": {
+                            "address": "172.22.2.20",
+                            "prefix": 24
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "nic",
+                          "via": "172.22.2.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "visitor-client": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "nic": {
+                          "link": "visitor-client",
+                          "up": true,
+                          "address": {
+                            "address": "172.22.1.10",
+                            "prefix": 24
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "nic",
+                          "via": "172.22.1.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "visitor-server": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "nic": {
+                          "link": "visitor-server",
+                          "up": true,
+                          "address": {
+                            "address": "172.22.2.20",
+                            "prefix": 24
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "nic",
+                          "via": "172.22.2.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "guide-edge": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "studio-in": {
+                          "link": "studio-client",
+                          "up": true,
+                          "address": {
+                            "address": "172.22.1.1",
+                            "prefix": 24
+                          }
+                        },
+                        "studio-out": {
+                          "link": "studio-server",
+                          "up": true,
+                          "address": {
+                            "address": "172.22.2.1",
+                            "prefix": 24
+                          }
+                        },
+                        "visitor-in": {
+                          "link": "visitor-client",
+                          "up": true,
+                          "address": {
+                            "address": "172.22.1.1",
+                            "prefix": 24
+                          }
+                        },
+                        "visitor-out": {
+                          "link": "visitor-server",
+                          "up": true,
+                          "address": {
+                            "address": "172.22.2.1",
+                            "prefix": 24
+                          }
+                        }
+                      },
+                      "routes": []
+                    }
+                  }
+                }
+              },
+              "initial": {
+                "bindings": [
+                  {
+                    "interface": "studio-in",
+                    "context": "cedar"
+                  },
+                  {
+                    "interface": "studio-out",
+                    "context": "cedar"
+                  },
+                  {
+                    "interface": "visitor-in",
+                    "context": "cedar"
+                  },
+                  {
+                    "interface": "visitor-out",
+                    "context": "cedar"
+                  }
+                ],
+                "router_up": true
+              },
+              "reference": {
+                "bindings": [
+                  {
+                    "interface": "studio-in",
+                    "context": "cedar"
+                  },
+                  {
+                    "interface": "studio-out",
+                    "context": "cedar"
+                  },
+                  {
+                    "interface": "visitor-in",
+                    "context": "birch"
+                  },
+                  {
+                    "interface": "visitor-out",
+                    "context": "birch"
+                  }
+                ],
+                "router_up": true
+              },
+              "pairs": [
+                {
+                  "to": "studio-server",
+                  "reachable": true,
+                  "from": "studio-client"
+                },
+                {
+                  "to": "studio-client",
+                  "reachable": true,
+                  "from": "studio-server"
+                },
+                {
+                  "to": "visitor-server",
+                  "reachable": false,
+                  "from": "studio-client"
+                },
+                {
+                  "to": "visitor-client",
+                  "reachable": false,
+                  "from": "studio-server"
+                },
+                {
+                  "to": "studio-server",
+                  "reachable": false,
+                  "from": "visitor-client"
+                },
+                {
+                  "to": "studio-client",
+                  "reachable": false,
+                  "from": "visitor-server"
+                },
+                {
+                  "to": "visitor-server",
+                  "reachable": true,
+                  "from": "visitor-client"
+                },
+                {
+                  "to": "visitor-client",
+                  "reachable": true,
+                  "from": "visitor-server"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "solution": [
+        "virtual-net {\"kind\":\"Edit\",\"configuration\":{\"kind\":\"Routing\",\"configuration\":{\"bindings\":[{\"interface\":\"east-in\",\"context\":\"blue\"},{\"interface\":\"east-out\",\"context\":\"blue\"},{\"interface\":\"west-in\",\"context\":\"green\"},{\"interface\":\"west-out\",\"context\":\"green\"}],\"router_up\":true}}}",
+        "virtual-net {\"kind\":\"Check\"}"
+      ]
+    }
+  ]
+}

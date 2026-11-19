@@ -676,6 +676,7 @@ fn cron_normal_unit_picker_start_next_and_complete_use_actual_events_and_warm_ch
     let picker = route_reveal(&ctx, &mut a, "unit");
     click(&ctx, &mut a, picker);
     let mut chosen = false;
+    let mut stable = None;
     for _ in 0..20 {
         let r = a
             .metrics
@@ -690,10 +691,22 @@ fn cron_normal_unit_picker_start_next_and_complete_use_actual_events_and_warm_ch
             .expect("Actual popup clip")
             .intersect(ctx.content_rect());
         if smoke::smoke_control_visible(r, clip, ctx.pixels_per_point()) {
-            click(&ctx, &mut a, r);
-            chosen = true;
-            break;
+            if stable == Some((r, clip)) {
+                click(&ctx, &mut a, r);
+                chosen = true;
+                break;
+            }
+            stable = Some((r, clip));
+            frame(
+                &ctx,
+                &mut a,
+                1200.,
+                850.,
+                vec![egui::Event::PointerMoved(r.center())],
+            );
+            continue;
         }
+        stable = None;
         frame(
             &ctx,
             &mut a,
@@ -708,6 +721,11 @@ fn cron_normal_unit_picker_start_next_and_complete_use_actual_events_and_warm_ch
                 },
             ],
         );
+        // Allow the native popup's wheel animation to settle before measuring
+        // the same option again; retain the existing20-wheel bound.
+        for _ in 0..8 {
+            frame(&ctx, &mut a, 1200., 850., vec![]);
+        }
     }
     assert!(chosen, "Choose the actual fully visible unit option");
     assert_eq!(a.filter.unit, "linux-cron-foundations");

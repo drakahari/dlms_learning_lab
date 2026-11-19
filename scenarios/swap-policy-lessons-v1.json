@@ -1,0 +1,1024 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-swap-prepared-activation",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Swap activation and saved policy",
+      "unit": "linux-swap-policy",
+      "title": "Make prepared swap available now and next time",
+      "summary": "Distinguish prepared space, saved instructions and actual active swap while preserving data.",
+      "objective": "fast-swap is the supplied prepared area UUID 00006100-0000-4000-8000-000000000003. Keep it active with priority 40 and automatically selected at that priority by the saved policy. Keep reserve active at its original priority 5, but manual (noauto) in the saved file. An active reserve need not be automatically selected. Keep /data mounted writable and /audit mounted read-only with their original UUIDs, automatic saved policies and supplied final fields. The saved configuration must retain these choices when the supplied device names are permuted. Use supported literal commands and the virtual editor only.",
+      "retry_guidance": "Read Saved and Active feedback separately. Inspect the active table before repeating an activation; keep protected mounts and the reserve intact.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "steps": [
+        "Understand the task",
+        "Repair saved policy and inspect active areas",
+        "Apply only the needed changes and verify"
+      ],
+      "guide": [],
+      "explanation": "A swap signature prepares space, a saved automatic row defines future selection, and activation supplies the present state. All three differ. Stable UUIDs keep saved policy tied to the intended area; noauto is not an instruction to deactivate an existing reserve.",
+      "hints": [
+        "Compare the supplied UUID with the saved source and the NAME/PRIO rows; a saved policy is not an active-state report.",
+        "Change only the requested swap row(s). Keep the complete original /data and /audit policy and their live mounts.",
+        "After saving an automatic swap row with the required priority, bulk activation reads it. A manual reserve is skipped and remains at its existing active priority."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/swapon.8.html",
+        "https://man7.org/linux/man-pages/man5/fstab.5.html"
+      ],
+      "simplifications": "Source-enabled prepared partitions only; no host devices, paging, memory/OOM policy, swap files, zram/zswap, discard, hibernation, kernel-selected priorities or full utility semantics. Only six literal fields and defaults/auto/noauto/one explicit pri are accepted. Real swapon can ignore unknown options; this simulator refuses them honestly. It validates complete supported syntax before bulk activation; admitted row failures preserve other successes. Fresh-policy cases permute supplied aliases in independent in-memory copies; they are not boot, init/systemd or physical-device acceptance.",
+      "initial": {
+        "kind": "PersistentMounts",
+        "storage": {
+          "inventory": {
+            "volumes": {
+              "data": {
+                "uuid": "00006100-0000-4000-8000-000000000001",
+                "filesystem": "ext4"
+              },
+              "audit": {
+                "uuid": "00006100-0000-4000-8000-000000000002",
+                "filesystem": "ext4"
+              }
+            },
+            "devices": {
+              "/dev/vda1": "data",
+              "/dev/vdb1": "audit"
+            },
+            "mountpoints": [
+              "/audit",
+              "/data"
+            ],
+            "swap": {
+              "areas": [
+                {
+                  "id": "fast-swap",
+                  "device": "/dev/vdc1",
+                  "uuid": "00006100-0000-4000-8000-000000000003",
+                  "size_bytes": 1073741824,
+                  "prepared": true,
+                  "available": true
+                },
+                {
+                  "id": "reserve",
+                  "device": "/dev/vdd1",
+                  "uuid": "00006100-0000-4000-8000-000000000004",
+                  "size_bytes": 536870912,
+                  "prepared": true,
+                  "available": true
+                }
+              ]
+            }
+          },
+          "configuration": "UUID=00006100-0000-4000-8000-000000000001 /data ext4 defaults 0 2\nUUID=00006100-0000-4000-8000-000000000002 /audit ext4 ro 0 2\nUUID=00006100-0000-4000-8000-000000000003 none swap noauto,pri=40 0 0\nUUID=00006100-0000-4000-8000-000000000004 none swap noauto,pri=5 0 0\n",
+          "live": {
+            "/data": {
+              "volume": "data",
+              "read_only": false
+            },
+            "/audit": {
+              "volume": "audit",
+              "read_only": true
+            }
+          },
+          "active_swap": {
+            "reserve": 5
+          }
+        }
+      },
+      "goal": {
+        "kind": "PersistentMounts",
+        "initial": {
+          "volumes": {
+            "data": {
+              "uuid": "00006100-0000-4000-8000-000000000001",
+              "filesystem": "ext4"
+            },
+            "audit": {
+              "uuid": "00006100-0000-4000-8000-000000000002",
+              "filesystem": "ext4"
+            }
+          },
+          "devices": {
+            "/dev/vda1": "data",
+            "/dev/vdb1": "audit"
+          },
+          "mountpoints": [
+            "/audit",
+            "/data"
+          ],
+          "swap": {
+            "areas": [
+              {
+                "id": "fast-swap",
+                "device": "/dev/vdc1",
+                "uuid": "00006100-0000-4000-8000-000000000003",
+                "size_bytes": 1073741824,
+                "prepared": true,
+                "available": true
+              },
+              {
+                "id": "reserve",
+                "device": "/dev/vdd1",
+                "uuid": "00006100-0000-4000-8000-000000000004",
+                "size_bytes": 536870912,
+                "prepared": true,
+                "available": true
+              }
+            ]
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Configured",
+            "target": "/data",
+            "volume": "data",
+            "read_only": false,
+            "automatic": true,
+            "dump": 0,
+            "pass": 2
+          },
+          {
+            "kind": "Mounted",
+            "target": "/data",
+            "volume": "data",
+            "read_only": false
+          },
+          {
+            "kind": "Configured",
+            "target": "/audit",
+            "volume": "audit",
+            "read_only": true,
+            "automatic": true,
+            "dump": 0,
+            "pass": 2
+          },
+          {
+            "kind": "Mounted",
+            "target": "/audit",
+            "volume": "audit",
+            "read_only": true
+          },
+          {
+            "kind": "FreshSession",
+            "devices": {
+              "/dev/vda1": "audit",
+              "/dev/vdb1": "data"
+            },
+            "expected": {
+              "/data": {
+                "volume": "data",
+                "read_only": false
+              },
+              "/audit": {
+                "volume": "audit",
+                "read_only": true
+              }
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Configured",
+              "area": "fast-swap",
+              "automatic": true,
+              "priority": 40
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Active",
+              "area": "fast-swap",
+              "priority": 40
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Configured",
+              "area": "reserve",
+              "automatic": false,
+              "priority": 5
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Active",
+              "area": "reserve",
+              "priority": 5
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Fresh",
+              "devices": {
+                "/dev/vdc1": "fast-swap",
+                "/dev/vdd1": "reserve"
+              },
+              "expected": {
+                "fast-swap": 40,
+                "reserve": null
+              }
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Fresh",
+              "devices": {
+                "/dev/vdc1": "reserve",
+                "/dev/vdd1": "fast-swap"
+              },
+              "expected": {
+                "fast-swap": 40,
+                "reserve": null
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "storage {\"kind\":\"Save\",\"text\":\"UUID=00006100-0000-4000-8000-000000000001 /data ext4 defaults 0 2\\nUUID=00006100-0000-4000-8000-000000000002 /audit ext4 ro 0 2\\nUUID=00006100-0000-4000-8000-000000000003 none swap auto,pri=40 0 0\\nUUID=00006100-0000-4000-8000-000000000004 none swap noauto,pri=5 0 0\\n\"}",
+        "swapon -a"
+      ],
+      "prerequisites": [
+        "lpic1-disk-delivery",
+        "lpic1-removable-shared-handover"
+      ],
+      "storage_teaching": {
+        "prerequisite_note": "Builds on prepared partitions and saved/live mount practice. This lesson teaches swap activation and explicit priority; no Linux swap command runs on your computer.",
+        "concepts": [
+          {
+            "title": "Prepared, saved and active are different states",
+            "text": "Swap is space the kernel can use to hold memory pages outside RAM. This activity models prepared partition identities and activation only; it does not page memory or change this computer. Earlier disk preparation supplied the signature. A prepared area is not necessarily active, and a saved row is an instruction rather than proof of activation."
+          },
+          {
+            "title": "Read the supplied identity and the active table",
+            "text": "Use blkid to match each supplied UUID and its current /dev alias. The UUID identifies the same area if device names change. Run swapon --show --bytes to inspect active areas and their PRIO values. SIZE is supplied usable bytes; USED stays zero because this activity has no paging workload. It is not a host memory measurement."
+          },
+          {
+            "title": "Write a swap policy row",
+            "text": "A swap row has six fields: source, none, swap, options, 0, 0. The target none is unused; swap is not mounted on a directory. Here pri=N gives an explicit priority from 0 to 32767; higher numbers are preferred. Auto selects bulk activation; noauto skips it but still permits an explicit request. For swapon -a, remove noauto when you want automatic activation; adding auto later does not cancel it. This bounded subset does not implement negative kernel defaults, swap files or other swap options."
+          },
+          {
+            "title": "Save policy, then change active state",
+            "text": "Type the complete policy in the editor and choose Save configuration. That changes saved text only. Run swapon -a to activate supported automatic rows; it skips noauto and already-active areas. Alternatively swapon -p N -U UUID explicitly activates one prepared area. No command runs when you fill the worked example. Keep the existing data mounts and reserve area unchanged."
+          },
+          {
+            "title": "Verify both the present and the next policy evaluation",
+            "text": "Check configuration grades saved and active facts separately. Fresh-policy checks use independent copies with supplied aliases changed; they are not a real reboot and do not replace your current state. A correct current /dev name can select a different area in that test. Inspect the specific failed rows, repair only the mistake and check again."
+          }
+        ],
+        "example_description": "The separate workshop host uses UUID 00006200-0000-4000-8000-000000000003. Its desired automatic/active priority is 30; standby stays manual and active at priority 5. The workshop signature already exists but its area is not active. Preserve both supplied data mounts.",
+        "fixture": {
+          "inventory": {
+            "volumes": {
+              "data": {
+                "uuid": "00006200-0000-4000-8000-000000000001",
+                "filesystem": "ext4"
+              },
+              "audit": {
+                "uuid": "00006200-0000-4000-8000-000000000002",
+                "filesystem": "ext4"
+              }
+            },
+            "devices": {
+              "/dev/vda1": "data",
+              "/dev/vdb1": "audit"
+            },
+            "mountpoints": [
+              "/audit",
+              "/data"
+            ],
+            "swap": {
+              "areas": [
+                {
+                  "id": "workshop",
+                  "device": "/dev/vdc1",
+                  "uuid": "00006200-0000-4000-8000-000000000003",
+                  "size_bytes": 1073741824,
+                  "prepared": true,
+                  "available": true
+                },
+                {
+                  "id": "standby",
+                  "device": "/dev/vdd1",
+                  "uuid": "00006200-0000-4000-8000-000000000004",
+                  "size_bytes": 536870912,
+                  "prepared": true,
+                  "available": true
+                }
+              ]
+            }
+          },
+          "configuration": "UUID=00006200-0000-4000-8000-000000000001 /data ext4 defaults 0 2\nUUID=00006200-0000-4000-8000-000000000002 /audit ext4 ro 0 2\nUUID=00006200-0000-4000-8000-000000000003 none swap noauto,pri=30 0 0\nUUID=00006200-0000-4000-8000-000000000004 none swap noauto,pri=5 0 0\n",
+          "live": {
+            "/data": {
+              "volume": "data",
+              "read_only": false
+            },
+            "/audit": {
+              "volume": "audit",
+              "read_only": true
+            }
+          },
+          "active_swap": {
+            "standby": 5
+          }
+        },
+        "example_solution": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=00006200-0000-4000-8000-000000000001 /data ext4 defaults 0 2\\nUUID=00006200-0000-4000-8000-000000000002 /audit ext4 ro 0 2\\nUUID=00006200-0000-4000-8000-000000000003 none swap auto,pri=30 0 0\\nUUID=00006200-0000-4000-8000-000000000004 none swap noauto,pri=5 0 0\\n\"}",
+          "swapon -a"
+        ],
+        "example_commands": [
+          {
+            "command": "blkid",
+            "explanation": "Match the supplied swap UUIDs and device aliases; this does not activate anything.",
+            "simulator_only": false
+          },
+          {
+            "command": "cat /etc/fstab",
+            "explanation": "Inspect saved rows rather than an unsaved editor draft.",
+            "simulator_only": false
+          },
+          {
+            "command": "swapon --show --bytes",
+            "explanation": "Inspect active identities and priorities; the no-workload model reports zero used bytes.",
+            "simulator_only": false
+          },
+          {
+            "command": "swapon -a",
+            "explanation": "Read supported automatic rows; existing active and noauto areas are skipped.",
+            "simulator_only": false
+          }
+        ],
+        "outcomes": [
+          {
+            "kind": "Configured",
+            "target": "/data",
+            "volume": "data",
+            "read_only": false,
+            "automatic": true,
+            "dump": 0,
+            "pass": 2
+          },
+          {
+            "kind": "Mounted",
+            "target": "/data",
+            "volume": "data",
+            "read_only": false
+          },
+          {
+            "kind": "Configured",
+            "target": "/audit",
+            "volume": "audit",
+            "read_only": true,
+            "automatic": true,
+            "dump": 0,
+            "pass": 2
+          },
+          {
+            "kind": "Mounted",
+            "target": "/audit",
+            "volume": "audit",
+            "read_only": true
+          },
+          {
+            "kind": "FreshSession",
+            "devices": {
+              "/dev/vda1": "audit",
+              "/dev/vdb1": "data"
+            },
+            "expected": {
+              "/data": {
+                "volume": "data",
+                "read_only": false
+              },
+              "/audit": {
+                "volume": "audit",
+                "read_only": true
+              }
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Configured",
+              "area": "workshop",
+              "automatic": true,
+              "priority": 30
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Active",
+              "area": "workshop",
+              "priority": 30
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Configured",
+              "area": "standby",
+              "automatic": false,
+              "priority": 5
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Active",
+              "area": "standby",
+              "priority": 5
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Fresh",
+              "devices": {
+                "/dev/vdc1": "workshop",
+                "/dev/vdd1": "standby"
+              },
+              "expected": {
+                "workshop": 30,
+                "standby": null
+              }
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Fresh",
+              "devices": {
+                "/dev/vdc1": "standby",
+                "/dev/vdd1": "workshop"
+              },
+              "expected": {
+                "workshop": 30,
+                "standby": null
+              }
+            }
+          }
+        ],
+        "try_change": "After passing, change only the worked saved auto to noauto. Observe that current activation and future selection differ.",
+        "try_actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=00006200-0000-4000-8000-000000000001 /data ext4 defaults 0 2\\nUUID=00006200-0000-4000-8000-000000000002 /audit ext4 ro 0 2\\nUUID=00006200-0000-4000-8000-000000000003 none swap noauto,pri=30 0 0\\nUUID=00006200-0000-4000-8000-000000000004 none swap noauto,pri=5 0 0\\n\"}"
+        ]
+      }
+    },
+    {
+      "id": "lpic1-swap-replacement-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Swap activation and saved policy",
+      "unit": "linux-swap-policy",
+      "title": "Retire old swap and apply the replacement priority",
+      "summary": "Diagnose saved-versus-active priority and retire obsolete swap without losing protected storage.",
+      "objective": "replacement is the supplied prepared area UUID 00006101-0000-4000-8000-000000000003. Keep it active with priority 100 and automatically selected at that priority by the saved policy. Retire retired: remove its saved swap entry and make it inactive. Diagnose the replacement\u2019s actual active priority rather than trusting its saved row. Keep reserve active at its original priority 5, but manual (noauto) in the saved file. An active reserve need not be automatically selected. Keep /data mounted writable and /audit mounted read-only with their original UUIDs, automatic saved policies and supplied final fields. The saved configuration must retain these choices when the supplied device names are permuted. Use supported literal commands and the virtual editor only.",
+      "retry_guidance": "Read Saved and Active feedback separately. Inspect the active table before repeating an activation; keep protected mounts and the reserve intact.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Repair saved policy and inspect active areas",
+        "Apply only the needed changes and verify"
+      ],
+      "guide": [],
+      "explanation": "The saved replacement priority did not alter its existing active priority. The old area also needed both a policy removal and deactivation. Reapplying the desired priority after deactivation repairs the live state; UUID policy survives alias changes. Protected data and the manual reserve remain.",
+      "hints": [
+        "Compare the supplied UUID with the saved source and the NAME/PRIO rows; a saved policy is not an active-state report.",
+        "Change only the requested swap row(s). Keep the complete original /data and /audit policy and their live mounts.",
+        "Running swapon -a cannot replace the priority of an active area. In this no-workload model deactivate the intended replacement, then activate it again after saving the correct policy. The retired area needs its own deactivation."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/swapon.8.html",
+        "https://man7.org/linux/man-pages/man5/fstab.5.html"
+      ],
+      "simplifications": "Source-enabled prepared partitions only; no host devices, paging, memory/OOM policy, swap files, zram/zswap, discard, hibernation, kernel-selected priorities or full utility semantics. Only six literal fields and defaults/auto/noauto/one explicit pri are accepted. Real swapon can ignore unknown options; this simulator refuses them honestly. It validates complete supported syntax before bulk activation; admitted row failures preserve other successes. Fresh-policy cases permute supplied aliases in independent in-memory copies; they are not boot, init/systemd or physical-device acceptance.",
+      "initial": {
+        "kind": "PersistentMounts",
+        "storage": {
+          "inventory": {
+            "volumes": {
+              "data": {
+                "uuid": "00006101-0000-4000-8000-000000000001",
+                "filesystem": "ext4"
+              },
+              "audit": {
+                "uuid": "00006101-0000-4000-8000-000000000002",
+                "filesystem": "ext4"
+              }
+            },
+            "devices": {
+              "/dev/vda1": "data",
+              "/dev/vdb1": "audit"
+            },
+            "mountpoints": [
+              "/audit",
+              "/data"
+            ],
+            "swap": {
+              "areas": [
+                {
+                  "id": "replacement",
+                  "device": "/dev/vdc1",
+                  "uuid": "00006101-0000-4000-8000-000000000003",
+                  "size_bytes": 1073741824,
+                  "prepared": true,
+                  "available": true
+                },
+                {
+                  "id": "reserve",
+                  "device": "/dev/vdd1",
+                  "uuid": "00006101-0000-4000-8000-000000000004",
+                  "size_bytes": 536870912,
+                  "prepared": true,
+                  "available": true
+                },
+                {
+                  "id": "retired",
+                  "device": "/dev/vde1",
+                  "uuid": "00006101-0000-4000-8000-000000000005",
+                  "size_bytes": 536870912,
+                  "prepared": true,
+                  "available": true
+                }
+              ]
+            }
+          },
+          "configuration": "UUID=00006101-0000-4000-8000-000000000001 /data ext4 defaults 0 2\nUUID=00006101-0000-4000-8000-000000000002 /audit ext4 ro 0 2\nUUID=00006101-0000-4000-8000-000000000003 none swap auto,pri=100 0 0\nUUID=00006101-0000-4000-8000-000000000004 none swap noauto,pri=5 0 0\nUUID=00006101-0000-4000-8000-000000000005 none swap auto,pri=40 0 0\n",
+          "live": {
+            "/data": {
+              "volume": "data",
+              "read_only": false
+            },
+            "/audit": {
+              "volume": "audit",
+              "read_only": true
+            }
+          },
+          "active_swap": {
+            "reserve": 5,
+            "replacement": 10,
+            "retired": 40
+          }
+        }
+      },
+      "goal": {
+        "kind": "PersistentMounts",
+        "initial": {
+          "volumes": {
+            "data": {
+              "uuid": "00006101-0000-4000-8000-000000000001",
+              "filesystem": "ext4"
+            },
+            "audit": {
+              "uuid": "00006101-0000-4000-8000-000000000002",
+              "filesystem": "ext4"
+            }
+          },
+          "devices": {
+            "/dev/vda1": "data",
+            "/dev/vdb1": "audit"
+          },
+          "mountpoints": [
+            "/audit",
+            "/data"
+          ],
+          "swap": {
+            "areas": [
+              {
+                "id": "replacement",
+                "device": "/dev/vdc1",
+                "uuid": "00006101-0000-4000-8000-000000000003",
+                "size_bytes": 1073741824,
+                "prepared": true,
+                "available": true
+              },
+              {
+                "id": "reserve",
+                "device": "/dev/vdd1",
+                "uuid": "00006101-0000-4000-8000-000000000004",
+                "size_bytes": 536870912,
+                "prepared": true,
+                "available": true
+              },
+              {
+                "id": "retired",
+                "device": "/dev/vde1",
+                "uuid": "00006101-0000-4000-8000-000000000005",
+                "size_bytes": 536870912,
+                "prepared": true,
+                "available": true
+              }
+            ]
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Configured",
+            "target": "/data",
+            "volume": "data",
+            "read_only": false,
+            "automatic": true,
+            "dump": 0,
+            "pass": 2
+          },
+          {
+            "kind": "Mounted",
+            "target": "/data",
+            "volume": "data",
+            "read_only": false
+          },
+          {
+            "kind": "Configured",
+            "target": "/audit",
+            "volume": "audit",
+            "read_only": true,
+            "automatic": true,
+            "dump": 0,
+            "pass": 2
+          },
+          {
+            "kind": "Mounted",
+            "target": "/audit",
+            "volume": "audit",
+            "read_only": true
+          },
+          {
+            "kind": "FreshSession",
+            "devices": {
+              "/dev/vda1": "audit",
+              "/dev/vdb1": "data"
+            },
+            "expected": {
+              "/data": {
+                "volume": "data",
+                "read_only": false
+              },
+              "/audit": {
+                "volume": "audit",
+                "read_only": true
+              }
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Configured",
+              "area": "replacement",
+              "automatic": true,
+              "priority": 100
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Active",
+              "area": "replacement",
+              "priority": 100
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Configured",
+              "area": "reserve",
+              "automatic": false,
+              "priority": 5
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Active",
+              "area": "reserve",
+              "priority": 5
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Unconfigured",
+              "area": "retired"
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Inactive",
+              "area": "retired"
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Fresh",
+              "devices": {
+                "/dev/vdc1": "reserve",
+                "/dev/vdd1": "retired",
+                "/dev/vde1": "replacement"
+              },
+              "expected": {
+                "replacement": 100,
+                "reserve": null,
+                "retired": null
+              }
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Fresh",
+              "devices": {
+                "/dev/vdc1": "retired",
+                "/dev/vdd1": "replacement",
+                "/dev/vde1": "reserve"
+              },
+              "expected": {
+                "replacement": 100,
+                "reserve": null,
+                "retired": null
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "storage {\"kind\":\"Save\",\"text\":\"UUID=00006101-0000-4000-8000-000000000001 /data ext4 defaults 0 2\\nUUID=00006101-0000-4000-8000-000000000002 /audit ext4 ro 0 2\\nUUID=00006101-0000-4000-8000-000000000003 none swap auto,pri=100 0 0\\nUUID=00006101-0000-4000-8000-000000000004 none swap noauto,pri=5 0 0\\n\"}",
+        "swapoff /dev/vde1",
+        "swapoff /dev/vdc1",
+        "swapon -a"
+      ],
+      "prerequisites": [
+        "lpic1-swap-prepared-activation"
+      ],
+      "storage_teaching": {
+        "prerequisite_note": "Builds on prepared partitions and saved/live mount practice. This lesson teaches swap activation and explicit priority; no Linux swap command runs on your computer.",
+        "concepts": [
+          {
+            "title": "Read the handover as three checks",
+            "text": "The earlier activity separated prepared, saved and active areas. This handover adds a replacement and a retirement. Inspect the intended replacement, the obsolete area and the protected reserve separately; a correct command for one does not prove the whole handover."
+          },
+          {
+            "title": "The saved file can be ahead of active state",
+            "text": "In the workshop example, the saved replacement row requests priority 90 while swapon --show --bytes still reports 10. That active row records the earlier activation. Repeating swapon -a skips an already-active area; it cannot adopt the new saved priority."
+          },
+          {
+            "title": "Retirement needs both policy and deactivation",
+            "text": "Removing the old saved row prevents future automatic selection, but does not stop its current activation. Deactivating it without removing that row leaves it able to return in the next policy test. Check both facts without changing standby or either data mount."
+          },
+          {
+            "title": "Apply the desired priority to the intended area",
+            "text": "Save the desired policy, deactivate only the obsolete and stale replacement areas, then activate the desired automatic row. Match UUIDs and aliases before each request; standby must retain its own active priority. The supplied areas have no paging workload. Real swapoff can fail if memory is insufficient; that runtime behavior is not modeled."
+          },
+          {
+            "title": "Verify future identity without resetting the session",
+            "text": "Test saved policy compares expected and actual automatic areas in independent copies with device aliases changed. Stable UUIDs keep the plan tied to the right area. An empty plan, an active-only repair or a stale old row fails a different requirement; read the specific feedback and retry only that part."
+          }
+        ],
+        "example_description": "The separate workshop host uses UUID 00006201-0000-4000-8000-000000000003. Its desired automatic/active priority is 90; standby stays manual and active at priority 5. Retire the old workshop area too. Its replacement is already active with the wrong priority.",
+        "fixture": {
+          "inventory": {
+            "volumes": {
+              "data": {
+                "uuid": "00006201-0000-4000-8000-000000000001",
+                "filesystem": "ext4"
+              },
+              "audit": {
+                "uuid": "00006201-0000-4000-8000-000000000002",
+                "filesystem": "ext4"
+              }
+            },
+            "devices": {
+              "/dev/vda1": "data",
+              "/dev/vdb1": "audit"
+            },
+            "mountpoints": [
+              "/audit",
+              "/data"
+            ],
+            "swap": {
+              "areas": [
+                {
+                  "id": "workshop",
+                  "device": "/dev/vdc1",
+                  "uuid": "00006201-0000-4000-8000-000000000003",
+                  "size_bytes": 1073741824,
+                  "prepared": true,
+                  "available": true
+                },
+                {
+                  "id": "standby",
+                  "device": "/dev/vdd1",
+                  "uuid": "00006201-0000-4000-8000-000000000004",
+                  "size_bytes": 536870912,
+                  "prepared": true,
+                  "available": true
+                },
+                {
+                  "id": "old-workshop",
+                  "device": "/dev/vde1",
+                  "uuid": "00006201-0000-4000-8000-000000000005",
+                  "size_bytes": 536870912,
+                  "prepared": true,
+                  "available": true
+                }
+              ]
+            }
+          },
+          "configuration": "UUID=00006201-0000-4000-8000-000000000001 /data ext4 defaults 0 2\nUUID=00006201-0000-4000-8000-000000000002 /audit ext4 ro 0 2\nUUID=00006201-0000-4000-8000-000000000003 none swap auto,pri=90 0 0\nUUID=00006201-0000-4000-8000-000000000004 none swap noauto,pri=5 0 0\nUUID=00006201-0000-4000-8000-000000000005 none swap auto,pri=40 0 0\n",
+          "live": {
+            "/data": {
+              "volume": "data",
+              "read_only": false
+            },
+            "/audit": {
+              "volume": "audit",
+              "read_only": true
+            }
+          },
+          "active_swap": {
+            "standby": 5,
+            "workshop": 10,
+            "old-workshop": 40
+          }
+        },
+        "example_solution": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=00006201-0000-4000-8000-000000000001 /data ext4 defaults 0 2\\nUUID=00006201-0000-4000-8000-000000000002 /audit ext4 ro 0 2\\nUUID=00006201-0000-4000-8000-000000000003 none swap auto,pri=90 0 0\\nUUID=00006201-0000-4000-8000-000000000004 none swap noauto,pri=5 0 0\\n\"}",
+          "swapoff /dev/vde1",
+          "swapoff /dev/vdc1",
+          "swapon -a"
+        ],
+        "example_commands": [
+          {
+            "command": "blkid",
+            "explanation": "Match the supplied swap UUIDs and device aliases; this does not activate anything.",
+            "simulator_only": false
+          },
+          {
+            "command": "cat /etc/fstab",
+            "explanation": "Inspect saved rows rather than an unsaved editor draft.",
+            "simulator_only": false
+          },
+          {
+            "command": "swapon --show --bytes",
+            "explanation": "Inspect active identities and priorities; the no-workload model reports zero used bytes.",
+            "simulator_only": false
+          },
+          {
+            "command": "swapon -a",
+            "explanation": "Read supported automatic rows; existing active and noauto areas are skipped.",
+            "simulator_only": false
+          }
+        ],
+        "outcomes": [
+          {
+            "kind": "Configured",
+            "target": "/data",
+            "volume": "data",
+            "read_only": false,
+            "automatic": true,
+            "dump": 0,
+            "pass": 2
+          },
+          {
+            "kind": "Mounted",
+            "target": "/data",
+            "volume": "data",
+            "read_only": false
+          },
+          {
+            "kind": "Configured",
+            "target": "/audit",
+            "volume": "audit",
+            "read_only": true,
+            "automatic": true,
+            "dump": 0,
+            "pass": 2
+          },
+          {
+            "kind": "Mounted",
+            "target": "/audit",
+            "volume": "audit",
+            "read_only": true
+          },
+          {
+            "kind": "FreshSession",
+            "devices": {
+              "/dev/vda1": "audit",
+              "/dev/vdb1": "data"
+            },
+            "expected": {
+              "/data": {
+                "volume": "data",
+                "read_only": false
+              },
+              "/audit": {
+                "volume": "audit",
+                "read_only": true
+              }
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Configured",
+              "area": "workshop",
+              "automatic": true,
+              "priority": 90
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Active",
+              "area": "workshop",
+              "priority": 90
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Configured",
+              "area": "standby",
+              "automatic": false,
+              "priority": 5
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Active",
+              "area": "standby",
+              "priority": 5
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Unconfigured",
+              "area": "old-workshop"
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Inactive",
+              "area": "old-workshop"
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Fresh",
+              "devices": {
+                "/dev/vdc1": "standby",
+                "/dev/vdd1": "old-workshop",
+                "/dev/vde1": "workshop"
+              },
+              "expected": {
+                "workshop": 90,
+                "standby": null,
+                "old-workshop": null
+              }
+            }
+          },
+          {
+            "kind": "Swap",
+            "requirement": {
+              "kind": "Fresh",
+              "devices": {
+                "/dev/vdc1": "old-workshop",
+                "/dev/vdd1": "workshop",
+                "/dev/vde1": "standby"
+              },
+              "expected": {
+                "workshop": 90,
+                "standby": null,
+                "old-workshop": null
+              }
+            }
+          }
+        ],
+        "try_change": "After passing, change only the worked saved priority, without reactivating it. Compare the saved and active results.",
+        "try_actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=00006201-0000-4000-8000-000000000001 /data ext4 defaults 0 2\\nUUID=00006201-0000-4000-8000-000000000002 /audit ext4 ro 0 2\\nUUID=00006201-0000-4000-8000-000000000003 none swap auto,pri=100 0 0\\nUUID=00006201-0000-4000-8000-000000000004 none swap noauto,pri=5 0 0\\n\"}"
+        ]
+      }
+    }
+  ]
+}

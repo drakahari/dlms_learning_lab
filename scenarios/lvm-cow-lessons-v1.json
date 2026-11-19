@@ -1,0 +1,4787 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-lvm-saved-view",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM snapshots and recovery",
+      "unit": "lvm-cow-recovery",
+      "title": "Keep an earlier report while the application changes",
+      "summary": "Create a point-in-time view, run a supplied update, and compare earlier and current data.",
+      "objective": "Prepare report/before_run before applying Next report. Use 128 KiB chunks and reserve 1\u20132 MiB of COW space. Current status must be week2=ok and total count=24; before_run must retain the supplied earlier values of both records. Keep at least 6 MiB free in report. Keep the origin allocation, reference volume, foreign device and unrelated data unchanged. Do not leave extra snapshots.",
+      "retry_guidance": "Compare current records, saved records, validity and physical reservations separately. A new matching name does not restore old history. Refused operations retain prior work; reset only this attempt if an essential original view was lost.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "report/report": {
+                  "next_snapshot_id": 1,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "status": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "total": {
+                      "offset": 131136,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "status": {
+                      "contents": "week1=ok"
+                    },
+                    "total": {
+                      "contents": "count=10"
+                    }
+                  },
+                  "snapshots": {}
+                }
+              }
+            },
+            "devices": {
+              "/dev/reportdisk": {
+                "bytes": 13631488,
+                "role": "PhysicalVolume",
+                "group": "report"
+              },
+              "/dev/reportforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "report": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reportdisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/reportdisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reportdisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "report/report": {
+                  "next_snapshot_id": 1,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "status": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "total": {
+                      "offset": 131136,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "status": {
+                      "contents": "week1=ok"
+                    },
+                    "total": {
+                      "contents": "count=10"
+                    }
+                  },
+                  "snapshots": {}
+                }
+              }
+            },
+            "devices": {
+              "/dev/reportdisk": {
+                "bytes": 13631488,
+                "role": "PhysicalVolume",
+                "group": "report"
+              },
+              "/dev/reportforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "report": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reportdisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/reportdisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reportdisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "sample/report": {
+                  "next_snapshot_id": 1,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "status": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "total": {
+                      "offset": 131136,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "status": {
+                      "contents": "demo1=ok"
+                    },
+                    "total": {
+                      "contents": "count=03"
+                    }
+                  },
+                  "snapshots": {}
+                }
+              }
+            },
+            "devices": {
+              "/dev/sampledisk": {
+                "bytes": 13631488,
+                "role": "PhysicalVolume",
+                "group": "sample"
+              },
+              "/dev/sampleforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "sample": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/sampledisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/sampledisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/sampledisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "sample/report": {
+                  "next_snapshot_id": 1,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "status": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "total": {
+                      "offset": 131136,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "status": {
+                      "contents": "demo1=ok"
+                    },
+                    "total": {
+                      "contents": "count=03"
+                    }
+                  },
+                  "snapshots": {}
+                }
+              }
+            },
+            "devices": {
+              "/dev/sampledisk": {
+                "bytes": 13631488,
+                "role": "PhysicalVolume",
+                "group": "sample"
+              },
+              "/dev/sampleforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "sample": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/sampledisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/sampledisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/sampledisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "report/report": {
+                  "next_snapshot_id": 1,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "status": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "total": {
+                      "offset": 131136,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "status": {
+                      "contents": "week1=ok"
+                    },
+                    "total": {
+                      "contents": "count=10"
+                    }
+                  },
+                  "snapshots": {}
+                }
+              }
+            },
+            "devices": {
+              "/dev/reportdisk": {
+                "bytes": 13631488,
+                "role": "PhysicalVolume",
+                "group": "report"
+              },
+              "/dev/reportforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "report": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reportdisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/reportdisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reportdisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "targets": [],
+          "snapshot_task": {
+            "context": {
+              "plan": {
+                "origins": [
+                  {
+                    "volume": "report/report",
+                    "records": [
+                      {
+                        "record": "status",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "week2=ok"
+                        }
+                      },
+                      {
+                        "record": "total",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "count=24"
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "snapshots": [
+                  {
+                    "origin": "report/report",
+                    "name": "before_run",
+                    "minimum_bytes": 1048576,
+                    "maximum_bytes": 2097152,
+                    "chunk_bytes": 131072,
+                    "records": [
+                      {
+                        "record": "status",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "total",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "retire": [],
+                "reserves": [
+                  {
+                    "group": "report",
+                    "minimum_bytes": 6291456
+                  }
+                ]
+              },
+              "updates": [
+                {
+                  "label": "Next report",
+                  "explanation": "The application writes two current records. A previously created saved view must still read the earlier report.",
+                  "writes": [
+                    {
+                      "origin": "report/report",
+                      "record": "status",
+                      "contents": "week2=ok"
+                    },
+                    {
+                      "origin": "report/report",
+                      "record": "total",
+                      "contents": "count=24"
+                    }
+                  ]
+                }
+              ]
+            },
+            "reference": [
+              {
+                "kind": "command",
+                "text": "lvcreate -s -L 1M -n before_run -c 128K report/report"
+              },
+              {
+                "kind": "apply_update",
+                "index": 0
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "First complete linear LVM growth and allocation practice: identify PV, VG, LV and free physical extents. This simulator supplies fixed-size raw application records, not a mounted filesystem. You do not need a real device or mount.",
+            "concepts": [
+              {
+                "title": "A saved view is a point in time",
+                "text": "The origin is the current application data. A snapshot lets you read an earlier view while the application keeps writing. Create it before the change you want protection from; a later snapshot cannot invent earlier data."
+              },
+              {
+                "title": "Copy on the first write",
+                "text": "Copy-on-write (COW) saves a chunk\u2019s old bytes the first time the origin writes there. Unchanged chunks still read from the origin. Rewriting a copied chunk does not consume another chunk in that snapshot."
+              },
+              {
+                "title": "Separate physical space",
+                "text": "The origin address range and its COW reservation are different storage. The example reserves a raw LV for the saved chunks and leaves the reference LV intact. Inspect vgs for the remaining physical space."
+              },
+              {
+                "title": "What you can inspect here",
+                "text": "These exercises use fixed-size, printable text records in raw virtual storage. The record reader and application-update buttons are simulator tools, not mounts, filesystems or Linux utilities. This is not a backup independent of the origin."
+              }
+            ],
+            "description": "sample/report starts with status demo1=ok and total count=03. Reserve sample/before_run first. Next report changes current data to demo2=ok and count=09; the saved view still reads demo1=ok and count=03.",
+            "fixture": {
+              "version": 1,
+              "snapshots": {
+                "origins": {
+                  "sample/report": {
+                    "next_snapshot_id": 1,
+                    "byte_len": 2097152,
+                    "layout": {
+                      "status": {
+                        "offset": 64,
+                        "length": 8
+                      },
+                      "total": {
+                        "offset": 131136,
+                        "length": 8
+                      }
+                    },
+                    "current": {
+                      "status": {
+                        "contents": "demo1=ok"
+                      },
+                      "total": {
+                        "contents": "count=03"
+                      }
+                    },
+                    "snapshots": {}
+                  }
+                }
+              },
+              "devices": {
+                "/dev/sampledisk": {
+                  "bytes": 13631488,
+                  "role": "PhysicalVolume",
+                  "group": "sample"
+                },
+                "/dev/sampleforeign": {
+                  "bytes": 9437184,
+                  "role": "Foreign",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "sample": {
+                  "extent_bytes": 1048576,
+                  "volumes": {
+                    "report": {
+                      "extents": [
+                        {
+                          "pv": "/dev/sampledisk",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/sampledisk",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": null
+                    },
+                    "reference": {
+                      "extents": [
+                        {
+                          "pv": "/dev/sampledisk",
+                          "index": 2
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 256,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "Keep this unrelated record unchanged.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [],
+            "worked": [],
+            "snapshot_practice": {
+              "context": {
+                "plan": {
+                  "origins": [
+                    {
+                      "volume": "sample/report",
+                      "records": [
+                        {
+                          "record": "status",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "demo2=ok"
+                          }
+                        },
+                        {
+                          "record": "total",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "count=09"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "snapshots": [
+                    {
+                      "origin": "sample/report",
+                      "name": "before_run",
+                      "minimum_bytes": 1048576,
+                      "maximum_bytes": 2097152,
+                      "chunk_bytes": 131072,
+                      "records": [
+                        {
+                          "record": "status",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "total",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "retire": [],
+                  "reserves": [
+                    {
+                      "group": "sample",
+                      "minimum_bytes": 6291456
+                    }
+                  ]
+                },
+                "updates": [
+                  {
+                    "label": "Next report",
+                    "explanation": "The application writes two current records. A previously created saved view must still read the earlier report.",
+                    "writes": [
+                      {
+                        "origin": "sample/report",
+                        "record": "status",
+                        "contents": "demo2=ok"
+                      },
+                      {
+                        "origin": "sample/report",
+                        "record": "total",
+                        "contents": "count=09"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "worked": [
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "lvcreate -s -L 1M -n before_run -c 128K sample/report"
+                  },
+                  "explanation": "Reserve a distinct 1 MiB COW store before the report changes. The 128 KiB chunks are an explicit exercise policy, not the command default."
+                },
+                {
+                  "operation": {
+                    "kind": "apply_update",
+                    "index": 0
+                  },
+                  "explanation": "Apply the supplied report update. Read the current status and the before_run value; they should now differ."
+                }
+              ],
+              "experiment": {
+                "kind": "command",
+                "text": "lvcreate -s -L 1M -n spare -c 128K sample/report"
+              },
+              "repair": [
+                {
+                  "kind": "command",
+                  "text": "lvremove -y sample/spare"
+                }
+              ]
+            },
+            "try_change": "After the worked example, create a spare saved view and check again: the extra storage violates the handover requirement. Remove only spare and retry. Reset and apply Next report before creating before_run to see why timing matters.",
+            "experiment": "",
+            "repair": ""
+          }
+        }
+      },
+      "steps": [
+        "Inspect current and saved storage.",
+        "Make the requested data and COW changes.",
+        "Verify actual records, free space and protected allocations."
+      ],
+      "guide": [
+        {
+          "title": "Keep an earlier report while the application changes",
+          "why": "Compare the current data with a readable saved point and preserve unrelated storage.",
+          "action": "Inspect current and saved storage.",
+          "commands": []
+        },
+        {
+          "title": "Keep an earlier report while the application changes",
+          "why": "Compare the current data with a readable saved point and preserve unrelated storage.",
+          "action": "Make the requested data and COW changes.",
+          "commands": []
+        },
+        {
+          "title": "Keep an earlier report while the application changes",
+          "why": "Compare the current data with a readable saved point and preserve unrelated storage.",
+          "action": "Verify actual records, free space and protected allocations.",
+          "commands": []
+        }
+      ],
+      "explanation": "Create or retain the required readable point before its protected changes. Manage only its separate COW store, use the explicit simulator application tools, and verify actual current and saved record values as well as protected physical allocations. Worked example: sample/report starts with status demo1=ok and total count=03. Reserve sample/before_run first. Next report changes current data to demo2=ok and count=09; the saved view still reads demo1=ok and count=03.",
+      "hints": [
+        "Create the saved view before applying Next report; later creation records the later data.",
+        "Use lvs and the reader to distinguish the 2 MiB origin from its separate COW reservation.",
+        "The worked approach reserves before_run with lvcreate -s, then uses the explicitly simulated report-update button."
+      ],
+      "sources": [
+        "https://man7.org/linux/man-pages/man8/lvcreate.8.html",
+        "https://man7.org/linux/man-pages/man8/lvextend.8.html",
+        "https://man7.org/linux/man-pages/man8/lvremove.8.html",
+        "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/system_design_guide/configuring_and_managing_logical_volumes"
+      ],
+      "simplifications": "Classic COW over supplied fixed-size printable ASCII raw records only; no mounted filesystem, binary data, kernel or real device. One metadata chunk is reserved as an explicit teaching convention, not real LVM metadata sizing. Chunks support powers of two from 4 to 512 KiB; these lessons prescribe 128 KiB. No thin snapshots, merge, automatic growth, activation, origin resize/removal or general backup/restore utility. Record updates and copies are clearly labeled simulator tools.",
+      "solution": [
+        "lvcreate -s -L 1M -n before_run -c 128K report/report",
+        "simulated-lvm-record {\"kind\":\"apply_update\",\"index\":0}"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-pv-capacity"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-cow-budget",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM snapshots and recovery",
+      "unit": "lvm-cow-recovery",
+      "title": "Prevent a saved view from exhausting its COW space",
+      "summary": "Diagnose the copied-chunk budget and grow the saved store before the scheduled update.",
+      "objective": "Grow budget/rolling while it is still readable to 2\u20133 MiB of COW space, preserving its existing point in time and 128 KiB chunks. Apply Scheduled eight chunks. The first eight current records must contain their supplied new values; the other eight current records must stay at their original values. rolling must retain all sixteen original records and remain readable. Keep at least 8 MiB free in budget and preserve all origin, reference and device allocations. Do not leave extra snapshots.",
+      "retry_guidance": "Compare current records, saved records, validity and physical reservations separately. A new matching name does not restore old history. Refused operations retain prior work; reset only this attempt if an essential original view was lost.",
+      "difficulty": "Intermediate",
+      "minutes": 26,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "budget/report": {
+                  "next_snapshot_id": 2,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "part00": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "part01": {
+                      "offset": 131136,
+                      "length": 8
+                    },
+                    "part02": {
+                      "offset": 262208,
+                      "length": 8
+                    },
+                    "part03": {
+                      "offset": 393280,
+                      "length": 8
+                    },
+                    "part04": {
+                      "offset": 524352,
+                      "length": 8
+                    },
+                    "part05": {
+                      "offset": 655424,
+                      "length": 8
+                    },
+                    "part06": {
+                      "offset": 786496,
+                      "length": 8
+                    },
+                    "part07": {
+                      "offset": 917568,
+                      "length": 8
+                    },
+                    "part08": {
+                      "offset": 1048640,
+                      "length": 8
+                    },
+                    "part09": {
+                      "offset": 1179712,
+                      "length": 8
+                    },
+                    "part10": {
+                      "offset": 1310784,
+                      "length": 8
+                    },
+                    "part11": {
+                      "offset": 1441856,
+                      "length": 8
+                    },
+                    "part12": {
+                      "offset": 1572928,
+                      "length": 8
+                    },
+                    "part13": {
+                      "offset": 1704000,
+                      "length": 8
+                    },
+                    "part14": {
+                      "offset": 1835072,
+                      "length": 8
+                    },
+                    "part15": {
+                      "offset": 1966144,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "part00": {
+                      "contents": "old-0000"
+                    },
+                    "part01": {
+                      "contents": "old-0001"
+                    },
+                    "part02": {
+                      "contents": "old-0002"
+                    },
+                    "part03": {
+                      "contents": "old-0003"
+                    },
+                    "part04": {
+                      "contents": "old-0004"
+                    },
+                    "part05": {
+                      "contents": "old-0005"
+                    },
+                    "part06": {
+                      "contents": "old-0006"
+                    },
+                    "part07": {
+                      "contents": "old-0007"
+                    },
+                    "part08": {
+                      "contents": "old-0008"
+                    },
+                    "part09": {
+                      "contents": "old-0009"
+                    },
+                    "part10": {
+                      "contents": "old-0010"
+                    },
+                    "part11": {
+                      "contents": "old-0011"
+                    },
+                    "part12": {
+                      "contents": "old-0012"
+                    },
+                    "part13": {
+                      "contents": "old-0013"
+                    },
+                    "part14": {
+                      "contents": "old-0014"
+                    },
+                    "part15": {
+                      "contents": "old-0015"
+                    }
+                  },
+                  "snapshots": {
+                    "rolling": {
+                      "id": 1,
+                      "capacity_bytes": 1048576,
+                      "chunk_bytes": 131072,
+                      "valid": true,
+                      "images": {}
+                    }
+                  }
+                }
+              }
+            },
+            "devices": {
+              "/dev/budgetdisk": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "budget"
+              },
+              "/dev/budgetforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "budget": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/budgetdisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/budgetdisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/budgetdisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  },
+                  "rolling": {
+                    "extents": [
+                      {
+                        "pv": "/dev/budgetdisk",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "budget/report": {
+                  "next_snapshot_id": 2,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "part00": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "part01": {
+                      "offset": 131136,
+                      "length": 8
+                    },
+                    "part02": {
+                      "offset": 262208,
+                      "length": 8
+                    },
+                    "part03": {
+                      "offset": 393280,
+                      "length": 8
+                    },
+                    "part04": {
+                      "offset": 524352,
+                      "length": 8
+                    },
+                    "part05": {
+                      "offset": 655424,
+                      "length": 8
+                    },
+                    "part06": {
+                      "offset": 786496,
+                      "length": 8
+                    },
+                    "part07": {
+                      "offset": 917568,
+                      "length": 8
+                    },
+                    "part08": {
+                      "offset": 1048640,
+                      "length": 8
+                    },
+                    "part09": {
+                      "offset": 1179712,
+                      "length": 8
+                    },
+                    "part10": {
+                      "offset": 1310784,
+                      "length": 8
+                    },
+                    "part11": {
+                      "offset": 1441856,
+                      "length": 8
+                    },
+                    "part12": {
+                      "offset": 1572928,
+                      "length": 8
+                    },
+                    "part13": {
+                      "offset": 1704000,
+                      "length": 8
+                    },
+                    "part14": {
+                      "offset": 1835072,
+                      "length": 8
+                    },
+                    "part15": {
+                      "offset": 1966144,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "part00": {
+                      "contents": "old-0000"
+                    },
+                    "part01": {
+                      "contents": "old-0001"
+                    },
+                    "part02": {
+                      "contents": "old-0002"
+                    },
+                    "part03": {
+                      "contents": "old-0003"
+                    },
+                    "part04": {
+                      "contents": "old-0004"
+                    },
+                    "part05": {
+                      "contents": "old-0005"
+                    },
+                    "part06": {
+                      "contents": "old-0006"
+                    },
+                    "part07": {
+                      "contents": "old-0007"
+                    },
+                    "part08": {
+                      "contents": "old-0008"
+                    },
+                    "part09": {
+                      "contents": "old-0009"
+                    },
+                    "part10": {
+                      "contents": "old-0010"
+                    },
+                    "part11": {
+                      "contents": "old-0011"
+                    },
+                    "part12": {
+                      "contents": "old-0012"
+                    },
+                    "part13": {
+                      "contents": "old-0013"
+                    },
+                    "part14": {
+                      "contents": "old-0014"
+                    },
+                    "part15": {
+                      "contents": "old-0015"
+                    }
+                  },
+                  "snapshots": {
+                    "rolling": {
+                      "id": 1,
+                      "capacity_bytes": 1048576,
+                      "chunk_bytes": 131072,
+                      "valid": true,
+                      "images": {}
+                    }
+                  }
+                }
+              }
+            },
+            "devices": {
+              "/dev/budgetdisk": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "budget"
+              },
+              "/dev/budgetforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "budget": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/budgetdisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/budgetdisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/budgetdisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  },
+                  "rolling": {
+                    "extents": [
+                      {
+                        "pv": "/dev/budgetdisk",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "practice/report": {
+                  "next_snapshot_id": 2,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "part00": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "part01": {
+                      "offset": 131136,
+                      "length": 8
+                    },
+                    "part02": {
+                      "offset": 262208,
+                      "length": 8
+                    },
+                    "part03": {
+                      "offset": 393280,
+                      "length": 8
+                    },
+                    "part04": {
+                      "offset": 524352,
+                      "length": 8
+                    },
+                    "part05": {
+                      "offset": 655424,
+                      "length": 8
+                    },
+                    "part06": {
+                      "offset": 786496,
+                      "length": 8
+                    },
+                    "part07": {
+                      "offset": 917568,
+                      "length": 8
+                    },
+                    "part08": {
+                      "offset": 1048640,
+                      "length": 8
+                    },
+                    "part09": {
+                      "offset": 1179712,
+                      "length": 8
+                    },
+                    "part10": {
+                      "offset": 1310784,
+                      "length": 8
+                    },
+                    "part11": {
+                      "offset": 1441856,
+                      "length": 8
+                    },
+                    "part12": {
+                      "offset": 1572928,
+                      "length": 8
+                    },
+                    "part13": {
+                      "offset": 1704000,
+                      "length": 8
+                    },
+                    "part14": {
+                      "offset": 1835072,
+                      "length": 8
+                    },
+                    "part15": {
+                      "offset": 1966144,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "part00": {
+                      "contents": "old-0000"
+                    },
+                    "part01": {
+                      "contents": "old-0001"
+                    },
+                    "part02": {
+                      "contents": "old-0002"
+                    },
+                    "part03": {
+                      "contents": "old-0003"
+                    },
+                    "part04": {
+                      "contents": "old-0004"
+                    },
+                    "part05": {
+                      "contents": "old-0005"
+                    },
+                    "part06": {
+                      "contents": "old-0006"
+                    },
+                    "part07": {
+                      "contents": "old-0007"
+                    },
+                    "part08": {
+                      "contents": "old-0008"
+                    },
+                    "part09": {
+                      "contents": "old-0009"
+                    },
+                    "part10": {
+                      "contents": "old-0010"
+                    },
+                    "part11": {
+                      "contents": "old-0011"
+                    },
+                    "part12": {
+                      "contents": "old-0012"
+                    },
+                    "part13": {
+                      "contents": "old-0013"
+                    },
+                    "part14": {
+                      "contents": "old-0014"
+                    },
+                    "part15": {
+                      "contents": "old-0015"
+                    }
+                  },
+                  "snapshots": {
+                    "rolling": {
+                      "id": 1,
+                      "capacity_bytes": 1048576,
+                      "chunk_bytes": 131072,
+                      "valid": true,
+                      "images": {}
+                    }
+                  }
+                }
+              }
+            },
+            "devices": {
+              "/dev/practicedisk": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "practice"
+              },
+              "/dev/practiceforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "practice": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/practicedisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/practicedisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/practicedisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  },
+                  "rolling": {
+                    "extents": [
+                      {
+                        "pv": "/dev/practicedisk",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "practice/report": {
+                  "next_snapshot_id": 2,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "part00": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "part01": {
+                      "offset": 131136,
+                      "length": 8
+                    },
+                    "part02": {
+                      "offset": 262208,
+                      "length": 8
+                    },
+                    "part03": {
+                      "offset": 393280,
+                      "length": 8
+                    },
+                    "part04": {
+                      "offset": 524352,
+                      "length": 8
+                    },
+                    "part05": {
+                      "offset": 655424,
+                      "length": 8
+                    },
+                    "part06": {
+                      "offset": 786496,
+                      "length": 8
+                    },
+                    "part07": {
+                      "offset": 917568,
+                      "length": 8
+                    },
+                    "part08": {
+                      "offset": 1048640,
+                      "length": 8
+                    },
+                    "part09": {
+                      "offset": 1179712,
+                      "length": 8
+                    },
+                    "part10": {
+                      "offset": 1310784,
+                      "length": 8
+                    },
+                    "part11": {
+                      "offset": 1441856,
+                      "length": 8
+                    },
+                    "part12": {
+                      "offset": 1572928,
+                      "length": 8
+                    },
+                    "part13": {
+                      "offset": 1704000,
+                      "length": 8
+                    },
+                    "part14": {
+                      "offset": 1835072,
+                      "length": 8
+                    },
+                    "part15": {
+                      "offset": 1966144,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "part00": {
+                      "contents": "old-0000"
+                    },
+                    "part01": {
+                      "contents": "old-0001"
+                    },
+                    "part02": {
+                      "contents": "old-0002"
+                    },
+                    "part03": {
+                      "contents": "old-0003"
+                    },
+                    "part04": {
+                      "contents": "old-0004"
+                    },
+                    "part05": {
+                      "contents": "old-0005"
+                    },
+                    "part06": {
+                      "contents": "old-0006"
+                    },
+                    "part07": {
+                      "contents": "old-0007"
+                    },
+                    "part08": {
+                      "contents": "old-0008"
+                    },
+                    "part09": {
+                      "contents": "old-0009"
+                    },
+                    "part10": {
+                      "contents": "old-0010"
+                    },
+                    "part11": {
+                      "contents": "old-0011"
+                    },
+                    "part12": {
+                      "contents": "old-0012"
+                    },
+                    "part13": {
+                      "contents": "old-0013"
+                    },
+                    "part14": {
+                      "contents": "old-0014"
+                    },
+                    "part15": {
+                      "contents": "old-0015"
+                    }
+                  },
+                  "snapshots": {
+                    "rolling": {
+                      "id": 1,
+                      "capacity_bytes": 1048576,
+                      "chunk_bytes": 131072,
+                      "valid": true,
+                      "images": {}
+                    }
+                  }
+                }
+              }
+            },
+            "devices": {
+              "/dev/practicedisk": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "practice"
+              },
+              "/dev/practiceforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "practice": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/practicedisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/practicedisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/practicedisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  },
+                  "rolling": {
+                    "extents": [
+                      {
+                        "pv": "/dev/practicedisk",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "budget/report": {
+                  "next_snapshot_id": 2,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "part00": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "part01": {
+                      "offset": 131136,
+                      "length": 8
+                    },
+                    "part02": {
+                      "offset": 262208,
+                      "length": 8
+                    },
+                    "part03": {
+                      "offset": 393280,
+                      "length": 8
+                    },
+                    "part04": {
+                      "offset": 524352,
+                      "length": 8
+                    },
+                    "part05": {
+                      "offset": 655424,
+                      "length": 8
+                    },
+                    "part06": {
+                      "offset": 786496,
+                      "length": 8
+                    },
+                    "part07": {
+                      "offset": 917568,
+                      "length": 8
+                    },
+                    "part08": {
+                      "offset": 1048640,
+                      "length": 8
+                    },
+                    "part09": {
+                      "offset": 1179712,
+                      "length": 8
+                    },
+                    "part10": {
+                      "offset": 1310784,
+                      "length": 8
+                    },
+                    "part11": {
+                      "offset": 1441856,
+                      "length": 8
+                    },
+                    "part12": {
+                      "offset": 1572928,
+                      "length": 8
+                    },
+                    "part13": {
+                      "offset": 1704000,
+                      "length": 8
+                    },
+                    "part14": {
+                      "offset": 1835072,
+                      "length": 8
+                    },
+                    "part15": {
+                      "offset": 1966144,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "part00": {
+                      "contents": "old-0000"
+                    },
+                    "part01": {
+                      "contents": "old-0001"
+                    },
+                    "part02": {
+                      "contents": "old-0002"
+                    },
+                    "part03": {
+                      "contents": "old-0003"
+                    },
+                    "part04": {
+                      "contents": "old-0004"
+                    },
+                    "part05": {
+                      "contents": "old-0005"
+                    },
+                    "part06": {
+                      "contents": "old-0006"
+                    },
+                    "part07": {
+                      "contents": "old-0007"
+                    },
+                    "part08": {
+                      "contents": "old-0008"
+                    },
+                    "part09": {
+                      "contents": "old-0009"
+                    },
+                    "part10": {
+                      "contents": "old-0010"
+                    },
+                    "part11": {
+                      "contents": "old-0011"
+                    },
+                    "part12": {
+                      "contents": "old-0012"
+                    },
+                    "part13": {
+                      "contents": "old-0013"
+                    },
+                    "part14": {
+                      "contents": "old-0014"
+                    },
+                    "part15": {
+                      "contents": "old-0015"
+                    }
+                  },
+                  "snapshots": {
+                    "rolling": {
+                      "id": 1,
+                      "capacity_bytes": 1048576,
+                      "chunk_bytes": 131072,
+                      "valid": true,
+                      "images": {}
+                    }
+                  }
+                }
+              }
+            },
+            "devices": {
+              "/dev/budgetdisk": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "budget"
+              },
+              "/dev/budgetforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "budget": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/budgetdisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/budgetdisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/budgetdisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  },
+                  "rolling": {
+                    "extents": [
+                      {
+                        "pv": "/dev/budgetdisk",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "targets": [],
+          "snapshot_task": {
+            "context": {
+              "plan": {
+                "origins": [
+                  {
+                    "volume": "budget/report",
+                    "records": [
+                      {
+                        "record": "part00",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "new-0000"
+                        }
+                      },
+                      {
+                        "record": "part01",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "new-0001"
+                        }
+                      },
+                      {
+                        "record": "part02",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "new-0002"
+                        }
+                      },
+                      {
+                        "record": "part03",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "new-0003"
+                        }
+                      },
+                      {
+                        "record": "part04",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "new-0004"
+                        }
+                      },
+                      {
+                        "record": "part05",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "new-0005"
+                        }
+                      },
+                      {
+                        "record": "part06",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "new-0006"
+                        }
+                      },
+                      {
+                        "record": "part07",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "new-0007"
+                        }
+                      },
+                      {
+                        "record": "part08",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "old-0008"
+                        }
+                      },
+                      {
+                        "record": "part09",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "old-0009"
+                        }
+                      },
+                      {
+                        "record": "part10",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "old-0010"
+                        }
+                      },
+                      {
+                        "record": "part11",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "old-0011"
+                        }
+                      },
+                      {
+                        "record": "part12",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "old-0012"
+                        }
+                      },
+                      {
+                        "record": "part13",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "old-0013"
+                        }
+                      },
+                      {
+                        "record": "part14",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "old-0014"
+                        }
+                      },
+                      {
+                        "record": "part15",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "old-0015"
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "snapshots": [
+                  {
+                    "origin": "budget/report",
+                    "name": "rolling",
+                    "minimum_bytes": 2097152,
+                    "maximum_bytes": 3145728,
+                    "chunk_bytes": 131072,
+                    "records": [
+                      {
+                        "record": "part00",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part01",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part02",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part03",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part04",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part05",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part06",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part07",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part08",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part09",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part10",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part11",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part12",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part13",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part14",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      },
+                      {
+                        "record": "part15",
+                        "expected": {
+                          "kind": "original"
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "retire": [],
+                "reserves": [
+                  {
+                    "group": "budget",
+                    "minimum_bytes": 8388608
+                  }
+                ]
+              },
+              "updates": [
+                {
+                  "label": "Scheduled eight chunks",
+                  "explanation": "Eight distinct 128 KiB chunks change. The initial 1 MiB COW store has room for only seven data chunks in this exercise.",
+                  "writes": [
+                    {
+                      "origin": "budget/report",
+                      "record": "part00",
+                      "contents": "new-0000"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part01",
+                      "contents": "new-0001"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part02",
+                      "contents": "new-0002"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part03",
+                      "contents": "new-0003"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part04",
+                      "contents": "new-0004"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part05",
+                      "contents": "new-0005"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part06",
+                      "contents": "new-0006"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part07",
+                      "contents": "new-0007"
+                    }
+                  ]
+                },
+                {
+                  "label": "Unexpected eight more chunks",
+                  "explanation": "Eight additional distinct chunks change. A 2 MiB COW reservation has fifteen data chunks after the exercise metadata allowance; sixteen distinct copied chunks exhaust it.",
+                  "writes": [
+                    {
+                      "origin": "budget/report",
+                      "record": "part08",
+                      "contents": "new-0008"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part09",
+                      "contents": "new-0009"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part10",
+                      "contents": "new-0010"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part11",
+                      "contents": "new-0011"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part12",
+                      "contents": "new-0012"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part13",
+                      "contents": "new-0013"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part14",
+                      "contents": "new-0014"
+                    },
+                    {
+                      "origin": "budget/report",
+                      "record": "part15",
+                      "contents": "new-0015"
+                    }
+                  ]
+                }
+              ]
+            },
+            "reference": [
+              {
+                "kind": "command",
+                "text": "lvextend -L +1M budget/rolling"
+              },
+              {
+                "kind": "apply_update",
+                "index": 0
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "First complete linear LVM growth and allocation practice: identify PV, VG, LV and free physical extents. This simulator supplies fixed-size raw application records, not a mounted filesystem. You do not need a real device or mount.",
+            "concepts": [
+              {
+                "title": "Plan before the write",
+                "text": "A classic COW snapshot needs room for distinct chunks that change, not just a count of edited records. Records sharing one chunk share its first-write cost; repeated writes to the same chunk reuse the saved bytes."
+              },
+              {
+                "title": "Calculate this exercise\u2019s budget",
+                "text": "Chunks are 128 KiB here. One chunk is reserved for metadata as a teaching convention: 1 MiB holds seven data chunks, and 2 MiB holds fifteen. Real LVM metadata accounting differs; do not use these numbers as a production sizing rule."
+              },
+              {
+                "title": "Grow the saved store, not the origin",
+                "text": "Use lvextend on the still-valid snapshot store before its space runs out. Physical extents must be free in the same group. The application origin stays 2 MiB; expanding it does not add COW space."
+              },
+              {
+                "title": "Once invalid, old data is unavailable",
+                "text": "If a new write needs more COW chunks than fit, the snapshot becomes invalid and old data is unavailable. The origin write still succeeds. Extending an invalid snapshot does not revive it. Reset practice to retry planning; a new snapshot means a new time."
+              }
+            ],
+            "description": "practice/rolling starts readable with 1 MiB reserved. Eight distinct 128 KiB chunks will change. Grow it to 2 MiB first, then apply Scheduled eight chunks. The current first eight records read new values; rolling still reads all sixteen old values.",
+            "fixture": {
+              "version": 1,
+              "snapshots": {
+                "origins": {
+                  "practice/report": {
+                    "next_snapshot_id": 2,
+                    "byte_len": 2097152,
+                    "layout": {
+                      "part00": {
+                        "offset": 64,
+                        "length": 8
+                      },
+                      "part01": {
+                        "offset": 131136,
+                        "length": 8
+                      },
+                      "part02": {
+                        "offset": 262208,
+                        "length": 8
+                      },
+                      "part03": {
+                        "offset": 393280,
+                        "length": 8
+                      },
+                      "part04": {
+                        "offset": 524352,
+                        "length": 8
+                      },
+                      "part05": {
+                        "offset": 655424,
+                        "length": 8
+                      },
+                      "part06": {
+                        "offset": 786496,
+                        "length": 8
+                      },
+                      "part07": {
+                        "offset": 917568,
+                        "length": 8
+                      },
+                      "part08": {
+                        "offset": 1048640,
+                        "length": 8
+                      },
+                      "part09": {
+                        "offset": 1179712,
+                        "length": 8
+                      },
+                      "part10": {
+                        "offset": 1310784,
+                        "length": 8
+                      },
+                      "part11": {
+                        "offset": 1441856,
+                        "length": 8
+                      },
+                      "part12": {
+                        "offset": 1572928,
+                        "length": 8
+                      },
+                      "part13": {
+                        "offset": 1704000,
+                        "length": 8
+                      },
+                      "part14": {
+                        "offset": 1835072,
+                        "length": 8
+                      },
+                      "part15": {
+                        "offset": 1966144,
+                        "length": 8
+                      }
+                    },
+                    "current": {
+                      "part00": {
+                        "contents": "old-0000"
+                      },
+                      "part01": {
+                        "contents": "old-0001"
+                      },
+                      "part02": {
+                        "contents": "old-0002"
+                      },
+                      "part03": {
+                        "contents": "old-0003"
+                      },
+                      "part04": {
+                        "contents": "old-0004"
+                      },
+                      "part05": {
+                        "contents": "old-0005"
+                      },
+                      "part06": {
+                        "contents": "old-0006"
+                      },
+                      "part07": {
+                        "contents": "old-0007"
+                      },
+                      "part08": {
+                        "contents": "old-0008"
+                      },
+                      "part09": {
+                        "contents": "old-0009"
+                      },
+                      "part10": {
+                        "contents": "old-0010"
+                      },
+                      "part11": {
+                        "contents": "old-0011"
+                      },
+                      "part12": {
+                        "contents": "old-0012"
+                      },
+                      "part13": {
+                        "contents": "old-0013"
+                      },
+                      "part14": {
+                        "contents": "old-0014"
+                      },
+                      "part15": {
+                        "contents": "old-0015"
+                      }
+                    },
+                    "snapshots": {
+                      "rolling": {
+                        "id": 1,
+                        "capacity_bytes": 1048576,
+                        "chunk_bytes": 131072,
+                        "valid": true,
+                        "images": {}
+                      }
+                    }
+                  }
+                }
+              },
+              "devices": {
+                "/dev/practicedisk": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "practice"
+                },
+                "/dev/practiceforeign": {
+                  "bytes": 9437184,
+                  "role": "Foreign",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "practice": {
+                  "extent_bytes": 1048576,
+                  "volumes": {
+                    "report": {
+                      "extents": [
+                        {
+                          "pv": "/dev/practicedisk",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/practicedisk",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": null
+                    },
+                    "reference": {
+                      "extents": [
+                        {
+                          "pv": "/dev/practicedisk",
+                          "index": 2
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 256,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "Keep this unrelated record unchanged.\n"
+                          }
+                        }
+                      }
+                    },
+                    "rolling": {
+                      "extents": [
+                        {
+                          "pv": "/dev/practicedisk",
+                          "index": 3
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [],
+            "worked": [],
+            "snapshot_practice": {
+              "context": {
+                "plan": {
+                  "origins": [
+                    {
+                      "volume": "practice/report",
+                      "records": [
+                        {
+                          "record": "part00",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "new-0000"
+                          }
+                        },
+                        {
+                          "record": "part01",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "new-0001"
+                          }
+                        },
+                        {
+                          "record": "part02",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "new-0002"
+                          }
+                        },
+                        {
+                          "record": "part03",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "new-0003"
+                          }
+                        },
+                        {
+                          "record": "part04",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "new-0004"
+                          }
+                        },
+                        {
+                          "record": "part05",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "new-0005"
+                          }
+                        },
+                        {
+                          "record": "part06",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "new-0006"
+                          }
+                        },
+                        {
+                          "record": "part07",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "new-0007"
+                          }
+                        },
+                        {
+                          "record": "part08",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "old-0008"
+                          }
+                        },
+                        {
+                          "record": "part09",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "old-0009"
+                          }
+                        },
+                        {
+                          "record": "part10",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "old-0010"
+                          }
+                        },
+                        {
+                          "record": "part11",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "old-0011"
+                          }
+                        },
+                        {
+                          "record": "part12",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "old-0012"
+                          }
+                        },
+                        {
+                          "record": "part13",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "old-0013"
+                          }
+                        },
+                        {
+                          "record": "part14",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "old-0014"
+                          }
+                        },
+                        {
+                          "record": "part15",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "old-0015"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "snapshots": [
+                    {
+                      "origin": "practice/report",
+                      "name": "rolling",
+                      "minimum_bytes": 2097152,
+                      "maximum_bytes": 3145728,
+                      "chunk_bytes": 131072,
+                      "records": [
+                        {
+                          "record": "part00",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part01",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part02",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part03",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part04",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part05",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part06",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part07",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part08",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part09",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part10",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part11",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part12",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part13",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part14",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        },
+                        {
+                          "record": "part15",
+                          "expected": {
+                            "kind": "original"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "retire": [],
+                  "reserves": [
+                    {
+                      "group": "practice",
+                      "minimum_bytes": 8388608
+                    }
+                  ]
+                },
+                "updates": [
+                  {
+                    "label": "Scheduled eight chunks",
+                    "explanation": "Eight distinct 128 KiB chunks change. The initial 1 MiB COW store has room for only seven data chunks in this exercise.",
+                    "writes": [
+                      {
+                        "origin": "practice/report",
+                        "record": "part00",
+                        "contents": "new-0000"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part01",
+                        "contents": "new-0001"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part02",
+                        "contents": "new-0002"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part03",
+                        "contents": "new-0003"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part04",
+                        "contents": "new-0004"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part05",
+                        "contents": "new-0005"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part06",
+                        "contents": "new-0006"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part07",
+                        "contents": "new-0007"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "Unexpected eight more chunks",
+                    "explanation": "Eight additional distinct chunks change. A 2 MiB COW reservation has fifteen data chunks after the exercise metadata allowance; sixteen distinct copied chunks exhaust it.",
+                    "writes": [
+                      {
+                        "origin": "practice/report",
+                        "record": "part08",
+                        "contents": "new-0008"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part09",
+                        "contents": "new-0009"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part10",
+                        "contents": "new-0010"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part11",
+                        "contents": "new-0011"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part12",
+                        "contents": "new-0012"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part13",
+                        "contents": "new-0013"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part14",
+                        "contents": "new-0014"
+                      },
+                      {
+                        "origin": "practice/report",
+                        "record": "part15",
+                        "contents": "new-0015"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "worked": [
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "lvextend -L +1M practice/rolling"
+                  },
+                  "explanation": "Increase the still-readable rolling COW store to 2 MiB before the application writes. Leave the 2 MiB origin and reference volume unchanged."
+                },
+                {
+                  "operation": {
+                    "kind": "apply_update",
+                    "index": 0
+                  },
+                  "explanation": "Apply Scheduled eight chunks. Eight copied chunks now fit; inspect the current record, saved value and remaining physical reserve."
+                }
+              ],
+              "experiment": {
+                "kind": "apply_update",
+                "index": 1
+              },
+              "repair": []
+            },
+            "try_change": "After the 2 MiB worked example, apply Unexpected eight more chunks. Sixteen distinct copied chunks exceed fifteen available data chunks: rolling becomes invalid while current writes succeed. Reset to retry. Also reset and apply Scheduled eight chunks before growth to see the original sizing failure.",
+            "experiment": "",
+            "repair": ""
+          }
+        }
+      },
+      "steps": [
+        "Inspect current and saved storage.",
+        "Make the requested data and COW changes.",
+        "Verify actual records, free space and protected allocations."
+      ],
+      "guide": [
+        {
+          "title": "Prevent a saved view from exhausting its COW space",
+          "why": "Compare the current data with a readable saved point and preserve unrelated storage.",
+          "action": "Inspect current and saved storage.",
+          "commands": []
+        },
+        {
+          "title": "Prevent a saved view from exhausting its COW space",
+          "why": "Compare the current data with a readable saved point and preserve unrelated storage.",
+          "action": "Make the requested data and COW changes.",
+          "commands": []
+        },
+        {
+          "title": "Prevent a saved view from exhausting its COW space",
+          "why": "Compare the current data with a readable saved point and preserve unrelated storage.",
+          "action": "Verify actual records, free space and protected allocations.",
+          "commands": []
+        }
+      ],
+      "explanation": "Create or retain the required readable point before its protected changes. Manage only its separate COW store, use the explicit simulator application tools, and verify actual current and saved record values as well as protected physical allocations. Worked example: practice/rolling starts readable with 1 MiB reserved. Eight distinct 128 KiB chunks will change. Grow it to 2 MiB first, then apply Scheduled eight chunks. The current first eight records read new values; rolling still reads all sixteen old values.",
+      "hints": [
+        "The initial COW store has seven usable chunks, but the scheduled update touches eight distinct chunks.",
+        "Extend budget/rolling before applying the update. Extending budget/report changes the wrong object and is outside this task.",
+        "If rolling has already become invalid, reset the attempt to retry planning. A larger invalid store cannot restore its old point."
+      ],
+      "sources": [
+        "https://man7.org/linux/man-pages/man8/lvcreate.8.html",
+        "https://man7.org/linux/man-pages/man8/lvextend.8.html",
+        "https://man7.org/linux/man-pages/man8/lvremove.8.html",
+        "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/system_design_guide/configuring_and_managing_logical_volumes"
+      ],
+      "simplifications": "Classic COW over supplied fixed-size printable ASCII raw records only; no mounted filesystem, binary data, kernel or real device. One metadata chunk is reserved as an explicit teaching convention, not real LVM metadata sizing. Chunks support powers of two from 4 to 512 KiB; these lessons prescribe 128 KiB. No thin snapshots, merge, automatic growth, activation, origin resize/removal or general backup/restore utility. Record updates and copies are clearly labeled simulator tools.",
+      "solution": [
+        "lvextend -L +1M budget/rolling",
+        "simulated-lvm-record {\"kind\":\"apply_update\",\"index\":0}"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-saved-view"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-record-recovery",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM snapshots and recovery",
+      "unit": "lvm-cow-recovery",
+      "title": "Repair a damaged import and hand over a verified saved view",
+      "summary": "Use a readable source, preserve its identity, retire an invalid view, and verify a fresh handover.",
+      "objective": "Repair recovery/report row0 and row1 using their original trusted saved values. Keep the original recovery/trusted snapshot readable, at its supplied 2 MiB size and 128 KiB chunks. Retire only recovery/expired. After repairing the current records, create recovery/handover with 128 KiB chunks and 1\u20132 MiB COW space; its row0 and row1 must match trusted. Leave every other current record, origin allocation, reference volume and device unchanged. Keep at least 8 MiB free in recovery. Do not leave extra snapshots.",
+      "retry_guidance": "Compare current records, saved records, validity and physical reservations separately. A new matching name does not restore old history. Refused operations retain prior work; reset only this attempt if an essential original view was lost.",
+      "difficulty": "Advanced",
+      "minutes": 30,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "recovery/report": {
+                  "next_snapshot_id": 3,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "row0": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "row1": {
+                      "offset": 131136,
+                      "length": 8
+                    },
+                    "row2": {
+                      "offset": 262208,
+                      "length": 8
+                    },
+                    "row3": {
+                      "offset": 393280,
+                      "length": 8
+                    },
+                    "row4": {
+                      "offset": 524352,
+                      "length": 8
+                    },
+                    "row5": {
+                      "offset": 655424,
+                      "length": 8
+                    },
+                    "row6": {
+                      "offset": 786496,
+                      "length": 8
+                    },
+                    "row7": {
+                      "offset": 917568,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "row0": {
+                      "contents": "bad--000"
+                    },
+                    "row1": {
+                      "contents": "bad--001"
+                    },
+                    "row2": {
+                      "contents": "good-002"
+                    },
+                    "row3": {
+                      "contents": "good-003"
+                    },
+                    "row4": {
+                      "contents": "good-004"
+                    },
+                    "row5": {
+                      "contents": "good-005"
+                    },
+                    "row6": {
+                      "contents": "good-006"
+                    },
+                    "row7": {
+                      "contents": "good-007"
+                    }
+                  },
+                  "snapshots": {
+                    "trusted": {
+                      "id": 1,
+                      "capacity_bytes": 2097152,
+                      "chunk_bytes": 131072,
+                      "valid": true,
+                      "images": {
+                        "0": {
+                          "fragments": {
+                            "row0": {
+                              "offset": 64,
+                              "data": "good-000"
+                            }
+                          }
+                        },
+                        "1": {
+                          "fragments": {
+                            "row1": {
+                              "offset": 64,
+                              "data": "good-001"
+                            }
+                          }
+                        },
+                        "2": {
+                          "fragments": {
+                            "row2": {
+                              "offset": 64,
+                              "data": "good-002"
+                            }
+                          }
+                        },
+                        "3": {
+                          "fragments": {
+                            "row3": {
+                              "offset": 64,
+                              "data": "good-003"
+                            }
+                          }
+                        },
+                        "4": {
+                          "fragments": {
+                            "row4": {
+                              "offset": 64,
+                              "data": "good-004"
+                            }
+                          }
+                        },
+                        "5": {
+                          "fragments": {
+                            "row5": {
+                              "offset": 64,
+                              "data": "good-005"
+                            }
+                          }
+                        },
+                        "6": {
+                          "fragments": {
+                            "row6": {
+                              "offset": 64,
+                              "data": "good-006"
+                            }
+                          }
+                        },
+                        "7": {
+                          "fragments": {
+                            "row7": {
+                              "offset": 64,
+                              "data": "good-007"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "expired": {
+                      "id": 2,
+                      "capacity_bytes": 1048576,
+                      "chunk_bytes": 131072,
+                      "valid": false,
+                      "images": {
+                        "0": {
+                          "fragments": {
+                            "row0": {
+                              "offset": 64,
+                              "data": "good-000"
+                            }
+                          }
+                        },
+                        "1": {
+                          "fragments": {
+                            "row1": {
+                              "offset": 64,
+                              "data": "good-001"
+                            }
+                          }
+                        },
+                        "2": {
+                          "fragments": {
+                            "row2": {
+                              "offset": 64,
+                              "data": "good-002"
+                            }
+                          }
+                        },
+                        "3": {
+                          "fragments": {
+                            "row3": {
+                              "offset": 64,
+                              "data": "good-003"
+                            }
+                          }
+                        },
+                        "4": {
+                          "fragments": {
+                            "row4": {
+                              "offset": 64,
+                              "data": "good-004"
+                            }
+                          }
+                        },
+                        "5": {
+                          "fragments": {
+                            "row5": {
+                              "offset": 64,
+                              "data": "good-005"
+                            }
+                          }
+                        },
+                        "6": {
+                          "fragments": {
+                            "row6": {
+                              "offset": 64,
+                              "data": "good-006"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "devices": {
+              "/dev/recoverydisk": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "recovery"
+              },
+              "/dev/recoveryforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "recovery": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  },
+                  "trusted": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "expired": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "recovery/report": {
+                  "next_snapshot_id": 3,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "row0": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "row1": {
+                      "offset": 131136,
+                      "length": 8
+                    },
+                    "row2": {
+                      "offset": 262208,
+                      "length": 8
+                    },
+                    "row3": {
+                      "offset": 393280,
+                      "length": 8
+                    },
+                    "row4": {
+                      "offset": 524352,
+                      "length": 8
+                    },
+                    "row5": {
+                      "offset": 655424,
+                      "length": 8
+                    },
+                    "row6": {
+                      "offset": 786496,
+                      "length": 8
+                    },
+                    "row7": {
+                      "offset": 917568,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "row0": {
+                      "contents": "bad--000"
+                    },
+                    "row1": {
+                      "contents": "bad--001"
+                    },
+                    "row2": {
+                      "contents": "good-002"
+                    },
+                    "row3": {
+                      "contents": "good-003"
+                    },
+                    "row4": {
+                      "contents": "good-004"
+                    },
+                    "row5": {
+                      "contents": "good-005"
+                    },
+                    "row6": {
+                      "contents": "good-006"
+                    },
+                    "row7": {
+                      "contents": "good-007"
+                    }
+                  },
+                  "snapshots": {
+                    "trusted": {
+                      "id": 1,
+                      "capacity_bytes": 2097152,
+                      "chunk_bytes": 131072,
+                      "valid": true,
+                      "images": {
+                        "0": {
+                          "fragments": {
+                            "row0": {
+                              "offset": 64,
+                              "data": "good-000"
+                            }
+                          }
+                        },
+                        "1": {
+                          "fragments": {
+                            "row1": {
+                              "offset": 64,
+                              "data": "good-001"
+                            }
+                          }
+                        },
+                        "2": {
+                          "fragments": {
+                            "row2": {
+                              "offset": 64,
+                              "data": "good-002"
+                            }
+                          }
+                        },
+                        "3": {
+                          "fragments": {
+                            "row3": {
+                              "offset": 64,
+                              "data": "good-003"
+                            }
+                          }
+                        },
+                        "4": {
+                          "fragments": {
+                            "row4": {
+                              "offset": 64,
+                              "data": "good-004"
+                            }
+                          }
+                        },
+                        "5": {
+                          "fragments": {
+                            "row5": {
+                              "offset": 64,
+                              "data": "good-005"
+                            }
+                          }
+                        },
+                        "6": {
+                          "fragments": {
+                            "row6": {
+                              "offset": 64,
+                              "data": "good-006"
+                            }
+                          }
+                        },
+                        "7": {
+                          "fragments": {
+                            "row7": {
+                              "offset": 64,
+                              "data": "good-007"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "expired": {
+                      "id": 2,
+                      "capacity_bytes": 1048576,
+                      "chunk_bytes": 131072,
+                      "valid": false,
+                      "images": {
+                        "0": {
+                          "fragments": {
+                            "row0": {
+                              "offset": 64,
+                              "data": "good-000"
+                            }
+                          }
+                        },
+                        "1": {
+                          "fragments": {
+                            "row1": {
+                              "offset": 64,
+                              "data": "good-001"
+                            }
+                          }
+                        },
+                        "2": {
+                          "fragments": {
+                            "row2": {
+                              "offset": 64,
+                              "data": "good-002"
+                            }
+                          }
+                        },
+                        "3": {
+                          "fragments": {
+                            "row3": {
+                              "offset": 64,
+                              "data": "good-003"
+                            }
+                          }
+                        },
+                        "4": {
+                          "fragments": {
+                            "row4": {
+                              "offset": 64,
+                              "data": "good-004"
+                            }
+                          }
+                        },
+                        "5": {
+                          "fragments": {
+                            "row5": {
+                              "offset": 64,
+                              "data": "good-005"
+                            }
+                          }
+                        },
+                        "6": {
+                          "fragments": {
+                            "row6": {
+                              "offset": 64,
+                              "data": "good-006"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "devices": {
+              "/dev/recoverydisk": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "recovery"
+              },
+              "/dev/recoveryforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "recovery": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  },
+                  "trusted": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "expired": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "training/report": {
+                  "next_snapshot_id": 3,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "row0": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "row1": {
+                      "offset": 131136,
+                      "length": 8
+                    },
+                    "row2": {
+                      "offset": 262208,
+                      "length": 8
+                    },
+                    "row3": {
+                      "offset": 393280,
+                      "length": 8
+                    },
+                    "row4": {
+                      "offset": 524352,
+                      "length": 8
+                    },
+                    "row5": {
+                      "offset": 655424,
+                      "length": 8
+                    },
+                    "row6": {
+                      "offset": 786496,
+                      "length": 8
+                    },
+                    "row7": {
+                      "offset": 917568,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "row0": {
+                      "contents": "bad--000"
+                    },
+                    "row1": {
+                      "contents": "bad--001"
+                    },
+                    "row2": {
+                      "contents": "good-002"
+                    },
+                    "row3": {
+                      "contents": "good-003"
+                    },
+                    "row4": {
+                      "contents": "good-004"
+                    },
+                    "row5": {
+                      "contents": "good-005"
+                    },
+                    "row6": {
+                      "contents": "good-006"
+                    },
+                    "row7": {
+                      "contents": "good-007"
+                    }
+                  },
+                  "snapshots": {
+                    "trusted": {
+                      "id": 1,
+                      "capacity_bytes": 2097152,
+                      "chunk_bytes": 131072,
+                      "valid": true,
+                      "images": {
+                        "0": {
+                          "fragments": {
+                            "row0": {
+                              "offset": 64,
+                              "data": "good-000"
+                            }
+                          }
+                        },
+                        "1": {
+                          "fragments": {
+                            "row1": {
+                              "offset": 64,
+                              "data": "good-001"
+                            }
+                          }
+                        },
+                        "2": {
+                          "fragments": {
+                            "row2": {
+                              "offset": 64,
+                              "data": "good-002"
+                            }
+                          }
+                        },
+                        "3": {
+                          "fragments": {
+                            "row3": {
+                              "offset": 64,
+                              "data": "good-003"
+                            }
+                          }
+                        },
+                        "4": {
+                          "fragments": {
+                            "row4": {
+                              "offset": 64,
+                              "data": "good-004"
+                            }
+                          }
+                        },
+                        "5": {
+                          "fragments": {
+                            "row5": {
+                              "offset": 64,
+                              "data": "good-005"
+                            }
+                          }
+                        },
+                        "6": {
+                          "fragments": {
+                            "row6": {
+                              "offset": 64,
+                              "data": "good-006"
+                            }
+                          }
+                        },
+                        "7": {
+                          "fragments": {
+                            "row7": {
+                              "offset": 64,
+                              "data": "good-007"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "expired": {
+                      "id": 2,
+                      "capacity_bytes": 1048576,
+                      "chunk_bytes": 131072,
+                      "valid": false,
+                      "images": {
+                        "0": {
+                          "fragments": {
+                            "row0": {
+                              "offset": 64,
+                              "data": "good-000"
+                            }
+                          }
+                        },
+                        "1": {
+                          "fragments": {
+                            "row1": {
+                              "offset": 64,
+                              "data": "good-001"
+                            }
+                          }
+                        },
+                        "2": {
+                          "fragments": {
+                            "row2": {
+                              "offset": 64,
+                              "data": "good-002"
+                            }
+                          }
+                        },
+                        "3": {
+                          "fragments": {
+                            "row3": {
+                              "offset": 64,
+                              "data": "good-003"
+                            }
+                          }
+                        },
+                        "4": {
+                          "fragments": {
+                            "row4": {
+                              "offset": 64,
+                              "data": "good-004"
+                            }
+                          }
+                        },
+                        "5": {
+                          "fragments": {
+                            "row5": {
+                              "offset": 64,
+                              "data": "good-005"
+                            }
+                          }
+                        },
+                        "6": {
+                          "fragments": {
+                            "row6": {
+                              "offset": 64,
+                              "data": "good-006"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "devices": {
+              "/dev/trainingdisk": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "training"
+              },
+              "/dev/trainingforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "training": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/trainingdisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/trainingdisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/trainingdisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  },
+                  "trusted": {
+                    "extents": [
+                      {
+                        "pv": "/dev/trainingdisk",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/trainingdisk",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "expired": {
+                    "extents": [
+                      {
+                        "pv": "/dev/trainingdisk",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "training/report": {
+                  "next_snapshot_id": 3,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "row0": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "row1": {
+                      "offset": 131136,
+                      "length": 8
+                    },
+                    "row2": {
+                      "offset": 262208,
+                      "length": 8
+                    },
+                    "row3": {
+                      "offset": 393280,
+                      "length": 8
+                    },
+                    "row4": {
+                      "offset": 524352,
+                      "length": 8
+                    },
+                    "row5": {
+                      "offset": 655424,
+                      "length": 8
+                    },
+                    "row6": {
+                      "offset": 786496,
+                      "length": 8
+                    },
+                    "row7": {
+                      "offset": 917568,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "row0": {
+                      "contents": "bad--000"
+                    },
+                    "row1": {
+                      "contents": "bad--001"
+                    },
+                    "row2": {
+                      "contents": "good-002"
+                    },
+                    "row3": {
+                      "contents": "good-003"
+                    },
+                    "row4": {
+                      "contents": "good-004"
+                    },
+                    "row5": {
+                      "contents": "good-005"
+                    },
+                    "row6": {
+                      "contents": "good-006"
+                    },
+                    "row7": {
+                      "contents": "good-007"
+                    }
+                  },
+                  "snapshots": {
+                    "trusted": {
+                      "id": 1,
+                      "capacity_bytes": 2097152,
+                      "chunk_bytes": 131072,
+                      "valid": true,
+                      "images": {
+                        "0": {
+                          "fragments": {
+                            "row0": {
+                              "offset": 64,
+                              "data": "good-000"
+                            }
+                          }
+                        },
+                        "1": {
+                          "fragments": {
+                            "row1": {
+                              "offset": 64,
+                              "data": "good-001"
+                            }
+                          }
+                        },
+                        "2": {
+                          "fragments": {
+                            "row2": {
+                              "offset": 64,
+                              "data": "good-002"
+                            }
+                          }
+                        },
+                        "3": {
+                          "fragments": {
+                            "row3": {
+                              "offset": 64,
+                              "data": "good-003"
+                            }
+                          }
+                        },
+                        "4": {
+                          "fragments": {
+                            "row4": {
+                              "offset": 64,
+                              "data": "good-004"
+                            }
+                          }
+                        },
+                        "5": {
+                          "fragments": {
+                            "row5": {
+                              "offset": 64,
+                              "data": "good-005"
+                            }
+                          }
+                        },
+                        "6": {
+                          "fragments": {
+                            "row6": {
+                              "offset": 64,
+                              "data": "good-006"
+                            }
+                          }
+                        },
+                        "7": {
+                          "fragments": {
+                            "row7": {
+                              "offset": 64,
+                              "data": "good-007"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "expired": {
+                      "id": 2,
+                      "capacity_bytes": 1048576,
+                      "chunk_bytes": 131072,
+                      "valid": false,
+                      "images": {
+                        "0": {
+                          "fragments": {
+                            "row0": {
+                              "offset": 64,
+                              "data": "good-000"
+                            }
+                          }
+                        },
+                        "1": {
+                          "fragments": {
+                            "row1": {
+                              "offset": 64,
+                              "data": "good-001"
+                            }
+                          }
+                        },
+                        "2": {
+                          "fragments": {
+                            "row2": {
+                              "offset": 64,
+                              "data": "good-002"
+                            }
+                          }
+                        },
+                        "3": {
+                          "fragments": {
+                            "row3": {
+                              "offset": 64,
+                              "data": "good-003"
+                            }
+                          }
+                        },
+                        "4": {
+                          "fragments": {
+                            "row4": {
+                              "offset": 64,
+                              "data": "good-004"
+                            }
+                          }
+                        },
+                        "5": {
+                          "fragments": {
+                            "row5": {
+                              "offset": 64,
+                              "data": "good-005"
+                            }
+                          }
+                        },
+                        "6": {
+                          "fragments": {
+                            "row6": {
+                              "offset": 64,
+                              "data": "good-006"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "devices": {
+              "/dev/trainingdisk": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "training"
+              },
+              "/dev/trainingforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "training": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/trainingdisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/trainingdisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/trainingdisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  },
+                  "trusted": {
+                    "extents": [
+                      {
+                        "pv": "/dev/trainingdisk",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/trainingdisk",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "expired": {
+                    "extents": [
+                      {
+                        "pv": "/dev/trainingdisk",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "snapshots": {
+              "origins": {
+                "recovery/report": {
+                  "next_snapshot_id": 3,
+                  "byte_len": 2097152,
+                  "layout": {
+                    "row0": {
+                      "offset": 64,
+                      "length": 8
+                    },
+                    "row1": {
+                      "offset": 131136,
+                      "length": 8
+                    },
+                    "row2": {
+                      "offset": 262208,
+                      "length": 8
+                    },
+                    "row3": {
+                      "offset": 393280,
+                      "length": 8
+                    },
+                    "row4": {
+                      "offset": 524352,
+                      "length": 8
+                    },
+                    "row5": {
+                      "offset": 655424,
+                      "length": 8
+                    },
+                    "row6": {
+                      "offset": 786496,
+                      "length": 8
+                    },
+                    "row7": {
+                      "offset": 917568,
+                      "length": 8
+                    }
+                  },
+                  "current": {
+                    "row0": {
+                      "contents": "bad--000"
+                    },
+                    "row1": {
+                      "contents": "bad--001"
+                    },
+                    "row2": {
+                      "contents": "good-002"
+                    },
+                    "row3": {
+                      "contents": "good-003"
+                    },
+                    "row4": {
+                      "contents": "good-004"
+                    },
+                    "row5": {
+                      "contents": "good-005"
+                    },
+                    "row6": {
+                      "contents": "good-006"
+                    },
+                    "row7": {
+                      "contents": "good-007"
+                    }
+                  },
+                  "snapshots": {
+                    "trusted": {
+                      "id": 1,
+                      "capacity_bytes": 2097152,
+                      "chunk_bytes": 131072,
+                      "valid": true,
+                      "images": {
+                        "0": {
+                          "fragments": {
+                            "row0": {
+                              "offset": 64,
+                              "data": "good-000"
+                            }
+                          }
+                        },
+                        "1": {
+                          "fragments": {
+                            "row1": {
+                              "offset": 64,
+                              "data": "good-001"
+                            }
+                          }
+                        },
+                        "2": {
+                          "fragments": {
+                            "row2": {
+                              "offset": 64,
+                              "data": "good-002"
+                            }
+                          }
+                        },
+                        "3": {
+                          "fragments": {
+                            "row3": {
+                              "offset": 64,
+                              "data": "good-003"
+                            }
+                          }
+                        },
+                        "4": {
+                          "fragments": {
+                            "row4": {
+                              "offset": 64,
+                              "data": "good-004"
+                            }
+                          }
+                        },
+                        "5": {
+                          "fragments": {
+                            "row5": {
+                              "offset": 64,
+                              "data": "good-005"
+                            }
+                          }
+                        },
+                        "6": {
+                          "fragments": {
+                            "row6": {
+                              "offset": 64,
+                              "data": "good-006"
+                            }
+                          }
+                        },
+                        "7": {
+                          "fragments": {
+                            "row7": {
+                              "offset": 64,
+                              "data": "good-007"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "expired": {
+                      "id": 2,
+                      "capacity_bytes": 1048576,
+                      "chunk_bytes": 131072,
+                      "valid": false,
+                      "images": {
+                        "0": {
+                          "fragments": {
+                            "row0": {
+                              "offset": 64,
+                              "data": "good-000"
+                            }
+                          }
+                        },
+                        "1": {
+                          "fragments": {
+                            "row1": {
+                              "offset": 64,
+                              "data": "good-001"
+                            }
+                          }
+                        },
+                        "2": {
+                          "fragments": {
+                            "row2": {
+                              "offset": 64,
+                              "data": "good-002"
+                            }
+                          }
+                        },
+                        "3": {
+                          "fragments": {
+                            "row3": {
+                              "offset": 64,
+                              "data": "good-003"
+                            }
+                          }
+                        },
+                        "4": {
+                          "fragments": {
+                            "row4": {
+                              "offset": 64,
+                              "data": "good-004"
+                            }
+                          }
+                        },
+                        "5": {
+                          "fragments": {
+                            "row5": {
+                              "offset": 64,
+                              "data": "good-005"
+                            }
+                          }
+                        },
+                        "6": {
+                          "fragments": {
+                            "row6": {
+                              "offset": 64,
+                              "data": "good-006"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "devices": {
+              "/dev/recoverydisk": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "recovery"
+              },
+              "/dev/recoveryforeign": {
+                "bytes": 9437184,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "recovery": {
+                "extent_bytes": 1048576,
+                "volumes": {
+                  "report": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 256,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "Keep this unrelated record unchanged.\n"
+                        }
+                      }
+                    }
+                  },
+                  "trusted": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "expired": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recoverydisk",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "targets": [],
+          "snapshot_task": {
+            "context": {
+              "plan": {
+                "origins": [
+                  {
+                    "volume": "recovery/report",
+                    "records": [
+                      {
+                        "record": "row0",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "good-000"
+                        }
+                      },
+                      {
+                        "record": "row1",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "good-001"
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "snapshots": [
+                  {
+                    "origin": "recovery/report",
+                    "name": "trusted",
+                    "minimum_bytes": 2097152,
+                    "maximum_bytes": 2097152,
+                    "chunk_bytes": 131072,
+                    "records": [
+                      {
+                        "record": "row0",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "good-000"
+                        }
+                      },
+                      {
+                        "record": "row1",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "good-001"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "origin": "recovery/report",
+                    "name": "handover",
+                    "minimum_bytes": 1048576,
+                    "maximum_bytes": 2097152,
+                    "chunk_bytes": 131072,
+                    "records": [
+                      {
+                        "record": "row0",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "good-000"
+                        }
+                      },
+                      {
+                        "record": "row1",
+                        "expected": {
+                          "kind": "text",
+                          "contents": "good-001"
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "retire": [
+                  {
+                    "volume": "recovery/expired"
+                  }
+                ],
+                "reserves": [
+                  {
+                    "group": "recovery",
+                    "minimum_bytes": 8388608
+                  }
+                ]
+              },
+              "updates": [
+                {
+                  "label": "Repeat damaged import",
+                  "explanation": "This explicit simulator workload overwrites the two restored current records. Compare them with the trusted saved values before repairing.",
+                  "writes": [
+                    {
+                      "origin": "recovery/report",
+                      "record": "row0",
+                      "contents": "bad--000"
+                    },
+                    {
+                      "origin": "recovery/report",
+                      "record": "row1",
+                      "contents": "bad--001"
+                    }
+                  ]
+                }
+              ]
+            },
+            "reference": [
+              {
+                "kind": "copy_record",
+                "origin": "recovery/report",
+                "snapshot": "trusted",
+                "record": "row0"
+              },
+              {
+                "kind": "copy_record",
+                "origin": "recovery/report",
+                "snapshot": "trusted",
+                "record": "row1"
+              },
+              {
+                "kind": "command",
+                "text": "lvremove -y recovery/expired"
+              },
+              {
+                "kind": "command",
+                "text": "lvcreate -s -L 1M -n handover -c 128K recovery/report"
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "First complete linear LVM growth and allocation practice: identify PV, VG, LV and free physical extents. This simulator supplies fixed-size raw application records, not a mounted filesystem. You do not need a real device or mount.",
+            "concepts": [
+              {
+                "title": "Diagnose which view is usable",
+                "text": "A snapshot marked invalid cannot supply the missing old bytes. The supplied trusted view is still readable. Compare current and saved records before deciding what to copy; never assume every snapshot is useful."
+              },
+              {
+                "title": "Restore only the requested records",
+                "text": "The simulated application reader can copy one saved record to current storage. This is a deliberate simulator tool, not a Linux command, filesystem restore or lvconvert merge. Leave unrelated records and the reference LV untouched."
+              },
+              {
+                "title": "Names cannot replace old history",
+                "text": "Keep the original trusted object. Removing it and creating another snapshot with that name gives a new point in time, even if some bytes happen to match. The checks retain the supplied snapshot\u2019s identity."
+              },
+              {
+                "title": "Verify the handover after the repair",
+                "text": "Retire only the expired COW store, and create handover after the record repair. Read both restored records through the new view. Verify free group space and protected data as well as a success message."
+              }
+            ],
+            "description": "training/report has two damaged current records. trusted still reads the good values; expired is invalid. Copy trusted row0 and row1 into current data, retire expired, then create handover. Inspect handover rather than trusting its name.",
+            "fixture": {
+              "version": 1,
+              "snapshots": {
+                "origins": {
+                  "training/report": {
+                    "next_snapshot_id": 3,
+                    "byte_len": 2097152,
+                    "layout": {
+                      "row0": {
+                        "offset": 64,
+                        "length": 8
+                      },
+                      "row1": {
+                        "offset": 131136,
+                        "length": 8
+                      },
+                      "row2": {
+                        "offset": 262208,
+                        "length": 8
+                      },
+                      "row3": {
+                        "offset": 393280,
+                        "length": 8
+                      },
+                      "row4": {
+                        "offset": 524352,
+                        "length": 8
+                      },
+                      "row5": {
+                        "offset": 655424,
+                        "length": 8
+                      },
+                      "row6": {
+                        "offset": 786496,
+                        "length": 8
+                      },
+                      "row7": {
+                        "offset": 917568,
+                        "length": 8
+                      }
+                    },
+                    "current": {
+                      "row0": {
+                        "contents": "bad--000"
+                      },
+                      "row1": {
+                        "contents": "bad--001"
+                      },
+                      "row2": {
+                        "contents": "good-002"
+                      },
+                      "row3": {
+                        "contents": "good-003"
+                      },
+                      "row4": {
+                        "contents": "good-004"
+                      },
+                      "row5": {
+                        "contents": "good-005"
+                      },
+                      "row6": {
+                        "contents": "good-006"
+                      },
+                      "row7": {
+                        "contents": "good-007"
+                      }
+                    },
+                    "snapshots": {
+                      "trusted": {
+                        "id": 1,
+                        "capacity_bytes": 2097152,
+                        "chunk_bytes": 131072,
+                        "valid": true,
+                        "images": {
+                          "0": {
+                            "fragments": {
+                              "row0": {
+                                "offset": 64,
+                                "data": "good-000"
+                              }
+                            }
+                          },
+                          "1": {
+                            "fragments": {
+                              "row1": {
+                                "offset": 64,
+                                "data": "good-001"
+                              }
+                            }
+                          },
+                          "2": {
+                            "fragments": {
+                              "row2": {
+                                "offset": 64,
+                                "data": "good-002"
+                              }
+                            }
+                          },
+                          "3": {
+                            "fragments": {
+                              "row3": {
+                                "offset": 64,
+                                "data": "good-003"
+                              }
+                            }
+                          },
+                          "4": {
+                            "fragments": {
+                              "row4": {
+                                "offset": 64,
+                                "data": "good-004"
+                              }
+                            }
+                          },
+                          "5": {
+                            "fragments": {
+                              "row5": {
+                                "offset": 64,
+                                "data": "good-005"
+                              }
+                            }
+                          },
+                          "6": {
+                            "fragments": {
+                              "row6": {
+                                "offset": 64,
+                                "data": "good-006"
+                              }
+                            }
+                          },
+                          "7": {
+                            "fragments": {
+                              "row7": {
+                                "offset": 64,
+                                "data": "good-007"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "expired": {
+                        "id": 2,
+                        "capacity_bytes": 1048576,
+                        "chunk_bytes": 131072,
+                        "valid": false,
+                        "images": {
+                          "0": {
+                            "fragments": {
+                              "row0": {
+                                "offset": 64,
+                                "data": "good-000"
+                              }
+                            }
+                          },
+                          "1": {
+                            "fragments": {
+                              "row1": {
+                                "offset": 64,
+                                "data": "good-001"
+                              }
+                            }
+                          },
+                          "2": {
+                            "fragments": {
+                              "row2": {
+                                "offset": 64,
+                                "data": "good-002"
+                              }
+                            }
+                          },
+                          "3": {
+                            "fragments": {
+                              "row3": {
+                                "offset": 64,
+                                "data": "good-003"
+                              }
+                            }
+                          },
+                          "4": {
+                            "fragments": {
+                              "row4": {
+                                "offset": 64,
+                                "data": "good-004"
+                              }
+                            }
+                          },
+                          "5": {
+                            "fragments": {
+                              "row5": {
+                                "offset": 64,
+                                "data": "good-005"
+                              }
+                            }
+                          },
+                          "6": {
+                            "fragments": {
+                              "row6": {
+                                "offset": 64,
+                                "data": "good-006"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "devices": {
+                "/dev/trainingdisk": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "training"
+                },
+                "/dev/trainingforeign": {
+                  "bytes": 9437184,
+                  "role": "Foreign",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "training": {
+                  "extent_bytes": 1048576,
+                  "volumes": {
+                    "report": {
+                      "extents": [
+                        {
+                          "pv": "/dev/trainingdisk",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/trainingdisk",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": null
+                    },
+                    "reference": {
+                      "extents": [
+                        {
+                          "pv": "/dev/trainingdisk",
+                          "index": 2
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 256,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "Keep this unrelated record unchanged.\n"
+                          }
+                        }
+                      }
+                    },
+                    "trusted": {
+                      "extents": [
+                        {
+                          "pv": "/dev/trainingdisk",
+                          "index": 3
+                        },
+                        {
+                          "pv": "/dev/trainingdisk",
+                          "index": 4
+                        }
+                      ],
+                      "filesystem": null
+                    },
+                    "expired": {
+                      "extents": [
+                        {
+                          "pv": "/dev/trainingdisk",
+                          "index": 5
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [],
+            "worked": [],
+            "snapshot_practice": {
+              "context": {
+                "plan": {
+                  "origins": [
+                    {
+                      "volume": "training/report",
+                      "records": [
+                        {
+                          "record": "row0",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "good-000"
+                          }
+                        },
+                        {
+                          "record": "row1",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "good-001"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "snapshots": [
+                    {
+                      "origin": "training/report",
+                      "name": "trusted",
+                      "minimum_bytes": 2097152,
+                      "maximum_bytes": 2097152,
+                      "chunk_bytes": 131072,
+                      "records": [
+                        {
+                          "record": "row0",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "good-000"
+                          }
+                        },
+                        {
+                          "record": "row1",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "good-001"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "origin": "training/report",
+                      "name": "handover",
+                      "minimum_bytes": 1048576,
+                      "maximum_bytes": 2097152,
+                      "chunk_bytes": 131072,
+                      "records": [
+                        {
+                          "record": "row0",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "good-000"
+                          }
+                        },
+                        {
+                          "record": "row1",
+                          "expected": {
+                            "kind": "text",
+                            "contents": "good-001"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "retire": [
+                    {
+                      "volume": "training/expired"
+                    }
+                  ],
+                  "reserves": [
+                    {
+                      "group": "training",
+                      "minimum_bytes": 8388608
+                    }
+                  ]
+                },
+                "updates": [
+                  {
+                    "label": "Repeat damaged import",
+                    "explanation": "This explicit simulator workload overwrites the two restored current records. Compare them with the trusted saved values before repairing.",
+                    "writes": [
+                      {
+                        "origin": "training/report",
+                        "record": "row0",
+                        "contents": "bad--000"
+                      },
+                      {
+                        "origin": "training/report",
+                        "record": "row1",
+                        "contents": "bad--001"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "worked": [
+                {
+                  "operation": {
+                    "kind": "copy_record",
+                    "origin": "training/report",
+                    "snapshot": "trusted",
+                    "record": "row0"
+                  },
+                  "explanation": "Inspect trusted row0, then explicitly copy that saved record into the current application. This is a simulator operation, not an LVM merge command."
+                },
+                {
+                  "operation": {
+                    "kind": "copy_record",
+                    "origin": "training/report",
+                    "snapshot": "trusted",
+                    "record": "row1"
+                  },
+                  "explanation": "Select row1 and copy its trusted saved value too. Other current records must remain unchanged."
+                },
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "lvremove -y training/expired"
+                  },
+                  "explanation": "Remove only the expired COW store. It is invalid; adding space cannot recover its old bytes. Keep the original trusted point."
+                },
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "lvcreate -s -L 1M -n handover -c 128K training/report"
+                  },
+                  "explanation": "Create handover after both copies. Inspect its two records and check the protected neighbor and remaining reserve."
+                }
+              ],
+              "experiment": {
+                "kind": "apply_update",
+                "index": 0
+              },
+              "repair": [
+                {
+                  "kind": "copy_record",
+                  "origin": "training/report",
+                  "snapshot": "trusted",
+                  "record": "row0"
+                },
+                {
+                  "kind": "copy_record",
+                  "origin": "training/report",
+                  "snapshot": "trusted",
+                  "record": "row1"
+                }
+              ]
+            },
+            "try_change": "After the worked handover, apply Repeat damaged import. Read the changed current records and both saved views. Copy only the two trusted records again, check, and confirm the original trusted object was retained.",
+            "experiment": "",
+            "repair": ""
+          }
+        }
+      },
+      "steps": [
+        "Inspect current and saved storage.",
+        "Make the requested data and COW changes.",
+        "Verify actual records, free space and protected allocations."
+      ],
+      "guide": [
+        {
+          "title": "Repair a damaged import and hand over a verified saved view",
+          "why": "Compare the current data with a readable saved point and preserve unrelated storage.",
+          "action": "Inspect current and saved storage.",
+          "commands": []
+        },
+        {
+          "title": "Repair a damaged import and hand over a verified saved view",
+          "why": "Compare the current data with a readable saved point and preserve unrelated storage.",
+          "action": "Make the requested data and COW changes.",
+          "commands": []
+        },
+        {
+          "title": "Repair a damaged import and hand over a verified saved view",
+          "why": "Compare the current data with a readable saved point and preserve unrelated storage.",
+          "action": "Verify actual records, free space and protected allocations.",
+          "commands": []
+        }
+      ],
+      "explanation": "Create or retain the required readable point before its protected changes. Manage only its separate COW store, use the explicit simulator application tools, and verify actual current and saved record values as well as protected physical allocations. Worked example: training/report has two damaged current records. trusted still reads the good values; expired is invalid. Copy trusted row0 and row1 into current data, retire expired, then create handover. Inspect handover rather than trusting its name.",
+      "hints": [
+        "Read current row0 and row1, then compare trusted and expired. Only a readable saved view can supply data.",
+        "Use the record picker and explicit simulator copy for each damaged record. These controls do not run a Linux restore utility.",
+        "Create handover after the copies. A handover made before repair keeps the damaged values and needs replacing; keep trusted itself."
+      ],
+      "sources": [
+        "https://man7.org/linux/man-pages/man8/lvcreate.8.html",
+        "https://man7.org/linux/man-pages/man8/lvextend.8.html",
+        "https://man7.org/linux/man-pages/man8/lvremove.8.html",
+        "https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/system_design_guide/configuring_and_managing_logical_volumes"
+      ],
+      "simplifications": "Classic COW over supplied fixed-size printable ASCII raw records only; no mounted filesystem, binary data, kernel or real device. One metadata chunk is reserved as an explicit teaching convention, not real LVM metadata sizing. Chunks support powers of two from 4 to 512 KiB; these lessons prescribe 128 KiB. No thin snapshots, merge, automatic growth, activation, origin resize/removal or general backup/restore utility. Record updates and copies are clearly labeled simulator tools.",
+      "solution": [
+        "simulated-lvm-record {\"kind\":\"copy_record\",\"origin\":\"recovery/report\",\"snapshot\":\"trusted\",\"record\":\"row0\"}",
+        "simulated-lvm-record {\"kind\":\"copy_record\",\"origin\":\"recovery/report\",\"snapshot\":\"trusted\",\"record\":\"row1\"}",
+        "lvremove -y recovery/expired",
+        "lvcreate -s -L 1M -n handover -c 128K recovery/report"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-cow-budget"
+      ]
+    }
+  ]
+}

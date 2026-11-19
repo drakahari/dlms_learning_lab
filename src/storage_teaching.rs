@@ -118,7 +118,7 @@ impl Learning {
         // Project the worked saved file only. No mount, save, command, check or
         // assignment execution happens in the learner's practice state.
         self.draft.text = repaired.configuration().into();
-        self.draft.notice=Some("Worked configuration filled in this example only. Save it, inspect the live mounts and run the relevant example commands; nothing ran automatically.".into());
+        self.draft.notice=Some(if lesson.fixture.inventory().swap().is_some(){"Worked swap policy filled in this example editor. Save it, then use the supported commands to change active areas; no command ran automatically."}else{"Worked configuration filled in this example only. Save it, inspect the live mounts and run the relevant example commands; nothing ran automatically."}.into());
         self.checked = false;
         Ok(())
     }
@@ -149,6 +149,7 @@ pub fn prepare(attempt: &mut crate::progress::Attempt, lesson: &Lesson, new_atte
             | crate::engine::State::Lvm { .. }
             | crate::engine::State::Ntp { .. }
             | crate::engine::State::Hsrp { .. }
+            | crate::engine::State::Syslog { .. }
     ) || crate::workspace::is_physical_workspace(attempt)
     {
         return;

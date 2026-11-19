@@ -47,6 +47,15 @@ pub fn singleline<'a>(ui: &egui::Ui, value: &'a mut dyn egui::TextBuffer) -> egu
         .vertical_align(egui::Align::Center)
         .min_size(egui::vec2(0., height(ui)))
 }
+/// Size the full single-line control, including the shared text margins.
+/// TextEdit's desired_width is the inner text width, not its outer click target.
+pub fn singleline_fitting<'a>(
+    ui: &egui::Ui,
+    value: &'a mut dyn egui::TextBuffer,
+    outer_width: f32,
+) -> egui::TextEdit<'a> {
+    singleline(ui, value).desired_width((outer_width - 2. * PAD_X as f32).max(24.))
+}
 /// Fit a dropdown in the remaining part of a wrapped row, including long values.
 /// available_width() permits a fresh whole row and can overrun adjacent labels.
 pub fn dropdown(ui: &egui::Ui, id: impl std::hash::Hash, maximum: f32) -> egui::ComboBox {
@@ -58,6 +67,40 @@ pub fn dropdown(ui: &egui::Ui, id: impl std::hash::Hash, maximum: f32) -> egui::
 /// egui's stock header forces Extend and expands its indented body to the
 /// title width. Prelayout the full title at the actual visible width so a long
 /// optional-help title cannot widen otherwise responsive form controls.
+/// Opt-in native dropdown focus retention. Escape returns to its trigger;
+/// passive reflow cannot steal focus after deliberate keyboard/pointer input.
+pub fn retain_dropdown_focus(ui: &egui::Ui, response: &egui::Response) {
+    let key = response.id.with("native-dropdown-focus");
+    let previous = ui
+        .ctx()
+        .data(|d| d.get_temp::<(egui::Rect, bool, bool)>(key));
+    let escape = ui.input(|i| i.key_pressed(egui::Key::Escape));
+    let pointer = ui.input(|i| {
+        i.events
+            .iter()
+            .any(|e| matches!(e, egui::Event::PointerButton { pressed: true, .. }))
+    });
+    let navigating = pointer
+        || ui.input(|i| {
+            i.events
+                .iter()
+                .any(|e| matches!(e, egui::Event::Key { pressed: true, .. }))
+        });
+    let reflow = previous.is_some_and(|(rect, focused, _)| focused && rect != response.rect)
+        && ui.ctx().memory(|m| m.focused().is_none())
+        && !navigating
+        && ui.input(|i| i.focused);
+    let escape_return = escape && !pointer && previous.is_some_and(|(_, _, open)| open);
+    if ui.is_enabled() && (reflow || escape_return) {
+        response.request_focus();
+    }
+    let open = egui::ComboBox::is_open(ui.ctx(), response.id);
+    let focused = response.has_focus();
+    ui.ctx().data_mut(|d| {
+        d.insert_temp(key, (response.rect, focused, open));
+    });
+}
+
 pub fn collapsing_header(ui: &egui::Ui, title: &str) -> egui::CollapsingHeader {
     let available = ui
         .available_width()
@@ -155,11 +198,33 @@ pub fn form_row<R>(
         })
     }
 }
+/// Opt-in label/control group: reserve enough width for its related widgets.
+/// Existing single-control rows keep their original layout unchanged.
+pub fn form_row_group<R>(
+    ui: &mut egui::Ui,
+    text: impl Into<egui::WidgetText>,
+    minimum_group: f32,
+    value: impl FnOnce(&mut egui::Ui, f32) -> R,
+) -> egui::InnerResponse<R> {
+    let labels = form_label_width(ui);
+    if ui.available_width() < labels + ui.spacing().item_spacing.x + minimum_group {
+        ui.vertical(|ui| {
+            ui.add(egui::Label::new(text).wrap());
+            value(ui, ui.available_width())
+        })
+    } else {
+        form_row(ui, text, value)
+    }
+}
 /// Read-only table cells keep body text readable without reserving an input's click target.
 pub fn table_height(ui: &egui::Ui) -> f32 {
     ui.text_style_height(&egui::TextStyle::Body).ceil() + 8.
 }
 pub fn table_text(ui: &mut egui::Ui, text: impl Into<egui::WidgetText>, width: f32) {
+    table_text_rect(ui, text, width);
+}
+/// Same read-only cell, with actual geometry for opt-in table layout checks.
+pub fn table_text_rect(ui: &mut egui::Ui, text: impl Into<egui::WidgetText>, width: f32) -> egui::Rect {
     let row_height = table_height(ui);
     ui.allocate_ui_with_layout(
         egui::vec2(width, row_height),
@@ -168,7 +233,7 @@ pub fn table_text(ui: &mut egui::Ui, text: impl Into<egui::WidgetText>, width: f
             ui.set_width(width);
             ui.add(egui::Label::new(text).wrap());
         },
-    );
+    ).response.rect
 }
 pub fn topology_frame(ui: &egui::Ui) -> egui::Frame {
     egui::Frame::new()

@@ -91,17 +91,34 @@ impl LabApp {
         match self.spanning_tree_view(i) {
             teaching::View::Introduction => {
                 let lesson = s.spanning_tree_teaching.as_ref().expect("prepared lesson");
-                ui.label(&lesson.prerequisite_note);
-                for c in &lesson.concepts {
-                    ui.label(RichText::new(&c.title).strong());
-                    ui.label(&c.text);
+                if ccna_presentation::enabled(&s) {
+                    ccna_presentation::concepts(
+                        ui,
+                        &s,
+                        &lesson.prerequisite_note,
+                        lesson
+                            .concepts
+                            .iter()
+                            .map(|c| (c.title.clone(), c.text.clone())),
+                    );
+                } else {
+                    ui.label(&lesson.prerequisite_note);
+                    for c in &lesson.concepts {
+                        ui.label(RichText::new(&c.title).strong());
+                        ui.label(&c.text);
+                    }
                 }
-                ui.label(RichText::new("A different graph to try").strong());
+                lesson_presentation::worked(
+                    ui,
+                    "Follow these worked actions in the separate graph. Apply each edit before inspecting the calculated tree.",
+                );
                 for a in &lesson.example_actions {
                     ui.label(RichText::new(&a.title).strong());
                     ui.label(&a.explanation);
                 }
-                ui.label(format!("Try a change: {}", lesson.try_change.description));
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change.description));
+                }
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try the separate example"));
                     self.metrics.example_action = Some(r.rect);
@@ -116,6 +133,7 @@ impl LabApp {
                 });
             }
             teaching::View::Example => {
+                ccna_presentation::example(ui, &s, true);
                 let lesson = s.spanning_tree_teaching.as_ref().expect("prepared lesson");
                 let mut l = self.progress.attempts[&s.id]
                     .workspace
@@ -125,9 +143,7 @@ impl LabApp {
                     .clone()
                     .unwrap();
                 let before = serde_json::to_vec(&l).unwrap();
-                ui.label(
-                    "Practice graph · Ungraded; assignment settings and drafts stay separate.",
-                );
+
                 ui.push_id(("stp-example", &s.id), |ui| {
                     controls::dropdown(ui, "worked-action", ui.available_width()).selected_text(&lesson.example_actions[l.selected_action].title).show_ui(ui, |ui| {
                         for (n, a) in lesson.example_actions.iter().enumerate() { ui.selectable_value(&mut l.selected_action, n, &a.title); }
@@ -157,14 +173,16 @@ impl LabApp {
                         if l.checked {
                             let rows = l.checks(lesson);
                             let pass=rows.iter().all(|r| r.0);
-                            if pass { self.metrics.stp_result=Some(ui.label(RichText::new("Example checks pass · No assignment credit").color(palette(ui).success)).rect); }
+                            if pass { self.metrics.stp_result=Some(ui.label(RichText::new("Example checks pass").color(palette(ui).success)).rect); }
                             let first=stp_results(ui, &rows);
                             if !pass {self.metrics.stp_result=first;}
                         }
                     });
                     self.metrics.feedback = Some(feedback.response.rect);
                 });
-                ui.label(format!("Try a change: {}", lesson.try_change.description));
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change.description));
+                }
                 let r = ui.add(button("Open full assignment"));
                 self.metrics.assignment_action = Some(r.rect);
                 if r.clicked() {
@@ -182,7 +200,7 @@ impl LabApp {
                     .spanning_tree_learning = Some(l);
             }
             teaching::View::Assignment => {
-                ui.label(&s.objective);
+                ccna_presentation::assignment(ui, &s);
                 let a = self.progress.attempts.get_mut(&s.id).unwrap();
                 let engine::State::SpanningTree { simulation } = &mut a.state else {
                     unreachable!()

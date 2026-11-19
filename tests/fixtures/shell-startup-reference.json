@@ -1,0 +1,492 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "login-priority",
+      "invocation": {
+        "kind": "InteractiveLogin",
+        "noprofile": false
+      },
+      "files": {
+        "/etc/profile": {
+          "text": "BASE=system\nexport BASE\n"
+        },
+        "~/.bash_profile": {
+          "text": "APP=\"$SOURCE\"\nexport APP\nPRIVATE=local"
+        },
+        "~/.bash_login": {
+          "text": "APP=wrong-login"
+        },
+        "~/.profile": {
+          "text": "APP=wrong-profile"
+        },
+        "~/.bashrc": {
+          "text": "printf wrong"
+        }
+      },
+      "expected_selection": [
+        "/etc/profile",
+        "~/.bash_profile"
+      ],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s\\n' \"$APP\"",
+      "observe": [
+        "APP",
+        "BASE",
+        "PRIVATE"
+      ]
+    },
+    {
+      "id": "login-fallback",
+      "invocation": {
+        "kind": "InteractiveLogin",
+        "noprofile": false
+      },
+      "files": {
+        "/etc/profile": {
+          "text": "BASE=system\nexport BASE\n"
+        },
+        "~/.bash_login": {
+          "text": "export APP=\"$SOURCE\""
+        },
+        "~/.profile": {
+          "text": "APP=wrong-profile"
+        }
+      },
+      "expected_selection": [
+        "/etc/profile",
+        "~/.bash_login"
+      ],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s\\n' \"$APP\"",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "profile-fallback",
+      "invocation": {
+        "kind": "InteractiveLogin",
+        "noprofile": false
+      },
+      "files": {
+        "~/.profile": {
+          "text": "export APP=\"$SOURCE\""
+        }
+      },
+      "expected_selection": [
+        "~/.profile"
+      ],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s\\n' \"$APP\"",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "empty-priority",
+      "invocation": {
+        "kind": "InteractiveLogin",
+        "noprofile": false
+      },
+      "files": {
+        "/etc/profile": {
+          "text": "false"
+        },
+        "~/.bash_profile": {
+          "text": ""
+        },
+        "~/.profile": {
+          "text": "printf wrong"
+        }
+      },
+      "expected_selection": [
+        "/etc/profile",
+        "~/.bash_profile"
+      ],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s\\n' \"$?\"",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "comment-priority",
+      "invocation": {
+        "kind": "InteractiveLogin",
+        "noprofile": false
+      },
+      "files": {
+        "/etc/profile": {
+          "text": "false"
+        },
+        "~/.bash_profile": {
+          "text": "# No commands in this file\n"
+        },
+        "~/.profile": {
+          "text": "printf wrong"
+        }
+      },
+      "expected_selection": [
+        "/etc/profile",
+        "~/.bash_profile"
+      ],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s\\n' \"$?\"",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "rc-only",
+      "invocation": {
+        "kind": "InteractiveNonLogin",
+        "norc": false
+      },
+      "files": {
+        "~/.bashrc": {
+          "text": "export APP=\"$SOURCE\""
+        },
+        "~/.bash_profile": {
+          "text": "printf wrong"
+        }
+      },
+      "expected_selection": [
+        "~/.bashrc"
+      ],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s\\n' \"$APP\"",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "norc",
+      "invocation": {
+        "kind": "InteractiveNonLogin",
+        "norc": true
+      },
+      "files": {
+        "~/.bashrc": {
+          "text": "printf wrong"
+        }
+      },
+      "expected_selection": [],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s\\n' quiet",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "noprofile",
+      "invocation": {
+        "kind": "InteractiveLogin",
+        "noprofile": true
+      },
+      "files": {
+        "/etc/profile": {
+          "text": "BASE=system\nexport BASE\n"
+        },
+        "~/.bash_profile": {
+          "text": "printf wrong"
+        }
+      },
+      "expected_selection": [],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s\\n' quiet",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "script-no-env",
+      "invocation": {
+        "kind": "NonInteractive",
+        "bash_env": null
+      },
+      "files": {
+        "~/.bashrc": {
+          "text": "printf wrong"
+        },
+        "~/.profile": {
+          "text": "printf wrong"
+        },
+        "/work/startup.env": {
+          "text": "printf wrong"
+        }
+      },
+      "expected_selection": [],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s\\n' quiet",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "script-env",
+      "invocation": {
+        "kind": "NonInteractive",
+        "bash_env": "/work/startup.env"
+      },
+      "files": {
+        "/work/startup.env": {
+          "text": "export APP=\"$SOURCE\""
+        },
+        "~/.bashrc": {
+          "text": "printf wrong"
+        }
+      },
+      "expected_selection": [
+        "/work/startup.env"
+      ],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s\\n' \"$APP\"",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "prior-status",
+      "invocation": {
+        "kind": "InteractiveLogin",
+        "noprofile": false
+      },
+      "files": {
+        "/etc/profile": {
+          "text": "false"
+        },
+        "~/.bash_profile": {
+          "text": "SEEN=$?\nAPP=\"$SOURCE\""
+        }
+      },
+      "expected_selection": [
+        "/etc/profile",
+        "~/.bash_profile"
+      ],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s|%s\\n' \"$SEEN\" \"$APP\"",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "unset-export-attribute",
+      "invocation": {
+        "kind": "InteractiveLogin",
+        "noprofile": false
+      },
+      "files": {
+        "/etc/profile": {
+          "text": "export APP"
+        },
+        "~/.bash_profile": {
+          "text": "APP=\"$SOURCE\""
+        }
+      },
+      "expected_selection": [
+        "/etc/profile",
+        "~/.bash_profile"
+      ],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s\\n' \"$APP\"",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "explicit-exit",
+      "invocation": {
+        "kind": "InteractiveLogin",
+        "noprofile": false
+      },
+      "files": {
+        "/etc/profile": {
+          "text": "APP=early\nprintf '%s' before\nexit 7"
+        },
+        "~/.bash_profile": {
+          "text": "APP=never"
+        }
+      },
+      "expected_selection": [
+        "/etc/profile",
+        "~/.bash_profile"
+      ],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s' never",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "quoted-data",
+      "invocation": {
+        "kind": "InteractiveNonLogin",
+        "norc": false
+      },
+      "files": {
+        "~/.bashrc": {
+          "text": "APP=\"$SOURCE\"\nexport APP"
+        }
+      },
+      "expected_selection": [
+        "~/.bashrc"
+      ],
+      "env": {
+        "SOURCE": "literal $HOME * [x] ; a name with spaces"
+      },
+      "command": "printf '%s\\n' \"$APP\"",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "opterr-invocation-reset",
+      "invocation": {
+        "kind": "NonInteractive",
+        "bash_env": null
+      },
+      "files": {},
+      "expected_selection": [],
+      "env": {
+        "OPTERR": "0"
+      },
+      "command": "printf '%s\\n' \"$OPTERR\"",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "condition-present",
+      "invocation": {
+        "kind": "InteractiveNonLogin",
+        "norc": false
+      },
+      "files": {
+        "~/.bashrc": {
+          "text": "if [ -n \"$SUFFIX\" ]; then APP=\"$SOURCE-$SUFFIX\"; else APP=\"$SOURCE\"; fi\nexport APP"
+        }
+      },
+      "expected_selection": [
+        "~/.bashrc"
+      ],
+      "env": {
+        "SOURCE": "copper",
+        "SUFFIX": "field"
+      },
+      "command": "printf '%s\\n' \"$APP\"",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "condition-absent",
+      "invocation": {
+        "kind": "InteractiveNonLogin",
+        "norc": false
+      },
+      "files": {
+        "~/.bashrc": {
+          "text": "if [ -n \"$SUFFIX\" ]; then APP=\"$SOURCE-$SUFFIX\"; else APP=\"$SOURCE\"; fi\nexport APP"
+        }
+      },
+      "expected_selection": [
+        "~/.bashrc"
+      ],
+      "env": {
+        "SOURCE": "copper",
+        "SUFFIX": ""
+      },
+      "command": "printf '%s\\n' \"$APP\"",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    },
+    {
+      "id": "quoted-export-removal",
+      "invocation": {
+        "kind": "InteractiveLogin",
+        "noprofile": false
+      },
+      "files": {
+        "/etc/profile": {
+          "text": "APP=first\nexport APP"
+        },
+        "~/.bash_profile": {
+          "text": "export -n \"APP\"\nAPP=\"$SOURCE\""
+        }
+      },
+      "expected_selection": [
+        "/etc/profile",
+        "~/.bash_profile"
+      ],
+      "env": {
+        "SOURCE": "amber"
+      },
+      "command": "printf '%s\\n' \"$APP\"",
+      "observe": [
+        "APP",
+        "PRIVATE",
+        "SEEN"
+      ]
+    }
+  ]
+}

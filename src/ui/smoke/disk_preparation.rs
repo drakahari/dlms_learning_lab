@@ -29,6 +29,7 @@ enum Target {
     Scale,
     HeaderChoice(String),
     Goal,
+    Introduction,
     Feedback,
     Notice,
     Text(String),
@@ -102,7 +103,7 @@ vec![
     Step::Replace("Prepare an export area beside retained evidence".into()),
     Step::Click(Target::Start(0)),
     Step::Task(0),
-    Step::Shot("lpic1-disk-safe-gap-introduction".into(), Target::Text("No disk-command knowledge is required. Familiarity with file paths is useful; read these concepts and try the independent practice before the full assignment. The introduction is skippable, and prerequisite suggestions never lock access.".into())),
+    Step::Shot("lpic1-disk-safe-gap-introduction".into(), Target::Introduction),
     Step::Click(Target::Control("assignment")),
     Step::Click(Target::Control("check")),
     Step::Rows(vec![false,true], false),
@@ -533,7 +534,7 @@ vec![
     Step::Replace("Finish a correctly allocated handoff".into()),
     Step::Click(Target::Start(1)),
     Step::Task(1),
-    Step::Shot("lpic1-disk-hints-versus-content-introduction".into(), Target::Text("No disk-command knowledge is required. Familiarity with file paths is useful; read these concepts and try the independent practice before the full assignment. The introduction is skippable, and prerequisite suggestions never lock access.".into())),
+    Step::Shot("lpic1-disk-hints-versus-content-introduction".into(), Target::Introduction),
     Step::Click(Target::Control("assignment")),
     Step::Click(Target::Control("check")),
     Step::Rows(vec![false,false,true], false),
@@ -930,7 +931,7 @@ vec![
     Step::Replace("Build a layout on eligible media".into()),
     Step::Click(Target::Start(2)),
     Step::Task(2),
-    Step::Shot("lpic1-disk-eligible-media-introduction".into(), Target::Text("No disk-command knowledge is required. Familiarity with file paths is useful; read these concepts and try the independent practice before the full assignment. The introduction is skippable, and prerequisite suggestions never lock access.".into())),
+    Step::Shot("lpic1-disk-eligible-media-introduction".into(), Target::Introduction),
     Step::Click(Target::Control("assignment")),
     Step::Click(Target::Control("check")),
     Step::Rows(vec![false,false,true], false),
@@ -1606,7 +1607,7 @@ vec![
     Step::Replace("Deliver prepared storage without disturbing retained data".into()),
     Step::Click(Target::Start(3)),
     Step::Task(3),
-    Step::Shot("lpic1-disk-delivery-introduction".into(), Target::Text("No disk-command knowledge is required. Familiarity with file paths is useful; read these concepts and try the independent practice before the full assignment. The introduction is skippable, and prerequisite suggestions never lock access.".into())),
+    Step::Shot("lpic1-disk-delivery-introduction".into(), Target::Introduction),
     Step::Click(Target::Control("assignment")),
     Step::Click(Target::Control("check")),
     Step::Rows(vec![false,false,true], false),
@@ -2787,6 +2788,23 @@ impl LabApp {
         let e = self.disk_editor();
         let d = &e.drafts[&e.selected];
         match o {
+            work::Operation::Mbr { operation } => match operation {
+                core::mbr::Action::Create { disk } => assert_eq!(&e.selected, disk),
+                core::mbr::Action::Add {
+                    disk,
+                    role,
+                    start,
+                    end,
+                    type_hint,
+                } => {
+                    assert_eq!(&e.selected, disk);
+                    let draft = &e.drafts[disk];
+                    assert_eq!(draft.mbr_role, Some(*role));
+                    assert_eq!(draft.start, start.to_string());
+                    assert_eq!(draft.end, end.to_string());
+                    assert_eq!(draft.type_hint, *type_hint);
+                }
+            },
             work::Operation::CreateGpt { disk } => assert_eq!(&e.selected, disk),
             work::Operation::AddPartition {
                 disk,
@@ -2881,6 +2899,13 @@ impl LabApp {
                     .find(|r| r.0 == *k)
                     .unwrap();
                 (r.1, r.2.intersect(ctx.content_rect()))
+            }
+            Target::Introduction => {
+                let (rect, clip) = m
+                    .partition_fs
+                    .introduction
+                    .expect("Actual rendered learning objective");
+                (rect, clip.intersect(root))
             }
             Target::Goal => (m.partition_fs.goal.unwrap(), root),
             Target::Notice => (m.partition_fs.notice.expect("Actual action refusal"), root),

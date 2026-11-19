@@ -1,0 +1,1210 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-rest-change-request",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "REST network changes",
+      "unit": "rest-network-changes",
+      "title": "Repair an authorized network change request",
+      "summary": "Read a resource, diagnose authorization and JSON errors, then verify the network.",
+      "objective": "Restore communication between the two staff endpoints by repairing the staff profile. Keep its current description. Keep both guest endpoints connected and separated from staff. Keep the visitors profile unchanged.",
+      "retry_guidance": "Read the actual response first. Correct the request fields and send again; then use each failing network requirement to check the applied result.",
+      "difficulty": "Beginner",
+      "minutes": 25,
+      "prerequisites": [],
+      "steps": [
+        "Read before changing",
+        "A request has separate parts",
+        "Permission and JSON types matter",
+        "Response success is not task success"
+      ],
+      "guide": [
+        {
+          "title": "Read before changing",
+          "why": "A resource is a named piece of data. GET /profiles lists the profiles; GET /profiles/team reads one profile. A binding selects which profile controls a supplied port. Changing a shared profile affects every port using it.",
+          "action": "Use the native request controls and inspect the actual response.",
+          "commands": []
+        },
+        {
+          "title": "A request has separate parts",
+          "why": "Method says what to do; Path selects the resource; Authorization identifies who is asking; Content-Type describes the body. GET reads. PATCH changes named fields. PUT replaces the full representation, so include required fields and any description you need to retain.",
+          "action": "Use the native request controls and inspect the actual response.",
+          "commands": []
+        },
+        {
+          "title": "Permission and JSON types matter",
+          "why": "This simulator supplies Bearer lab-reader for reading and Bearer lab-operator for changes. A missing or invalid identity gets 401; a reader attempting a change gets 403. These labels are not real credentials. JSON true is an on/off value; \"true\" is text. PATCH uses application/merge-patch+json. A rejected request leaves resources unchanged.",
+          "action": "Use the native request controls and inspect the actual response.",
+          "commands": []
+        },
+        {
+          "title": "Response success is not task success",
+          "why": "Send request applies one valid change. A 204 response means this origin accepted the update; it does not prove the desired network works. Check network separately tests current paths, group separation and protected fields. Editing request fields clears the current result; sending a change can break a previously working network.",
+          "action": "Use the native request controls and inspect the actual response.",
+          "commands": []
+        }
+      ],
+      "explanation": "The request needed a permitted identity, a matching media type and a real boolean. PATCH retained the other profile fields while enabling both selected ports. Equivalent complete PUT representations can work too. Only the network and preservation checks established the requested outcome; a2xx status alone did not.",
+      "hints": [
+        "Use GET /profiles and GET /bindings with an empty Body to inspect current resources. The supplied map connects binding names to switch ports and endpoints.",
+        "401 means identity missing or invalid; 403 means identified but not permitted; 415 means wrong Content-Type; 400 means a JSON, path or request-format error; 422 means the data violates this resource schema.",
+        "A 2xx response is not completion. Check network, read each failing requirement, and keep unrelated profile fields intact."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc9110.html",
+        "https://www.rfc-editor.org/rfc/rfc7396.html"
+      ],
+      "simplifications": "Sources checked 2026-11-13UTC. Finite in-process lab origin, not a Cisco API or HTTP wire implementation. Supplied synthetic Bearer roles are not real credentials, Basic, OAuth or TLS. Named profiles and fixed access-port bindings project into existing Ethernet/VLAN simulation. GET/POST/PUT/PATCH/DELETE only; JSON and Merge Patch with typed resource limits. No URL, server, socket, shell or host execution. Up to12profiles/12bindings,4KiB request bodies,128JSON values/depth8,64changes/16KiB replay and64KiB session. See REST_CONTROLLER_SUBSET.md. No complete6.5or controller architecture claim.",
+      "initial": {
+        "kind": "RestController",
+        "simulation": {
+          "version": 1,
+          "context": "ccna-rest-change-request",
+          "view": "introduction",
+          "assignment": {
+            "request": {
+              "method": "PATCH",
+              "path": "/profiles/staff",
+              "authorization": "Bearer lab-reader",
+              "content_type": "application/json",
+              "body": "{\"up\":\"true\"}"
+            },
+            "changes": [],
+            "checked": false
+          },
+          "practice": {
+            "request": {
+              "method": "PATCH",
+              "path": "/profiles/team",
+              "authorization": "Bearer lab-reader",
+              "content_type": "application/json",
+              "body": "{\"up\":\"true\"}"
+            },
+            "changes": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "RestController",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "id": "ccna-rest-change-request",
+            "instructions": "Restore communication between the two staff endpoints by repairing the staff profile. Keep its current description. Keep both guest endpoints connected and separated from staff. Keep the visitors profile unchanged.",
+            "api": {
+              "inventory": {
+                "fabric": {
+                  "switches": {
+                    "access": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10,
+                        20,
+                        30
+                      ],
+                      "ports": {
+                        "p1": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "p2": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "p3": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "p4": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "staff-a": {
+                      "label": "Staff A",
+                      "up": true
+                    },
+                    "staff-b": {
+                      "label": "Staff B",
+                      "up": true
+                    },
+                    "guest-a": {
+                      "label": "Guest A",
+                      "up": true
+                    },
+                    "guest-b": {
+                      "label": "Guest B",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "c0",
+                      "a": {
+                        "kind": "host",
+                        "host": "staff-a"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "access",
+                        "port": "p1"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "c1",
+                      "a": {
+                        "kind": "host",
+                        "host": "staff-b"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "access",
+                        "port": "p2"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "c2",
+                      "a": {
+                        "kind": "host",
+                        "host": "guest-a"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "access",
+                        "port": "p3"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "c3",
+                      "a": {
+                        "kind": "host",
+                        "host": "guest-b"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "access",
+                        "port": "p4"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "editable": {
+                  "access": [
+                    "p1",
+                    "p2",
+                    "p3",
+                    "p4"
+                  ]
+                }
+              },
+              "ports": {
+                "desk-1": {
+                  "switch": "access",
+                  "port": "p1"
+                },
+                "desk-2": {
+                  "switch": "access",
+                  "port": "p2"
+                },
+                "desk-3": {
+                  "switch": "access",
+                  "port": "p3"
+                },
+                "desk-4": {
+                  "switch": "access",
+                  "port": "p4"
+                }
+              }
+            },
+            "initial": {
+              "profiles": {
+                "staff": {
+                  "up": false,
+                  "vlan": 10,
+                  "description": "Staff desk service"
+                },
+                "visitors": {
+                  "up": true,
+                  "vlan": 20,
+                  "description": "Visitor desk service"
+                }
+              },
+              "bindings": {
+                "desk-1": {
+                  "profile": "staff"
+                },
+                "desk-2": {
+                  "profile": "staff"
+                },
+                "desk-3": {
+                  "profile": "visitors"
+                },
+                "desk-4": {
+                  "profile": "visitors"
+                }
+              }
+            },
+            "starter": {
+              "method": "PATCH",
+              "path": "/profiles/staff",
+              "authorization": "Bearer lab-reader",
+              "content_type": "application/json",
+              "body": "{\"up\":\"true\"}"
+            },
+            "reference": [
+              {
+                "method": "PATCH",
+                "path": "/profiles/staff",
+                "authorization": "Bearer lab-operator",
+                "content_type": "application/merge-patch+json",
+                "body": "{\"up\":true}"
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "visibility",
+                  "label": "Staff pair",
+                  "from": "staff-a",
+                  "to": "staff-b",
+                  "visible": true
+                }
+              },
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "visibility",
+                  "label": "Guest pair",
+                  "from": "guest-a",
+                  "to": "guest-b",
+                  "visible": true
+                }
+              },
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "visibility",
+                  "label": "Separate staff and guests",
+                  "from": "staff-a",
+                  "to": "guest-a",
+                  "visible": false
+                }
+              },
+              {
+                "kind": "PreserveProfile",
+                "name": "visitors"
+              },
+              {
+                "kind": "PreserveDescription",
+                "name": "staff"
+              }
+            ]
+          },
+          "example": {
+            "id": "rest-update-example",
+            "instructions": "Restore communication between the two staff endpoints by repairing the team profile. Keep its current description. Keep both guest endpoints connected and separated from staff. Keep the guests profile unchanged.",
+            "api": {
+              "inventory": {
+                "fabric": {
+                  "switches": {
+                    "demo": {
+                      "label": "Practice switch",
+                      "vlans": [
+                        100,
+                        200,
+                        300
+                      ],
+                      "ports": {
+                        "p1": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 100
+                          }
+                        },
+                        "p2": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 100
+                          }
+                        },
+                        "p3": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 100
+                          }
+                        },
+                        "p4": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 100
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "staff-a": {
+                      "label": "Staff A",
+                      "up": true
+                    },
+                    "staff-b": {
+                      "label": "Staff B",
+                      "up": true
+                    },
+                    "guest-a": {
+                      "label": "Guest A",
+                      "up": true
+                    },
+                    "guest-b": {
+                      "label": "Guest B",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "c0",
+                      "a": {
+                        "kind": "host",
+                        "host": "staff-a"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "demo",
+                        "port": "p1"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "c1",
+                      "a": {
+                        "kind": "host",
+                        "host": "staff-b"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "demo",
+                        "port": "p2"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "c2",
+                      "a": {
+                        "kind": "host",
+                        "host": "guest-a"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "demo",
+                        "port": "p3"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "c3",
+                      "a": {
+                        "kind": "host",
+                        "host": "guest-b"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "demo",
+                        "port": "p4"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "editable": {
+                  "demo": [
+                    "p1",
+                    "p2",
+                    "p3",
+                    "p4"
+                  ]
+                }
+              },
+              "ports": {
+                "desk-1": {
+                  "switch": "demo",
+                  "port": "p1"
+                },
+                "desk-2": {
+                  "switch": "demo",
+                  "port": "p2"
+                },
+                "desk-3": {
+                  "switch": "demo",
+                  "port": "p3"
+                },
+                "desk-4": {
+                  "switch": "demo",
+                  "port": "p4"
+                }
+              }
+            },
+            "initial": {
+              "profiles": {
+                "team": {
+                  "up": false,
+                  "vlan": 100,
+                  "description": "Practice team desk service"
+                },
+                "guests": {
+                  "up": true,
+                  "vlan": 200,
+                  "description": "Practice guest service"
+                }
+              },
+              "bindings": {
+                "desk-1": {
+                  "profile": "team"
+                },
+                "desk-2": {
+                  "profile": "team"
+                },
+                "desk-3": {
+                  "profile": "guests"
+                },
+                "desk-4": {
+                  "profile": "guests"
+                }
+              }
+            },
+            "starter": {
+              "method": "PATCH",
+              "path": "/profiles/team",
+              "authorization": "Bearer lab-reader",
+              "content_type": "application/json",
+              "body": "{\"up\":\"true\"}"
+            },
+            "reference": [
+              {
+                "method": "PATCH",
+                "path": "/profiles/team",
+                "authorization": "Bearer lab-operator",
+                "content_type": "application/merge-patch+json",
+                "body": "{\"up\":true}"
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "visibility",
+                  "label": "Staff pair",
+                  "from": "staff-a",
+                  "to": "staff-b",
+                  "visible": true
+                }
+              },
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "visibility",
+                  "label": "Guest pair",
+                  "from": "guest-a",
+                  "to": "guest-b",
+                  "visible": true
+                }
+              },
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "visibility",
+                  "label": "Separate staff and guests",
+                  "from": "staff-a",
+                  "to": "guest-a",
+                  "visible": false
+                }
+              },
+              {
+                "kind": "PreserveProfile",
+                "name": "guests"
+              },
+              {
+                "kind": "PreserveDescription",
+                "name": "team"
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "REST REQUEST\n{\"method\":\"PATCH\",\"path\":\"/profiles/staff\",\"authorization\":\"Bearer lab-operator\",\"content_type\":\"application/merge-patch+json\",\"body\":\"{\\\"up\\\":true}\"}"
+      ]
+    },
+    {
+      "id": "ccna-rest-profile-handover",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "REST network changes",
+      "unit": "rest-network-changes",
+      "title": "Hand over a controller profile without collateral changes",
+      "summary": "Create, rebind, verify and retire resources while protecting another group.",
+      "objective": "Move both guest ports (desk-3 and desk-4) to a new working profile in VLAN 30. Keep guest peers connected and separate from staff. Keep the staff profile unchanged. Retire the old visitors profile after moving its bindings.",
+      "retry_guidance": "Read the actual response first. Correct the request fields and send again; then use each failing network requirement to check the applied result.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "prerequisites": [
+        "ccna-rest-change-request"
+      ],
+      "steps": [
+        "Create data before choosing it",
+        "Move one binding at a time",
+        "Retire safely after verification",
+        "Use replacement and partial changes deliberately"
+      ],
+      "guide": [
+        {
+          "title": "Create data before choosing it",
+          "why": "POST /profiles creates a named profile from name, up and vlan. A 201 response includes Location, the new resource path. PUT /profiles/NAME can also create a full profile at that path. Existing port bindings keep their old selection until you change them.",
+          "action": "Use the native request controls and inspect the actual response.",
+          "commands": []
+        },
+        {
+          "title": "Move one binding at a time",
+          "why": "GET /bindings lists port selections. PATCH /bindings/desk-3 with a new profile name changes only that port. Moving just one peer can split a working pair: a valid 204 response is not a complete handover.",
+          "action": "Use the native request controls and inspect the actual response.",
+          "commands": []
+        },
+        {
+          "title": "Retire safely after verification",
+          "why": "DELETE removes an unused profile. This origin returns 409 while a port still selects it, so read the bindings and move the remaining users first. The two guest ports need the target VLAN; staff must keep its existing profile and behavior.",
+          "action": "Use the native request controls and inspect the actual response.",
+          "commands": []
+        },
+        {
+          "title": "Use replacement and partial changes deliberately",
+          "why": "PUT replaces the whole resource representation; PATCH changes only named fields. PATCH description:null removes an optional description. Removing up, vlan or a binding profile is invalid because those fields are required. You may choose a different new profile name if its behavior meets the full assignment.",
+          "action": "Use the native request controls and inspect the actual response.",
+          "commands": []
+        }
+      ],
+      "explanation": "Creation, port selection and retirement were separate resource operations. Both guest bindings needed a working target profile before their old one could be deleted. Current Ethernet outcomes and preserved staff data mattered more than request order or the chosen new profile name.",
+      "hints": [
+        "Use GET /profiles and GET /bindings with an empty Body to inspect current resources. The supplied map connects binding names to switch ports and endpoints.",
+        "401 means identity missing or invalid; 403 means identified but not permitted; 415 means wrong Content-Type; 400 means a JSON, path or request-format error; 422 means the data violates this resource schema.",
+        "A 2xx response is not completion. Check network, read each failing requirement, and keep unrelated profile fields intact."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc9110.html",
+        "https://www.rfc-editor.org/rfc/rfc7396.html"
+      ],
+      "simplifications": "Sources checked 2026-11-13UTC. Finite in-process lab origin, not a Cisco API or HTTP wire implementation. Supplied synthetic Bearer roles are not real credentials, Basic, OAuth or TLS. Named profiles and fixed access-port bindings project into existing Ethernet/VLAN simulation. GET/POST/PUT/PATCH/DELETE only; JSON and Merge Patch with typed resource limits. No URL, server, socket, shell or host execution. Up to12profiles/12bindings,4KiB request bodies,128JSON values/depth8,64changes/16KiB replay and64KiB session. See REST_CONTROLLER_SUBSET.md. No complete6.5or controller architecture claim.",
+      "initial": {
+        "kind": "RestController",
+        "simulation": {
+          "version": 1,
+          "context": "ccna-rest-profile-handover",
+          "view": "introduction",
+          "assignment": {
+            "request": {
+              "method": "GET",
+              "path": "/profiles",
+              "authorization": "Bearer lab-reader",
+              "content_type": "application/json",
+              "body": ""
+            },
+            "changes": [],
+            "checked": false
+          },
+          "practice": {
+            "request": {
+              "method": "GET",
+              "path": "/profiles",
+              "authorization": "Bearer lab-reader",
+              "content_type": "application/json",
+              "body": ""
+            },
+            "changes": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "RestController",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "id": "ccna-rest-profile-handover",
+            "instructions": "Move both guest ports (desk-3 and desk-4) to a new working profile in VLAN 30. Keep guest peers connected and separate from staff. Keep the staff profile unchanged. Retire the old visitors profile after moving its bindings.",
+            "api": {
+              "inventory": {
+                "fabric": {
+                  "switches": {
+                    "access": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10,
+                        20,
+                        30
+                      ],
+                      "ports": {
+                        "p1": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "p2": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "p3": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "p4": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "staff-a": {
+                      "label": "Staff A",
+                      "up": true
+                    },
+                    "staff-b": {
+                      "label": "Staff B",
+                      "up": true
+                    },
+                    "guest-a": {
+                      "label": "Guest A",
+                      "up": true
+                    },
+                    "guest-b": {
+                      "label": "Guest B",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "c0",
+                      "a": {
+                        "kind": "host",
+                        "host": "staff-a"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "access",
+                        "port": "p1"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "c1",
+                      "a": {
+                        "kind": "host",
+                        "host": "staff-b"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "access",
+                        "port": "p2"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "c2",
+                      "a": {
+                        "kind": "host",
+                        "host": "guest-a"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "access",
+                        "port": "p3"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "c3",
+                      "a": {
+                        "kind": "host",
+                        "host": "guest-b"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "access",
+                        "port": "p4"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "editable": {
+                  "access": [
+                    "p1",
+                    "p2",
+                    "p3",
+                    "p4"
+                  ]
+                }
+              },
+              "ports": {
+                "desk-1": {
+                  "switch": "access",
+                  "port": "p1"
+                },
+                "desk-2": {
+                  "switch": "access",
+                  "port": "p2"
+                },
+                "desk-3": {
+                  "switch": "access",
+                  "port": "p3"
+                },
+                "desk-4": {
+                  "switch": "access",
+                  "port": "p4"
+                }
+              }
+            },
+            "initial": {
+              "profiles": {
+                "staff": {
+                  "up": true,
+                  "vlan": 10,
+                  "description": "Staff desk service"
+                },
+                "visitors": {
+                  "up": true,
+                  "vlan": 20,
+                  "description": "Visitor desk service"
+                }
+              },
+              "bindings": {
+                "desk-1": {
+                  "profile": "staff"
+                },
+                "desk-2": {
+                  "profile": "staff"
+                },
+                "desk-3": {
+                  "profile": "visitors"
+                },
+                "desk-4": {
+                  "profile": "visitors"
+                }
+              }
+            },
+            "starter": {
+              "method": "GET",
+              "path": "/profiles",
+              "authorization": "Bearer lab-reader",
+              "content_type": "application/json",
+              "body": ""
+            },
+            "reference": [
+              {
+                "method": "POST",
+                "path": "/profiles",
+                "authorization": "Bearer lab-operator",
+                "content_type": "application/json",
+                "body": "{\"name\":\"guest-next\",\"up\":true,\"vlan\":30}"
+              },
+              {
+                "method": "PATCH",
+                "path": "/bindings/desk-3",
+                "authorization": "Bearer lab-operator",
+                "content_type": "application/merge-patch+json",
+                "body": "{\"profile\":\"guest-next\"}"
+              },
+              {
+                "method": "PATCH",
+                "path": "/bindings/desk-4",
+                "authorization": "Bearer lab-operator",
+                "content_type": "application/merge-patch+json",
+                "body": "{\"profile\":\"guest-next\"}"
+              },
+              {
+                "method": "DELETE",
+                "path": "/profiles/visitors",
+                "authorization": "Bearer lab-operator",
+                "content_type": "application/json",
+                "body": ""
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "visibility",
+                  "label": "Staff pair",
+                  "from": "staff-a",
+                  "to": "staff-b",
+                  "visible": true
+                }
+              },
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "visibility",
+                  "label": "Guest pair",
+                  "from": "guest-a",
+                  "to": "guest-b",
+                  "visible": true
+                }
+              },
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "visibility",
+                  "label": "Separate staff and guests",
+                  "from": "staff-a",
+                  "to": "guest-a",
+                  "visible": false
+                }
+              },
+              {
+                "kind": "PreserveProfile",
+                "name": "staff"
+              },
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "access_vlan",
+                  "switch": "access",
+                  "port": "p3",
+                  "vlan": 30
+                }
+              },
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "access_vlan",
+                  "switch": "access",
+                  "port": "p4",
+                  "vlan": 30
+                }
+              },
+              {
+                "kind": "AbsentProfile",
+                "name": "visitors"
+              }
+            ]
+          },
+          "example": {
+            "id": "rest-handover-example",
+            "instructions": "Move both guest ports (desk-3 and desk-4) to a new working profile in VLAN 300. Keep guest peers connected and separate from staff. Keep the team profile unchanged. Retire the old guests profile after moving its bindings.",
+            "api": {
+              "inventory": {
+                "fabric": {
+                  "switches": {
+                    "demo": {
+                      "label": "Practice switch",
+                      "vlans": [
+                        100,
+                        200,
+                        300
+                      ],
+                      "ports": {
+                        "p1": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 100
+                          }
+                        },
+                        "p2": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 100
+                          }
+                        },
+                        "p3": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 100
+                          }
+                        },
+                        "p4": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 100
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "staff-a": {
+                      "label": "Staff A",
+                      "up": true
+                    },
+                    "staff-b": {
+                      "label": "Staff B",
+                      "up": true
+                    },
+                    "guest-a": {
+                      "label": "Guest A",
+                      "up": true
+                    },
+                    "guest-b": {
+                      "label": "Guest B",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "c0",
+                      "a": {
+                        "kind": "host",
+                        "host": "staff-a"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "demo",
+                        "port": "p1"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "c1",
+                      "a": {
+                        "kind": "host",
+                        "host": "staff-b"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "demo",
+                        "port": "p2"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "c2",
+                      "a": {
+                        "kind": "host",
+                        "host": "guest-a"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "demo",
+                        "port": "p3"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "c3",
+                      "a": {
+                        "kind": "host",
+                        "host": "guest-b"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "demo",
+                        "port": "p4"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "editable": {
+                  "demo": [
+                    "p1",
+                    "p2",
+                    "p3",
+                    "p4"
+                  ]
+                }
+              },
+              "ports": {
+                "desk-1": {
+                  "switch": "demo",
+                  "port": "p1"
+                },
+                "desk-2": {
+                  "switch": "demo",
+                  "port": "p2"
+                },
+                "desk-3": {
+                  "switch": "demo",
+                  "port": "p3"
+                },
+                "desk-4": {
+                  "switch": "demo",
+                  "port": "p4"
+                }
+              }
+            },
+            "initial": {
+              "profiles": {
+                "team": {
+                  "up": true,
+                  "vlan": 100,
+                  "description": "Practice team desk service"
+                },
+                "guests": {
+                  "up": true,
+                  "vlan": 200,
+                  "description": "Practice guest service"
+                }
+              },
+              "bindings": {
+                "desk-1": {
+                  "profile": "team"
+                },
+                "desk-2": {
+                  "profile": "team"
+                },
+                "desk-3": {
+                  "profile": "guests"
+                },
+                "desk-4": {
+                  "profile": "guests"
+                }
+              }
+            },
+            "starter": {
+              "method": "GET",
+              "path": "/profiles",
+              "authorization": "Bearer lab-reader",
+              "content_type": "application/json",
+              "body": ""
+            },
+            "reference": [
+              {
+                "method": "POST",
+                "path": "/profiles",
+                "authorization": "Bearer lab-operator",
+                "content_type": "application/json",
+                "body": "{\"name\":\"practice-new\",\"up\":true,\"vlan\":300}"
+              },
+              {
+                "method": "PATCH",
+                "path": "/bindings/desk-3",
+                "authorization": "Bearer lab-operator",
+                "content_type": "application/merge-patch+json",
+                "body": "{\"profile\":\"practice-new\"}"
+              },
+              {
+                "method": "PATCH",
+                "path": "/bindings/desk-4",
+                "authorization": "Bearer lab-operator",
+                "content_type": "application/merge-patch+json",
+                "body": "{\"profile\":\"practice-new\"}"
+              },
+              {
+                "method": "DELETE",
+                "path": "/profiles/guests",
+                "authorization": "Bearer lab-operator",
+                "content_type": "application/json",
+                "body": ""
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "visibility",
+                  "label": "Staff pair",
+                  "from": "staff-a",
+                  "to": "staff-b",
+                  "visible": true
+                }
+              },
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "visibility",
+                  "label": "Guest pair",
+                  "from": "guest-a",
+                  "to": "guest-b",
+                  "visible": true
+                }
+              },
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "visibility",
+                  "label": "Separate staff and guests",
+                  "from": "staff-a",
+                  "to": "guest-a",
+                  "visible": false
+                }
+              },
+              {
+                "kind": "PreserveProfile",
+                "name": "team"
+              },
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "access_vlan",
+                  "switch": "demo",
+                  "port": "p3",
+                  "vlan": 300
+                }
+              },
+              {
+                "kind": "Network",
+                "requirement": {
+                  "kind": "access_vlan",
+                  "switch": "demo",
+                  "port": "p4",
+                  "vlan": 300
+                }
+              },
+              {
+                "kind": "AbsentProfile",
+                "name": "guests"
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "REST REQUEST\n{\"method\":\"POST\",\"path\":\"/profiles\",\"authorization\":\"Bearer lab-operator\",\"content_type\":\"application/json\",\"body\":\"{\\\"name\\\":\\\"guest-next\\\",\\\"up\\\":true,\\\"vlan\\\":30}\"}",
+        "REST REQUEST\n{\"method\":\"PATCH\",\"path\":\"/bindings/desk-3\",\"authorization\":\"Bearer lab-operator\",\"content_type\":\"application/merge-patch+json\",\"body\":\"{\\\"profile\\\":\\\"guest-next\\\"}\"}",
+        "REST REQUEST\n{\"method\":\"PATCH\",\"path\":\"/bindings/desk-4\",\"authorization\":\"Bearer lab-operator\",\"content_type\":\"application/merge-patch+json\",\"body\":\"{\\\"profile\\\":\\\"guest-next\\\"}\"}",
+        "REST REQUEST\n{\"method\":\"DELETE\",\"path\":\"/profiles/visitors\",\"authorization\":\"Bearer lab-operator\",\"content_type\":\"application/json\",\"body\":\"\"}"
+      ]
+    }
+  ]
+}

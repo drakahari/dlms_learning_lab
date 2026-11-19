@@ -1,0 +1,691 @@
+{
+  "schema_version": 1,
+  "status": "Developer task/session fixture; not registered curriculum",
+  "tasks": [
+    {
+      "id": "lpic1-sticky-collaboration",
+      "definition": {
+        "source_id": "lpic1-sticky-collaboration",
+        "initial": {
+          "tree": {
+            "nodes": {
+              "/": {
+                "mode": 493,
+                "owner": "root",
+                "group": "root",
+                "directory": true
+              },
+              "/work": {
+                "mode": 493,
+                "owner": "alex",
+                "group": "staff",
+                "directory": true
+              },
+              "/work/shared": {
+                "mode": 504,
+                "owner": "alex",
+                "group": "team",
+                "directory": true
+              },
+              "/work/shared/owner-note": {
+                "mode": 432,
+                "owner": "alex",
+                "group": "team",
+                "directory": false
+              },
+              "/work/shared/peer-note": {
+                "mode": 432,
+                "owner": "bea",
+                "group": "team",
+                "directory": false
+              },
+              "/work/shared/readonly-note": {
+                "mode": 288,
+                "owner": "chen",
+                "group": "team",
+                "directory": false
+              },
+              "/work/keep": {
+                "mode": 384,
+                "owner": "alex",
+                "group": "staff",
+                "directory": false
+              }
+            },
+            "files": {
+              "/work/shared/owner-note": "Team working note\n",
+              "/work/shared/peer-note": "Peer working note\n",
+              "/work/shared/readonly-note": "Retain this read-only sample\n",
+              "/work/keep": "Retain this private note\n"
+            },
+            "users": {
+              "root": [
+                "root"
+              ],
+              "alex": [
+                "staff",
+                "team"
+              ],
+              "bea": [
+                "team"
+              ],
+              "chen": [
+                "team"
+              ],
+              "devon": [
+                "visitors"
+              ]
+            },
+            "user": "alex",
+            "home": "/work",
+            "cwd": "/work",
+            "previous": null,
+            "umask": 18,
+            "clock": 0,
+            "modified": {}
+          },
+          "sticky": []
+        },
+        "example": {
+          "tree": {
+            "nodes": {
+              "/": {
+                "mode": 493,
+                "owner": "root",
+                "group": "root",
+                "directory": true
+              },
+              "/practice": {
+                "mode": 493,
+                "owner": "sam",
+                "group": "staff",
+                "directory": true
+              },
+              "/practice/shared": {
+                "mode": 509,
+                "owner": "sam",
+                "group": "team",
+                "directory": true
+              },
+              "/practice/shared/owner-note": {
+                "mode": 432,
+                "owner": "sam",
+                "group": "team",
+                "directory": false
+              },
+              "/practice/shared/peer-note": {
+                "mode": 432,
+                "owner": "taylor",
+                "group": "team",
+                "directory": false
+              },
+              "/practice/shared/readonly-note": {
+                "mode": 288,
+                "owner": "morgan",
+                "group": "team",
+                "directory": false
+              },
+              "/practice/keep": {
+                "mode": 384,
+                "owner": "sam",
+                "group": "staff",
+                "directory": false
+              }
+            },
+            "files": {
+              "/practice/shared/owner-note": "Team working note\n",
+              "/practice/shared/peer-note": "Peer working note\n",
+              "/practice/shared/readonly-note": "Retain this read-only sample\n",
+              "/practice/keep": "Retain this private note\n"
+            },
+            "users": {
+              "root": [
+                "root"
+              ],
+              "sam": [
+                "staff",
+                "team"
+              ],
+              "taylor": [
+                "team"
+              ],
+              "morgan": [
+                "team"
+              ],
+              "pat": [
+                "visitors"
+              ]
+            },
+            "user": "sam",
+            "home": "/practice",
+            "cwd": "/practice",
+            "previous": null,
+            "umask": 18,
+            "clock": 0,
+            "modified": {}
+          },
+          "sticky": []
+        },
+        "goal": {
+          "kind": "collaboration",
+          "directory": "/work/shared",
+          "cases": [
+            {
+              "label": "bea can create an item",
+              "actor": "bea",
+              "operation": {
+                "kind": "create",
+                "path": "/work/shared/new-item"
+              },
+              "expected": "succeeds"
+            },
+            {
+              "label": "chen can remove their own read-only file",
+              "actor": "chen",
+              "operation": {
+                "kind": "remove",
+                "path": "/work/shared/readonly-note"
+              },
+              "expected": "succeeds"
+            },
+            {
+              "label": "bea cannot remove chen’s name",
+              "actor": "bea",
+              "operation": {
+                "kind": "remove",
+                "path": "/work/shared/readonly-note"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "bea cannot rename chen’s name",
+              "actor": "bea",
+              "operation": {
+                "kind": "move",
+                "source": "/work/shared/readonly-note",
+                "destination": "/work/shared/renamed-item"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "alex, the directory owner, may remove an item",
+              "actor": "alex",
+              "operation": {
+                "kind": "remove",
+                "path": "/work/shared/peer-note"
+              },
+              "expected": "succeeds"
+            },
+            {
+              "label": "devon cannot create an item",
+              "actor": "devon",
+              "operation": {
+                "kind": "create",
+                "path": "/work/shared/visitor-item"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "Existing file-write permission remains separate",
+              "actor": "chen",
+              "operation": {
+                "kind": "copy",
+                "source": "/work/shared/readonly-note",
+                "destination": "/work/shared/peer-note"
+              },
+              "expected": "succeeds"
+            }
+          ]
+        },
+        "example_goal": {
+          "kind": "collaboration",
+          "directory": "/practice/shared",
+          "cases": [
+            {
+              "label": "taylor can create an item",
+              "actor": "taylor",
+              "operation": {
+                "kind": "create",
+                "path": "/practice/shared/new-item"
+              },
+              "expected": "succeeds"
+            },
+            {
+              "label": "morgan can remove their own read-only file",
+              "actor": "morgan",
+              "operation": {
+                "kind": "remove",
+                "path": "/practice/shared/readonly-note"
+              },
+              "expected": "succeeds"
+            },
+            {
+              "label": "taylor cannot remove morgan’s name",
+              "actor": "taylor",
+              "operation": {
+                "kind": "remove",
+                "path": "/practice/shared/readonly-note"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "taylor cannot rename morgan’s name",
+              "actor": "taylor",
+              "operation": {
+                "kind": "move",
+                "source": "/practice/shared/readonly-note",
+                "destination": "/practice/shared/renamed-item"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "sam, the directory owner, may remove an item",
+              "actor": "sam",
+              "operation": {
+                "kind": "remove",
+                "path": "/practice/shared/peer-note"
+              },
+              "expected": "succeeds"
+            },
+            {
+              "label": "pat cannot create an item",
+              "actor": "pat",
+              "operation": {
+                "kind": "create",
+                "path": "/practice/shared/visitor-item"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "Existing file-write permission remains separate",
+              "actor": "morgan",
+              "operation": {
+                "kind": "copy",
+                "source": "/practice/shared/readonly-note",
+                "destination": "/practice/shared/peer-note"
+              },
+              "expected": "succeeds"
+            }
+          ]
+        },
+        "example_commands": [
+          "ls -ld /practice/shared",
+          "chmod +t /practice/shared",
+          "ls -ld /practice/shared"
+        ]
+      },
+      "solution": [
+        "chmod +t /work/shared"
+      ]
+    },
+    {
+      "id": "lpic1-sticky-collision-handover",
+      "definition": {
+        "source_id": "lpic1-sticky-collision-handover",
+        "initial": {
+          "tree": {
+            "nodes": {
+              "/": {
+                "mode": 493,
+                "owner": "root",
+                "group": "root",
+                "directory": true
+              },
+              "/work": {
+                "mode": 493,
+                "owner": "bea",
+                "group": "team",
+                "directory": true
+              },
+              "/work/staging": {
+                "mode": 504,
+                "owner": "alex",
+                "group": "team",
+                "directory": true
+              },
+              "/work/handover": {
+                "mode": 504,
+                "owner": "alex",
+                "group": "team",
+                "directory": true
+              },
+              "/work/staging/draft.txt": {
+                "mode": 416,
+                "owner": "bea",
+                "group": "team",
+                "directory": false
+              },
+              "/work/staging/obsolete.txt": {
+                "mode": 256,
+                "owner": "bea",
+                "group": "team",
+                "directory": false
+              },
+              "/work/handover/release.txt": {
+                "mode": 432,
+                "owner": "chen",
+                "group": "team",
+                "directory": false
+              },
+              "/work/staging/peer-note.txt": {
+                "mode": 288,
+                "owner": "chen",
+                "group": "team",
+                "directory": false
+              },
+              "/work/retained-release.txt": {
+                "mode": 288,
+                "owner": "chen",
+                "group": "team",
+                "directory": false
+              },
+              "/work/approved-copy.txt": {
+                "mode": 416,
+                "owner": "bea",
+                "group": "team",
+                "directory": false
+              }
+            },
+            "files": {
+              "/work/staging/draft.txt": "bea approved release\n",
+              "/work/staging/obsolete.txt": "bea obsolete draft\n",
+              "/work/handover/release.txt": "chen retained release\n",
+              "/work/staging/peer-note.txt": "Retain this peer note\n",
+              "/work/retained-release.txt": "chen retained release\n",
+              "/work/approved-copy.txt": "bea approved release\n"
+            },
+            "users": {
+              "root": [
+                "root"
+              ],
+              "bea": [
+                "team"
+              ],
+              "alex": [
+                "staff",
+                "team"
+              ],
+              "chen": [
+                "team"
+              ],
+              "devon": [
+                "visitors"
+              ]
+            },
+            "user": "bea",
+            "home": "/work",
+            "cwd": "/work",
+            "previous": null,
+            "umask": 18,
+            "clock": 0,
+            "modified": {}
+          },
+          "sticky": [
+            "/work/handover",
+            "/work/staging"
+          ]
+        },
+        "example": {
+          "tree": {
+            "nodes": {
+              "/": {
+                "mode": 493,
+                "owner": "root",
+                "group": "root",
+                "directory": true
+              },
+              "/practice": {
+                "mode": 493,
+                "owner": "taylor",
+                "group": "team",
+                "directory": true
+              },
+              "/practice/staging": {
+                "mode": 504,
+                "owner": "sam",
+                "group": "team",
+                "directory": true
+              },
+              "/practice/handover": {
+                "mode": 504,
+                "owner": "sam",
+                "group": "team",
+                "directory": true
+              },
+              "/practice/staging/draft.txt": {
+                "mode": 416,
+                "owner": "taylor",
+                "group": "team",
+                "directory": false
+              },
+              "/practice/staging/obsolete.txt": {
+                "mode": 256,
+                "owner": "taylor",
+                "group": "team",
+                "directory": false
+              },
+              "/practice/handover/release.txt": {
+                "mode": 432,
+                "owner": "morgan",
+                "group": "team",
+                "directory": false
+              },
+              "/practice/staging/peer-note.txt": {
+                "mode": 288,
+                "owner": "morgan",
+                "group": "team",
+                "directory": false
+              },
+              "/practice/retained-release.txt": {
+                "mode": 288,
+                "owner": "morgan",
+                "group": "team",
+                "directory": false
+              },
+              "/practice/approved-copy.txt": {
+                "mode": 416,
+                "owner": "taylor",
+                "group": "team",
+                "directory": false
+              }
+            },
+            "files": {
+              "/practice/staging/draft.txt": "taylor approved release\n",
+              "/practice/staging/obsolete.txt": "taylor obsolete draft\n",
+              "/practice/handover/release.txt": "morgan retained release\n",
+              "/practice/staging/peer-note.txt": "Retain this peer note\n",
+              "/practice/retained-release.txt": "morgan retained release\n",
+              "/practice/approved-copy.txt": "taylor approved release\n"
+            },
+            "users": {
+              "root": [
+                "root"
+              ],
+              "taylor": [
+                "team"
+              ],
+              "sam": [
+                "staff",
+                "team"
+              ],
+              "morgan": [
+                "team"
+              ],
+              "pat": [
+                "visitors"
+              ]
+            },
+            "user": "taylor",
+            "home": "/practice",
+            "cwd": "/practice",
+            "previous": null,
+            "umask": 18,
+            "clock": 0,
+            "modified": {}
+          },
+          "sticky": [
+            "/practice/handover",
+            "/practice/staging"
+          ]
+        },
+        "goal": {
+          "kind": "handover",
+          "source": "/work/staging/draft.txt",
+          "destination": "/work/handover/bea-release.txt",
+          "retire": "/work/staging/obsolete.txt",
+          "collision": "/work/handover/release.txt",
+          "cases": [
+            {
+              "label": "bea can remove their published name",
+              "actor": "bea",
+              "operation": {
+                "kind": "remove",
+                "path": "/work/handover/bea-release.txt"
+              },
+              "expected": "succeeds"
+            },
+            {
+              "label": "chen cannot remove bea’s published name",
+              "actor": "chen",
+              "operation": {
+                "kind": "remove",
+                "path": "/work/handover/bea-release.txt"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "bea cannot remove the colleague’s existing name",
+              "actor": "bea",
+              "operation": {
+                "kind": "remove",
+                "path": "/work/handover/release.txt"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "bea cannot rename the colleague’s existing name",
+              "actor": "bea",
+              "operation": {
+                "kind": "move",
+                "source": "/work/handover/release.txt",
+                "destination": "/work/handover/retired-peer.txt"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "Collaboration still permits new items",
+              "actor": "bea",
+              "operation": {
+                "kind": "create",
+                "path": "/work/handover/new-item"
+              },
+              "expected": "succeeds"
+            },
+            {
+              "label": "devon still cannot create an item",
+              "actor": "devon",
+              "operation": {
+                "kind": "create",
+                "path": "/work/handover/visitor-item"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "The directory-owner exception still works",
+              "actor": "alex",
+              "operation": {
+                "kind": "remove",
+                "path": "/work/handover/release.txt"
+              },
+              "expected": "succeeds"
+            }
+          ]
+        },
+        "example_goal": {
+          "kind": "handover",
+          "source": "/practice/staging/draft.txt",
+          "destination": "/practice/handover/taylor-release.txt",
+          "retire": "/practice/staging/obsolete.txt",
+          "collision": "/practice/handover/release.txt",
+          "cases": [
+            {
+              "label": "taylor can remove their published name",
+              "actor": "taylor",
+              "operation": {
+                "kind": "remove",
+                "path": "/practice/handover/taylor-release.txt"
+              },
+              "expected": "succeeds"
+            },
+            {
+              "label": "morgan cannot remove taylor’s published name",
+              "actor": "morgan",
+              "operation": {
+                "kind": "remove",
+                "path": "/practice/handover/taylor-release.txt"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "taylor cannot remove the colleague’s existing name",
+              "actor": "taylor",
+              "operation": {
+                "kind": "remove",
+                "path": "/practice/handover/release.txt"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "taylor cannot rename the colleague’s existing name",
+              "actor": "taylor",
+              "operation": {
+                "kind": "move",
+                "source": "/practice/handover/release.txt",
+                "destination": "/practice/handover/retired-peer.txt"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "Collaboration still permits new items",
+              "actor": "taylor",
+              "operation": {
+                "kind": "create",
+                "path": "/practice/handover/new-item"
+              },
+              "expected": "succeeds"
+            },
+            {
+              "label": "pat still cannot create an item",
+              "actor": "pat",
+              "operation": {
+                "kind": "create",
+                "path": "/practice/handover/visitor-item"
+              },
+              "expected": "permission_denied"
+            },
+            {
+              "label": "The directory-owner exception still works",
+              "actor": "sam",
+              "operation": {
+                "kind": "remove",
+                "path": "/practice/handover/release.txt"
+              },
+              "expected": "succeeds"
+            }
+          ]
+        },
+        "example_commands": [
+          "ls -ld /practice/staging",
+          "ls -ld /practice/handover",
+          "ls -l /practice/handover",
+          "mv /practice/staging/draft.txt /practice/handover/taylor-release.txt",
+          "rm /practice/staging/obsolete.txt"
+        ]
+      },
+      "solution": [
+        "mv /work/staging/draft.txt /work/handover/bea-release.txt",
+        "rm /work/staging/obsolete.txt"
+      ]
+    }
+  ]
+}

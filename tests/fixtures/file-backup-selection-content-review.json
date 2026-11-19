@@ -1,0 +1,430 @@
+{
+  "status": "SOURCE_ONLY_UNREGISTERED_UNEXECUTED",
+  "id": "lpic2-backup-directory-selection",
+  "dependency": {
+    "manifest": "selection-capability-source-r2/MANIFEST.json",
+    "sha256": "98899573e51756a9b06989e5a5d592c3942662f2e5f15b001b258d6d08213b25",
+    "required_variant": "Requirement::ArtifactSet",
+    "actual_validation": null
+  },
+  "row_order": [
+    "Preserve /etc/orchard",
+    "Preserve /var/lib/orchard",
+    "Preserve /var/cache/orchard",
+    "Preserve /run/orchard",
+    "Exact delivery archive/snapshot filenames",
+    "Current configuration tree",
+    "Current persistent-data tree",
+    "Fresh configuration empty destination",
+    "Fresh configuration nonempty destination",
+    "Fresh persistent-data empty destination",
+    "Fresh persistent-data nonempty destination",
+    "Configuration full type/root/member names only",
+    "Data full type/root/member names only"
+  ],
+  "initial_expected": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "reference": {
+    "commands": [
+      "tar -cf /backups/orchard-config.tar -C /etc orchard",
+      "tar -cf /backups/orchard-data.tar -C /var/lib orchard",
+      "tar -xf /backups/orchard-config.tar -C /recovery/etc",
+      "tar -xf /backups/orchard-data.tar -C /recovery/lib"
+    ],
+    "expected": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "actual": null
+  },
+  "alternates": [
+    {
+      "name": "Long options with reversed independent work order",
+      "commands": [
+        "tar --create --file=/backups/orchard-data.tar --directory=/var/lib -- orchard",
+        "tar --create --directory=/etc --file=/backups/orchard-config.tar -- orchard",
+        "tar --extract --directory=/recovery/lib --file=/backups/orchard-data.tar",
+        "tar --extract --file=/backups/orchard-config.tar --directory=/recovery/etc"
+      ],
+      "expected": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "actual": null
+    },
+    {
+      "name": "Use relative names from each selected source parent",
+      "commands": [
+        "cd /etc",
+        "tar -cf /backups/orchard-config.tar orchard",
+        "cd /var/lib",
+        "tar -cf /backups/orchard-data.tar orchard",
+        "cd /recovery/etc",
+        "tar -xf /backups/orchard-config.tar",
+        "cd /recovery/lib",
+        "tar -xf /backups/orchard-data.tar"
+      ],
+      "expected": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "actual": null
+    }
+  ],
+  "negatives": [
+    {
+      "name": "Only inspect, then stop",
+      "commands": [
+        "ls /etc/orchard",
+        "tar -tf /backups/orchard-config.tar"
+      ],
+      "expect_command_error_index": 1,
+      "expected_after_successful_prefix": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "actual": null
+    },
+    {
+      "name": "Create both archives without restoring either current destination",
+      "commands": [
+        "tar -cf /backups/orchard-config.tar -C /etc orchard",
+        "tar -cf /backups/orchard-data.tar -C /var/lib orchard"
+      ],
+      "expected": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "actual": null
+    },
+    {
+      "name": "Missing configuration selection",
+      "commands": [
+        "tar -cf /backups/orchard-data.tar -C /var/lib orchard",
+        "tar -xf /backups/orchard-data.tar -C /recovery/lib"
+      ],
+      "expected": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ],
+      "actual": null
+    },
+    {
+      "name": "Include all cache and runtime folders despite a correct recovery",
+      "commands": [
+        "tar -cf /backups/orchard-config.tar -C /etc orchard",
+        "tar -cf /backups/orchard-data.tar -C /var/lib orchard",
+        "tar -xf /backups/orchard-config.tar -C /recovery/etc",
+        "tar -xf /backups/orchard-data.tar -C /recovery/lib",
+        "tar -cf /backups/cache.tar -C /var/cache orchard",
+        "tar -cf /backups/runtime.tar -C /run orchard"
+      ],
+      "expected": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "repair": [
+        "rm /backups/cache.tar",
+        "rm /backups/runtime.tar"
+      ],
+      "actual": null
+    },
+    {
+      "name": "Same top-level folder and members, wrong source for configuration",
+      "commands": [
+        "tar -cf /backups/orchard-config.tar -C /etc orchard",
+        "tar -cf /backups/orchard-data.tar -C /var/lib orchard",
+        "tar -xf /backups/orchard-config.tar -C /recovery/etc",
+        "tar -xf /backups/orchard-data.tar -C /recovery/lib",
+        "tar -cf /backups/orchard-config.tar -C /var/lib orchard"
+      ],
+      "expected": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "repair": [
+        "tar -cf /backups/orchard-config.tar -C /etc orchard"
+      ],
+      "actual": null
+    },
+    {
+      "name": "Correct delivery names and earlier correct-looking trees conceal wrong cache/runtime contents",
+      "commands": [
+        "tar -cf /backups/orchard-config.tar -C /etc orchard",
+        "tar -cf /backups/orchard-data.tar -C /var/lib orchard",
+        "tar -xf /backups/orchard-config.tar -C /recovery/etc",
+        "tar -xf /backups/orchard-data.tar -C /recovery/lib",
+        "tar -cf /backups/orchard-config.tar -C /var/cache orchard",
+        "tar -cf /backups/orchard-data.tar -C /run orchard"
+      ],
+      "expected": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
+      ],
+      "repair": [
+        "tar -cf /backups/orchard-config.tar -C /etc orchard",
+        "tar -cf /backups/orchard-data.tar -C /var/lib orchard"
+      ],
+      "actual": null
+    },
+    {
+      "name": "Damaged restored configuration after success",
+      "commands": [
+        "tar -cf /backups/orchard-config.tar -C /etc orchard",
+        "tar -cf /backups/orchard-data.tar -C /var/lib orchard",
+        "tar -xf /backups/orchard-config.tar -C /recovery/etc",
+        "tar -xf /backups/orchard-data.tar -C /recovery/lib",
+        "chmod 777 /recovery/etc/orchard/payload.txt"
+      ],
+      "expected": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "repair": [
+        "tar -xf /backups/orchard-config.tar -C /recovery/etc"
+      ],
+      "actual": null
+    },
+    {
+      "name": "Altered protected source after creating a correct delivery",
+      "commands": [
+        "tar -cf /backups/orchard-config.tar -C /etc orchard",
+        "tar -cf /backups/orchard-data.tar -C /var/lib orchard",
+        "tar -xf /backups/orchard-config.tar -C /recovery/etc",
+        "tar -xf /backups/orchard-data.tar -C /recovery/lib",
+        "chmod 777 /etc/orchard/payload.txt"
+      ],
+      "expected": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "repair": [
+        "chmod 640 /etc/orchard/payload.txt"
+      ],
+      "actual": null
+    }
+  ],
+  "independent_expected_reasoning": "Four source-tree rows precede seven requirements. Each of the two Recovery requirements emits two fresh probe rows, yielding13 total. ArtifactSet verifies exact delivered filenames only. Payloads verifies root/member-name set/full-vs-incremental only. Neither filename row can certify contents. Current Tree checks and all four fresh recovery rows verify actual names, text, file type/mode/owner/group. Full overlays retain unrelated local notes in both current and fresh nonempty destinations. Clock values are not graded by Tree comparisons.",
+  "practice": {
+    "initial_expected": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "after_worked_expected": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "after_experiment_expected": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "after_repair_expected": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "actual": null
+  },
+  "coverage_proposal": {
+    "objective": "LPIC-2 v4.5 206.2.K1",
+    "current_status": "Open",
+    "future_slice_if_gated": "Application-specific selection of settings and persistent records versus explicitly rebuildable cache/current-boot state, actual full archives and independent restore verification.",
+    "remaining": "Not universal whole-system/user-home directory selection, application-consistency procedures, databases, network products, media, encryption, off-site policy or disaster-recovery completeness.",
+    "actual_credit": null
+  },
+  "required_future_gates": [
+    "Typed pack/lesson validation with dependency applied",
+    "Reference and two alternatives",
+    "Every complete negative vector and repair",
+    "Fresh-probe stale-file retention",
+    "Practice isolation and no credit",
+    "Whole-Attempt bounds/save/export/restore/reset/resume",
+    "Native normal-library introduction/practice/full-assignment flow and larger-text rendering",
+    "Full current-catalog/retained-history regression",
+    "Independent content review"
+  ],
+  "results": {
+    "schema": null,
+    "reachability": null,
+    "content": null,
+    "native": null,
+    "current_catalog": null
+  }
+}

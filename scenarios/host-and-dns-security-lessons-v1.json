@@ -1,0 +1,1095 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-retire-socket-activation",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-retire-unused-services",
+      "topic": "Host security and service startup",
+      "title": "Retire an unused socket and its service",
+      "summary": "Close an unused listener and its startup routes while keeping the required status service available.",
+      "objective": "Stop the obsolete import service and its activating socket. Disable the service and socket for future startup. Confirm the obsolete endpoint cannot answer now or after simulated startup. Keep the inventory-status service available now and after startup.",
+      "retry_guidance": "Inspect the current and saved settings separately before checking again.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "The service does the work. A socket unit waits for a request and can ask the service manager to start it. Use systemctl status on each supplied unit to distinguish a running service from a listening socket.",
+          "action": "Inspect the practice and assignment work orders.",
+          "commands": []
+        },
+        {
+          "title": "Try the separate example",
+          "why": "Stop ends current operation. Disable removes the instruction to start later. Use disable --now to do both for one supplied unit, or issue disable and stop separately.",
+          "action": "Inspect the practice and assignment work orders.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "Test the obsolete listener before and after a simulated startup. Test the required status service separately, so a broad shutdown cannot satisfy the work order.",
+          "action": "Inspect the practice and assignment work orders.",
+          "commands": []
+        }
+      ],
+      "explanation": "The obsolete service and its socket are off now and disabled for future starts. The required service still answers both requests.",
+      "hints": [
+        "Check the .socket unit even if the .service unit is already inactive.",
+        "Disable changes startup enrollment. Stop changes the current session. The --now option does both in the supported command form.",
+        "Test the required endpoint before and after startup to detect an overly broad shutdown."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.freedesktop.org/software/systemd/man/262/systemctl.html",
+        "https://www.freedesktop.org/software/systemd/man/262/systemd.socket.html"
+      ],
+      "simplifications": "One source-held service/socket activation relationship and two supplied service endpoints. No real systemd, listener, process, host startup, arbitrary units, legacy inetd or TCP wrappers are used.",
+      "prerequisites": [
+        "lpic1-listener-audit"
+      ],
+      "initial": {
+        "kind": "AutomationWorkshop",
+        "simulation": {
+          "version": 1,
+          "source_id": "lpic1-retire-socket-activation",
+          "view": "introduction",
+          "assignment": {
+            "source": "{\"activity\":\"socket_retirement\",\"supplied\":{\"activating_socket\":\"legacy-import.socket\",\"initial\":{\"activation\":{\"enabled\":true,\"listening\":true},\"services\":{\"artifacts\":{},\"boot_links\":{\"handover.target\":[\"inventory-status.service\",\"legacy-import.service\"]},\"configuration\":{\"/etc/handover/inventory-status.conf\":\"PORT=9102\\n\",\"/etc/handover/legacy-import.conf\":\"PORT=7055\\n\"},\"default_target\":\"handover.target\",\"documents\":{\"handover.target\":\"[Unit]\\nDescription=Workshop virtual startup\\n\",\"inventory-status.service\":\"[Unit]\\nDescription=Supplied inventory-status service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/inventory-status\\n[Install]\\nWantedBy=handover.target\\n\",\"legacy-import.service\":\"[Unit]\\nDescription=Supplied legacy-import service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/legacy-import\\n[Install]\\nWantedBy=handover.target\\n\"},\"inventory\":{\"artifact_ids\":[],\"config_paths\":[\"/etc/handover/inventory-status.conf\",\"/etc/handover/legacy-import.conf\"],\"fixture\":\"handover-listener-inventory\",\"programs\":{\"/sim/bin/inventory-status\":{\"config\":\"/etc/handover/inventory-status.conf\",\"key\":\"PORT\",\"kind\":\"PortDaemon\",\"prerequisite\":null},\"/sim/bin/legacy-import\":{\"config\":\"/etc/handover/legacy-import.conf\",\"key\":\"PORT\",\"kind\":\"PortDaemon\",\"prerequisite\":null}},\"schema_version\":1,\"units\":[\"handover.target\",\"inventory-status.service\",\"legacy-import.service\"]},\"loaded\":{\"handover.target\":\"[Unit]\\nDescription=Workshop virtual startup\\n\",\"inventory-status.service\":\"[Unit]\\nDescription=Supplied inventory-status service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/inventory-status\\n[Install]\\nWantedBy=handover.target\\n\",\"legacy-import.service\":\"[Unit]\\nDescription=Supplied legacy-import service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/legacy-import\\n[Install]\\nWantedBy=handover.target\\n\"},\"runtime\":{\"inventory-status.service\":{\"kind\":\"Running\",\"snapshot\":{\"artifact_input\":null,\"configuration\":\"PORT=9102\\n\",\"unit_source\":\"[Unit]\\nDescription=Supplied inventory-status service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/inventory-status\\n[Install]\\nWantedBy=handover.target\\n\"}},\"legacy-import.service\":{\"kind\":\"Running\",\"snapshot\":{\"artifact_input\":null,\"configuration\":\"PORT=7055\\n\",\"unit_source\":\"[Unit]\\nDescription=Supplied legacy-import service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/legacy-import\\n[Install]\\nWantedBy=handover.target\\n\"}}},\"schema_version\":1}},\"obsolete_port\":7055,\"obsolete_service\":\"legacy-import.service\",\"required_port\":9102,\"required_service\":\"inventory-status.service\"}}",
+            "work": {
+              "current": {
+                "activity": "socket_retirement",
+                "console": {
+                  "state": {
+                    "services": {
+                      "schema_version": 1,
+                      "inventory": {
+                        "schema_version": 1,
+                        "fixture": "handover-listener-inventory",
+                        "units": [
+                          "handover.target",
+                          "inventory-status.service",
+                          "legacy-import.service"
+                        ],
+                        "programs": {
+                          "/sim/bin/legacy-import": {
+                            "kind": "PortDaemon",
+                            "config": "/etc/handover/legacy-import.conf",
+                            "key": "PORT",
+                            "prerequisite": null
+                          },
+                          "/sim/bin/inventory-status": {
+                            "kind": "PortDaemon",
+                            "config": "/etc/handover/inventory-status.conf",
+                            "key": "PORT",
+                            "prerequisite": null
+                          }
+                        },
+                        "config_paths": [
+                          "/etc/handover/inventory-status.conf",
+                          "/etc/handover/legacy-import.conf"
+                        ],
+                        "artifact_ids": []
+                      },
+                      "documents": {
+                        "handover.target": "[Unit]\nDescription=Workshop virtual startup\n",
+                        "legacy-import.service": "[Unit]\nDescription=Supplied legacy-import service\n[Service]\nType=simple\nExecStart=/sim/bin/legacy-import\n[Install]\nWantedBy=handover.target\n",
+                        "inventory-status.service": "[Unit]\nDescription=Supplied inventory-status service\n[Service]\nType=simple\nExecStart=/sim/bin/inventory-status\n[Install]\nWantedBy=handover.target\n"
+                      },
+                      "configuration": {
+                        "/etc/handover/legacy-import.conf": "PORT=7055\n",
+                        "/etc/handover/inventory-status.conf": "PORT=9102\n"
+                      },
+                      "loaded": {
+                        "handover.target": "[Unit]\nDescription=Workshop virtual startup\n",
+                        "legacy-import.service": "[Unit]\nDescription=Supplied legacy-import service\n[Service]\nType=simple\nExecStart=/sim/bin/legacy-import\n[Install]\nWantedBy=handover.target\n",
+                        "inventory-status.service": "[Unit]\nDescription=Supplied inventory-status service\n[Service]\nType=simple\nExecStart=/sim/bin/inventory-status\n[Install]\nWantedBy=handover.target\n"
+                      },
+                      "runtime": {
+                        "legacy-import.service": {
+                          "kind": "Running",
+                          "snapshot": {
+                            "unit_source": "[Unit]\nDescription=Supplied legacy-import service\n[Service]\nType=simple\nExecStart=/sim/bin/legacy-import\n[Install]\nWantedBy=handover.target\n",
+                            "configuration": "PORT=7055\n",
+                            "artifact_input": null
+                          }
+                        },
+                        "inventory-status.service": {
+                          "kind": "Running",
+                          "snapshot": {
+                            "unit_source": "[Unit]\nDescription=Supplied inventory-status service\n[Service]\nType=simple\nExecStart=/sim/bin/inventory-status\n[Install]\nWantedBy=handover.target\n",
+                            "configuration": "PORT=9102\n",
+                            "artifact_input": null
+                          }
+                        }
+                      },
+                      "artifacts": {},
+                      "boot_links": {
+                        "handover.target": [
+                          "inventory-status.service",
+                          "legacy-import.service"
+                        ]
+                      },
+                      "default_target": "handover.target"
+                    },
+                    "activation": {
+                      "enabled": true,
+                      "listening": true
+                    }
+                  },
+                  "draft": "",
+                  "history": []
+                }
+              },
+              "checked": false
+            }
+          },
+          "example": {
+            "source": "{\"activity\":\"socket_retirement\",\"supplied\":{\"activating_socket\":\"boot-relay.socket\",\"initial\":{\"activation\":{\"enabled\":true,\"listening\":true},\"services\":{\"artifacts\":{},\"boot_links\":{\"practice.target\":[\"boot-relay.service\",\"status-desk.service\"]},\"configuration\":{\"/etc/practice/boot-relay.conf\":\"PORT=8055\\n\",\"/etc/practice/status-desk.conf\":\"PORT=9101\\n\"},\"default_target\":\"practice.target\",\"documents\":{\"boot-relay.service\":\"[Unit]\\nDescription=Supplied boot-relay service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/boot-relay\\n[Install]\\nWantedBy=practice.target\\n\",\"practice.target\":\"[Unit]\\nDescription=Workshop virtual startup\\n\",\"status-desk.service\":\"[Unit]\\nDescription=Supplied status-desk service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/status-desk\\n[Install]\\nWantedBy=practice.target\\n\"},\"inventory\":{\"artifact_ids\":[],\"config_paths\":[\"/etc/practice/boot-relay.conf\",\"/etc/practice/status-desk.conf\"],\"fixture\":\"practice-listener-inventory\",\"programs\":{\"/sim/bin/boot-relay\":{\"config\":\"/etc/practice/boot-relay.conf\",\"key\":\"PORT\",\"kind\":\"PortDaemon\",\"prerequisite\":null},\"/sim/bin/status-desk\":{\"config\":\"/etc/practice/status-desk.conf\",\"key\":\"PORT\",\"kind\":\"PortDaemon\",\"prerequisite\":null}},\"schema_version\":1,\"units\":[\"boot-relay.service\",\"practice.target\",\"status-desk.service\"]},\"loaded\":{\"boot-relay.service\":\"[Unit]\\nDescription=Supplied boot-relay service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/boot-relay\\n[Install]\\nWantedBy=practice.target\\n\",\"practice.target\":\"[Unit]\\nDescription=Workshop virtual startup\\n\",\"status-desk.service\":\"[Unit]\\nDescription=Supplied status-desk service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/status-desk\\n[Install]\\nWantedBy=practice.target\\n\"},\"runtime\":{\"boot-relay.service\":{\"kind\":\"Running\",\"snapshot\":{\"artifact_input\":null,\"configuration\":\"PORT=8055\\n\",\"unit_source\":\"[Unit]\\nDescription=Supplied boot-relay service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/boot-relay\\n[Install]\\nWantedBy=practice.target\\n\"}},\"status-desk.service\":{\"kind\":\"Running\",\"snapshot\":{\"artifact_input\":null,\"configuration\":\"PORT=9101\\n\",\"unit_source\":\"[Unit]\\nDescription=Supplied status-desk service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/status-desk\\n[Install]\\nWantedBy=practice.target\\n\"}}},\"schema_version\":1}},\"obsolete_port\":8055,\"obsolete_service\":\"boot-relay.service\",\"required_port\":9101,\"required_service\":\"status-desk.service\"}}",
+            "work": {
+              "current": {
+                "activity": "socket_retirement",
+                "console": {
+                  "state": {
+                    "services": {
+                      "schema_version": 1,
+                      "inventory": {
+                        "schema_version": 1,
+                        "fixture": "practice-listener-inventory",
+                        "units": [
+                          "boot-relay.service",
+                          "practice.target",
+                          "status-desk.service"
+                        ],
+                        "programs": {
+                          "/sim/bin/boot-relay": {
+                            "kind": "PortDaemon",
+                            "config": "/etc/practice/boot-relay.conf",
+                            "key": "PORT",
+                            "prerequisite": null
+                          },
+                          "/sim/bin/status-desk": {
+                            "kind": "PortDaemon",
+                            "config": "/etc/practice/status-desk.conf",
+                            "key": "PORT",
+                            "prerequisite": null
+                          }
+                        },
+                        "config_paths": [
+                          "/etc/practice/boot-relay.conf",
+                          "/etc/practice/status-desk.conf"
+                        ],
+                        "artifact_ids": []
+                      },
+                      "documents": {
+                        "practice.target": "[Unit]\nDescription=Workshop virtual startup\n",
+                        "boot-relay.service": "[Unit]\nDescription=Supplied boot-relay service\n[Service]\nType=simple\nExecStart=/sim/bin/boot-relay\n[Install]\nWantedBy=practice.target\n",
+                        "status-desk.service": "[Unit]\nDescription=Supplied status-desk service\n[Service]\nType=simple\nExecStart=/sim/bin/status-desk\n[Install]\nWantedBy=practice.target\n"
+                      },
+                      "configuration": {
+                        "/etc/practice/boot-relay.conf": "PORT=8055\n",
+                        "/etc/practice/status-desk.conf": "PORT=9101\n"
+                      },
+                      "loaded": {
+                        "practice.target": "[Unit]\nDescription=Workshop virtual startup\n",
+                        "boot-relay.service": "[Unit]\nDescription=Supplied boot-relay service\n[Service]\nType=simple\nExecStart=/sim/bin/boot-relay\n[Install]\nWantedBy=practice.target\n",
+                        "status-desk.service": "[Unit]\nDescription=Supplied status-desk service\n[Service]\nType=simple\nExecStart=/sim/bin/status-desk\n[Install]\nWantedBy=practice.target\n"
+                      },
+                      "runtime": {
+                        "boot-relay.service": {
+                          "kind": "Running",
+                          "snapshot": {
+                            "unit_source": "[Unit]\nDescription=Supplied boot-relay service\n[Service]\nType=simple\nExecStart=/sim/bin/boot-relay\n[Install]\nWantedBy=practice.target\n",
+                            "configuration": "PORT=8055\n",
+                            "artifact_input": null
+                          }
+                        },
+                        "status-desk.service": {
+                          "kind": "Running",
+                          "snapshot": {
+                            "unit_source": "[Unit]\nDescription=Supplied status-desk service\n[Service]\nType=simple\nExecStart=/sim/bin/status-desk\n[Install]\nWantedBy=practice.target\n",
+                            "configuration": "PORT=9101\n",
+                            "artifact_input": null
+                          }
+                        }
+                      },
+                      "artifacts": {},
+                      "boot_links": {
+                        "practice.target": [
+                          "boot-relay.service",
+                          "status-desk.service"
+                        ]
+                      },
+                      "default_target": "practice.target"
+                    },
+                    "activation": {
+                      "enabled": true,
+                      "listening": true
+                    }
+                  },
+                  "draft": "",
+                  "history": []
+                }
+              },
+              "checked": false
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "AutomationWorkshop",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic1-retire-socket-activation",
+          "assignment": {
+            "activity": "socket_retirement",
+            "supplied": {
+              "initial": {
+                "services": {
+                  "schema_version": 1,
+                  "inventory": {
+                    "schema_version": 1,
+                    "fixture": "handover-listener-inventory",
+                    "units": [
+                      "handover.target",
+                      "inventory-status.service",
+                      "legacy-import.service"
+                    ],
+                    "programs": {
+                      "/sim/bin/legacy-import": {
+                        "kind": "PortDaemon",
+                        "config": "/etc/handover/legacy-import.conf",
+                        "key": "PORT",
+                        "prerequisite": null
+                      },
+                      "/sim/bin/inventory-status": {
+                        "kind": "PortDaemon",
+                        "config": "/etc/handover/inventory-status.conf",
+                        "key": "PORT",
+                        "prerequisite": null
+                      }
+                    },
+                    "config_paths": [
+                      "/etc/handover/inventory-status.conf",
+                      "/etc/handover/legacy-import.conf"
+                    ],
+                    "artifact_ids": []
+                  },
+                  "documents": {
+                    "handover.target": "[Unit]\nDescription=Workshop virtual startup\n",
+                    "legacy-import.service": "[Unit]\nDescription=Supplied legacy-import service\n[Service]\nType=simple\nExecStart=/sim/bin/legacy-import\n[Install]\nWantedBy=handover.target\n",
+                    "inventory-status.service": "[Unit]\nDescription=Supplied inventory-status service\n[Service]\nType=simple\nExecStart=/sim/bin/inventory-status\n[Install]\nWantedBy=handover.target\n"
+                  },
+                  "configuration": {
+                    "/etc/handover/legacy-import.conf": "PORT=7055\n",
+                    "/etc/handover/inventory-status.conf": "PORT=9102\n"
+                  },
+                  "loaded": {
+                    "handover.target": "[Unit]\nDescription=Workshop virtual startup\n",
+                    "legacy-import.service": "[Unit]\nDescription=Supplied legacy-import service\n[Service]\nType=simple\nExecStart=/sim/bin/legacy-import\n[Install]\nWantedBy=handover.target\n",
+                    "inventory-status.service": "[Unit]\nDescription=Supplied inventory-status service\n[Service]\nType=simple\nExecStart=/sim/bin/inventory-status\n[Install]\nWantedBy=handover.target\n"
+                  },
+                  "runtime": {
+                    "legacy-import.service": {
+                      "kind": "Running",
+                      "snapshot": {
+                        "unit_source": "[Unit]\nDescription=Supplied legacy-import service\n[Service]\nType=simple\nExecStart=/sim/bin/legacy-import\n[Install]\nWantedBy=handover.target\n",
+                        "configuration": "PORT=7055\n",
+                        "artifact_input": null
+                      }
+                    },
+                    "inventory-status.service": {
+                      "kind": "Running",
+                      "snapshot": {
+                        "unit_source": "[Unit]\nDescription=Supplied inventory-status service\n[Service]\nType=simple\nExecStart=/sim/bin/inventory-status\n[Install]\nWantedBy=handover.target\n",
+                        "configuration": "PORT=9102\n",
+                        "artifact_input": null
+                      }
+                    }
+                  },
+                  "artifacts": {},
+                  "boot_links": {
+                    "handover.target": [
+                      "inventory-status.service",
+                      "legacy-import.service"
+                    ]
+                  },
+                  "default_target": "handover.target"
+                },
+                "activation": {
+                  "enabled": true,
+                  "listening": true
+                }
+              },
+              "obsolete_service": "legacy-import.service",
+              "obsolete_port": 7055,
+              "activating_socket": "legacy-import.socket",
+              "required_service": "inventory-status.service",
+              "required_port": 9102
+            }
+          },
+          "example": {
+            "activity": "socket_retirement",
+            "supplied": {
+              "initial": {
+                "services": {
+                  "schema_version": 1,
+                  "inventory": {
+                    "schema_version": 1,
+                    "fixture": "practice-listener-inventory",
+                    "units": [
+                      "boot-relay.service",
+                      "practice.target",
+                      "status-desk.service"
+                    ],
+                    "programs": {
+                      "/sim/bin/boot-relay": {
+                        "kind": "PortDaemon",
+                        "config": "/etc/practice/boot-relay.conf",
+                        "key": "PORT",
+                        "prerequisite": null
+                      },
+                      "/sim/bin/status-desk": {
+                        "kind": "PortDaemon",
+                        "config": "/etc/practice/status-desk.conf",
+                        "key": "PORT",
+                        "prerequisite": null
+                      }
+                    },
+                    "config_paths": [
+                      "/etc/practice/boot-relay.conf",
+                      "/etc/practice/status-desk.conf"
+                    ],
+                    "artifact_ids": []
+                  },
+                  "documents": {
+                    "practice.target": "[Unit]\nDescription=Workshop virtual startup\n",
+                    "boot-relay.service": "[Unit]\nDescription=Supplied boot-relay service\n[Service]\nType=simple\nExecStart=/sim/bin/boot-relay\n[Install]\nWantedBy=practice.target\n",
+                    "status-desk.service": "[Unit]\nDescription=Supplied status-desk service\n[Service]\nType=simple\nExecStart=/sim/bin/status-desk\n[Install]\nWantedBy=practice.target\n"
+                  },
+                  "configuration": {
+                    "/etc/practice/boot-relay.conf": "PORT=8055\n",
+                    "/etc/practice/status-desk.conf": "PORT=9101\n"
+                  },
+                  "loaded": {
+                    "practice.target": "[Unit]\nDescription=Workshop virtual startup\n",
+                    "boot-relay.service": "[Unit]\nDescription=Supplied boot-relay service\n[Service]\nType=simple\nExecStart=/sim/bin/boot-relay\n[Install]\nWantedBy=practice.target\n",
+                    "status-desk.service": "[Unit]\nDescription=Supplied status-desk service\n[Service]\nType=simple\nExecStart=/sim/bin/status-desk\n[Install]\nWantedBy=practice.target\n"
+                  },
+                  "runtime": {
+                    "boot-relay.service": {
+                      "kind": "Running",
+                      "snapshot": {
+                        "unit_source": "[Unit]\nDescription=Supplied boot-relay service\n[Service]\nType=simple\nExecStart=/sim/bin/boot-relay\n[Install]\nWantedBy=practice.target\n",
+                        "configuration": "PORT=8055\n",
+                        "artifact_input": null
+                      }
+                    },
+                    "status-desk.service": {
+                      "kind": "Running",
+                      "snapshot": {
+                        "unit_source": "[Unit]\nDescription=Supplied status-desk service\n[Service]\nType=simple\nExecStart=/sim/bin/status-desk\n[Install]\nWantedBy=practice.target\n",
+                        "configuration": "PORT=9101\n",
+                        "artifact_input": null
+                      }
+                    }
+                  },
+                  "artifacts": {},
+                  "boot_links": {
+                    "practice.target": [
+                      "boot-relay.service",
+                      "status-desk.service"
+                    ]
+                  },
+                  "default_target": "practice.target"
+                },
+                "activation": {
+                  "enabled": true,
+                  "listening": true
+                }
+              },
+              "obsolete_service": "boot-relay.service",
+              "obsolete_port": 8055,
+              "activating_socket": "boot-relay.socket",
+              "required_service": "status-desk.service",
+              "required_port": 9101
+            }
+          }
+        }
+      },
+      "solution": [
+        "automation-workshop {\"op\":\"RetirementCommand\",\"text\":\"systemctl disable --now legacy-import.socket\"}",
+        "automation-workshop {\"op\":\"RetirementCommand\",\"text\":\"systemctl disable --now legacy-import.service\"}",
+        "automation-workshop {\"op\":\"Check\"}"
+      ]
+    },
+    {
+      "id": "lpic2-authenticated-zone-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-authenticated-zone-transfer",
+      "topic": "DNS transaction authentication",
+      "title": "Authorize a zone transfer by its verified key",
+      "summary": "Update a secondary zone copy using a verified key while keeping unsigned copies and an unrelated zone protected.",
+      "objective": "Apply a policy requiring an approved verified key for the served zone. Choose the matching current reference on the secondary. Refresh the secondary to its current serial and record. Reject unsigned and outdated proof requests without revealing a copy. Keep the unrelated zone closed for transfers and preserve ordinary authoritative lookup.",
+      "retry_guidance": "Inspect the current and saved settings separately before checking again.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "An address rule recognizes a source address. It does not establish that the sender and receiver share the intended credential. A DNS transaction signature (TSIG) lets the two servers authenticate their messages using a shared key.",
+          "action": "Inspect the practice and assignment work orders.",
+          "commands": []
+        },
+        {
+          "title": "Try the separate example",
+          "why": "The two hosts must trust the same key identity. An obsolete key with the same name fails the supplied authentication check. Use key references already provided in the exercise. Do not enter key material.",
+          "action": "Inspect the practice and assignment work orders.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "A successful transfer refreshes the older secondary. Read the new serial and address. Verify unsigned or outdated requests receive no copy, and ordinary authoritative lookups still work.",
+          "action": "Inspect the practice and assignment work orders.",
+          "commands": []
+        }
+      ],
+      "explanation": "Matching current key references authenticate the approved exchange and the replica receives the published zone update. The unrelated zone and unauthorized cases remain protected.",
+      "hints": [
+        "The served zone should require one of the supplied current key identities, rather than just the secondary address.",
+        "After editing, apply the policy and refresh. A correct rule alone does not change the old secondary copy.",
+        "Keep the unrelated zone transfer rule at none and verify the independent public lookup."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://bind9.readthedocs.io/en/v9.20.9/chapter7.html#tsig-based-access-control",
+        "https://www.rfc-editor.org/info/rfc8945/"
+      ],
+      "simplifications": "One supported allow-transfer statement per supplied virtual zone, opaque proof identities and real simulated serial comparison. No MAC/key generation, packets, time verification, full BIND syntax, real DNS, DNSSEC, DANE or root/jail setup is simulated.",
+      "prerequisites": [
+        "lpic2-dns-secondary-transfer-policy"
+      ],
+      "initial": {
+        "kind": "AutomationWorkshop",
+        "simulation": {
+          "version": 1,
+          "source_id": "lpic2-authenticated-zone-handover",
+          "view": "introduction",
+          "assignment": {
+            "source": "{\"activity\":\"keyed_transfer\",\"supplied\":{\"approved\":[{\"name\":\"cedar-transfer.example.\",\"version\":\"ApprovedActive\"},{\"name\":\"cedar-standby.example.\",\"version\":\"ApprovedStandby\"}],\"expected_record\":\"198.51.100.62\",\"initial\":{\"primary\":{\"method\":\"source_address\"},\"secondary\":{\"name\":\"cedar-transfer.example.\",\"version\":\"Superseded\"},\"unrelated\":{\"method\":\"deny\"}},\"lookup\":\"service.cedar.example.\",\"other_address\":\"198.51.100.54\",\"protected\":{\"origin\":\"cedar-protected.example.\",\"records\":[{\"data\":{\"target\":\"ns.cedar-protected.example.\",\"type\":\"NS\"},\"owner\":\"cedar-protected.example.\",\"ttl\":600},{\"data\":{\"address\":\"192.0.2.53\",\"type\":\"A\"},\"owner\":\"ns.cedar-protected.example.\",\"ttl\":600},{\"data\":{\"address\":\"192.0.2.80\",\"type\":\"A\"},\"owner\":\"service.cedar-protected.example.\",\"ttl\":600}],\"serial\":10},\"secondary_address\":\"192.0.2.54\",\"served\":{\"configured\":{\"origin\":\"cedar.example.\",\"records\":[{\"data\":{\"target\":\"ns.cedar.example.\",\"type\":\"NS\"},\"owner\":\"cedar.example.\",\"ttl\":600},{\"data\":{\"address\":\"192.0.2.53\",\"type\":\"A\"},\"owner\":\"ns.cedar.example.\",\"ttl\":600},{\"data\":{\"address\":\"198.51.100.62\",\"type\":\"A\"},\"owner\":\"service.cedar.example.\",\"ttl\":600}],\"serial\":22},\"primary\":{\"origin\":\"cedar.example.\",\"records\":[{\"data\":{\"target\":\"ns.cedar.example.\",\"type\":\"NS\"},\"owner\":\"cedar.example.\",\"ttl\":600},{\"data\":{\"address\":\"192.0.2.53\",\"type\":\"A\"},\"owner\":\"ns.cedar.example.\",\"ttl\":600},{\"data\":{\"address\":\"198.51.100.62\",\"type\":\"A\"},\"owner\":\"service.cedar.example.\",\"ttl\":600}],\"serial\":22},\"secondary\":{\"origin\":\"cedar.example.\",\"records\":[{\"data\":{\"target\":\"ns.cedar.example.\",\"type\":\"NS\"},\"owner\":\"cedar.example.\",\"ttl\":600},{\"data\":{\"address\":\"192.0.2.53\",\"type\":\"A\"},\"owner\":\"ns.cedar.example.\",\"ttl\":600},{\"data\":{\"address\":\"198.51.100.61\",\"type\":\"A\"},\"owner\":\"service.cedar.example.\",\"ttl\":600}],\"serial\":21},\"version\":1},\"stale\":{\"name\":\"cedar-transfer.example.\",\"version\":\"Superseded\"}}}",
+            "work": {
+              "current": {
+                "activity": "keyed_transfer",
+                "edit": {
+                  "served_fragment": "allow-transfer { 192.0.2.54; };",
+                  "protected_fragment": "allow-transfer { none; };",
+                  "selected_key": {
+                    "name": "cedar-transfer.example.",
+                    "version": "Superseded"
+                  },
+                  "actual": {
+                    "draft": {
+                      "primary": {
+                        "method": "source_address"
+                      },
+                      "secondary": {
+                        "name": "cedar-transfer.example.",
+                        "version": "Superseded"
+                      },
+                      "unrelated": {
+                        "method": "deny"
+                      }
+                    },
+                    "applied": {
+                      "primary": {
+                        "method": "source_address"
+                      },
+                      "secondary": {
+                        "name": "cedar-transfer.example.",
+                        "version": "Superseded"
+                      },
+                      "unrelated": {
+                        "method": "deny"
+                      }
+                    },
+                    "copies": {
+                      "version": 1,
+                      "configured": {
+                        "origin": "cedar.example.",
+                        "serial": 22,
+                        "records": [
+                          {
+                            "owner": "cedar.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "NS",
+                              "target": "ns.cedar.example."
+                            }
+                          },
+                          {
+                            "owner": "ns.cedar.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "A",
+                              "address": "192.0.2.53"
+                            }
+                          },
+                          {
+                            "owner": "service.cedar.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "A",
+                              "address": "198.51.100.62"
+                            }
+                          }
+                        ]
+                      },
+                      "primary": {
+                        "origin": "cedar.example.",
+                        "serial": 22,
+                        "records": [
+                          {
+                            "owner": "cedar.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "NS",
+                              "target": "ns.cedar.example."
+                            }
+                          },
+                          {
+                            "owner": "ns.cedar.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "A",
+                              "address": "192.0.2.53"
+                            }
+                          },
+                          {
+                            "owner": "service.cedar.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "A",
+                              "address": "198.51.100.62"
+                            }
+                          }
+                        ]
+                      },
+                      "secondary": {
+                        "origin": "cedar.example.",
+                        "serial": 21,
+                        "records": [
+                          {
+                            "owner": "cedar.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "NS",
+                              "target": "ns.cedar.example."
+                            }
+                          },
+                          {
+                            "owner": "ns.cedar.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "A",
+                              "address": "192.0.2.53"
+                            }
+                          },
+                          {
+                            "owner": "service.cedar.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "A",
+                              "address": "198.51.100.61"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "checked": false
+            }
+          },
+          "example": {
+            "source": "{\"activity\":\"keyed_transfer\",\"supplied\":{\"approved\":[{\"name\":\"workshop-transfer.example.\",\"version\":\"ApprovedActive\"},{\"name\":\"workshop-standby.example.\",\"version\":\"ApprovedStandby\"}],\"expected_record\":\"192.0.2.62\",\"initial\":{\"primary\":{\"method\":\"source_address\"},\"secondary\":{\"name\":\"workshop-transfer.example.\",\"version\":\"Superseded\"},\"unrelated\":{\"method\":\"deny\"}},\"lookup\":\"service.workshop.example.\",\"other_address\":\"198.51.100.54\",\"protected\":{\"origin\":\"workshop-protected.example.\",\"records\":[{\"data\":{\"target\":\"ns.workshop-protected.example.\",\"type\":\"NS\"},\"owner\":\"workshop-protected.example.\",\"ttl\":600},{\"data\":{\"address\":\"192.0.2.53\",\"type\":\"A\"},\"owner\":\"ns.workshop-protected.example.\",\"ttl\":600},{\"data\":{\"address\":\"192.0.2.80\",\"type\":\"A\"},\"owner\":\"service.workshop-protected.example.\",\"ttl\":600}],\"serial\":10},\"secondary_address\":\"192.0.2.54\",\"served\":{\"configured\":{\"origin\":\"workshop.example.\",\"records\":[{\"data\":{\"target\":\"ns.workshop.example.\",\"type\":\"NS\"},\"owner\":\"workshop.example.\",\"ttl\":600},{\"data\":{\"address\":\"192.0.2.53\",\"type\":\"A\"},\"owner\":\"ns.workshop.example.\",\"ttl\":600},{\"data\":{\"address\":\"192.0.2.62\",\"type\":\"A\"},\"owner\":\"service.workshop.example.\",\"ttl\":600}],\"serial\":12},\"primary\":{\"origin\":\"workshop.example.\",\"records\":[{\"data\":{\"target\":\"ns.workshop.example.\",\"type\":\"NS\"},\"owner\":\"workshop.example.\",\"ttl\":600},{\"data\":{\"address\":\"192.0.2.53\",\"type\":\"A\"},\"owner\":\"ns.workshop.example.\",\"ttl\":600},{\"data\":{\"address\":\"192.0.2.62\",\"type\":\"A\"},\"owner\":\"service.workshop.example.\",\"ttl\":600}],\"serial\":12},\"secondary\":{\"origin\":\"workshop.example.\",\"records\":[{\"data\":{\"target\":\"ns.workshop.example.\",\"type\":\"NS\"},\"owner\":\"workshop.example.\",\"ttl\":600},{\"data\":{\"address\":\"192.0.2.53\",\"type\":\"A\"},\"owner\":\"ns.workshop.example.\",\"ttl\":600},{\"data\":{\"address\":\"192.0.2.61\",\"type\":\"A\"},\"owner\":\"service.workshop.example.\",\"ttl\":600}],\"serial\":11},\"version\":1},\"stale\":{\"name\":\"workshop-transfer.example.\",\"version\":\"Superseded\"}}}",
+            "work": {
+              "current": {
+                "activity": "keyed_transfer",
+                "edit": {
+                  "served_fragment": "allow-transfer { 192.0.2.54; };",
+                  "protected_fragment": "allow-transfer { none; };",
+                  "selected_key": {
+                    "name": "workshop-transfer.example.",
+                    "version": "Superseded"
+                  },
+                  "actual": {
+                    "draft": {
+                      "primary": {
+                        "method": "source_address"
+                      },
+                      "secondary": {
+                        "name": "workshop-transfer.example.",
+                        "version": "Superseded"
+                      },
+                      "unrelated": {
+                        "method": "deny"
+                      }
+                    },
+                    "applied": {
+                      "primary": {
+                        "method": "source_address"
+                      },
+                      "secondary": {
+                        "name": "workshop-transfer.example.",
+                        "version": "Superseded"
+                      },
+                      "unrelated": {
+                        "method": "deny"
+                      }
+                    },
+                    "copies": {
+                      "version": 1,
+                      "configured": {
+                        "origin": "workshop.example.",
+                        "serial": 12,
+                        "records": [
+                          {
+                            "owner": "workshop.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "NS",
+                              "target": "ns.workshop.example."
+                            }
+                          },
+                          {
+                            "owner": "ns.workshop.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "A",
+                              "address": "192.0.2.53"
+                            }
+                          },
+                          {
+                            "owner": "service.workshop.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "A",
+                              "address": "192.0.2.62"
+                            }
+                          }
+                        ]
+                      },
+                      "primary": {
+                        "origin": "workshop.example.",
+                        "serial": 12,
+                        "records": [
+                          {
+                            "owner": "workshop.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "NS",
+                              "target": "ns.workshop.example."
+                            }
+                          },
+                          {
+                            "owner": "ns.workshop.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "A",
+                              "address": "192.0.2.53"
+                            }
+                          },
+                          {
+                            "owner": "service.workshop.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "A",
+                              "address": "192.0.2.62"
+                            }
+                          }
+                        ]
+                      },
+                      "secondary": {
+                        "origin": "workshop.example.",
+                        "serial": 11,
+                        "records": [
+                          {
+                            "owner": "workshop.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "NS",
+                              "target": "ns.workshop.example."
+                            }
+                          },
+                          {
+                            "owner": "ns.workshop.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "A",
+                              "address": "192.0.2.53"
+                            }
+                          },
+                          {
+                            "owner": "service.workshop.example.",
+                            "ttl": 600,
+                            "data": {
+                              "type": "A",
+                              "address": "192.0.2.61"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "checked": false
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "AutomationWorkshop",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-authenticated-zone-handover",
+          "assignment": {
+            "activity": "keyed_transfer",
+            "supplied": {
+              "served": {
+                "version": 1,
+                "configured": {
+                  "origin": "cedar.example.",
+                  "serial": 22,
+                  "records": [
+                    {
+                      "owner": "cedar.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "NS",
+                        "target": "ns.cedar.example."
+                      }
+                    },
+                    {
+                      "owner": "ns.cedar.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "A",
+                        "address": "192.0.2.53"
+                      }
+                    },
+                    {
+                      "owner": "service.cedar.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "A",
+                        "address": "198.51.100.62"
+                      }
+                    }
+                  ]
+                },
+                "primary": {
+                  "origin": "cedar.example.",
+                  "serial": 22,
+                  "records": [
+                    {
+                      "owner": "cedar.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "NS",
+                        "target": "ns.cedar.example."
+                      }
+                    },
+                    {
+                      "owner": "ns.cedar.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "A",
+                        "address": "192.0.2.53"
+                      }
+                    },
+                    {
+                      "owner": "service.cedar.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "A",
+                        "address": "198.51.100.62"
+                      }
+                    }
+                  ]
+                },
+                "secondary": {
+                  "origin": "cedar.example.",
+                  "serial": 21,
+                  "records": [
+                    {
+                      "owner": "cedar.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "NS",
+                        "target": "ns.cedar.example."
+                      }
+                    },
+                    {
+                      "owner": "ns.cedar.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "A",
+                        "address": "192.0.2.53"
+                      }
+                    },
+                    {
+                      "owner": "service.cedar.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "A",
+                        "address": "198.51.100.61"
+                      }
+                    }
+                  ]
+                }
+              },
+              "protected": {
+                "origin": "cedar-protected.example.",
+                "serial": 10,
+                "records": [
+                  {
+                    "owner": "cedar-protected.example.",
+                    "ttl": 600,
+                    "data": {
+                      "type": "NS",
+                      "target": "ns.cedar-protected.example."
+                    }
+                  },
+                  {
+                    "owner": "ns.cedar-protected.example.",
+                    "ttl": 600,
+                    "data": {
+                      "type": "A",
+                      "address": "192.0.2.53"
+                    }
+                  },
+                  {
+                    "owner": "service.cedar-protected.example.",
+                    "ttl": 600,
+                    "data": {
+                      "type": "A",
+                      "address": "192.0.2.80"
+                    }
+                  }
+                ]
+              },
+              "initial": {
+                "primary": {
+                  "method": "source_address"
+                },
+                "secondary": {
+                  "name": "cedar-transfer.example.",
+                  "version": "Superseded"
+                },
+                "unrelated": {
+                  "method": "deny"
+                }
+              },
+              "approved": [
+                {
+                  "name": "cedar-transfer.example.",
+                  "version": "ApprovedActive"
+                },
+                {
+                  "name": "cedar-standby.example.",
+                  "version": "ApprovedStandby"
+                }
+              ],
+              "stale": {
+                "name": "cedar-transfer.example.",
+                "version": "Superseded"
+              },
+              "secondary_address": "192.0.2.54",
+              "other_address": "198.51.100.54",
+              "lookup": "service.cedar.example.",
+              "expected_record": "198.51.100.62"
+            }
+          },
+          "example": {
+            "activity": "keyed_transfer",
+            "supplied": {
+              "served": {
+                "version": 1,
+                "configured": {
+                  "origin": "workshop.example.",
+                  "serial": 12,
+                  "records": [
+                    {
+                      "owner": "workshop.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "NS",
+                        "target": "ns.workshop.example."
+                      }
+                    },
+                    {
+                      "owner": "ns.workshop.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "A",
+                        "address": "192.0.2.53"
+                      }
+                    },
+                    {
+                      "owner": "service.workshop.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "A",
+                        "address": "192.0.2.62"
+                      }
+                    }
+                  ]
+                },
+                "primary": {
+                  "origin": "workshop.example.",
+                  "serial": 12,
+                  "records": [
+                    {
+                      "owner": "workshop.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "NS",
+                        "target": "ns.workshop.example."
+                      }
+                    },
+                    {
+                      "owner": "ns.workshop.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "A",
+                        "address": "192.0.2.53"
+                      }
+                    },
+                    {
+                      "owner": "service.workshop.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "A",
+                        "address": "192.0.2.62"
+                      }
+                    }
+                  ]
+                },
+                "secondary": {
+                  "origin": "workshop.example.",
+                  "serial": 11,
+                  "records": [
+                    {
+                      "owner": "workshop.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "NS",
+                        "target": "ns.workshop.example."
+                      }
+                    },
+                    {
+                      "owner": "ns.workshop.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "A",
+                        "address": "192.0.2.53"
+                      }
+                    },
+                    {
+                      "owner": "service.workshop.example.",
+                      "ttl": 600,
+                      "data": {
+                        "type": "A",
+                        "address": "192.0.2.61"
+                      }
+                    }
+                  ]
+                }
+              },
+              "protected": {
+                "origin": "workshop-protected.example.",
+                "serial": 10,
+                "records": [
+                  {
+                    "owner": "workshop-protected.example.",
+                    "ttl": 600,
+                    "data": {
+                      "type": "NS",
+                      "target": "ns.workshop-protected.example."
+                    }
+                  },
+                  {
+                    "owner": "ns.workshop-protected.example.",
+                    "ttl": 600,
+                    "data": {
+                      "type": "A",
+                      "address": "192.0.2.53"
+                    }
+                  },
+                  {
+                    "owner": "service.workshop-protected.example.",
+                    "ttl": 600,
+                    "data": {
+                      "type": "A",
+                      "address": "192.0.2.80"
+                    }
+                  }
+                ]
+              },
+              "initial": {
+                "primary": {
+                  "method": "source_address"
+                },
+                "secondary": {
+                  "name": "workshop-transfer.example.",
+                  "version": "Superseded"
+                },
+                "unrelated": {
+                  "method": "deny"
+                }
+              },
+              "approved": [
+                {
+                  "name": "workshop-transfer.example.",
+                  "version": "ApprovedActive"
+                },
+                {
+                  "name": "workshop-standby.example.",
+                  "version": "ApprovedStandby"
+                }
+              ],
+              "stale": {
+                "name": "workshop-transfer.example.",
+                "version": "Superseded"
+              },
+              "secondary_address": "192.0.2.54",
+              "other_address": "198.51.100.54",
+              "lookup": "service.workshop.example.",
+              "expected_record": "192.0.2.62"
+            }
+          }
+        }
+      },
+      "solution": [
+        "automation-workshop {\"op\":\"ChangeTransferRule\",\"protected\":false,\"text\":\"allow-transfer { key cedar-transfer.example.; };\"}",
+        "automation-workshop {\"op\":\"SelectTransferKey\",\"reference\":{\"name\":\"cedar-transfer.example.\",\"version\":\"ApprovedActive\"}}",
+        "automation-workshop {\"op\":\"ApplyTransferPolicy\"}",
+        "automation-workshop {\"op\":\"RunTransfer\",\"client\":\"configured_secondary\",\"protected\":false}",
+        "automation-workshop {\"op\":\"Check\"}"
+      ]
+    }
+  ]
+}

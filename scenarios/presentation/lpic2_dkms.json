@@ -1,0 +1,149 @@
+[
+  {
+    "id": "lpic2-dkms-kernel-recovery",
+    "goal": "Recover missing per-kernel module installation from source registration and build records.",
+    "context": "Prerequisites: saved kernel builds, per-release module trees and a preserved boot fallback.",
+    "concepts": [
+      {
+        "title": "One source, several kernel instances",
+        "text": "DKMS helps maintain extra kernel modules from source when kernels change. A module is a separately loadable piece of kernel code. This lesson supplies build-ready training sources and two kernels; nothing is downloaded or compiled on your computer."
+      },
+      {
+        "title": "Read added, built and installed",
+        "text": "Added means a source version is registered. Built means an instance has been prepared for a particular kernel and architecture. Installed means its object has been placed in that kernel’s module tree. Installed does not mean loaded or that a device works. A label such as survey-net/0.8 gives the module package name followed by its version. The equivalent -m option supplies the package name and -v supplies its version."
+      },
+      {
+        "title": "Choose the kernel deliberately",
+        "text": "In the console, type a supported command and select Run. dkms status inspects the registry. -k names one supplied kernel; without it, build/install/uninstall use the displayed running kernel. A newly prepared kernel is not automatically the running one."
+      },
+      {
+        "title": "Connect preparation to installation",
+        "text": "dkms build can register a missing supplied source. dkms install can register and build as needed. You may use separate add, build and install steps, or install directly. A built result still needs installation before the target requirement is met."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Supplied example",
+        "value": "survey-net; running 6.1.120; maintenance 6.1.121",
+        "explanation": "These example facts differ from the independent assignment. Both use supplied training inputs."
+      },
+      {
+        "label": "Inspect",
+        "value": "dkms status",
+        "explanation": "Expected: the running kernel already has survey-net/0.8 installed. Actual output appears below the console only after Run."
+      },
+      {
+        "label": "Prepare",
+        "value": "dkms build survey-net/0.8 -k 6.1.121",
+        "explanation": "Expected: built for the maintenance kernel. This has not installed it."
+      },
+      {
+        "label": "Place",
+        "value": "dkms install -m survey-net -v 0.8 -k 6.1.121",
+        "explanation": "Expected: installed for the maintenance kernel. The module/version form is equivalent. Direct install can also add/build when needed."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Inspect the supplied instances",
+        "action": "Enter dkms status in the console and select Run. Find the running and maintenance kernels in Actual console results.",
+        "observe": "Each line identifies the module/version, kernel and architecture. An added source alone has no per-kernel instance."
+      },
+      {
+        "title": "Prepare and target the change",
+        "action": "Run dkms build survey-net/0.8 -k 6.1.121. Read its result, then run dkms install survey-net/0.8 -k 6.1.121.",
+        "observe": "Built and installed are different results. Omitting -k would select the supplied running kernel instead of the maintenance target."
+      },
+      {
+        "title": "Verify, break and retry",
+        "action": "Run dkms status -k 6.1.121, then select Check configuration. Uninstall survey-net/0.8 only for 6.1.121 and check again; reinstall it to repair the target.",
+        "observe": "A state-changing operation clears the last check. The failed row explains which version/kernel is missing; read-only status does not break a correct configuration."
+      }
+    ],
+    "requirements": [
+      "Install campus-net/1.4 for maintenance kernel 6.6.61.",
+      "Preserve every supplied module record for running fallback kernel 6.6.60. No module-loading test is required or simulated."
+    ],
+    "status": "updated",
+    "source": "scenarios/dkms-lessons-v1.json",
+    "review": {
+      "introduction": "Read every lifecycle/default-kernel concept and the different-input worked commands against the finite parser/model. Explains the prerequisite terms before independent work. Native rendering pending.",
+      "example": "Read actual console control names, commands and expected observations. Uses separate source/kernel facts; actual execution, reset and draft isolation tests pending.",
+      "assignment": "Read each requirement against per-source/version/kernel and fallback-state checks. No solved commands in the starter. Authored interaction and native verification pending."
+    }
+  },
+  {
+    "id": "lpic2-dkms-version-handover",
+    "goal": "Inspect two module versions, prepare a replacement and preserve another kernel’s known state.",
+    "context": "Prerequisites: saved kernel builds, per-release module trees and a preserved boot fallback. Complete the per-kernel DKMS recovery lesson first.",
+    "concepts": [
+      {
+        "title": "One source, several kernel instances",
+        "text": "DKMS helps maintain extra kernel modules from source when kernels change. A module is a separately loadable piece of kernel code. This lesson supplies build-ready training sources and two kernels; nothing is downloaded or compiled on your computer."
+      },
+      {
+        "title": "Read added, built and installed",
+        "text": "Added means a source version is registered. Built means an instance has been prepared for a particular kernel and architecture. Installed means its object has been placed in that kernel’s module tree. Installed does not mean loaded or that a device works. A label such as survey-net/0.8 gives the module package name followed by its version. The equivalent -m option supplies the package name and -v supplies its version."
+      },
+      {
+        "title": "Choose the kernel deliberately",
+        "text": "In the console, type a supported command and select Run. dkms status inspects the registry. -k names one supplied kernel; without it, build/install/uninstall use the displayed running kernel. A newly prepared kernel is not automatically the running one."
+      },
+      {
+        "title": "Prepare a targeted version handover",
+        "text": "Build the replacement for the maintenance kernel first. In this subset, explicitly uninstall the older target instance, then install the replacement. Uninstall leaves its built record available. Automatic replacement, version sanity checks and original-module backups are outside the simulator, so a conflicting direct installation is honestly refused."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Supplied example",
+        "value": "survey-net; running 6.1.120; maintenance 6.1.121",
+        "explanation": "These example facts differ from the independent assignment. Both use supplied training inputs."
+      },
+      {
+        "label": "Inspect",
+        "value": "dkms status",
+        "explanation": "Expected: the running kernel already has survey-net/0.8 installed. Actual output appears below the console only after Run."
+      },
+      {
+        "label": "Prepare replacement",
+        "value": "dkms build survey-net/0.9 -k 6.1.121",
+        "explanation": "Expected: a built instance for the maintenance kernel; the old installed version still remains there."
+      },
+      {
+        "label": "Targeted handover",
+        "value": "dkms uninstall survey-net/0.8 -k 6.1.121\ndkms install survey-net/0.9 -k 6.1.121",
+        "explanation": "Run each command separately. Expected: old target instance built, new target installed, running kernel still on 0.8."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Inspect the supplied instances",
+        "action": "Enter dkms status in the console and select Run. Find the running and maintenance kernels in Actual console results.",
+        "observe": "Each line identifies the module/version, kernel and architecture. An added source alone has no per-kernel instance."
+      },
+      {
+        "title": "Prepare and target the change",
+        "action": "Run each command separately with Run:\ndkms build survey-net/0.9 -k 6.1.121\ndkms uninstall survey-net/0.8 -k 6.1.121\ndkms install survey-net/0.9 -k 6.1.121",
+        "observe": "The replacement is built before installation; uninstall leaves the previous version built. The running kernel’s instance stays unchanged."
+      },
+      {
+        "title": "Verify, break and retry",
+        "action": "Run dkms status -k 6.1.121, then select Check configuration. Uninstall survey-net/0.9 only for 6.1.121 and check again; reinstall it to repair the target.",
+        "observe": "A state-changing operation clears the last check. The failed row explains which version/kernel is missing; read-only status does not break a correct configuration."
+      }
+    ],
+    "requirements": [
+      "Install campus-net/1.5 for maintenance kernel 6.6.61.",
+      "Leave campus-net/1.4 not installed for the maintenance kernel; its built record can remain.",
+      "Preserve every supplied module record for running fallback kernel 6.6.60. No module-loading test is required or simulated."
+    ],
+    "status": "updated",
+    "source": "scenarios/dkms-lessons-v1.json",
+    "review": {
+      "introduction": "Read every lifecycle/default-kernel concept and the different-input worked commands against the finite parser/model. Explains the prerequisite terms before independent work. Native rendering pending.",
+      "example": "Read actual console control names, commands and expected observations. Uses separate source/kernel facts; actual execution, reset and draft isolation tests pending.",
+      "assignment": "Read each requirement against per-source/version/kernel and fallback-state checks. No solved commands in the starter. Authored interaction and native verification pending."
+    }
+  }
+]

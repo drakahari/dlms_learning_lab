@@ -1,0 +1,1109 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-mailbox-administration-recovery",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-mailbox-administration",
+      "topic": "Mailbox administration",
+      "title": "Audit a pending change and clean up read notices",
+      "summary": "Audit a pending mail-path change, then preview and remove only read expired notices without touching protected mail.",
+      "objective": "Keep saved and running per-account mail locations consistent for both rowan and tess; keep the service running and enabled at boot. Keep both accounts' protected IMAP/POP access working and reject unprotected remote passwords. In rowan's INBOX and Archive, permanently remove every read message whose Subject contains [EXPIRED]. Keep unread [EXPIRED] notices unread and unmarked, preserve all other rowan messages, and preserve every tess message.",
+      "retry_guidance": "Read the failing outcome and actual command results. Correct the saved/running setting or refine the mailbox/user/query. If protected mail was removed, reset this attempt to restore its supplied messages before retrying.",
+      "difficulty": "Advanced",
+      "minutes": 40,
+      "steps": [
+        "Understand the task",
+        "Investigate and change the supplied server",
+        "Verify current outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Inspect, repair and save the pending setting",
+          "why": "A running server can be healthy while its saved file would break the next restart. doveconf mail_path prints the saved setting; -h hides the setting name. It does not read unsaved editor text or apply changes. Here only named-setting queries are supported, not full/default dumps.",
+          "action": "Run doveconf -h mail_path before editing. Fill worked configuration, then Save configuration and run the query again. Restart service only after the saved value is correct; Enable at boot.",
+          "commands": []
+        },
+        {
+          "title": "Preview and apply the same precise query",
+          "why": "doveadm works on a server-side mail store. This workspace supplies that administrator role; it does not ask you to run sudo or contact a real server. mailbox list names a supplied user’s folders; search identifies matching messages by mailbox identity and UID. UIDs are not POP positions.",
+          "action": "Insert and Run command for mailbox list, then search and fetch for elin/INBOX with seen subject '[DRILL]'. Inspect the UID and Subject before running expunge with that same query. Repeat for Archive.",
+          "commands": [
+            {
+              "command": "doveconf -h mail_path",
+              "explanation": "Read the saved mail_path value. It is not the unsaved editor text or a claim about the running process.",
+              "simulator_only": false
+            },
+            {
+              "command": "doveconf mail_path ssl",
+              "explanation": "Inspect two named saved settings after Save configuration.",
+              "simulator_only": false
+            },
+            {
+              "command": "doveadm mailbox list -u elin",
+              "explanation": "List folders belonging to the supplied worked account; this is not an IMAP LOGIN.",
+              "simulator_only": false
+            },
+            {
+              "command": "doveadm search -u elin mailbox INBOX seen subject '[DRILL]'",
+              "explanation": "Preview the intersection of mailbox, read flag and Subject before changing mail.",
+              "simulator_only": false
+            },
+            {
+              "command": "doveadm fetch -u elin 'uid flags hdr.subject' mailbox INBOX seen subject '[DRILL]'",
+              "explanation": "Inspect matching identifiers and headers without changing the read flag.",
+              "simulator_only": false
+            },
+            {
+              "command": "doveadm expunge -u elin mailbox INBOX seen subject '[DRILL]'",
+              "explanation": "Remove only this previewed selection immediately; this is a real administration operation within virtual mail.",
+              "simulator_only": false
+            },
+            {
+              "command": "doveadm search -u elin mailbox Archive seen subject '[DRILL]'",
+              "explanation": "Preview the same conditions in the other supplied folder.",
+              "simulator_only": false
+            },
+            {
+              "command": "doveadm expunge -u elin mailbox Archive seen subject '[DRILL]'",
+              "explanation": "Apply the verified Archive selection separately.",
+              "simulator_only": false
+            },
+            {
+              "command": "doveadm search -u elin mailbox INBOX subject '[DRILL]'",
+              "explanation": "A read-only counterexample: dropping seen also selects the unread notice. Inspect this broader result before deciding whether it is safe.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Check and try a useful counterexample",
+          "why": "Search terms combine with AND. For example, mailbox INBOX seen subject '[DRILL]' selects read notices containing that marker in one mailbox. Quote 'uid flags hdr.subject' so fetch receives one field-list argument. Fetch inspects without marking mail read here. Expunge immediately removes matches; it does not wait for a Deleted flag or QUIT.",
+          "action": "Check example. Run the final read-only search without seen on the remaining mail, then run the precise query again. Compare the UIDs before considering any further expunge.",
+          "commands": []
+        }
+      ],
+      "explanation": "Inspect the saved mail_path, replace the fixed-user path with a supplied per-account form, save it and keep the running settings consistent. In each rowan folder, preview the conjunction of seen and Subject [EXPIRED], inspect UID/flags/Subject, then expunge that same selection. Individual explicit UID selections derived from inspection are also valid. Preserve the unread notices and all tess mail; admin expunge is not a POP commit.",
+      "hints": [
+        "Compare doveconf mail_path with the two supplied account locations; one fixed user path cannot serve both.",
+        "Preview rowan’s folders with MAILBOX, SEEN and SUBJECT together. A Subject-only query also selects protected unread mail.",
+        "Expunge is immediate. Verify each folder and the other account afterward; changing the saved file requires matching running settings and boot enablement."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://doc.dovecot.org/2.4.1/core/man/doveconf.1.html",
+        "https://doc.dovecot.org/2.4.1/core/man/doveadm-mailbox.1.html",
+        "https://doc.dovecot.org/2.4.1/core/man/doveadm-search.1.html",
+        "https://doc.dovecot.org/2.4.1/core/man/doveadm-search-query.7.html",
+        "https://doc.dovecot.org/2.4.1/core/man/doveadm-fetch.1.html",
+        "https://doc.dovecot.org/2.4.1/core/man/doveadm-expunge.1.html",
+        "https://www.courier-mta.org/imap/",
+        "https://www.courier-mta.org/authlib/"
+      ],
+      "simplifications": "Dovecot CE2.4.1-inspired named-setting queries and bounded local mailbox administration; no full/default dumps, filters, sockets, userdb, MIME/date/OR/NOT/wildcard queries, new mailboxes, external daemon or host files. Input is literal command words with quoting, not a full shell. GUID-shaped values are synthetic stable mailbox identities. Courier is awareness, not a simulated implementation. See MAILBOX_ADMIN_SUBSET.md.",
+      "initial": {
+        "kind": "MailboxAdministration",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-mailbox-administration-recovery",
+          "view": "introduction",
+          "assignment": {
+            "runtime": {
+              "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/rowan/Maildir\npop3_no_flag_updates = no\n",
+              "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/%{user}/Maildir\npop3_no_flag_updates = no\n",
+              "running": true,
+              "enabled": false,
+              "generation": 0,
+              "store": {
+                "rowan": {
+                  "INBOX": {
+                    "uid_validity": 177,
+                    "uid_next": 340,
+                    "messages": [
+                      {
+                        "uid": 311,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[EXPIRED] monthly notice"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 317,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[EXPIRED] unread reminder"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 319,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[EXPIRED] old status"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 331,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] handover report"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      }
+                    ]
+                  },
+                  "Archive": {
+                    "uid_validity": 277,
+                    "uid_next": 430,
+                    "messages": [
+                      {
+                        "uid": 401,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[EXPIRED] filed notice"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 407,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[EXPIRED] review later"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 419,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] year-end copy"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "tess": {
+                  "INBOX": {
+                    "uid_validity": 377,
+                    "uid_next": 530,
+                    "messages": [
+                      {
+                        "uid": 501,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[EXPIRED] other account"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 507,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] other current mail"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 519,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] other signed copy"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              "logs": [],
+              "error": null,
+              "pop_committed": {}
+            },
+            "connection": null,
+            "draft": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/rowan/Maildir\npop3_no_flag_updates = no\n",
+            "input": "",
+            "client": "imap-plain",
+            "output": "",
+            "checked": false
+          },
+          "practice": {
+            "runtime": {
+              "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/elin/Maildir\npop3_no_flag_updates = no\n",
+              "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n",
+              "running": true,
+              "enabled": false,
+              "generation": 0,
+              "store": {
+                "elin": {
+                  "INBOX": {
+                    "uid_validity": 188,
+                    "uid_next": 50,
+                    "messages": [
+                      {
+                        "uid": 41,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[DRILL] retired notice"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 44,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[DRILL] unread reminder"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 47,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] current report"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      }
+                    ]
+                  },
+                  "Archive": {
+                    "uid_validity": 288,
+                    "uid_next": 80,
+                    "messages": [
+                      {
+                        "uid": 61,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[DRILL] filed notice"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 67,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[DRILL] unread archive"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 71,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] signed copy"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "gabe": {
+                  "INBOX": {
+                    "uid_validity": 388,
+                    "uid_next": 100,
+                    "messages": [
+                      {
+                        "uid": 81,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[DRILL] other account"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 87,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] other report"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "logs": [],
+              "error": null,
+              "pop_committed": {}
+            },
+            "connection": null,
+            "draft": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/elin/Maildir\npop3_no_flag_updates = no\n",
+            "input": "",
+            "client": "imap-plain",
+            "output": "",
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "MailboxAdministration",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-mailbox-administration-recovery",
+          "assignment": {
+            "editable_config": true,
+            "facts": {
+              "server_name": "mail.example.test",
+              "day": 100,
+              "accounts": {
+                "rowan": {
+                  "sample_password": "sample-rowan",
+                  "enabled": true,
+                  "home": "/srv/mail/rowan",
+                  "maildir_path": "/srv/mail/rowan/Maildir"
+                },
+                "tess": {
+                  "sample_password": "sample-tess",
+                  "enabled": true,
+                  "home": "/srv/mail/tess",
+                  "maildir_path": "/srv/mail/tess/Maildir"
+                }
+              },
+              "mailboxes": {
+                "rowan": {
+                  "INBOX": {
+                    "uid_validity": 177,
+                    "uid_next": 340,
+                    "messages": [
+                      {
+                        "uid": 311,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[EXPIRED] monthly notice"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 317,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[EXPIRED] unread reminder"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 319,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[EXPIRED] old status"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 331,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] handover report"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      }
+                    ]
+                  },
+                  "Archive": {
+                    "uid_validity": 277,
+                    "uid_next": 430,
+                    "messages": [
+                      {
+                        "uid": 401,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[EXPIRED] filed notice"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 407,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[EXPIRED] review later"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 419,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] year-end copy"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "tess": {
+                  "INBOX": {
+                    "uid_validity": 377,
+                    "uid_next": 530,
+                    "messages": [
+                      {
+                        "uid": 501,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[EXPIRED] other account"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 507,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] other current mail"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 519,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] other signed copy"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              "certificates": {
+                "/etc/dovecot/site.pem": {
+                  "key_id": "site-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "mail.example.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                },
+                "/etc/dovecot/old.pem": {
+                  "key_id": "old-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "retired.example.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                }
+              },
+              "keys": {
+                "/etc/dovecot/site.key": {
+                  "key_id": "site-key",
+                  "owner": "root",
+                  "mode": 384
+                },
+                "/etc/dovecot/old.key": {
+                  "key_id": "old-key",
+                  "owner": "root",
+                  "mode": 384
+                }
+              }
+            },
+            "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/rowan/Maildir\npop3_no_flag_updates = no\n",
+            "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/site.pem\nssl_server_key_file = /etc/dovecot/site.key\nmail_driver = maildir\nmail_path = /srv/mail/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "enabled": false,
+            "clients": {
+              "imap-plain": {
+                "protocol": "imap",
+                "port": 143,
+                "implicit_tls": false,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "imap-tls": {
+                "protocol": "imap",
+                "port": 993,
+                "implicit_tls": true,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-plain": {
+                "protocol": "pop3",
+                "port": 110,
+                "implicit_tls": false,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-tls": {
+                "protocol": "pop3",
+                "port": 995,
+                "implicit_tls": true,
+                "server_name": "mail.example.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              }
+            },
+            "requirements": [
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "rowan",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "tess",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-tls",
+                "user": "rowan",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-tls",
+                "user": "tess",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-plain",
+                "user": "rowan",
+                "upgrade": true,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-plain",
+                "user": "tess",
+                "upgrade": true,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-plain",
+                "user": "rowan",
+                "upgrade": false,
+                "allow": false
+              },
+              {
+                "kind": "access",
+                "profile": "pop-plain",
+                "user": "tess",
+                "upgrade": false,
+                "allow": false
+              },
+              {
+                "kind": "enabled"
+              },
+              {
+                "kind": "message",
+                "user": "rowan",
+                "mailbox": "INBOX",
+                "uid": 311,
+                "present": false,
+                "seen": null,
+                "deleted": null
+              },
+              {
+                "kind": "message",
+                "user": "rowan",
+                "mailbox": "INBOX",
+                "uid": 319,
+                "present": false,
+                "seen": null,
+                "deleted": null
+              },
+              {
+                "kind": "message",
+                "user": "rowan",
+                "mailbox": "Archive",
+                "uid": 401,
+                "present": false,
+                "seen": null,
+                "deleted": null
+              },
+              {
+                "kind": "message",
+                "user": "rowan",
+                "mailbox": "INBOX",
+                "uid": 317,
+                "present": true,
+                "seen": false,
+                "deleted": false
+              },
+              {
+                "kind": "message",
+                "user": "rowan",
+                "mailbox": "Archive",
+                "uid": 407,
+                "present": true,
+                "seen": false,
+                "deleted": false
+              }
+            ]
+          },
+          "example": {
+            "editable_config": true,
+            "facts": {
+              "server_name": "practice.mail.test",
+              "day": 100,
+              "accounts": {
+                "elin": {
+                  "sample_password": "sample-elin",
+                  "enabled": true,
+                  "home": "/srv/practice/elin",
+                  "maildir_path": "/srv/practice/elin/Maildir"
+                },
+                "gabe": {
+                  "sample_password": "sample-gabe",
+                  "enabled": true,
+                  "home": "/srv/practice/gabe",
+                  "maildir_path": "/srv/practice/gabe/Maildir"
+                }
+              },
+              "mailboxes": {
+                "elin": {
+                  "INBOX": {
+                    "uid_validity": 188,
+                    "uid_next": 50,
+                    "messages": [
+                      {
+                        "uid": 41,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[DRILL] retired notice"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 44,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[DRILL] unread reminder"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 47,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] current report"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      }
+                    ]
+                  },
+                  "Archive": {
+                    "uid_validity": 288,
+                    "uid_next": 80,
+                    "messages": [
+                      {
+                        "uid": 61,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[DRILL] filed notice"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 67,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[DRILL] unread archive"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": []
+                      },
+                      {
+                        "uid": 71,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] signed copy"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "gabe": {
+                  "INBOX": {
+                    "uid_validity": 388,
+                    "uid_next": 100,
+                    "messages": [
+                      {
+                        "uid": 81,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[DRILL] other account"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": [
+                          "Seen"
+                        ]
+                      },
+                      {
+                        "uid": 87,
+                        "headers": [
+                          [
+                            "Subject",
+                            "[KEEP] other report"
+                          ]
+                        ],
+                        "body": "Supplied retention exercise mail. No external mail is accessed.\n",
+                        "flags": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "certificates": {
+                "/etc/dovecot/practice.pem": {
+                  "key_id": "practice-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "practice.mail.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                },
+                "/etc/dovecot/old.pem": {
+                  "key_id": "old-key",
+                  "issuer_id": "training-ca",
+                  "dns_names": [
+                    "retired.example.test"
+                  ],
+                  "valid_from_day": 90,
+                  "valid_through_day": 120
+                }
+              },
+              "keys": {
+                "/etc/dovecot/practice.key": {
+                  "key_id": "practice-key",
+                  "owner": "root",
+                  "mode": 384
+                },
+                "/etc/dovecot/old.key": {
+                  "key_id": "old-key",
+                  "owner": "root",
+                  "mode": 384
+                }
+              }
+            },
+            "saved": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/elin/Maildir\npop3_no_flag_updates = no\n",
+            "active": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n",
+            "enabled": false,
+            "clients": {
+              "imap-plain": {
+                "protocol": "imap",
+                "port": 143,
+                "implicit_tls": false,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "imap-tls": {
+                "protocol": "imap",
+                "port": 993,
+                "implicit_tls": true,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-plain": {
+                "protocol": "pop3",
+                "port": 110,
+                "implicit_tls": false,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              },
+              "pop-tls": {
+                "protocol": "pop3",
+                "port": 995,
+                "implicit_tls": true,
+                "server_name": "practice.mail.test",
+                "trusted_issuers": [
+                  "training-ca"
+                ]
+              }
+            },
+            "requirements": [
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "elin",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-tls",
+                "user": "gabe",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-tls",
+                "user": "elin",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-tls",
+                "user": "gabe",
+                "upgrade": false,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-plain",
+                "user": "elin",
+                "upgrade": true,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "pop-plain",
+                "user": "gabe",
+                "upgrade": true,
+                "allow": true
+              },
+              {
+                "kind": "access",
+                "profile": "imap-plain",
+                "user": "elin",
+                "upgrade": false,
+                "allow": false
+              },
+              {
+                "kind": "access",
+                "profile": "pop-plain",
+                "user": "gabe",
+                "upgrade": false,
+                "allow": false
+              },
+              {
+                "kind": "enabled"
+              },
+              {
+                "kind": "message",
+                "user": "elin",
+                "mailbox": "INBOX",
+                "uid": 41,
+                "present": false,
+                "seen": null,
+                "deleted": null
+              },
+              {
+                "kind": "message",
+                "user": "elin",
+                "mailbox": "Archive",
+                "uid": 61,
+                "present": false,
+                "seen": null,
+                "deleted": null
+              },
+              {
+                "kind": "message",
+                "user": "elin",
+                "mailbox": "INBOX",
+                "uid": 44,
+                "present": true,
+                "seen": false,
+                "deleted": false
+              },
+              {
+                "kind": "message",
+                "user": "elin",
+                "mailbox": "Archive",
+                "uid": 67,
+                "present": true,
+                "seen": false,
+                "deleted": false
+              }
+            ]
+          },
+          "worked_config": "dovecot_config_version = 2.4.0\ndovecot_storage_version = 2.4.0\nprotocols = imap pop3\nssl = required\nauth_allow_cleartext = no\nauth_mechanisms = plain login\nssl_server_cert_file = /etc/dovecot/practice.pem\nssl_server_key_file = /etc/dovecot/practice.key\nmail_driver = maildir\nmail_path = /srv/practice/%{user}/Maildir\npop3_no_flag_updates = no\n"
+        }
+      },
+      "solution": [
+        "mailbox-workspace {\"kind\":\"admin\",\"line\":\"doveconf -h mail_path\"}",
+        "mailbox-workspace {\"kind\":\"edit\",\"text\":\"dovecot_config_version = 2.4.0\\ndovecot_storage_version = 2.4.0\\nprotocols = imap pop3\\nssl = required\\nauth_allow_cleartext = no\\nauth_mechanisms = plain login\\nssl_server_cert_file = /etc/dovecot/site.pem\\nssl_server_key_file = /etc/dovecot/site.key\\nmail_driver = maildir\\nmail_path = /srv/mail/%{user}/Maildir\\npop3_no_flag_updates = no\\n\"}",
+        "mailbox-workspace {\"kind\":\"save\"}",
+        "mailbox-workspace {\"kind\":\"admin\",\"line\":\"doveconf mail_path ssl\"}",
+        "mailbox-workspace {\"kind\":\"restart\"}",
+        "mailbox-workspace {\"kind\":\"enable\"}",
+        "mailbox-workspace {\"kind\":\"admin\",\"line\":\"doveadm mailbox list -u rowan\"}",
+        "mailbox-workspace {\"kind\":\"admin\",\"line\":\"doveadm search -u rowan mailbox INBOX seen subject '[EXPIRED]'\"}",
+        "mailbox-workspace {\"kind\":\"admin\",\"line\":\"doveadm fetch -u rowan 'uid flags hdr.subject' mailbox INBOX seen subject '[EXPIRED]'\"}",
+        "mailbox-workspace {\"kind\":\"admin\",\"line\":\"doveadm expunge -u rowan mailbox INBOX seen subject '[EXPIRED]'\"}",
+        "mailbox-workspace {\"kind\":\"admin\",\"line\":\"doveadm search -u rowan mailbox Archive seen subject '[EXPIRED]'\"}",
+        "mailbox-workspace {\"kind\":\"admin\",\"line\":\"doveadm fetch -u rowan 'uid flags hdr.subject' mailbox Archive seen subject '[EXPIRED]'\"}",
+        "mailbox-workspace {\"kind\":\"admin\",\"line\":\"doveadm expunge -u rowan mailbox Archive seen subject '[EXPIRED]'\"}",
+        "mailbox-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-pop-transaction-recovery"
+      ]
+    }
+  ]
+}

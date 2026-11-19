@@ -1,0 +1,73 @@
+{
+  "id": "lpic1-host-resolver",
+  "source": "scenarios/linux-host-lessons-v2.json",
+  "status": "updated",
+  "review": {
+    "introduction": "Expanded existing resolver lesson: teaches A, explicit numeric @server, absolute final dot and +short before practice; compares separate worked server records with configured getent lookup. Positive-A limitation explicit in optional help. No real DNS or host command. Adds an equivalent explicit typed host query, different argument order and selected-server/answer interpretation before practice; only positive-A facts, no full BIND conformance claim.",
+    "example": "Guided terminal queries compare both supplied servers and both actual records before the learner edits the separate sample resolver. Run command is observational; Save resolver and current-state Check example retain the meaningful repair and useful wrong-first-server retry. Uses both genuine supported utility forms against the sample facts; neither observational command repairs or completes the task.",
+    "assignment": "All original independent requirements, intentional nameserver fault, interfaces/routes, valid alternate resolver formatting and existing grading are unchanged. Direct query is an optional investigation tool, not a new mastery condition or an assignment answer dump."
+  },
+  "goal": "Repair the virtual client resolver without changing healthy interfaces or routes.",
+  "requirements": [
+    "Resolve service.lab.test to 203.0.113.80 and inventory.lab.test to 203.0.113.90 using the supplied virtual resolver data.",
+    "Keep the already-working IP path to 203.0.113.80 and both interface configurations unchanged.",
+    "Preserve the default-route entries and 10.40.0.0/24 management routes. Edit only the virtual /etc/resolv.conf as needed.",
+    "Only IPv4 nameserver lines and comments are supported. Save the editor before checking; no host file is changed."
+  ],
+  "context": "Builds on IPv4 path checks and the earlier interface/route lessons. A DNS server answers questions about names; an A record supplies an IPv4 address. The two supplied servers can return different records even when both paths work.",
+  "concepts": [
+    {
+      "title": "Separate the IP path from the name lookup",
+      "text": "Test address checks whether the supplied numeric destination has a usable simulated path. getent ahostsv4 service.lab.test asks through the saved virtual client resolver. A working IP path does not prove that the client selected the right DNS server."
+    },
+    {
+      "title": "Ask one supplied server directly",
+      "text": "In Command, run dig @10.73.0.53 service.lab.test. A +short. @ selects the server, A asks for an IPv4 address, and +short prints that address. The final dot prevents added suffixes. The equivalent host -t A service.lab.test. 10.73.0.53 puts the server at the end, without @; it shows the chosen server before a has address line. Both bypass the saved client resolver."
+    },
+    {
+      "title": "Compare answers before editing",
+      "text": "The worked server 10.73.0.53 returns 10.73.0.80 for service.lab.test.; 10.73.0.54 instead returns 10.73.0.90. Both are reachable, but only the first answer meets this example’s service requirement. Ask inventory.lab.test. too: checking one record alone can miss a swapped pair."
+    },
+    {
+      "title": "Repair the client, then verify both names",
+      "text": "Save resolver applies the nameserver line in the virtual editor. The first reachable supplied resolver is used; putting the wrong answering server first does not let a later correct server override it. Run both getent lookups and Check example. A direct query observes a server; it does not repair the client or complete the task."
+    }
+  ],
+  "practice": [
+    {
+      "title": "Compare the two servers before changing the client",
+      "action": "In Command, run dig @10.73.0.53 service.lab.test. A +short. Change only @10.73.0.53 to @10.73.0.54 and Run command again. Ask for the second name with host -t A inventory.lab.test. 10.73.0.53; compare its has address line.",
+      "observe": "Expected: service returns 10.73.0.80 from .53 and 10.73.0.90 from .54; inventory returns 10.73.0.90 from .53. Actual results appear in the terminal. host also identifies the chosen server. The client resolver is still unchanged."
+    },
+    {
+      "title": "Use the evidence to repair and test the sample",
+      "action": "In the virtual resolver editor enter nameserver 10.73.0.53, then Save resolver. Run getent ahostsv4 service.lab.test and getent ahostsv4 inventory.lab.test. Select Check example. Try .54 first instead, read the failed name results, then restore .53 and retry.",
+      "observe": "The correct saved client resolves both required names without changing healthy interfaces or routes. Merely running dig, or adding .53 after a reachable wrong .54, does not fix the task."
+    }
+  ],
+  "worked": [
+    {
+      "label": "Ask the first server",
+      "value": "dig @10.73.0.53 service.lab.test. A +short",
+      "explanation": "Expected output: 10.73.0.80. Explicit @ selects this supplied server independently of the configured client."
+    },
+    {
+      "label": "Compare the other server",
+      "value": "dig +short @10.73.0.54 service.lab.test. A",
+      "explanation": "Expected output: 10.73.0.90. This is a successful DNS answer, but the wrong address for the sample service."
+    },
+    {
+      "label": "Ask the second name with host",
+      "value": "host -t A inventory.lab.test. 10.73.0.53",
+      "explanation": "Expected answer line: inventory.lab.test has address 10.73.0.90. The preceding server banner identifies 10.73.0.53. -t A selects one IPv4 record query; no default multi-type lookup is simulated."
+    },
+    {
+      "label": "Repair only the client",
+      "value": "nameserver 10.73.0.53",
+      "explanation": "Put this in the sample virtual resolver editor and Save resolver. Verify both names using getent, then Check example."
+    }
+  ],
+  "prerequisite_sources": [
+    "https://bind9.readthedocs.io/en/stable/manpages.html"
+  ]
+}

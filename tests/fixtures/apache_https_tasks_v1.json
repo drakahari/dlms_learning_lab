@@ -1,0 +1,626 @@
+{
+  "lpic2-apache-https-chain": {
+    "definition": {
+      "version": 1,
+      "source_id": "lpic2-apache-https-chain",
+      "assignment": {
+        "inventory": {
+          "certificates": [
+            {
+              "id": "campus-root",
+              "public_key_id": "campus-root-pub",
+              "issuer": "campus-root",
+              "is_ca": true,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": []
+            },
+            {
+              "id": "campus-intermediate",
+              "public_key_id": "campus-intermediate-pub",
+              "issuer": "campus-root",
+              "is_ca": true,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": []
+            },
+            {
+              "id": "campus-reports",
+              "public_key_id": "campus-reports-pub",
+              "issuer": "campus-intermediate",
+              "is_ca": false,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": [
+                "reports.campus.example"
+              ]
+            },
+            {
+              "id": "campus-archive",
+              "public_key_id": "campus-archive-pub",
+              "issuer": "campus-intermediate",
+              "is_ca": false,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": [
+                "archive.campus.example"
+              ]
+            },
+            {
+              "id": "campus-reports-old",
+              "public_key_id": "campus-reports-old-pub",
+              "issuer": "campus-intermediate",
+              "is_ca": false,
+              "first_day": 1,
+              "last_day": 30,
+              "dns_names": [
+                "reports.campus.example"
+              ]
+            }
+          ],
+          "bundles": [
+            {
+              "path": "/etc/ssl/campus/reports-leaf.pem",
+              "certificate_ids": [
+                "campus-reports"
+              ]
+            },
+            {
+              "path": "/etc/ssl/campus/reports-full.pem",
+              "certificate_ids": [
+                "campus-reports",
+                "campus-intermediate"
+              ]
+            },
+            {
+              "path": "/etc/ssl/campus/reports-with-root.pem",
+              "certificate_ids": [
+                "campus-reports",
+                "campus-intermediate",
+                "campus-root"
+              ]
+            },
+            {
+              "path": "/etc/ssl/campus/reports-old.pem",
+              "certificate_ids": [
+                "campus-reports-old",
+                "campus-intermediate"
+              ]
+            },
+            {
+              "path": "/etc/ssl/campus/archive-full.pem",
+              "certificate_ids": [
+                "campus-archive",
+                "campus-intermediate"
+              ]
+            }
+          ],
+          "keys": [
+            {
+              "path": "/etc/ssl/campus/reports.key",
+              "matching_public_key_id": "campus-reports-pub"
+            },
+            {
+              "path": "/etc/ssl/campus/archive.key",
+              "matching_public_key_id": "campus-archive-pub"
+            },
+            {
+              "path": "/etc/ssl/campus/reports-old.key",
+              "matching_public_key_id": "campus-reports-old-pub"
+            }
+          ]
+        },
+        "starter": "# Supplied HTTPS sites\n<VirtualHost *:443>\n    ServerName reports.campus.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/campus/reports-leaf.pem\n    SSLCertificateKeyFile /etc/ssl/campus/reports.key\n</VirtualHost>\n\n<VirtualHost *:443>\n    ServerName archive.campus.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/campus/archive-full.pem\n    SSLCertificateKeyFile /etc/ssl/campus/archive.key\n</VirtualHost>\n",
+        "checks": [
+          {
+            "label": "Primary HTTPS client",
+            "client": {
+              "hostname": "reports.campus.example",
+              "sni": "reports.campus.example",
+              "day": 46,
+              "trusted": [
+                "campus-root"
+              ]
+            },
+            "site": "reports.campus.example",
+            "expected": "verified"
+          },
+          {
+            "label": "Auxiliary HTTPS client",
+            "client": {
+              "hostname": "archive.campus.example",
+              "sni": "archive.campus.example",
+              "day": 46,
+              "trusted": [
+                "campus-root"
+              ]
+            },
+            "site": "archive.campus.example",
+            "expected": "verified"
+          }
+        ]
+      },
+      "example": {
+        "inventory": {
+          "certificates": [
+            {
+              "id": "training-root",
+              "public_key_id": "training-root-pub",
+              "issuer": "training-root",
+              "is_ca": true,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": []
+            },
+            {
+              "id": "training-intermediate",
+              "public_key_id": "training-intermediate-pub",
+              "issuer": "training-root",
+              "is_ca": true,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": []
+            },
+            {
+              "id": "training-portal",
+              "public_key_id": "training-portal-pub",
+              "issuer": "training-intermediate",
+              "is_ca": false,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": [
+                "portal.training.example"
+              ]
+            },
+            {
+              "id": "training-photos",
+              "public_key_id": "training-photos-pub",
+              "issuer": "training-intermediate",
+              "is_ca": false,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": [
+                "photos.training.example"
+              ]
+            },
+            {
+              "id": "training-portal-old",
+              "public_key_id": "training-portal-old-pub",
+              "issuer": "training-intermediate",
+              "is_ca": false,
+              "first_day": 1,
+              "last_day": 30,
+              "dns_names": [
+                "portal.training.example"
+              ]
+            }
+          ],
+          "bundles": [
+            {
+              "path": "/etc/ssl/training/portal-leaf.pem",
+              "certificate_ids": [
+                "training-portal"
+              ]
+            },
+            {
+              "path": "/etc/ssl/training/portal-full.pem",
+              "certificate_ids": [
+                "training-portal",
+                "training-intermediate"
+              ]
+            },
+            {
+              "path": "/etc/ssl/training/portal-with-root.pem",
+              "certificate_ids": [
+                "training-portal",
+                "training-intermediate",
+                "training-root"
+              ]
+            },
+            {
+              "path": "/etc/ssl/training/portal-old.pem",
+              "certificate_ids": [
+                "training-portal-old",
+                "training-intermediate"
+              ]
+            },
+            {
+              "path": "/etc/ssl/training/photos-full.pem",
+              "certificate_ids": [
+                "training-photos",
+                "training-intermediate"
+              ]
+            }
+          ],
+          "keys": [
+            {
+              "path": "/etc/ssl/training/portal.key",
+              "matching_public_key_id": "training-portal-pub"
+            },
+            {
+              "path": "/etc/ssl/training/photos.key",
+              "matching_public_key_id": "training-photos-pub"
+            },
+            {
+              "path": "/etc/ssl/training/portal-old.key",
+              "matching_public_key_id": "training-portal-old-pub"
+            }
+          ]
+        },
+        "starter": "# Supplied HTTPS sites\n<VirtualHost *:443>\n    ServerName portal.training.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/training/portal-leaf.pem\n    SSLCertificateKeyFile /etc/ssl/training/portal.key\n</VirtualHost>\n\n<VirtualHost *:443>\n    ServerName photos.training.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/training/photos-full.pem\n    SSLCertificateKeyFile /etc/ssl/training/photos.key\n</VirtualHost>\n",
+        "checks": [
+          {
+            "label": "Primary HTTPS client",
+            "client": {
+              "hostname": "portal.training.example",
+              "sni": "portal.training.example",
+              "day": 46,
+              "trusted": [
+                "training-root"
+              ]
+            },
+            "site": "portal.training.example",
+            "expected": "verified"
+          },
+          {
+            "label": "Auxiliary HTTPS client",
+            "client": {
+              "hostname": "photos.training.example",
+              "sni": "photos.training.example",
+              "day": 46,
+              "trusted": [
+                "training-root"
+              ]
+            },
+            "site": "photos.training.example",
+            "expected": "verified"
+          }
+        ]
+      }
+    },
+    "answers": {
+      "assignment": "# Supplied HTTPS sites\n<VirtualHost *:443>\n    ServerName reports.campus.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/campus/reports-full.pem\n    SSLCertificateKeyFile /etc/ssl/campus/reports.key\n</VirtualHost>\n\n<VirtualHost *:443>\n    ServerName archive.campus.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/campus/archive-full.pem\n    SSLCertificateKeyFile /etc/ssl/campus/archive.key\n</VirtualHost>\n",
+      "alternate": "# Supplied HTTPS sites\n<VirtualHost *:443>\n    ServerName reports.campus.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/campus/reports-with-root.pem\n    SSLCertificateKeyFile /etc/ssl/campus/reports.key\n</VirtualHost>\n\n<VirtualHost *:443>\n    ServerName archive.campus.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/campus/archive-full.pem\n    SSLCertificateKeyFile /etc/ssl/campus/archive.key\n</VirtualHost>\n",
+      "expired": "# Supplied HTTPS sites\n<VirtualHost *:443>\n    ServerName reports.campus.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/campus/reports-old.pem\n    SSLCertificateKeyFile /etc/ssl/campus/reports-old.key\n</VirtualHost>\n\n<VirtualHost *:443>\n    ServerName archive.campus.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/campus/archive-full.pem\n    SSLCertificateKeyFile /etc/ssl/campus/archive.key\n</VirtualHost>\n",
+      "example": "# Supplied HTTPS sites\n<VirtualHost *:443>\n    ServerName portal.training.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/training/portal-full.pem\n    SSLCertificateKeyFile /etc/ssl/training/portal.key\n</VirtualHost>\n\n<VirtualHost *:443>\n    ServerName photos.training.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/training/photos-full.pem\n    SSLCertificateKeyFile /etc/ssl/training/photos.key\n</VirtualHost>\n"
+    }
+  },
+  "lpic2-apache-https-sni": {
+    "definition": {
+      "version": 1,
+      "source_id": "lpic2-apache-https-sni",
+      "assignment": {
+        "inventory": {
+          "certificates": [
+            {
+              "id": "studio-root",
+              "public_key_id": "studio-root-pub",
+              "issuer": "studio-root",
+              "is_ca": true,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": []
+            },
+            {
+              "id": "studio-intermediate",
+              "public_key_id": "studio-intermediate-pub",
+              "issuer": "studio-root",
+              "is_ca": true,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": []
+            },
+            {
+              "id": "studio-catalog",
+              "public_key_id": "studio-catalog-pub",
+              "issuer": "studio-intermediate",
+              "is_ca": false,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": [
+                "catalog.studio.example"
+              ]
+            },
+            {
+              "id": "studio-docs",
+              "public_key_id": "studio-docs-pub",
+              "issuer": "studio-intermediate",
+              "is_ca": false,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": [
+                "docs.studio.example"
+              ]
+            },
+            {
+              "id": "studio-catalog-old",
+              "public_key_id": "studio-catalog-old-pub",
+              "issuer": "studio-intermediate",
+              "is_ca": false,
+              "first_day": 1,
+              "last_day": 30,
+              "dns_names": [
+                "catalog.studio.example"
+              ]
+            }
+          ],
+          "bundles": [
+            {
+              "path": "/etc/ssl/studio/catalog-leaf.pem",
+              "certificate_ids": [
+                "studio-catalog"
+              ]
+            },
+            {
+              "path": "/etc/ssl/studio/catalog-full.pem",
+              "certificate_ids": [
+                "studio-catalog",
+                "studio-intermediate"
+              ]
+            },
+            {
+              "path": "/etc/ssl/studio/catalog-with-root.pem",
+              "certificate_ids": [
+                "studio-catalog",
+                "studio-intermediate",
+                "studio-root"
+              ]
+            },
+            {
+              "path": "/etc/ssl/studio/catalog-old.pem",
+              "certificate_ids": [
+                "studio-catalog-old",
+                "studio-intermediate"
+              ]
+            },
+            {
+              "path": "/etc/ssl/studio/docs-full.pem",
+              "certificate_ids": [
+                "studio-docs",
+                "studio-intermediate"
+              ]
+            }
+          ],
+          "keys": [
+            {
+              "path": "/etc/ssl/studio/catalog.key",
+              "matching_public_key_id": "studio-catalog-pub"
+            },
+            {
+              "path": "/etc/ssl/studio/docs.key",
+              "matching_public_key_id": "studio-docs-pub"
+            },
+            {
+              "path": "/etc/ssl/studio/catalog-old.key",
+              "matching_public_key_id": "studio-catalog-old-pub"
+            }
+          ]
+        },
+        "starter": "# Supplied HTTPS sites\n<VirtualHost *:443>\n    ServerName docs.studio.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/studio/catalog-full.pem\n    SSLCertificateKeyFile /etc/ssl/studio/catalog.key\n</VirtualHost>\n\n<VirtualHost *:443>\n    ServerName catalog.studio.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/studio/docs-full.pem\n    SSLCertificateKeyFile /etc/ssl/studio/docs.key\n</VirtualHost>\n",
+        "checks": [
+          {
+            "label": "Primary HTTPS client",
+            "client": {
+              "hostname": "catalog.studio.example",
+              "sni": "catalog.studio.example",
+              "day": 46,
+              "trusted": [
+                "studio-root"
+              ]
+            },
+            "site": "catalog.studio.example",
+            "expected": "verified"
+          },
+          {
+            "label": "Auxiliary HTTPS client",
+            "client": {
+              "hostname": "docs.studio.example",
+              "sni": "docs.studio.example",
+              "day": 46,
+              "trusted": [
+                "studio-root"
+              ]
+            },
+            "site": "docs.studio.example",
+            "expected": "verified"
+          },
+          {
+            "label": "Unknown SNI uses the primary default",
+            "client": {
+              "hostname": "unknown.studio.example",
+              "sni": "unknown.studio.example",
+              "day": 46,
+              "trusted": [
+                "studio-root"
+              ]
+            },
+            "site": "catalog.studio.example",
+            "expected": "name_mismatch_on_default"
+          },
+          {
+            "label": "No SNI uses the primary default",
+            "client": {
+              "hostname": "unknown.studio.example",
+              "sni": null,
+              "day": 46,
+              "trusted": [
+                "studio-root"
+              ]
+            },
+            "site": "catalog.studio.example",
+            "expected": "name_mismatch_on_default"
+          }
+        ]
+      },
+      "example": {
+        "inventory": {
+          "certificates": [
+            {
+              "id": "practice-root",
+              "public_key_id": "practice-root-pub",
+              "issuer": "practice-root",
+              "is_ca": true,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": []
+            },
+            {
+              "id": "practice-intermediate",
+              "public_key_id": "practice-intermediate-pub",
+              "issuer": "practice-root",
+              "is_ca": true,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": []
+            },
+            {
+              "id": "practice-web",
+              "public_key_id": "practice-web-pub",
+              "issuer": "practice-intermediate",
+              "is_ca": false,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": [
+                "web.practice.example"
+              ]
+            },
+            {
+              "id": "practice-status",
+              "public_key_id": "practice-status-pub",
+              "issuer": "practice-intermediate",
+              "is_ca": false,
+              "first_day": 1,
+              "last_day": 100,
+              "dns_names": [
+                "status.practice.example"
+              ]
+            },
+            {
+              "id": "practice-web-old",
+              "public_key_id": "practice-web-old-pub",
+              "issuer": "practice-intermediate",
+              "is_ca": false,
+              "first_day": 1,
+              "last_day": 30,
+              "dns_names": [
+                "web.practice.example"
+              ]
+            }
+          ],
+          "bundles": [
+            {
+              "path": "/etc/ssl/practice/web-leaf.pem",
+              "certificate_ids": [
+                "practice-web"
+              ]
+            },
+            {
+              "path": "/etc/ssl/practice/web-full.pem",
+              "certificate_ids": [
+                "practice-web",
+                "practice-intermediate"
+              ]
+            },
+            {
+              "path": "/etc/ssl/practice/web-with-root.pem",
+              "certificate_ids": [
+                "practice-web",
+                "practice-intermediate",
+                "practice-root"
+              ]
+            },
+            {
+              "path": "/etc/ssl/practice/web-old.pem",
+              "certificate_ids": [
+                "practice-web-old",
+                "practice-intermediate"
+              ]
+            },
+            {
+              "path": "/etc/ssl/practice/status-full.pem",
+              "certificate_ids": [
+                "practice-status",
+                "practice-intermediate"
+              ]
+            }
+          ],
+          "keys": [
+            {
+              "path": "/etc/ssl/practice/web.key",
+              "matching_public_key_id": "practice-web-pub"
+            },
+            {
+              "path": "/etc/ssl/practice/status.key",
+              "matching_public_key_id": "practice-status-pub"
+            },
+            {
+              "path": "/etc/ssl/practice/web-old.key",
+              "matching_public_key_id": "practice-web-old-pub"
+            }
+          ]
+        },
+        "starter": "# Supplied HTTPS sites\n<VirtualHost *:443>\n    ServerName status.practice.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/practice/web-full.pem\n    SSLCertificateKeyFile /etc/ssl/practice/web.key\n</VirtualHost>\n\n<VirtualHost *:443>\n    ServerName web.practice.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/practice/status-full.pem\n    SSLCertificateKeyFile /etc/ssl/practice/status.key\n</VirtualHost>\n",
+        "checks": [
+          {
+            "label": "Primary HTTPS client",
+            "client": {
+              "hostname": "web.practice.example",
+              "sni": "web.practice.example",
+              "day": 46,
+              "trusted": [
+                "practice-root"
+              ]
+            },
+            "site": "web.practice.example",
+            "expected": "verified"
+          },
+          {
+            "label": "Auxiliary HTTPS client",
+            "client": {
+              "hostname": "status.practice.example",
+              "sni": "status.practice.example",
+              "day": 46,
+              "trusted": [
+                "practice-root"
+              ]
+            },
+            "site": "status.practice.example",
+            "expected": "verified"
+          },
+          {
+            "label": "Unknown SNI uses the primary default",
+            "client": {
+              "hostname": "unknown.practice.example",
+              "sni": "unknown.practice.example",
+              "day": 46,
+              "trusted": [
+                "practice-root"
+              ]
+            },
+            "site": "web.practice.example",
+            "expected": "name_mismatch_on_default"
+          },
+          {
+            "label": "No SNI uses the primary default",
+            "client": {
+              "hostname": "unknown.practice.example",
+              "sni": null,
+              "day": 46,
+              "trusted": [
+                "practice-root"
+              ]
+            },
+            "site": "web.practice.example",
+            "expected": "name_mismatch_on_default"
+          }
+        ]
+      }
+    },
+    "answers": {
+      "assignment": "# Supplied HTTPS sites\n<VirtualHost *:443>\n    ServerName catalog.studio.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/studio/catalog-full.pem\n    SSLCertificateKeyFile /etc/ssl/studio/catalog.key\n</VirtualHost>\n\n<VirtualHost *:443>\n    ServerName docs.studio.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/studio/docs-full.pem\n    SSLCertificateKeyFile /etc/ssl/studio/docs.key\n</VirtualHost>\n",
+      "alternate": "# Supplied HTTPS sites\n<VirtualHost *:443>\n    ServerName catalog.studio.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/studio/catalog-with-root.pem\n    SSLCertificateKeyFile /etc/ssl/studio/catalog.key\n</VirtualHost>\n\n<VirtualHost *:443>\n    ServerName docs.studio.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/studio/docs-full.pem\n    SSLCertificateKeyFile /etc/ssl/studio/docs.key\n</VirtualHost>\n",
+      "expired": "# Supplied HTTPS sites\n<VirtualHost *:443>\n    ServerName catalog.studio.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/studio/catalog-old.pem\n    SSLCertificateKeyFile /etc/ssl/studio/catalog-old.key\n</VirtualHost>\n\n<VirtualHost *:443>\n    ServerName docs.studio.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/studio/docs-full.pem\n    SSLCertificateKeyFile /etc/ssl/studio/docs.key\n</VirtualHost>\n",
+      "example": "# Supplied HTTPS sites\n<VirtualHost *:443>\n    ServerName web.practice.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/practice/web-full.pem\n    SSLCertificateKeyFile /etc/ssl/practice/web.key\n</VirtualHost>\n\n<VirtualHost *:443>\n    ServerName status.practice.example\n    SSLEngine on\n    SSLCertificateFile /etc/ssl/practice/status-full.pem\n    SSLCertificateKeyFile /etc/ssl/practice/status.key\n</VirtualHost>\n"
+    }
+  }
+}

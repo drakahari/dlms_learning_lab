@@ -1,0 +1,914 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-sieve-header-filing",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-sieve-filters",
+      "topic": "Sieve exact header filing",
+      "title": "File a named list without moving unrelated mail",
+      "summary": "Write a mail filter that files one named list and safely keeps other messages.",
+      "objective": "File messages with an X-List value exactly equal to staff-updates in News only. Ignore ASCII letter case in field names and values; one matching duplicate field is sufficient. Keep all other messages in INBOX only, including a missing or empty X-List, a different list, and the same words appearing only in Subject. Run the filter against every sample. A correct filter must preserve legitimate unmatched mail and avoid extra mailbox copies. Equivalent supported rules are accepted.",
+      "retry_guidance": "Read the failing sample’s Expected and Actual destinations. Distinguish a syntax or unsupported-feature error from a condition or rule-order mistake, then edit and run again.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Edit and run the filter",
+        "Verify all sample outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Run the separate club filter",
+          "why": "A message has fields such as Subject. This exercise also supplies X-List, a custom field identifying a list. The filter reads that field and chooses a mailbox. These supplied fields are practice inputs, not proof that a sender is trustworthy.",
+          "action": "Select Woodland club in Sample message. Select Fill worked example, then Run filter. Read Actual results for every sample.",
+          "commands": []
+        },
+        {
+          "title": "Change the matching value",
+          "why": "Sieve is a mail-filter language. require \"fileinto\"; enables filing. if introduces a condition; braces group the action to take when it matches. End each simple action with a semicolon. Double quotes contain literal text; nothing runs in a shell.",
+          "action": "In Filter, change woodland to not-woodland in the quoted test value, then select Run filter.",
+          "commands": []
+        },
+        {
+          "title": "Observe an unwanted extra copy",
+          "why": "header :is compares the entire field value, ignoring ASCII letter case by default. An absent field does not match. fileinto chooses a mailbox and cancels the default INBOX copy. When no filing action matches, Sieve keeps the message in INBOX. An unconditional keep after filing would add another copy.",
+          "action": "Fill the worked example again. Add keep; after the closing brace and run it. Remove that final keep; and retry.",
+          "commands": []
+        }
+      ],
+      "explanation": "The exact field-value test separates the named list from similar names and unrelated fields. A matching fileinto cancels implicit keep; leaving unmatched mail alone preserves INBOX. No unconditional keep is needed after a successful filing action.",
+      "hints": [
+        "Compare the required field with the selected sample headers. Subject and X-List are different fields.",
+        "Use a whole-value comparison when a similar prefix or suffix must not match.",
+        "If Actual results show both News and INBOX, inspect actions after the matching rule. Filing does not stop later statements."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc5228.html"
+      ],
+      "simplifications": "Bounded Sieve header/size/filing subset with plain represented ASCII headers and named virtual mailboxes. No real mail delivery, host files, shell, subprocess or network. LF script lines are accepted; message size counts canonical CRLF. No address/envelope parsing, redirect, reject, vacation, procmail, variables, MIME decoding or other extensions. Resource errors are explicit and never earn credit. See SIEVE_SUBSET.md.",
+      "initial": {
+        "kind": "SieveFiltering",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-header-filing",
+          "view": "introduction",
+          "assignment": {
+            "draft": "require \"fileinto\";\n# Write a filter for the supplied delivery policy.\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          },
+          "practice": {
+            "draft": "require \"fileinto\";\n# Try the worked filter here.\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SieveFiltering",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-header-filing",
+          "assignment": {
+            "starter": "require \"fileinto\";\n# Write a filter for the supplied delivery policy.\nkeep;\n",
+            "reference": "require \"fileinto\";\nif header :is \"X-List\" \"staff-updates\" {\n    fileinto \"News\";\n}\n",
+            "cases": [
+              {
+                "id": "staff",
+                "label": "Named staff list",
+                "headers": [
+                  [
+                    "X-List",
+                    "staff-updates"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "News"
+                ]
+              },
+              {
+                "id": "mixed",
+                "label": "Different letter case",
+                "headers": [
+                  [
+                    "x-list",
+                    "STAFF-UPDATES"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "News"
+                ]
+              },
+              {
+                "id": "subject",
+                "label": "The same words in another field",
+                "headers": [
+                  [
+                    "Subject",
+                    "staff-updates"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "prefix",
+                "label": "A different list with a similar ending",
+                "headers": [
+                  [
+                    "X-List",
+                    "not-staff-updates"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "suffix",
+                "label": "A different list with a similar start",
+                "headers": [
+                  [
+                    "X-List",
+                    "staff-updates-extra"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "missing",
+                "label": "No list field",
+                "headers": [],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "duplicate",
+                "label": "Two list fields, one matching",
+                "headers": [
+                  [
+                    "X-List",
+                    "outside"
+                  ],
+                  [
+                    "X-List",
+                    "staff-updates"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "News"
+                ]
+              },
+              {
+                "id": "empty",
+                "label": "An empty list field",
+                "headers": [
+                  [
+                    "X-List",
+                    ""
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              }
+            ],
+            "mailboxes": [
+              "INBOX",
+              "News"
+            ]
+          },
+          "example": {
+            "starter": "require \"fileinto\";\n# Try the worked filter here.\nkeep;\n",
+            "reference": "require \"fileinto\";\nif header :is \"X-Club\" \"woodland\" {\n    fileinto \"Club\";\n}\n",
+            "cases": [
+              {
+                "id": "club",
+                "label": "Woodland club",
+                "headers": [
+                  [
+                    "X-Club",
+                    "woodland"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Club"
+                ]
+              },
+              {
+                "id": "case",
+                "label": "Club with different case",
+                "headers": [
+                  [
+                    "X-Club",
+                    "WOODLAND"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Club"
+                ]
+              },
+              {
+                "id": "other",
+                "label": "Another club",
+                "headers": [
+                  [
+                    "X-Club",
+                    "not-woodland"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "ordinary",
+                "label": "Ordinary message",
+                "headers": [
+                  [
+                    "Subject",
+                    "Meeting"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              }
+            ],
+            "mailboxes": [
+              "Club",
+              "INBOX"
+            ]
+          }
+        }
+      },
+      "solution": [
+        "sieve-workspace {\"kind\":\"edit\",\"script\":\"require \\\"fileinto\\\";\\nif header :is \\\"X-List\\\" \\\"staff-updates\\\" {\\n    fileinto \\\"News\\\";\\n}\\n\"}",
+        "sieve-workspace {\"kind\":\"run\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "lpic2-sieve-compound-filter",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-sieve-filters",
+      "topic": "Sieve compound tests and message size",
+      "title": "Combine review conditions with a message-size boundary",
+      "summary": "Combine project membership, review status and message size without moving unrelated mail.",
+      "objective": "File in Review only when X-Project exactly matches atlas and either X-Review exactly matches pending or the complete represented message is larger than 1024 bytes. Ignore ASCII letter case for these exact comparisons. Size includes headers, the blank separator and body, not just body length. Exactly 1024 bytes is not over 1024; pending project mail still qualifies at that boundary. Keep every nonqualifying sample in INBOX only. Run all samples and avoid extra mailbox copies. Equivalent supported conditions are accepted.",
+      "retry_guidance": "Read the failing sample’s Expected and Actual destinations. Distinguish a syntax or unsupported-feature error from a condition or rule-order mistake, then edit and run again.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Understand the task",
+        "Edit and run the filter",
+        "Verify all sample outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Inspect two different reasons to review",
+          "why": "allof (test, test) means every enclosed test must be true. anyof (test, test) means at least one must be true. Separate tests with commas. Parentheses preserve the intended grouping: team membership AND (review needed OR large message).",
+          "action": "Fill worked example and select Run filter. Select Small orchard todo, then Large orchard ready. Read their headers, represented size and Actual results.",
+          "commands": []
+        },
+        {
+          "title": "Test the exact boundary",
+          "why": "size :over compares complete message bytes, including headers and the separating blank line. K means 1024 bytes, so size :over 1K means strictly larger than 1024. At exactly the threshold, neither :over nor :under matches.",
+          "action": "Select Ready orchard mail at 512 bytes. Change :over 512 to :over 511 in Filter and run again; restore 512 afterward.",
+          "commands": []
+        },
+        {
+          "title": "Compare anyof and allof",
+          "why": "A large message from another team must not pass a team-specific rule. Keep the team test outside the anyof group; otherwise size alone could admit unrelated mail. Missing headers do not match, but another true condition inside anyof can still make that group true.",
+          "action": "Replace the inner anyof with allof, then run. Compare the small todo and large ready cases. Restore the worked example and rerun.",
+          "commands": []
+        }
+      ],
+      "explanation": "The outer allof requires the correct project. Its inner anyof permits pending review or a message over the strict size threshold. Exactly 1024 bytes cannot satisfy the size alternative, but can still qualify through pending status. Other projects remain in INBOX regardless of size.",
+      "hints": [
+        "Read each failed sample’s project, review field and complete represented size. Separate the outer requirement from the inner alternatives.",
+        "The project condition must remain true even when a message is large.",
+        "At the size boundary, check whether pending status independently satisfies the alternatives. Do not change :over to an inclusive comparison."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc5228.html"
+      ],
+      "simplifications": "Bounded Sieve header/size/filing subset with plain represented ASCII headers and named virtual mailboxes. No real mail delivery, host files, shell, subprocess or network. LF script lines are accepted; message size counts canonical CRLF. No address/envelope parsing, redirect, reject, vacation, procmail, variables, MIME decoding or other extensions. Resource errors are explicit and never earn credit. See SIEVE_SUBSET.md.",
+      "initial": {
+        "kind": "SieveFiltering",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-compound-filter",
+          "view": "introduction",
+          "assignment": {
+            "draft": "require \"fileinto\";\n# This starter sends too much project mail to Review.\nif header :is \"X-Project\" \"atlas\" {\n    fileinto \"Review\";\n}\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          },
+          "practice": {
+            "draft": "require \"fileinto\";\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SieveFiltering",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-compound-filter",
+          "assignment": {
+            "starter": "require \"fileinto\";\n# This starter sends too much project mail to Review.\nif header :is \"X-Project\" \"atlas\" {\n    fileinto \"Review\";\n}\n",
+            "reference": "require \"fileinto\";\nif allof (header :is \"X-Project\" \"atlas\",\n          anyof (header :is \"X-Review\" \"pending\", size :over 1K)) {\n    fileinto \"Review\";\n}\n",
+            "cases": [
+              {
+                "id": "pending",
+                "label": "Small pending project mail",
+                "headers": [
+                  [
+                    "X-Project",
+                    "atlas"
+                  ],
+                  [
+                    "X-Review",
+                    "pending"
+                  ]
+                ],
+                "body": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "expected": [
+                  "Review"
+                ]
+              },
+              {
+                "id": "large",
+                "label": "Large ready project mail",
+                "headers": [
+                  [
+                    "X-Project",
+                    "atlas"
+                  ],
+                  [
+                    "X-Review",
+                    "ready"
+                  ]
+                ],
+                "body": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "expected": [
+                  "Review"
+                ]
+              },
+              {
+                "id": "boundary",
+                "label": "Ready project mail at exactly 1024 bytes",
+                "headers": [
+                  [
+                    "X-Project",
+                    "atlas"
+                  ],
+                  [
+                    "X-Review",
+                    "ready"
+                  ]
+                ],
+                "body": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "pending-boundary",
+                "label": "Pending mail at the size boundary",
+                "headers": [
+                  [
+                    "X-Project",
+                    "atlas"
+                  ],
+                  [
+                    "X-Review",
+                    "pending"
+                  ]
+                ],
+                "body": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "expected": [
+                  "Review"
+                ]
+              },
+              {
+                "id": "other",
+                "label": "Large pending mail from another project",
+                "headers": [
+                  [
+                    "X-Project",
+                    "elsewhere"
+                  ],
+                  [
+                    "X-Review",
+                    "pending"
+                  ]
+                ],
+                "body": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "missing-review",
+                "label": "Large project mail without a review field",
+                "headers": [
+                  [
+                    "X-Project",
+                    "atlas"
+                  ]
+                ],
+                "body": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "expected": [
+                  "Review"
+                ]
+              },
+              {
+                "id": "missing-project",
+                "label": "Large pending mail without a project field",
+                "headers": [
+                  [
+                    "X-Review",
+                    "pending"
+                  ]
+                ],
+                "body": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "ready",
+                "label": "Small ready project mail",
+                "headers": [
+                  [
+                    "X-Project",
+                    "atlas"
+                  ],
+                  [
+                    "X-Review",
+                    "ready"
+                  ]
+                ],
+                "body": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "expected": [
+                  "INBOX"
+                ]
+              }
+            ],
+            "mailboxes": [
+              "INBOX",
+              "Review"
+            ]
+          },
+          "example": {
+            "starter": "require \"fileinto\";\nkeep;\n",
+            "reference": "require \"fileinto\";\nif allof (header :is \"X-Team\" \"orchard\",\n          anyof (header :is \"X-Review\" \"todo\", size :over 512)) {\n    fileinto \"Review\";\n}\n",
+            "cases": [
+              {
+                "id": "todo",
+                "label": "Small orchard todo",
+                "headers": [
+                  [
+                    "X-Team",
+                    "orchard"
+                  ],
+                  [
+                    "X-Review",
+                    "todo"
+                  ]
+                ],
+                "body": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "expected": [
+                  "Review"
+                ]
+              },
+              {
+                "id": "large",
+                "label": "Large orchard ready",
+                "headers": [
+                  [
+                    "X-Team",
+                    "orchard"
+                  ],
+                  [
+                    "X-Review",
+                    "ready"
+                  ]
+                ],
+                "body": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "expected": [
+                  "Review"
+                ]
+              },
+              {
+                "id": "boundary",
+                "label": "Ready orchard mail at 512 bytes",
+                "headers": [
+                  [
+                    "X-Team",
+                    "orchard"
+                  ],
+                  [
+                    "X-Review",
+                    "ready"
+                  ]
+                ],
+                "body": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "elsewhere",
+                "label": "Large todo for another team",
+                "headers": [
+                  [
+                    "X-Team",
+                    "elsewhere"
+                  ],
+                  [
+                    "X-Review",
+                    "todo"
+                  ]
+                ],
+                "body": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "expected": [
+                  "INBOX"
+                ]
+              }
+            ],
+            "mailboxes": [
+              "INBOX",
+              "Review"
+            ]
+          }
+        }
+      },
+      "solution": [
+        "sieve-workspace {\"kind\":\"edit\",\"script\":\"require \\\"fileinto\\\";\\nif allof (header :is \\\"X-Project\\\" \\\"atlas\\\",\\n          anyof (header :is \\\"X-Review\\\" \\\"pending\\\", size :over 1K)) {\\n    fileinto \\\"Review\\\";\\n}\\n\"}",
+        "sieve-workspace {\"kind\":\"run\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "lpic2-sieve-rule-order",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-sieve-filters",
+      "topic": "Sieve rule order and safe recovery",
+      "title": "Recover an ordered filter without losing unmatched mail",
+      "summary": "Repair a filter whose overlapping rules create extra copies and override priority.",
+      "objective": "Urgent mail, identified by X-Priority exactly equal to urgent, must go to Review only, even when it also belongs to the staff list. Otherwise, mail with X-List exactly equal to staff-updates must go to News only. Keep all remaining mail in INBOX only. Ignore ASCII letter case and accept one matching duplicate field. Repair the supplied filter and run every sample. Preserve unmatched mail, respect priority and avoid duplicate destinations. Equivalent supported control flow is accepted.",
+      "retry_guidance": "Read the failing sample’s Expected and Actual destinations. Distinguish a syntax or unsupported-feature error from a condition or rule-order mistake, then edit and run again.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Edit and run the filter",
+        "Verify all sample outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Diagnose the overlapping starter",
+          "why": "Separate if rules are independent. When both match, both bodies run; fileinto does not stop processing. A later keep also adds INBOX, even after another mailbox was chosen.",
+          "action": "Run the supplied example before filling it. Select Maintenance notice from the club, then Ordinary club update. Read Actual results.",
+          "commands": []
+        },
+        {
+          "title": "Compare a priority repair",
+          "why": "An if / elsif / else chain runs only the first matching branch. Alternatively, stop; ends the entire filter at that point. Use these tools to implement priority, rather than relying on the position of a filing action alone. The Stop button cancels the sample run; stop; inside a rule ends processing of that one message.",
+          "action": "Select Fill worked example, then Run filter. Inspect the same samples and Unmatched personal mail.",
+          "commands": []
+        },
+        {
+          "title": "Try an equivalent control flow",
+          "why": "stop without an earlier delivery action still permits implicit keep. discard cancels implicit keep and does not undo other actions, so it is not a repair for an unwanted extra copy. Leave unmatched mail with a deliberate keep or the default INBOX behavior.",
+          "action": "Replace the chain with two separate if rules, add stop; after each successful fileinto inside its block, and run.",
+          "commands": []
+        }
+      ],
+      "explanation": "The starter runs independent rules and an unconditional keep, so overlapping mail acquires extra destinations. Prioritize urgent mail using an if/elsif chain, or stop after a matching filing action. Preserve the default delivery for everything unmatched.",
+      "hints": [
+        "Start with the sample matching both urgent and staff-list conditions. Count its actual mailbox destinations.",
+        "fileinto does not stop the next independent if, and keep is an additional delivery action.",
+        "Either select exactly one branch or explicitly stop after a successful filing. Preserve INBOX for messages matching neither rule."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc5228.html"
+      ],
+      "simplifications": "Bounded Sieve header/size/filing subset with plain represented ASCII headers and named virtual mailboxes. No real mail delivery, host files, shell, subprocess or network. LF script lines are accepted; message size counts canonical CRLF. No address/envelope parsing, redirect, reject, vacation, procmail, variables, MIME decoding or other extensions. Resource errors are explicit and never earn credit. See SIEVE_SUBSET.md.",
+      "initial": {
+        "kind": "SieveFiltering",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-rule-order",
+          "view": "introduction",
+          "assignment": {
+            "draft": "require \"fileinto\";\nif header :is \"X-Priority\" \"urgent\" {\n    fileinto \"Review\";\n}\nif header :is \"X-List\" \"staff-updates\" {\n    fileinto \"News\";\n}\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          },
+          "practice": {
+            "draft": "require \"fileinto\";\nif header :is \"X-Priority\" \"maintenance\" {\n    fileinto \"Review\";\n}\nif header :is \"X-Club\" \"woodland\" {\n    fileinto \"Club\";\n}\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SieveFiltering",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-rule-order",
+          "assignment": {
+            "starter": "require \"fileinto\";\nif header :is \"X-Priority\" \"urgent\" {\n    fileinto \"Review\";\n}\nif header :is \"X-List\" \"staff-updates\" {\n    fileinto \"News\";\n}\nkeep;\n",
+            "reference": "require \"fileinto\";\nif header :is \"X-Priority\" \"urgent\" {\n    fileinto \"Review\";\n} elsif header :is \"X-List\" \"staff-updates\" {\n    fileinto \"News\";\n}\n",
+            "cases": [
+              {
+                "id": "both",
+                "label": "Urgent mail from the staff list",
+                "headers": [
+                  [
+                    "X-Priority",
+                    "urgent"
+                  ],
+                  [
+                    "X-List",
+                    "staff-updates"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Review"
+                ]
+              },
+              {
+                "id": "urgent",
+                "label": "Urgent mail outside the list",
+                "headers": [
+                  [
+                    "X-Priority",
+                    "urgent"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Review"
+                ]
+              },
+              {
+                "id": "news",
+                "label": "Ordinary staff update",
+                "headers": [
+                  [
+                    "X-List",
+                    "staff-updates"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "News"
+                ]
+              },
+              {
+                "id": "case",
+                "label": "Urgent with different letter case",
+                "headers": [
+                  [
+                    "X-Priority",
+                    "URGENT"
+                  ],
+                  [
+                    "X-List",
+                    "STAFF-UPDATES"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Review"
+                ]
+              },
+              {
+                "id": "ordinary",
+                "label": "Unmatched mail",
+                "headers": [
+                  [
+                    "Subject",
+                    "Hello"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "empty",
+                "label": "No routing headers",
+                "headers": [],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "similar",
+                "label": "Similar priority name is not urgent",
+                "headers": [
+                  [
+                    "X-Priority",
+                    "not-urgent"
+                  ],
+                  [
+                    "X-List",
+                    "staff-updates"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "News"
+                ]
+              },
+              {
+                "id": "duplicate",
+                "label": "One of two priority fields is urgent",
+                "headers": [
+                  [
+                    "X-Priority",
+                    "routine"
+                  ],
+                  [
+                    "X-Priority",
+                    "urgent"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Review"
+                ]
+              }
+            ],
+            "mailboxes": [
+              "INBOX",
+              "News",
+              "Review"
+            ]
+          },
+          "example": {
+            "starter": "require \"fileinto\";\nif header :is \"X-Priority\" \"maintenance\" {\n    fileinto \"Review\";\n}\nif header :is \"X-Club\" \"woodland\" {\n    fileinto \"Club\";\n}\nkeep;\n",
+            "reference": "require \"fileinto\";\nif header :is \"X-Priority\" \"maintenance\" {\n    fileinto \"Review\";\n} elsif header :is \"X-Club\" \"woodland\" {\n    fileinto \"Club\";\n}\n",
+            "cases": [
+              {
+                "id": "both",
+                "label": "Maintenance notice from the club",
+                "headers": [
+                  [
+                    "X-Priority",
+                    "maintenance"
+                  ],
+                  [
+                    "X-Club",
+                    "woodland"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Review"
+                ]
+              },
+              {
+                "id": "club",
+                "label": "Ordinary club update",
+                "headers": [
+                  [
+                    "X-Club",
+                    "woodland"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Club"
+                ]
+              },
+              {
+                "id": "ordinary",
+                "label": "Unmatched personal mail",
+                "headers": [
+                  [
+                    "Subject",
+                    "Hello"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "similar",
+                "label": "A different priority",
+                "headers": [
+                  [
+                    "X-Priority",
+                    "not-maintenance"
+                  ],
+                  [
+                    "X-Club",
+                    "woodland"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Club"
+                ]
+              }
+            ],
+            "mailboxes": [
+              "Club",
+              "INBOX",
+              "Review"
+            ]
+          }
+        }
+      },
+      "solution": [
+        "sieve-workspace {\"kind\":\"edit\",\"script\":\"require \\\"fileinto\\\";\\nif header :is \\\"X-Priority\\\" \\\"urgent\\\" {\\n    fileinto \\\"Review\\\";\\n} elsif header :is \\\"X-List\\\" \\\"staff-updates\\\" {\\n    fileinto \\\"News\\\";\\n}\\n\"}",
+        "sieve-workspace {\"kind\":\"run\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}"
+      ],
+      "prerequisites": []
+    }
+  ]
+}

@@ -38,6 +38,74 @@ def require(ok, text):
         raise ReopenError(text)
 
 
+
+def verify_environment_replay(initial, expected, replay):
+    """Bind this same-binary run to its actual writer record, not a stale revision.
+
+    This checks current cold/replay evidence only; it never re-labels or replays
+    a historical evaluator baseline. All inputs already passed bounded reads.
+    """
+    try:
+        state = expected['progress']['attempts']['lpic1-env-child-settings']['state']
+        draft = state['simulation']['assignment']
+        record = draft['result']
+        revision = record['revision']
+        consistent = (state['kind'] == 'Environment'
+                      and record['task']['id'] == 'lpic1-env-child-settings'
+                      and isinstance(draft['source'], str)
+                      and record['source'] == draft['source'])
+    except (KeyError, TypeError):
+        raise ReopenError('Environment writer lacks its completed fixed-task record') from None
+    require(consistent and type(revision) is int and 17 <= revision <= 0xffffffff,
+            'Environment writer needs a consistent supported evaluator revision')
+    require(isinstance(initial, dict)
+            and type(initial.get('evaluator_revision')) is int
+            and initial.get('evaluator_revision') == revision
+            and initial.get('saved_record_verified') is False
+            and initial.get('current_assignment_credit') is False
+            and initial.get('drafts_preserved') is True,
+            'Environment cold load must match the writer revision, preserve unverified observations and independent drafts')
+    require(isinstance(replay, dict) and replay.get('observed') == expected
+            and replay.get('record_verified') is True
+            and replay.get('current_assignment_credit') is True,
+            'Environment current credit requires actual bounded replay with exact outcomes')
+    return revision
+
+
+def verify_editor_handover_replay(initial, expected, replay):
+    """Same-binary bounded replay; independent drafts and prior file check stay exact."""
+    try:
+        state = expected['progress']['attempts']['lpic1-editor-handover']['state']
+        simulation = state['simulation']
+        draft = simulation['setup']['assignment']
+        record = draft['result']
+        revision = record['revision']
+        consistent = (state['kind'] == 'EditorHandover'
+                      and record['task']['id'] == 'lpic1-editor-handover-assignment'
+                      and record['source'] == draft['source']
+                      and isinstance(draft['source'], str)
+                      and simulation['assignment_launch'] is not None
+                      and simulation['files']['assignment']['checked'] is True
+                      and simulation['setup']['example']['result'] is None
+                      and simulation['example_launch'] is None)
+    except (KeyError, TypeError):
+        raise ReopenError('Handover writer lacks its completed fixed-task record') from None
+    require(consistent and type(revision) is int and 17 <= revision <= 0xffffffff,
+            'Handover needs a consistent current writer setup and independent draft')
+    require(isinstance(initial, dict)
+            and type(initial.get('evaluator_revision')) is int
+            and initial['evaluator_revision'] == revision
+            and initial.get('saved_record_verified') is False
+            and initial.get('current_assignment_credit') is False
+            and initial.get('drafts_preserved') is True,
+            'Handover cold load must retain unverified observations and independent drafts')
+    require(isinstance(replay, dict) and replay.get('observed') == expected
+            and replay.get('record_verified') is True
+            and replay.get('current_assignment_credit') is True,
+            'Handover credit requires fresh actual replay with exact portable observations')
+    return revision
+
+
 def signature(info):
     return info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns
 
@@ -174,12 +242,15 @@ def stop_own_child(process):
     require(process.poll() is not None, 'Owned GUI child did not exit; outer runner must block/clean it')
 
 
-def capture(app, role, logfile, cwd, env, lock_fd, timeout):
+def capture(app, role, logfile, cwd, env, lock_fd, timeout, review=False):
     """Fixed identity or GUI argv, nonblocking output, bounded timeout/held pipe.
     No setsid/group escape: MAIN guard owns the entire group, including on failure.
     """
     require(role in ('version', 'write', 'read'), 'Fixed launch role only')
+    require(type(review) is bool and (not review or role != 'version'), 'Fixed GUI review selection only')
     command = [str(app), '--version' if role == 'version' else '--developer']
+    if review:
+        command.append('--presentation-review')
     cap = 4096 if role == 'version' else LOG_CAP
     process = None
     started = time.monotonic()
@@ -276,12 +347,12 @@ def publish_manifest(session, report):
 
 
 def session_marker(session, temporary, nonce, case='script'):
-    require(case in ('script', 'dhcpv4', 'nfs'), 'Fixed script/dhcpv4/nfs case only')
+    require(case in ('script', 'dhcpv4', 'nfs', 'environment', 'user-mounts', 'editor-handover', 'samba', 'virtual', 'guest-drivers', 'smtp-routing', 'sieve-filters', 'sieve-addresses', 'sieve-delivery', 'sieve-vacation', 'mailbox-access', 'mailbox-administration', 'linux-router', 'linux-flow', 'linux-v6', 'services-router', 'v6-admin', 'v6-startup', 'ftp-identity', 'service-exposure', 'vpn-point', 'rpm-patch', 'auth-filter', 'ids-rule', 'poe', 'kernel-build', 'dkms', 'initramfs'), 'Fixed native reopen case only')
     require(re.fullmatch(r'[0-9a-f]{32}', nonce) is not None, 'Fixed marker nonce')
     marker = {'version': 1, 'purpose': PURPOSE, 'root': str(session),
               'temporary_root': str(temporary), 'nonce': nonce}
     # Preserve the exact legacy marker shape when the new case is not requested.
-    if case in ('dhcpv4', 'nfs'):
+    if case in ('dhcpv4', 'nfs', 'environment', 'user-mounts', 'editor-handover', 'samba', 'virtual', 'guest-drivers', 'smtp-routing', 'sieve-filters', 'sieve-addresses', 'sieve-delivery', 'sieve-vacation', 'mailbox-access', 'mailbox-administration', 'linux-router', 'linux-flow', 'linux-v6', 'services-router', 'v6-admin', 'v6-startup', 'ftp-identity', 'service-exposure', 'vpn-point', 'rpm-patch', 'auth-filter', 'ids-rule', 'poe', 'kernel-build', 'dkms', 'initramfs'):
         marker['case'] = case
     return marker
 
@@ -314,7 +385,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--app', required=True, type=Path)
     parser.add_argument('--output', type=Path)
-    parser.add_argument('--case', choices=('script', 'dhcpv4', 'nfs'), default='script')
+    parser.add_argument('--case', choices=('script', 'dhcpv4', 'nfs', 'environment', 'user-mounts', 'editor-handover', 'samba', 'virtual', 'guest-drivers', 'smtp-routing', 'sieve-filters', 'sieve-addresses', 'sieve-delivery', 'sieve-vacation', 'mailbox-access', 'mailbox-administration', 'linux-router', 'linux-flow', 'linux-v6', 'services-router', 'v6-admin', 'v6-startup', 'ftp-identity', 'service-exposure', 'vpn-point', 'rpm-patch', 'auth-filter', 'ids-rule', 'poe', 'kernel-build', 'dkms', 'initramfs'), default='script')
     args = parser.parse_args()
     require(os.name == 'posix' and Path('/proc/self/fd').is_dir(), 'Fixed Linux native acceptance only')
     temporary = checked_directory(Path(os.environ.get('TMPDIR', '')))
@@ -346,7 +417,8 @@ def main():
         require(pin(app, BINARY_CAP) == before, 'Executable changed before GUI launch')
         inventory(session)
         phases.append(capture(app, role, session / f'{role}.log', session / role,
-                              child_environment(session, role), lock_fd, PHASE_TIMEOUT))
+                              child_environment(session, role), lock_fd, PHASE_TIMEOUT,
+                              review=args.case in ('environment','user-mounts','editor-handover','samba','virtual','guest-drivers','smtp-routing','sieve-filters', 'sieve-addresses', 'sieve-delivery', 'sieve-vacation', 'mailbox-access', 'mailbox-administration', 'linux-router', 'linux-flow', 'linux-v6', 'services-router', 'v6-admin', 'v6-startup', 'ftp-identity', 'service-exposure', 'vpn-point', 'rpm-patch', 'auth-filter', 'ids-rule', 'poe', 'kernel-build', 'dkms', 'initramfs')))
         require(REQUIRED[role] in read_bytes(session / f'{role}.log', LOG_CAP).decode(),
                 'Native phase did not reach its fixed completion marker')
         if role == 'write':
@@ -363,7 +435,7 @@ def main():
         else:
             loaded = json.loads(read_bytes(session / 'reader-loaded.json', JSON_CAP))
             require(loaded == expected, 'Second process did not load the exact writer observation')
-            if args.case in ('dhcpv4', 'nfs'):
+            if args.case in ('dhcpv4', 'nfs', 'environment', 'user-mounts', 'editor-handover', 'samba', 'virtual', 'guest-drivers', 'smtp-routing', 'sieve-filters', 'sieve-addresses', 'sieve-delivery', 'sieve-vacation', 'mailbox-access', 'mailbox-administration', 'linux-router', 'linux-flow', 'linux-v6', 'services-router', 'v6-admin', 'v6-startup', 'ftp-identity', 'service-exposure', 'vpn-point', 'rpm-patch', 'auth-filter', 'ids-rule', 'poe', 'kernel-build', 'dkms', 'initramfs'):
                 verify_repaired_reader(session, expected)
     require(len(phases) == 2 and phases[0]['pid'] != phases[1]['pid'], 'Expected two distinct GUI processes')
     require(pin(app, BINARY_CAP) == before, 'Executable changed during native acceptance')
@@ -383,6 +455,128 @@ def main():
                            'distinct unfinished exports drafts, current mounts/files, favorite and appearance '
                            'survive cold load. Reader repairs through native editors and rechecks both goals. '
                            'No injected State, host NFS, novice or other-platform acceptance.')
+    if args.case=='ids-rule':
+        report['case']='ids-rule'
+        report['scope']='Two normal native processes restore saved rules, exact source-bound history, selected decoded records, replay snapshots, checks and separate unfinished assignment/example editors before native repair. Exact raw progress/preferences compared first. No injected learner state, Snort daemon, real traffic, scanner, host files or personal progress; not novice or other-platform acceptance.'
+    if args.case=='auth-filter':
+        report['case']='auth-filter'
+        report['scope']='Two normal native processes restore saved filters, separate unsaved editors and unfinished commands, selected samples, actual line results and checks before native repair. Exact raw progress/preferences compared first. No injected learner state, real fail2ban, daemon, firewall, host files or personal progress; not novice or other-platform acceptance.'
+    if args.case=='rpm-patch':
+        report['case']='rpm-patch'
+        report['scope']='Two normal native processes restore actual partially updated package sets, retained/staged virtual files, source-owned advisory policies and distinct unfinished terminal drafts before native repair. Exact raw progress/preferences compared first. No host package database, service, personal progress or novice/other-platform acceptance.'
+    if args.case=='vpn-point':
+        report['case']='vpn-point'
+        report['scope']='Two normal native processes restore actual saved/applied VPN profile fragments, modeled path observations, source snapshots and distinct unfinished example/assignment editors and address-query drafts before native repair. Exact raw progress/preferences compared before repair. Supplied identity metadata only: no TLS, daemon, host file/network, personal progress or novice/other-platform acceptance.'
+    if args.case=='initramfs':
+        report['case']='initramfs'
+        report['scope']='Two native processes restore separate virtual images, unsaved boot entries, unfinished commands and check state. Initial progress and preferences match before independent repairs.'
+    if args.case=='dkms':
+        report['case']='dkms'
+        report['scope']='Exact initial cold loading of separate partial DKMS build/installation records, unfinished commands, source-bound requirements and preferences before actual independent native repair; no real DKMS or module compilation.'
+    if args.case=='kernel-build':
+        report['case']='kernel-build'
+        report['scope']='Two normal native processes restore source-bound kernel configuration drafts, image receipts, actual partial virtual staging, distinct unfinished entry/command drafts and check state before widget-driven repair. Exact raw progress/preferences compared before repair. No injected State, host compiler/kernel/files, real boot, personal progress or novice/other-platform acceptance.'
+    if args.case=='poe':
+        report['case']='poe'
+        report['scope']='Two normal native processes restore separate partial power plans, source snapshots and check state, comparing exact raw progress/preferences before native port/power repair. No hardware, electrical or network operation, original progress, novice or other-platform acceptance.'
+    if args.case=='service-exposure':
+        report['case']='service-exposure'
+        report['scope']='Two normal native processes restore actual filter/listener state, selected observer, scan results, source snapshots and separate queued server/observer commands before native Run/Check repair. Exact raw progress/preferences compared before repair. No injected State, scanner, host files/network/services, personal progress or novice/other-platform acceptance.'
+    if args.case=='ftp-identity':
+        report['case']='ftp-identity'
+        report['scope']='Two normal native processes restore separate FTP configuration drafts, saved/applied policy, queued admin/client commands, actual virtual uploads/download buffers and cwd before native Run/Save/Check repair. Exact raw progress/preferences compared before repair. No injected State, daemon, host filesystem/network or novice/other-platform acceptance.'
+    if args.case=='v6-startup':
+        report['case']='v6-startup'
+        report['scope']='Two normal native processes restore current IPv6 rules, saved filter, separate unsaved editors, queued enable commands and actual failed startup before native Save/Enable/Restart/Startup/Check repairs. Exact raw progress/preferences compared before repair. No host services/firewall, full boot, original profile or novice/other-platform acceptance.'
+    if args.case=='v6-admin':
+        report['case']='v6-admin'
+        report['scope']='Two normal native processes restore saved IPv6 settings, unsaved separate editor/command drafts, current role and failed transit before native Save/Load/Observe/Check repairs. Exact raw progress/preferences compared before repair. Not a full OS reboot or novice/other-platform acceptance.'
+    if args.case=='services-router':
+        report['case']='services-router'
+        report['scope']='Two normal native processes preserve separate saved service files, unsaved editor drafts, current numeric policies, queued named-rule commands and exact traffic observations plus raw/provenance/preferences before actual Save/Run/Check repairs. No injected state, host files/NSS/iptables/packets, personal profile, novice/device or other-platform acceptance.'
+    if args.case=='linux-v6':
+        report['case']='linux-v6'
+        report['scope']='Two normal native processes preserve distinct unfinished IPv6 policies, queued control-header commands and exact traffic reports plus raw/provenance/preferences before actual native Run/Check repairs. No injected state, host packets/kernel/network/files, personal profile, novice/device or other-platform acceptance.'
+    if args.case=='linux-flow':
+        report['case']='linux-flow'
+        report['scope']='Two normal native processes preserve independent unfinished NAT configurations, queued repair commands and exact traffic results plus raw/provenance/preferences before real native Run/Check repairs. No injected state, host networking, kernel action, personal profile, physical-device, novice or other-platform acceptance.'
+    if args.case=='linux-router':
+        report['case']='linux-router'
+        report['scope']='Two normal native processes preserve independent unsaved forwarding drafts, saved filter repairs, queued commands, live/saved differences and exact raw/provenance/preferences before actual native Save/Run/Check repairs. No personal profile, host networking, kernel action, physical-device, novice or other-platform acceptance.'
+    if args.case=='mailbox-administration':
+        report['case']='mailbox-administration'
+        report['scope']='Two real normal GUI processes preserve separate unfinished config drafts, precise completed INBOX removal, retained Archive mail, unsent admin commands and exact raw/provenance/preferences before actual native repairs. No injected State, host Dovecot/files/network, personal progress, physical-device, novice or other-platform acceptance.'
+    if args.case=='mailbox-access':
+        report['case']='mailbox-access'
+        report['scope']='Two real normal GUI processes preserve separate config drafts, pending POP transactions, unsent QUIT inputs, client choices, virtual mail and exact raw/provenance/preferences before native QUIT commit and fresh checks. A paused simulator session is preserved work, not a real TCP reconnect. No real Dovecot/network/files, personal progress, physical-device, independent novice or other-platform acceptance.'
+    if args.case=='sieve-vacation':
+        report['case']='sieve-vacation'
+        report['scope']='Two actual normal GUI processes preserve distinct partially repaired vacation filter drafts, virtual timeline results and exact raw/provenance/preferences before native repairs. Shared reply history is reconstructed from real ordered arrivals, not injected cache data. No real mail, personal progress, physical-device, novice or other-platform acceptance.'
+    if args.case=='sieve-delivery':
+        report['case']='sieve-delivery'
+        report['scope']='Two actual normal GUI processes preserve distinct partially repaired delivery-filter drafts, selected messages and exact refusal/conflict case results plus raw/provenance/preferences before native repairs. No injected State, host mail/files/network, personal progress, physical-device, novice or other-platform acceptance.'
+    if args.case=='sieve-addresses':
+        report['case']='sieve-addresses'
+        report['scope']='Two actual normal GUI processes preserve distinct partially repaired address-filter drafts, selected messages and exact actual case results plus raw/provenance/preferences before native repairs. No injected State, host mail/files/network, personal progress, physical-device, novice or other-platform acceptance.'
+    if args.case=='sieve-filters':
+        report['case']='sieve-filters'
+        report['scope']='Two actual normal GUI processes on a fresh private profile preserve distinct partially repaired Sieve script drafts, selected messages and exact actual per-case results plus raw/progress/provenance/preferences before reader native edits and fresh runs repair both scopes. No injected State, host Sieve/server/files/network, personal progress, physical-device, novice or other-platform acceptance.'
+    if args.case=='smtp-routing':
+        report['case']='smtp-routing'
+        report['scope']='Two actual normal GUI processes on a new private profile: independent unsaved mail repairs, deferred original queues, selected servers, unfinished command drafts, real history and exact raw/progress/provenance/preferences survive cold load before native save/reload/retry and fresh grading. No host MTA/network/files, personal progress, novice or other-platform acceptance.'
+    if args.case=='guest-drivers':
+        report['case']='guest-drivers'
+        report['scope']=('Two normal GUI processes use one private profile. Native package and module actions leave independent assignment/example image repairs, unfinished command drafts, selections and actual history. Exact raw/progress/provenance/preferences survive cold load before native repairs and fresh grading. No host guest/kernel/package action, personal progress, novice or other-platform acceptance.')
+    if args.case=='virtual':
+        report['case']='virtual'
+        report['scope']=('Two actual normal GUI processes share one fresh private profile. Both represented '
+                         'workload and VRF lessons retain distinct unfinished assignment/example configurations '
+                         'and current selections, exact raw/portable/provenance/preferences through cold load. '
+                         'Reader repairs both lessons via native controls and fresh checks. Transient observations '
+                         'are not invented. No VM, container, real network, original progress, novice or other-OS acceptance.')
+    if args.case=='samba':
+        report['case']='samba'
+        report['scope']=('Two actual normal GUI processes share a new private profile. Native account, '
+                         'Unix permission, editor Save/Apply and check actions create repaired worlds and '
+                         'separate unfinished policy drafts. Exact raw/progress/preference/provenance '
+                         'observations survive cold load; reader repairs both drafts using native controls '
+                         'and grades the actual outcomes. Transient output is not fabricated. No host SMB, '
+                         'personal progress, independent novice, physical input or other-platform acceptance.')
+    if args.case == 'environment':
+        initial=json.loads(read_bytes(session/'reader-before-replay.json',JSON_CAP))
+        replay=json.loads(read_bytes(session/'reader-replayed.json',JSON_CAP))
+        report['evaluator_revision']=verify_environment_replay(initial, expected, replay)
+        report['case']='environment'
+        report['scope']=('Two real native processes use a fresh private profile. Actual parent/child runs, '
+                         'three independent unfinished drafts, favorite and appearance persist. Reader '
+                         'observes no current credit before actual replay, then repairs a second task '
+                         'through native editors. No injected State, host child or novice/platform acceptance.')
+    if args.case=='editor-handover':
+        initial=json.loads(read_bytes(session/'reader-before-replay.json',JSON_CAP))
+        replay=json.loads(read_bytes(session/'reader-replayed.json',JSON_CAP))
+        report['evaluator_revision']=verify_editor_handover_replay(initial,expected,replay)
+        report['case']='editor-handover'
+        report['scope']=('Two actual normal native processes on a fresh private profile. Real setup/editor '
+                         'widgets create completion and an independent unfinished script/Insert buffer. '
+                         'Cold load has no runtime credit before bounded replay; replay preserves every '
+                         'serialized field, then native editing resumes and repairs practice. Favorite '
+                         'and appearance are synthetic fixture metadata. No host editor/child, personal '
+                         'data, independent novice, physical keyboard or other-platform acceptance.')
+    if args.case=='user-mounts':
+        initial=json.loads(read_bytes(session/'reader-before-replay.json',JSON_CAP))
+        require(initial['activity_revision']==1 and initial['saved_record_verified'] is False
+                and initial['current_assignment_credit'] is False and initial['drafts_preserved'] is True,
+                'Mount cold load must retain unverified records and independent drafts')
+        replay=json.loads(read_bytes(session/'reader-replayed.json',JSON_CAP))
+        require(replay['observed']==expected and replay['record_verified'] is True
+                and replay['current_assignment_credit'] is True,
+                'Current mount credit requires actual bounded replay of preserved actions')
+        report['case']='user-mounts'
+        report['scope']=('Two real native processes use a fresh private profile. Real editor/caller/Mount '
+                         'actions, successful history and three independent unfinished drafts persist. '
+                         'Reader observes no credit before actual replay, then repairs the shared task '
+                         'through native editors and caller controls. No state injection or host mount; '
+                         'not novice, physical accessibility or other-platform acceptance.')
     publish_manifest(session, report)
     try:
         print(f'PASS native cold-process reopen: {session}', flush=True)

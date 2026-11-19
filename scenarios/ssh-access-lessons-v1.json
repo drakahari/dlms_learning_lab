@@ -1,0 +1,2910 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-ssh-server-trust",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "ssh-client-trust",
+      "topic": "SSH identity and administration",
+      "title": "Verify the SSH server before using an account",
+      "summary": "Separate a server host key from a user’s public key and repair only the stale trust entry.",
+      "objective": "Correct store.lab.test’s saved host key using the supplied verified server public key; a user’s public key does not identify the server. Preserve the archive.lab.test trust record. Confirm that alex’s admin-key is permitted and the different supplied client identity is refused.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "prerequisites": [],
+      "steps": [
+        "Understand the task, inspect the supplied public identities and virtual documents, repair the requested state, then Check access."
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "SshAccess",
+        "simulation": {
+          "id": "lpic1-ssh-server-trust",
+          "version": 1,
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "version": 1,
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/alex": {
+                    "owner": "alex",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/alex/.ssh": {
+                    "owner": "alex",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/alex/.ssh/authorized_keys": {
+                    "owner": "alex",
+                    "group": "ops",
+                    "mode": 420,
+                    "directory": false
+                  },
+                  "/home/alex/notes.txt": {
+                    "owner": "alex",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/alex/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea alex public record\n",
+                  "/home/alex/notes.txt": "Preserve this original account note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "alex": [
+                    "ops"
+                  ]
+                },
+                "user": "alex",
+                "home": "/home/alex",
+                "cwd": "/home/alex",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "known_hosts": "store.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM\narchive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu preserved host\n",
+              "saved_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers alex\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "active_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers alex\nAuthorizedKeysFile .ssh/authorized_keys\n"
+            },
+            "drafts": {
+              "known_hosts": "store.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM\narchive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu preserved host\n",
+              "config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers alex\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "files": [],
+              "metadata": [],
+              "selected": {
+                "kind": "KnownHosts"
+              }
+            },
+            "checked": false,
+            "notice": null
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/lee": {
+                    "owner": "lee",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/lee/.ssh": {
+                    "owner": "lee",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/lee/.ssh/authorized_keys": {
+                    "owner": "lee",
+                    "group": "ops",
+                    "mode": 420,
+                    "directory": false
+                  },
+                  "/home/lee/notes.txt": {
+                    "owner": "lee",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/lee/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM lee public record\n",
+                  "/home/lee/notes.txt": "Preserve this original account note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "lee": [
+                    "ops"
+                  ]
+                },
+                "user": "lee",
+                "home": "/home/lee",
+                "cwd": "/home/lee",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "known_hosts": "practice-trust.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea\npractice-archive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl preserved host\n",
+              "saved_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers lee\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "active_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers lee\nAuthorizedKeysFile .ssh/authorized_keys\n"
+            },
+            "drafts": {
+              "known_hosts": "practice-trust.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea\npractice-archive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl preserved host\n",
+              "config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers lee\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "files": [],
+              "metadata": [],
+              "selected": {
+                "kind": "KnownHosts"
+              }
+            },
+            "checked": false,
+            "notice": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "SshAccess",
+        "definition": {
+          "id": "lpic1-ssh-server-trust",
+          "objective": "Correct store.lab.test’s saved host key using the supplied verified server public key; a user’s public key does not identify the server. Preserve the archive.lab.test trust record. Confirm that alex’s admin-key is permitted and the different supplied client identity is refused.",
+          "initial": {
+            "scope": {
+              "host": "store.lab.test",
+              "host_key": {
+                "bytes": [
+                  252,
+                  81,
+                  205,
+                  142,
+                  98,
+                  24,
+                  161,
+                  163,
+                  141,
+                  164,
+                  126,
+                  208,
+                  2,
+                  48,
+                  240,
+                  88,
+                  8,
+                  22,
+                  237,
+                  19,
+                  186,
+                  51,
+                  3,
+                  172,
+                  93,
+                  235,
+                  145,
+                  21,
+                  72,
+                  144,
+                  128,
+                  37
+                ]
+              },
+              "identities": {
+                "admin-key": {
+                  "bytes": [
+                    215,
+                    90,
+                    152,
+                    1,
+                    130,
+                    177,
+                    10,
+                    183,
+                    213,
+                    75,
+                    254,
+                    211,
+                    201,
+                    100,
+                    7,
+                    58,
+                    14,
+                    225,
+                    114,
+                    243,
+                    218,
+                    166,
+                    35,
+                    37,
+                    175,
+                    2,
+                    26,
+                    104,
+                    247,
+                    7,
+                    81,
+                    26
+                  ]
+                },
+                "other-key": {
+                  "bytes": [
+                    61,
+                    64,
+                    23,
+                    195,
+                    232,
+                    67,
+                    137,
+                    90,
+                    146,
+                    183,
+                    10,
+                    167,
+                    77,
+                    27,
+                    126,
+                    188,
+                    156,
+                    152,
+                    44,
+                    207,
+                    46,
+                    196,
+                    150,
+                    140,
+                    192,
+                    205,
+                    85,
+                    241,
+                    42,
+                    244,
+                    102,
+                    12
+                  ]
+                }
+              },
+              "initial_tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/alex": {
+                    "owner": "alex",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/alex/.ssh": {
+                    "owner": "alex",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/alex/.ssh/authorized_keys": {
+                    "owner": "alex",
+                    "group": "ops",
+                    "mode": 420,
+                    "directory": false
+                  },
+                  "/home/alex/notes.txt": {
+                    "owner": "alex",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/alex/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea alex public record\n",
+                  "/home/alex/notes.txt": "Preserve this original account note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "alex": [
+                    "ops"
+                  ]
+                },
+                "user": "alex",
+                "home": "/home/alex",
+                "cwd": "/home/alex",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "editable_metadata": [],
+              "editable_text": []
+            },
+            "world": {
+              "version": 1,
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/alex": {
+                    "owner": "alex",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/alex/.ssh": {
+                    "owner": "alex",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/alex/.ssh/authorized_keys": {
+                    "owner": "alex",
+                    "group": "ops",
+                    "mode": 420,
+                    "directory": false
+                  },
+                  "/home/alex/notes.txt": {
+                    "owner": "alex",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/alex/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea alex public record\n",
+                  "/home/alex/notes.txt": "Preserve this original account note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "alex": [
+                    "ops"
+                  ]
+                },
+                "user": "alex",
+                "home": "/home/alex",
+                "cwd": "/home/alex",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "known_hosts": "store.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM\narchive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu preserved host\n",
+              "saved_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers alex\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "active_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers alex\nAuthorizedKeysFile .ssh/authorized_keys\n"
+            },
+            "documents": [
+              {
+                "kind": "KnownHosts"
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Access",
+                "label": "Administrator access",
+                "host": "store.lab.test",
+                "user": "alex",
+                "identity": "admin-key",
+                "expected": "Permitted"
+              },
+              {
+                "kind": "Access",
+                "label": "Different client identity",
+                "host": "store.lab.test",
+                "user": "alex",
+                "identity": "other-key",
+                "expected": "KeyDenies"
+              },
+              {
+                "kind": "PreserveTrust",
+                "host": "archive.lab.test"
+              }
+            ]
+          },
+          "example": {
+            "scope": {
+              "host": "practice-trust.lab.test",
+              "host_key": {
+                "bytes": [
+                  39,
+                  129,
+                  23,
+                  252,
+                  20,
+                  76,
+                  114,
+                  52,
+                  15,
+                  103,
+                  208,
+                  242,
+                  49,
+                  110,
+                  131,
+                  134,
+                  206,
+                  255,
+                  191,
+                  43,
+                  36,
+                  40,
+                  201,
+                  197,
+                  31,
+                  239,
+                  124,
+                  89,
+                  127,
+                  29,
+                  66,
+                  110
+                ]
+              },
+              "identities": {
+                "admin-key": {
+                  "bytes": [
+                    61,
+                    64,
+                    23,
+                    195,
+                    232,
+                    67,
+                    137,
+                    90,
+                    146,
+                    183,
+                    10,
+                    167,
+                    77,
+                    27,
+                    126,
+                    188,
+                    156,
+                    152,
+                    44,
+                    207,
+                    46,
+                    196,
+                    150,
+                    140,
+                    192,
+                    205,
+                    85,
+                    241,
+                    42,
+                    244,
+                    102,
+                    12
+                  ]
+                },
+                "other-key": {
+                  "bytes": [
+                    215,
+                    90,
+                    152,
+                    1,
+                    130,
+                    177,
+                    10,
+                    183,
+                    213,
+                    75,
+                    254,
+                    211,
+                    201,
+                    100,
+                    7,
+                    58,
+                    14,
+                    225,
+                    114,
+                    243,
+                    218,
+                    166,
+                    35,
+                    37,
+                    175,
+                    2,
+                    26,
+                    104,
+                    247,
+                    7,
+                    81,
+                    26
+                  ]
+                }
+              },
+              "initial_tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/lee": {
+                    "owner": "lee",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/lee/.ssh": {
+                    "owner": "lee",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/lee/.ssh/authorized_keys": {
+                    "owner": "lee",
+                    "group": "ops",
+                    "mode": 420,
+                    "directory": false
+                  },
+                  "/home/lee/notes.txt": {
+                    "owner": "lee",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/lee/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM lee public record\n",
+                  "/home/lee/notes.txt": "Preserve this original account note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "lee": [
+                    "ops"
+                  ]
+                },
+                "user": "lee",
+                "home": "/home/lee",
+                "cwd": "/home/lee",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "editable_metadata": [],
+              "editable_text": []
+            },
+            "world": {
+              "version": 1,
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/lee": {
+                    "owner": "lee",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/lee/.ssh": {
+                    "owner": "lee",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/lee/.ssh/authorized_keys": {
+                    "owner": "lee",
+                    "group": "ops",
+                    "mode": 420,
+                    "directory": false
+                  },
+                  "/home/lee/notes.txt": {
+                    "owner": "lee",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/lee/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM lee public record\n",
+                  "/home/lee/notes.txt": "Preserve this original account note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "lee": [
+                    "ops"
+                  ]
+                },
+                "user": "lee",
+                "home": "/home/lee",
+                "cwd": "/home/lee",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "known_hosts": "practice-trust.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea\npractice-archive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl preserved host\n",
+              "saved_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers lee\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "active_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers lee\nAuthorizedKeysFile .ssh/authorized_keys\n"
+            },
+            "documents": [
+              {
+                "kind": "KnownHosts"
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Access",
+                "label": "Administrator access",
+                "host": "practice-trust.lab.test",
+                "user": "lee",
+                "identity": "admin-key",
+                "expected": "Permitted"
+              },
+              {
+                "kind": "Access",
+                "label": "Different client identity",
+                "host": "practice-trust.lab.test",
+                "user": "lee",
+                "identity": "other-key",
+                "expected": "KeyDenies"
+              },
+              {
+                "kind": "PreserveTrust",
+                "host": "practice-archive.lab.test"
+              }
+            ]
+          },
+          "example_solution": [
+            {
+              "kind": "Text",
+              "document": {
+                "kind": "KnownHosts"
+              },
+              "text": "practice-trust.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu verified server record\npractice-archive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl preserved host\n"
+            },
+            {
+              "kind": "Save",
+              "document": {
+                "kind": "KnownHosts"
+              }
+            },
+            {
+              "kind": "Check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "ssh-lab {\"kind\":\"Text\",\"document\":{\"kind\":\"KnownHosts\"},\"text\":\"store.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl verified server record\\narchive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu preserved host\\n\"}",
+        "ssh-lab {\"kind\":\"Save\",\"document\":{\"kind\":\"KnownHosts\"}}",
+        "ssh-lab {\"kind\":\"Check\"}"
+      ],
+      "hints": [
+        "Separate the server’s verified host identity from the user identity offered by a supplied client.",
+        "Save the relevant virtual document or attributes. Changed draft text does not change the saved or active state.",
+        "Keep the other trusted host entry while correcting the target host record."
+      ],
+      "explanation": "The trusted host record identifies the supplied server; the separate authorized-key file controls which client identity can use its account. Keeping these roles separate restores the intended modeled access.",
+      "retry_guidance": "Read the failing stage, change the relevant document or attributes, save it, apply policy if changed, then Check access again.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man.openbsd.org/sshd",
+        "https://man.openbsd.org/sshd_config",
+        "https://man.openbsd.org/ssh_config",
+        "https://www.rfc-editor.org/info/rfc8709/",
+        "https://www.rfc-editor.org/rfc/rfc8032.html#section-7.1"
+      ],
+      "simplifications": "Supplied, reachable server and public client identities are exercise assumptions. No SSH process, private key, network, signature/encryption verification or real login is used. Plain Ed25519 public encodings, literal lower-case host/IPv4 trust, supported sshd_config directives and ordinary nonroot /home/USER key paths only. No agent, key generation, PAM/ACL/SELinux, Match/Include, hashed/wildcard hosts, forwarding, certificates or general SSH utility conformance. Unsupported behavior is not counted as a denied request."
+    },
+    {
+      "id": "lpic2-ssh-key-authorization",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "ssh-administration",
+      "topic": "SSH identity and administration",
+      "title": "Repair authorized keys and their access permissions",
+      "summary": "Diagnose a wrong public identity, ownership and writable key paths using supplied virtual files.",
+      "objective": "Allow morgan’s supplied admin-key and remove retired-key from /home/morgan/.ssh/authorized_keys. Repair the owner and ordinary permissions of that file and .ssh so StrictModes and directory traversal allow the intended access. Keep StrictModes, other account files and the supplied user/group inventory unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "prerequisites": [
+        "lpic1-ssh-server-trust"
+      ],
+      "steps": [
+        "Understand the task, inspect the supplied public identities and virtual documents, repair the requested state, then Check access."
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "SshAccess",
+        "simulation": {
+          "id": "lpic2-ssh-key-authorization",
+          "version": 1,
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "version": 1,
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/morgan": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/morgan/.ssh": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 509,
+                    "directory": true
+                  },
+                  "/home/morgan/.ssh/authorized_keys": {
+                    "owner": "noah",
+                    "group": "ops",
+                    "mode": 436,
+                    "directory": false
+                  },
+                  "/home/morgan/notes.txt": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/morgan/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM temporary onboarding record\n",
+                  "/home/morgan/notes.txt": "Preserve this original account note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "morgan": [
+                    "ops"
+                  ],
+                  "noah": [
+                    "guests"
+                  ]
+                },
+                "user": "morgan",
+                "home": "/home/morgan",
+                "cwd": "/home/morgan",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "known_hosts": "files.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl\narchive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu preserved host\n",
+              "saved_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers morgan\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "active_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers morgan\nAuthorizedKeysFile .ssh/authorized_keys\n"
+            },
+            "drafts": {
+              "known_hosts": "files.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl\narchive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu preserved host\n",
+              "config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers morgan\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "files": [
+                {
+                  "path": "/home/morgan/.ssh/authorized_keys",
+                  "text": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM temporary onboarding record\n"
+                }
+              ],
+              "metadata": [
+                {
+                  "path": "/home/morgan/.ssh",
+                  "owner": "morgan",
+                  "group": "ops",
+                  "mode": "775"
+                },
+                {
+                  "path": "/home/morgan/.ssh/authorized_keys",
+                  "owner": "noah",
+                  "group": "ops",
+                  "mode": "664"
+                }
+              ],
+              "selected": {
+                "kind": "KeyFile",
+                "path": "/home/morgan/.ssh/authorized_keys"
+              }
+            },
+            "checked": false,
+            "notice": null
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/dana": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/dana/.ssh": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 509,
+                    "directory": true
+                  },
+                  "/home/dana/.ssh/authorized_keys": {
+                    "owner": "noah",
+                    "group": "ops",
+                    "mode": 436,
+                    "directory": false
+                  },
+                  "/home/dana/notes.txt": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/dana/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea temporary onboarding record\n",
+                  "/home/dana/notes.txt": "Preserve this original account note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "dana": [
+                    "ops"
+                  ],
+                  "noah": [
+                    "guests"
+                  ]
+                },
+                "user": "dana",
+                "home": "/home/dana",
+                "cwd": "/home/dana",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "known_hosts": "practice-keys.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu\npractice-archive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl preserved host\n",
+              "saved_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers dana\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "active_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers dana\nAuthorizedKeysFile .ssh/authorized_keys\n"
+            },
+            "drafts": {
+              "known_hosts": "practice-keys.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu\npractice-archive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl preserved host\n",
+              "config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers dana\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "files": [
+                {
+                  "path": "/home/dana/.ssh/authorized_keys",
+                  "text": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea temporary onboarding record\n"
+                }
+              ],
+              "metadata": [
+                {
+                  "path": "/home/dana/.ssh",
+                  "owner": "dana",
+                  "group": "ops",
+                  "mode": "775"
+                },
+                {
+                  "path": "/home/dana/.ssh/authorized_keys",
+                  "owner": "noah",
+                  "group": "ops",
+                  "mode": "664"
+                }
+              ],
+              "selected": {
+                "kind": "KeyFile",
+                "path": "/home/dana/.ssh/authorized_keys"
+              }
+            },
+            "checked": false,
+            "notice": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "SshAccess",
+        "definition": {
+          "id": "lpic2-ssh-key-authorization",
+          "objective": "Allow morgan’s supplied admin-key and remove retired-key from /home/morgan/.ssh/authorized_keys. Repair the owner and ordinary permissions of that file and .ssh so StrictModes and directory traversal allow the intended access. Keep StrictModes, other account files and the supplied user/group inventory unchanged.",
+          "initial": {
+            "scope": {
+              "host": "files.lab.test",
+              "host_key": {
+                "bytes": [
+                  252,
+                  81,
+                  205,
+                  142,
+                  98,
+                  24,
+                  161,
+                  163,
+                  141,
+                  164,
+                  126,
+                  208,
+                  2,
+                  48,
+                  240,
+                  88,
+                  8,
+                  22,
+                  237,
+                  19,
+                  186,
+                  51,
+                  3,
+                  172,
+                  93,
+                  235,
+                  145,
+                  21,
+                  72,
+                  144,
+                  128,
+                  37
+                ]
+              },
+              "identities": {
+                "admin-key": {
+                  "bytes": [
+                    215,
+                    90,
+                    152,
+                    1,
+                    130,
+                    177,
+                    10,
+                    183,
+                    213,
+                    75,
+                    254,
+                    211,
+                    201,
+                    100,
+                    7,
+                    58,
+                    14,
+                    225,
+                    114,
+                    243,
+                    218,
+                    166,
+                    35,
+                    37,
+                    175,
+                    2,
+                    26,
+                    104,
+                    247,
+                    7,
+                    81,
+                    26
+                  ]
+                },
+                "retired-key": {
+                  "bytes": [
+                    61,
+                    64,
+                    23,
+                    195,
+                    232,
+                    67,
+                    137,
+                    90,
+                    146,
+                    183,
+                    10,
+                    167,
+                    77,
+                    27,
+                    126,
+                    188,
+                    156,
+                    152,
+                    44,
+                    207,
+                    46,
+                    196,
+                    150,
+                    140,
+                    192,
+                    205,
+                    85,
+                    241,
+                    42,
+                    244,
+                    102,
+                    12
+                  ]
+                }
+              },
+              "initial_tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/morgan": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/morgan/.ssh": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 509,
+                    "directory": true
+                  },
+                  "/home/morgan/.ssh/authorized_keys": {
+                    "owner": "noah",
+                    "group": "ops",
+                    "mode": 436,
+                    "directory": false
+                  },
+                  "/home/morgan/notes.txt": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/morgan/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM temporary onboarding record\n",
+                  "/home/morgan/notes.txt": "Preserve this original account note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "morgan": [
+                    "ops"
+                  ],
+                  "noah": [
+                    "guests"
+                  ]
+                },
+                "user": "morgan",
+                "home": "/home/morgan",
+                "cwd": "/home/morgan",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "editable_metadata": [
+                "/home/morgan/.ssh",
+                "/home/morgan/.ssh/authorized_keys"
+              ],
+              "editable_text": [
+                "/home/morgan/.ssh/authorized_keys"
+              ]
+            },
+            "world": {
+              "version": 1,
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/morgan": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/morgan/.ssh": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 509,
+                    "directory": true
+                  },
+                  "/home/morgan/.ssh/authorized_keys": {
+                    "owner": "noah",
+                    "group": "ops",
+                    "mode": 436,
+                    "directory": false
+                  },
+                  "/home/morgan/notes.txt": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/morgan/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM temporary onboarding record\n",
+                  "/home/morgan/notes.txt": "Preserve this original account note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "morgan": [
+                    "ops"
+                  ],
+                  "noah": [
+                    "guests"
+                  ]
+                },
+                "user": "morgan",
+                "home": "/home/morgan",
+                "cwd": "/home/morgan",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "known_hosts": "files.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl\narchive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu preserved host\n",
+              "saved_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers morgan\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "active_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers morgan\nAuthorizedKeysFile .ssh/authorized_keys\n"
+            },
+            "documents": [
+              {
+                "kind": "KeyFile",
+                "path": "/home/morgan/.ssh/authorized_keys"
+              },
+              {
+                "kind": "Attributes",
+                "path": "/home/morgan/.ssh"
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Access",
+                "label": "Administrator access",
+                "host": "files.lab.test",
+                "user": "morgan",
+                "identity": "admin-key",
+                "expected": "Permitted"
+              },
+              {
+                "kind": "Access",
+                "label": "Retired client identity",
+                "host": "files.lab.test",
+                "user": "morgan",
+                "identity": "retired-key",
+                "expected": "KeyDenies"
+              },
+              {
+                "kind": "KeySet",
+                "path": "/home/morgan/.ssh/authorized_keys",
+                "required": [
+                  "admin-key"
+                ],
+                "forbidden": [
+                  "retired-key"
+                ]
+              },
+              {
+                "kind": "Policy",
+                "rule": "StrictModes"
+              }
+            ]
+          },
+          "example": {
+            "scope": {
+              "host": "practice-keys.lab.test",
+              "host_key": {
+                "bytes": [
+                  39,
+                  129,
+                  23,
+                  252,
+                  20,
+                  76,
+                  114,
+                  52,
+                  15,
+                  103,
+                  208,
+                  242,
+                  49,
+                  110,
+                  131,
+                  134,
+                  206,
+                  255,
+                  191,
+                  43,
+                  36,
+                  40,
+                  201,
+                  197,
+                  31,
+                  239,
+                  124,
+                  89,
+                  127,
+                  29,
+                  66,
+                  110
+                ]
+              },
+              "identities": {
+                "admin-key": {
+                  "bytes": [
+                    61,
+                    64,
+                    23,
+                    195,
+                    232,
+                    67,
+                    137,
+                    90,
+                    146,
+                    183,
+                    10,
+                    167,
+                    77,
+                    27,
+                    126,
+                    188,
+                    156,
+                    152,
+                    44,
+                    207,
+                    46,
+                    196,
+                    150,
+                    140,
+                    192,
+                    205,
+                    85,
+                    241,
+                    42,
+                    244,
+                    102,
+                    12
+                  ]
+                },
+                "retired-key": {
+                  "bytes": [
+                    215,
+                    90,
+                    152,
+                    1,
+                    130,
+                    177,
+                    10,
+                    183,
+                    213,
+                    75,
+                    254,
+                    211,
+                    201,
+                    100,
+                    7,
+                    58,
+                    14,
+                    225,
+                    114,
+                    243,
+                    218,
+                    166,
+                    35,
+                    37,
+                    175,
+                    2,
+                    26,
+                    104,
+                    247,
+                    7,
+                    81,
+                    26
+                  ]
+                }
+              },
+              "initial_tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/dana": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/dana/.ssh": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 509,
+                    "directory": true
+                  },
+                  "/home/dana/.ssh/authorized_keys": {
+                    "owner": "noah",
+                    "group": "ops",
+                    "mode": 436,
+                    "directory": false
+                  },
+                  "/home/dana/notes.txt": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/dana/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea temporary onboarding record\n",
+                  "/home/dana/notes.txt": "Preserve this original account note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "dana": [
+                    "ops"
+                  ],
+                  "noah": [
+                    "guests"
+                  ]
+                },
+                "user": "dana",
+                "home": "/home/dana",
+                "cwd": "/home/dana",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "editable_metadata": [
+                "/home/dana/.ssh",
+                "/home/dana/.ssh/authorized_keys"
+              ],
+              "editable_text": [
+                "/home/dana/.ssh/authorized_keys"
+              ]
+            },
+            "world": {
+              "version": 1,
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/dana": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/dana/.ssh": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 509,
+                    "directory": true
+                  },
+                  "/home/dana/.ssh/authorized_keys": {
+                    "owner": "noah",
+                    "group": "ops",
+                    "mode": 436,
+                    "directory": false
+                  },
+                  "/home/dana/notes.txt": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/dana/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea temporary onboarding record\n",
+                  "/home/dana/notes.txt": "Preserve this original account note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "dana": [
+                    "ops"
+                  ],
+                  "noah": [
+                    "guests"
+                  ]
+                },
+                "user": "dana",
+                "home": "/home/dana",
+                "cwd": "/home/dana",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "known_hosts": "practice-keys.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu\npractice-archive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl preserved host\n",
+              "saved_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers dana\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "active_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers dana\nAuthorizedKeysFile .ssh/authorized_keys\n"
+            },
+            "documents": [
+              {
+                "kind": "KeyFile",
+                "path": "/home/dana/.ssh/authorized_keys"
+              },
+              {
+                "kind": "Attributes",
+                "path": "/home/dana/.ssh"
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Access",
+                "label": "Administrator access",
+                "host": "practice-keys.lab.test",
+                "user": "dana",
+                "identity": "admin-key",
+                "expected": "Permitted"
+              },
+              {
+                "kind": "Access",
+                "label": "Retired client identity",
+                "host": "practice-keys.lab.test",
+                "user": "dana",
+                "identity": "retired-key",
+                "expected": "KeyDenies"
+              },
+              {
+                "kind": "KeySet",
+                "path": "/home/dana/.ssh/authorized_keys",
+                "required": [
+                  "admin-key"
+                ],
+                "forbidden": [
+                  "retired-key"
+                ]
+              },
+              {
+                "kind": "Policy",
+                "rule": "StrictModes"
+              }
+            ]
+          },
+          "example_solution": [
+            {
+              "kind": "Metadata",
+              "path": "/home/dana/.ssh",
+              "owner": "dana",
+              "group": "ops",
+              "mode": "750"
+            },
+            {
+              "kind": "Save",
+              "document": {
+                "kind": "Attributes",
+                "path": "/home/dana/.ssh"
+              }
+            },
+            {
+              "kind": "Text",
+              "document": {
+                "kind": "KeyFile",
+                "path": "/home/dana/.ssh/authorized_keys"
+              },
+              "text": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM administrator public record\n"
+            },
+            {
+              "kind": "Metadata",
+              "path": "/home/dana/.ssh/authorized_keys",
+              "owner": "dana",
+              "group": "ops",
+              "mode": "640"
+            },
+            {
+              "kind": "Save",
+              "document": {
+                "kind": "KeyFile",
+                "path": "/home/dana/.ssh/authorized_keys"
+              }
+            },
+            {
+              "kind": "Check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "ssh-lab {\"kind\":\"Metadata\",\"path\":\"/home/morgan/.ssh\",\"owner\":\"morgan\",\"group\":\"ops\",\"mode\":\"750\"}",
+        "ssh-lab {\"kind\":\"Save\",\"document\":{\"kind\":\"Attributes\",\"path\":\"/home/morgan/.ssh\"}}",
+        "ssh-lab {\"kind\":\"Text\",\"document\":{\"kind\":\"KeyFile\",\"path\":\"/home/morgan/.ssh/authorized_keys\"},\"text\":\"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea administrator public record\\n\"}",
+        "ssh-lab {\"kind\":\"Metadata\",\"path\":\"/home/morgan/.ssh/authorized_keys\",\"owner\":\"morgan\",\"group\":\"ops\",\"mode\":\"640\"}",
+        "ssh-lab {\"kind\":\"Save\",\"document\":{\"kind\":\"KeyFile\",\"path\":\"/home/morgan/.ssh/authorized_keys\"}}",
+        "ssh-lab {\"kind\":\"Check\"}"
+      ],
+      "hints": [
+        "Separate the server’s verified host identity from the user identity offered by a supplied client.",
+        "Save the relevant virtual document or attributes. Changed draft text does not change the saved or active state.",
+        "StrictModes rejects unsafe ownership or write access, but read-only group access can be valid."
+      ],
+      "explanation": "A readable file can still be rejected for unsafe ownership or write permissions. With safe paths and the intended public key present, the administrator passes while the retired identity does not.",
+      "retry_guidance": "Read the failing stage, change the relevant document or attributes, save it, apply policy if changed, then Check access again.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man.openbsd.org/sshd",
+        "https://man.openbsd.org/sshd_config",
+        "https://man.openbsd.org/ssh_config",
+        "https://www.rfc-editor.org/info/rfc8709/",
+        "https://www.rfc-editor.org/rfc/rfc8032.html#section-7.1"
+      ],
+      "simplifications": "Supplied, reachable server and public client identities are exercise assumptions. No SSH process, private key, network, signature/encryption verification or real login is used. Plain Ed25519 public encodings, literal lower-case host/IPv4 trust, supported sshd_config directives and ordinary nonroot /home/USER key paths only. No agent, key generation, PAM/ACL/SELinux, Match/Include, hashed/wildcard hosts, forwarding, certificates or general SSH utility conformance. Unsupported behavior is not counted as a denied request."
+    },
+    {
+      "id": "lpic2-ssh-policy-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "ssh-administration",
+      "topic": "SSH identity and administration",
+      "title": "Recover key-based administration without losing rescue access",
+      "summary": "Combine trusted server identity, key retirement and active access policy while protecting recovery access.",
+      "objective": "Restore trusted key-based administration for morgan and rescue on control.lab.test using the supplied server identity. Remove morgan’s retired key while preserving rescue’s key, account files and archive.lab.test trust. Apply a saved policy that offers only public-key authentication with StrictModes enabled, permits both required administrators and refuses guest and root at the policy stage. Verify the supplied accepted and refused requests; saved-only edits do not change the active server policy.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "prerequisites": [
+        "lpic2-ssh-key-authorization"
+      ],
+      "steps": [
+        "Understand the task, inspect the supplied public identities and virtual documents, repair the requested state, then Check access."
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "SshAccess",
+        "simulation": {
+          "id": "lpic2-ssh-policy-handover",
+          "version": 1,
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "version": 1,
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/morgan": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/morgan/.ssh": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/morgan/.ssh/authorized_keys": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 420,
+                    "directory": false
+                  },
+                  "/home/morgan/notes.txt": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  },
+                  "/home/rescue": {
+                    "owner": "rescue",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/rescue/.ssh": {
+                    "owner": "rescue",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/rescue/.ssh/authorized_keys": {
+                    "owner": "rescue",
+                    "group": "ops",
+                    "mode": 384,
+                    "directory": false
+                  },
+                  "/home/guest": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/guest/.ssh": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/guest/.ssh/authorized_keys": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 384,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/morgan/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea administrator\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM temporary\n",
+                  "/home/morgan/notes.txt": "Preserve this original account note.\n",
+                  "/home/rescue/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu rescue public record\n",
+                  "/home/guest/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea guest public record\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "morgan": [
+                    "ops"
+                  ],
+                  "rescue": [
+                    "ops"
+                  ],
+                  "guest": [
+                    "ops"
+                  ]
+                },
+                "user": "morgan",
+                "home": "/home/morgan",
+                "cwd": "/home/morgan",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "known_hosts": "control.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM\narchive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu preserved host\n",
+              "saved_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers morgan rescue\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "active_config": "PubkeyAuthentication yes\nStrictModes no\nPermitRootLogin yes\nPasswordAuthentication yes\nKbdInteractiveAuthentication yes\nAuthorizedKeysFile .ssh/authorized_keys\n"
+            },
+            "drafts": {
+              "known_hosts": "control.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM\narchive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu preserved host\n",
+              "config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers morgan rescue\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "files": [
+                {
+                  "path": "/home/morgan/.ssh/authorized_keys",
+                  "text": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea administrator\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM temporary\n"
+                }
+              ],
+              "metadata": [],
+              "selected": {
+                "kind": "KnownHosts"
+              }
+            },
+            "checked": false,
+            "notice": null
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/dana": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/dana/.ssh": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/dana/.ssh/authorized_keys": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 420,
+                    "directory": false
+                  },
+                  "/home/dana/notes.txt": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  },
+                  "/home/support": {
+                    "owner": "support",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/support/.ssh": {
+                    "owner": "support",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/support/.ssh/authorized_keys": {
+                    "owner": "support",
+                    "group": "ops",
+                    "mode": 384,
+                    "directory": false
+                  },
+                  "/home/guest": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/guest/.ssh": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/guest/.ssh/authorized_keys": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 384,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/dana/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM administrator\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea temporary\n",
+                  "/home/dana/notes.txt": "Preserve this original account note.\n",
+                  "/home/support/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl support public record\n",
+                  "/home/guest/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM guest public record\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "dana": [
+                    "ops"
+                  ],
+                  "support": [
+                    "ops"
+                  ],
+                  "guest": [
+                    "ops"
+                  ]
+                },
+                "user": "dana",
+                "home": "/home/dana",
+                "cwd": "/home/dana",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "known_hosts": "practice-handover.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea\npractice-archive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl preserved host\n",
+              "saved_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers dana support\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "active_config": "PubkeyAuthentication yes\nStrictModes no\nPermitRootLogin yes\nPasswordAuthentication yes\nKbdInteractiveAuthentication yes\nAuthorizedKeysFile .ssh/authorized_keys\n"
+            },
+            "drafts": {
+              "known_hosts": "practice-handover.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea\npractice-archive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl preserved host\n",
+              "config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers dana support\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "files": [
+                {
+                  "path": "/home/dana/.ssh/authorized_keys",
+                  "text": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM administrator\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea temporary\n"
+                }
+              ],
+              "metadata": [],
+              "selected": {
+                "kind": "KnownHosts"
+              }
+            },
+            "checked": false,
+            "notice": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "SshAccess",
+        "definition": {
+          "id": "lpic2-ssh-policy-handover",
+          "objective": "Restore trusted key-based administration for morgan and rescue on control.lab.test using the supplied server identity. Remove morgan’s retired key while preserving rescue’s key, account files and archive.lab.test trust. Apply a saved policy that offers only public-key authentication with StrictModes enabled, permits both required administrators and refuses guest and root at the policy stage. Verify the supplied accepted and refused requests; saved-only edits do not change the active server policy.",
+          "initial": {
+            "scope": {
+              "host": "control.lab.test",
+              "host_key": {
+                "bytes": [
+                  252,
+                  81,
+                  205,
+                  142,
+                  98,
+                  24,
+                  161,
+                  163,
+                  141,
+                  164,
+                  126,
+                  208,
+                  2,
+                  48,
+                  240,
+                  88,
+                  8,
+                  22,
+                  237,
+                  19,
+                  186,
+                  51,
+                  3,
+                  172,
+                  93,
+                  235,
+                  145,
+                  21,
+                  72,
+                  144,
+                  128,
+                  37
+                ]
+              },
+              "identities": {
+                "admin-key": {
+                  "bytes": [
+                    215,
+                    90,
+                    152,
+                    1,
+                    130,
+                    177,
+                    10,
+                    183,
+                    213,
+                    75,
+                    254,
+                    211,
+                    201,
+                    100,
+                    7,
+                    58,
+                    14,
+                    225,
+                    114,
+                    243,
+                    218,
+                    166,
+                    35,
+                    37,
+                    175,
+                    2,
+                    26,
+                    104,
+                    247,
+                    7,
+                    81,
+                    26
+                  ]
+                },
+                "retired-key": {
+                  "bytes": [
+                    61,
+                    64,
+                    23,
+                    195,
+                    232,
+                    67,
+                    137,
+                    90,
+                    146,
+                    183,
+                    10,
+                    167,
+                    77,
+                    27,
+                    126,
+                    188,
+                    156,
+                    152,
+                    44,
+                    207,
+                    46,
+                    196,
+                    150,
+                    140,
+                    192,
+                    205,
+                    85,
+                    241,
+                    42,
+                    244,
+                    102,
+                    12
+                  ]
+                },
+                "rescue-key": {
+                  "bytes": [
+                    39,
+                    129,
+                    23,
+                    252,
+                    20,
+                    76,
+                    114,
+                    52,
+                    15,
+                    103,
+                    208,
+                    242,
+                    49,
+                    110,
+                    131,
+                    134,
+                    206,
+                    255,
+                    191,
+                    43,
+                    36,
+                    40,
+                    201,
+                    197,
+                    31,
+                    239,
+                    124,
+                    89,
+                    127,
+                    29,
+                    66,
+                    110
+                  ]
+                }
+              },
+              "initial_tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/morgan": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/morgan/.ssh": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/morgan/.ssh/authorized_keys": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 420,
+                    "directory": false
+                  },
+                  "/home/morgan/notes.txt": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  },
+                  "/home/rescue": {
+                    "owner": "rescue",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/rescue/.ssh": {
+                    "owner": "rescue",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/rescue/.ssh/authorized_keys": {
+                    "owner": "rescue",
+                    "group": "ops",
+                    "mode": 384,
+                    "directory": false
+                  },
+                  "/home/guest": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/guest/.ssh": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/guest/.ssh/authorized_keys": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 384,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/morgan/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea administrator\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM temporary\n",
+                  "/home/morgan/notes.txt": "Preserve this original account note.\n",
+                  "/home/rescue/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu rescue public record\n",
+                  "/home/guest/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea guest public record\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "morgan": [
+                    "ops"
+                  ],
+                  "rescue": [
+                    "ops"
+                  ],
+                  "guest": [
+                    "ops"
+                  ]
+                },
+                "user": "morgan",
+                "home": "/home/morgan",
+                "cwd": "/home/morgan",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "editable_metadata": [],
+              "editable_text": [
+                "/home/morgan/.ssh/authorized_keys"
+              ]
+            },
+            "world": {
+              "version": 1,
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/morgan": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/morgan/.ssh": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/morgan/.ssh/authorized_keys": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 420,
+                    "directory": false
+                  },
+                  "/home/morgan/notes.txt": {
+                    "owner": "morgan",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  },
+                  "/home/rescue": {
+                    "owner": "rescue",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/rescue/.ssh": {
+                    "owner": "rescue",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/rescue/.ssh/authorized_keys": {
+                    "owner": "rescue",
+                    "group": "ops",
+                    "mode": 384,
+                    "directory": false
+                  },
+                  "/home/guest": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/guest/.ssh": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/guest/.ssh/authorized_keys": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 384,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/morgan/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea administrator\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM temporary\n",
+                  "/home/morgan/notes.txt": "Preserve this original account note.\n",
+                  "/home/rescue/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu rescue public record\n",
+                  "/home/guest/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea guest public record\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "morgan": [
+                    "ops"
+                  ],
+                  "rescue": [
+                    "ops"
+                  ],
+                  "guest": [
+                    "ops"
+                  ]
+                },
+                "user": "morgan",
+                "home": "/home/morgan",
+                "cwd": "/home/morgan",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "known_hosts": "control.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM\narchive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu preserved host\n",
+              "saved_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers morgan rescue\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "active_config": "PubkeyAuthentication yes\nStrictModes no\nPermitRootLogin yes\nPasswordAuthentication yes\nKbdInteractiveAuthentication yes\nAuthorizedKeysFile .ssh/authorized_keys\n"
+            },
+            "documents": [
+              {
+                "kind": "KnownHosts"
+              },
+              {
+                "kind": "ServerConfig"
+              },
+              {
+                "kind": "KeyFile",
+                "path": "/home/morgan/.ssh/authorized_keys"
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Access",
+                "label": "Administrator access",
+                "host": "control.lab.test",
+                "user": "morgan",
+                "identity": "admin-key",
+                "expected": "Permitted"
+              },
+              {
+                "kind": "Access",
+                "label": "Retired client identity",
+                "host": "control.lab.test",
+                "user": "morgan",
+                "identity": "retired-key",
+                "expected": "KeyDenies"
+              },
+              {
+                "kind": "KeySet",
+                "path": "/home/morgan/.ssh/authorized_keys",
+                "required": [
+                  "admin-key"
+                ],
+                "forbidden": [
+                  "retired-key"
+                ]
+              },
+              {
+                "kind": "Policy",
+                "rule": "StrictModes"
+              },
+              {
+                "kind": "PreserveTrust",
+                "host": "archive.lab.test"
+              },
+              {
+                "kind": "Access",
+                "label": "Rescue administrator access",
+                "host": "control.lab.test",
+                "user": "rescue",
+                "identity": "rescue-key",
+                "expected": "Permitted"
+              },
+              {
+                "kind": "Access",
+                "label": "Guest policy restriction",
+                "host": "control.lab.test",
+                "user": "guest",
+                "identity": "admin-key",
+                "expected": "PolicyDenies"
+              },
+              {
+                "kind": "Access",
+                "label": "Root policy restriction",
+                "host": "control.lab.test",
+                "user": "root",
+                "identity": "admin-key",
+                "expected": "PolicyDenies"
+              },
+              {
+                "kind": "Published"
+              },
+              {
+                "kind": "Policy",
+                "rule": "OnlyPublicKey"
+              }
+            ]
+          },
+          "example": {
+            "scope": {
+              "host": "practice-handover.lab.test",
+              "host_key": {
+                "bytes": [
+                  39,
+                  129,
+                  23,
+                  252,
+                  20,
+                  76,
+                  114,
+                  52,
+                  15,
+                  103,
+                  208,
+                  242,
+                  49,
+                  110,
+                  131,
+                  134,
+                  206,
+                  255,
+                  191,
+                  43,
+                  36,
+                  40,
+                  201,
+                  197,
+                  31,
+                  239,
+                  124,
+                  89,
+                  127,
+                  29,
+                  66,
+                  110
+                ]
+              },
+              "identities": {
+                "admin-key": {
+                  "bytes": [
+                    61,
+                    64,
+                    23,
+                    195,
+                    232,
+                    67,
+                    137,
+                    90,
+                    146,
+                    183,
+                    10,
+                    167,
+                    77,
+                    27,
+                    126,
+                    188,
+                    156,
+                    152,
+                    44,
+                    207,
+                    46,
+                    196,
+                    150,
+                    140,
+                    192,
+                    205,
+                    85,
+                    241,
+                    42,
+                    244,
+                    102,
+                    12
+                  ]
+                },
+                "retired-key": {
+                  "bytes": [
+                    215,
+                    90,
+                    152,
+                    1,
+                    130,
+                    177,
+                    10,
+                    183,
+                    213,
+                    75,
+                    254,
+                    211,
+                    201,
+                    100,
+                    7,
+                    58,
+                    14,
+                    225,
+                    114,
+                    243,
+                    218,
+                    166,
+                    35,
+                    37,
+                    175,
+                    2,
+                    26,
+                    104,
+                    247,
+                    7,
+                    81,
+                    26
+                  ]
+                },
+                "rescue-key": {
+                  "bytes": [
+                    252,
+                    81,
+                    205,
+                    142,
+                    98,
+                    24,
+                    161,
+                    163,
+                    141,
+                    164,
+                    126,
+                    208,
+                    2,
+                    48,
+                    240,
+                    88,
+                    8,
+                    22,
+                    237,
+                    19,
+                    186,
+                    51,
+                    3,
+                    172,
+                    93,
+                    235,
+                    145,
+                    21,
+                    72,
+                    144,
+                    128,
+                    37
+                  ]
+                }
+              },
+              "initial_tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/dana": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/dana/.ssh": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/dana/.ssh/authorized_keys": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 420,
+                    "directory": false
+                  },
+                  "/home/dana/notes.txt": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  },
+                  "/home/support": {
+                    "owner": "support",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/support/.ssh": {
+                    "owner": "support",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/support/.ssh/authorized_keys": {
+                    "owner": "support",
+                    "group": "ops",
+                    "mode": 384,
+                    "directory": false
+                  },
+                  "/home/guest": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/guest/.ssh": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/guest/.ssh/authorized_keys": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 384,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/dana/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM administrator\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea temporary\n",
+                  "/home/dana/notes.txt": "Preserve this original account note.\n",
+                  "/home/support/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl support public record\n",
+                  "/home/guest/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM guest public record\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "dana": [
+                    "ops"
+                  ],
+                  "support": [
+                    "ops"
+                  ],
+                  "guest": [
+                    "ops"
+                  ]
+                },
+                "user": "dana",
+                "home": "/home/dana",
+                "cwd": "/home/dana",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "editable_metadata": [],
+              "editable_text": [
+                "/home/dana/.ssh/authorized_keys"
+              ]
+            },
+            "world": {
+              "version": 1,
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home": {
+                    "owner": "root",
+                    "group": "root",
+                    "mode": 493,
+                    "directory": true
+                  },
+                  "/home/dana": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/dana/.ssh": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/dana/.ssh/authorized_keys": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 420,
+                    "directory": false
+                  },
+                  "/home/dana/notes.txt": {
+                    "owner": "dana",
+                    "group": "ops",
+                    "mode": 416,
+                    "directory": false
+                  },
+                  "/home/support": {
+                    "owner": "support",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/support/.ssh": {
+                    "owner": "support",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/support/.ssh/authorized_keys": {
+                    "owner": "support",
+                    "group": "ops",
+                    "mode": 384,
+                    "directory": false
+                  },
+                  "/home/guest": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/guest/.ssh": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 488,
+                    "directory": true
+                  },
+                  "/home/guest/.ssh/authorized_keys": {
+                    "owner": "guest",
+                    "group": "ops",
+                    "mode": 384,
+                    "directory": false
+                  }
+                },
+                "files": {
+                  "/home/dana/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM administrator\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea temporary\n",
+                  "/home/dana/notes.txt": "Preserve this original account note.\n",
+                  "/home/support/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl support public record\n",
+                  "/home/guest/.ssh/authorized_keys": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM guest public record\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "dana": [
+                    "ops"
+                  ],
+                  "support": [
+                    "ops"
+                  ],
+                  "guest": [
+                    "ops"
+                  ]
+                },
+                "user": "dana",
+                "home": "/home/dana",
+                "cwd": "/home/dana",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "known_hosts": "practice-handover.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea\npractice-archive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl preserved host\n",
+              "saved_config": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers dana support\nAuthorizedKeysFile .ssh/authorized_keys\n",
+              "active_config": "PubkeyAuthentication yes\nStrictModes no\nPermitRootLogin yes\nPasswordAuthentication yes\nKbdInteractiveAuthentication yes\nAuthorizedKeysFile .ssh/authorized_keys\n"
+            },
+            "documents": [
+              {
+                "kind": "KnownHosts"
+              },
+              {
+                "kind": "ServerConfig"
+              },
+              {
+                "kind": "KeyFile",
+                "path": "/home/dana/.ssh/authorized_keys"
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Access",
+                "label": "Administrator access",
+                "host": "practice-handover.lab.test",
+                "user": "dana",
+                "identity": "admin-key",
+                "expected": "Permitted"
+              },
+              {
+                "kind": "Access",
+                "label": "Retired client identity",
+                "host": "practice-handover.lab.test",
+                "user": "dana",
+                "identity": "retired-key",
+                "expected": "KeyDenies"
+              },
+              {
+                "kind": "KeySet",
+                "path": "/home/dana/.ssh/authorized_keys",
+                "required": [
+                  "admin-key"
+                ],
+                "forbidden": [
+                  "retired-key"
+                ]
+              },
+              {
+                "kind": "Policy",
+                "rule": "StrictModes"
+              },
+              {
+                "kind": "PreserveTrust",
+                "host": "practice-archive.lab.test"
+              },
+              {
+                "kind": "Access",
+                "label": "Rescue administrator access",
+                "host": "practice-handover.lab.test",
+                "user": "support",
+                "identity": "rescue-key",
+                "expected": "Permitted"
+              },
+              {
+                "kind": "Access",
+                "label": "Guest policy restriction",
+                "host": "practice-handover.lab.test",
+                "user": "guest",
+                "identity": "admin-key",
+                "expected": "PolicyDenies"
+              },
+              {
+                "kind": "Access",
+                "label": "Root policy restriction",
+                "host": "practice-handover.lab.test",
+                "user": "root",
+                "identity": "admin-key",
+                "expected": "PolicyDenies"
+              },
+              {
+                "kind": "Published"
+              },
+              {
+                "kind": "Policy",
+                "rule": "OnlyPublicKey"
+              }
+            ]
+          },
+          "example_solution": [
+            {
+              "kind": "Text",
+              "document": {
+                "kind": "KnownHosts"
+              },
+              "text": "practice-handover.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu verified server record\npractice-archive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl preserved host\n"
+            },
+            {
+              "kind": "Save",
+              "document": {
+                "kind": "KnownHosts"
+              }
+            },
+            {
+              "kind": "Text",
+              "document": {
+                "kind": "KeyFile",
+                "path": "/home/dana/.ssh/authorized_keys"
+              },
+              "text": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1AF8PoQ4lakrcKp00bfrycmCzPLsSWjMDNVfEq9GYM administrator public record\n"
+            },
+            {
+              "kind": "Save",
+              "document": {
+                "kind": "KeyFile",
+                "path": "/home/dana/.ssh/authorized_keys"
+              }
+            },
+            {
+              "kind": "Text",
+              "document": {
+                "kind": "ServerConfig"
+              },
+              "text": "PubkeyAuthentication yes\nStrictModes yes\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nAllowUsers dana support\nAuthorizedKeysFile .ssh/authorized_keys\n"
+            },
+            {
+              "kind": "Save",
+              "document": {
+                "kind": "ServerConfig"
+              }
+            },
+            {
+              "kind": "ApplyPolicy"
+            },
+            {
+              "kind": "Check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "ssh-lab {\"kind\":\"Text\",\"document\":{\"kind\":\"KnownHosts\"},\"text\":\"control.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxRzY5iGKGjjaR+0AIw8FgIFu0TujMDrF3rkRVIkIAl verified server record\\narchive.lab.test ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICeBF/wUTHI0D2fQ8jFug4bO/78rJCjJxR/vfFl/HUJu preserved host\\n\"}",
+        "ssh-lab {\"kind\":\"Save\",\"document\":{\"kind\":\"KnownHosts\"}}",
+        "ssh-lab {\"kind\":\"Text\",\"document\":{\"kind\":\"KeyFile\",\"path\":\"/home/morgan/.ssh/authorized_keys\"},\"text\":\"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdamAGCsQq31Uv+08lkBzoO4XLz2qYjJa8CGmj3B1Ea administrator public record\\n\"}",
+        "ssh-lab {\"kind\":\"Save\",\"document\":{\"kind\":\"KeyFile\",\"path\":\"/home/morgan/.ssh/authorized_keys\"}}",
+        "ssh-lab {\"kind\":\"Text\",\"document\":{\"kind\":\"ServerConfig\"},\"text\":\"PubkeyAuthentication yes\\nStrictModes yes\\nPermitRootLogin no\\nPasswordAuthentication no\\nKbdInteractiveAuthentication no\\nAllowUsers morgan rescue\\nAuthorizedKeysFile .ssh/authorized_keys\\n\"}",
+        "ssh-lab {\"kind\":\"Save\",\"document\":{\"kind\":\"ServerConfig\"}}",
+        "ssh-lab {\"kind\":\"ApplyPolicy\"}",
+        "ssh-lab {\"kind\":\"Check\"}"
+      ],
+      "hints": [
+        "Separate the server’s verified host identity from the user identity offered by a supplied client.",
+        "Save the relevant virtual document or attributes. Changed draft text does not change the saved or active state.",
+        "Compare saved and active policy. Check both required administrators and each refused identity after applying changes."
+      ],
+      "explanation": "Host trust, public-identity authorization and active policy are separate gates. Saving a configuration does not apply it. The complete handover preserves recovery access while removing the retired key and excluding unwanted methods/accounts.",
+      "retry_guidance": "Read the failing stage, change the relevant document or attributes, save it, apply policy if changed, then Check access again.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man.openbsd.org/sshd",
+        "https://man.openbsd.org/sshd_config",
+        "https://man.openbsd.org/ssh_config",
+        "https://www.rfc-editor.org/info/rfc8709/",
+        "https://www.rfc-editor.org/rfc/rfc8032.html#section-7.1"
+      ],
+      "simplifications": "Supplied, reachable server and public client identities are exercise assumptions. No SSH process, private key, network, signature/encryption verification or real login is used. Plain Ed25519 public encodings, literal lower-case host/IPv4 trust, supported sshd_config directives and ordinary nonroot /home/USER key paths only. No agent, key generation, PAM/ACL/SELinux, Match/Include, hashed/wildcard hosts, forwarding, certificates or general SSH utility conformance. Unsupported behavior is not counted as a denied request."
+    }
+  ]
+}

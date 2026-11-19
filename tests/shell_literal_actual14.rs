@@ -49,7 +49,7 @@ fn histories(a: &progress::Attempt, primary: bool) -> std::collections::BTreeMap
 #[test]
 #[ignore = "Requires independently sealed genuine14; Root guarded explicit run only"]
 fn genuine60_records477_cases60_examples_remain_real_source_bound_at_current14() {
-    assert_eq!(shell::EVALUATOR_REVISION, 15);
+    assert_eq!(shell::EVALUATOR_REVISION, 19);
     let all = pack::bundled().unwrap();
     let observed = rows();
     assert_eq!(observed.len(), 60);
@@ -81,7 +81,7 @@ fn genuine60_records477_cases60_examples_remain_real_source_bound_at_current14()
 #[test]
 #[ignore = "Requires independently sealed genuine14 original/draft profiles"]
 fn all_prior_records_multiplicity_two_unfinished_contexts_and_90_nonscript_attempts_stay_exact() {
-    assert_eq!(shell::EVALUATOR_REVISION, 15);
+    assert_eq!(shell::EVALUATOR_REVISION, 19);
     let all = pack::bundled().unwrap();
     for (role, total) in [("original", 426usize), ("drafts", 416usize)] {
         let raw = evidence::observed(&format!("writer14-{role}.json"));
@@ -205,7 +205,7 @@ fn four_new_normal_disk_sources_do_not_invent_work_in_the_genuine14_profiles() {
 #[test]
 #[ignore = "Requires sealed genuine14; actual15 rerun, private save and explicit historical preservation"]
 fn genuine14_remains_legacy_until_actual15_rerun_and_save_keeps_every_other_attempt() {
-    assert_eq!(shell::EVALUATOR_REVISION, 15);
+    assert_eq!(shell::EVALUATOR_REVISION, 19);
     let all = pack::bundled().unwrap();
     let id = "shell-ere-event-view";
     let s = all.iter().find(|s| s.id == id).unwrap();
@@ -229,7 +229,7 @@ fn genuine14_remains_legacy_until_actual15_rerun_and_save_keeps_every_other_atte
             .collect::<Vec<_>>();
         assert!(cases.iter().zip(&results).all(|(c, r)| c.accepts(r)));
         let actual = Record {
-            engine_revision: 15,
+            engine_revision: 19,
             source: source.clone(),
             results,
         };
@@ -263,7 +263,7 @@ fn genuine14_remains_legacy_until_actual15_rerun_and_save_keeps_every_other_atte
         assert_eq!(value(&p), caller);
         assert_eq!(value(&p.migration_receipts), receipt);
         assert_eq!(
-            std::fs::read(path.with_extension("before-shell-v15.json")).unwrap(),
+            std::fs::read(path.with_extension("before-shell-v19.json")).unwrap(),
             raw
         );
         let resumed = progress::load(&path, &all).unwrap();
@@ -272,7 +272,7 @@ fn genuine14_remains_legacy_until_actual15_rerun_and_save_keeps_every_other_atte
         expected_receipt["shell"]
             .as_array_mut()
             .unwrap()
-            .push(serde_json::json!(15));
+            .push(serde_json::json!(19));
         assert_eq!(value(&resumed.migration_receipts), expected_receipt);
         assert!(progress::current_solved(&resumed.attempts[id], s));
     }

@@ -1,0 +1,1061 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-protocol-round-trips",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-protocol-evidence",
+      "topic": "TCP, UDP and ICMP evidence",
+      "title": "Restore reachability and service delivery separately",
+      "summary": "Distinguish ICMP reachability from application receipt; repair return-path policy without opening a forbidden UDP service.",
+      "objective": "Repair the supplied R1 policy so both ICMP Echo queries complete their round trips and both TCP report conversations deliver the unchanged supplied content to the Server service on TCP port 8443. Keep the supplied UDP datagram blocked at R1/office inbound, even though a UDP listener uses the same number. Keep the supplied endpoints, listeners, conversations, routes and interfaces unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Compare the three protocols",
+        "Try the separate repair",
+        "Restore the independent policy"
+      ],
+      "guide": [
+        {
+          "title": "Compare the three protocols",
+          "why": "A returned echo and a working application are different observations.",
+          "action": "Read Introduction and its worked example before opening Try example.",
+          "commands": []
+        },
+        {
+          "title": "Try the separate repair",
+          "why": "The practice network and service port differ from the assignment.",
+          "action": "Check the starter, inspect each actual trace, repair the echo rule first, then compare the still-failing TCP conversations.",
+          "commands": []
+        },
+        {
+          "title": "Restore the independent policy",
+          "why": "Useful traffic and the unwanted datagram must meet all requirements together.",
+          "action": "Edit the supplied R1 configuration document and use Check configuration. Review each failing case, retry and preserve the UDP restriction.",
+          "commands": []
+        }
+      ],
+      "explanation": "1. Different jobs, different evidence\nTCP gives applications an ordered byte stream; this finite model shows a normal SYN, SYN-ACK, ACK opening and one supplied data fragment. UDP sends a datagram without that opening or a delivery guarantee. Both use source and destination ports. ICMP carries IP control/diagnostic messages: here, an Echo request (type 8, code 0) and Echo reply (type 0, code 0), without service ports. A reply reflects the identifier, sequence and bytes. This activity covers Echo, not every ICMP message.\n\n2. Follow the return path\nA delivered request is not a completed round trip. An ICMP reply swaps the IP addresses; a TCP SYN-ACK swaps both addresses and ports. Echo success cannot prove that a TCP listener works, and a filtered Echo does not by itself prove that a separate application is unavailable. Check each supplied conversation.\n\n3. Read the supplied router policy\nR1's editor is an isolated IOS-style policy document, not a Linux script or host firewall. FORWARD applies as packets enter office from Client; RETURN applies as packets leave office toward Client. Read rules in numeric order: the first matching rule decides. permit allows; deny blocks. host selects one address. In a TCP rule, a port condition after the first address matches the source port; one after the second address matches the destination port. ICMP has no TCP/UDP port condition. The supplied lists and interface bindings are already present; investigate their rules.\n\n4. Worked practice uses different values\nPractice has Client 10.90.3.10, Server 10.90.4.20 and report service 9443. For a reply from that service, source port 9443 returns to client ports 50123 or 60101. In RETURN, permit icmp host 10.90.4.20 host 10.90.3.10 lets the matching echo direction pass. permit tcp host 10.90.4.20 eq 9443 host 10.90.3.10 range 49152 65535 covers both supplied TCP client ports. Keep the other list and final deny rules. Filling worked settings changes the separate draft; Check configuration runs the cases.\n\n5. Apply evidence without opening everything\nFirst correct Echo in practice and check: its round trips can pass while TCP still fails. Repair TCP and check again. In the assignment, require both TCP payloads, both Echo round trips and the blocked UDP datagram together. TCP and UDP can have separate listeners at the same numeric port. Permit-all loses the unwanted-traffic requirement; deny-all loses useful traffic. Actual traces describe supplied virtual packets, never a live network or a real ping result.",
+      "hints": [
+        "ICMP has no service ports. Read each query’s actual request/reply trace; a delivered request alone is not a round trip.",
+        "Inspect RETURN relative to the office interface. TCP replies reverse both addresses and ports; the report service port belongs to the source on the return path.",
+        "Use a rule broad enough for both supplied TCP client ports while retaining the unwanted UDP restriction. Permit-all and deny-all do not meet this task."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc792.html",
+        "https://www.rfc-editor.org/rfc/rfc1122.html",
+        "https://www.rfc-editor.org/rfc/rfc9293.html",
+        "https://www.rfc-editor.org/rfc/rfc768.html",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-create-ip-apply-0.html"
+      ],
+      "simplifications": "Primary sources checked2026-11-12: LPIC-1 objectives5.0/109.1, RFC792 and RFC1122 Echo, RFC9293 normal TCP opening, RFC768 UDP and Cisco IOS XE17 policy grammar. Existing in-process route/ACL model and finite transport reducers only. IPv4 unicast Echo types8/0 with code0, fixed identifier/sequence and reflected bounded binary bytes. No wire checksum serialization, ICMP errors, IPv6/ICMPv6, TTL/latency, timers, retries, sockets, Linux ping or host command execution. ACL matches all protocol1 traffic; it does not implement ICMP type filtering. Supplied application data is opaque, not HTTP/TLS interoperability. No Linux firewall or full IOS operating-system claim.",
+      "initial": {
+        "kind": "Transport",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-protocol-round-trips",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "listeners": [
+                {
+                  "protocol": "tcp",
+                  "port": "8443"
+                },
+                {
+                  "protocol": "udp",
+                  "port": "8443"
+                }
+              ],
+              "exchanges": [
+                {
+                  "id": "report-main",
+                  "protocol": "tcp",
+                  "client_port": "50123",
+                  "server_port": "8443"
+                },
+                {
+                  "id": "report-retry",
+                  "protocol": "tcp",
+                  "client_port": "60101",
+                  "server_port": "8443"
+                },
+                {
+                  "id": "blocked-datagram",
+                  "protocol": "udp",
+                  "client_port": "51234",
+                  "server_port": "8443"
+                }
+              ],
+              "documents": {
+                "schema_version": 1,
+                "routers": {
+                  "R1": "ip access-list extended FORWARD\n 10 permit tcp host 10.80.10.10 host 10.80.20.20 eq 8443\n 20 permit icmp host 10.80.10.10 host 10.80.20.20\n 30 deny udp any any eq 8443\n 40 deny ip any any\nexit\nip access-list extended RETURN\n 10 permit tcp host 10.80.20.20 host 10.80.10.10 eq 8443\n 20 deny icmp any any\n 30 deny ip any any\nexit\ninterface office\n ip access-group FORWARD in\n ip access-group RETURN out\nexit\n"
+                }
+              }
+            },
+            "tested": null
+          },
+          "practice": {
+            "draft": {
+              "listeners": [
+                {
+                  "protocol": "tcp",
+                  "port": "9443"
+                },
+                {
+                  "protocol": "udp",
+                  "port": "9443"
+                }
+              ],
+              "exchanges": [
+                {
+                  "id": "report-main",
+                  "protocol": "tcp",
+                  "client_port": "50123",
+                  "server_port": "9443"
+                },
+                {
+                  "id": "report-retry",
+                  "protocol": "tcp",
+                  "client_port": "60101",
+                  "server_port": "9443"
+                },
+                {
+                  "id": "blocked-datagram",
+                  "protocol": "udp",
+                  "client_port": "51234",
+                  "server_port": "9443"
+                }
+              ],
+              "documents": {
+                "schema_version": 1,
+                "routers": {
+                  "R1": "ip access-list extended FORWARD\n 10 permit tcp host 10.90.3.10 host 10.90.4.20 eq 9443\n 20 permit icmp host 10.90.3.10 host 10.90.4.20\n 30 deny udp any any eq 9443\n 40 deny ip any any\nexit\nip access-list extended RETURN\n 10 permit tcp host 10.90.4.20 host 10.90.3.10 eq 9443\n 20 deny icmp any any\n 30 deny ip any any\nexit\ninterface office\n ip access-group FORWARD in\n ip access-group RETURN out\nexit\n"
+                }
+              }
+            },
+            "tested": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "Transport",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic1-protocol-round-trips",
+          "assignment": {
+            "transport": {
+              "version": 1,
+              "hosts": [
+                {
+                  "id": "Client",
+                  "address": "10.80.10.10"
+                },
+                {
+                  "id": "Server",
+                  "address": "10.80.20.20"
+                }
+              ],
+              "listeners": [
+                {
+                  "protocol": "tcp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 8443
+                  }
+                },
+                {
+                  "protocol": "udp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 8443
+                  }
+                }
+              ],
+              "exchanges": [
+                {
+                  "id": "report-main",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Client",
+                    "port": 50123
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 8443
+                  },
+                  "payload": "Assignment report 1\n"
+                },
+                {
+                  "id": "report-retry",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Client",
+                    "port": 60101
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 8443
+                  },
+                  "payload": "Assignment report 2\n"
+                },
+                {
+                  "id": "blocked-datagram",
+                  "protocol": "udp",
+                  "client": {
+                    "host": "Client",
+                    "port": 51234
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 8443
+                  },
+                  "payload": "Assignment datagram\n"
+                }
+              ]
+            },
+            "network": {
+              "schema_version": 1,
+              "host_endpoints": {
+                "Client": "lan",
+                "Server": "lan"
+              },
+              "topology": {
+                "devices": {
+                  "Client": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "10.80.10.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "length": 0,
+                          "address": "0.0.0.0"
+                        },
+                        "interface": "lan",
+                        "via": "10.80.10.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "R1": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "10.80.10.1",
+                          "prefix": 24
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "10.80.20.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Server": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "10.80.20.20",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "length": 0,
+                          "address": "0.0.0.0"
+                        },
+                        "interface": "lan",
+                        "via": "10.80.20.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              },
+              "devices": {
+                "R1": {
+                  "policy": {
+                    "schema_version": 1,
+                    "lists": {
+                      "FORWARD": {
+                        "kind": "extended",
+                        "rules": [
+                          {
+                            "id": "seq-10",
+                            "action": "permit",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "10.80.10.10",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "destination": {
+                                "base": "10.80.20.20",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "protocol": {
+                                "kind": "tcp",
+                                "source_port": {
+                                  "kind": "any"
+                                },
+                                "destination_port": {
+                                  "kind": "eq",
+                                  "port": 8443
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-20",
+                            "action": "permit",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "10.80.10.10",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "destination": {
+                                "base": "10.80.20.20",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "protocol": {
+                                "kind": "icmp"
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-30",
+                            "action": "deny",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "destination": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "protocol": {
+                                "kind": "udp",
+                                "source_port": {
+                                  "kind": "any"
+                                },
+                                "destination_port": {
+                                  "kind": "eq",
+                                  "port": 8443
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-40",
+                            "action": "deny",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "destination": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "protocol": {
+                                "kind": "ip"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "RETURN": {
+                        "kind": "extended",
+                        "rules": [
+                          {
+                            "id": "seq-10",
+                            "action": "permit",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "10.80.20.20",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "destination": {
+                                "base": "10.80.10.10",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "protocol": {
+                                "kind": "tcp",
+                                "source_port": {
+                                  "kind": "any"
+                                },
+                                "destination_port": {
+                                  "kind": "eq",
+                                  "port": 8443
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-20",
+                            "action": "deny",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "destination": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "protocol": {
+                                "kind": "icmp"
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-30",
+                            "action": "deny",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "destination": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "protocol": {
+                                "kind": "ip"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "attachments": {
+                    "office": {
+                      "inbound": "FORWARD",
+                      "outbound": "RETURN"
+                    }
+                  }
+                }
+              }
+            },
+            "editable_listeners": [],
+            "editable_exchanges": [],
+            "editable_routers": [
+              "R1"
+            ],
+            "requirements": [
+              {
+                "kind": "receive",
+                "exchange": "report-main",
+                "protocol": "tcp",
+                "server_port": 8443
+              },
+              {
+                "kind": "receive",
+                "exchange": "report-retry",
+                "protocol": "tcp",
+                "server_port": 8443
+              },
+              {
+                "kind": "block",
+                "exchange": "blocked-datagram",
+                "at": {
+                  "device": "R1",
+                  "interface": "office",
+                  "direction": "inbound"
+                }
+              },
+              {
+                "kind": "echo_receive",
+                "query": "client-echo"
+              },
+              {
+                "kind": "echo_receive",
+                "query": "branch-echo"
+              }
+            ],
+            "echoes": [
+              {
+                "id": "client-echo",
+                "source": "Client",
+                "destination": "Server",
+                "identifier": 905,
+                "sequence": 1,
+                "payload": [
+                  65,
+                  115,
+                  115,
+                  105,
+                  103,
+                  110,
+                  109,
+                  101,
+                  110,
+                  116,
+                  32,
+                  101,
+                  99,
+                  104,
+                  111,
+                  32,
+                  49
+                ]
+              },
+              {
+                "id": "branch-echo",
+                "source": "Server",
+                "destination": "Client",
+                "identifier": 905,
+                "sequence": 2,
+                "payload": [
+                  65,
+                  115,
+                  115,
+                  105,
+                  103,
+                  110,
+                  109,
+                  101,
+                  110,
+                  116,
+                  32,
+                  101,
+                  99,
+                  104,
+                  111,
+                  32,
+                  50
+                ]
+              }
+            ]
+          },
+          "example": {
+            "transport": {
+              "version": 1,
+              "hosts": [
+                {
+                  "id": "Client",
+                  "address": "10.90.3.10"
+                },
+                {
+                  "id": "Server",
+                  "address": "10.90.4.20"
+                }
+              ],
+              "listeners": [
+                {
+                  "protocol": "tcp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 9443
+                  }
+                },
+                {
+                  "protocol": "udp",
+                  "endpoint": {
+                    "host": "Server",
+                    "port": 9443
+                  }
+                }
+              ],
+              "exchanges": [
+                {
+                  "id": "report-main",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Client",
+                    "port": 50123
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 9443
+                  },
+                  "payload": "Practice report 1\n"
+                },
+                {
+                  "id": "report-retry",
+                  "protocol": "tcp",
+                  "client": {
+                    "host": "Client",
+                    "port": 60101
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 9443
+                  },
+                  "payload": "Practice report 2\n"
+                },
+                {
+                  "id": "blocked-datagram",
+                  "protocol": "udp",
+                  "client": {
+                    "host": "Client",
+                    "port": 51234
+                  },
+                  "server": {
+                    "host": "Server",
+                    "port": 9443
+                  },
+                  "payload": "Practice datagram\n"
+                }
+              ]
+            },
+            "network": {
+              "schema_version": 1,
+              "host_endpoints": {
+                "Client": "lan",
+                "Server": "lan"
+              },
+              "topology": {
+                "devices": {
+                  "Client": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "10.90.3.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "length": 0,
+                          "address": "0.0.0.0"
+                        },
+                        "interface": "lan",
+                        "via": "10.90.3.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "R1": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "10.90.3.1",
+                          "prefix": 24
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "10.90.4.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Server": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "10.90.4.20",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "length": 0,
+                          "address": "0.0.0.0"
+                        },
+                        "interface": "lan",
+                        "via": "10.90.4.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              },
+              "devices": {
+                "R1": {
+                  "policy": {
+                    "schema_version": 1,
+                    "lists": {
+                      "FORWARD": {
+                        "kind": "extended",
+                        "rules": [
+                          {
+                            "id": "seq-10",
+                            "action": "permit",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "10.90.3.10",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "destination": {
+                                "base": "10.90.4.20",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "protocol": {
+                                "kind": "tcp",
+                                "source_port": {
+                                  "kind": "any"
+                                },
+                                "destination_port": {
+                                  "kind": "eq",
+                                  "port": 9443
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-20",
+                            "action": "permit",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "10.90.3.10",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "destination": {
+                                "base": "10.90.4.20",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "protocol": {
+                                "kind": "icmp"
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-30",
+                            "action": "deny",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "destination": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "protocol": {
+                                "kind": "udp",
+                                "source_port": {
+                                  "kind": "any"
+                                },
+                                "destination_port": {
+                                  "kind": "eq",
+                                  "port": 9443
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-40",
+                            "action": "deny",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "destination": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "protocol": {
+                                "kind": "ip"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "RETURN": {
+                        "kind": "extended",
+                        "rules": [
+                          {
+                            "id": "seq-10",
+                            "action": "permit",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "10.90.4.20",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "destination": {
+                                "base": "10.90.3.10",
+                                "wildcard": "0.0.0.0"
+                              },
+                              "protocol": {
+                                "kind": "tcp",
+                                "source_port": {
+                                  "kind": "any"
+                                },
+                                "destination_port": {
+                                  "kind": "eq",
+                                  "port": 9443
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-20",
+                            "action": "deny",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "destination": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "protocol": {
+                                "kind": "icmp"
+                              }
+                            }
+                          },
+                          {
+                            "id": "seq-30",
+                            "action": "deny",
+                            "selector": {
+                              "kind": "extended",
+                              "source": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "destination": {
+                                "base": "0.0.0.0",
+                                "wildcard": "255.255.255.255"
+                              },
+                              "protocol": {
+                                "kind": "ip"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "attachments": {
+                    "office": {
+                      "inbound": "FORWARD",
+                      "outbound": "RETURN"
+                    }
+                  }
+                }
+              }
+            },
+            "editable_listeners": [],
+            "editable_exchanges": [],
+            "editable_routers": [
+              "R1"
+            ],
+            "requirements": [
+              {
+                "kind": "receive",
+                "exchange": "report-main",
+                "protocol": "tcp",
+                "server_port": 9443
+              },
+              {
+                "kind": "receive",
+                "exchange": "report-retry",
+                "protocol": "tcp",
+                "server_port": 9443
+              },
+              {
+                "kind": "block",
+                "exchange": "blocked-datagram",
+                "at": {
+                  "device": "R1",
+                  "interface": "office",
+                  "direction": "inbound"
+                }
+              },
+              {
+                "kind": "echo_receive",
+                "query": "client-echo"
+              },
+              {
+                "kind": "echo_receive",
+                "query": "branch-echo"
+              }
+            ],
+            "echoes": [
+              {
+                "id": "client-echo",
+                "source": "Client",
+                "destination": "Server",
+                "identifier": 905,
+                "sequence": 1,
+                "payload": [
+                  80,
+                  114,
+                  97,
+                  99,
+                  116,
+                  105,
+                  99,
+                  101,
+                  32,
+                  101,
+                  99,
+                  104,
+                  111,
+                  32,
+                  49
+                ]
+              },
+              {
+                "id": "branch-echo",
+                "source": "Server",
+                "destination": "Client",
+                "identifier": 905,
+                "sequence": 2,
+                "payload": [
+                  80,
+                  114,
+                  97,
+                  99,
+                  116,
+                  105,
+                  99,
+                  101,
+                  32,
+                  101,
+                  99,
+                  104,
+                  111,
+                  32,
+                  50
+                ]
+              }
+            ]
+          },
+          "worked_assignment": {
+            "listeners": [
+              {
+                "protocol": "tcp",
+                "port": "8443"
+              },
+              {
+                "protocol": "udp",
+                "port": "8443"
+              }
+            ],
+            "exchanges": [
+              {
+                "id": "report-main",
+                "protocol": "tcp",
+                "client_port": "50123",
+                "server_port": "8443"
+              },
+              {
+                "id": "report-retry",
+                "protocol": "tcp",
+                "client_port": "60101",
+                "server_port": "8443"
+              },
+              {
+                "id": "blocked-datagram",
+                "protocol": "udp",
+                "client_port": "51234",
+                "server_port": "8443"
+              }
+            ],
+            "documents": {
+              "schema_version": 1,
+              "routers": {
+                "R1": "ip access-list extended FORWARD\n 10 permit tcp host 10.80.10.10 host 10.80.20.20 eq 8443\n 20 permit icmp host 10.80.10.10 host 10.80.20.20\n 30 deny udp any any eq 8443\n 40 deny ip any any\nexit\nip access-list extended RETURN\n 10 permit tcp host 10.80.20.20 eq 8443 host 10.80.10.10 range 49152 65535\n 20 permit icmp host 10.80.20.20 host 10.80.10.10\n 30 deny ip any any\nexit\ninterface office\n ip access-group FORWARD in\n ip access-group RETURN out\nexit\n"
+              }
+            }
+          },
+          "worked_example": {
+            "listeners": [
+              {
+                "protocol": "tcp",
+                "port": "9443"
+              },
+              {
+                "protocol": "udp",
+                "port": "9443"
+              }
+            ],
+            "exchanges": [
+              {
+                "id": "report-main",
+                "protocol": "tcp",
+                "client_port": "50123",
+                "server_port": "9443"
+              },
+              {
+                "id": "report-retry",
+                "protocol": "tcp",
+                "client_port": "60101",
+                "server_port": "9443"
+              },
+              {
+                "id": "blocked-datagram",
+                "protocol": "udp",
+                "client_port": "51234",
+                "server_port": "9443"
+              }
+            ],
+            "documents": {
+              "schema_version": 1,
+              "routers": {
+                "R1": "ip access-list extended FORWARD\n 10 permit tcp host 10.90.3.10 host 10.90.4.20 eq 9443\n 20 permit icmp host 10.90.3.10 host 10.90.4.20\n 30 deny udp any any eq 9443\n 40 deny ip any any\nexit\nip access-list extended RETURN\n 10 permit tcp host 10.90.4.20 eq 9443 host 10.90.3.10 range 49152 65535\n 20 permit icmp host 10.90.4.20 host 10.90.3.10\n 30 deny ip any any\nexit\ninterface office\n ip access-group FORWARD in\n ip access-group RETURN out\nexit\n"
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "@transport {\"kind\":\"edit\",\"draft\":{\"listeners\":[{\"protocol\":\"tcp\",\"port\":\"8443\"},{\"protocol\":\"udp\",\"port\":\"8443\"}],\"exchanges\":[{\"id\":\"report-main\",\"protocol\":\"tcp\",\"client_port\":\"50123\",\"server_port\":\"8443\"},{\"id\":\"report-retry\",\"protocol\":\"tcp\",\"client_port\":\"60101\",\"server_port\":\"8443\"},{\"id\":\"blocked-datagram\",\"protocol\":\"udp\",\"client_port\":\"51234\",\"server_port\":\"8443\"}],\"documents\":{\"schema_version\":1,\"routers\":{\"R1\":\"ip access-list extended FORWARD\\n 10 permit tcp host 10.80.10.10 host 10.80.20.20 eq 8443\\n 20 permit icmp host 10.80.10.10 host 10.80.20.20\\n 30 deny udp any any eq 8443\\n 40 deny ip any any\\nexit\\nip access-list extended RETURN\\n 10 permit tcp host 10.80.20.20 eq 8443 host 10.80.10.10 range 49152 65535\\n 20 permit icmp host 10.80.20.20 host 10.80.10.10\\n 30 deny ip any any\\nexit\\ninterface office\\n ip access-group FORWARD in\\n ip access-group RETURN out\\nexit\\n\"}}}}",
+        "@transport {\"kind\":\"check\"}"
+      ],
+      "prerequisites": []
+    }
+  ]
+}

@@ -1369,7 +1369,9 @@ fn page(
     };
     let mut dirty = false;
     ui.heading(&s.title);
-    ui.label(RichText::new(&s.objective).strong());
+    if view(a) == teaching::View::Assignment {
+        ccna_presentation::assignment(ui, s);
+    }
     ui.label(
         RichText::new(
             "Simulated Layer 2 LACP · Configuration controls affect this supplied network only",
@@ -1377,6 +1379,9 @@ fn page(
         .small(),
     );
     let current = view(a);
+    if current == teaching::View::Example {
+        ccna_presentation::example(ui, s, true);
+    }
     let mut requested = current;
     let scope = egui::Id::new((
         "etherchannel",
@@ -1405,13 +1410,25 @@ fn page(
     }
     if current == teaching::View::Introduction {
         if let Some(lesson) = &s.etherchannel_teaching {
-            ui.label(&lesson.prerequisite_note);
-            for concept in &lesson.concepts {
-                ui.strong(&concept.title);
-                ui.label(&concept.text);
+            if ccna_presentation::enabled(s) {
+                ccna_presentation::concepts(
+                    ui,
+                    s,
+                    &lesson.prerequisite_note,
+                    lesson
+                        .concepts
+                        .iter()
+                        .map(|c| (c.title.clone(), c.text.clone())),
+                );
+            } else {
+                ui.label(&lesson.prerequisite_note);
+                for concept in &lesson.concepts {
+                    ui.strong(&concept.title);
+                    ui.label(&concept.text);
+                }
             }
-            ui.strong("A separate network to try");
-            ui.label(&lesson.example_description);
+            lesson_presentation::worked(ui, &lesson.example_description);
+            lesson_presentation::worked_rows(ui, s);
             ui.add_enabled_ui(active, |ui| {
                 if action(ui, &mut m.ether, "try-example", "Try this example", true) {
                     requested = teaching::View::Example;
@@ -1446,7 +1463,7 @@ fn page(
     let mut example_choice = None;
     ui.add_enabled_ui(active,|ui|{
         if practice&&let Some(lesson)=&s.etherchannel_teaching {
-            ui.strong("Separate example · Ungraded");ui.label(&lesson.example_description);
+            if !ccna_presentation::enabled(s) { ui.label(&lesson.example_description); }
             let selected=a.workspace.as_ref().unwrap().etherchannel_learning.as_ref().unwrap().selected_example;
             let mut choice=selected;
             controls::form_row(ui,"Worked action",|ui,width|{

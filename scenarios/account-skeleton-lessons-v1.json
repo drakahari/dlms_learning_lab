@@ -1,0 +1,2149 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-skeleton-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Account templates and home creation",
+      "unit": "linux-account-defaults",
+      "title": "Repair account defaults and hand over a new home",
+      "summary": "Maintain saved account-template files, exclude a private draft and verify that only a newly created home receives the repaired defaults.",
+      "objective": "Repair the supplied /etc/skel/.profile to contain exactly TEAM_ZONE=north followed by export TEAM_ZONE, one line each with a final newline; set mode 0640. Repair /etc/skel/welcome.txt to contain exactly North support: keep team handover notes here. followed by a newline; set mode 0644. Remove only the declared /etc/skel/draft-note.txt from the template. Create support with GID 2600 and rhea with UID 1600, primary support, supplementary audit, home /home/rhea and shell /bin/bash; do not create an automatic private group. Create Rhea’s home from the repaired default /etc/skel. Its .profile and welcome.txt must match the saved template text and modes, belong to UID 1600/GID 2600 and exclude draft-note.txt. Use the supplied private-home mode 0700. Preserve every pre-existing account, group, other template and unrelated file, including Pax’s different /home/pax/.profile. Finish with no extra trial accounts, groups or files.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "retry_guidance": "Compare the first failed template and copied-home paths with cat and ls -ld. Save each edited template before useradd: pending editor text does not change the source. A corrected source does not rewrite a home created earlier. If the new trial home is wrong, preserve existing users and carefully recreate only your requested trial account/home after fixing the source; its group remains. Check exact newlines, modes, numeric ownership and the excluded draft note.",
+      "steps": [
+        "Inspect and save the account defaults",
+        "Create and inspect the new copied home",
+        "Verify required copies and preserve existing work"
+      ],
+      "guide": [],
+      "explanation": "The saved /etc/skel must contain the stated TEAM_ZONE profile and welcome text, with their separate modes, and no draft note. Existing useradd -m copies these current source entries into /home/rhea and assigns the new UID and primary GID to those copies. A later source edit leaves an existing copied home unchanged. The complete check compares both the template and new home plus all original accounts, groups, other templates and unrelated files. Copied profile text is not executed.",
+      "hints": [
+        "Inspect /etc/skel/.profile and welcome.txt in the native editor. A source file and a copied home file are different objects; save the source before creating the trial home.",
+        "Use the numeric mode as well as the required text. The removable note must be absent in both the source and new home; unchecking its Include option is only a pending edit until Remove selected file.",
+        "The primary support group must exist before useradd. The earlier onboarding lesson explains explicit IDs, -N, -g, -G, -d, -s and -m. Default /etc/skel and explicit -k /etc/skel select the same source here.",
+        "Use id rhea, ls -ld on each copied file and cat to compare its text. If creation happened too early, inspect and remove/recreate only rhea’s trial home/account after saving the repaired template; do not repeat groupadd when support already exists."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/#rdp-we-105.1_Customize_and_use_the_shell_environment",
+        "https://man7.org/linux/man-pages/man8/useradd.8.html",
+        "https://raw.githubusercontent.com/shadow-maint/shadow/4.20.3/man/userdel.8.xml"
+      ],
+      "simplifications": "Source-only authored proposal 2026-11-05; no runtime, reference-tool or novice acceptance claimed. The primary useradd(8) -m/-k/NOTES sections were read by the primary developer on 2026-11-05; this proposal reuses that recorded source check. Narrow LPIC-1 v5.0 objective 105.1 skeleton-directory practice, not complete shell customization. All records, paths, file text and numeric ownership exist only in the bounded in-process Accounts model. Native Save/Remove operates on three source-declared ordinary text leaves; it is not a real Linux command or broad /etc editor. No host users/files, ACLs, symlinks, distribution account defaults, login, passwords, PAM, profile execution or authentication are simulated. Home mode 0700 is exercise policy, not a universal useradd result. .profile contents are graded copied text only. All account command flags and supplied source identities remain explicit; no automatic private-group allocation. Full expected configuration checks unrelated preservation and no leftover trial state.",
+      "initial": {
+        "kind": "Accounts",
+        "simulation": {
+          "policy": {
+            "fixture": "skeleton-north-handover",
+            "today": 20762,
+            "protected_users": [
+              "root",
+              "service_bot"
+            ],
+            "protected_groups": [
+              "root",
+              "archive"
+            ],
+            "protected_entries": [
+              "/",
+              "/root",
+              "/etc",
+              "/home",
+              "/srv",
+              "/srv/shared",
+              "/srv/service_bot"
+            ],
+            "skeletons": [
+              "/etc/skel",
+              "/etc/skel-field"
+            ],
+            "shells": [
+              "/bin/bash",
+              "/usr/sbin/nologin"
+            ],
+            "editable_skeleton_leaves": {
+              "/etc/skel/.profile": {
+                "uid": 0,
+                "gid": 0,
+                "allow_remove": false
+              },
+              "/etc/skel/welcome.txt": {
+                "uid": 0,
+                "gid": 0,
+                "allow_remove": false
+              },
+              "/etc/skel/draft-note.txt": {
+                "uid": 0,
+                "gid": 0,
+                "allow_remove": true
+              }
+            }
+          },
+          "configuration": {
+            "users": {
+              "root": {
+                "uid": 0,
+                "primary_gid": 0,
+                "supplementary": [],
+                "home": "/root",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              },
+              "service_bot": {
+                "uid": 500,
+                "primary_gid": 2300,
+                "supplementary": [],
+                "home": "/srv/service_bot",
+                "shell": "/usr/sbin/nologin",
+                "comment": "",
+                "expires": null
+              },
+              "pax": {
+                "uid": 1101,
+                "primary_gid": 1000,
+                "supplementary": [
+                  2001,
+                  2002
+                ],
+                "home": "/home/pax",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              },
+              "teal": {
+                "uid": 1102,
+                "primary_gid": 1000,
+                "supplementary": [
+                  2100
+                ],
+                "home": "/home/teal",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              }
+            },
+            "groups": {
+              "root": {
+                "gid": 0
+              },
+              "staff": {
+                "gid": 1000
+              },
+              "audit": {
+                "gid": 2001
+              },
+              "legacy": {
+                "gid": 2002
+              },
+              "review": {
+                "gid": 2100
+              },
+              "archive": {
+                "gid": 2300
+              }
+            },
+            "entries": {
+              "/": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/root": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv/shared": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 493,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv/service_bot": {
+                "uid": 500,
+                "gid": 2300,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel/.profile": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 420,
+                "data": {
+                  "kind": "text",
+                  "contents": "TEAM_ZONE=legacy\nexport TEAM_ZONE\n"
+                }
+              },
+              "/home/pax": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home/pax/notes.txt": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "pax retained personal notes\n"
+                }
+              },
+              "/home/teal": {
+                "uid": 1102,
+                "gid": 1000,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home/teal/notes.txt": {
+                "uid": 1102,
+                "gid": 1000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "teal retained personal notes\n"
+                }
+              },
+              "/home/pax/borrowed.txt": {
+                "uid": 1102,
+                "gid": 1000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "Another owner, same old primary group\n"
+                }
+              },
+              "/home/pax/audit.txt": {
+                "uid": 1101,
+                "gid": 2001,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "Different-group evidence stays unchanged\n"
+                }
+              },
+              "/srv/shared/outside.txt": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 288,
+                "data": {
+                  "kind": "text",
+                  "contents": "Outside-home ownership stays unchanged\n"
+                }
+              },
+              "/etc/skel-field": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel-field/.profile": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 420,
+                "data": {
+                  "kind": "text",
+                  "contents": "Supplied team profile\n"
+                }
+              },
+              "/etc/skel-field/welcome.txt": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "Field welcome: keep this exact text\n"
+                }
+              },
+              "/etc/skel/welcome.txt": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "Legacy support template\n"
+                }
+              },
+              "/etc/skel/draft-note.txt": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "SYNTHETIC PRIVATE DRAFT: do not include in a new home\n"
+                }
+              },
+              "/home/pax/.profile": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "TEAM_ZONE=personal\nexport TEAM_ZONE\n"
+                }
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Accounts",
+        "initial": {
+          "policy": {
+            "fixture": "skeleton-north-handover",
+            "today": 20762,
+            "protected_users": [
+              "root",
+              "service_bot"
+            ],
+            "protected_groups": [
+              "root",
+              "archive"
+            ],
+            "protected_entries": [
+              "/",
+              "/root",
+              "/etc",
+              "/home",
+              "/srv",
+              "/srv/shared",
+              "/srv/service_bot"
+            ],
+            "skeletons": [
+              "/etc/skel",
+              "/etc/skel-field"
+            ],
+            "shells": [
+              "/bin/bash",
+              "/usr/sbin/nologin"
+            ],
+            "editable_skeleton_leaves": {
+              "/etc/skel/.profile": {
+                "uid": 0,
+                "gid": 0,
+                "allow_remove": false
+              },
+              "/etc/skel/welcome.txt": {
+                "uid": 0,
+                "gid": 0,
+                "allow_remove": false
+              },
+              "/etc/skel/draft-note.txt": {
+                "uid": 0,
+                "gid": 0,
+                "allow_remove": true
+              }
+            }
+          },
+          "configuration": {
+            "users": {
+              "root": {
+                "uid": 0,
+                "primary_gid": 0,
+                "supplementary": [],
+                "home": "/root",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              },
+              "service_bot": {
+                "uid": 500,
+                "primary_gid": 2300,
+                "supplementary": [],
+                "home": "/srv/service_bot",
+                "shell": "/usr/sbin/nologin",
+                "comment": "",
+                "expires": null
+              },
+              "pax": {
+                "uid": 1101,
+                "primary_gid": 1000,
+                "supplementary": [
+                  2001,
+                  2002
+                ],
+                "home": "/home/pax",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              },
+              "teal": {
+                "uid": 1102,
+                "primary_gid": 1000,
+                "supplementary": [
+                  2100
+                ],
+                "home": "/home/teal",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              }
+            },
+            "groups": {
+              "root": {
+                "gid": 0
+              },
+              "staff": {
+                "gid": 1000
+              },
+              "audit": {
+                "gid": 2001
+              },
+              "legacy": {
+                "gid": 2002
+              },
+              "review": {
+                "gid": 2100
+              },
+              "archive": {
+                "gid": 2300
+              }
+            },
+            "entries": {
+              "/": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/root": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv/shared": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 493,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv/service_bot": {
+                "uid": 500,
+                "gid": 2300,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel/.profile": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 420,
+                "data": {
+                  "kind": "text",
+                  "contents": "TEAM_ZONE=legacy\nexport TEAM_ZONE\n"
+                }
+              },
+              "/home/pax": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home/pax/notes.txt": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "pax retained personal notes\n"
+                }
+              },
+              "/home/teal": {
+                "uid": 1102,
+                "gid": 1000,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home/teal/notes.txt": {
+                "uid": 1102,
+                "gid": 1000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "teal retained personal notes\n"
+                }
+              },
+              "/home/pax/borrowed.txt": {
+                "uid": 1102,
+                "gid": 1000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "Another owner, same old primary group\n"
+                }
+              },
+              "/home/pax/audit.txt": {
+                "uid": 1101,
+                "gid": 2001,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "Different-group evidence stays unchanged\n"
+                }
+              },
+              "/srv/shared/outside.txt": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 288,
+                "data": {
+                  "kind": "text",
+                  "contents": "Outside-home ownership stays unchanged\n"
+                }
+              },
+              "/etc/skel-field": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel-field/.profile": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 420,
+                "data": {
+                  "kind": "text",
+                  "contents": "Supplied team profile\n"
+                }
+              },
+              "/etc/skel-field/welcome.txt": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "Field welcome: keep this exact text\n"
+                }
+              },
+              "/etc/skel/welcome.txt": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "Legacy support template\n"
+                }
+              },
+              "/etc/skel/draft-note.txt": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "SYNTHETIC PRIVATE DRAFT: do not include in a new home\n"
+                }
+              },
+              "/home/pax/.profile": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "TEAM_ZONE=personal\nexport TEAM_ZONE\n"
+                }
+              }
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Entry",
+            "path": "/etc/skel/.profile",
+            "expected": {
+              "uid": 0,
+              "gid": 0,
+              "mode": 416,
+              "data": {
+                "kind": "text",
+                "contents": "TEAM_ZONE=north\nexport TEAM_ZONE\n"
+              }
+            }
+          },
+          {
+            "kind": "Entry",
+            "path": "/etc/skel/welcome.txt",
+            "expected": {
+              "uid": 0,
+              "gid": 0,
+              "mode": 420,
+              "data": {
+                "kind": "text",
+                "contents": "North support: keep team handover notes here.\n"
+              }
+            }
+          },
+          {
+            "kind": "AbsentPath",
+            "path": "/etc/skel/draft-note.txt"
+          },
+          {
+            "kind": "Group",
+            "name": "support",
+            "expected": {
+              "gid": 2600
+            }
+          },
+          {
+            "kind": "User",
+            "name": "rhea",
+            "expected": {
+              "uid": 1600,
+              "primary_gid": 2600,
+              "supplementary": [
+                2001
+              ],
+              "home": "/home/rhea",
+              "shell": "/bin/bash",
+              "comment": "",
+              "expires": null
+            }
+          },
+          {
+            "kind": "Entry",
+            "path": "/home/rhea",
+            "expected": {
+              "uid": 1600,
+              "gid": 2600,
+              "mode": 448,
+              "data": {
+                "kind": "directory"
+              }
+            }
+          },
+          {
+            "kind": "Entry",
+            "path": "/home/rhea/.profile",
+            "expected": {
+              "uid": 1600,
+              "gid": 2600,
+              "mode": 416,
+              "data": {
+                "kind": "text",
+                "contents": "TEAM_ZONE=north\nexport TEAM_ZONE\n"
+              }
+            }
+          },
+          {
+            "kind": "Entry",
+            "path": "/home/rhea/welcome.txt",
+            "expected": {
+              "uid": 1600,
+              "gid": 2600,
+              "mode": 420,
+              "data": {
+                "kind": "text",
+                "contents": "North support: keep team handover notes here.\n"
+              }
+            }
+          },
+          {
+            "kind": "AbsentPath",
+            "path": "/home/rhea/draft-note.txt"
+          },
+          {
+            "kind": "Entry",
+            "path": "/home/pax/.profile",
+            "expected": {
+              "uid": 1101,
+              "gid": 1000,
+              "mode": 384,
+              "data": {
+                "kind": "text",
+                "contents": "TEAM_ZONE=personal\nexport TEAM_ZONE\n"
+              }
+            }
+          },
+          {
+            "kind": "Configuration",
+            "expected": {
+              "users": {
+                "root": {
+                  "uid": 0,
+                  "primary_gid": 0,
+                  "supplementary": [],
+                  "home": "/root",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "service_bot": {
+                  "uid": 500,
+                  "primary_gid": 2300,
+                  "supplementary": [],
+                  "home": "/srv/service_bot",
+                  "shell": "/usr/sbin/nologin",
+                  "comment": "",
+                  "expires": null
+                },
+                "pax": {
+                  "uid": 1101,
+                  "primary_gid": 1000,
+                  "supplementary": [
+                    2001,
+                    2002
+                  ],
+                  "home": "/home/pax",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "teal": {
+                  "uid": 1102,
+                  "primary_gid": 1000,
+                  "supplementary": [
+                    2100
+                  ],
+                  "home": "/home/teal",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "rhea": {
+                  "uid": 1600,
+                  "primary_gid": 2600,
+                  "supplementary": [
+                    2001
+                  ],
+                  "home": "/home/rhea",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                }
+              },
+              "groups": {
+                "root": {
+                  "gid": 0
+                },
+                "staff": {
+                  "gid": 1000
+                },
+                "audit": {
+                  "gid": 2001
+                },
+                "legacy": {
+                  "gid": 2002
+                },
+                "review": {
+                  "gid": 2100
+                },
+                "archive": {
+                  "gid": 2300
+                },
+                "support": {
+                  "gid": 2600
+                }
+              },
+              "entries": {
+                "/": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/root": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv/shared": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 493,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv/service_bot": {
+                  "uid": 500,
+                  "gid": 2300,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel/.profile": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "TEAM_ZONE=north\nexport TEAM_ZONE\n"
+                  }
+                },
+                "/home/pax": {
+                  "uid": 1101,
+                  "gid": 1000,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/pax/notes.txt": {
+                  "uid": 1101,
+                  "gid": 1000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "pax retained personal notes\n"
+                  }
+                },
+                "/home/teal": {
+                  "uid": 1102,
+                  "gid": 1000,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/teal/notes.txt": {
+                  "uid": 1102,
+                  "gid": 1000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "teal retained personal notes\n"
+                  }
+                },
+                "/home/pax/borrowed.txt": {
+                  "uid": 1102,
+                  "gid": 1000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Another owner, same old primary group\n"
+                  }
+                },
+                "/home/pax/audit.txt": {
+                  "uid": 1101,
+                  "gid": 2001,
+                  "mode": 384,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Different-group evidence stays unchanged\n"
+                  }
+                },
+                "/srv/shared/outside.txt": {
+                  "uid": 1101,
+                  "gid": 1000,
+                  "mode": 288,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Outside-home ownership stays unchanged\n"
+                  }
+                },
+                "/etc/skel-field": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel-field/.profile": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 420,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Supplied team profile\n"
+                  }
+                },
+                "/etc/skel-field/welcome.txt": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Field welcome: keep this exact text\n"
+                  }
+                },
+                "/etc/skel/welcome.txt": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 420,
+                  "data": {
+                    "kind": "text",
+                    "contents": "North support: keep team handover notes here.\n"
+                  }
+                },
+                "/home/pax/.profile": {
+                  "uid": 1101,
+                  "gid": 1000,
+                  "mode": 384,
+                  "data": {
+                    "kind": "text",
+                    "contents": "TEAM_ZONE=personal\nexport TEAM_ZONE\n"
+                  }
+                },
+                "/home/rhea": {
+                  "uid": 1600,
+                  "gid": 2600,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/rhea/.profile": {
+                  "uid": 1600,
+                  "gid": 2600,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "TEAM_ZONE=north\nexport TEAM_ZONE\n"
+                  }
+                },
+                "/home/rhea/welcome.txt": {
+                  "uid": 1600,
+                  "gid": 2600,
+                  "mode": 420,
+                  "data": {
+                    "kind": "text",
+                    "contents": "North support: keep team handover notes here.\n"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "groupadd -g 2600 support",
+        "useradd -N -u 1600 -g support -G audit -d /home/rhea -s /bin/bash -m rhea"
+      ],
+      "prerequisites": [
+        "lpic1-account-onboarding",
+        "lpic1-fhs-locate-active-files"
+      ],
+      "accounts_teaching": {
+        "prerequisite_note": "First complete explicit account onboarding and the file-location handover. Reuse numeric modes, text inspection and supplied UID/GID records. This exercise is a virtual administration workspace; your desktop account and /etc/skel are untouched.",
+        "concepts": [
+          {
+            "title": "A template is a starting copy",
+            "text": "A skeleton directory is a set of starting files for a new home. In this exercise, useradd -m copies the saved /etc/skel; -k can choose another supplied skeleton. useradd -M makes only the account record. Existing homes are independent copies, not links to the template. A leading dot, as in .profile, marks a hidden filename; naming it explicitly lets you inspect it."
+          },
+          {
+            "title": "Save the standard before creating the account",
+            "text": "The native Template file editor changes only the supplied known leaves. Edit File contents and the octal mode, then Save selected file. Clear Include in new homes for the removable draft note, then Remove selected file. Pending edits are not the saved template used by useradd. These are simulator editor controls, not Linux shell commands."
+          },
+          {
+            "title": "Text, permissions and ownership are separate",
+            "text": "In the worked example, .profile needs mode 0640: its owner can read/write, its group can read and others have no access. welcome.txt needs 0644: owner read/write, group and others read. Copying retains these file modes but sets copied ownership to the new user’s UID and primary GID. Home mode 0700 is the supplied exercise policy, not a universal Linux default. These are file permission bits: home mode 0700 still prevents other users from traversing the home."
+          },
+          {
+            "title": "Create and verify both records and files",
+            "text": "The annotated command below supplies every account value. The primary group must already exist. id maps memberships to numbers; ls -ld inspects each named file’s owner, group and mode; cat reads text. A correct account record alone does not prove that its home contains the repaired defaults. A copied .profile is only text here: no login or shell startup is being tested."
+          },
+          {
+            "title": "Changing a template is not a home update",
+            "text": "After Lumi’s home exists, changing /etc/skel/.profile affects a later copy, not /home/lumi/.profile. Guided practice compares the two paths. Restore the worked template to finish the example. If you create your own trial account too early, repair its source first and carefully remove/recreate only that trial account and home; never remove existing users to repair their defaults."
+          }
+        ],
+        "example": [
+          "groupadd -g 4600 sample_ops",
+          "useradd -N -u 3400 -g sample_ops -G sample_audit -d /home/lumi -s /bin/bash -m lumi",
+          "id lumi",
+          "ls -ld /home/lumi/.profile",
+          "ls -ld /home/lumi/welcome.txt",
+          "cat /home/lumi/.profile"
+        ],
+        "example_commands": [
+          {
+            "command": "groupadd -g 4600 sample_ops",
+            "explanation": "Create the worked example’s primary group before useradd names it.",
+            "simulator_only": false
+          },
+          {
+            "command": "useradd -N -u 3400 -g sample_ops -G sample_audit -d /home/lumi -s /bin/bash -m lumi",
+            "explanation": "Create Lumi using the saved default /etc/skel. -N avoids an automatic private group; -u/-g/-G set user, primary and supplementary IDs; -d/-s set the home and shell; -m creates the home and copies defaults.",
+            "simulator_only": false
+          },
+          {
+            "command": "id lumi",
+            "explanation": "Inspect the newly created virtual user and map its memberships to numeric IDs. This does not log in.",
+            "simulator_only": false
+          },
+          {
+            "command": "ls -ld /home/lumi/.profile",
+            "explanation": "Inspect the explicitly named hidden profile file, including mode and owner/group. -d requests the named entry rather than listing a directory.",
+            "simulator_only": false
+          },
+          {
+            "command": "ls -ld /home/lumi/welcome.txt",
+            "explanation": "Inspect the copied welcome file independently: it has a different required mode.",
+            "simulator_only": false
+          },
+          {
+            "command": "cat /home/lumi/.profile",
+            "explanation": "Read the copied profile text; the simulator does not execute it.",
+            "simulator_only": false
+          }
+        ],
+        "inputs": "Separate worked case: first save the template changes shown below, then create sample_ops GID 4600 and lumi UID 3400 with sample_audit, home /home/lumi and shell /bin/bash. Umi’s existing profile is personal and must stay unchanged.",
+        "try_change": "After the worked home exists, save DEMO_ZONE=trial followed by export DEMO_ZONE in the template profile. Read both template and home profiles to observe copy-once behavior. Restore the worked harbor template; Umi’s existing home and all other work stay unchanged.",
+        "fixture": {
+          "policy": {
+            "fixture": "skeleton-harbor-example",
+            "today": 20531,
+            "protected_users": [
+              "root",
+              "sample_bot"
+            ],
+            "protected_groups": [
+              "root",
+              "sample_archive"
+            ],
+            "protected_entries": [
+              "/",
+              "/root",
+              "/etc",
+              "/home",
+              "/srv",
+              "/srv/shared",
+              "/srv/sample_bot"
+            ],
+            "skeletons": [
+              "/etc/skel",
+              "/etc/skel-sample"
+            ],
+            "shells": [
+              "/bin/bash",
+              "/usr/sbin/nologin"
+            ],
+            "editable_skeleton_leaves": {
+              "/etc/skel/.profile": {
+                "uid": 0,
+                "gid": 0,
+                "allow_remove": false
+              },
+              "/etc/skel/welcome.txt": {
+                "uid": 0,
+                "gid": 0,
+                "allow_remove": false
+              },
+              "/etc/skel/draft-note.txt": {
+                "uid": 0,
+                "gid": 0,
+                "allow_remove": true
+              }
+            }
+          },
+          "configuration": {
+            "users": {
+              "root": {
+                "uid": 0,
+                "primary_gid": 0,
+                "supplementary": [],
+                "home": "/root",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              },
+              "sample_bot": {
+                "uid": 600,
+                "primary_gid": 4300,
+                "supplementary": [],
+                "home": "/srv/sample_bot",
+                "shell": "/usr/sbin/nologin",
+                "comment": "",
+                "expires": null
+              },
+              "umi": {
+                "uid": 3101,
+                "primary_gid": 3000,
+                "supplementary": [
+                  4001,
+                  4002
+                ],
+                "home": "/home/umi",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              },
+              "noa": {
+                "uid": 3102,
+                "primary_gid": 3000,
+                "supplementary": [
+                  4100
+                ],
+                "home": "/home/noa",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              }
+            },
+            "groups": {
+              "root": {
+                "gid": 0
+              },
+              "sample_staff": {
+                "gid": 3000
+              },
+              "sample_audit": {
+                "gid": 4001
+              },
+              "sample_legacy": {
+                "gid": 4002
+              },
+              "sample_review": {
+                "gid": 4100
+              },
+              "sample_archive": {
+                "gid": 4300
+              }
+            },
+            "entries": {
+              "/": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/root": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv/shared": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 493,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv/sample_bot": {
+                "uid": 600,
+                "gid": 4300,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel/.profile": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 420,
+                "data": {
+                  "kind": "text",
+                  "contents": "DEMO_ZONE=old\nexport DEMO_ZONE\n"
+                }
+              },
+              "/home/umi": {
+                "uid": 3101,
+                "gid": 3000,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home/umi/notes.txt": {
+                "uid": 3101,
+                "gid": 3000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "umi retained personal notes\n"
+                }
+              },
+              "/home/noa": {
+                "uid": 3102,
+                "gid": 3000,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home/noa/notes.txt": {
+                "uid": 3102,
+                "gid": 3000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "noa retained personal notes\n"
+                }
+              },
+              "/home/umi/borrowed.txt": {
+                "uid": 3102,
+                "gid": 3000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "Another owner, same old primary group\n"
+                }
+              },
+              "/home/umi/audit.txt": {
+                "uid": 3101,
+                "gid": 4001,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "Different-group evidence stays unchanged\n"
+                }
+              },
+              "/srv/shared/outside.txt": {
+                "uid": 3101,
+                "gid": 3000,
+                "mode": 288,
+                "data": {
+                  "kind": "text",
+                  "contents": "Outside-home ownership stays unchanged\n"
+                }
+              },
+              "/etc/skel-sample": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel-sample/.profile": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 420,
+                "data": {
+                  "kind": "text",
+                  "contents": "Supplied team profile\n"
+                }
+              },
+              "/etc/skel-sample/welcome.txt": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "Sample field welcome\n"
+                }
+              },
+              "/etc/skel/welcome.txt": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "Old gallery welcome\n"
+                }
+              },
+              "/etc/skel/draft-note.txt": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "SYNTHETIC GALLERY DRAFT: not a standard account default\n"
+                }
+              },
+              "/home/umi/.profile": {
+                "uid": 3101,
+                "gid": 3000,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "DEMO_ZONE=personal\nexport DEMO_ZONE\n"
+                }
+              }
+            }
+          }
+        },
+        "outcomes": [
+          {
+            "kind": "Entry",
+            "path": "/etc/skel/.profile",
+            "expected": {
+              "uid": 0,
+              "gid": 0,
+              "mode": 416,
+              "data": {
+                "kind": "text",
+                "contents": "DEMO_ZONE=harbor\nexport DEMO_ZONE\n"
+              }
+            }
+          },
+          {
+            "kind": "Entry",
+            "path": "/etc/skel/welcome.txt",
+            "expected": {
+              "uid": 0,
+              "gid": 0,
+              "mode": 420,
+              "data": {
+                "kind": "text",
+                "contents": "Harbor training workspace\n"
+              }
+            }
+          },
+          {
+            "kind": "AbsentPath",
+            "path": "/etc/skel/draft-note.txt"
+          },
+          {
+            "kind": "Entry",
+            "path": "/home/lumi/.profile",
+            "expected": {
+              "uid": 3400,
+              "gid": 4600,
+              "mode": 416,
+              "data": {
+                "kind": "text",
+                "contents": "DEMO_ZONE=harbor\nexport DEMO_ZONE\n"
+              }
+            }
+          },
+          {
+            "kind": "Entry",
+            "path": "/home/lumi/welcome.txt",
+            "expected": {
+              "uid": 3400,
+              "gid": 4600,
+              "mode": 420,
+              "data": {
+                "kind": "text",
+                "contents": "Harbor training workspace\n"
+              }
+            }
+          },
+          {
+            "kind": "AbsentPath",
+            "path": "/home/lumi/draft-note.txt"
+          },
+          {
+            "kind": "Configuration",
+            "expected": {
+              "users": {
+                "root": {
+                  "uid": 0,
+                  "primary_gid": 0,
+                  "supplementary": [],
+                  "home": "/root",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "sample_bot": {
+                  "uid": 600,
+                  "primary_gid": 4300,
+                  "supplementary": [],
+                  "home": "/srv/sample_bot",
+                  "shell": "/usr/sbin/nologin",
+                  "comment": "",
+                  "expires": null
+                },
+                "umi": {
+                  "uid": 3101,
+                  "primary_gid": 3000,
+                  "supplementary": [
+                    4001,
+                    4002
+                  ],
+                  "home": "/home/umi",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "noa": {
+                  "uid": 3102,
+                  "primary_gid": 3000,
+                  "supplementary": [
+                    4100
+                  ],
+                  "home": "/home/noa",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "lumi": {
+                  "uid": 3400,
+                  "primary_gid": 4600,
+                  "supplementary": [
+                    4001
+                  ],
+                  "home": "/home/lumi",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                }
+              },
+              "groups": {
+                "root": {
+                  "gid": 0
+                },
+                "sample_staff": {
+                  "gid": 3000
+                },
+                "sample_audit": {
+                  "gid": 4001
+                },
+                "sample_legacy": {
+                  "gid": 4002
+                },
+                "sample_review": {
+                  "gid": 4100
+                },
+                "sample_archive": {
+                  "gid": 4300
+                },
+                "sample_ops": {
+                  "gid": 4600
+                }
+              },
+              "entries": {
+                "/": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/root": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv/shared": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 493,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv/sample_bot": {
+                  "uid": 600,
+                  "gid": 4300,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel/.profile": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "DEMO_ZONE=harbor\nexport DEMO_ZONE\n"
+                  }
+                },
+                "/home/umi": {
+                  "uid": 3101,
+                  "gid": 3000,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/umi/notes.txt": {
+                  "uid": 3101,
+                  "gid": 3000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "umi retained personal notes\n"
+                  }
+                },
+                "/home/noa": {
+                  "uid": 3102,
+                  "gid": 3000,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/noa/notes.txt": {
+                  "uid": 3102,
+                  "gid": 3000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "noa retained personal notes\n"
+                  }
+                },
+                "/home/umi/borrowed.txt": {
+                  "uid": 3102,
+                  "gid": 3000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Another owner, same old primary group\n"
+                  }
+                },
+                "/home/umi/audit.txt": {
+                  "uid": 3101,
+                  "gid": 4001,
+                  "mode": 384,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Different-group evidence stays unchanged\n"
+                  }
+                },
+                "/srv/shared/outside.txt": {
+                  "uid": 3101,
+                  "gid": 3000,
+                  "mode": 288,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Outside-home ownership stays unchanged\n"
+                  }
+                },
+                "/etc/skel-sample": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel-sample/.profile": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 420,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Supplied team profile\n"
+                  }
+                },
+                "/etc/skel-sample/welcome.txt": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Sample field welcome\n"
+                  }
+                },
+                "/etc/skel/welcome.txt": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 420,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Harbor training workspace\n"
+                  }
+                },
+                "/home/umi/.profile": {
+                  "uid": 3101,
+                  "gid": 3000,
+                  "mode": 384,
+                  "data": {
+                    "kind": "text",
+                    "contents": "DEMO_ZONE=personal\nexport DEMO_ZONE\n"
+                  }
+                },
+                "/home/lumi": {
+                  "uid": 3400,
+                  "gid": 4600,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/lumi/.profile": {
+                  "uid": 3400,
+                  "gid": 4600,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "DEMO_ZONE=harbor\nexport DEMO_ZONE\n"
+                  }
+                },
+                "/home/lumi/welcome.txt": {
+                  "uid": 3400,
+                  "gid": 4600,
+                  "mode": 420,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Harbor training workspace\n"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "try_actions": [
+          "cat /etc/skel/.profile",
+          "cat /home/lumi/.profile"
+        ],
+        "try_outcomes": [
+          {
+            "kind": "Entry",
+            "path": "/etc/skel/.profile",
+            "expected": {
+              "uid": 0,
+              "gid": 0,
+              "mode": 416,
+              "data": {
+                "kind": "text",
+                "contents": "DEMO_ZONE=trial\nexport DEMO_ZONE\n"
+              }
+            }
+          },
+          {
+            "kind": "Entry",
+            "path": "/home/lumi/.profile",
+            "expected": {
+              "uid": 3400,
+              "gid": 4600,
+              "mode": 416,
+              "data": {
+                "kind": "text",
+                "contents": "DEMO_ZONE=harbor\nexport DEMO_ZONE\n"
+              }
+            }
+          },
+          {
+            "kind": "Configuration",
+            "expected": {
+              "users": {
+                "root": {
+                  "uid": 0,
+                  "primary_gid": 0,
+                  "supplementary": [],
+                  "home": "/root",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "sample_bot": {
+                  "uid": 600,
+                  "primary_gid": 4300,
+                  "supplementary": [],
+                  "home": "/srv/sample_bot",
+                  "shell": "/usr/sbin/nologin",
+                  "comment": "",
+                  "expires": null
+                },
+                "umi": {
+                  "uid": 3101,
+                  "primary_gid": 3000,
+                  "supplementary": [
+                    4001,
+                    4002
+                  ],
+                  "home": "/home/umi",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "noa": {
+                  "uid": 3102,
+                  "primary_gid": 3000,
+                  "supplementary": [
+                    4100
+                  ],
+                  "home": "/home/noa",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "lumi": {
+                  "uid": 3400,
+                  "primary_gid": 4600,
+                  "supplementary": [
+                    4001
+                  ],
+                  "home": "/home/lumi",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                }
+              },
+              "groups": {
+                "root": {
+                  "gid": 0
+                },
+                "sample_staff": {
+                  "gid": 3000
+                },
+                "sample_audit": {
+                  "gid": 4001
+                },
+                "sample_legacy": {
+                  "gid": 4002
+                },
+                "sample_review": {
+                  "gid": 4100
+                },
+                "sample_archive": {
+                  "gid": 4300
+                },
+                "sample_ops": {
+                  "gid": 4600
+                }
+              },
+              "entries": {
+                "/": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/root": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv/shared": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 493,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv/sample_bot": {
+                  "uid": 600,
+                  "gid": 4300,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel/.profile": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "DEMO_ZONE=trial\nexport DEMO_ZONE\n"
+                  }
+                },
+                "/home/umi": {
+                  "uid": 3101,
+                  "gid": 3000,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/umi/notes.txt": {
+                  "uid": 3101,
+                  "gid": 3000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "umi retained personal notes\n"
+                  }
+                },
+                "/home/noa": {
+                  "uid": 3102,
+                  "gid": 3000,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/noa/notes.txt": {
+                  "uid": 3102,
+                  "gid": 3000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "noa retained personal notes\n"
+                  }
+                },
+                "/home/umi/borrowed.txt": {
+                  "uid": 3102,
+                  "gid": 3000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Another owner, same old primary group\n"
+                  }
+                },
+                "/home/umi/audit.txt": {
+                  "uid": 3101,
+                  "gid": 4001,
+                  "mode": 384,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Different-group evidence stays unchanged\n"
+                  }
+                },
+                "/srv/shared/outside.txt": {
+                  "uid": 3101,
+                  "gid": 3000,
+                  "mode": 288,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Outside-home ownership stays unchanged\n"
+                  }
+                },
+                "/etc/skel-sample": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel-sample/.profile": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 420,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Supplied team profile\n"
+                  }
+                },
+                "/etc/skel-sample/welcome.txt": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Sample field welcome\n"
+                  }
+                },
+                "/etc/skel/welcome.txt": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 420,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Harbor training workspace\n"
+                  }
+                },
+                "/home/umi/.profile": {
+                  "uid": 3101,
+                  "gid": 3000,
+                  "mode": 384,
+                  "data": {
+                    "kind": "text",
+                    "contents": "DEMO_ZONE=personal\nexport DEMO_ZONE\n"
+                  }
+                },
+                "/home/lumi": {
+                  "uid": 3400,
+                  "gid": 4600,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/lumi/.profile": {
+                  "uid": 3400,
+                  "gid": 4600,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "DEMO_ZONE=harbor\nexport DEMO_ZONE\n"
+                  }
+                },
+                "/home/lumi/welcome.txt": {
+                  "uid": 3400,
+                  "gid": 4600,
+                  "mode": 420,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Harbor training workspace\n"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "repair": [
+          "cat /etc/skel/.profile",
+          "id lumi"
+        ],
+        "template_teaching": {
+          "assignment": [
+            {
+              "action": "save",
+              "path": "/etc/skel/.profile",
+              "contents": "TEAM_ZONE=north\nexport TEAM_ZONE\n",
+              "mode": 416
+            },
+            {
+              "action": "save",
+              "path": "/etc/skel/welcome.txt",
+              "contents": "North support: keep team handover notes here.\n",
+              "mode": 420
+            },
+            {
+              "action": "remove",
+              "path": "/etc/skel/draft-note.txt"
+            }
+          ],
+          "example": [
+            {
+              "action": "save",
+              "path": "/etc/skel/.profile",
+              "contents": "DEMO_ZONE=harbor\nexport DEMO_ZONE\n",
+              "mode": 416
+            },
+            {
+              "action": "save",
+              "path": "/etc/skel/welcome.txt",
+              "contents": "Harbor training workspace\n",
+              "mode": 420
+            },
+            {
+              "action": "remove",
+              "path": "/etc/skel/draft-note.txt"
+            }
+          ],
+          "try_steps": [
+            {
+              "action": "save",
+              "path": "/etc/skel/.profile",
+              "contents": "DEMO_ZONE=trial\nexport DEMO_ZONE\n",
+              "mode": 416
+            }
+          ],
+          "repair": [
+            {
+              "action": "save",
+              "path": "/etc/skel/.profile",
+              "contents": "DEMO_ZONE=harbor\nexport DEMO_ZONE\n",
+              "mode": 416
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

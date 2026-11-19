@@ -14,6 +14,7 @@ fn blank() -> core::Disk {
         in_use: false,
         occupied_without_table: false,
         table: None,
+        mbr: None,
     }
 }
 fn world(first: char, word: &str) -> core::State {
@@ -48,6 +49,7 @@ fn world(first: char, word: &str) -> core::State {
     });
     core::State {
         version: 1,
+        mbr_profile: None,
         next_uuid: 1,
         disks: BTreeMap::from([
             (names[0].clone(), blank()),
@@ -120,6 +122,8 @@ pub fn definition() -> work::Definition {
     let initial = world('a', "Assignment");
     let fixture = world('e', "Separate practice");
     let plan = work::Plan {
+        mbr: None,
+        layout: None,
         targets: vec![
             target(
                 "reports",
@@ -142,6 +146,8 @@ pub fn definition() -> work::Definition {
         ],
     };
     let practice_plan = work::Plan {
+        mbr: None,
+        layout: None,
         targets: vec![
             target(
                 "sample",
@@ -163,7 +169,7 @@ pub fn definition() -> work::Definition {
             ),
         ],
     };
-    let worked=operations("/dev/vde","sample","pool",4,1,"sample").into_iter().map(|operation|work::WorkedStep{explanation:match &operation{work::Operation::CreateGpt{..}=>"Create a virtual partition table; this does not create any filesystem.",work::Operation::AddPartition{..}=>"Allocate the inclusive sector range, keeping reserved areas and retained peer data unchanged.",work::Operation::Format{format:work::FormatChoice::Ext4,..}=>"Initialize the blank selected partition as ext4; a type hint alone was not formatting.",work::Operation::Format{..}=>"Initialize a swap area; it is not activated or mounted."}.into(),operation}).collect();
+    let worked=operations("/dev/vde","sample","pool",4,1,"sample").into_iter().map(|operation|work::WorkedStep{explanation:match &operation{work::Operation::Mbr{..}=>panic!("Legacy GPT fixture must not invent MBR worked steps"),work::Operation::CreateGpt{..}=>"Create a virtual partition table; this does not create any filesystem.",work::Operation::AddPartition{..}=>"Allocate the inclusive sector range, keeping reserved areas and retained peer data unchanged.",work::Operation::Format{format:work::FormatChoice::Ext4,..}=>"Initialize the blank selected partition as ext4; a type hint alone was not formatting.",work::Operation::Format{..}=>"Initialize a swap area; it is not activated or mounted."}.into(),operation}).collect();
     work::Definition{initial,plan,reference:operations("/dev/vda","reports","paging",8,2,"reports"),lesson:work::Lesson{prerequisite_note:"Read the supplied disk geometry and retained-data facts before using virtual preparation tools.".into(),concepts:vec![Concept{title:"Partitions and content are different".into(),text:"A sector is512bytes. Inclusive range size is(end-start+1)times512. An ext4 type hint allocates space; initializing ext4 is a separate operation.".into()},Concept{title:"Protection and recovery".into(),text:"Existing data cannot be overwritten here. A wrong extra practice allocation can be repaired by Reset practice then replaying the native worked steps. This does not claim real disk undo.".into()}],description:"Use different media and smaller capacities in this isolated practice. The retained peer and spare must remain unchanged.".into(),fixture,plan:practice_plan,worked,try_change:"Add an unwanted extra partition after the worked result. Check again, then Reset practice and manually replay the worked steps.".into(),experiment:work::Operation::AddPartition{disk:"/dev/vde".into(),name:"extra".into(),start:12288,end:14335,type_hint:core::TypeHint::LinuxData}}}
 }
 pub fn scenario() -> pack::Scenario {

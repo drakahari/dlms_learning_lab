@@ -1,0 +1,2005 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-dhcp-dynamic-ranges",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "DHCP server configuration",
+      "unit": "linux-dhcp-configuration",
+      "title": "Provide enough dynamic addresses without rewriting a held lease",
+      "summary": "Diagnose a partially successful client test and repair a dynamic range while retaining a held binding.",
+      "objective": "Keep one dynamic range entirely within 10.50.0.100–10.50.0.110 on 10.50.0.0/24; serve no additional subnet. Both new clients need distinct usable leases in both supplied cases, including the case with .100 and .101 occupied. Supply router 10.50.0.1, DNS 203.0.113.53 and a 600-second grant to each new client. Keep the supplied management lease, including its current options and timing, unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Edit the supplied virtual configuration, run both client cases, inspect specific failures and retry."
+      ],
+      "guide": [],
+      "explanation": "Choose a range inside the supplied allowed window with at least two free addresses in each test case. The reference uses .100 through .103: four addresses minus the two supplied occupied addresses leaves two. Supported alternatives such as .102 through .104 can also work. Keep router, DNS and duration correct; the existing held management binding is preserved rather than reacquired.",
+      "hints": [
+        "Compare the number of free addresses with the two new clients in the busy case; occupied addresses are not available.",
+        "The endpoints are inclusive. A range with three addresses can leave only one when two are occupied. Any supported range within the allowed window with enough free addresses may work."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://kb.isc.org/docs/isc-dhcp-44-manual-pages-dhcpdconf",
+        "https://kb.isc.org/docs/isc-dhcp-44-manual-pages-dhcp-options"
+      ],
+      "simplifications": "Offline legacy ISC-style configuration subset and deterministic logical clients, not an ISC daemon or packet capture. At most eight /1–30 subnets, one inclusive range of up to 256 addresses per subnet, numeric router/DNS options and bounded default/max lease durations. /31 and /32 are excluded special cases. Global parameters precede subnet declarations; local parameters precede range. Includes, hooks, static host declarations, router lists, shared networks, IPv6, failover and unmodeled syntax refuse honestly. No host files, commands, services, real network or wall clock. Renew is limited to an eligible held address during the supplied renewal window; no ISC NAK/cache/lease-file fidelity. ISC DHCP is EOL; this teaches an exam-listed legacy format, not a deployment recommendation.",
+      "initial": {
+        "kind": "DhcpConfig",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-dhcp-dynamic-ranges",
+          "view": "introduction",
+          "assignment": {
+            "draft": "default-lease-time 600;\nmax-lease-time 3600;\noption domain-name-servers 203.0.113.53;\nsubnet 10.50.0.0 netmask 255.255.255.0 {\n  option routers 10.50.0.1;\n  range 10.50.0.100 10.50.0.102;\n}\n",
+            "tested": null
+          },
+          "practice": {
+            "draft": "default-lease-time 600;\nmax-lease-time 3600;\noption domain-name-servers 203.0.113.53;\nsubnet 10.60.0.0 netmask 255.255.255.0 {\n  option routers 10.60.0.1;\n  range 10.60.0.100 10.60.0.102;\n}\n",
+            "tested": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "DhcpConfig",
+        "definition": {
+          "initial": {
+            "id": "lpic2-dhcp-dynamic-ranges",
+            "instructions": "Keep one dynamic range entirely within 10.50.0.100–10.50.0.110 on 10.50.0.0/24; serve no additional subnet. Both new clients need distinct usable leases in both supplied cases, including the case with .100 and .101 occupied. Supply router 10.50.0.1, DNS 203.0.113.53 and a 600-second grant to each new client. Keep the supplied management lease, including its current options and timing, unchanged.",
+            "starter": "default-lease-time 600;\nmax-lease-time 3600;\noption domain-name-servers 203.0.113.53;\nsubnet 10.50.0.0 netmask 255.255.255.0 {\n  option routers 10.50.0.1;\n  range 10.50.0.100 10.50.0.102;\n}\n",
+            "cases": [
+              {
+                "id": "lpic2-dhcp-dynamic-ranges-case-0",
+                "label": "Available addresses",
+                "initial": {
+                  "topology": {
+                    "server": "10.50.0.1",
+                    "segments": {
+                      "alpha": {
+                        "subnet": {
+                          "network": "10.50.0.0",
+                          "prefix": 24
+                        },
+                        "server_interface": "10.50.0.1",
+                        "relay_interface": null,
+                        "relay_to_server": false,
+                        "client_unicast_to_server": true,
+                        "occupied": []
+                      }
+                    },
+                    "clients": {
+                      "lpic2-dhcp-dynamic-ranges-management": {
+                        "segment": "alpha"
+                      },
+                      "lpic2-dhcp-dynamic-ranges-new-a": {
+                        "segment": "alpha"
+                      },
+                      "lpic2-dhcp-dynamic-ranges-new-b": {
+                        "segment": "alpha"
+                      }
+                    }
+                  },
+                  "policy": {
+                    "server_enabled": true,
+                    "pools": {
+                      "net-10-50-0-0-24": {
+                        "subnet": {
+                          "network": "10.50.0.0",
+                          "prefix": 24
+                        },
+                        "first": "10.50.0.10",
+                        "last": "10.50.0.10",
+                        "excluded": [],
+                        "reservations": {},
+                        "router": "10.50.0.1",
+                        "dns": [
+                          "203.0.113.53"
+                        ],
+                        "lease_seconds": 600
+                      }
+                    },
+                    "relays": {}
+                  },
+                  "now": 0,
+                  "next_token": 1,
+                  "offers": {},
+                  "bindings": {
+                    "lpic2-dhcp-dynamic-ranges-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-50-0-0-24",
+                      "address": "10.50.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.50.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.50.0.1",
+                        "dns": [
+                          "203.0.113.53"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  },
+                  "leases": {
+                    "lpic2-dhcp-dynamic-ranges-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-50-0-0-24",
+                      "address": "10.50.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.50.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.50.0.1",
+                        "dns": [
+                          "203.0.113.53"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  }
+                },
+                "actions": [
+                  {
+                    "kind": "Acquire",
+                    "client": "lpic2-dhcp-dynamic-ranges-new-a"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "lpic2-dhcp-dynamic-ranges-new-b"
+                  }
+                ],
+                "requirements": [
+                  {
+                    "kind": "PreserveBinding",
+                    "client": "lpic2-dhcp-dynamic-ranges-management"
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "lpic2-dhcp-dynamic-ranges-new-a",
+                    "subnet": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.50.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "lpic2-dhcp-dynamic-ranges-new-a",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "lpic2-dhcp-dynamic-ranges-new-b",
+                    "subnet": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.50.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "lpic2-dhcp-dynamic-ranges-new-b",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "PoolWindow",
+                    "subnet": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "first": "10.50.0.100",
+                    "last": "10.50.0.110"
+                  },
+                  {
+                    "kind": "PoolsOnly",
+                    "subnets": [
+                      {
+                        "network": "10.50.0.0",
+                        "prefix": 24
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "lpic2-dhcp-dynamic-ranges-case-1",
+                "label": "Two occupied addresses",
+                "initial": {
+                  "topology": {
+                    "server": "10.50.0.1",
+                    "segments": {
+                      "alpha": {
+                        "subnet": {
+                          "network": "10.50.0.0",
+                          "prefix": 24
+                        },
+                        "server_interface": "10.50.0.1",
+                        "relay_interface": null,
+                        "relay_to_server": false,
+                        "client_unicast_to_server": true,
+                        "occupied": [
+                          "10.50.0.100",
+                          "10.50.0.101"
+                        ]
+                      }
+                    },
+                    "clients": {
+                      "lpic2-dhcp-dynamic-ranges-management": {
+                        "segment": "alpha"
+                      },
+                      "lpic2-dhcp-dynamic-ranges-new-a": {
+                        "segment": "alpha"
+                      },
+                      "lpic2-dhcp-dynamic-ranges-new-b": {
+                        "segment": "alpha"
+                      }
+                    }
+                  },
+                  "policy": {
+                    "server_enabled": true,
+                    "pools": {
+                      "net-10-50-0-0-24": {
+                        "subnet": {
+                          "network": "10.50.0.0",
+                          "prefix": 24
+                        },
+                        "first": "10.50.0.10",
+                        "last": "10.50.0.10",
+                        "excluded": [],
+                        "reservations": {},
+                        "router": "10.50.0.1",
+                        "dns": [
+                          "203.0.113.53"
+                        ],
+                        "lease_seconds": 600
+                      }
+                    },
+                    "relays": {}
+                  },
+                  "now": 0,
+                  "next_token": 1,
+                  "offers": {},
+                  "bindings": {
+                    "lpic2-dhcp-dynamic-ranges-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-50-0-0-24",
+                      "address": "10.50.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.50.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.50.0.1",
+                        "dns": [
+                          "203.0.113.53"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  },
+                  "leases": {
+                    "lpic2-dhcp-dynamic-ranges-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-50-0-0-24",
+                      "address": "10.50.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.50.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.50.0.1",
+                        "dns": [
+                          "203.0.113.53"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  }
+                },
+                "actions": [
+                  {
+                    "kind": "Acquire",
+                    "client": "lpic2-dhcp-dynamic-ranges-new-a"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "lpic2-dhcp-dynamic-ranges-new-b"
+                  }
+                ],
+                "requirements": [
+                  {
+                    "kind": "PreserveBinding",
+                    "client": "lpic2-dhcp-dynamic-ranges-management"
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "lpic2-dhcp-dynamic-ranges-new-a",
+                    "subnet": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.50.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "lpic2-dhcp-dynamic-ranges-new-a",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "lpic2-dhcp-dynamic-ranges-new-b",
+                    "subnet": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.50.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "lpic2-dhcp-dynamic-ranges-new-b",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "PoolWindow",
+                    "subnet": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "first": "10.50.0.100",
+                    "last": "10.50.0.110"
+                  },
+                  {
+                    "kind": "PoolsOnly",
+                    "subnets": [
+                      {
+                        "network": "10.50.0.0",
+                        "prefix": 24
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "workshop-dynamic-ranges",
+            "instructions": "In the separate workshop, provide two new clients with distinct addresses from 10.60.0.100–10.60.0.110, router 10.60.0.1, DNS 203.0.113.53 and 600-second grants. Preserve the held management lease. Compare the available-address case with the case where .100 and .101 are already occupied.",
+            "starter": "default-lease-time 600;\nmax-lease-time 3600;\noption domain-name-servers 203.0.113.53;\nsubnet 10.60.0.0 netmask 255.255.255.0 {\n  option routers 10.60.0.1;\n  range 10.60.0.100 10.60.0.102;\n}\n",
+            "cases": [
+              {
+                "id": "workshop-dynamic-ranges-case-0",
+                "label": "Available addresses",
+                "initial": {
+                  "topology": {
+                    "server": "10.60.0.1",
+                    "segments": {
+                      "alpha": {
+                        "subnet": {
+                          "network": "10.60.0.0",
+                          "prefix": 24
+                        },
+                        "server_interface": "10.60.0.1",
+                        "relay_interface": null,
+                        "relay_to_server": false,
+                        "client_unicast_to_server": true,
+                        "occupied": []
+                      }
+                    },
+                    "clients": {
+                      "workshop-dynamic-ranges-management": {
+                        "segment": "alpha"
+                      },
+                      "workshop-dynamic-ranges-new-a": {
+                        "segment": "alpha"
+                      },
+                      "workshop-dynamic-ranges-new-b": {
+                        "segment": "alpha"
+                      }
+                    }
+                  },
+                  "policy": {
+                    "server_enabled": true,
+                    "pools": {
+                      "net-10-60-0-0-24": {
+                        "subnet": {
+                          "network": "10.60.0.0",
+                          "prefix": 24
+                        },
+                        "first": "10.60.0.10",
+                        "last": "10.60.0.10",
+                        "excluded": [],
+                        "reservations": {},
+                        "router": "10.60.0.1",
+                        "dns": [
+                          "203.0.113.53"
+                        ],
+                        "lease_seconds": 600
+                      }
+                    },
+                    "relays": {}
+                  },
+                  "now": 0,
+                  "next_token": 1,
+                  "offers": {},
+                  "bindings": {
+                    "workshop-dynamic-ranges-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-60-0-0-24",
+                      "address": "10.60.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.60.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.60.0.1",
+                        "dns": [
+                          "203.0.113.53"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  },
+                  "leases": {
+                    "workshop-dynamic-ranges-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-60-0-0-24",
+                      "address": "10.60.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.60.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.60.0.1",
+                        "dns": [
+                          "203.0.113.53"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  }
+                },
+                "actions": [
+                  {
+                    "kind": "Acquire",
+                    "client": "workshop-dynamic-ranges-new-a"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "workshop-dynamic-ranges-new-b"
+                  }
+                ],
+                "requirements": [
+                  {
+                    "kind": "PreserveBinding",
+                    "client": "workshop-dynamic-ranges-management"
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "workshop-dynamic-ranges-new-a",
+                    "subnet": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.60.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "workshop-dynamic-ranges-new-a",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "workshop-dynamic-ranges-new-b",
+                    "subnet": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.60.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "workshop-dynamic-ranges-new-b",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "PoolWindow",
+                    "subnet": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "first": "10.60.0.100",
+                    "last": "10.60.0.110"
+                  },
+                  {
+                    "kind": "PoolsOnly",
+                    "subnets": [
+                      {
+                        "network": "10.60.0.0",
+                        "prefix": 24
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "workshop-dynamic-ranges-case-1",
+                "label": "Two occupied addresses",
+                "initial": {
+                  "topology": {
+                    "server": "10.60.0.1",
+                    "segments": {
+                      "alpha": {
+                        "subnet": {
+                          "network": "10.60.0.0",
+                          "prefix": 24
+                        },
+                        "server_interface": "10.60.0.1",
+                        "relay_interface": null,
+                        "relay_to_server": false,
+                        "client_unicast_to_server": true,
+                        "occupied": [
+                          "10.60.0.100",
+                          "10.60.0.101"
+                        ]
+                      }
+                    },
+                    "clients": {
+                      "workshop-dynamic-ranges-management": {
+                        "segment": "alpha"
+                      },
+                      "workshop-dynamic-ranges-new-a": {
+                        "segment": "alpha"
+                      },
+                      "workshop-dynamic-ranges-new-b": {
+                        "segment": "alpha"
+                      }
+                    }
+                  },
+                  "policy": {
+                    "server_enabled": true,
+                    "pools": {
+                      "net-10-60-0-0-24": {
+                        "subnet": {
+                          "network": "10.60.0.0",
+                          "prefix": 24
+                        },
+                        "first": "10.60.0.10",
+                        "last": "10.60.0.10",
+                        "excluded": [],
+                        "reservations": {},
+                        "router": "10.60.0.1",
+                        "dns": [
+                          "203.0.113.53"
+                        ],
+                        "lease_seconds": 600
+                      }
+                    },
+                    "relays": {}
+                  },
+                  "now": 0,
+                  "next_token": 1,
+                  "offers": {},
+                  "bindings": {
+                    "workshop-dynamic-ranges-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-60-0-0-24",
+                      "address": "10.60.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.60.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.60.0.1",
+                        "dns": [
+                          "203.0.113.53"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  },
+                  "leases": {
+                    "workshop-dynamic-ranges-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-60-0-0-24",
+                      "address": "10.60.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.60.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.60.0.1",
+                        "dns": [
+                          "203.0.113.53"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  }
+                },
+                "actions": [
+                  {
+                    "kind": "Acquire",
+                    "client": "workshop-dynamic-ranges-new-a"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "workshop-dynamic-ranges-new-b"
+                  }
+                ],
+                "requirements": [
+                  {
+                    "kind": "PreserveBinding",
+                    "client": "workshop-dynamic-ranges-management"
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "workshop-dynamic-ranges-new-a",
+                    "subnet": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.60.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "workshop-dynamic-ranges-new-a",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "workshop-dynamic-ranges-new-b",
+                    "subnet": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.60.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "workshop-dynamic-ranges-new-b",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "PoolWindow",
+                    "subnet": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "first": "10.60.0.100",
+                    "last": "10.60.0.110"
+                  },
+                  {
+                    "kind": "PoolsOnly",
+                    "subnets": [
+                      {
+                        "network": "10.60.0.0",
+                        "prefix": 24
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": "default-lease-time 600;\nmax-lease-time 3600;\noption domain-name-servers 203.0.113.53;\nsubnet 10.60.0.0 netmask 255.255.255.0 {\n  option routers 10.60.0.1;\n  range 10.60.0.100 10.60.0.103;\n}\n"
+        }
+      },
+      "solution": [
+        "DHCP CONFIG\ndefault-lease-time 600;\nmax-lease-time 3600;\noption domain-name-servers 203.0.113.53;\nsubnet 10.50.0.0 netmask 255.255.255.0 {\n  option routers 10.50.0.1;\n  range 10.50.0.100 10.50.0.103;\n}\n"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "lpic2-dhcp-option-scope",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "DHCP server configuration",
+      "unit": "linux-dhcp-configuration",
+      "title": "Repair inherited DHCP options and verify a renewing client",
+      "summary": "Diagnose option inheritance across two networks and distinguish new, renewing and untouched client settings.",
+      "objective": "Alpha clients need router 10.51.0.1 and DNS 203.0.113.53; beta clients need router 10.51.1.1 and DNS 203.0.113.54. Every new or renewed client needs a 600-second grant; evaluate both supplied occupancy cases. Keep alpha’s dynamic range inside .10–.20 and beta’s inside .50–.60 in their respective supplied /24 networks. Serve no other dynamic subnet. The management client renews at 300 virtual seconds and must receive the corrected alpha settings. Keep the untouched beta client’s supplied address, options and lease timing exactly unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Edit the supplied virtual configuration, run both client cases, inspect specific failures and retry."
+      ],
+      "guide": [],
+      "explanation": "Use global DNS .53 and a local beta DNS .54 override, with local .1 routers and an effective default duration of 600 seconds. Equivalent explicit per-subnet settings are supported. Keep dynamic ranges eligible for the supplied renewals and large enough in both occupancy cases. The management renewal receives new options; no action should rewrite the untouched held beta binding.",
+      "hints": [
+        "A global DNS parameter supplies a default. A local option inside one subnet changes only that subnet’s inherited DNS.",
+        "Compare new and renewing clients with the untouched held client. Loading configuration is not a broadcast of new options to all current clients."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://kb.isc.org/docs/isc-dhcp-44-manual-pages-dhcpdconf",
+        "https://kb.isc.org/docs/isc-dhcp-44-manual-pages-dhcp-options"
+      ],
+      "simplifications": "Offline legacy ISC-style configuration subset and deterministic logical clients, not an ISC daemon or packet capture. At most eight /1–30 subnets, one inclusive range of up to 256 addresses per subnet, numeric router/DNS options and bounded default/max lease durations. /31 and /32 are excluded special cases. Global parameters precede subnet declarations; local parameters precede range. Includes, hooks, static host declarations, router lists, shared networks, IPv6, failover and unmodeled syntax refuse honestly. No host files, commands, services, real network or wall clock. Renew is limited to an eligible held address during the supplied renewal window; no ISC NAK/cache/lease-file fidelity. ISC DHCP is EOL; this teaches an exam-listed legacy format, not a deployment recommendation.",
+      "initial": {
+        "kind": "DhcpConfig",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-dhcp-option-scope",
+          "view": "introduction",
+          "assignment": {
+            "draft": "default-lease-time 600;\nmax-lease-time 3600;\noption domain-name-servers 203.0.113.99;\nsubnet 10.51.0.0 netmask 255.255.255.0 {\n  option routers 10.51.0.1;\n  range 10.51.0.10 10.51.0.15;\n}\nsubnet 10.51.1.0 netmask 255.255.255.0 {\n  option routers 10.51.1.1;\n  option domain-name-servers 203.0.113.53;\n  range 10.51.1.50 10.51.1.53;\n}\n",
+            "tested": null
+          },
+          "practice": {
+            "draft": "default-lease-time 600;\nmax-lease-time 3600;\noption domain-name-servers 203.0.113.99;\nsubnet 10.61.0.0 netmask 255.255.255.0 {\n  option routers 10.61.0.1;\n  range 10.61.0.10 10.61.0.15;\n}\nsubnet 10.61.1.0 netmask 255.255.255.0 {\n  option routers 10.61.1.1;\n  option domain-name-servers 203.0.113.53;\n  range 10.61.1.50 10.61.1.53;\n}\n",
+            "tested": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "DhcpConfig",
+        "definition": {
+          "initial": {
+            "id": "lpic2-dhcp-option-scope",
+            "instructions": "Alpha clients need router 10.51.0.1 and DNS 203.0.113.53; beta clients need router 10.51.1.1 and DNS 203.0.113.54. Every new or renewed client needs a 600-second grant; evaluate both supplied occupancy cases. Keep alpha’s dynamic range inside .10–.20 and beta’s inside .50–.60 in their respective supplied /24 networks. Serve no other dynamic subnet. The management client renews at 300 virtual seconds and must receive the corrected alpha settings. Keep the untouched beta client’s supplied address, options and lease timing exactly unchanged.",
+            "starter": "default-lease-time 600;\nmax-lease-time 3600;\noption domain-name-servers 203.0.113.99;\nsubnet 10.51.0.0 netmask 255.255.255.0 {\n  option routers 10.51.0.1;\n  range 10.51.0.10 10.51.0.15;\n}\nsubnet 10.51.1.0 netmask 255.255.255.0 {\n  option routers 10.51.1.1;\n  option domain-name-servers 203.0.113.53;\n  range 10.51.1.50 10.51.1.53;\n}\n",
+            "cases": [
+              {
+                "id": "lpic2-dhcp-option-scope-case-0",
+                "label": "Available addresses",
+                "initial": {
+                  "topology": {
+                    "server": "10.51.0.1",
+                    "segments": {
+                      "alpha": {
+                        "subnet": {
+                          "network": "10.51.0.0",
+                          "prefix": 24
+                        },
+                        "server_interface": "10.51.0.1",
+                        "relay_interface": null,
+                        "relay_to_server": false,
+                        "client_unicast_to_server": true,
+                        "occupied": []
+                      },
+                      "beta": {
+                        "subnet": {
+                          "network": "10.51.1.0",
+                          "prefix": 24
+                        },
+                        "server_interface": "10.51.1.1",
+                        "relay_interface": null,
+                        "relay_to_server": false,
+                        "client_unicast_to_server": true,
+                        "occupied": []
+                      }
+                    },
+                    "clients": {
+                      "lpic2-dhcp-option-scope-management": {
+                        "segment": "alpha"
+                      },
+                      "lpic2-dhcp-option-scope-new-a": {
+                        "segment": "alpha"
+                      },
+                      "lpic2-dhcp-option-scope-new-b": {
+                        "segment": "alpha"
+                      },
+                      "lpic2-dhcp-option-scope-remote": {
+                        "segment": "beta"
+                      },
+                      "lpic2-dhcp-option-scope-untouched": {
+                        "segment": "beta"
+                      }
+                    }
+                  },
+                  "policy": {
+                    "server_enabled": true,
+                    "pools": {
+                      "net-10-51-0-0-24": {
+                        "subnet": {
+                          "network": "10.51.0.0",
+                          "prefix": 24
+                        },
+                        "first": "10.51.0.10",
+                        "last": "10.51.0.10",
+                        "excluded": [],
+                        "reservations": {},
+                        "router": "10.51.0.1",
+                        "dns": [
+                          "203.0.113.10"
+                        ],
+                        "lease_seconds": 600
+                      },
+                      "net-10-51-1-0-24": {
+                        "subnet": {
+                          "network": "10.51.1.0",
+                          "prefix": 24
+                        },
+                        "first": "10.51.1.50",
+                        "last": "10.51.1.53",
+                        "excluded": [],
+                        "reservations": {},
+                        "router": "10.51.1.1",
+                        "dns": [
+                          "203.0.113.54"
+                        ],
+                        "lease_seconds": 600
+                      }
+                    },
+                    "relays": {}
+                  },
+                  "now": 0,
+                  "next_token": 2,
+                  "offers": {},
+                  "bindings": {
+                    "lpic2-dhcp-option-scope-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-51-0-0-24",
+                      "address": "10.51.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.51.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.51.0.1",
+                        "dns": [
+                          "203.0.113.10"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    },
+                    "lpic2-dhcp-option-scope-untouched": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-51-1-0-24",
+                      "address": "10.51.1.50",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.51.1.0",
+                          "prefix": 24
+                        },
+                        "router": "10.51.1.1",
+                        "dns": [
+                          "203.0.113.54"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  },
+                  "leases": {
+                    "lpic2-dhcp-option-scope-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-51-0-0-24",
+                      "address": "10.51.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.51.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.51.0.1",
+                        "dns": [
+                          "203.0.113.10"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    },
+                    "lpic2-dhcp-option-scope-untouched": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-51-1-0-24",
+                      "address": "10.51.1.50",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.51.1.0",
+                          "prefix": 24
+                        },
+                        "router": "10.51.1.1",
+                        "dns": [
+                          "203.0.113.54"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  }
+                },
+                "actions": [
+                  {
+                    "kind": "Advance",
+                    "seconds": 300
+                  },
+                  {
+                    "kind": "Renew",
+                    "client": "lpic2-dhcp-option-scope-management"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "lpic2-dhcp-option-scope-new-a"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "lpic2-dhcp-option-scope-new-b"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "lpic2-dhcp-option-scope-remote"
+                  }
+                ],
+                "requirements": [
+                  {
+                    "kind": "Parameters",
+                    "client": "lpic2-dhcp-option-scope-new-a",
+                    "subnet": {
+                      "network": "10.51.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.51.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "lpic2-dhcp-option-scope-new-a",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "lpic2-dhcp-option-scope-new-b",
+                    "subnet": {
+                      "network": "10.51.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.51.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "lpic2-dhcp-option-scope-new-b",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "lpic2-dhcp-option-scope-remote",
+                    "subnet": {
+                      "network": "10.51.1.0",
+                      "prefix": 24
+                    },
+                    "router": "10.51.1.1",
+                    "dns": [
+                      "203.0.113.54"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "lpic2-dhcp-option-scope-remote",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "PoolWindow",
+                    "subnet": {
+                      "network": "10.51.0.0",
+                      "prefix": 24
+                    },
+                    "first": "10.51.0.10",
+                    "last": "10.51.0.20"
+                  },
+                  {
+                    "kind": "PoolWindow",
+                    "subnet": {
+                      "network": "10.51.1.0",
+                      "prefix": 24
+                    },
+                    "first": "10.51.1.50",
+                    "last": "10.51.1.60"
+                  },
+                  {
+                    "kind": "PoolsOnly",
+                    "subnets": [
+                      {
+                        "network": "10.51.0.0",
+                        "prefix": 24
+                      },
+                      {
+                        "network": "10.51.1.0",
+                        "prefix": 24
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "lpic2-dhcp-option-scope-management",
+                    "subnet": {
+                      "network": "10.51.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.51.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "lpic2-dhcp-option-scope-management",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "PreserveBinding",
+                    "client": "lpic2-dhcp-option-scope-untouched"
+                  }
+                ]
+              },
+              {
+                "id": "lpic2-dhcp-option-scope-case-1",
+                "label": "Two occupied addresses",
+                "initial": {
+                  "topology": {
+                    "server": "10.51.0.1",
+                    "segments": {
+                      "alpha": {
+                        "subnet": {
+                          "network": "10.51.0.0",
+                          "prefix": 24
+                        },
+                        "server_interface": "10.51.0.1",
+                        "relay_interface": null,
+                        "relay_to_server": false,
+                        "client_unicast_to_server": true,
+                        "occupied": [
+                          "10.51.0.11",
+                          "10.51.0.12"
+                        ]
+                      },
+                      "beta": {
+                        "subnet": {
+                          "network": "10.51.1.0",
+                          "prefix": 24
+                        },
+                        "server_interface": "10.51.1.1",
+                        "relay_interface": null,
+                        "relay_to_server": false,
+                        "client_unicast_to_server": true,
+                        "occupied": []
+                      }
+                    },
+                    "clients": {
+                      "lpic2-dhcp-option-scope-management": {
+                        "segment": "alpha"
+                      },
+                      "lpic2-dhcp-option-scope-new-a": {
+                        "segment": "alpha"
+                      },
+                      "lpic2-dhcp-option-scope-new-b": {
+                        "segment": "alpha"
+                      },
+                      "lpic2-dhcp-option-scope-remote": {
+                        "segment": "beta"
+                      },
+                      "lpic2-dhcp-option-scope-untouched": {
+                        "segment": "beta"
+                      }
+                    }
+                  },
+                  "policy": {
+                    "server_enabled": true,
+                    "pools": {
+                      "net-10-51-0-0-24": {
+                        "subnet": {
+                          "network": "10.51.0.0",
+                          "prefix": 24
+                        },
+                        "first": "10.51.0.10",
+                        "last": "10.51.0.10",
+                        "excluded": [],
+                        "reservations": {},
+                        "router": "10.51.0.1",
+                        "dns": [
+                          "203.0.113.10"
+                        ],
+                        "lease_seconds": 600
+                      },
+                      "net-10-51-1-0-24": {
+                        "subnet": {
+                          "network": "10.51.1.0",
+                          "prefix": 24
+                        },
+                        "first": "10.51.1.50",
+                        "last": "10.51.1.53",
+                        "excluded": [],
+                        "reservations": {},
+                        "router": "10.51.1.1",
+                        "dns": [
+                          "203.0.113.54"
+                        ],
+                        "lease_seconds": 600
+                      }
+                    },
+                    "relays": {}
+                  },
+                  "now": 0,
+                  "next_token": 2,
+                  "offers": {},
+                  "bindings": {
+                    "lpic2-dhcp-option-scope-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-51-0-0-24",
+                      "address": "10.51.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.51.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.51.0.1",
+                        "dns": [
+                          "203.0.113.10"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    },
+                    "lpic2-dhcp-option-scope-untouched": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-51-1-0-24",
+                      "address": "10.51.1.50",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.51.1.0",
+                          "prefix": 24
+                        },
+                        "router": "10.51.1.1",
+                        "dns": [
+                          "203.0.113.54"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  },
+                  "leases": {
+                    "lpic2-dhcp-option-scope-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-51-0-0-24",
+                      "address": "10.51.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.51.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.51.0.1",
+                        "dns": [
+                          "203.0.113.10"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    },
+                    "lpic2-dhcp-option-scope-untouched": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-51-1-0-24",
+                      "address": "10.51.1.50",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.51.1.0",
+                          "prefix": 24
+                        },
+                        "router": "10.51.1.1",
+                        "dns": [
+                          "203.0.113.54"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  }
+                },
+                "actions": [
+                  {
+                    "kind": "Advance",
+                    "seconds": 300
+                  },
+                  {
+                    "kind": "Renew",
+                    "client": "lpic2-dhcp-option-scope-management"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "lpic2-dhcp-option-scope-new-a"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "lpic2-dhcp-option-scope-new-b"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "lpic2-dhcp-option-scope-remote"
+                  }
+                ],
+                "requirements": [
+                  {
+                    "kind": "Parameters",
+                    "client": "lpic2-dhcp-option-scope-new-a",
+                    "subnet": {
+                      "network": "10.51.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.51.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "lpic2-dhcp-option-scope-new-a",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "lpic2-dhcp-option-scope-new-b",
+                    "subnet": {
+                      "network": "10.51.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.51.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "lpic2-dhcp-option-scope-new-b",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "lpic2-dhcp-option-scope-remote",
+                    "subnet": {
+                      "network": "10.51.1.0",
+                      "prefix": 24
+                    },
+                    "router": "10.51.1.1",
+                    "dns": [
+                      "203.0.113.54"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "lpic2-dhcp-option-scope-remote",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "PoolWindow",
+                    "subnet": {
+                      "network": "10.51.0.0",
+                      "prefix": 24
+                    },
+                    "first": "10.51.0.10",
+                    "last": "10.51.0.20"
+                  },
+                  {
+                    "kind": "PoolWindow",
+                    "subnet": {
+                      "network": "10.51.1.0",
+                      "prefix": 24
+                    },
+                    "first": "10.51.1.50",
+                    "last": "10.51.1.60"
+                  },
+                  {
+                    "kind": "PoolsOnly",
+                    "subnets": [
+                      {
+                        "network": "10.51.0.0",
+                        "prefix": 24
+                      },
+                      {
+                        "network": "10.51.1.0",
+                        "prefix": 24
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "lpic2-dhcp-option-scope-management",
+                    "subnet": {
+                      "network": "10.51.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.51.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "lpic2-dhcp-option-scope-management",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "PreserveBinding",
+                    "client": "lpic2-dhcp-option-scope-untouched"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "workshop-option-scope",
+            "instructions": "Repair workshop alpha DNS to 203.0.113.53 and beta DNS to 203.0.113.54, with each subnet’s .1 router and 600-second grants. Retain the supplied ranges. Tests advance virtual time by 300 seconds, renew management, then request leases for three new clients. The untouched beta client must keep its held binding.",
+            "starter": "default-lease-time 600;\nmax-lease-time 3600;\noption domain-name-servers 203.0.113.99;\nsubnet 10.61.0.0 netmask 255.255.255.0 {\n  option routers 10.61.0.1;\n  range 10.61.0.10 10.61.0.15;\n}\nsubnet 10.61.1.0 netmask 255.255.255.0 {\n  option routers 10.61.1.1;\n  option domain-name-servers 203.0.113.53;\n  range 10.61.1.50 10.61.1.53;\n}\n",
+            "cases": [
+              {
+                "id": "workshop-option-scope-case-0",
+                "label": "Available addresses",
+                "initial": {
+                  "topology": {
+                    "server": "10.61.0.1",
+                    "segments": {
+                      "alpha": {
+                        "subnet": {
+                          "network": "10.61.0.0",
+                          "prefix": 24
+                        },
+                        "server_interface": "10.61.0.1",
+                        "relay_interface": null,
+                        "relay_to_server": false,
+                        "client_unicast_to_server": true,
+                        "occupied": []
+                      },
+                      "beta": {
+                        "subnet": {
+                          "network": "10.61.1.0",
+                          "prefix": 24
+                        },
+                        "server_interface": "10.61.1.1",
+                        "relay_interface": null,
+                        "relay_to_server": false,
+                        "client_unicast_to_server": true,
+                        "occupied": []
+                      }
+                    },
+                    "clients": {
+                      "workshop-option-scope-management": {
+                        "segment": "alpha"
+                      },
+                      "workshop-option-scope-new-a": {
+                        "segment": "alpha"
+                      },
+                      "workshop-option-scope-new-b": {
+                        "segment": "alpha"
+                      },
+                      "workshop-option-scope-remote": {
+                        "segment": "beta"
+                      },
+                      "workshop-option-scope-untouched": {
+                        "segment": "beta"
+                      }
+                    }
+                  },
+                  "policy": {
+                    "server_enabled": true,
+                    "pools": {
+                      "net-10-61-0-0-24": {
+                        "subnet": {
+                          "network": "10.61.0.0",
+                          "prefix": 24
+                        },
+                        "first": "10.61.0.10",
+                        "last": "10.61.0.10",
+                        "excluded": [],
+                        "reservations": {},
+                        "router": "10.61.0.1",
+                        "dns": [
+                          "203.0.113.10"
+                        ],
+                        "lease_seconds": 600
+                      },
+                      "net-10-61-1-0-24": {
+                        "subnet": {
+                          "network": "10.61.1.0",
+                          "prefix": 24
+                        },
+                        "first": "10.61.1.50",
+                        "last": "10.61.1.53",
+                        "excluded": [],
+                        "reservations": {},
+                        "router": "10.61.1.1",
+                        "dns": [
+                          "203.0.113.54"
+                        ],
+                        "lease_seconds": 600
+                      }
+                    },
+                    "relays": {}
+                  },
+                  "now": 0,
+                  "next_token": 2,
+                  "offers": {},
+                  "bindings": {
+                    "workshop-option-scope-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-61-0-0-24",
+                      "address": "10.61.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.61.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.61.0.1",
+                        "dns": [
+                          "203.0.113.10"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    },
+                    "workshop-option-scope-untouched": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-61-1-0-24",
+                      "address": "10.61.1.50",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.61.1.0",
+                          "prefix": 24
+                        },
+                        "router": "10.61.1.1",
+                        "dns": [
+                          "203.0.113.54"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  },
+                  "leases": {
+                    "workshop-option-scope-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-61-0-0-24",
+                      "address": "10.61.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.61.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.61.0.1",
+                        "dns": [
+                          "203.0.113.10"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    },
+                    "workshop-option-scope-untouched": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-61-1-0-24",
+                      "address": "10.61.1.50",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.61.1.0",
+                          "prefix": 24
+                        },
+                        "router": "10.61.1.1",
+                        "dns": [
+                          "203.0.113.54"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  }
+                },
+                "actions": [
+                  {
+                    "kind": "Advance",
+                    "seconds": 300
+                  },
+                  {
+                    "kind": "Renew",
+                    "client": "workshop-option-scope-management"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "workshop-option-scope-new-a"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "workshop-option-scope-new-b"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "workshop-option-scope-remote"
+                  }
+                ],
+                "requirements": [
+                  {
+                    "kind": "Parameters",
+                    "client": "workshop-option-scope-new-a",
+                    "subnet": {
+                      "network": "10.61.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.61.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "workshop-option-scope-new-a",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "workshop-option-scope-new-b",
+                    "subnet": {
+                      "network": "10.61.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.61.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "workshop-option-scope-new-b",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "workshop-option-scope-remote",
+                    "subnet": {
+                      "network": "10.61.1.0",
+                      "prefix": 24
+                    },
+                    "router": "10.61.1.1",
+                    "dns": [
+                      "203.0.113.54"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "workshop-option-scope-remote",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "PoolWindow",
+                    "subnet": {
+                      "network": "10.61.0.0",
+                      "prefix": 24
+                    },
+                    "first": "10.61.0.10",
+                    "last": "10.61.0.20"
+                  },
+                  {
+                    "kind": "PoolWindow",
+                    "subnet": {
+                      "network": "10.61.1.0",
+                      "prefix": 24
+                    },
+                    "first": "10.61.1.50",
+                    "last": "10.61.1.60"
+                  },
+                  {
+                    "kind": "PoolsOnly",
+                    "subnets": [
+                      {
+                        "network": "10.61.0.0",
+                        "prefix": 24
+                      },
+                      {
+                        "network": "10.61.1.0",
+                        "prefix": 24
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "workshop-option-scope-management",
+                    "subnet": {
+                      "network": "10.61.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.61.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "workshop-option-scope-management",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "PreserveBinding",
+                    "client": "workshop-option-scope-untouched"
+                  }
+                ]
+              },
+              {
+                "id": "workshop-option-scope-case-1",
+                "label": "Two occupied addresses",
+                "initial": {
+                  "topology": {
+                    "server": "10.61.0.1",
+                    "segments": {
+                      "alpha": {
+                        "subnet": {
+                          "network": "10.61.0.0",
+                          "prefix": 24
+                        },
+                        "server_interface": "10.61.0.1",
+                        "relay_interface": null,
+                        "relay_to_server": false,
+                        "client_unicast_to_server": true,
+                        "occupied": [
+                          "10.61.0.11",
+                          "10.61.0.12"
+                        ]
+                      },
+                      "beta": {
+                        "subnet": {
+                          "network": "10.61.1.0",
+                          "prefix": 24
+                        },
+                        "server_interface": "10.61.1.1",
+                        "relay_interface": null,
+                        "relay_to_server": false,
+                        "client_unicast_to_server": true,
+                        "occupied": []
+                      }
+                    },
+                    "clients": {
+                      "workshop-option-scope-management": {
+                        "segment": "alpha"
+                      },
+                      "workshop-option-scope-new-a": {
+                        "segment": "alpha"
+                      },
+                      "workshop-option-scope-new-b": {
+                        "segment": "alpha"
+                      },
+                      "workshop-option-scope-remote": {
+                        "segment": "beta"
+                      },
+                      "workshop-option-scope-untouched": {
+                        "segment": "beta"
+                      }
+                    }
+                  },
+                  "policy": {
+                    "server_enabled": true,
+                    "pools": {
+                      "net-10-61-0-0-24": {
+                        "subnet": {
+                          "network": "10.61.0.0",
+                          "prefix": 24
+                        },
+                        "first": "10.61.0.10",
+                        "last": "10.61.0.10",
+                        "excluded": [],
+                        "reservations": {},
+                        "router": "10.61.0.1",
+                        "dns": [
+                          "203.0.113.10"
+                        ],
+                        "lease_seconds": 600
+                      },
+                      "net-10-61-1-0-24": {
+                        "subnet": {
+                          "network": "10.61.1.0",
+                          "prefix": 24
+                        },
+                        "first": "10.61.1.50",
+                        "last": "10.61.1.53",
+                        "excluded": [],
+                        "reservations": {},
+                        "router": "10.61.1.1",
+                        "dns": [
+                          "203.0.113.54"
+                        ],
+                        "lease_seconds": 600
+                      }
+                    },
+                    "relays": {}
+                  },
+                  "now": 0,
+                  "next_token": 2,
+                  "offers": {},
+                  "bindings": {
+                    "workshop-option-scope-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-61-0-0-24",
+                      "address": "10.61.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.61.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.61.0.1",
+                        "dns": [
+                          "203.0.113.10"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    },
+                    "workshop-option-scope-untouched": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-61-1-0-24",
+                      "address": "10.61.1.50",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.61.1.0",
+                          "prefix": 24
+                        },
+                        "router": "10.61.1.1",
+                        "dns": [
+                          "203.0.113.54"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  },
+                  "leases": {
+                    "workshop-option-scope-management": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-61-0-0-24",
+                      "address": "10.61.0.10",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.61.0.0",
+                          "prefix": 24
+                        },
+                        "router": "10.61.0.1",
+                        "dns": [
+                          "203.0.113.10"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    },
+                    "workshop-option-scope-untouched": {
+                      "granted_seconds": 600,
+                      "pool": "net-10-61-1-0-24",
+                      "address": "10.61.1.50",
+                      "parameters": {
+                        "subnet": {
+                          "network": "10.61.1.0",
+                          "prefix": 24
+                        },
+                        "router": "10.61.1.1",
+                        "dns": [
+                          "203.0.113.54"
+                        ]
+                      },
+                      "acquired_at": 0,
+                      "renew_at": 300,
+                      "rebind_at": 525,
+                      "expires_at": 600
+                    }
+                  }
+                },
+                "actions": [
+                  {
+                    "kind": "Advance",
+                    "seconds": 300
+                  },
+                  {
+                    "kind": "Renew",
+                    "client": "workshop-option-scope-management"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "workshop-option-scope-new-a"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "workshop-option-scope-new-b"
+                  },
+                  {
+                    "kind": "Acquire",
+                    "client": "workshop-option-scope-remote"
+                  }
+                ],
+                "requirements": [
+                  {
+                    "kind": "Parameters",
+                    "client": "workshop-option-scope-new-a",
+                    "subnet": {
+                      "network": "10.61.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.61.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "workshop-option-scope-new-a",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "workshop-option-scope-new-b",
+                    "subnet": {
+                      "network": "10.61.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.61.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "workshop-option-scope-new-b",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "workshop-option-scope-remote",
+                    "subnet": {
+                      "network": "10.61.1.0",
+                      "prefix": 24
+                    },
+                    "router": "10.61.1.1",
+                    "dns": [
+                      "203.0.113.54"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "workshop-option-scope-remote",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "PoolWindow",
+                    "subnet": {
+                      "network": "10.61.0.0",
+                      "prefix": 24
+                    },
+                    "first": "10.61.0.10",
+                    "last": "10.61.0.20"
+                  },
+                  {
+                    "kind": "PoolWindow",
+                    "subnet": {
+                      "network": "10.61.1.0",
+                      "prefix": 24
+                    },
+                    "first": "10.61.1.50",
+                    "last": "10.61.1.60"
+                  },
+                  {
+                    "kind": "PoolsOnly",
+                    "subnets": [
+                      {
+                        "network": "10.61.0.0",
+                        "prefix": 24
+                      },
+                      {
+                        "network": "10.61.1.0",
+                        "prefix": 24
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "Parameters",
+                    "client": "workshop-option-scope-management",
+                    "subnet": {
+                      "network": "10.61.0.0",
+                      "prefix": 24
+                    },
+                    "router": "10.61.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ]
+                  },
+                  {
+                    "kind": "Duration",
+                    "client": "workshop-option-scope-management",
+                    "seconds": 600
+                  },
+                  {
+                    "kind": "PreserveBinding",
+                    "client": "workshop-option-scope-untouched"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": "default-lease-time 600;\nmax-lease-time 3600;\noption domain-name-servers 203.0.113.53;\nsubnet 10.61.0.0 netmask 255.255.255.0 {\n  option routers 10.61.0.1;\n  range 10.61.0.10 10.61.0.15;\n}\nsubnet 10.61.1.0 netmask 255.255.255.0 {\n  option routers 10.61.1.1;\n  option domain-name-servers 203.0.113.54;\n  range 10.61.1.50 10.61.1.53;\n}\n"
+        }
+      },
+      "solution": [
+        "DHCP CONFIG\ndefault-lease-time 600;\nmax-lease-time 3600;\noption domain-name-servers 203.0.113.53;\nsubnet 10.51.0.0 netmask 255.255.255.0 {\n  option routers 10.51.0.1;\n  range 10.51.0.10 10.51.0.15;\n}\nsubnet 10.51.1.0 netmask 255.255.255.0 {\n  option routers 10.51.1.1;\n  option domain-name-servers 203.0.113.54;\n  range 10.51.1.50 10.51.1.53;\n}\n"
+      ],
+      "prerequisites": [
+        "lpic2-dhcp-dynamic-ranges"
+      ]
+    }
+  ]
+}

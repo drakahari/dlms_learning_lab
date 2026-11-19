@@ -1,0 +1,790 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-map-lookup",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-associative-maps",
+      "topic": "Named lookup and record reconciliation",
+      "title": "Answer a changing catalog by name",
+      "summary": "Resolve supplied requests from a changing named catalog without losing order or literal text.",
+      "objective": "The lab supplies three unique nonempty keys KEY_A/KEY_B/KEY_C and their nonempty VALUE_A/VALUE_B/VALUE_C. Use those actual values; do not hardcode a case-specific catalog. For every supplied argument, print exactly KEY: VALUE and a newline. Use its matching supplied value, or unknown when the request has no match. A blank argument is an unknown request: print : unknown and a newline. Guard it before attempting a map lookup. Preserve argument order, repeated requests, spaces and all literal percent/wildcard/quote text. 01 and 1 are different labels. With no arguments, print nothing. Finish with status 0 and no standard error in every case. Keep every simulated file unchanged. Keys are at most 128 UTF-8 bytes and are never exactly @ or *; no out-of-scope key syntax is required.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Build the lookup and guard blank requests",
+        "Compare the complete requested report"
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "Script",
+        "source": "# Build a lookup from the supplied KEY_A/B/C and VALUE_A/B/C.\n# Read requests from the quoted script arguments and print the required report.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Choose values by requested labels",
+            "args": [
+              "ash",
+              "oak",
+              "missing",
+              "elm"
+            ],
+            "stdin": "",
+            "env": {
+              "KEY_A": "oak",
+              "KEY_B": "elm",
+              "KEY_C": "ash",
+              "VALUE_A": "team north",
+              "VALUE_B": "team west",
+              "VALUE_C": "team south"
+            },
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "ash: team south\noak: team north\nmissing: unknown\nelm: team west\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Values are literal text",
+            "args": [
+              "review",
+              "support",
+              "build"
+            ],
+            "stdin": "",
+            "env": {
+              "KEY_A": "build",
+              "KEY_B": "review",
+              "KEY_C": "support",
+              "VALUE_A": "100% ready",
+              "VALUE_B": "night shift *",
+              "VALUE_C": "cost $5 [checked]"
+            },
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "review: night shift *\nsupport: cost $5 [checked]\nbuild: 100% ready\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Spaces quotes brackets and dollars in keys",
+            "args": [
+              "owner's ] $note",
+              "north desk",
+              "west [blue]"
+            ],
+            "stdin": "",
+            "env": {
+              "KEY_A": "north desk",
+              "KEY_B": "owner's ] $note",
+              "KEY_C": "west [blue]",
+              "VALUE_A": "first owner",
+              "VALUE_B": "second owner",
+              "VALUE_C": "third owner"
+            },
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "owner's ] $note: second owner\nnorth desk: first owner\nwest [blue]: third owner\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Numeric-looking keys are distinct labels",
+            "args": [
+              "1",
+              "01",
+              "001",
+              "0"
+            ],
+            "stdin": "",
+            "env": {
+              "KEY_A": "01",
+              "KEY_B": "1",
+              "KEY_C": "001",
+              "VALUE_A": "leading zero",
+              "VALUE_B": "plain one",
+              "VALUE_C": "two leading zeros"
+            },
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "1: plain one\n01: leading zero\n001: two leading zeros\n0: unknown\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Preserve repeated request order",
+            "args": [
+              "blue",
+              "red",
+              "blue",
+              "green",
+              "red"
+            ],
+            "stdin": "",
+            "env": {
+              "KEY_A": "red",
+              "KEY_B": "blue",
+              "KEY_C": "green",
+              "VALUE_A": "first team",
+              "VALUE_B": "second team",
+              "VALUE_C": "third team"
+            },
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "blue: second team\nred: first team\nblue: second team\ngreen: third team\nred: first team\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Unknown labels are not guessed",
+            "args": [
+              "absent",
+              "other",
+              "missing"
+            ],
+            "stdin": "",
+            "env": {
+              "KEY_A": "alpha",
+              "KEY_B": "beta",
+              "KEY_C": "gamma",
+              "VALUE_A": "one",
+              "VALUE_B": "two",
+              "VALUE_C": "three"
+            },
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "absent: unknown\nother: unknown\nmissing: unknown\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Guard blank requests before lookup",
+            "args": [
+              "",
+              "night",
+              "",
+              "day",
+              ""
+            ],
+            "stdin": "",
+            "env": {
+              "KEY_A": "day",
+              "KEY_B": "evening",
+              "KEY_C": "night",
+              "VALUE_A": "early",
+              "VALUE_B": "middle",
+              "VALUE_C": "late"
+            },
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": ": unknown\nnight: late\n: unknown\nday: early\n: unknown\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "No requests means no output",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "KEY_A": "intake",
+              "KEY_B": "audit",
+              "KEY_C": "release",
+              "VALUE_A": "one",
+              "VALUE_B": "two",
+              "VALUE_C": "three"
+            },
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "A different supplied catalog",
+            "args": [
+              "desk",
+              "ledger",
+              "station",
+              "unknown"
+            ],
+            "stdin": "",
+            "env": {
+              "KEY_A": "ledger",
+              "KEY_B": "station",
+              "KEY_C": "desk",
+              "VALUE_A": "harbor crew",
+              "VALUE_B": "hill crew",
+              "VALUE_C": "field crew"
+            },
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "desk: field crew\nledger: harbor crew\nstation: hill crew\nunknown: unknown\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Whitespace is part of a nonempty key",
+            "args": [
+              " ",
+              "left",
+              " left ",
+              "right ",
+              "right"
+            ],
+            "stdin": "",
+            "env": {
+              "KEY_A": " ",
+              "KEY_B": " left ",
+              "KEY_C": "right ",
+              "VALUE_A": "space owner",
+              "VALUE_B": "left owner",
+              "VALUE_C": "right owner"
+            },
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": " : space owner\nleft: unknown\n left : left owner\nright : right owner\nright: unknown\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Exact key byte boundary",
+            "args": [
+              "éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+              "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+              "short"
+            ],
+            "stdin": "",
+            "env": {
+              "KEY_A": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+              "KEY_B": "éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+              "KEY_C": "short",
+              "VALUE_A": "long ascii",
+              "VALUE_B": "long utf eight",
+              "VALUE_C": "short value"
+            },
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé: long utf eight\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: long ascii\nshort: short value\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Wildcard labels stay literal",
+            "args": [
+              "quote'key",
+              "vendor*name",
+              "dash-key",
+              "vendorXname"
+            ],
+            "stdin": "",
+            "env": {
+              "KEY_A": "vendor*name",
+              "KEY_B": "quote'key",
+              "KEY_C": "dash-key",
+              "VALUE_A": "$KEY_A stays literal",
+              "VALUE_B": "100% complete",
+              "VALUE_C": "* [0]"
+            },
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "quote'key: 100% complete\nvendor*name: $KEY_A stays literal\ndash-key: * [0]\nvendorXname: unknown\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "declare -A owners\nowners[\"$KEY_A\"]=\"$VALUE_A\"\nowners[\"$KEY_B\"]=\"$VALUE_B\"\nowners[\"$KEY_C\"]=\"$VALUE_C\"\nfor request in \"$@\"; do\n    if [ -z \"$request\" ]; then\n        printf '%s: %s\\n' \"$request\" unknown\n    else\n        found=\"${owners[$request]}\"\n        if [ -n \"$found\" ]; then\n            printf '%s: %s\\n' \"$request\" \"$found\"\n        else\n            printf '%s: %s\\n' \"$request\" unknown\n        fi\n    fi\ndone\n"
+      ],
+      "prerequisites": [
+        "shell-array-priority"
+      ],
+      "explanation": "A named map associates supplied labels with values; an indexed position is a different concept. Quoted argument iteration preserves caller order and repeats. Guard the blank request before lookup. Under this task's nonempty-value guarantee, an empty result safely selects unknown. Equivalent supported behavior also passes.",
+      "hints": [
+        "Compare the first wrong output line with that case's supplied keys, values and request order. The three catalog labels change between cases.",
+        "Create a fresh Bash map, store the supplied key/value pairs, then iterate \"$@\" with quotes. Keep the format string literal so percent signs in values stay data.",
+        "Handle an empty request before lookup. Only this task's guaranteed nonempty owner values make an empty lookup a safe unknown fallback."
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on quoted arguments, for loops and indexed arrays. The assignment supplies KEY_A/B/C, VALUE_A/B/C and requests as arguments; create your own fresh map and loop variables.",
+        "concepts": [
+          {
+            "title": "A name can identify a value",
+            "text": "An indexed list uses positions such as 0 and 1. A Bash associative map uses labels instead: one label can find its matching owner without depending on input position. Labels 01 and 1 are different keys. This is Bash-specific syntax, not portable sh."
+          },
+          {
+            "title": "Create a fresh map, then store supplied values",
+            "text": "declare -A staff creates an empty named map. staff[\"$DESK_KEY_A\"]=\"$DESK_VALUE_A\" stores the supplied value under the supplied label. The lab provides those variables; staff is a new name created by the script. Do not redeclare a supplied scalar as a map."
+          },
+          {
+            "title": "Quote a requested label and its value",
+            "text": "\"${staff[$request]}\" reads the value for one label. Double quotes keep spaces, percent signs and wildcard text intact. The lookup does not run the label as code. Report requests with for request in \"$@\" to preserve their order and repeats; do not assume a map iteration order."
+          },
+          {
+            "title": "Guard an empty request before looking it up",
+            "text": "An empty string cannot be a map key. Test [ -z \"$request\" ] first and handle that request as unknown. Missing keys read as empty text. Because this task supplies only nonempty owner values, [ -n \"$answer\" ] can choose a known value; this is not a general test for whether a map entry exists."
+          }
+        ],
+        "example": "declare -A staff\nstaff[\"$DESK_KEY_A\"]=\"$DESK_VALUE_A\"\nstaff[\"$DESK_KEY_B\"]=\"$DESK_VALUE_B\"\nstaff[\"$DESK_KEY_C\"]=\"$DESK_VALUE_C\"\nfor request in \"$@\"; do\n    if [ -z \"$request\" ]; then\n        answer=unknown\n    else\n        answer=\"${staff[$request]}\"\n        if [ -z \"$answer\" ]; then answer=unknown; fi\n    fi\n    printf '%s: %s\\n' \"$request\" \"$answer\"\ndone\n",
+        "inputs": "The separate example supplies DESK_KEY_A/B/C and DESK_VALUE_A/B/C, plus five requests. staff, request and answer are created by the example. Open Expected preview to compare the original output with Actual result.",
+        "try_change": "Change only the value stored under DESK_KEY_A to temporary and Run example. Only the east desk lines should change. Restore that storage line, then replace [ -z \"$request\" ] with false in the first if condition and run again to inspect the empty-key diagnostic. Restore the condition afterward.",
+        "fixture": {
+          "name": "Separate desk lookup",
+          "args": [
+            "east desk",
+            "late desk",
+            "west desk",
+            "east desk",
+            ""
+          ],
+          "stdin": "",
+          "env": {
+            "DESK_KEY_A": "east desk",
+            "DESK_VALUE_A": "blue team",
+            "DESK_KEY_B": "west desk",
+            "DESK_VALUE_B": "silver team",
+            "DESK_KEY_C": "archive desk",
+            "DESK_VALUE_C": "gold team"
+          },
+          "files": {
+            "/work/keep.txt": "Preserve this unrelated note.\n",
+            "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+          },
+          "stdout": "east desk: blue team\nlate desk: unknown\nwest desk: silver team\neast desk: blue team\n: unknown\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Preserve this unrelated note.\n",
+            "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+          }
+        }
+      },
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Arrays.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Looping-Constructs.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html"
+      ],
+      "simplifications": "Proposed evaluator 19, in-process simulated shell only. Bash-specific fresh top-level declare -A and bounded named entries;128 entries/map and128 UTF-8 bytes/key under existing memory/instruction/output limits. No map enumeration/order promise, compound map initialization, array conversion, unset, local/export/xtrace combination, special @/* keys, computed/nested key expressions or host execution. The taught dynamic lookup uses one scalar key variable; expanded key/value data is never reparsed as code. Each test starts with its own sample inputs; simulated files reset for that test. Example work is separate from assignment drafts and earns no assignment credit. Sources checked2026-11-04/05: installed GNU Bash 5.3 manual, Arrays/Builtins/Loops/Conditions; existing documented simulated cut subset.16 fixed Bash 5.3.9 comparisons support the narrow core only; these proposed lessons have not run in the VM or native app.",
+      "retry_guidance": "Read syntax/unsupported diagnostics first. For behavioral failures compare expected versus actual output, error output, status and final files for the first failing sample; edit and retry. Each test uses its own sample inputs and resets simulated files. A correct count or message cannot compensate for the wrong values or changed files."
+    },
+    {
+      "id": "shell-map-reconcile",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-associative-maps",
+      "topic": "Named lookup and record reconciliation",
+      "title": "Reconcile accepted updates into one current report",
+      "summary": "Validate a stream, keep the latest accepted value for each key and report honest entry/rejection counts.",
+      "objective": "Read finite standard input as KEY|VALUE records. Accept exactly one bar and a nonempty key; VALUE may be empty. Preserve all whitespace and literal text. Each accepted record replaces the previous value of its key. Process the final nonempty line even when it has no newline. For every rejected row, print Skipped: LINE and a newline on standard error, increment the rejection count once, and retain earlier accepted data. Do not stop the remaining intake. After intake, for each nonempty argument print KEY=<VALUE> and a newline, in supplied order including repeats. A missing key has empty VALUE. Skip blank arguments. Then print Entries: N and Rejected: N on separate lines, each ending in a newline. N is respectively the number of stored keys and rejected rows; finish with status 0 even when rows were skipped. Keep all simulated files unchanged. Supplied nonempty keys are at most 128 UTF-8 bytes and never exactly @ or *. This is a plain bar-separated format, not CSV or escaped input.",
+      "difficulty": "Advanced",
+      "minutes": 35,
+      "steps": [
+        "Understand the task",
+        "Validate and reconcile complete input",
+        "Report requested values and verify counts"
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "Script",
+        "source": "# Read and validate the supplied record stream.\n# Keep the latest accepted value, report requested keys, then print both counters.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Read a small complete stream",
+            "args": [
+              "elm",
+              "ash",
+              "oak"
+            ],
+            "stdin": "oak|north\nelm|west\nash|south\n",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "elm=<west>\nash=<south>\noak=<north>\nEntries: 3\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Last accepted update replaces earlier value",
+            "args": [
+              "oak",
+              "elm",
+              "oak"
+            ],
+            "stdin": "oak|old\nelm|steady\noak|new\noak|latest\n",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "oak=<latest>\nelm=<steady>\noak=<latest>\nEntries: 2\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "An empty value is still a stored entry",
+            "args": [
+              "oak",
+              "missing",
+              "elm"
+            ],
+            "stdin": "oak|\nelm|present\n",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "oak=<>\nmissing=<>\nelm=<present>\nEntries: 2\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Rejected updates do not overwrite prior data",
+            "args": [
+              "oak",
+              "wrong"
+            ],
+            "stdin": "oak|keep\noak|wrong|extra\n|empty key\n",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "oak=<keep>\nwrong=<>\nEntries: 1\nRejected: 2\n",
+            "stderr": "Skipped: oak|wrong|extra\nSkipped: |empty key\n",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Blank absent and extra separators",
+            "args": [
+              "valid"
+            ],
+            "stdin": "\nno delimiter\na|b|c\nvalid|kept\n",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "valid=<kept>\nEntries: 1\nRejected: 3\n",
+            "stderr": "Skipped: \nSkipped: no delimiter\nSkipped: a|b|c\n",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Final update has no newline",
+            "args": [
+              "oak",
+              "elm"
+            ],
+            "stdin": "oak|old\nelm|steady\noak|new",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "oak=<new>\nelm=<steady>\nEntries: 2\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Spaces wildcard quotes and dollar data",
+            "args": [
+              " north * ",
+              "owner's ]",
+              "north *"
+            ],
+            "stdin": " north * |team $5 [ready]\nowner's ]|100% steady\n",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": " north * =<team $5 [ready]>\nowner's ]=<100% steady>\nnorth *=<>\nEntries: 2\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Numeric labels do not collapse into indices",
+            "args": [
+              "1",
+              "01",
+              "001"
+            ],
+            "stdin": "01|leading\n1|plain\n01|updated\n",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "1=<plain>\n01=<updated>\n001=<>\nEntries: 2\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Empty input and no requests",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "Entries: 0\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "No requests still reports intake counts",
+            "args": [],
+            "stdin": "one|A\ntwo|B\nthree|C\n",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "Entries: 3\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Unknown requests with empty input",
+            "args": [
+              "missing",
+              "",
+              "other"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "missing=<>\nother=<>\nEntries: 0\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          },
+          {
+            "name": "Quoted bars are data and EOF empty value is valid",
+            "args": [
+              "quote",
+              "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+              "last",
+              ""
+            ],
+            "stdin": "quote|\"a|b\"\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz|final\nlast|",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            },
+            "stdout": "quote=<>\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz=<final>\nlast=<>\nEntries: 2\nRejected: 1\n",
+            "stderr": "Skipped: quote|\"a|b\"\n",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Preserve this unrelated note.\n",
+              "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "declare -A latest\nrejected=0\nwhile IFS= read -r line || [ -n \"$line\" ]; do\n    case \"$line\" in\n        *'|'*'|'*)\n            printf 'Skipped: %s\\n' \"$line\" >&2\n            rejected=$((rejected + 1))\n            ;;\n        *'|'*)\n            key=$(printf '%s\\n' \"$line\" | cut -d '|' -f 1)\n            if [ -z \"$key\" ]; then\n                printf 'Skipped: %s\\n' \"$line\" >&2\n                rejected=$((rejected + 1))\n            else\n                value=$(printf '%s\\n' \"$line\" | cut -d '|' -f 2)\n                latest[\"$key\"]=\"$value\"\n            fi\n            ;;\n        *)\n            printf 'Skipped: %s\\n' \"$line\" >&2\n            rejected=$((rejected + 1))\n            ;;\n    esac\ndone\nfor request in \"$@\"; do\n    if [ -n \"$request\" ]; then\n        printf '%s=<%s>\\n' \"$request\" \"${latest[$request]}\"\n    fi\ndone\nprintf 'Entries: %s\\nRejected: %s\\n' \"${#latest[@]}\" \"$rejected\"\n"
+      ],
+      "prerequisites": [
+        "shell-map-lookup",
+        "shell-text-capstone",
+        "shell-preserve-lines"
+      ],
+      "explanation": "Validate the complete record before changing the map. Replacing one key keeps its count unchanged, while storing an empty value still creates an entry. The EOF guard preserves a final nonnewline update. Keep rejection messages on standard error and report the final accepted state in caller-requested order; counts alone do not prove the values are correct.",
+      "hints": [
+        "Inspect standard error and the first different report line separately. An expected Skipped line is normal recovery, not a syntax error.",
+        "Reject two-or-more separators before extracting fields; reject an empty key before storage. Store empty values rather than treating them as missing records.",
+        "Use the preserved-line EOF guard. After the loop, iterate nonempty requests and use the map's entry count, not the number of accepted updates."
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on named lookups, case patterns, cut, command-output capture, counters and preserved-line reading. This introduction revisits exact separator checks and the final-line EOF guard before the independent assignment.",
+        "concepts": [
+          {
+            "title": "A later accepted record updates one label",
+            "text": "A record is one line such as atlas|old: the bar separates the key from its value. catalog[\"$key\"]=\"$value\" stores or replaces that entry. A later atlas|new changes the value without adding another key. Empty values are valid entries, so an empty lookup does not prove a key was absent."
+          },
+          {
+            "title": "Validate the separator before extracting fields",
+            "text": "Accept exactly one bar and a nonempty key. In case patterns, *'|'*'|'* matches two or more bars; *'|'* matches at least one. Check the two-bar pattern first. Quotes in input are ordinary data, not CSV escaping. Use printf '%s\\n' \"$line\" | cut -d '|' -f 1 or -f 2 only after checking the bar count; reject an empty extracted key before storing anything."
+          },
+          {
+            "title": "Read the final line even without its newline",
+            "text": "IFS= read -r line preserves whitespace and backslashes. A final nonempty line without a newline sets line but returns failure. while IFS= read -r line || [ -n \"$line\" ] keeps that last record; an empty EOF ends the loop. The lab supplies finite standard input, not a file you must create."
+          },
+          {
+            "title": "Keep rejected rows separate from the report",
+            "text": "printf 'Skipped: %s\\n' \"$line\" >&2 sends a rejected row to standard error. Increment a separate counter and continue; do not overwrite a prior accepted value. Each invalid row contributes exactly one rejection, even when several checks would fail."
+          },
+          {
+            "title": "Count entries, then report requested keys in order",
+            "text": "${#catalog[@]} counts stored keys, including keys with empty values. It does not count input rows. Iterate the supplied quoted arguments for a stable report order, skip blank requests before lookup, then print the two counters. No requests still requires the counters."
+          }
+        ],
+        "example": "declare -A catalog\nrejected=0\nwhile IFS= read -r line || [ -n \"$line\" ]; do\n    case \"$line\" in\n        *'|'*'|'*)\n            printf 'Skipped: %s\\n' \"$line\" >&2\n            rejected=$((rejected + 1))\n            ;;\n        *'|'*)\n            key=$(printf '%s\\n' \"$line\" | cut -d '|' -f 1)\n            if [ -z \"$key\" ]; then\n                printf 'Skipped: %s\\n' \"$line\" >&2\n                rejected=$((rejected + 1))\n            else\n                value=$(printf '%s\\n' \"$line\" | cut -d '|' -f 2)\n                catalog[\"$key\"]=\"$value\"\n            fi\n            ;;\n        *)\n            printf 'Skipped: %s\\n' \"$line\" >&2\n            rejected=$((rejected + 1))\n            ;;\n    esac\ndone\nfor request in \"$@\"; do\n    if [ -n \"$request\" ]; then\n        printf '%s=<%s>\\n' \"$request\" \"${catalog[$request]}\"\n    fi\ndone\nprintf 'Entries: %s\\nRejected: %s\\n' \"${#catalog[@]}\" \"$rejected\"\n",
+        "inputs": "The separate example supplies atlas|old, lyra| and atlas|new as standard input; the last record has no newline. Requests are atlas, missing, lyra and a blank. catalog, key, value, line and rejected are created by the example.",
+        "try_change": "Remove only || [ -n \"$line\" ] from the while condition and Run example. The last atlas update is skipped, so the old value remains although the entry count is unchanged. Restore the condition, then store a constant instead of \"$value\" and compare report values with counts.",
+        "fixture": {
+          "name": "Separate atlas and lyra updates without final newline",
+          "args": [
+            "atlas",
+            "missing",
+            "lyra",
+            ""
+          ],
+          "stdin": "atlas|old\nlyra|\natlas|new",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Preserve this unrelated note.\n",
+            "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+          },
+          "stdout": "atlas=<new>\nmissing=<>\nlyra=<>\nEntries: 2\nRejected: 0\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Preserve this unrelated note.\n",
+            "/work/a.txt": "Literal wildcard data must not select or change this file.\n"
+          }
+        }
+      },
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Arrays.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Looping-Constructs.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html"
+      ],
+      "simplifications": "Proposed evaluator 19, in-process simulated shell only. Bash-specific fresh top-level declare -A and bounded named entries;128 entries/map and128 UTF-8 bytes/key under existing memory/instruction/output limits. No map enumeration/order promise, compound map initialization, array conversion, unset, local/export/xtrace combination, special @/* keys, computed/nested key expressions or host execution. The taught dynamic lookup uses one scalar key variable; expanded key/value data is never reparsed as code. Each test starts with its own sample inputs; simulated files reset for that test. Example work is separate from assignment drafts and earns no assignment credit. Sources checked2026-11-04/05: installed GNU Bash 5.3 manual, Arrays/Builtins/Loops/Conditions; existing documented simulated cut subset.16 fixed Bash 5.3.9 comparisons support the narrow core only; these proposed lessons have not run in the VM or native app.",
+      "retry_guidance": "Read syntax/unsupported diagnostics first. For behavioral failures compare expected versus actual output, error output, status and final files for the first failing sample; edit and retry. Each test uses its own sample inputs and resets simulated files. A correct count or message cannot compensate for the wrong values or changed files."
+    }
+  ]
+}

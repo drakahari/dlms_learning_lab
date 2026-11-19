@@ -1,4 +1,13 @@
-# Resilient first-hop gateway lessons: unregistered source proposal
+# Resilient first-hop gateway lessons: source history and current review batch
+
+The previously unregistered proposal below is preserved as historical evidence.
+As of2026-11-01 the four byte-exact source tasks are integrated into the209/56
+native review library, following the accepted205/55 teaching baseline. The48
+existing core/workspace/content tests pass. Current integration, rendered flows
+and final candidate evidence are tracked in [GATEWAY_BATCH.md](GATEWAY_BATCH.md);
+source-history statements below do not supersede that current status.
+
+## Original unregistered proposal
 
 Four assignments teach different decisions in the reviewed settled HSRP model.
 They do not extend its protocol subset, register a unit, or grant CCNA3.5 credit.

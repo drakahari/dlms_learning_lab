@@ -546,17 +546,35 @@ impl LabApp {
         let output = egui::Frame::new().fill(palette(ui).input).stroke(egui::Stroke::new(1_f32,palette(ui).border)).inner_margin(10.).show(ui, |ui| {
             controls::nested_scroll(ui, egui::ScrollArea::both().id_salt(("script-output",i,case)).max_height(330.).min_scrolled_height(if r.is_some() { 160. } else { 40. }).auto_shrink([false,r.is_none()]), |ui| {
                 if let Some(r) = r {
-                    let diagnostic = outcome(ui, r);
-                    if !earlier { self.metrics.script_diagnostic = diagnostic; }
                     let engine::Goal::Script { cases } = &self.scenarios[i].goal else { return; };
                     let c = &cases[case];
+                    let traced_mismatch = !earlier && r.error.is_none() && !c.accepts(r)
+                        && self.scenarios[i].unit=="shell-tracing-diagnosis"
+                        && r.stderr.lines().any(|line|line.starts_with("+ "));
+                    // Explain the diagnostic before long trace text consumes the
+                    // bounded output viewport; keep one actionable message.
+                    if traced_mismatch {
+                        ui.label("The + lines are debugging traces. Remove the enabling set -x and run again for the final checks; set +x at the end does not erase earlier lines.");
+                    }
+                    let diagnostic = outcome(ui, r);
+                    if !earlier { self.metrics.script_diagnostic = diagnostic; }
                     if !earlier && r.error.is_none() && !c.accepts(r) {
                         ui.label(RichText::new("Behavior differs · Edit your script and Run again.").color(palette(ui).error));
                         if !self.scenarios[i].retry_guidance.is_empty() { ui.label(&self.scenarios[i].retry_guidance); }
                         if c.stdout != r.stdout { if self.scenarios[i].retry_guidance.is_empty() { ui.label(teaching::output_advice(&c.stdout,&r.stdout)); } output_diff(ui,"Standard output", &c.stdout, &r.stdout); }
-                        if c.stderr != r.stderr { ui.label("Standard error is the separate channel for problem messages; >&2 sends text there."); output_diff(ui,"Standard error", &c.stderr, &r.stderr); }
+                        if c.stderr != r.stderr {
+                            if !traced_mismatch {ui.label("Standard error is the separate channel for diagnostics; >&2 sends text there.");}
+                            output_diff(ui,"Standard error", &c.stderr, &r.stderr);
+                        }
                         if c.status != r.status { ui.label(format!("Expected exit status: {} · Actual: {}. Match the status stated for these inputs; a nonzero status can be the correct result of an investigation.", c.status, r.status)); }
-                        if c.after != r.files { ui.label("The virtual files differ. Check the destination path, filter and whether > replaced or >> appended text. Inspect the files below."); }
+                        if c.after != r.files {
+                            let explanation=match self.scenarios[i].id.as_str(){
+                                "shell-stage-report"=>"Compare the source, destination and protected files. Copy the source exactly; a success message does not prove that data was preserved.",
+                                "shell-cleanup-preview"=>"Preview must leave every file unchanged. Apply removes only requested allowed files; validate the entire request before removing the first file.",
+                                "shell-recover-publication"=>"Compare CURRENT and BACKUP separately. Deploy saves the previous CURRENT; restore copies the backup without consuming it. Validation errors must leave every file unchanged.",
+                                _=>"The virtual files differ. Check the destination path, filter and whether > replaced or >> appended text. Inspect the files below.",
+                            };ui.label(explanation);
+                        }
                     }
                 } else { ui.label("Type your script in the editor, then choose Run script. Output and feedback appear here."); }
             });
@@ -664,7 +682,7 @@ pub(super) fn outcome(ui: &mut egui::Ui, r: &shell::Outcome) -> Option<egui::Rec
     );
     if !r.stderr.is_empty() {
         ui.label(
-            RichText::new("Standard error · problem messages")
+            RichText::new("Standard error · diagnostics")
                 .small()
                 .color(palette(ui).error),
         );

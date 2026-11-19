@@ -26,7 +26,7 @@ def sha(path):
     return digest.hexdigest()
 
 
-def candidate(root, value):
+def candidate(root, value, expected_manifest_sha256=None):
     distribution = owned_directory(root, root / 'dist')
     location = Path(value).resolve(strict=True)
     if not location.is_relative_to(distribution) or not location.is_dir():
@@ -35,8 +35,14 @@ def candidate(root, value):
     if manifest.is_symlink() or not manifest.is_file() or manifest.stat().st_size > 1_000_000:
         raise ValueError('Expected a bounded ordinary BUILD_INFO.json')
     info = json.loads(manifest.read_text())
-    if not re.fullmatch(r'[0-9a-f]{40}', info.get('revision', '')):
-        raise ValueError('Expected an exact source revision')
+    if not re.fullmatch(r'[0-9a-f]{40}(?:-dirty)?', info.get('revision', '')):
+        raise ValueError('Expected an exact source revision with optional explicit dirty marker')
+    if info['revision'].endswith('-dirty'):
+        if (not isinstance(expected_manifest_sha256, str)
+                or not re.fullmatch('[0-9a-f]{64}', expected_manifest_sha256)
+                or sha(manifest) != expected_manifest_sha256):
+            raise ValueError('Review candidate requires its exact independently retained manifest hash')
+        review_sources(info)
     for name in ['install.sh', 'uninstall.sh', 'dlms-learning-lab', 'INSTALL_FILES.txt']:
         path = location / name
         if path.is_symlink() or not path.is_file():
@@ -44,6 +50,51 @@ def candidate(root, value):
     if sha(location / 'dlms-learning-lab') != info.get('binary_sha256'):
         raise ValueError('Candidate executable does not match its build manifest')
     return location, info
+
+
+def review_sources(info):
+    """Validate declared review metadata. The explicit manifest pin binds its receipt.
+
+    This does not independently reconstruct the historical complete source tree,
+    and it never makes a dirty build a release identity.
+    """
+    sources = info.get('pilot_source_sha256')
+    if (info.get('pilot_profile') != 'Separate ccna-presentation-pilot subdirectory; originals never written'
+            or not isinstance(sources, dict) or not 4 <= len(sources) <= 2000
+            or not {'src/main.rs', 'src/lib.rs', 'src/pack.rs', 'src/course.rs'} <= sources.keys()):
+        raise ValueError('Dirty review candidate needs its bounded source closure and protected profile')
+    for name, value in sources.items():
+        if (not isinstance(name, str) or len(name) > 256 or not name.startswith(('src/', 'scenarios/'))
+                or any(part in ('', '.', '..') for part in name.split('/'))
+                or not re.fullmatch(r"[A-Za-z0-9_./-]+", name) or "\\" in name or not isinstance(value, str) or not re.fullmatch('[0-9a-f]{64}', value)):
+            raise ValueError('Invalid review source identity')
+    bundled = info.get('bundled_content')
+    if (not isinstance(bundled, dict) or not bundled
+            or any(not isinstance(name, str) for name in bundled)):
+        raise ValueError('Review candidate needs its bundled scenario identities')
+    expected_scenarios = {'scenarios/' + name: value for name, value in bundled.items()}
+    if {name: value for name, value in sources.items() if name.startswith('scenarios/')} != expected_scenarios:
+        raise ValueError('Review source metadata does not match every bundled scenario')
+    catalog = info.get('pilot_catalog')
+    if (not isinstance(catalog, dict) or catalog.get('all_existing_review_labs') is not True
+            or type(catalog.get('labs')) is not int or type(catalog.get('units')) is not int
+            or not 1 <= catalog['units'] <= catalog['labs'] <= 1000):
+        raise ValueError('Review catalog identity is required')
+    return sources
+
+
+def upgrade_identity(old_info, info):
+    """Require different actual builds, even when no new commit is authorized."""
+    if old_info['binary_sha256'] == info['binary_sha256']:
+        raise ValueError('An identical executable cannot establish upgrade acceptance')
+    if old_info['revision'] != info['revision']:
+        return 'different-revision'
+    if not info['revision'].endswith('-dirty'):
+        raise ValueError('Same clean revision cannot establish upgrade acceptance')
+    old_sources, sources = review_sources(old_info), review_sources(info)
+    if not any(old_sources[name] != sources[name] for name in old_sources.keys() & sources.keys()):
+        raise ValueError('A review upgrade needs a changed common source, not only removed/added metadata')
+    return 'different-review-source-and-binary'
 
 
 def require(condition, message):
@@ -129,6 +180,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--candidate', type=Path, required=True)
     parser.add_argument('--previous', type=Path, required=True)
+    parser.add_argument('--candidate-manifest-sha256')
+    parser.add_argument('--previous-manifest-sha256')
     parser.add_argument('--labs', type=int, required=True)
     parser.add_argument('--units', type=int, required=True)
     args = parser.parse_args()
@@ -141,13 +194,12 @@ def main():
     temporary = Path(os.environ.get('TMPDIR', '/')).resolve()
     if not temporary.is_relative_to(ROOT / '.build-artifacts'):
         parser.error('Use the project disk-backed temporary workflow')
-    current, info = candidate(ROOT, args.candidate)
+    current, info = candidate(ROOT, args.candidate, args.candidate_manifest_sha256)
     archive = current.with_name(current.name + '.tar.gz')
     if archive.is_symlink() or not archive.is_file():
         parser.error('Expected the ordinary archive beside the candidate')
-    previous, old_info = candidate(ROOT, args.previous)
-    if old_info['revision'] == info['revision']:
-        parser.error('Upgrade evidence requires a different previous source revision')
+    previous, old_info = candidate(ROOT, args.previous, args.previous_manifest_sha256)
+    upgrade_kind = upgrade_identity(old_info, info)
     # The parent dev.py owns the single shared lock, memory observer and process
     # group. All child commands are fixed project installers or static app flags.
     base = installation_base(ROOT)
@@ -178,7 +230,7 @@ def main():
               '--desktop-dir', menu])
 
     install(previous)
-    require(json.loads((prefix / 'BUILD_INFO.json').read_text())['revision'] == old_info['revision'], 'Previous build identity differs')
+    require(json.loads((prefix / 'BUILD_INFO.json').read_text()) == old_info, 'Previous build identity differs')
     require(sha(prefix / 'dlms-learning-lab') == old_info['binary_sha256'], 'Previous installed binary differs')
     require(old_info['revision'] in call([bindir / 'dlms-learning-lab', '--version']), 'Previous executable identity differs')
     install(current)
@@ -199,6 +251,12 @@ def main():
               'app': str(bindir / 'dlms-learning-lab'), 'binary_sha256': sha(binary),
               'archive_sha256': sha(archive),
               'previous_revision': old_info['revision'], 'catalog': contents,
+              'previous_binary_sha256': old_info['binary_sha256'],
+              'upgrade_identity': upgrade_kind,
+              'candidate_manifest_sha256': sha(current / 'BUILD_INFO.json'),
+              'previous_manifest_sha256': sha(previous / 'BUILD_INFO.json'),
+              'previous_source_sha256': old_info.get('pilot_source_sha256'),
+              'source_sha256': info.get('pilot_source_sha256'),
               'synthetic_original_nine_bytes_sha256': hashlib.sha256(original).hexdigest(),
               'checks': ['upgrade', 'outside-checkout identity/content/hash', 'desktop validation',
                          'clean uninstall/reinstall', 'exact synthetic progress retention'],

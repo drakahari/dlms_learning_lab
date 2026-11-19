@@ -1,0 +1,1771 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-bridge-lan-commission",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Linux bridge interfaces",
+      "unit": "linux-bridged-lan",
+      "title": "Join two LAN segments with a Linux bridge",
+      "summary": "Connect two untagged LAN segments with a Linux bridge, keep the host address on the bridge, and explain which paths remain when one port is unavailable.",
+      "objective": "Prepare the four saved virtual profiles for the next simulated startup: put a usable address with the supplied LAN prefix on br0, distinct from the two workstations, and attach both intended physical NICs as bridge ports. With both ports available, br0 must reach both workstations and the workstations must have a two-way untagged path through the bridge. When a physical port is unavailable, retain the reachable segment and keep the two segments isolated; do not invent bond-style failover. Keep the current bridge IP settings, controller configuration and attached membership unchanged while re-reading saved files. Keep audit.nmconnection unchanged, keep Audit reachable on mgmt0 and add no default route there. Retain all four supplied filenames and UUIDs. Choose Test startup profiles and inspect all three physical cases.",
+      "difficulty": "Advanced",
+      "minutes": 35,
+      "initial": {
+        "kind": "NmProfiles",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-bridge-lan-commission",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "bridge.nmconnection": "[connection]\nid=Workshop bridge\nuuid=40000240-0000-4000-8000-000000000001\ntype=bridge\ninterface-name=br0\nautoconnect=true\nautoconnect-ports=0\n[ethernet]\n[bridge]\n[ipv4]\nmethod=manual\naddress1=10.242.0.20/24\n[ipv6]\nmethod=disabled\naddr-gen-mode=default\n[proxy]\n",
+              "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 bridge port\nuuid=40000240-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+              "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 bridge port\nuuid=40000240-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\n[ethernet]\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=40000240-0000-4000-8000-000000000004\ntype=ethernet\ninterface-name=mgmt0\nautoconnect=true\n[ipv4]\nmethod=manual\naddress1=10.241.0.20/24\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "bridge.nmconnection"
+          },
+          "practice": {
+            "draft": {
+              "bridge.nmconnection": "[connection]\nid=Workshop bridge\nuuid=40000250-0000-4000-8000-000000000001\ntype=bridge\ninterface-name=br0\nautoconnect=true\nautoconnect-ports=0\n[ethernet]\n[bridge]\n[ipv4]\nmethod=manual\naddress1=10.252.0.20/24\n[ipv6]\nmethod=disabled\naddr-gen-mode=default\n[proxy]\n",
+              "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 bridge port\nuuid=40000250-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+              "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 bridge port\nuuid=40000250-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\n[ethernet]\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=40000250-0000-4000-8000-000000000004\ntype=ethernet\ninterface-name=mgmt0\nautoconnect=true\n[ipv4]\nmethod=manual\naddress1=10.251.0.20/24\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "bridge.nmconnection"
+          }
+        }
+      },
+      "goal": {
+        "kind": "NmProfiles",
+        "definition": {
+          "initial": {
+            "id": "lpic2-bridge-lan-commission",
+            "instructions": "Prepare the four saved virtual profiles for the next simulated startup: put a usable address with the supplied LAN prefix on br0, distinct from the two workstations, and attach both intended physical NICs as bridge ports. With both ports available, br0 must reach both workstations and the workstations must have a two-way untagged path through the bridge. When a physical port is unavailable, retain the reachable segment and keep the two segments isolated; do not invent bond-style failover. Keep the current bridge IP settings, controller configuration and attached membership unchanged while re-reading saved files. Keep audit.nmconnection unchanged, keep Audit reachable on mgmt0 and add no default route there. Retain all four supplied filenames and UUIDs. Choose Test startup profiles and inspect all three physical cases.",
+            "starter": {
+              "bridge.nmconnection": "[connection]\nid=Workshop bridge\nuuid=40000240-0000-4000-8000-000000000001\ntype=bridge\ninterface-name=br0\nautoconnect=true\nautoconnect-ports=0\n[ethernet]\n[bridge]\n[ipv4]\nmethod=manual\naddress1=10.242.0.20/24\n[ipv6]\nmethod=disabled\naddr-gen-mode=default\n[proxy]\n",
+              "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 bridge port\nuuid=40000240-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+              "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 bridge port\nuuid=40000240-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\n[ethernet]\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=40000240-0000-4000-8000-000000000004\ntype=ethernet\ninterface-name=mgmt0\nautoconnect=true\n[ipv4]\nmethod=manual\naddress1=10.241.0.20/24\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "protected_profiles": [
+              "audit.nmconnection"
+            ],
+            "cases": [
+              {
+                "id": "both-up",
+                "label": "Both physical ports available",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-bridge-lan-commission",
+                    "links": [
+                      {
+                        "name": "br0",
+                        "network": {
+                          "address": "10.240.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "mgmt0",
+                        "network": {
+                          "address": "10.241.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [],
+                    "nodes": [
+                      {
+                        "address": "10.240.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.240.0.60",
+                        "available": true
+                      },
+                      {
+                        "address": "10.241.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "br0": 100,
+                    "mgmt0": 200
+                  },
+                  "bridge": {
+                    "version": 1,
+                    "profiles": {
+                      "version": 1,
+                      "controller": {
+                        "file": "bridge.nmconnection",
+                        "uuid": "40000240-0000-4000-8000-000000000001",
+                        "interface": "br0"
+                      },
+                      "members": [
+                        {
+                          "file": "port-enp1s0.nmconnection",
+                          "uuid": "40000240-0000-4000-8000-000000000002",
+                          "interface": "enp1s0"
+                        },
+                        {
+                          "file": "port-enp2s0.nmconnection",
+                          "uuid": "40000240-0000-4000-8000-000000000003",
+                          "interface": "enp2s0"
+                        }
+                      ]
+                    },
+                    "lan": {
+                      "version": 1,
+                      "interface": "br0",
+                      "fabric": {
+                        "switches": {
+                          "sw-left": {
+                            "label": "Left LAN segment",
+                            "vlans": [
+                              1
+                            ],
+                            "ports": {
+                              "nic-left": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              },
+                              "client-left": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              }
+                            }
+                          },
+                          "sw-right": {
+                            "label": "Right LAN segment",
+                            "vlans": [
+                              1
+                            ],
+                            "ports": {
+                              "nic-right": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              },
+                              "client-right": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "hosts": {
+                          "nic-left": {
+                            "label": "Left physical NIC",
+                            "up": true
+                          },
+                          "client-left": {
+                            "label": "Left workstation",
+                            "up": true
+                          },
+                          "nic-right": {
+                            "label": "Right physical NIC",
+                            "up": true
+                          },
+                          "client-right": {
+                            "label": "Right workstation",
+                            "up": true
+                          }
+                        },
+                        "cables": [
+                          {
+                            "id": "wire-nic-left",
+                            "a": {
+                              "kind": "host",
+                              "host": "nic-left"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-left",
+                              "port": "nic-left"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-client-left",
+                            "a": {
+                              "kind": "host",
+                              "host": "client-left"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-left",
+                              "port": "client-left"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-nic-right",
+                            "a": {
+                              "kind": "host",
+                              "host": "nic-right"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-right",
+                              "port": "nic-right"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-client-right",
+                            "a": {
+                              "kind": "host",
+                              "host": "client-right"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-right",
+                              "port": "client-right"
+                            },
+                            "up": true
+                          }
+                        ]
+                      },
+                      "ports": [
+                        {
+                          "interface": "enp1s0",
+                          "endpoint": "nic-left"
+                        },
+                        {
+                          "interface": "enp2s0",
+                          "endpoint": "nic-right"
+                        }
+                      ]
+                    },
+                    "peers": [
+                      {
+                        "address": "10.240.0.50",
+                        "endpoint": "client-left"
+                      },
+                      {
+                        "address": "10.240.0.60",
+                        "endpoint": "client-right"
+                      }
+                    ]
+                  }
+                },
+                "current_bridge": {
+                  "controller": true,
+                  "members": [
+                    "enp1s0",
+                    "enp2s0"
+                  ]
+                },
+                "current_files": {
+                  "bridge.nmconnection": "[connection]\nid=Workshop bridge\nuuid=40000240-0000-4000-8000-000000000001\ntype=bridge\ninterface-name=br0\nautoconnect=true\nautoconnect-ports=1\n[ethernet]\n[bridge]\n[ipv4]\nmethod=manual\naddress1=10.240.0.20/24\n[ipv6]\nmethod=disabled\naddr-gen-mode=default\n[proxy]\n",
+                  "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 bridge port\nuuid=40000240-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+                  "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 bridge port\nuuid=40000240-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=40000240-0000-4000-8000-000000000004\ntype=ethernet\ninterface-name=mgmt0\nautoconnect=true\n[ipv4]\nmethod=manual\naddress1=10.241.0.20/24\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "40000240-0000-4000-8000-000000000001",
+                  "40000240-0000-4000-8000-000000000004"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "br0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "mgmt0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "br0",
+                    "uuid": "40000240-0000-4000-8000-000000000001"
+                  },
+                  {
+                    "kind": "FutureNetwork",
+                    "interface": "br0",
+                    "network": {
+                      "address": "10.240.0.0",
+                      "length": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "mgmt0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "mgmt0",
+                    "target": "10.241.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "br0",
+                    "target": "10.240.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "br0",
+                    "target": "10.240.0.60"
+                  },
+                  {
+                    "kind": "FutureBridgeDelivery",
+                    "interface": "br0",
+                    "from": "10.240.0.50",
+                    "to": "10.240.0.60",
+                    "delivered": true
+                  }
+                ]
+              },
+              {
+                "id": "left-unavailable",
+                "label": "Left port unavailable: enp1s0",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-bridge-lan-commission",
+                    "links": [
+                      {
+                        "name": "br0",
+                        "network": {
+                          "address": "10.240.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "mgmt0",
+                        "network": {
+                          "address": "10.241.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [],
+                    "nodes": [
+                      {
+                        "address": "10.240.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.240.0.60",
+                        "available": true
+                      },
+                      {
+                        "address": "10.241.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "br0": 100,
+                    "mgmt0": 200
+                  },
+                  "bridge": {
+                    "version": 1,
+                    "profiles": {
+                      "version": 1,
+                      "controller": {
+                        "file": "bridge.nmconnection",
+                        "uuid": "40000240-0000-4000-8000-000000000001",
+                        "interface": "br0"
+                      },
+                      "members": [
+                        {
+                          "file": "port-enp1s0.nmconnection",
+                          "uuid": "40000240-0000-4000-8000-000000000002",
+                          "interface": "enp1s0"
+                        },
+                        {
+                          "file": "port-enp2s0.nmconnection",
+                          "uuid": "40000240-0000-4000-8000-000000000003",
+                          "interface": "enp2s0"
+                        }
+                      ]
+                    },
+                    "lan": {
+                      "version": 1,
+                      "interface": "br0",
+                      "fabric": {
+                        "switches": {
+                          "sw-left": {
+                            "label": "Left LAN segment",
+                            "vlans": [
+                              1
+                            ],
+                            "ports": {
+                              "nic-left": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              },
+                              "client-left": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              }
+                            }
+                          },
+                          "sw-right": {
+                            "label": "Right LAN segment",
+                            "vlans": [
+                              1
+                            ],
+                            "ports": {
+                              "nic-right": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              },
+                              "client-right": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "hosts": {
+                          "nic-left": {
+                            "label": "Left physical NIC",
+                            "up": false
+                          },
+                          "client-left": {
+                            "label": "Left workstation",
+                            "up": true
+                          },
+                          "nic-right": {
+                            "label": "Right physical NIC",
+                            "up": true
+                          },
+                          "client-right": {
+                            "label": "Right workstation",
+                            "up": true
+                          }
+                        },
+                        "cables": [
+                          {
+                            "id": "wire-nic-left",
+                            "a": {
+                              "kind": "host",
+                              "host": "nic-left"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-left",
+                              "port": "nic-left"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-client-left",
+                            "a": {
+                              "kind": "host",
+                              "host": "client-left"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-left",
+                              "port": "client-left"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-nic-right",
+                            "a": {
+                              "kind": "host",
+                              "host": "nic-right"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-right",
+                              "port": "nic-right"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-client-right",
+                            "a": {
+                              "kind": "host",
+                              "host": "client-right"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-right",
+                              "port": "client-right"
+                            },
+                            "up": true
+                          }
+                        ]
+                      },
+                      "ports": [
+                        {
+                          "interface": "enp1s0",
+                          "endpoint": "nic-left"
+                        },
+                        {
+                          "interface": "enp2s0",
+                          "endpoint": "nic-right"
+                        }
+                      ]
+                    },
+                    "peers": [
+                      {
+                        "address": "10.240.0.50",
+                        "endpoint": "client-left"
+                      },
+                      {
+                        "address": "10.240.0.60",
+                        "endpoint": "client-right"
+                      }
+                    ]
+                  }
+                },
+                "current_bridge": {
+                  "controller": true,
+                  "members": [
+                    "enp1s0",
+                    "enp2s0"
+                  ]
+                },
+                "current_files": {
+                  "bridge.nmconnection": "[connection]\nid=Workshop bridge\nuuid=40000240-0000-4000-8000-000000000001\ntype=bridge\ninterface-name=br0\nautoconnect=true\nautoconnect-ports=1\n[ethernet]\n[bridge]\n[ipv4]\nmethod=manual\naddress1=10.240.0.20/24\n[ipv6]\nmethod=disabled\naddr-gen-mode=default\n[proxy]\n",
+                  "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 bridge port\nuuid=40000240-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+                  "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 bridge port\nuuid=40000240-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=40000240-0000-4000-8000-000000000004\ntype=ethernet\ninterface-name=mgmt0\nautoconnect=true\n[ipv4]\nmethod=manual\naddress1=10.241.0.20/24\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "40000240-0000-4000-8000-000000000001",
+                  "40000240-0000-4000-8000-000000000004"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "br0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "mgmt0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "br0",
+                    "uuid": "40000240-0000-4000-8000-000000000001"
+                  },
+                  {
+                    "kind": "FutureNetwork",
+                    "interface": "br0",
+                    "network": {
+                      "address": "10.240.0.0",
+                      "length": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "mgmt0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "mgmt0",
+                    "target": "10.241.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "br0",
+                    "target": "10.240.0.60"
+                  },
+                  {
+                    "kind": "FutureBridgeDelivery",
+                    "interface": "br0",
+                    "from": "10.240.0.50",
+                    "to": "10.240.0.60",
+                    "delivered": false
+                  }
+                ]
+              },
+              {
+                "id": "right-unavailable",
+                "label": "Right port unavailable: enp2s0",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-bridge-lan-commission",
+                    "links": [
+                      {
+                        "name": "br0",
+                        "network": {
+                          "address": "10.240.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "mgmt0",
+                        "network": {
+                          "address": "10.241.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [],
+                    "nodes": [
+                      {
+                        "address": "10.240.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.240.0.60",
+                        "available": true
+                      },
+                      {
+                        "address": "10.241.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "br0": 100,
+                    "mgmt0": 200
+                  },
+                  "bridge": {
+                    "version": 1,
+                    "profiles": {
+                      "version": 1,
+                      "controller": {
+                        "file": "bridge.nmconnection",
+                        "uuid": "40000240-0000-4000-8000-000000000001",
+                        "interface": "br0"
+                      },
+                      "members": [
+                        {
+                          "file": "port-enp1s0.nmconnection",
+                          "uuid": "40000240-0000-4000-8000-000000000002",
+                          "interface": "enp1s0"
+                        },
+                        {
+                          "file": "port-enp2s0.nmconnection",
+                          "uuid": "40000240-0000-4000-8000-000000000003",
+                          "interface": "enp2s0"
+                        }
+                      ]
+                    },
+                    "lan": {
+                      "version": 1,
+                      "interface": "br0",
+                      "fabric": {
+                        "switches": {
+                          "sw-left": {
+                            "label": "Left LAN segment",
+                            "vlans": [
+                              1
+                            ],
+                            "ports": {
+                              "nic-left": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              },
+                              "client-left": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              }
+                            }
+                          },
+                          "sw-right": {
+                            "label": "Right LAN segment",
+                            "vlans": [
+                              1
+                            ],
+                            "ports": {
+                              "nic-right": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              },
+                              "client-right": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "hosts": {
+                          "nic-left": {
+                            "label": "Left physical NIC",
+                            "up": true
+                          },
+                          "client-left": {
+                            "label": "Left workstation",
+                            "up": true
+                          },
+                          "nic-right": {
+                            "label": "Right physical NIC",
+                            "up": false
+                          },
+                          "client-right": {
+                            "label": "Right workstation",
+                            "up": true
+                          }
+                        },
+                        "cables": [
+                          {
+                            "id": "wire-nic-left",
+                            "a": {
+                              "kind": "host",
+                              "host": "nic-left"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-left",
+                              "port": "nic-left"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-client-left",
+                            "a": {
+                              "kind": "host",
+                              "host": "client-left"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-left",
+                              "port": "client-left"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-nic-right",
+                            "a": {
+                              "kind": "host",
+                              "host": "nic-right"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-right",
+                              "port": "nic-right"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-client-right",
+                            "a": {
+                              "kind": "host",
+                              "host": "client-right"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-right",
+                              "port": "client-right"
+                            },
+                            "up": true
+                          }
+                        ]
+                      },
+                      "ports": [
+                        {
+                          "interface": "enp1s0",
+                          "endpoint": "nic-left"
+                        },
+                        {
+                          "interface": "enp2s0",
+                          "endpoint": "nic-right"
+                        }
+                      ]
+                    },
+                    "peers": [
+                      {
+                        "address": "10.240.0.50",
+                        "endpoint": "client-left"
+                      },
+                      {
+                        "address": "10.240.0.60",
+                        "endpoint": "client-right"
+                      }
+                    ]
+                  }
+                },
+                "current_bridge": {
+                  "controller": true,
+                  "members": [
+                    "enp1s0",
+                    "enp2s0"
+                  ]
+                },
+                "current_files": {
+                  "bridge.nmconnection": "[connection]\nid=Workshop bridge\nuuid=40000240-0000-4000-8000-000000000001\ntype=bridge\ninterface-name=br0\nautoconnect=true\nautoconnect-ports=1\n[ethernet]\n[bridge]\n[ipv4]\nmethod=manual\naddress1=10.240.0.20/24\n[ipv6]\nmethod=disabled\naddr-gen-mode=default\n[proxy]\n",
+                  "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 bridge port\nuuid=40000240-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+                  "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 bridge port\nuuid=40000240-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=40000240-0000-4000-8000-000000000004\ntype=ethernet\ninterface-name=mgmt0\nautoconnect=true\n[ipv4]\nmethod=manual\naddress1=10.241.0.20/24\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "40000240-0000-4000-8000-000000000001",
+                  "40000240-0000-4000-8000-000000000004"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "br0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "mgmt0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "br0",
+                    "uuid": "40000240-0000-4000-8000-000000000001"
+                  },
+                  {
+                    "kind": "FutureNetwork",
+                    "interface": "br0",
+                    "network": {
+                      "address": "10.240.0.0",
+                      "length": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "mgmt0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "mgmt0",
+                    "target": "10.241.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "br0",
+                    "target": "10.240.0.50"
+                  },
+                  {
+                    "kind": "FutureBridgeDelivery",
+                    "interface": "br0",
+                    "from": "10.240.0.50",
+                    "to": "10.240.0.60",
+                    "delivered": false
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-bridge-lan-commission-practice",
+            "instructions": "Join the two separate practice LAN segments through br0. Repair its saved address and port-start policy, then bind the right NIC. Test each physical case and compare reachable versus isolated paths without changing current work.",
+            "starter": {
+              "bridge.nmconnection": "[connection]\nid=Workshop bridge\nuuid=40000250-0000-4000-8000-000000000001\ntype=bridge\ninterface-name=br0\nautoconnect=true\nautoconnect-ports=0\n[ethernet]\n[bridge]\n[ipv4]\nmethod=manual\naddress1=10.252.0.20/24\n[ipv6]\nmethod=disabled\naddr-gen-mode=default\n[proxy]\n",
+              "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 bridge port\nuuid=40000250-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+              "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 bridge port\nuuid=40000250-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\n[ethernet]\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=40000250-0000-4000-8000-000000000004\ntype=ethernet\ninterface-name=mgmt0\nautoconnect=true\n[ipv4]\nmethod=manual\naddress1=10.251.0.20/24\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "protected_profiles": [
+              "audit.nmconnection"
+            ],
+            "cases": [
+              {
+                "id": "both-up",
+                "label": "Both physical ports available",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-bridge-lan-commission",
+                    "links": [
+                      {
+                        "name": "br0",
+                        "network": {
+                          "address": "10.250.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "mgmt0",
+                        "network": {
+                          "address": "10.251.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [],
+                    "nodes": [
+                      {
+                        "address": "10.250.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.250.0.60",
+                        "available": true
+                      },
+                      {
+                        "address": "10.251.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "br0": 100,
+                    "mgmt0": 200
+                  },
+                  "bridge": {
+                    "version": 1,
+                    "profiles": {
+                      "version": 1,
+                      "controller": {
+                        "file": "bridge.nmconnection",
+                        "uuid": "40000250-0000-4000-8000-000000000001",
+                        "interface": "br0"
+                      },
+                      "members": [
+                        {
+                          "file": "port-enp1s0.nmconnection",
+                          "uuid": "40000250-0000-4000-8000-000000000002",
+                          "interface": "enp1s0"
+                        },
+                        {
+                          "file": "port-enp2s0.nmconnection",
+                          "uuid": "40000250-0000-4000-8000-000000000003",
+                          "interface": "enp2s0"
+                        }
+                      ]
+                    },
+                    "lan": {
+                      "version": 1,
+                      "interface": "br0",
+                      "fabric": {
+                        "switches": {
+                          "sw-left": {
+                            "label": "Left LAN segment",
+                            "vlans": [
+                              1
+                            ],
+                            "ports": {
+                              "nic-left": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              },
+                              "client-left": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              }
+                            }
+                          },
+                          "sw-right": {
+                            "label": "Right LAN segment",
+                            "vlans": [
+                              1
+                            ],
+                            "ports": {
+                              "nic-right": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              },
+                              "client-right": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "hosts": {
+                          "nic-left": {
+                            "label": "Left physical NIC",
+                            "up": true
+                          },
+                          "client-left": {
+                            "label": "Left workstation",
+                            "up": true
+                          },
+                          "nic-right": {
+                            "label": "Right physical NIC",
+                            "up": true
+                          },
+                          "client-right": {
+                            "label": "Right workstation",
+                            "up": true
+                          }
+                        },
+                        "cables": [
+                          {
+                            "id": "wire-nic-left",
+                            "a": {
+                              "kind": "host",
+                              "host": "nic-left"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-left",
+                              "port": "nic-left"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-client-left",
+                            "a": {
+                              "kind": "host",
+                              "host": "client-left"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-left",
+                              "port": "client-left"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-nic-right",
+                            "a": {
+                              "kind": "host",
+                              "host": "nic-right"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-right",
+                              "port": "nic-right"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-client-right",
+                            "a": {
+                              "kind": "host",
+                              "host": "client-right"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-right",
+                              "port": "client-right"
+                            },
+                            "up": true
+                          }
+                        ]
+                      },
+                      "ports": [
+                        {
+                          "interface": "enp1s0",
+                          "endpoint": "nic-left"
+                        },
+                        {
+                          "interface": "enp2s0",
+                          "endpoint": "nic-right"
+                        }
+                      ]
+                    },
+                    "peers": [
+                      {
+                        "address": "10.250.0.50",
+                        "endpoint": "client-left"
+                      },
+                      {
+                        "address": "10.250.0.60",
+                        "endpoint": "client-right"
+                      }
+                    ]
+                  }
+                },
+                "current_bridge": {
+                  "controller": true,
+                  "members": [
+                    "enp1s0",
+                    "enp2s0"
+                  ]
+                },
+                "current_files": {
+                  "bridge.nmconnection": "[connection]\nid=Workshop bridge\nuuid=40000250-0000-4000-8000-000000000001\ntype=bridge\ninterface-name=br0\nautoconnect=true\nautoconnect-ports=1\n[ethernet]\n[bridge]\n[ipv4]\nmethod=manual\naddress1=10.250.0.20/24\n[ipv6]\nmethod=disabled\naddr-gen-mode=default\n[proxy]\n",
+                  "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 bridge port\nuuid=40000250-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+                  "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 bridge port\nuuid=40000250-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=40000250-0000-4000-8000-000000000004\ntype=ethernet\ninterface-name=mgmt0\nautoconnect=true\n[ipv4]\nmethod=manual\naddress1=10.251.0.20/24\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "40000250-0000-4000-8000-000000000001",
+                  "40000250-0000-4000-8000-000000000004"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "br0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "mgmt0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "br0",
+                    "uuid": "40000250-0000-4000-8000-000000000001"
+                  },
+                  {
+                    "kind": "FutureNetwork",
+                    "interface": "br0",
+                    "network": {
+                      "address": "10.250.0.0",
+                      "length": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "mgmt0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "mgmt0",
+                    "target": "10.251.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "br0",
+                    "target": "10.250.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "br0",
+                    "target": "10.250.0.60"
+                  },
+                  {
+                    "kind": "FutureBridgeDelivery",
+                    "interface": "br0",
+                    "from": "10.250.0.50",
+                    "to": "10.250.0.60",
+                    "delivered": true
+                  }
+                ]
+              },
+              {
+                "id": "left-unavailable",
+                "label": "Left port unavailable: enp1s0",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-bridge-lan-commission",
+                    "links": [
+                      {
+                        "name": "br0",
+                        "network": {
+                          "address": "10.250.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "mgmt0",
+                        "network": {
+                          "address": "10.251.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [],
+                    "nodes": [
+                      {
+                        "address": "10.250.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.250.0.60",
+                        "available": true
+                      },
+                      {
+                        "address": "10.251.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "br0": 100,
+                    "mgmt0": 200
+                  },
+                  "bridge": {
+                    "version": 1,
+                    "profiles": {
+                      "version": 1,
+                      "controller": {
+                        "file": "bridge.nmconnection",
+                        "uuid": "40000250-0000-4000-8000-000000000001",
+                        "interface": "br0"
+                      },
+                      "members": [
+                        {
+                          "file": "port-enp1s0.nmconnection",
+                          "uuid": "40000250-0000-4000-8000-000000000002",
+                          "interface": "enp1s0"
+                        },
+                        {
+                          "file": "port-enp2s0.nmconnection",
+                          "uuid": "40000250-0000-4000-8000-000000000003",
+                          "interface": "enp2s0"
+                        }
+                      ]
+                    },
+                    "lan": {
+                      "version": 1,
+                      "interface": "br0",
+                      "fabric": {
+                        "switches": {
+                          "sw-left": {
+                            "label": "Left LAN segment",
+                            "vlans": [
+                              1
+                            ],
+                            "ports": {
+                              "nic-left": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              },
+                              "client-left": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              }
+                            }
+                          },
+                          "sw-right": {
+                            "label": "Right LAN segment",
+                            "vlans": [
+                              1
+                            ],
+                            "ports": {
+                              "nic-right": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              },
+                              "client-right": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "hosts": {
+                          "nic-left": {
+                            "label": "Left physical NIC",
+                            "up": false
+                          },
+                          "client-left": {
+                            "label": "Left workstation",
+                            "up": true
+                          },
+                          "nic-right": {
+                            "label": "Right physical NIC",
+                            "up": true
+                          },
+                          "client-right": {
+                            "label": "Right workstation",
+                            "up": true
+                          }
+                        },
+                        "cables": [
+                          {
+                            "id": "wire-nic-left",
+                            "a": {
+                              "kind": "host",
+                              "host": "nic-left"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-left",
+                              "port": "nic-left"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-client-left",
+                            "a": {
+                              "kind": "host",
+                              "host": "client-left"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-left",
+                              "port": "client-left"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-nic-right",
+                            "a": {
+                              "kind": "host",
+                              "host": "nic-right"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-right",
+                              "port": "nic-right"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-client-right",
+                            "a": {
+                              "kind": "host",
+                              "host": "client-right"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-right",
+                              "port": "client-right"
+                            },
+                            "up": true
+                          }
+                        ]
+                      },
+                      "ports": [
+                        {
+                          "interface": "enp1s0",
+                          "endpoint": "nic-left"
+                        },
+                        {
+                          "interface": "enp2s0",
+                          "endpoint": "nic-right"
+                        }
+                      ]
+                    },
+                    "peers": [
+                      {
+                        "address": "10.250.0.50",
+                        "endpoint": "client-left"
+                      },
+                      {
+                        "address": "10.250.0.60",
+                        "endpoint": "client-right"
+                      }
+                    ]
+                  }
+                },
+                "current_bridge": {
+                  "controller": true,
+                  "members": [
+                    "enp1s0",
+                    "enp2s0"
+                  ]
+                },
+                "current_files": {
+                  "bridge.nmconnection": "[connection]\nid=Workshop bridge\nuuid=40000250-0000-4000-8000-000000000001\ntype=bridge\ninterface-name=br0\nautoconnect=true\nautoconnect-ports=1\n[ethernet]\n[bridge]\n[ipv4]\nmethod=manual\naddress1=10.250.0.20/24\n[ipv6]\nmethod=disabled\naddr-gen-mode=default\n[proxy]\n",
+                  "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 bridge port\nuuid=40000250-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+                  "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 bridge port\nuuid=40000250-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=40000250-0000-4000-8000-000000000004\ntype=ethernet\ninterface-name=mgmt0\nautoconnect=true\n[ipv4]\nmethod=manual\naddress1=10.251.0.20/24\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "40000250-0000-4000-8000-000000000001",
+                  "40000250-0000-4000-8000-000000000004"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "br0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "mgmt0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "br0",
+                    "uuid": "40000250-0000-4000-8000-000000000001"
+                  },
+                  {
+                    "kind": "FutureNetwork",
+                    "interface": "br0",
+                    "network": {
+                      "address": "10.250.0.0",
+                      "length": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "mgmt0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "mgmt0",
+                    "target": "10.251.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "br0",
+                    "target": "10.250.0.60"
+                  },
+                  {
+                    "kind": "FutureBridgeDelivery",
+                    "interface": "br0",
+                    "from": "10.250.0.50",
+                    "to": "10.250.0.60",
+                    "delivered": false
+                  }
+                ]
+              },
+              {
+                "id": "right-unavailable",
+                "label": "Right port unavailable: enp2s0",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-bridge-lan-commission",
+                    "links": [
+                      {
+                        "name": "br0",
+                        "network": {
+                          "address": "10.250.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "mgmt0",
+                        "network": {
+                          "address": "10.251.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [],
+                    "nodes": [
+                      {
+                        "address": "10.250.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.250.0.60",
+                        "available": true
+                      },
+                      {
+                        "address": "10.251.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "br0": 100,
+                    "mgmt0": 200
+                  },
+                  "bridge": {
+                    "version": 1,
+                    "profiles": {
+                      "version": 1,
+                      "controller": {
+                        "file": "bridge.nmconnection",
+                        "uuid": "40000250-0000-4000-8000-000000000001",
+                        "interface": "br0"
+                      },
+                      "members": [
+                        {
+                          "file": "port-enp1s0.nmconnection",
+                          "uuid": "40000250-0000-4000-8000-000000000002",
+                          "interface": "enp1s0"
+                        },
+                        {
+                          "file": "port-enp2s0.nmconnection",
+                          "uuid": "40000250-0000-4000-8000-000000000003",
+                          "interface": "enp2s0"
+                        }
+                      ]
+                    },
+                    "lan": {
+                      "version": 1,
+                      "interface": "br0",
+                      "fabric": {
+                        "switches": {
+                          "sw-left": {
+                            "label": "Left LAN segment",
+                            "vlans": [
+                              1
+                            ],
+                            "ports": {
+                              "nic-left": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              },
+                              "client-left": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              }
+                            }
+                          },
+                          "sw-right": {
+                            "label": "Right LAN segment",
+                            "vlans": [
+                              1
+                            ],
+                            "ports": {
+                              "nic-right": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              },
+                              "client-right": {
+                                "up": true,
+                                "mode": {
+                                  "kind": "access",
+                                  "vlan": 1
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "hosts": {
+                          "nic-left": {
+                            "label": "Left physical NIC",
+                            "up": true
+                          },
+                          "client-left": {
+                            "label": "Left workstation",
+                            "up": true
+                          },
+                          "nic-right": {
+                            "label": "Right physical NIC",
+                            "up": false
+                          },
+                          "client-right": {
+                            "label": "Right workstation",
+                            "up": true
+                          }
+                        },
+                        "cables": [
+                          {
+                            "id": "wire-nic-left",
+                            "a": {
+                              "kind": "host",
+                              "host": "nic-left"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-left",
+                              "port": "nic-left"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-client-left",
+                            "a": {
+                              "kind": "host",
+                              "host": "client-left"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-left",
+                              "port": "client-left"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-nic-right",
+                            "a": {
+                              "kind": "host",
+                              "host": "nic-right"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-right",
+                              "port": "nic-right"
+                            },
+                            "up": true
+                          },
+                          {
+                            "id": "wire-client-right",
+                            "a": {
+                              "kind": "host",
+                              "host": "client-right"
+                            },
+                            "b": {
+                              "kind": "switch",
+                              "switch": "sw-right",
+                              "port": "client-right"
+                            },
+                            "up": true
+                          }
+                        ]
+                      },
+                      "ports": [
+                        {
+                          "interface": "enp1s0",
+                          "endpoint": "nic-left"
+                        },
+                        {
+                          "interface": "enp2s0",
+                          "endpoint": "nic-right"
+                        }
+                      ]
+                    },
+                    "peers": [
+                      {
+                        "address": "10.250.0.50",
+                        "endpoint": "client-left"
+                      },
+                      {
+                        "address": "10.250.0.60",
+                        "endpoint": "client-right"
+                      }
+                    ]
+                  }
+                },
+                "current_bridge": {
+                  "controller": true,
+                  "members": [
+                    "enp1s0",
+                    "enp2s0"
+                  ]
+                },
+                "current_files": {
+                  "bridge.nmconnection": "[connection]\nid=Workshop bridge\nuuid=40000250-0000-4000-8000-000000000001\ntype=bridge\ninterface-name=br0\nautoconnect=true\nautoconnect-ports=1\n[ethernet]\n[bridge]\n[ipv4]\nmethod=manual\naddress1=10.250.0.20/24\n[ipv6]\nmethod=disabled\naddr-gen-mode=default\n[proxy]\n",
+                  "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 bridge port\nuuid=40000250-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+                  "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 bridge port\nuuid=40000250-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=40000250-0000-4000-8000-000000000004\ntype=ethernet\ninterface-name=mgmt0\nautoconnect=true\n[ipv4]\nmethod=manual\naddress1=10.251.0.20/24\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "40000250-0000-4000-8000-000000000001",
+                  "40000250-0000-4000-8000-000000000004"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "br0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "mgmt0"
+                  },
+                  {
+                    "kind": "FutureProfile",
+                    "interface": "br0",
+                    "uuid": "40000250-0000-4000-8000-000000000001"
+                  },
+                  {
+                    "kind": "FutureNetwork",
+                    "interface": "br0",
+                    "network": {
+                      "address": "10.250.0.0",
+                      "length": 24
+                    }
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "mgmt0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "mgmt0",
+                    "target": "10.251.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "br0",
+                    "target": "10.250.0.50"
+                  },
+                  {
+                    "kind": "FutureBridgeDelivery",
+                    "interface": "br0",
+                    "from": "10.250.0.50",
+                    "to": "10.250.0.60",
+                    "delivered": false
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "bridge.nmconnection": "[connection]\nid=Workshop bridge\nuuid=40000250-0000-4000-8000-000000000001\ntype=bridge\ninterface-name=br0\nautoconnect=true\nautoconnect-ports=1\n[ethernet]\n[bridge]\n[ipv4]\nmethod=manual\naddress1=10.250.0.20/24\n[ipv6]\nmethod=disabled\naddr-gen-mode=default\n[proxy]\n",
+            "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 bridge port\nuuid=40000250-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+            "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 bridge port\nuuid=40000250-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=br0\nport-type=bridge\n[ethernet]\n[bridge-port]\n",
+            "audit.nmconnection": "[connection]\nid=Audit\nuuid=40000250-0000-4000-8000-000000000004\ntype=ethernet\ninterface-name=mgmt0\nautoconnect=true\n[ipv4]\nmethod=manual\naddress1=10.251.0.20/24\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+          }
+        }
+      },
+      "steps": [
+        "Inspect the four saved profiles, repair the controller and missing port, then test all three cases while preserving the supplied current bridge and Audit."
+      ],
+      "guide": [],
+      "explanation": "br0 is a software bridge joining two untagged segments. Its manual host address belongs to the common supplied LAN; a different usable address can work if it does not duplicate either workstation. The controller starts matching bound ports when autoconnect-ports=1, even with port autoconnect=false. Both ports forward in the supplied settled tree. A missing binding or down port isolates that segment rather than choosing a backup NIC as a bond would. Current parsed IP/control/membership snapshots remain separate from edited future files. Passing all three cases means matching the expected available and blocked paths, not making a disconnected cable work.",
+      "hints": [
+        "Compare the saved br0 address and prefix with the supplied LAN. Put host addressing on the bridge controller; the physical ports have no separate host address in this task.",
+        "Inspect autoconnect-ports in bridge.nmconnection and the two binding keys in port-enp2s0.nmconnection. An unbound Ethernet candidate is not a bridge port.",
+        "After testing, select each physical case. The unavailable segment should remain isolated while the other segment and Audit stay usable. Read current and next-startup settings separately."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://docs.kernel.org/networking/bridge.html",
+        "https://networkmanager.dev/docs/api/latest/settings-connection.html",
+        "https://networkmanager.dev/docs/api/latest/settings-bridge.html",
+        "https://networkmanager.dev/docs/api/latest/settings-bridge-port.html",
+        "https://networkmanager.dev/docs/api/latest/nm-settings-keyfile.html"
+      ],
+      "simplifications": "One source-bound bridge and two physical ports in a supplied acyclic untagged tree; manual IPv4 on the controller, separate Audit interface, explicit current/future snapshots and three fixed physical cases. Both-direction broadcast delivery is a bounded Layer2 proof, not real ping, IP forwarding, MAC learning or a packet capture. No tagged traffic, VLAN filtering, STP election/convergence/timers, hairpin/multicast options, independent port-driven startup/discovery, general nmcli/ip, DHCP/IPv6 bridge, nested controllers, host files/services/devices, daemon/kernel/boot or network operations. NM STP defaults enabled; accepting disabled STP in this supplied tree is not evidence of general loop safety. Each down-port case has explicit expected isolated paths.",
+      "solution": [
+        "NM PROFILES\n{\n  \"bridge.nmconnection\": \"[connection]\\nid=Workshop bridge\\nuuid=40000240-0000-4000-8000-000000000001\\ntype=bridge\\ninterface-name=br0\\nautoconnect=true\\nautoconnect-ports=1\\n[ethernet]\\n[bridge]\\n[ipv4]\\nmethod=manual\\naddress1=10.240.0.20/24\\n[ipv6]\\nmethod=disabled\\naddr-gen-mode=default\\n[proxy]\\n\",\n  \"port-enp1s0.nmconnection\": \"[connection]\\nid=enp1s0 bridge port\\nuuid=40000240-0000-4000-8000-000000000002\\ntype=ethernet\\ninterface-name=enp1s0\\nautoconnect=false\\ncontroller=br0\\nport-type=bridge\\n[ethernet]\\n[bridge-port]\\n\",\n  \"port-enp2s0.nmconnection\": \"[connection]\\nid=enp2s0 bridge port\\nuuid=40000240-0000-4000-8000-000000000003\\ntype=ethernet\\ninterface-name=enp2s0\\nautoconnect=false\\ncontroller=br0\\nport-type=bridge\\n[ethernet]\\n[bridge-port]\\n\",\n  \"audit.nmconnection\": \"[connection]\\nid=Audit\\nuuid=40000240-0000-4000-8000-000000000004\\ntype=ethernet\\ninterface-name=mgmt0\\nautoconnect=true\\n[ipv4]\\nmethod=manual\\naddress1=10.241.0.20/24\\nnever-default=true\\n[ipv6]\\nmethod=disabled\\n\"\n}"
+      ],
+      "prerequisites": [
+        "lpic2-bonded-vlan-handover"
+      ]
+    }
+  ]
+}

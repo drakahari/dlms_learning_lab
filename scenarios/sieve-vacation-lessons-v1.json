@@ -1,0 +1,1497 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-sieve-vacation-safety",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-sieve-vacation",
+      "topic": "Sieve vacation eligibility and repeat suppression",
+      "title": "Configure a considerate absence reply",
+      "summary": "Prepare useful personal absence replies without replying to every arrival or losing the incoming mail.",
+      "objective": "For learner@absence.test, prepare a personal vacation reply identifying cover@absence.test as the cover contact. Use your own wording. Keep incoming messages in INBOX only. Allow another reply to the same sender and response after three full days (259200 seconds), not before. Each different sender has independent reply history. Follow all arrivals in their listed order. Do not reply to the supplied automatic, list, null-return, self or non-personal messages. Run filter must pass every arrival.",
+      "retry_guidance": "Compare each failed arrival’s time, mailbox and reply effect. An interval, eligibility or rule-order error needs a different repair. Edit the filter and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 26,
+      "steps": [
+        "Understand the task",
+        "Configure and test the responder",
+        "Verify delivery and reply outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Add an absence reply",
+          "why": "An absence reply tells a person who can help while you are away. The original message still needs delivery. Enable the vacation extension with require \"vacation\"; then use vacation with a quoted reply message. Unlike fileinto or redirect, vacation does not cancel the default INBOX copy.",
+          "action": "In Filter, select Fill worked example, then Run filter. Select First personal message and open Outcome details, then Prepared reply.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the interval boundary",
+          "why": "In the studio example, vacation :days 2 \"I am away; contact cover@studio.guide.test.\"; supplies the replacement contact and allows another reply after two days. :days is an interval for the same sender and response, not a daily schedule. Without :days the default is seven days; this site clamps requested intervals to 1–365 days.",
+          "action": "Compare Repeat before expiry with Exact interval boundary. Read the arrival seconds and actual repeat-suppression detail.",
+          "commands": []
+        },
+        {
+          "title": "Try a different interval",
+          "why": "Read Arrival in Shared reply timeline. One day is 86400 seconds: two days is 172800. The first personal message gets a reply, a repeat at 172799 does not, and an otherwise identical arrival at 172800 can get one. A suppressed repeat does not restart the timer. Run filter starts the timeline again; Stop retains the draft and partial observations.",
+          "action": "Change :days 2 to :days 3 in Filter, then Run filter. Read the failed boundary case before restoring the worked example.",
+          "commands": []
+        }
+      ],
+      "explanation": "The responder keeps the incoming delivery and reply decision separate, honors the same sender’s interval across ordered arrivals, suppresses unsafe replies and stays reachable through the required delivery rules.",
+      "hints": [
+        "Compare the actual arrival time with the previous reply to that sender; a suppressed arrival does not reset it.",
+        "Declare vacation before using it. The default seven-day interval is different from the required three-day interval.",
+        "Use the required contact text in the quoted reply message. Keep the default INBOX delivery; no extra keep action is needed."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc5230.html",
+        "https://www.rfc-editor.org/rfc/rfc5228.html"
+      ],
+      "simplifications": "Bounded plain-message Sieve vacation subset with virtual arrival seconds and a per-run 1000-entry history, not a real clock or SMTP sender. Site intervals clamp to 1–365 days; default7. Bare dot-atom envelope/from/alias fields and plain ASCII message headers only. Optional :mime, MIME encoded headers, :seconds and unsupported extensions produce diagnostics. Replies and delivery effects roll back together on errors. Existing twelve-sample/16KiB source/resource limits remain; no host files, shell, network or real mail. Shared history is derived by bounded replay, never trusted caller-supplied cache. See SIEVE_VACATION_SUBSET.md.",
+      "initial": {
+        "kind": "SieveFiltering",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-vacation-safety",
+          "view": "introduction",
+          "assignment": {
+            "draft": "# Configure a vacation reply without losing incoming mail.\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          },
+          "practice": {
+            "draft": "# Configure a vacation reply without losing incoming mail.\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SieveFiltering",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-vacation-safety",
+          "assignment": {
+            "address_tests": true,
+            "delivery_actions": true,
+            "vacation": {
+              "user": {
+                "primary": "learner@absence.test",
+                "aliases": []
+              },
+              "required_reply_text": "cover@absence.test"
+            },
+            "starter": "# Configure a vacation reply without losing incoming mail.\nkeep;\n",
+            "reference": "require \"vacation\";\nvacation :days 3 \"I am away; contact cover@absence.test.\";\n",
+            "mailboxes": [
+              "INBOX"
+            ],
+            "cases": [
+              {
+                "id": "first-personal-message",
+                "label": "First personal message",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@absence.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@absence.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 0,
+                "expected_reply": true
+              },
+              {
+                "id": "repeat-before-expiry",
+                "label": "Repeat before expiry",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@absence.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@absence.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 259199,
+                "expected_reply": false
+              },
+              {
+                "id": "exact-interval-boundary",
+                "label": "Exact interval boundary",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@absence.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@absence.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 259200,
+                "expected_reply": true
+              },
+              {
+                "id": "different-sender",
+                "label": "Different sender",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@absence.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@absence.test",
+                  "from": "second@outside.test"
+                },
+                "arrival_seconds": 259201,
+                "expected_reply": true
+              },
+              {
+                "id": "automatic-message",
+                "label": "Automatic message",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@absence.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ],
+                  [
+                    "Auto-Submitted",
+                    "auto-generated"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@absence.test",
+                  "from": "robot@outside.test"
+                },
+                "arrival_seconds": 259202,
+                "expected_reply": false
+              },
+              {
+                "id": "mailing-list",
+                "label": "Mailing list",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@absence.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ],
+                  [
+                    "List-Id",
+                    "<group.outside.test>"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@absence.test",
+                  "from": "list@outside.test"
+                },
+                "arrival_seconds": 259203,
+                "expected_reply": false
+              },
+              {
+                "id": "null-return-address",
+                "label": "Null return address",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@absence.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@absence.test",
+                  "from": ""
+                },
+                "arrival_seconds": 259204,
+                "expected_reply": false
+              },
+              {
+                "id": "not-personal",
+                "label": "Not personal",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "group@elsewhere.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@absence.test",
+                  "from": "other@outside.test"
+                },
+                "arrival_seconds": 259205,
+                "expected_reply": false
+              },
+              {
+                "id": "reply-to-self",
+                "label": "Reply to self",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@absence.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@absence.test",
+                  "from": "learner@absence.test"
+                },
+                "arrival_seconds": 259206,
+                "expected_reply": false
+              },
+              {
+                "id": "repeat-after-suppressed-mail",
+                "label": "Repeat after suppressed mail",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@absence.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@absence.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 259207,
+                "expected_reply": false
+              },
+              {
+                "id": "next-interval-boundary",
+                "label": "Next interval boundary",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@absence.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@absence.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 518400,
+                "expected_reply": true
+              }
+            ]
+          },
+          "example": {
+            "address_tests": true,
+            "delivery_actions": true,
+            "vacation": {
+              "user": {
+                "primary": "learner@studio.guide.test",
+                "aliases": []
+              },
+              "required_reply_text": "cover@studio.guide.test"
+            },
+            "starter": "# Configure a vacation reply without losing incoming mail.\nkeep;\n",
+            "reference": "require \"vacation\";\nvacation :days 2 \"I am away; contact cover@studio.guide.test.\";\n",
+            "mailboxes": [
+              "INBOX"
+            ],
+            "cases": [
+              {
+                "id": "first-personal-message",
+                "label": "First personal message",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.guide.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 0,
+                "expected_reply": true
+              },
+              {
+                "id": "repeat-before-expiry",
+                "label": "Repeat before expiry",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.guide.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 172799,
+                "expected_reply": false
+              },
+              {
+                "id": "exact-interval-boundary",
+                "label": "Exact interval boundary",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.guide.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 172800,
+                "expected_reply": true
+              },
+              {
+                "id": "different-sender",
+                "label": "Different sender",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.guide.test",
+                  "from": "second@outside.test"
+                },
+                "arrival_seconds": 172801,
+                "expected_reply": true
+              },
+              {
+                "id": "automatic-message",
+                "label": "Automatic message",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ],
+                  [
+                    "Auto-Submitted",
+                    "auto-generated"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.guide.test",
+                  "from": "robot@outside.test"
+                },
+                "arrival_seconds": 172802,
+                "expected_reply": false
+              },
+              {
+                "id": "mailing-list",
+                "label": "Mailing list",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ],
+                  [
+                    "List-Id",
+                    "<group.outside.test>"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.guide.test",
+                  "from": "list@outside.test"
+                },
+                "arrival_seconds": 172803,
+                "expected_reply": false
+              },
+              {
+                "id": "null-return-address",
+                "label": "Null return address",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.guide.test",
+                  "from": ""
+                },
+                "arrival_seconds": 172804,
+                "expected_reply": false
+              },
+              {
+                "id": "not-personal",
+                "label": "Not personal",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "group@elsewhere.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.guide.test",
+                  "from": "other@outside.test"
+                },
+                "arrival_seconds": 172805,
+                "expected_reply": false
+              },
+              {
+                "id": "reply-to-self",
+                "label": "Reply to self",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.guide.test",
+                  "from": "learner@studio.guide.test"
+                },
+                "arrival_seconds": 172806,
+                "expected_reply": false
+              },
+              {
+                "id": "repeat-after-suppressed-mail",
+                "label": "Repeat after suppressed mail",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.guide.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 172807,
+                "expected_reply": false
+              },
+              {
+                "id": "next-interval-boundary",
+                "label": "Next interval boundary",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.guide.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 345600,
+                "expected_reply": true
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "sieve-workspace {\"kind\":\"edit\",\"script\":\"require \\\"vacation\\\";\\nvacation :days 3 \\\"I am away; contact cover@absence.test.\\\";\\n\"}",
+        "sieve-workspace {\"kind\":\"run\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}"
+      ],
+      "prerequisites": [
+        "lpic2-sieve-rejection-priority"
+      ]
+    },
+    {
+      "id": "lpic2-sieve-vacation-routing-recovery",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-sieve-vacation",
+      "topic": "Sieve vacation and delivery rule recovery",
+      "title": "Repair replies skipped by delivery rules",
+      "summary": "Restore both absence replies and selective delivery without reply storms or extra local copies.",
+      "objective": "Repair the supplied rule order. Actual envelope deliveries to desk@dispatch.away.test belong in Desk only; every other recipient stays in INBOX only. A visible desk mention must not choose the destination. Eligible personal arrivals need a vacation reply identifying cover@dispatch.away.test as the cover contact. Use your own wording. Keep one shared response identity across desk and general mail: no repeat to a sender until one full day (86400 seconds) has elapsed. Different senders have independent history. Preserve normal delivery for automatic, list, null-return and non-personal mail while suppressing their replies. Do not add virtual forwards, refusals or extra INBOX copies. Equivalent supported rule order or branching is accepted.",
+      "retry_guidance": "Compare each failed arrival’s time, mailbox and reply effect. An interval, eligibility or rule-order error needs a different repair. Edit the filter and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Configure and test the responder",
+        "Verify delivery and reply outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Reproduce the missing reply",
+          "why": "The studio example files actual desk@studio.routing.test deliveries in Desk and leaves other mail in INBOX. Independently, eligible personal messages need an absence reply containing the studio contact. A reply and a delivery destination are separate outcomes.",
+          "action": "Run the supplied example. Compare First desk request with Same sender general. Read both mailbox and vacation effects.",
+          "commands": []
+        },
+        {
+          "title": "Compare the reachable repair",
+          "why": "In the starter, desk mail is filed and stop ends processing before vacation is reached. Those incoming messages arrive in the right folder but never get a reply. Move shared reply processing to a reachable place, or use equivalent branches that execute at most one vacation action for each arrival.",
+          "action": "Select Fill worked example and Run filter. Inspect the vacation action before the filing condition.",
+          "commands": []
+        },
+        {
+          "title": "Create and diagnose an extra copy",
+          "why": "A sender who writes to the desk and then to the general recipient still shares the same responder history. Reusing the same reply content and raw options keeps the same response identity. If different reply bodies are intentional, an explicit :handle can give them a shared identity. :days is not part of that identity.",
+          "action": "Add keep; after the filing condition and Run filter. Read a failed desk case, then remove that extra keep and retry.",
+          "commands": []
+        }
+      ],
+      "explanation": "The responder keeps the incoming delivery and reply decision separate, honors the same sender’s interval across ordered arrivals, suppresses unsafe replies and stays reachable through the required delivery rules.",
+      "hints": [
+        "A correct mailbox is not proof that the reply action was reached. Read the first failed reply case and look for an earlier stop.",
+        "Keep the same response identity across desk and general arrivals from one sender. A suppressed repeat must not move the last-reply time.",
+        "Run reply processing in a reachable place. File the actual desk recipient without adding an explicit INBOX copy; leave unrelated deliveries alone."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc5230.html",
+        "https://www.rfc-editor.org/rfc/rfc5228.html"
+      ],
+      "simplifications": "Bounded plain-message Sieve vacation subset with virtual arrival seconds and a per-run 1000-entry history, not a real clock or SMTP sender. Site intervals clamp to 1–365 days; default7. Bare dot-atom envelope/from/alias fields and plain ASCII message headers only. Optional :mime, MIME encoded headers, :seconds and unsupported extensions produce diagnostics. Replies and delivery effects roll back together on errors. Existing twelve-sample/16KiB source/resource limits remain; no host files, shell, network or real mail. Shared history is derived by bounded replay, never trusted caller-supplied cache. See SIEVE_VACATION_SUBSET.md.",
+      "initial": {
+        "kind": "SieveFiltering",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-vacation-routing-recovery",
+          "view": "introduction",
+          "assignment": {
+            "draft": "require [\"vacation\", \"envelope\", \"fileinto\"];\nif envelope :is \"to\" \"desk@dispatch.away.test\" {\n    fileinto \"Desk\";\n    stop;\n}\nvacation :days 1 \"I am away; contact cover@dispatch.away.test.\";\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          },
+          "practice": {
+            "draft": "require [\"vacation\", \"envelope\", \"fileinto\"];\nif envelope :is \"to\" \"desk@studio.routing.test\" {\n    fileinto \"Desk\";\n    stop;\n}\nvacation :days 2 \"I am away; contact cover@studio.routing.test.\";\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SieveFiltering",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-vacation-routing-recovery",
+          "assignment": {
+            "address_tests": true,
+            "delivery_actions": true,
+            "vacation": {
+              "user": {
+                "primary": "learner@dispatch.away.test",
+                "aliases": []
+              },
+              "required_reply_text": "cover@dispatch.away.test"
+            },
+            "starter": "require [\"vacation\", \"envelope\", \"fileinto\"];\nif envelope :is \"to\" \"desk@dispatch.away.test\" {\n    fileinto \"Desk\";\n    stop;\n}\nvacation :days 1 \"I am away; contact cover@dispatch.away.test.\";\nkeep;\n",
+            "reference": "require [\"vacation\", \"envelope\", \"fileinto\"];\nvacation :days 1 \"I am away; contact cover@dispatch.away.test.\";\nif envelope :is \"to\" \"desk@dispatch.away.test\" {\n    fileinto \"Desk\";\n}\n",
+            "mailboxes": [
+              "Desk",
+              "INBOX"
+            ],
+            "cases": [
+              {
+                "id": "first-desk-request",
+                "label": "First desk request",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@dispatch.away.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@dispatch.away.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 0,
+                "expected_reply": true
+              },
+              {
+                "id": "same-sender-general",
+                "label": "Same sender general",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@dispatch.away.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@dispatch.away.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 1,
+                "expected_reply": false
+              },
+              {
+                "id": "repeat-desk",
+                "label": "Repeat desk",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@dispatch.away.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@dispatch.away.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 86399,
+                "expected_reply": false
+              },
+              {
+                "id": "desk-at-expiry",
+                "label": "Desk at expiry",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@dispatch.away.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@dispatch.away.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 86400,
+                "expected_reply": true
+              },
+              {
+                "id": "automatic-desk",
+                "label": "Automatic desk",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@dispatch.away.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ],
+                  [
+                    "Auto-Submitted",
+                    "auto-generated"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@dispatch.away.test",
+                  "from": "robot@outside.test"
+                },
+                "arrival_seconds": 86401,
+                "expected_reply": false
+              },
+              {
+                "id": "second-person",
+                "label": "Second person",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@dispatch.away.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@dispatch.away.test",
+                  "from": "second@outside.test"
+                },
+                "arrival_seconds": 86402,
+                "expected_reply": true
+              },
+              {
+                "id": "visible-desk-decoy",
+                "label": "Visible desk decoy",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@dispatch.away.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ],
+                  [
+                    "Cc",
+                    "desk@dispatch.away.test"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@dispatch.away.test",
+                  "from": "second@outside.test"
+                },
+                "arrival_seconds": 86403,
+                "expected_reply": false
+              },
+              {
+                "id": "null-return-desk",
+                "label": "Null return desk",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@dispatch.away.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@dispatch.away.test",
+                  "from": ""
+                },
+                "arrival_seconds": 86404,
+                "expected_reply": false
+              },
+              {
+                "id": "not-personal-desk",
+                "label": "Not personal desk",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "group@elsewhere.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@dispatch.away.test",
+                  "from": "third@outside.test"
+                },
+                "arrival_seconds": 86405,
+                "expected_reply": false
+              },
+              {
+                "id": "list-desk",
+                "label": "List desk",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@dispatch.away.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ],
+                  [
+                    "List-Id",
+                    "<group.outside.test>"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@dispatch.away.test",
+                  "from": "list@outside.test"
+                },
+                "arrival_seconds": 86406,
+                "expected_reply": false
+              }
+            ]
+          },
+          "example": {
+            "address_tests": true,
+            "delivery_actions": true,
+            "vacation": {
+              "user": {
+                "primary": "learner@studio.routing.test",
+                "aliases": []
+              },
+              "required_reply_text": "cover@studio.routing.test"
+            },
+            "starter": "require [\"vacation\", \"envelope\", \"fileinto\"];\nif envelope :is \"to\" \"desk@studio.routing.test\" {\n    fileinto \"Desk\";\n    stop;\n}\nvacation :days 2 \"I am away; contact cover@studio.routing.test.\";\nkeep;\n",
+            "reference": "require [\"vacation\", \"envelope\", \"fileinto\"];\nvacation :days 2 \"I am away; contact cover@studio.routing.test.\";\nif envelope :is \"to\" \"desk@studio.routing.test\" {\n    fileinto \"Desk\";\n}\n",
+            "mailboxes": [
+              "Desk",
+              "INBOX"
+            ],
+            "cases": [
+              {
+                "id": "first-desk-request",
+                "label": "First desk request",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.routing.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@studio.routing.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 0,
+                "expected_reply": true
+              },
+              {
+                "id": "same-sender-general",
+                "label": "Same sender general",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.routing.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.routing.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 1,
+                "expected_reply": false
+              },
+              {
+                "id": "repeat-desk",
+                "label": "Repeat desk",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.routing.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@studio.routing.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 172799,
+                "expected_reply": false
+              },
+              {
+                "id": "desk-at-expiry",
+                "label": "Desk at expiry",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.routing.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@studio.routing.test",
+                  "from": "writer@outside.test"
+                },
+                "arrival_seconds": 172800,
+                "expected_reply": true
+              },
+              {
+                "id": "automatic-desk",
+                "label": "Automatic desk",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.routing.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ],
+                  [
+                    "Auto-Submitted",
+                    "auto-generated"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@studio.routing.test",
+                  "from": "robot@outside.test"
+                },
+                "arrival_seconds": 172801,
+                "expected_reply": false
+              },
+              {
+                "id": "second-person",
+                "label": "Second person",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.routing.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.routing.test",
+                  "from": "second@outside.test"
+                },
+                "arrival_seconds": 172802,
+                "expected_reply": true
+              },
+              {
+                "id": "visible-desk-decoy",
+                "label": "Visible desk decoy",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.routing.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ],
+                  [
+                    "Cc",
+                    "desk@studio.routing.test"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "to": "learner@studio.routing.test",
+                  "from": "second@outside.test"
+                },
+                "arrival_seconds": 172803,
+                "expected_reply": false
+              },
+              {
+                "id": "null-return-desk",
+                "label": "Null return desk",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.routing.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@studio.routing.test",
+                  "from": ""
+                },
+                "arrival_seconds": 172804,
+                "expected_reply": false
+              },
+              {
+                "id": "not-personal-desk",
+                "label": "Not personal desk",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "group@elsewhere.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@studio.routing.test",
+                  "from": "third@outside.test"
+                },
+                "arrival_seconds": 172805,
+                "expected_reply": false
+              },
+              {
+                "id": "list-desk",
+                "label": "List desk",
+                "headers": [
+                  [
+                    "From",
+                    "Visible Writer <different@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "learner@studio.routing.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary personal request"
+                  ],
+                  [
+                    "List-Id",
+                    "<group.outside.test>"
+                  ]
+                ],
+                "body": "A simulated personal message.\n",
+                "expected": [
+                  "Desk"
+                ],
+                "envelope": {
+                  "to": "desk@studio.routing.test",
+                  "from": "list@outside.test"
+                },
+                "arrival_seconds": 172806,
+                "expected_reply": false
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "sieve-workspace {\"kind\":\"edit\",\"script\":\"require [\\\"vacation\\\", \\\"envelope\\\", \\\"fileinto\\\"];\\nvacation :days 1 \\\"I am away; contact cover@dispatch.away.test.\\\";\\nif envelope :is \\\"to\\\" \\\"desk@dispatch.away.test\\\" {\\n    fileinto \\\"Desk\\\";\\n}\\n\"}",
+        "sieve-workspace {\"kind\":\"run\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}"
+      ],
+      "prerequisites": [
+        "lpic2-sieve-vacation-safety",
+        "lpic2-sieve-rule-order"
+      ]
+    }
+  ]
+}

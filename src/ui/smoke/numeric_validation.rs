@@ -143,60 +143,17 @@ struct Warm {
     full: serde_json::Value,
     loaded_full: serde_json::Value,
 }
-#[derive(Clone)]
-struct GoalRows {
-    rows: Vec<egui::Rect>,
-    clip: egui::Rect,
-}
+type GoalRows = lesson_presentation::paint::Rows;
 fn painted_goal_rows(
     ctx: &egui::Context,
-    objective: &str,
+    scenario: &Scenario,
     visible: egui::Rect,
 ) -> Option<GoalRows> {
-    fn find(
-        shape: &egui::Shape,
-        clip: egui::Rect,
-        objective: &str,
-        visible: egui::Rect,
-    ) -> Option<GoalRows> {
-        match shape {
-            egui::Shape::Text(text) if text.galley.text() == objective => {
-                assert!(
-                    !text.galley.elided,
-                    "Essential task text must never be elided"
-                );
-                let rows = text
-                    .galley
-                    .rows
-                    .iter()
-                    .filter(|row| !row.text().trim().is_empty())
-                    .map(|row| row.rect().translate(text.pos.to_vec2()))
-                    .collect::<Vec<_>>();
-                assert!(
-                    !rows.is_empty() && rows.len() <= 128,
-                    "Bounded actual task rows"
-                );
-                Some(GoalRows {
-                    rows,
-                    clip: clip.intersect(visible),
-                })
-            }
-            egui::Shape::Vec(shapes) => shapes
-                .iter()
-                .find_map(|s| find(s, clip, objective, visible)),
-            _ => None,
-        }
-    }
-    // CentralPanel uses the background painter. No Context calls within graphics.
-    ctx.graphics(|graphics| {
-        graphics.get(egui::LayerId::background()).and_then(|list| {
-            list.all_entries()
-                .find_map(|s| find(&s.shape, s.clip_rect, objective, visible))
-        })
-    })
+    lesson_presentation::paint::collect(ctx, scenario, visible)
 }
 #[derive(Clone)]
 struct GoalProof {
+    keys: Vec<(usize, usize)>,
     seen: Vec<bool>,
 }
 fn editor_band(viewport: egui::Rect, height: f32) -> egui::Rect {
@@ -253,11 +210,12 @@ impl LabApp {
         }
         self.case_lesson_geometry(ctx)
     }
-    fn numeric_validation_goal_center(
+    fn numeric_validation_goal_align(
         &mut self,
         ctx: &egui::Context,
         row: egui::Rect,
         clip: egui::Rect,
+        at_top: bool,
     ) -> bool {
         let offset = self.metrics.main_scroll_offset.y;
         let key = egui::Id::new(("numeric-goal-center", self.smoke_stage));
@@ -277,7 +235,11 @@ impl LabApp {
                 return false;
             }
         }
-        let delta = clip.center().y - row.center().y;
+        let delta = if at_top {
+            clip.top() - row.top()
+        } else {
+            clip.center().y - row.center().y
+        };
         if delta.abs() <= 1. / ctx.pixels_per_point() {
             return true;
         }
@@ -596,7 +558,7 @@ impl LabApp {
         stage: usize,
     ) -> (bool, Option<String>) {
         const {
-            assert!(shell::EVALUATOR_REVISION == 15);
+            assert!(shell::EVALUATOR_REVISION == 19);
         }
         assert!(self.smoke && self._smoke_profile.is_some());
         assert!((BASE..=BASE + 2 * STRIDE + LAST).contains(&stage));
@@ -1433,13 +1395,13 @@ impl LabApp {
                     _ => unreachable!(),
                 }
             }
-            165..=176 => {
+            165..=180 => {
                 assert_eq!(n, 2, "Only the capstone needs these long-task slices");
-                let setting = (phase - 165) / 3;
-                let slice = (phase - 165) % 3;
+                let setting = (phase - 165) / 4;
+                let slice = (phase - 165) % 4;
                 let top = slice == 0;
-                let middle = slice == 1;
-                let bottom = slice == 2;
+                let middle = slice == 1 || slice == 2;
+                let bottom = slice == 3;
                 let light = setting < 2;
                 let wide = setting.is_multiple_of(2);
                 let requested = if wide {
@@ -1454,8 +1416,10 @@ impl LabApp {
                     if wide { "wide" } else { "narrow" },
                     if bottom {
                         "bottom"
-                    } else if middle {
-                        "middle"
+                    } else if slice == 1 {
+                        "middle-one"
+                    } else if slice == 2 {
+                        "middle-two"
                     } else {
                         "top"
                     }
@@ -1487,7 +1451,7 @@ impl LabApp {
                     .main_viewport
                     .unwrap()
                     .intersect(ctx.content_rect());
-                let Some(rows) = painted_goal_rows(ctx, &scenario.objective, clip) else {
+                let Some(rows) = painted_goal_rows(ctx, &scenario, clip) else {
                     // From the focused editor below the task, scroll upward normally
                     // until the real label contributes a painted galley. Bounded20.
                     assert!(top, "Middle or bottom slice lost the already observed task");
@@ -1512,25 +1476,18 @@ impl LabApp {
                     ctx.request_repaint();
                     return (false, None);
                 };
-                let target = if bottom {
-                    *rows.rows.last().unwrap()
-                } else if middle {
-                    rows.rows[(rows.rows.len() - 1) / 2]
-                } else {
-                    rows.rows[0]
-                };
+                let target_index = lesson_presentation::paint::slice_target(&rows, slice, 4);
+                let target = rows.rows[target_index];
                 if middle || bottom {
                     // A short fully painted goal needs no extra scroll, which
                     // could be impossible at the document's upper boundary.
                     // Center a long goal's final row as well: mere edge containment
                     // can leave its text behind a nested floating scrollbar.
-                    let all_visible = rows.rows.iter().all(|rect| {
-                        rows.clip
-                            .expand(1. / ctx.pixels_per_point())
-                            .contains_rect(*rect)
-                    });
-                    if !all_visible {
-                        if !self.numeric_validation_goal_center(ctx, target, rows.clip) {
+                    let all_visible = rows.all_witnessed();
+                    let final_clearance = target.bottom() + target.height()
+                        <= rows.clip.bottom() + 1. / ctx.pixels_per_point();
+                    if !all_visible || bottom && !final_clearance {
+                        if !self.numeric_validation_goal_align(ctx, target, rows.clip, false) {
                             return (false, None);
                         }
                         assert!(
@@ -1543,7 +1500,7 @@ impl LabApp {
                             "Centered target needs real clearance from edge scrollbars"
                         );
                     }
-                } else if !self.reveal_smoke_control(ctx, target) {
+                } else if !self.numeric_validation_goal_align(ctx, target, rows.clip, true) {
                     return (false, None);
                 }
                 let tolerance = 1. / ctx.pixels_per_point();
@@ -1554,8 +1511,11 @@ impl LabApp {
                     );
                 }
                 assert!(
-                    rows.clip.expand(tolerance).contains_rect(target),
-                    "Target task row must actually paint inside its clip"
+                    rows.clips[target_index]
+                        .expand(tolerance)
+                        .contains_rect(target)
+                        && rows.witnessed[target_index],
+                    "Target task row must have actual unobscured nontransparent glyphs inside its own clip"
                 );
                 let key = egui::Id::new(("numeric-goal-proof", setting));
                 let mut proof = if !top {
@@ -1563,6 +1523,7 @@ impl LabApp {
                         .expect("Top slice was actually captured first")
                 } else {
                     GoalProof {
+                        keys: rows.keys.clone(),
                         seen: vec![false; rows.rows.len()],
                     }
                 };
@@ -1571,8 +1532,12 @@ impl LabApp {
                     rows.rows.len(),
                     "Task wraps consistently within this settled setting"
                 );
-                for (seen, rect) in proof.seen.iter_mut().zip(&rows.rows) {
-                    *seen |= rows.clip.expand(tolerance).contains_rect(*rect);
+                assert_eq!(
+                    proof.keys, rows.keys,
+                    "Each required label and wrapped-row identity remains stable"
+                );
+                for (seen, witnessed) in proof.seen.iter_mut().zip(&rows.witnessed) {
+                    *seen |= *witnessed;
                 }
                 eprintln!(
                     "numeric-validation actual goal rows {label}: visible_union={}/{} clip={:?}",
@@ -1606,12 +1571,12 @@ impl LabApp {
                 if bottom {
                     assert!(
                         proof.seen.iter().all(|seen| *seen),
-                        "Every essential task row must actually appear inside one of the three captured slices"
+                        "Every essential task row must actually appear inside one of the four captured slices"
                     );
                 }
                 ctx.data_mut(|d| d.insert_temp(key, proof));
                 shot = Some(self.numeric_validation_shot(ctx, id, &label));
-                if phase == 176 {
+                if phase == 180 {
                     self.smoke_stage = BASE + n * STRIDE + 54;
                 }
             }

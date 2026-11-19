@@ -9,6 +9,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Lesson {
+    /// Optional source-owned virtual endpoints; no extra grading requirements.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lookup: Option<crate::dns_query_tools::Lesson>,
     pub prerequisite_note: String,
     pub concepts: Vec<Concept>,
     pub example_description: String,
@@ -19,6 +22,11 @@ pub struct Lesson {
 }
 impl Lesson {
     pub fn validate(&self) -> Result<(), String> {
+        if let Some(lookup) = &self.lookup {
+            lookup.example.validate(&self.fixture)?;
+            // The actual assignment state is validated by the pack loader too.
+            lookup.assignment.validate(&self.fixture)?;
+        }
         if self.concepts.is_empty()
             || self.concepts.len() > 6
             || self.concepts.iter().any(|c| {
@@ -77,11 +85,13 @@ impl Learning {
         self.version == 1 && self.server.validate().is_ok() && self.draft.valid()
     }
     pub fn fill_example(&mut self, lesson: &Lesson) -> Result<(), String> {
+        let utility = self.draft.utility.clone();
         let mut candidate = lesson.fixture.clone();
         for action in &lesson.example_solution {
             dns_workspace::adapter(&mut candidate, action)?;
         }
         self.draft = Draft::new(&candidate);
+        self.draft.utility = utility;
         self.checked = false;
         Ok(())
     }
@@ -107,6 +117,7 @@ pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
             | crate::engine::State::Lvm { .. }
             | crate::engine::State::Ntp { .. }
             | crate::engine::State::Hsrp { .. }
+            | crate::engine::State::Syslog { .. }
     ) || crate::workspace::is_physical_workspace(attempt)
     {
         return;

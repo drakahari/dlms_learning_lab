@@ -785,10 +785,12 @@ fn actual9_private_profile_nat_addition_preserves_full_old_histories_target_byte
         evidence::exact(&loaded.attempts[id], value);
     }
     evidence::exact(&loaded.attempts[&s.id], &selected);
+    // This assertion concerns the current writer, not the retained historical inputs.
+    assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 19);
     let mut expected = original["migration_receipts"].clone();
     let versions = expected["shell"].as_array_mut().unwrap();
-    if versions.last() != Some(&serde_json::json!(15)) {
-        versions.push(serde_json::json!(15));
+    if versions.last() != Some(&serde_json::json!(19)) {
+        versions.push(serde_json::json!(19));
     }
     evidence::exact(&loaded.migration_receipts.as_ref().unwrap(), &expected);
     assert_eq!(loaded.attempts.len(), 134);

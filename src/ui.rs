@@ -7,43 +7,159 @@ use dlms_learning_lab::{
 };
 use dlms_learning_lab::{course, script_teaching as teaching, shell, theme};
 use eframe::egui::{self, RichText};
+#[cfg(test)]
+#[path = "../tests/support/aaa_tasks.rs"]
+mod aaa_fixture;
+mod accounts_template_page;
 mod accounts_workspace;
+mod ccna_presentation;
+mod ccna_preview;
+mod ipv4_teaching_revision;
+mod lesson_presentation;
+mod magic_subnet;
+mod teaching_preview;
+#[cfg(test)]
+use aaa_fixture::local_fixture as local_access_fixture;
+mod aaa_access_page;
+#[cfg(test)]
+#[path = "../tests/support/accounts_template_fixture.rs"]
+mod accounts_template_fixture;
 mod acl_workspace;
 mod address_learning;
+mod aging_page;
 mod apache_static_workspace;
+mod arp_inspection_page;
+mod autofs_page;
+mod capacity_page;
+mod resource_observation_page;
+mod maintenance_notice_page;
+mod dns_access_page;
+mod print_queue_page;
+mod localization_page;
+mod timezone_page;
+mod wireless_channel_page;
+mod wlan_page;
+mod snmp_page;
+mod proxy_page;
+mod http_cache_page;
+mod service_page;
+mod reverse_proxy_page;
+mod wlan_paths_page;
+mod source_install_page;
+mod capacity_planning_page;
 mod client_learning;
+mod client_names_page;
 mod completion_index;
 mod controls;
 mod cron_workspace;
 mod data;
+mod debian_conffiles;
 mod debian_packages_workspace;
+mod debian_sources_page;
+mod dhcp_page;
+mod dhcp_snooping_page;
 mod dhcpv4_workspace;
+mod directory_policy_page;
 mod discovery_workspace;
 mod dns_workspace;
+mod environment_lookup;
+mod environment_page;
 mod etherchannel_workspace;
 mod file_backup_workspace;
+mod file_index_page;
+mod fs_integrity_page;
+mod host_page;
+mod ssh_page;
+mod modal_editor;
+mod network_transfer_page;
+mod network_architecture_page;
+mod virtual_isolation_page;
+mod smtp_page;
+mod sieve_page;
+mod mailbox_page;
+mod linux_router_page;
+mod linux_flow_page;
+mod linux_v6_page;
+mod linux_service_router_page;
+mod linux_v6_admin_page;
+mod linux_v6_startup_page;
+mod service_exposure_page;
+mod poe_page;
+mod kernel_build_page;
+mod dkms_page;
+mod initramfs_page;
+mod pxe_page;
+mod iscsi_page;
+mod ata_smart_page;
+mod apache_https_page;
+mod desktop_page;
+mod security_investigation_page;
+mod automation_workshop_page;
+mod ids_rule_page;
+mod auth_filter_page;
+mod vpn_point_page;
+mod ftp_identity_page;
+mod guest_driver_page;
+mod samba_share_page;
+mod modal_page;
+mod editor_handover_page;
 mod hsrp_workspace;
+mod kernel_module_page;
+mod ldap_access_page;
+mod ldap_changes_page;
+mod ldap_client_page;
+mod ldap_password_page;
+mod ldap_schema_page;
+mod ldap_schema_query_page;
+mod bios_loader_page;
+mod efi_loader_page;
+mod grub_once_page;
+mod chrony_page;
+mod local_mail_page;
+mod device_path_page;
+mod json_inventory_page;
+mod rest_controller_page;
+mod copied_journal_page;
+mod boot_entry_page;
 mod legacy_learning;
+mod links_page;
+mod linux_logging_page;
+mod local_access_page;
 mod lvm_workspace;
+mod management_page;
 mod nat_workspace;
 mod nfs_workspace;
+mod nm_page;
 mod ntp_workspace;
 mod one_off_boundary;
 mod one_off_workspace;
+mod optional_mount_page;
 mod ospf_workspace;
+mod pam_page;
 mod partition_fs_workspace;
 mod physical_link_workspace;
+mod port_security_page;
 mod process_learning;
+mod qos_page;
+mod raid1_page;
+mod raid_assembly_page;
+mod recursive_tree_page;
+mod repository_page;
 mod rpm_packages;
 mod script_learning;
 mod scripting;
 mod seed_learning;
 mod service_learning;
+mod shared_libraries_page;
 mod spanning_tree_workspace;
+mod startup_page;
 mod storage_workspace;
+mod syslog_workspace;
 mod terminal_learning;
+mod transport_page;
 mod unit_manager_workspace;
-use std::{path::PathBuf, time::Instant};
+mod user_mount_page;
+use std::{collections::BTreeSet, path::PathBuf, time::Instant};
 mod ipv4_routing_workspace;
 mod ipv4_workspace;
 mod ipv6_workspace;
@@ -55,6 +171,43 @@ mod tests;
 mod workspace;
 #[derive(Default)]
 struct Metrics {
+    qos: qos_page::Metrics,
+    dhcp_config: dhcp_page::Metrics,
+    client_names: client_names_page::Metrics,
+    debian_sources: debian_sources_page::Metrics,
+    nm_profiles: nm_page::Metrics,
+    pam: pam_page::Metrics,
+    aging: aging_page::Metrics,
+    port_security: port_security_page::Metrics,
+    dhcp_snooping: dhcp_snooping_page::Metrics,
+    arp_inspection: arp_inspection_page::Metrics,
+    management: management_page::Metrics,
+    local_access: local_access_page::Metrics,
+    aaa_access: aaa_access_page::Metrics,
+    ldap_client: ldap_client_page::Metrics,
+    ldap_password: ldap_password_page::Metrics,
+    ldap_access: ldap_access_page::Metrics,
+    ldap_schema: ldap_schema_page::Metrics,
+    ldap_schema_query: ldap_schema_query_page::Metrics,
+    bios_loader: bios_loader_page::Metrics,
+    efi_loader: efi_loader_page::Metrics,
+    grub_once: grub_once_page::Metrics,
+    chrony: chrony_page::Metrics,
+    local_mail: local_mail_page::Metrics,
+    device_path: device_path_page::Metrics,
+    json_inventory: json_inventory_page::Metrics,
+    rest_controller: rest_controller_page::Metrics,
+    copied_journal: copied_journal_page::Metrics,
+    boot_entry: boot_entry_page::Metrics,
+    ldap_changes: ldap_changes_page::Metrics,
+    optional_mount: optional_mount_page::Metrics,
+    user_mounts: user_mount_page::Metrics,
+    raid1: raid1_page::Metrics,
+    shared_libraries: shared_libraries_page::Metrics,
+    file_index: file_index_page::Metrics,
+    fs_integrity: fs_integrity_page::Metrics,
+    startup_files: startup_page::Metrics,
+    magic_problem_inputs: Vec<egui::Rect>,
     cron: cron_workspace::CronMetrics,
     one_off: one_off_workspace::OneOffMetrics,
     backup: file_backup_workspace::BackupMetrics,
@@ -65,6 +218,66 @@ struct Metrics {
     ntp: ntp_workspace::Metrics,
     partition_fs: partition_fs_workspace::Metrics,
     hsrp: hsrp_workspace::Metrics,
+    transport: transport_page::Metrics,
+    kernel_module: kernel_module_page::Metrics,
+    recursive_tree: recursive_tree_page::Metrics,
+    directory_policy: directory_policy_page::Metrics,
+    raid_assembly: raid_assembly_page::Metrics,
+    autofs: autofs_page::Metrics,
+    links: links_page::Metrics,
+    capacity: capacity_page::Metrics,
+    resource_observation: resource_observation_page::Metrics,
+    maintenance_notice: maintenance_notice_page::Metrics,
+    dns_access: dns_access_page::Metrics,
+    print_queues: print_queue_page::Metrics,
+    localization: localization_page::Metrics,
+    timezone: timezone_page::Metrics,
+    wireless_channel: wireless_channel_page::Metrics,
+    wlan: wlan_page::Metrics,
+    snmp: snmp_page::Metrics,
+    proxy: proxy_page::Metrics,
+    http_cache: http_cache_page::Metrics,
+    services: service_page::Metrics,
+    reverse_proxy: reverse_proxy_page::Metrics,
+    wlan_paths: wlan_paths_page::Metrics,
+    source_install: source_install_page::Metrics,
+    capacity_planning: capacity_planning_page::Metrics,
+    repository: repository_page::Metrics,
+    host: host_page::Metrics,
+    ssh: ssh_page::Metrics,
+    network_transfer: network_transfer_page::Metrics,
+    network_architecture: network_architecture_page::Metrics,
+    virtual_isolation: virtual_isolation_page::Metrics,
+    smtp: smtp_page::Metrics,
+    sieve: sieve_page::Metrics,
+    mailbox: mailbox_page::Metrics,
+    router: linux_router_page::Metrics,
+    flow: linux_flow_page::Metrics,
+    v6: linux_v6_page::Metrics,
+    services_router: linux_v6_page::Metrics,
+    v6_admin: linux_v6_page::Metrics,
+    v6_startup: linux_v6_page::Metrics,
+    service_exposure: linux_v6_page::Metrics,
+    poe: linux_v6_page::Metrics,
+    kernel_build: linux_v6_page::Metrics,
+    dkms: linux_v6_page::Metrics,
+    early_userspace: linux_v6_page::Metrics,
+    network_boot: linux_v6_page::Metrics,
+    iscsi: linux_v6_page::Metrics,
+    ata_smart: linux_v6_page::Metrics,
+    apache_https: linux_v6_page::Metrics,
+    desktop_profile: linux_v6_page::Metrics,
+    security_investigation: linux_v6_page::Metrics,
+    automation_workshop: linux_v6_page::Metrics,
+    ids_rule: linux_v6_page::Metrics,
+    auth_filter: linux_v6_page::Metrics,
+    vpn_point: linux_v6_page::Metrics,
+    ftp_identity: linux_v6_page::Metrics,
+    guest_driver: guest_driver_page::Metrics,
+    samba: samba_share_page::Metrics,
+    modal: modal_page::Metrics,
+    linux_logging: linux_logging_page::Metrics,
+    syslog: syslog_workspace::Metrics,
     rpm: rpm_packages::RpmMetrics,
     nat_fields: Vec<(String, egui::Rect, egui::Id, bool, egui::Rect)>,
     nat_controls: Vec<(String, egui::Rect, bool, egui::Rect)>,
@@ -77,6 +290,7 @@ struct Metrics {
     nat_static_scroll: Option<(egui::Id, egui::Vec2, egui::Vec2)>,
     nat_feedback: Option<egui::Rect>,
     nat_observation: Option<egui::Rect>,
+    nat_state: Option<egui::Rect>,
     apache_controls: Vec<(String, egui::Rect, bool)>,
     apache_fields: Vec<(String, egui::Rect, egui::Id, bool)>,
     apache_editor: Option<(egui::Rect, egui::Rect, egui::Id, bool)>,
@@ -88,6 +302,7 @@ struct Metrics {
     apache_check_evaluated: bool,
     workspace_header_controls: Vec<(String, egui::Rect, egui::Id)>,
     main_viewport: Option<egui::Rect>,
+    main_scroll_region: Option<egui::Rect>,
     main_scroll_offset: egui::Vec2,
     main_content_size: egui::Vec2,
     main_content_top: f32,
@@ -146,6 +361,7 @@ struct Metrics {
     filters: Vec<egui::Rect>,
     card_actions: Vec<(egui::Rect, egui::Rect)>,
     library_search: Option<egui::Rect>,
+    library_track_choices: Vec<(String, egui::Rect, egui::Id)>,
     card_verification: Vec<(String, Option<completion_index::Status>, egui::Rect)>,
     pagination: bool,
     inputs: Vec<egui::Rect>,
@@ -163,9 +379,12 @@ struct Metrics {
     terminal_example_popup: Option<egui::Rect>,
     terminal_example_choices: Vec<(usize, egui::Rect)>,
     accounts_run: Option<egui::Rect>,
+    accounts_template_popup: Option<egui::Rect>,
     manager_slot: Option<egui::Rect>,
     manager_file: Option<egui::Rect>,
     manager_run: Option<egui::Rect>,
+    manager_start_default: Option<egui::Rect>,
+    manager_start_recovery: Option<egui::Rect>,
     manager_diagnostics: Vec<(egui::Rect, f32)>,
     manager_inspector: Option<egui::Rect>,
     manager_inspector_open: bool,
@@ -205,6 +424,8 @@ struct Metrics {
     dns_result: Option<egui::Rect>,
     package_heading: Option<egui::Rect>,
     package_result: Option<egui::Rect>,
+    package_output_scroll: Option<(f32, f32, egui::Rect)>,
+    package_configuration: Vec<(String, egui::Rect)>,
     package_command: Option<(egui::Rect, egui::Id, bool)>,
     package_run: Option<(egui::Rect, bool)>,
     package_path: Option<egui::Rect>,
@@ -333,6 +554,11 @@ pub struct LabApp {
     scale: f32,
     theme_id: String,
     theme_preview: bool,
+    dhcp_config_run: Option<dhcp_page::ActiveRun>,
+    client_names_run: Option<client_names_page::ActiveRun>,
+    nm_profiles_run: Option<nm_page::ActiveRun>,
+    pam_run: Option<pam_page::ActiveRun>,
+    optional_mount_run: Option<optional_mount_page::ActiveRun>,
     settings_open: bool,
     settings_data: bool,
     data_tools: data::Tools,
@@ -340,6 +566,19 @@ pub struct LabApp {
     preferences_error: Option<String>,
     preferences_read_only: bool,
     mac_trace_reset: Option<usize>,
+    startup_files_epoch: u64,
+    startup_files_run: Option<startup_page::ActiveRun>,
+    startup_files_suppressed: BTreeSet<(String, bool)>,
+    fs_integrity_epoch: u64,
+    fs_integrity_run: Option<fs_integrity_page::ActiveRun>,
+    fs_integrity_suppressed: BTreeSet<(String, bool)>,
+    user_mounts_epoch: u64,
+    user_mounts_run: Option<user_mount_page::ActiveRun>,
+    user_mounts_suppressed: BTreeSet<(String, bool)>,
+    environment_run: Option<environment_page::ActiveRun>,
+    editor_handover_run: Option<editor_handover_page::ActiveRun>,
+    editor_handover_suppressed: std::collections::BTreeSet<(String,bool)>,
+    environment_suppressed: BTreeSet<(String, bool)>,
     script_job: Option<scripting::Job>,
     script_case: usize,
     focus_input: bool,
@@ -357,6 +596,7 @@ pub struct LabApp {
     ntp_presentation: ntp_workspace::Presentation,
     partition_fs_presentation: partition_fs_workspace::Presentation,
     hsrp_presentation: hsrp_workspace::Presentation,
+    syslog_presentation: syslog_workspace::Presentation,
     completion_index: completion_index::Handle,
     cron_presentation: cron_workspace::Presentation,
     one_off_presentation: one_off_workspace::Presentation,
@@ -374,12 +614,103 @@ pub struct LabApp {
     smoke_stage: usize,
     pending_events: Vec<egui::Event>,
     capture_pending: bool,
+    magic_scopes: [u64; 2],
 }
 impl LabApp {
     pub fn new(cc: &eframe::CreationContext<'_>, smoke: bool, developer: bool) -> Self {
         Self::from_context(&cc.egui_ctx, smoke, developer)
     }
     fn from_context(ctx: &egui::Context, smoke: bool, developer: bool) -> Self {
+        let pilot = option_env!("DLMS_CCNA_PILOT") == Some("1")
+            || std::env::args()
+                .any(|a| matches!(a.as_str(), "--ccna-pilot" | "--presentation-review"))
+            || smoke
+                && matches!(
+                    std::env::var("DLMS_SMOKE_STAGE").as_deref(),
+                    Ok("lvm-cow-batch"
+                        | "mbr-layout-batch"
+                        | "lvm-pv-capacity-batch"
+                        | "lvm-rename-batch"
+                        | "lvm-activation-batch"
+                        | "lvm-retirement-batch"
+                        | "lvm-provisioning-batch"
+                        | "swap-policy-batch"
+                        | "host-ipv6-previews"
+                        | "host-ipv6-batch"
+                        | "rpm-metadata-batch"
+                        | "rpm-patch-batch"
+                        | "log-triage-batch"
+                        | "account-skeleton-batch"
+                        | "path-lookup-batch"
+                        | "listener-batch"
+                        | "managed-config-batch"
+                        | "fhs-batch"
+                        | "shared-libraries-batch"
+                        | "ccna-pilot"
+                        | "teaching-rollout"
+                        | "gateway-batch"
+                        | "links-batch"
+                        | "syslog-batch"
+                        | "syslog-previews"
+                        | "capacity-batch"
+                        | "repository-batch"
+                        | "host-batch"
+                        | "debug-recovery-batch"
+                        | "linux-logging-batch"
+                        | "startup-batch"
+                        | "qos-batch"
+                        | "backup-selection-batch"
+                        | "dhcp-config-batch"
+                        | "nm-profiles-batch"
+                        | "nm-vlan-batch"
+                        | "nm-bond-batch"
+                        | "nm-bridge-batch"
+                        | "pam-auth-batch"
+                        | "optional-mount-batch"
+                        | "client-names-batch"
+                        | "resolver-search-batch"
+                        | "debian-contents-batch"
+                        | "debian-sources-batch"
+                        | "tracing-batch"
+                        | "file-lifecycle-batch"
+                        | "associative-batch"
+                        | "environment-batch"
+                        | "user-mounts-batch"
+                        | "raid1-batch"
+                        | "conffile-batch"
+                        | "debian-conflicts-batch"
+                        | "nm-dhcp-batch"
+                        | "fs-integrity-batch"
+                        | "startup-files-batch")
+                );
+        Self::from_context_with_pilot(ctx, smoke, developer, pilot)
+    }
+    /// Real learner sessions always use the complete current catalog. Preserve
+    /// explicitly selected closed legacy smoke fixtures; review flags select a
+    /// separate progress profile, not the availability of implemented lessons.
+    fn current_catalog_for_session(smoke: bool, pilot: bool, stage: Option<&str>) -> bool {
+        !smoke || pilot || matches!(stage, Some("ftp-identity-batch" | "v6-startup-batch" | "v6-admin-batch" | "services-router-batch" | "linux-v6-batch" | "linux-flow-feedback" | "linux-flow-batch" | "linux-router-batch" | "mailbox-administration-batch" | "mailbox-access-batch" | "procmail-migration-batch" | "sieve-vacation-batch" | "sieve-delivery-batch" | "sieve-address-batch" | "sieve-filter-batch" | "smtp-routing-batch" | "guest-driver-batch" | "virtual-isolation-batch" | "samba-share-batch" | "leaf-spine-batch" | "network-architectures-batch" | "network-transfers-batch" | "editor-handover-batch" | "modal-editing-batch" | "ssh-access-batch" | "dns-query-tools-batch" | "direct-dns-batch" | "client-diagnostic-batch" | "rest-controller-batch" | "echo-diagnosis-batch" | "protocol-evidence-batch" | "mixed-ip-batch" | "service-clients-batch" | "service-clients-wide-batch" | "reverse-proxy-batch" | "http-cache-batch" | "proxy-policy-batch" | "snmp-monitor-batch" | "wlan-path-batch" | "wlan-profile-batch" | "wireless-channel-batch" | "timezone-batch" | "localization-batch" | "print-queues-batch" | "dns-access-batch" | "source-install-batch" | "maintenance-notice-batch" | "capacity-planning-batch" | "resource-observation-popup" | "resource-observation-batch" | "measurement-reports-batch" | "disk-layout-batch" | "json-inventory-batch" | "device-path-batch" | "local-mail-batch" | "copied-journal-batch" | "chrony-source-batch" | "rescue-startup-batch" | "grub-once-batch" | "efi-removable-batch" | "efi-loader-batch" | "bios-loader-batch" | "eui64-batch" | "boot-entry-batch" | "grub-menu-batch" | "grub-settings-batch"))
+    }
+    fn from_context_with_pilot(
+        ctx: &egui::Context,
+        smoke: bool,
+        developer: bool,
+        pilot: bool,
+    ) -> Self {
+        let current = Self::current_catalog_for_session(
+            smoke,
+            pilot,
+            std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),
+        );
+        Self::from_context_with_catalog(ctx, smoke, developer, pilot, current)
+    }
+    fn from_context_with_catalog(
+        ctx: &egui::Context,
+        smoke: bool,
+        developer: bool,
+        pilot: bool,
+        current: bool,
+    ) -> Self {
         let history_source =
             HistorySource::from_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref());
         let mut style = (*ctx.style()).clone();
@@ -402,11 +733,25 @@ impl LabApp {
             .insert(egui::TextStyle::Monospace, egui::FontId::monospace(15.));
         ctx.set_style(style);
         #[cfg(not(test))]
-        let scenarios = pack::bundled().expect("Bundled pack validates");
+        let scenarios = if current {
+            pack::current()
+        } else {
+            pack::bundled()
+        }
+        .expect("Bundled pack validates");
         #[cfg(not(test))]
-        let units = course::bundled(&scenarios).expect("Bundled units validate");
+        let units = if current {
+            course::current(&scenarios)
+        } else {
+            course::bundled(&scenarios)
+        }
+        .expect("Bundled units validate");
         #[cfg(test)]
-        let (scenarios, units) = tests::validated_ui_catalog();
+        let (scenarios, units) = if current {
+            tests::ccna_pilot::catalog()
+        } else {
+            tests::validated_ui_catalog()
+        };
         // Developer reopen validation runs before default path/fallback/profile I/O.
         let reopen = smoke::reopen::Session::from_environment(smoke, developer)
             .unwrap_or_else(|e| panic!("Developer reopen refused: {e}"));
@@ -429,6 +774,11 @@ impl LabApp {
         } else {
             progress::default_path()
                 .unwrap_or_else(|_| PathBuf::from("local-data/progress-v1.json"))
+        };
+        let path = if !smoke && pilot {
+            progress::pilot_profile(&path).unwrap_or_else(|e| panic!("Pilot profile refused: {e}"))
+        } else {
+            path
         };
         if let Some(session) = &reopen {
             session
@@ -466,13 +816,21 @@ impl LabApp {
         let preferences = preferences.unwrap_or_default();
         theme::apply(ctx, &preferences.theme);
         let completion_index = completion_index::Handle::default();
-        Self {
+        let app = Self {
             scenarios,
             units,
             progress,
             path,
             _smoke_profile: smoke_profile,
-            filter: Filter::default(),
+            filter: if pilot {
+                Filter {
+                    track: "CCNA".into(),
+                    unit: "ccna-magic-number".into(),
+                    ..Default::default()
+                }
+            } else {
+                Filter::default()
+            },
             selected: None,
             input: String::new(),
             checked: false,
@@ -487,6 +845,11 @@ impl LabApp {
             scale: preferences.text_scale,
             theme_id: preferences.theme,
             theme_preview: false,
+            dhcp_config_run: None,
+            client_names_run: None,
+            nm_profiles_run: None,
+            pam_run: None,
+            optional_mount_run: None,
             settings_open: false,
             settings_data: false,
             data_tools: data::Tools::default(),
@@ -494,6 +857,19 @@ impl LabApp {
             preferences_error,
             preferences_read_only,
             mac_trace_reset: None,
+            startup_files_epoch: 0,
+            startup_files_run: None,
+            startup_files_suppressed: BTreeSet::new(),
+            fs_integrity_epoch: 0,
+            fs_integrity_run: None,
+            fs_integrity_suppressed: BTreeSet::new(),
+            user_mounts_epoch: 0,
+            user_mounts_run: None,
+            user_mounts_suppressed: BTreeSet::new(),
+            environment_run: None,
+            editor_handover_run: None,
+            editor_handover_suppressed: Default::default(),
+            environment_suppressed: BTreeSet::new(),
             script_job: None,
             script_case: 0,
             focus_input: false,
@@ -504,6 +880,7 @@ impl LabApp {
             ntp_presentation: Default::default(),
             partition_fs_presentation: Default::default(),
             hsrp_presentation: Default::default(),
+            syslog_presentation: Default::default(),
             metrics: Metrics::default(),
             apache_presentation: apache_static_workspace::Presentation::default(),
             nat_presentation: nat_workspace::Presentation::default(),
@@ -611,11 +988,16 @@ impl LabApp {
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("legacy-terminal-teaching")
             {
                 28000
-            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-reverse") {
+            } else if smoke && matches!(std::env::var("DLMS_SMOKE_STAGE").as_deref(), Ok("dns-reverse" | "dns-query-tools-batch")) {
                 27000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("seed-teaching") {
                 25000
-            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("find-lessons") {
+            } else if smoke
+                && matches!(
+                    std::env::var("DLMS_SMOKE_STAGE").as_deref(),
+                    Ok("find-lessons" | "fhs-batch")
+                )
+            {
                 21000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mac-layout") {
                 20000
@@ -840,7 +1222,14 @@ impl LabApp {
             },
             pending_events: Vec::new(),
             capture_pending: false,
+            magic_scopes: [0; 2],
+        };
+        if let Some(session) = &app.reopen {
+            app.reopen_editor_handover_loaded(session);
+            app.reopen_environment_loaded(session);
+            app.reopen_user_mounts_loaded(session);
         }
+        app
     }
     fn launch(&mut self, i: usize) {
         let source = &self.scenarios[i];
@@ -856,6 +1245,670 @@ impl LabApp {
         {
             self.notice = Some(e);
             return;
+        }
+        let module_source = &self.scenarios[i];
+        if matches!(module_source.initial, engine::State::KernelModules { .. })
+            || matches!(module_source.goal, engine::Goal::KernelModules { .. })
+            || self
+                .progress
+                .attempts
+                .get(&module_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::KernelModules { .. }))
+        {
+            let admitted =
+                dlms_learning_lab::kernel_module_source::source(module_source).and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&module_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::kernel_module_source::context(a, module_source)
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let recursive_source = &self.scenarios[i];
+        if matches!(
+            recursive_source.initial,
+            engine::State::RecursiveTree { .. }
+        ) || matches!(recursive_source.goal, engine::Goal::RecursiveTree { .. })
+            || self
+                .progress
+                .attempts
+                .get(&recursive_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::RecursiveTree { .. }))
+        {
+            let admitted = dlms_learning_lab::recursive_tree_source::source(recursive_source)
+                .and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&recursive_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::recursive_tree_source::context(a, recursive_source)
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let transport_source = &self.scenarios[i];
+        if matches!(transport_source.initial, engine::State::Transport { .. })
+            || matches!(transport_source.goal, engine::Goal::Transport { .. })
+            || self
+                .progress
+                .attempts
+                .get(&transport_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::Transport { .. }))
+        {
+            let admitted = dlms_learning_lab::transport_workspace::source(transport_source)
+                .and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&transport_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::transport_workspace::context(a, transport_source)
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let raid_assembly_source = &self.scenarios[i];
+        if matches!(
+            raid_assembly_source.initial,
+            engine::State::RaidAssembly { .. }
+        ) || matches!(raid_assembly_source.goal, engine::Goal::RaidAssembly { .. })
+            || self
+                .progress
+                .attempts
+                .get(&raid_assembly_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::RaidAssembly { .. }))
+        {
+            let admitted = dlms_learning_lab::raid_assembly_source::source(raid_assembly_source)
+                .and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&raid_assembly_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::raid_assembly_source::context(
+                                a,
+                                raid_assembly_source,
+                            )
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let autofs_source = &self.scenarios[i];
+        if matches!(autofs_source.initial, engine::State::Autofs { .. })
+            || matches!(autofs_source.goal, engine::Goal::Autofs { .. })
+            || self
+                .progress
+                .attempts
+                .get(&autofs_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::Autofs { .. }))
+        {
+            let admitted = dlms_learning_lab::autofs_source::source(autofs_source).and_then(|_| {
+                self.progress
+                    .attempts
+                    .get(&autofs_source.id)
+                    .map_or(Ok(()), |a| {
+                        dlms_learning_lab::autofs_source::context(a, autofs_source)
+                    })
+            });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let pam_source = &self.scenarios[i];
+        if matches!(pam_source.initial, engine::State::PamStack { .. })
+            || matches!(pam_source.goal, engine::Goal::PamStack { .. })
+            || self
+                .progress
+                .attempts
+                .get(&pam_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::PamStack { .. }))
+        {
+            let admitted = dlms_learning_lab::pam_workspace::source(pam_source).and_then(|_| {
+                self.progress
+                    .attempts
+                    .get(&pam_source.id)
+                    .map_or(Ok(()), |a| {
+                        dlms_learning_lab::pam_workspace::context(a, pam_source)
+                    })
+            });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let aging_source = &self.scenarios[i];
+        if matches!(aging_source.initial, engine::State::Aging { .. })
+            || matches!(aging_source.goal, engine::Goal::Aging { .. })
+            || self
+                .progress
+                .attempts
+                .get(&aging_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::Aging { .. }))
+        {
+            let admitted =
+                dlms_learning_lab::aging_workspace::source(aging_source).and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&aging_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::aging_workspace::context(a, aging_source)
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let port_security_source = &self.scenarios[i];
+        if matches!(
+            port_security_source.initial,
+            engine::State::PortSecurity { .. }
+        ) || matches!(port_security_source.goal, engine::Goal::PortSecurity { .. })
+            || self
+                .progress
+                .attempts
+                .get(&port_security_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::PortSecurity { .. }))
+        {
+            let admitted = dlms_learning_lab::port_security_workspace::source(port_security_source)
+                .and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&port_security_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::port_security_workspace::context(
+                                a,
+                                port_security_source,
+                            )
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let directory_source = &self.scenarios[i];
+        if matches!(
+            directory_source.initial,
+            engine::State::DirectoryPolicy { .. }
+        ) || matches!(directory_source.goal, engine::Goal::DirectoryPolicy { .. })
+            || self
+                .progress
+                .attempts
+                .get(&directory_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::DirectoryPolicy { .. }))
+        {
+            let admit = dlms_learning_lab::directory_policy_source::source(directory_source)
+                .and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&directory_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::directory_policy_source::context(a, directory_source)
+                        })
+                });
+            if let Err(e) = admit {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let dhcp_snooping_source = &self.scenarios[i];
+        if matches!(
+            dhcp_snooping_source.initial,
+            engine::State::DhcpSnooping { .. }
+        ) || matches!(dhcp_snooping_source.goal, engine::Goal::DhcpSnooping { .. })
+            || self
+                .progress
+                .attempts
+                .get(&dhcp_snooping_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::DhcpSnooping { .. }))
+        {
+            let admitted = dlms_learning_lab::dhcp_snooping_workspace::source(dhcp_snooping_source)
+                .and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&dhcp_snooping_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::dhcp_snooping_workspace::context(
+                                a,
+                                dhcp_snooping_source,
+                            )
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let arp_inspection_source = &self.scenarios[i];
+        if matches!(
+            arp_inspection_source.initial,
+            engine::State::ArpInspection { .. }
+        ) || matches!(
+            arp_inspection_source.goal,
+            engine::Goal::ArpInspection { .. }
+        ) || self
+            .progress
+            .attempts
+            .get(&arp_inspection_source.id)
+            .is_some_and(|a| matches!(a.state, engine::State::ArpInspection { .. }))
+        {
+            let admitted =
+                dlms_learning_lab::arp_inspection_workspace::source(arp_inspection_source)
+                    .and_then(|_| {
+                        self.progress
+                            .attempts
+                            .get(&arp_inspection_source.id)
+                            .map_or(Ok(()), |a| {
+                                dlms_learning_lab::arp_inspection_workspace::context(
+                                    a,
+                                    arp_inspection_source,
+                                )
+                            })
+                    });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let management_policy_source = &self.scenarios[i];
+        if matches!(
+            management_policy_source.initial,
+            engine::State::ManagementPolicy { .. }
+        ) || matches!(
+            management_policy_source.goal,
+            engine::Goal::ManagementPolicy { .. }
+        ) || self
+            .progress
+            .attempts
+            .get(&management_policy_source.id)
+            .is_some_and(|a| matches!(a.state, engine::State::ManagementPolicy { .. }))
+        {
+            let admitted = dlms_learning_lab::management_workspace::source(
+                management_policy_source,
+            )
+            .and_then(|_| {
+                self.progress
+                    .attempts
+                    .get(&management_policy_source.id)
+                    .map_or(Ok(()), |a| {
+                        dlms_learning_lab::management_workspace::context(
+                            a,
+                            management_policy_source,
+                        )
+                    })
+            });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let local_access_source = &self.scenarios[i];
+        if matches!(
+            local_access_source.initial,
+            engine::State::LocalAccess { .. }
+        ) || matches!(local_access_source.goal, engine::Goal::LocalAccess { .. })
+            || self
+                .progress
+                .attempts
+                .get(&local_access_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::LocalAccess { .. }))
+        {
+            let admitted = dlms_learning_lab::local_access_workspace::source(local_access_source)
+                .and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&local_access_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::local_access_workspace::context(
+                                a,
+                                local_access_source,
+                            )
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let aaa_access_source = &self.scenarios[i];
+        if matches!(aaa_access_source.initial, engine::State::AaaAccess { .. })
+            || matches!(aaa_access_source.goal, engine::Goal::AaaAccess { .. })
+            || self
+                .progress
+                .attempts
+                .get(&aaa_access_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::AaaAccess { .. }))
+        {
+            let admitted =
+                dlms_learning_lab::aaa_workspace::source(aaa_access_source).and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&aaa_access_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::aaa_workspace::context(a, aaa_access_source)
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let ldap_client_source = &self.scenarios[i];
+        if matches!(ldap_client_source.initial, engine::State::LdapClient { .. })
+            || matches!(ldap_client_source.goal, engine::Goal::LdapClient { .. })
+            || self
+                .progress
+                .attempts
+                .get(&ldap_client_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::LdapClient { .. }))
+        {
+            let admitted =
+                dlms_learning_lab::ldap_workspace::source(ldap_client_source).and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&ldap_client_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::ldap_workspace::context(a, ldap_client_source)
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let ldap_access_source = &self.scenarios[i];
+        if matches!(ldap_access_source.initial, engine::State::LdapAccess { .. })
+            || matches!(ldap_access_source.goal, engine::Goal::LdapAccess { .. })
+            || self
+                .progress
+                .attempts
+                .get(&ldap_access_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::LdapAccess { .. }))
+        {
+            let admitted = dlms_learning_lab::ldap_access_workspace::source(ldap_access_source)
+                .and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&ldap_access_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::ldap_access_workspace::context(a, ldap_access_source)
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let ldap_schema_source = &self.scenarios[i];
+        if matches!(ldap_schema_source.initial, engine::State::LdapSchema { .. })
+            || matches!(ldap_schema_source.goal, engine::Goal::LdapSchema { .. })
+            || self
+                .progress
+                .attempts
+                .get(&ldap_schema_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::LdapSchema { .. }))
+        {
+            let admitted = dlms_learning_lab::ldap_schema_workspace::source(ldap_schema_source)
+                .and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&ldap_schema_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::ldap_schema_workspace::context(a, ldap_schema_source)
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let boot_source=&self.scenarios[i];
+        if matches!(boot_source.initial, engine::State::CopiedJournal { .. })
+            || matches!(boot_source.goal, engine::Goal::CopiedJournal { .. })
+            || self.progress.attempts.get(&boot_source.id).is_some_and(|attempt| matches!(attempt.state, engine::State::CopiedJournal { .. }))
+        {
+            let admitted = dlms_learning_lab::journal_archive_workspace::source(boot_source)
+                .and_then(|_| self.progress.attempts.get(&boot_source.id).map_or(Ok(()), |attempt| {
+                    dlms_learning_lab::journal_archive_workspace::context(attempt, boot_source)
+                }));
+            if let Err(error) = admitted {
+                self.notice = Some(error);
+                return;
+            }
+        }
+        if matches!(boot_source.initial, engine::State::JsonInventory { .. })
+            || matches!(boot_source.goal, engine::Goal::JsonInventory { .. })
+            || self.progress.attempts.get(&boot_source.id).is_some_and(|attempt| matches!(attempt.state, engine::State::JsonInventory { .. }))
+        {
+            let admitted = dlms_learning_lab::json_inventory_workspace::source(boot_source)
+                .and_then(|_| self.progress.attempts.get(&boot_source.id).map_or(Ok(()), |attempt| {
+                    dlms_learning_lab::json_inventory_workspace::context(attempt, boot_source)
+                }));
+            if let Err(error) = admitted {
+                self.notice = Some(error);
+                return;
+            }
+        }
+        if matches!(boot_source.initial, engine::State::RestController { .. })
+            || matches!(boot_source.goal, engine::Goal::RestController { .. })
+            || self.progress.attempts.get(&boot_source.id).is_some_and(|attempt| matches!(attempt.state, engine::State::RestController { .. }))
+        {
+            let admitted = dlms_learning_lab::rest_workspace::source(boot_source)
+                .and_then(|_| self.progress.attempts.get(&boot_source.id).map_or(Ok(()), |attempt| {
+                    dlms_learning_lab::rest_workspace::context(attempt, boot_source)
+                }));
+            if let Err(error) = admitted {
+                self.notice = Some(error);
+                return;
+            }
+        }
+        if matches!(boot_source.initial, engine::State::DevicePath { .. })
+            || matches!(boot_source.goal, engine::Goal::DevicePath { .. })
+            || self.progress.attempts.get(&boot_source.id).is_some_and(|attempt| matches!(attempt.state, engine::State::DevicePath { .. }))
+        {
+            let admitted = dlms_learning_lab::device_path_workspace::source(boot_source)
+                .and_then(|_| self.progress.attempts.get(&boot_source.id).map_or(Ok(()), |attempt| {
+                    dlms_learning_lab::device_path_workspace::context(attempt, boot_source)
+                }));
+            if let Err(error) = admitted {
+                self.notice = Some(error);
+                return;
+            }
+        }
+        if matches!(boot_source.initial, engine::State::LocalMail { .. })
+            || matches!(boot_source.goal, engine::Goal::LocalMail { .. })
+            || self.progress.attempts.get(&boot_source.id).is_some_and(|attempt| matches!(attempt.state, engine::State::LocalMail { .. }))
+        {
+            let admitted = dlms_learning_lab::local_mail_workspace::source(boot_source)
+                .and_then(|_| self.progress.attempts.get(&boot_source.id).map_or(Ok(()), |attempt| {
+                    dlms_learning_lab::local_mail_workspace::context(attempt, boot_source)
+                }));
+            if let Err(error) = admitted {
+                self.notice = Some(error);
+                return;
+            }
+        }
+        if matches!(boot_source.initial, engine::State::Chrony { .. })
+            || matches!(boot_source.goal, engine::Goal::Chrony { .. })
+            || self.progress.attempts.get(&boot_source.id).is_some_and(|attempt| matches!(attempt.state, engine::State::Chrony { .. }))
+        {
+            let admitted = dlms_learning_lab::chrony_workspace::source(boot_source)
+                .and_then(|_| self.progress.attempts.get(&boot_source.id).map_or(Ok(()), |attempt| {
+                    dlms_learning_lab::chrony_workspace::context(attempt, boot_source)
+                }));
+            if let Err(error) = admitted {
+                self.notice = Some(error);
+                return;
+            }
+        }
+        if matches!(boot_source.initial, engine::State::GrubOnce { .. })
+            || matches!(boot_source.goal, engine::Goal::GrubOnce { .. })
+            || self.progress.attempts.get(&boot_source.id).is_some_and(|a| matches!(a.state, engine::State::GrubOnce { .. }))
+        {
+            let admitted = dlms_learning_lab::grub_once_workspace::source(boot_source)
+                .and_then(|_| self.progress.attempts.get(&boot_source.id).map_or(Ok(()), |attempt| {
+                    dlms_learning_lab::grub_once_workspace::context(attempt, boot_source)
+                }));
+            if let Err(error) = admitted {
+                self.notice = Some(error);
+                return;
+            }
+        }
+        if matches!(boot_source.initial,engine::State::EfiLoader{..}) || matches!(boot_source.goal,engine::Goal::EfiLoader{..}) || self.progress.attempts.get(&boot_source.id).is_some_and(|a|matches!(a.state,engine::State::EfiLoader{..})) {
+            let admitted=dlms_learning_lab::efi_loader_workspace::source(boot_source).and_then(|_|self.progress.attempts.get(&boot_source.id).map_or(Ok(()),|a|dlms_learning_lab::efi_loader_workspace::context(a,boot_source)));
+            if let Err(e)=admitted{self.notice=Some(e);return;}
+        }
+        if matches!(boot_source.initial,engine::State::BiosLoader{..}) || matches!(boot_source.goal,engine::Goal::BiosLoader{..}) || self.progress.attempts.get(&boot_source.id).is_some_and(|a|matches!(a.state,engine::State::BiosLoader{..})) {
+            let admitted=dlms_learning_lab::bios_loader_workspace::source(boot_source).and_then(|_|self.progress.attempts.get(&boot_source.id).map_or(Ok(()),|a|dlms_learning_lab::bios_loader_workspace::context(a,boot_source)));
+            if let Err(e)=admitted{self.notice=Some(e);return;}
+        }
+        let boot_source=&self.scenarios[i];
+        if matches!(boot_source.initial,engine::State::BootEntry{..}) || matches!(boot_source.goal,engine::Goal::BootEntry{..}) || self.progress.attempts.get(&boot_source.id).is_some_and(|a|matches!(a.state,engine::State::BootEntry{..})) {
+            let admitted=dlms_learning_lab::boot_entry_workspace::source(boot_source).and_then(|_|self.progress.attempts.get(&boot_source.id).map_or(Ok(()),|a|dlms_learning_lab::boot_entry_workspace::context(a,boot_source)));
+            if let Err(e)=admitted{self.notice=Some(e);return;}
+        }
+        let ldap_schema_query_source = &self.scenarios[i];
+        if matches!(
+            ldap_schema_query_source.initial,
+            engine::State::LdapSchemaQuery { .. }
+        ) || matches!(
+            ldap_schema_query_source.goal,
+            engine::Goal::LdapSchemaQuery { .. }
+        ) || self
+            .progress
+            .attempts
+            .get(&ldap_schema_query_source.id)
+            .is_some_and(|a| matches!(a.state, engine::State::LdapSchemaQuery { .. }))
+        {
+            let admitted =
+                dlms_learning_lab::ldap_schema_query_workspace::source(ldap_schema_query_source)
+                    .and_then(|_| {
+                        self.progress
+                            .attempts
+                            .get(&ldap_schema_query_source.id)
+                            .map_or(Ok(()), |a| {
+                                dlms_learning_lab::ldap_schema_query_workspace::context(
+                                    a,
+                                    ldap_schema_query_source,
+                                )
+                            })
+                    });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let ldap_password_source = &self.scenarios[i];
+        if matches!(
+            ldap_password_source.initial,
+            engine::State::LdapPassword { .. }
+        ) || matches!(ldap_password_source.goal, engine::Goal::LdapPassword { .. })
+            || self
+                .progress
+                .attempts
+                .get(&ldap_password_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::LdapPassword { .. }))
+        {
+            let admitted = dlms_learning_lab::ldap_password_workspace::source(ldap_password_source)
+                .and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&ldap_password_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::ldap_password_workspace::context(
+                                a,
+                                ldap_password_source,
+                            )
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let ldap_changes_source = &self.scenarios[i];
+        if matches!(
+            ldap_changes_source.initial,
+            engine::State::LdapChanges { .. }
+        ) || matches!(ldap_changes_source.goal, engine::Goal::LdapChanges { .. })
+            || self
+                .progress
+                .attempts
+                .get(&ldap_changes_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::LdapChanges { .. }))
+        {
+            let admitted = dlms_learning_lab::ldap_change_workspace::source(ldap_changes_source)
+                .and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&ldap_changes_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::ldap_change_workspace::context(
+                                a,
+                                ldap_changes_source,
+                            )
+                        })
+                });
+            if let Err(e) = admitted {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let directory_source = &self.scenarios[i];
+        if matches!(
+            directory_source.initial,
+            engine::State::DirectoryPolicy { .. }
+        ) || matches!(directory_source.goal, engine::Goal::DirectoryPolicy { .. })
+            || self
+                .progress
+                .attempts
+                .get(&directory_source.id)
+                .is_some_and(|a| matches!(a.state, engine::State::DirectoryPolicy { .. }))
+        {
+            let admit = dlms_learning_lab::directory_policy_source::source(directory_source)
+                .and_then(|_| {
+                    self.progress
+                        .attempts
+                        .get(&directory_source.id)
+                        .map_or(Ok(()), |a| {
+                            dlms_learning_lab::directory_policy_source::context(a, directory_source)
+                        })
+                });
+            if let Err(e) = admit {
+                self.notice = Some(e);
+                return;
+            }
+        }
+        let link_source = &self.scenarios[i];
+        if matches!(link_source.initial, engine::State::Links { .. })
+            || matches!(link_source.goal, engine::Goal::Links { .. })
+        {
+            let admit = dlms_learning_lab::links_workspace::source(link_source).and_then(|_| {
+                self.progress
+                    .attempts
+                    .get(&link_source.id)
+                    .map_or(Ok(()), |a| {
+                        dlms_learning_lab::links_workspace::context(a, link_source)
+                    })
+            });
+            if let Err(e) = admit {
+                self.notice = Some(e);
+                return;
+            }
         }
         let hsrp_source = &self.scenarios[i];
         let previous = self.progress.attempts.get(&hsrp_source.id);
@@ -873,6 +1926,23 @@ impl LabApp {
                 return;
             }
         }
+        let syslog_source = &self.scenarios[i];
+        let previous = self.progress.attempts.get(&syslog_source.id);
+        if matches!(syslog_source.initial, engine::State::Syslog { .. })
+            || matches!(syslog_source.goal, engine::Goal::Syslog { .. })
+            || previous.is_some_and(|a| matches!(a.state, engine::State::Syslog { .. }))
+        {
+            let admission = dlms_learning_lab::syslog_workspace::binding::admit_launch(
+                previous,
+                syslog_source,
+                self.progress.clock.saturating_add(1),
+            );
+            if let Err(e) = admission {
+                self.notice = Some(e);
+                return;
+            }
+        }
+
         let ntp_source = &self.scenarios[i];
         let previous = self.progress.attempts.get(&ntp_source.id);
         if matches!(ntp_source.initial, engine::State::Ntp { .. })
@@ -915,6 +1985,14 @@ impl LabApp {
         self.one_off_presentation.clear();
         self.backup_presentation.clear();
         self.script_job = None;
+        self.environment_run = None;
+        self.editor_handover_run = None;
+        self.user_mounts_run = None;
+        self.user_mounts_epoch = self.user_mounts_epoch.wrapping_add(1);
+        self.startup_files_run = None;
+        self.startup_files_epoch = self.startup_files_epoch.wrapping_add(1);
+        self.fs_integrity_run = None;
+        self.fs_integrity_epoch = self.fs_integrity_epoch.wrapping_add(1);
         self.script_case = 0;
         self.progress.clock = self.progress.clock.saturating_add(1);
         let clock = self.progress.clock;
@@ -934,6 +2012,12 @@ impl LabApp {
         }
         if matches!(a.state, engine::State::Hsrp { .. })
             && let Err(e) = dlms_learning_lab::hsrp_workspace::binding::prepare(a, s)
+        {
+            self.notice = Some(e);
+            return;
+        }
+        if matches!(a.state, engine::State::Syslog { .. })
+            && let Err(e) = dlms_learning_lab::syslog_workspace::binding::prepare(a, s)
         {
             self.notice = Some(e);
             return;
@@ -989,7 +2073,16 @@ impl LabApp {
             dlms_learning_lab::address_teaching::prepare(a, lesson, new_attempt);
         }
         if let Some(lesson) = &s.terminal_teaching {
-            dlms_learning_lab::terminal_teaching::prepare(a, lesson, new_attempt);
+            if dlms_learning_lab::command_location_workspace::has_source(s) {
+                if let Err(error) =
+                    dlms_learning_lab::command_location_workspace::prepare(a, s, new_attempt)
+                {
+                    self.notice = Some(error);
+                    return;
+                }
+            } else {
+                dlms_learning_lab::terminal_teaching::prepare(a, lesson, new_attempt);
+            }
         }
         if let Some(lesson) = &s.process_teaching {
             dlms_learning_lab::process_teaching::prepare(a, lesson, new_attempt);
@@ -1024,7 +2117,16 @@ impl LabApp {
             }
         }
         if let Some(lesson) = &s.accounts_teaching {
-            dlms_learning_lab::accounts_teaching::prepare(a, lesson, new_attempt);
+            if dlms_learning_lab::accounts_template_workspace::has_source(s) {
+                if let Err(e) =
+                    dlms_learning_lab::accounts_template_workspace::prepare(a, s, new_attempt)
+                {
+                    self.notice = Some(e);
+                    return;
+                }
+            } else {
+                dlms_learning_lab::accounts_teaching::prepare(a, lesson, new_attempt);
+            }
         }
         if let Some(lesson) = &s.unit_manager_teaching {
             dlms_learning_lab::unit_manager_teaching::prepare(a, lesson, new_attempt)
@@ -1139,6 +2241,9 @@ impl LabApp {
         };
     }
     fn reset_attempt(&mut self, i: usize) {
+        if matches!(self.scenarios[i].initial, engine::State::MagicSubnet { .. }) {
+            self.magic_scopes[0] = self.magic_scopes[0].wrapping_add(1);
+        }
         if matches!(self.scenarios[i].initial, engine::State::PartitionFs { .. }) {
             let s = &self.scenarios[i];
             if let Err(e) = dlms_learning_lab::partition_fs_workspace::binding::admit_launch(
@@ -1163,6 +2268,19 @@ impl LabApp {
             }
             self.hsrp_presentation.reset_all();
         }
+        if matches!(self.scenarios[i].initial, engine::State::Syslog { .. }) {
+            let source = &self.scenarios[i];
+            if let Err(e) = dlms_learning_lab::syslog_workspace::binding::admit_launch(
+                None,
+                source,
+                self.progress.attempts[&source.id].visited,
+            ) {
+                self.notice = Some(e);
+                return;
+            }
+            self.syslog_presentation.reset_all();
+        }
+
         if matches!(self.scenarios[i].initial, engine::State::Ntp { .. }) {
             self.ntp_presentation.reset_all();
         }
@@ -1210,6 +2328,12 @@ impl LabApp {
         }
         if matches!(a.state, engine::State::Hsrp { .. })
             && let Err(e) = dlms_learning_lab::hsrp_workspace::binding::prepare(a, s)
+        {
+            self.notice = Some(e);
+            return;
+        }
+        if matches!(a.state, engine::State::Syslog { .. })
+            && let Err(e) = dlms_learning_lab::syslog_workspace::binding::prepare(a, s)
         {
             self.notice = Some(e);
             return;
@@ -1265,7 +2389,16 @@ impl LabApp {
             dlms_learning_lab::address_teaching::prepare(a, lesson, true);
         }
         if let Some(lesson) = &s.terminal_teaching {
-            dlms_learning_lab::terminal_teaching::prepare(a, lesson, true);
+            if dlms_learning_lab::command_location_workspace::has_source(s) {
+                if let Err(error) =
+                    dlms_learning_lab::command_location_workspace::prepare(a, s, true)
+                {
+                    self.notice = Some(error);
+                    return;
+                }
+            } else {
+                dlms_learning_lab::terminal_teaching::prepare(a, lesson, true);
+            }
         }
         if let Some(lesson) = &s.process_teaching {
             dlms_learning_lab::process_teaching::prepare(a, lesson, true);
@@ -1294,7 +2427,15 @@ impl LabApp {
             Self::ospf_initial_selection(a, s);
         }
         if let Some(lesson) = &s.accounts_teaching {
-            dlms_learning_lab::accounts_teaching::prepare(a, lesson, true);
+            if dlms_learning_lab::accounts_template_workspace::has_source(s) {
+                if let Err(e) = dlms_learning_lab::accounts_template_workspace::prepare(a, s, true)
+                {
+                    self.notice = Some(e);
+                    return;
+                }
+            } else {
+                dlms_learning_lab::accounts_teaching::prepare(a, lesson, true);
+            }
         }
         if let Some(lesson) = &s.unit_manager_teaching {
             dlms_learning_lab::unit_manager_teaching::prepare(a, lesson, true)
@@ -1336,6 +2477,14 @@ impl LabApp {
                 .selected_device = device;
         }
         self.script_job = None;
+        self.environment_run = None;
+        self.editor_handover_run = None;
+        self.user_mounts_run = None;
+        self.user_mounts_epoch = self.user_mounts_epoch.wrapping_add(1);
+        self.startup_files_run = None;
+        self.startup_files_epoch = self.startup_files_epoch.wrapping_add(1);
+        self.fs_integrity_run = None;
+        self.fs_integrity_epoch = self.fs_integrity_epoch.wrapping_add(1);
         self.input.clear();
         self.checked = false;
         self.reset_pending = false;
@@ -1367,12 +2516,14 @@ impl LabApp {
             || self.ntp_capture_active()
             || self.disk_capture_active()
             || self.literal_capture_active()
-            || self.snapshot_capture_active();
+            || self.snapshot_capture_active()
+            || self.shared_libraries_capture_active();
         ui.label(RichText::new("Text size").small().color(palette(ui).muted));
         let r = egui::ComboBox::from_id_salt("text-size")
             .width(84.)
             .selected_text(format!("{:.0}%", self.scale * 100.))
             .show_ui(ui, |ui| {
+                let first_choice = self.metrics.physical_picker_choices.len();
                 for scale in [1., 1.15, 1.25, 1.5, 2.] {
                     let item = ui.selectable_value(
                         &mut self.scale,
@@ -1386,6 +2537,12 @@ impl LabApp {
                             item.rect,
                             ui.clip_rect(),
                         ));
+                    }
+                }
+                if self.shared_libraries_capture_active() {
+                    let clip = controls::popup_content_clip(ui);
+                    for choice in &mut self.metrics.physical_picker_choices[first_choice..] {
+                        choice.2 = clip;
                     }
                 }
             });
@@ -1418,13 +2575,15 @@ impl LabApp {
             || self.ntp_capture_active()
             || self.disk_capture_active()
             || self.literal_capture_active()
-            || self.snapshot_capture_active();
+            || self.snapshot_capture_active()
+            || self.shared_libraries_capture_active();
         let r = controls::cell(ui, width, |ui| {
             egui::ComboBox::from_id_salt("native-theme-picker")
                 .width(width)
                 .truncate()
                 .selected_text(theme::find(&self.theme_id).name.clone())
                 .show_ui(ui, |ui| {
+                    let first_choice = self.metrics.physical_picker_choices.len();
                     for t in theme::inventory() {
                         let item = ui.selectable_value(
                             &mut self.theme_id,
@@ -1440,6 +2599,12 @@ impl LabApp {
                                 item.rect,
                                 ui.clip_rect(),
                             ));
+                        }
+                    }
+                    if self.shared_libraries_capture_active() {
+                        let clip = controls::popup_content_clip(ui);
+                        for choice in &mut self.metrics.physical_picker_choices[first_choice..] {
+                            choice.2 = clip;
                         }
                     }
                 })
@@ -1503,6 +2668,22 @@ impl LabApp {
                 .save(&self.path.with_file_name("preferences-v1.json"))
                 .err();
             }
+        }
+    }
+    fn open_magic_introduction(&mut self) {
+        if let Some(i) = self
+            .scenarios
+            .iter()
+            .position(|s| s.id == "ccna-magic-blocks")
+        {
+            self.launch(i);
+            let a = self.progress.attempts.get_mut("ccna-magic-blocks").unwrap();
+            a.challenge = false;
+            if let engine::State::MagicSubnet { session } = &mut a.state {
+                session.view = teaching::View::Introduction;
+            }
+            self.lesson_scroll_reset = true;
+            self.dirty = true;
         }
     }
     fn course_entry(&mut self, ui: &mut egui::Ui) {
@@ -1575,6 +2756,14 @@ impl LabApp {
                 format!("{} · {done}/{} labs complete", unit.title, unit.labs.len())
             });
             ui.label(&unit.summary);
+            if unit.id == "ccna-magic-number" {
+                let r = ui.add(primary(ui, "Open first lesson · introduction"));
+                self.metrics.course_start = Some(r.rect);
+                if r.clicked() {
+                    self.open_magic_introduction();
+                }
+            }
+
             if !unit.prerequisites.is_empty() {
                 ui.label(
                     RichText::new(format!(
@@ -1706,10 +2895,11 @@ impl LabApp {
                 ("LPIC-2", "LPIC-2"),
                 ("Bash/Shell", "Bash/Shell"),
             ] {
-                if ui
-                    .selectable_label(self.filter.track == value, label)
-                    .clicked()
-                {
+                let choice = ui.selectable_label(self.filter.track == value, label);
+                self.metrics
+                    .library_track_choices
+                    .push((value.into(), choice.rect, choice.id));
+                if choice.clicked() {
                     if self.filter.track != value {
                         self.filter.unit.clear();
                         self.filter.topic.clear();
@@ -1723,12 +2913,18 @@ impl LabApp {
                 .changed()
             {
                 self.page = 0;
+                if self.filter.track == "CCNA" && self.filter.unit == "ccna-magic-number" {
+                    self.filter.unit.clear();
+                }
             }
             if ui
                 .toggle_value(&mut self.filter.recent, "Recent / continue")
                 .changed()
             {
                 self.page = 0;
+                if self.filter.track == "CCNA" && self.filter.unit == "ccna-magic-number" {
+                    self.filter.unit.clear();
+                }
             }
         });
         let search = ui.add_sized(
@@ -1887,6 +3083,17 @@ impl LabApp {
                 )
             })
             .collect();
+        if self.filter.track == "CCNA" && !self.filter.recent {
+            items.sort_by_key(|(_, s)| {
+                self.units
+                    .iter()
+                    .enumerate()
+                    .find_map(|(u, unit)| {
+                        unit.labs.iter().position(|id| id == &s.id).map(|l| (u, l))
+                    })
+                    .unwrap_or((usize::MAX, usize::MAX))
+            });
+        }
         if self.filter.recent {
             items.sort_by_key(|(_, s)| {
                 std::cmp::Reverse(self.progress.attempts.get(&s.id).map_or(0, |a| a.visited))
@@ -2247,6 +3454,38 @@ impl LabApp {
     }
     fn render(&mut self, ctx: &egui::Context) {
         self.metrics = Metrics::default();
+        if self.optional_mount_run.as_ref().is_some_and(|job| {
+            self.reset_pending
+                || self
+                    .selected
+                    .is_none_or(|i| self.scenarios[i].id != job.scenario)
+        }) {
+            self.optional_mount_run = None;
+        }
+        if self.client_names_run.as_ref().is_some_and(|job| {
+            self.reset_pending
+                || self
+                    .selected
+                    .is_none_or(|i| self.scenarios[i].id != job.scenario)
+        }) {
+            self.client_names_run = None;
+        }
+        if self.nm_profiles_run.as_ref().is_some_and(|job| {
+            self.reset_pending
+                || self
+                    .selected
+                    .is_none_or(|i| self.scenarios[i].id != job.scenario)
+        }) {
+            self.nm_profiles_run = None;
+        }
+        if self.dhcp_config_run.as_ref().is_some_and(|job| {
+            self.reset_pending
+                || self
+                    .selected
+                    .is_none_or(|i| self.scenarios[i].id != job.scenario)
+        }) {
+            self.dhcp_config_run = None;
+        }
         let completion_root_frame = ctx.cumulative_frame_nr_for(egui::ViewportId::ROOT);
         self.completion_index.begin_frame(completion_root_frame);
         self.nat_presentation.memo.begin_frame();
@@ -2257,12 +3496,18 @@ impl LabApp {
         ctx.set_zoom_factor(self.scale);
         controls::configure(ctx);
         self.advance_scripts(ctx);
+        self.advance_environment(ctx);
+        self.advance_editor_handover(ctx);
+        self.advance_user_mounts(ctx);
+        self.advance_fs_integrity(ctx);
+        self.advance_startup_files(ctx);
         let previous = (self.theme_id.clone(), self.scale);
         self.header(ctx);
         self.appearance_preview(ctx);
         let nfs_selected_before_restore = self.selected;
         self.data_dialog(ctx);
         if nfs_selected_before_restore.is_some() && self.selected.is_none() {
+            self.syslog_presentation.reset_all();
             self.completion_index.clear();
             self.nfs_presentation.clear();
             self.ether_presentation.clear();
@@ -2312,6 +3557,12 @@ impl LabApp {
                 let mut area = egui::ScrollArea::vertical()
                     .id_salt(("main", self.selected))
                     .min_scrolled_height(0.);
+                // Opt-in for the new policy/print workspaces: keep the centered lesson's
+                // gutter constant while its nested editor starts/stops scrolling.
+                // Existing workspace/library scrollbar behavior is unchanged.
+                if self.selected.is_some_and(|i| self.scenarios[i].unit == "ccna-virtual-isolation" || matches!(self.scenarios[i].initial, engine::State::SmtpRouting { .. } | engine::State::GuestDrivers { .. } | engine::State::VirtualIsolation { .. } | engine::State::SambaShare { .. } | engine::State::DnsAccess { .. } | engine::State::PrintQueues { .. } | engine::State::Localization { .. } | engine::State::Timezone { .. } | engine::State::WirelessChannels { .. } | engine::State::WlanProfiles { .. } | engine::State::WlanPaths { .. } | engine::State::SnmpMonitor { .. } | engine::State::ServiceClients { .. } | engine::State::ReverseProxy { .. } | engine::State::HttpCache { .. } | engine::State::ProxyPolicy { .. })) {
+                    area = area.scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible);
+                }
                 self.metrics.main_available_height = ui.available_height();
                 if std::mem::take(&mut self.lesson_scroll_reset) {
                     area = area.vertical_scroll_offset(0.);
@@ -2341,6 +3592,7 @@ impl LabApp {
                     });
                 });
                 self.metrics.main_viewport = Some(scroll.inner_rect);
+                self.metrics.main_scroll_region = Some(ui.min_rect());
                 self.metrics.main_scroll_offset = scroll.state.offset;
                 self.metrics.main_content_size = scroll.content_size;
             });
@@ -2451,7 +3703,340 @@ impl eframe::App for LabApp {
             self.reopen_tick(ctx);
             ctx.request_repaint_after(std::time::Duration::from_millis(50));
         } else if self.smoke {
-            self.smoke_tick(ctx);
+            if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("device-path-batch") {
+                self.device_path_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("local-mail-batch") {
+                self.local_mail_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("copied-journal-batch") {
+                self.copied_journal_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("disk-layout-batch") {
+                self.disk_layout_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("protocol-evidence-batch") {
+                self.protocol_evidence_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("rest-controller-batch") {
+                self.rest_controller_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("echo-diagnosis-batch") {
+                self.echo_diagnosis_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("mixed-ip-batch") {
+                self.mixed_ip_tick(ctx);
+            } else if matches!(std::env::var("DLMS_SMOKE_STAGE").as_deref(),Ok("service-clients-batch"|"service-clients-wide-batch")) {
+                self.service_clients_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("reverse-proxy-batch") {
+                self.reverse_proxy_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("http-cache-batch") {
+                self.http_cache_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("proxy-policy-batch") {
+                self.proxy_policy_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("snmp-monitor-batch") {
+                self.snmp_monitor_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("wlan-path-batch") {
+                self.wlan_path_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("wlan-profile-batch") {
+                self.wlan_profile_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("wireless-channel-batch") {
+                self.wireless_channel_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("timezone-batch") {
+                self.timezone_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("localization-batch") {
+                self.localization_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("print-queues-batch") {
+                self.print_queues_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-access-batch") {
+                self.dns_access_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("source-install-batch") {
+                self.source_install_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("maintenance-notice-batch") {
+                self.maintenance_notice_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("capacity-planning-batch") {
+                self.capacity_planning_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("resource-observation-batch") || std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("resource-observation-popup") {
+                self.resource_observation_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("measurement-reports-batch") {
+                self.measurement_reports_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("json-inventory-batch") {
+                self.json_inventory_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("chrony-source-batch") {
+                self.chrony_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("rescue-startup-batch") {
+                self.rescue_startup_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("grub-once-batch") {
+                self.grub_once_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("efi-removable-batch") {
+                self.removable_efi_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("efi-loader-batch") {
+                self.efi_loader_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("bios-loader-batch") {
+                self.bios_loader_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("grub-settings-batch") {
+                self.grub_settings_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("grub-menu-batch") {
+                self.grub_menu_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("boot-entry-batch") {
+                self.boot_entry_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("eui64-batch") {
+                self.eui64_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ldap-schema-query-batch")
+            {
+                self.ldap_schema_query_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ldap-schema-batch") {
+                self.ldap_schema_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ldap-config-batch") {
+                self.ldap_configuration_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ldap-access-batch") {
+                self.ldap_access_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ldap-password-batch") {
+                self.ldap_password_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ldap-retirement-batch") {
+                self.ldap_retirement_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ldap-utility-batch") {
+                self.ldap_utility_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ldap-change-batch") {
+                self.ldap_changes_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ldap-client-batch") {
+                self.ldap_client_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("aaa-access-batch") {
+                self.aaa_access_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("local-access-batch") {
+                self.local_access_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("management-policy-batch")
+            {
+                self.management_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("arp-inspection-batch") {
+                self.arp_inspection_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dhcp-snooping-batch") {
+                self.dhcp_snooping_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("port-security-batch") {
+                self.port_security_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("raid-assembly-batch") {
+                self.raid_assembly_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("autofs-batch") {
+                self.autofs_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mbr-layout-batch") {
+                self.mbr_layout_tick(ctx);
+            } else if matches!(
+                std::env::var("DLMS_SMOKE_STAGE").as_deref(),
+                Ok("lvm-mount-batch"
+                    | "lvm-config-batch"
+                    | "lvm-reference-batch"
+                    | "lvm-cow-batch"
+                    | "lvm-provisioning-batch"
+                    | "lvm-retirement-batch"
+                    | "lvm-activation-batch"
+                    | "lvm-rename-batch"
+                    | "lvm-pv-capacity-batch")
+            ) {
+                self.lvm_provisioning_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("swap-policy-batch") {
+                self.swap_policy_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("host-ipv6-previews") {
+                self.teaching_preview_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("rpm-patch-batch") {
+                self.rpm_patch_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("rpm-metadata-batch") {
+                self.rpm_metadata_tick(ctx);
+            } else if matches!(
+                std::env::var("DLMS_SMOKE_STAGE").as_deref(),
+                Ok("kernel-module-batch" | "kernel-name-batch")
+            ) {
+                self.kernel_module_tick(ctx);
+            } else if matches!(
+                std::env::var("DLMS_SMOKE_STAGE").as_deref(),
+                Ok("recursive-tree-batch" | "size-search-batch")
+            ) {
+                self.recursive_tree_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("directory-policy-batch") {
+                self.directory_policy_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("links-inode-batch") {
+                self.links_inode_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("whereis-batch") {
+                self.whereis_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("file-index-batch") {
+                self.file_index_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("command-location-batch") {
+                self.command_location_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("account-skeleton-batch") {
+                self.accounts_template_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("listener-batch") {
+                self.listener_audit_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("shared-libraries-batch") {
+                self.shared_libraries_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("raid1-batch") {
+                self.raid1_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("conffile-batch") {
+                self.conffile_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("startup-files-batch") {
+                self.startup_files_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("fs-integrity-batch") {
+                self.fs_integrity_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("debian-conflicts-batch") {
+                self.debian_conflicts_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("user-mounts-batch") {
+                self.user_mounts_lessons_tick(ctx);
+            } else if matches!(
+                std::env::var("DLMS_SMOKE_STAGE").as_deref(),
+                Ok("log-triage-batch"
+                    | "content-backup-batch"
+                    | "path-lookup-batch"
+                    | "managed-config-batch"
+                    | "tracing-batch"
+                    | "file-lifecycle-batch"
+                    | "associative-batch"
+                    | "environment-batch")
+            ) {
+                self.debug_recovery_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("debian-sources-batch") {
+                self.debian_sources_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("debian-contents-batch") {
+                self.debian_contents_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("resolver-search-batch") {
+                self.resolver_search_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("client-names-batch") || std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("client-diagnostic-batch") {
+                self.client_names_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("optional-mount-batch") {
+                self.optional_mount_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("aging-batch") {
+                self.aging_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("pam-auth-batch") {
+                self.pam_auth_tick(ctx);
+            } else if matches!(
+                std::env::var("DLMS_SMOKE_STAGE").as_deref(),
+                Ok("nm-profiles-batch"
+                    | "nm-vlan-batch"
+                    | "nm-bond-batch"
+                    | "nm-bridge-batch"
+                    | "nm-dhcp-batch")
+            ) {
+                self.nm_profiles_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dhcp-config-batch") {
+                self.dhcp_config_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("backup-selection-batch") {
+                self.backup_selection_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("qos-batch") {
+                self.qos_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("startup-batch") {
+                self.startup_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("linux-logging-batch") {
+                self.linux_logging_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("debug-recovery-batch") {
+                self.debug_recovery_tick(ctx);
+            } else if matches!(
+                std::env::var("DLMS_SMOKE_STAGE").as_deref(),
+                Ok("host-batch" | "host-ipv6-batch" | "direct-dns-batch")
+            ) {
+                self.host_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("ids-rule-batch") {
+                self.ids_rule_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("auth-filter-batch") {
+                self.auth_filter_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("vpn-point-batch") {
+                self.vpn_point_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("pxe-batch") {
+                self.pxe_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("iscsi-batch") {
+                self.iscsi_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("security-investigation-batch") {
+                self.security_investigation_tick(ctx, false);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("credentials-vpn-batch") {
+                self.security_investigation_tick(ctx, true);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("staged-network-batch") {
+                self.staged_network_tick(ctx, smoke::NetworkFlow::Rollout);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("network-evidence-review-batch") {
+                self.staged_network_tick(ctx, smoke::NetworkFlow::Evidence);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("site-connectivity-batch") {
+                self.staged_network_tick(ctx, smoke::NetworkFlow::SitePaths);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("host-security-batch") {
+                self.staged_network_tick(ctx, smoke::NetworkFlow::HostSecurity);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("vlan-gateway-batch") {
+                self.staged_network_tick(ctx, smoke::NetworkFlow::VlanGateways);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("nfs-export-operations") {
+                self.staged_network_tick(ctx, smoke::NetworkFlow::NfsExportOps);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("route-reading-batch") {
+                self.staged_network_tick(ctx, smoke::NetworkFlow::RouteReading);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ospf-broadcast-batch") {
+                self.staged_network_tick(ctx, smoke::NetworkFlow::OspfBroadcast);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("desktop-profile-batch") {
+                self.desktop_profile_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("apache-https-batch") {
+                self.apache_https_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("ata-smart-batch") {
+                self.ata_smart_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("initramfs-batch") {
+                self.initramfs_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("dkms-batch") {
+                self.dkms_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("kernel-build-batch") {
+                self.kernel_build_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("poe-power-batch") {
+                self.poe_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("service-exposure-batch") {
+                self.service_exposure_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("ftp-identity-batch") {
+                self.ftp_identity_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("v6-startup-batch") {
+                self.v6_startup_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("v6-admin-batch") {
+                self.v6_admin_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("services-router-batch") {
+                self.services_router_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref()==Ok("linux-v6-batch") {
+                self.v6_tick(ctx);
+            } else if matches!(std::env::var("DLMS_SMOKE_STAGE").as_deref(), Ok("linux-flow-batch" | "linux-flow-feedback")) {
+                self.connection_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("linux-router-batch") {
+                self.router_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mailbox-administration-batch") {
+                self.mailbox_admin_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mailbox-access-batch") {
+                self.mailbox_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("procmail-migration-batch") {
+                self.procmail_migration_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("sieve-vacation-batch") {
+                self.sieve_vacation_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("sieve-delivery-batch") {
+                self.sieve_delivery_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("sieve-address-batch") {
+                self.sieve_addresses_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("sieve-filter-batch") {
+                self.sieve_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("smtp-routing-batch") {
+                self.smtp_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("guest-driver-batch") {
+                self.guest_driver_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("virtual-isolation-batch") {
+                self.virtual_isolation_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("samba-share-batch") {
+                self.samba_tick(ctx);
+            } else if matches!(std::env::var("DLMS_SMOKE_STAGE").as_deref(), Ok("network-architectures-batch" | "leaf-spine-batch")) {
+                self.network_architecture_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("network-transfers-batch") {
+                self.network_transfer_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("editor-handover-batch") {
+                self.editor_handover_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("modal-editing-batch") {
+                self.modal_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ssh-access-batch") {
+                self.ssh_access_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("repository-batch") {
+                self.repository_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("capacity-batch") {
+                self.capacity_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("syslog-previews") {
+                self.teaching_preview_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("syslog-batch") {
+                self.syslog_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("links-batch") {
+                self.links_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("gateway-batch") {
+                self.gateway_lessons_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("transport-batch") {
+                self.transport_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("teaching-rollout") {
+                self.teaching_preview_tick(ctx);
+            } else if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ccna-pilot") {
+                self.ccna_preview_tick(ctx);
+            } else {
+                self.smoke_tick(ctx);
+            }
             ctx.request_repaint_after(std::time::Duration::from_millis(50));
         }
     }

@@ -96,55 +96,130 @@ fn assert_header_painted_for_capture(
     }
 }
 
-fn assert_goal_edge(ctx: &egui::Context, app: &LabApp, out: &egui::FullOutput, tag: &str) {
+fn assert_goal_edge(
+    ctx: &egui::Context,
+    app: &LabApp,
+    out: &egui::FullOutput,
+    tag: &str,
+    rows: &lesson_presentation::paint::Rows,
+) {
     let source = &app.scenarios[app.selected.unwrap()];
+    let texts = lesson_presentation::assignment_texts(source);
     let root = app
         .metrics
         .main_viewport
         .unwrap()
         .intersect(ctx.content_rect());
+    let tolerance = 1. / ctx.pixels_per_point();
+    let body = egui::TextStyle::Body.resolve(&ctx.style());
+    let mono = egui::TextStyle::Monospace.resolve(&ctx.style());
+    assert_eq!(
+        rows.keys
+            .iter()
+            .map(|(piece, _)| *piece)
+            .collect::<BTreeSet<_>>()
+            .len(),
+        texts.len()
+    );
+    for (rect, clip) in rows.rows.iter().zip(&rows.clips) {
+        assert!(
+            rect.left() >= clip.left() - tolerance && rect.right() <= clip.right() + tolerance,
+            "All actual assignment label rows fit their own horizontal clip {tag}/{rect:?}/{clip:?}"
+        );
+    }
+    let edge_index = if tag.ends_with("-last") {
+        rows.rows.len() - 1
+    } else {
+        0
+    };
+    let (piece, line) = rows.keys[edge_index];
+    assert!(
+        rows.witnessed[edge_index],
+        "Current real edge glyphs were independently witnessed inside their own clip"
+    );
     let mut flat = Vec::new();
     for shape in &out.shapes {
         flatten_paint(&shape.shape, shape.clip_rect, &mut flat);
     }
-    let (paint, clip) = flat
-        .into_iter()
-        .find_map(|(clip, shape)| match shape {
-            egui::Shape::Text(t) if t.galley.text() == source.objective => {
-                Some((t, clip.intersect(root)))
+    let (at, paint, clip) = flat
+        .iter()
+        .enumerate()
+        .find_map(|(at, (clip, shape))| {
+            let egui::Shape::Text(text) = shape else {
+                return None;
+            };
+            if text.galley.text() != texts[piece] {
+                return None;
             }
-            _ => None,
+            let row = text
+                .galley
+                .rows
+                .iter()
+                .filter(|r| !r.text().trim().is_empty())
+                .nth(line)?;
+            let actual = row.rect().translate(text.pos.to_vec2());
+            ((actual.min - rows.rows[edge_index].min).length() <= tolerance
+                && (actual.max - rows.rows[edge_index].max).length() <= tolerance)
+                .then_some((
+                    at,
+                    text,
+                    clip.intersect(root).intersect(rows.clips[edge_index]),
+                ))
         })
-        .expect("Capture paints the actual complete assignment galley");
+        .expect("Capture output contains the exact actual first/final goal or requirement row");
     assert_eq!(paint.angle, 0.);
-    assert!(paint.opacity_factor > 0.);
-    let body = egui::TextStyle::Body.resolve(&ctx.style());
+    assert!(paint.opacity_factor > 0. && !paint.galley.elided);
     assert!(!paint.galley.job.sections.is_empty());
     for section in &paint.galley.job.sections {
-        assert_eq!(
-            section.format.font_id, body,
-            "Normal readable goal font is retained"
-        );
+        if piece == 0 {
+            assert_eq!(section.format.font_id.family, body.family);
+            assert_eq!(
+                section.format.font_id.size, 21.,
+                "Accepted readable learning-goal heading size"
+            );
+        } else {
+            assert!(
+                section.format.font_id == body || section.format.font_id == mono,
+                "Requirements retain normal Body text and intentional address/command Monospace, never shrunk text"
+            );
+        }
     }
-    let tolerance = 1. / ctx.pixels_per_point();
-    for row in &paint.galley.rows {
-        let r = row.rect().translate(paint.pos.to_vec2());
-        assert!(
-            r.left() >= clip.left() - tolerance && r.right() <= clip.right() + tolerance,
-            "All actual goal rows fit their horizontal clip {tag}/{r:?}/{clip:?}"
-        );
-    }
-    let row = if tag.ends_with("-last") {
-        paint.galley.rows.last()
-    } else {
-        paint.galley.rows.first()
-    }
-    .unwrap();
+    let row = paint
+        .galley
+        .rows
+        .iter()
+        .filter(|r| !r.text().trim().is_empty())
+        .nth(line)
+        .unwrap();
     let edge = row.rect().translate(paint.pos.to_vec2());
-    assert!(
-        smoke::smoke_control_visible(edge, clip, ctx.pixels_per_point()),
-        "Actual first/last assignment row is fully visible {tag}/{edge:?}/{clip:?}"
-    );
+    assert!(smoke::smoke_control_visible(
+        edge,
+        clip,
+        ctx.pixels_per_point()
+    ));
+    let vertices = &row.visuals.mesh.vertices[row.visuals.glyph_vertex_range.clone()];
+    assert!(!vertices.is_empty());
+    for vertex in vertices {
+        let color = paint.override_text_color.unwrap_or_else(|| {
+            if vertex.color == egui::Color32::PLACEHOLDER {
+                paint.fallback_color
+            } else {
+                vertex.color
+            }
+        });
+        assert!(
+            color.a() > 0,
+            "Actual endpoint glyph vertices are nontransparent"
+        );
+    }
+    assert!(!flat[at+1..].iter().any(|(clip,shape)|matches!(shape,egui::Shape::Rect(rect)if rect.fill.a()==255 && clip.intersect(rect.rect).intersects(edge))),
+        "No later opaque rectangle covers the actual goal edge");
+    if tag.ends_with("-last") {
+        assert!(
+            route::goal_rows_complete(ctx, source),
+            "All intermediate goal and requirement rows were witnessed through real scrolling before final capture"
+        );
+    }
 }
 fn captures() -> BTreeSet<String> {
     let mut names = BTreeSet::new();
@@ -239,20 +314,46 @@ fn one_off_normal_four_tasks_real_events_finish_all_capture_phases_and_preserve_
     let checked197 = disk_registration::literal_registration::before_scenarios(&a.scenarios);
     let checked52 = disk_registration::literal_registration::before_typed_units(&a.units);
     assert_eq!((checked197.len(), checked52.len()), (197, 52));
-    let checked199=disk_registration::literal_registration::snapshot_registration::before_scenarios(&a.scenarios);
-    let checked53=disk_registration::literal_registration::snapshot_registration::before_typed_units(&a.units);
-    assert_eq!((checked199.len(),checked53.len()),(199,53));
-    assert_eq!((a.scenarios.len(),a.units.len()),(201,54));
-    assert_eq!(a.scenarios[199..].iter().map(|s|s.id.as_str()).collect::<Vec<_>>(),disk_registration::literal_registration::snapshot_registration::IDS);
-    assert_eq!(a.units[53].id,"shell-snapshot-rollout");
-    assert_eq!(a.units[53].labs,disk_registration::literal_registration::snapshot_registration::IDS);
+    let checked199 =
+        disk_registration::literal_registration::snapshot_registration::before_scenarios(
+            &a.scenarios,
+        );
+    let checked53 =
+        disk_registration::literal_registration::snapshot_registration::before_typed_units(
+            &a.units,
+        );
+    assert_eq!((checked199.len(), checked53.len()), (199, 53));
+    assert_eq!((a.scenarios.len(), a.units.len()), (201, 54));
+    assert_eq!(
+        a.scenarios[199..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        disk_registration::literal_registration::snapshot_registration::IDS
+    );
+    assert_eq!(a.units[53].id, "shell-snapshot-rollout");
+    assert_eq!(
+        a.units[53].labs,
+        disk_registration::literal_registration::snapshot_registration::IDS
+    );
     for source in &a.scenarios[199..] {
-        assert!(matches!(source.initial,dlms_learning_lab::engine::State::Script{run:None,..}));
-        let dlms_learning_lab::engine::Goal::Script{cases}=&source.goal else {panic!("Snapshot source must retain its typed Script Goal")};
-        assert_eq!(cases.len(),12);
+        assert!(matches!(
+            source.initial,
+            dlms_learning_lab::engine::State::Script { run: None, .. }
+        ));
+        let dlms_learning_lab::engine::Goal::Script { cases } = &source.goal else {
+            panic!("Snapshot source must retain its typed Script Goal")
+        };
+        assert_eq!(cases.len(), 12);
         assert!(source.teaching.is_some());
-        assert!(!a.progress.attempts.contains_key(&source.id)&&!a.progress.favorites.contains(&source.id));
-        assert!(!dlms_learning_lab::progress::current_solved(&dlms_learning_lab::progress::Attempt::new(source,0),source));
+        assert!(
+            !a.progress.attempts.contains_key(&source.id)
+                && !a.progress.favorites.contains(&source.id)
+        );
+        assert!(!dlms_learning_lab::progress::current_solved(
+            &dlms_learning_lab::progress::Attempt::new(source, 0),
+            source
+        ));
     }
     let catalog = serde_json::to_vec(&a.scenarios).unwrap();
     let units = serde_json::to_vec(&a.units).unwrap();
@@ -268,7 +369,7 @@ fn one_off_normal_four_tasks_real_events_finish_all_capture_phases_and_preserve_
     let mut stop_interstitial_proved = false;
     let mut stop_run_observed = false;
     let mut painted = 0;
-    for _ in 0..60_000 {
+    for frame_index in 0_usize..60_000 {
         let before = route::observations(&ctx);
         let waiting = before.is_some_and(|v| v.2.is_some_and(|end| time < end));
         if waiting && route::undo_waiting(&ctx) {
@@ -300,8 +401,25 @@ fn one_off_normal_four_tasks_real_events_finish_all_capture_phases_and_preserve_
         let viewport = input.viewports.get_mut(&egui::ViewportId::ROOT).unwrap();
         viewport.native_pixels_per_point = Some(1.15);
         viewport.fullscreen = Some(fullscreen);
+        if frame_index.is_multiple_of(250) {
+            eprintln!(
+                "OneOff bounded progress stage={} stage_frames={stage_frames} time={time:.3} observations={before:?} shots={}",
+                a.smoke_stage,
+                shots.len()
+            );
+        }
+        let mut assignment_rows = None;
         let out = ctx.run(input, |ctx| {
             a.render(ctx);
+            if let Some(i) = a.selected
+                && let Some(visible) = a.metrics.main_viewport
+            {
+                assignment_rows = lesson_presentation::paint::collect(
+                    ctx,
+                    &a.scenarios[i],
+                    visible.intersect(ctx.content_rect()),
+                );
+            }
             a.save();
             a.started = Instant::now() - std::time::Duration::from_secs(1);
             a.smoke_tick(ctx);
@@ -336,7 +454,7 @@ fn one_off_normal_four_tasks_real_events_finish_all_capture_phases_and_preserve_
                             .clone();
                         assert_header_painted_for_capture(&ctx, &a, &out, &tag);
                         if tag.starts_with("one-off-3-goal-") {
-                            assert_goal_edge(&ctx, &a, &out, &tag);
+                            assert_goal_edge(&ctx, &a, &out, &tag, assignment_rows.as_ref().expect("Capture retains current-pass actual assignment layout/paint evidence"));
                         }
                         painted += 1;
                         assert!(
@@ -510,5 +628,4 @@ fn one_off_normal_four_tasks_real_events_finish_all_capture_phases_and_preserve_
         assert!(!a.progress.attempts.contains_key(id));
         assert!(!a.progress.favorites.contains(id));
     }
-
 }

@@ -1,0 +1,545 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-dns-search-suffixes",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-resolver-search",
+      "topic": "DNS search suffixes",
+      "title": "Repair a DNS search path without choosing the wrong site",
+      "summary": "Edit a resolver excerpt and inspect the actual candidate sequence against supplied DNS snapshots.",
+      "objective": "Resolve report through north.office.lab.test, even though south.office.lab.test also has that name. Let assets fall through to its supplied answer in south.office.lab.test. Preserve the absolute peer lookup (peer.office.lab.test.) and leave the supplied missing name unresolved. Apply the same search policy to both DNS snapshots; the sample hostname alone supplies the wrong default site.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "prerequisites": [
+        "lpic1-name-source-fallback"
+      ],
+      "steps": [
+        "Inspect the supplied DNS records, edit the virtual search settings and verify every required lookup."
+      ],
+      "guide": [],
+      "hints": [
+        "Read the candidate that produced the wrong answer; SUCCESS alone does not identify the intended site.",
+        "Keep both requested sites on one search line. A later search line replaces the earlier list.",
+        "The report site must be first, but assets still needs the second site after a definite miss."
+      ],
+      "explanation": "The ordered north/south search list makes report stop at the intended north record while assets falls through to its south record. Both supplied snapshots follow the same policy despite a changed A value. The final dot on the peer/missing queries prevents suffixes. Comments, uppercase/trailing-dot suffix spellings and equivalent supported ndots settings can work; an incomplete or reversed site list cannot satisfy all lookups.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man5/resolv.conf.5.html",
+        "https://sourceware.org/glibc/manual/latest/html_node/index.html"
+      ],
+      "simplifications": "Pure in-process search/domain/options-ndots excerpt only. DNS snapshots provide one IPv4 A answer or a definite missing name; no actual queries. The supplied hostname, not the desktop, determines the default domain. At most16KiB/128lines, three suffixes/four candidate names, ordinary ASCII labels and253-byte expanded names, ndots0–15, explicit root suffix, final-dot absolute names and first-positive stopping. Whole-line comments only. No nameserver routing, other options, unavailable/retry sequencing, HOSTALIASES/environment/other resolver flags, cache, CNAME, IPv6/multiple answers, DNSSEC, packets, timing, files, sockets or OS resolver calls. This is not actual glibc conformance or full109.4 coverage.",
+      "initial": {
+        "kind": "ClientNames",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-dns-search-suffixes",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "resolv.conf": "search south.office.lab.test north.office.lab.test\n"
+            },
+            "tested": null,
+            "selected": "resolv.conf"
+          },
+          "practice": {
+            "draft": {
+              "resolv.conf": "search archive.workshop.lab.test studio.workshop.lab.test\n"
+            },
+            "tested": null,
+            "selected": "resolv.conf"
+          }
+        }
+      },
+      "goal": {
+        "kind": "ClientNames",
+        "definition": {
+          "initial": {
+            "mode": "search",
+            "id": "lpic1-dns-search-suffixes",
+            "instructions": "Resolve report through north.office.lab.test, even though south.office.lab.test also has that name. Let assets fall through to its supplied answer in south.office.lab.test. Preserve the absolute peer lookup (peer.office.lab.test.) and leave the supplied missing name unresolved. Apply the same search policy to both DNS snapshots; the sample hostname alone supplies the wrong default site.",
+            "starter": {
+              "resolv.conf": "search south.office.lab.test north.office.lab.test\n"
+            },
+            "cases": [
+              {
+                "id": "snapshot-0",
+                "label": "DNS snapshot 1: intended-site address changes",
+                "hostname": "client.retired0.office.lab.test",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "report.north.office.lab.test": "192.0.2.80",
+                      "report.south.office.lab.test": "192.0.2.99",
+                      "assets.south.office.lab.test": "198.51.100.81",
+                      "peer.office.lab.test": "198.51.100.30"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "report",
+                    "address": "192.0.2.80",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "assets",
+                    "address": "198.51.100.81",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "peer.office.lab.test.",
+                    "address": "198.51.100.30",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "missing.office.lab.test.",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              },
+              {
+                "id": "snapshot-1",
+                "label": "DNS snapshot 2: intended-site address changes",
+                "hostname": "client.retired1.office.lab.test",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "report.north.office.lab.test": "192.0.2.82",
+                      "report.south.office.lab.test": "192.0.2.99",
+                      "assets.south.office.lab.test": "198.51.100.81",
+                      "peer.office.lab.test": "198.51.100.30"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "report",
+                    "address": "192.0.2.82",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "assets",
+                    "address": "198.51.100.81",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "peer.office.lab.test.",
+                    "address": "198.51.100.30",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "missing.office.lab.test.",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "mode": "search",
+            "id": "practice-lpic1-dns-search-suffixes",
+            "instructions": "Resolve preview through studio.workshop.lab.test, even though archive.workshop.lab.test also has that name. Let images fall through to its supplied answer in archive.workshop.lab.test. Preserve the absolute peer lookup (camera.workshop.lab.test.) and leave the supplied missing name unresolved. Apply the same search policy to both DNS snapshots; the sample hostname alone supplies the wrong default site.",
+            "starter": {
+              "resolv.conf": "search archive.workshop.lab.test studio.workshop.lab.test\n"
+            },
+            "cases": [
+              {
+                "id": "snapshot-0",
+                "label": "DNS snapshot 1: intended-site address changes",
+                "hostname": "client.retired0.workshop.lab.test",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "preview.studio.workshop.lab.test": "192.0.2.80",
+                      "preview.archive.workshop.lab.test": "192.0.2.99",
+                      "images.archive.workshop.lab.test": "198.51.100.81",
+                      "camera.workshop.lab.test": "198.51.100.30"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "preview",
+                    "address": "192.0.2.80",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "images",
+                    "address": "198.51.100.81",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "camera.workshop.lab.test.",
+                    "address": "198.51.100.30",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "missing.workshop.lab.test.",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              },
+              {
+                "id": "snapshot-1",
+                "label": "DNS snapshot 2: intended-site address changes",
+                "hostname": "client.retired1.workshop.lab.test",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "preview.studio.workshop.lab.test": "192.0.2.82",
+                      "preview.archive.workshop.lab.test": "192.0.2.99",
+                      "images.archive.workshop.lab.test": "198.51.100.81",
+                      "camera.workshop.lab.test": "198.51.100.30"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "preview",
+                    "address": "192.0.2.82",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "images",
+                    "address": "198.51.100.81",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "camera.workshop.lab.test.",
+                    "address": "198.51.100.30",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "missing.workshop.lab.test.",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "resolv.conf": "search studio.workshop.lab.test archive.workshop.lab.test\noptions ndots:1\n"
+          }
+        }
+      },
+      "solution": [
+        "NAME SOURCES\n{\"resolv.conf\":\"search north.office.lab.test south.office.lab.test\\noptions ndots:1\\n\"}"
+      ]
+    },
+    {
+      "id": "lpic1-dns-absolute-precedence",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-resolver-search",
+      "topic": "DNS ndots and absolute names",
+      "title": "Separate short, dotted and absolute DNS lookups",
+      "summary": "Edit a resolver excerpt and inspect the actual candidate sequence against supplied DNS snapshots.",
+      "objective": "Keep status on the supplied branch.remote.test service instead of the bare-name shadow. Resolve portal.remote.test as that given name before trying a suffixed shadow. Preserve (portal.remote.test.) as an absolute lookup. Keep (audit.remote.test.) unresolved even though the same name without its final dot can find a supplied suffixed record. Retain the branch.remote.test search suffix across both DNS snapshots.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "prerequisites": [
+        "lpic1-dns-search-suffixes"
+      ],
+      "steps": [
+        "Inspect the supplied DNS records, edit the virtual search settings and verify every required lookup."
+      ],
+      "guide": [],
+      "hints": [
+        "Compare the actual relative and final-dot candidate lists before changing DNS data. Only this search excerpt is editable.",
+        "ndots0 can break the short service even when the remote query looks right. A larger threshold can prefer a suffixed shadow.",
+        "Keep the branch suffix. A supported threshold of1 or2 protects this task’s short and multi-dot remote names."
+      ],
+      "explanation": "The branch suffix plus ndots1 or2 tries the short status service under branch first and the multi-dot portal name as given first. A final dot bypasses all suffixes, including after a miss. The relative audit spelling may search after its initial miss; its absolute spelling remains unresolved. This is finite positive/missing-reply reasoning, not an OS resolver or packet trace.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man5/resolv.conf.5.html",
+        "https://sourceware.org/glibc/manual/latest/html_node/index.html"
+      ],
+      "simplifications": "Pure in-process search/domain/options-ndots excerpt only. DNS snapshots provide one IPv4 A answer or a definite missing name; no actual queries. The supplied hostname, not the desktop, determines the default domain. At most16KiB/128lines, three suffixes/four candidate names, ordinary ASCII labels and253-byte expanded names, ndots0–15, explicit root suffix, final-dot absolute names and first-positive stopping. Whole-line comments only. No nameserver routing, other options, unavailable/retry sequencing, HOSTALIASES/environment/other resolver flags, cache, CNAME, IPv6/multiple answers, DNSSEC, packets, timing, files, sockets or OS resolver calls. This is not actual glibc conformance or full109.4 coverage.",
+      "initial": {
+        "kind": "ClientNames",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-dns-absolute-precedence",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "resolv.conf": "search branch.remote.test\noptions ndots:4\n"
+            },
+            "tested": null,
+            "selected": "resolv.conf"
+          },
+          "practice": {
+            "draft": {
+              "resolv.conf": "search studio.workshop.test\noptions ndots:4\n"
+            },
+            "tested": null,
+            "selected": "resolv.conf"
+          }
+        }
+      },
+      "goal": {
+        "kind": "ClientNames",
+        "definition": {
+          "initial": {
+            "mode": "search",
+            "id": "lpic1-dns-absolute-precedence",
+            "instructions": "Keep status on the supplied branch.remote.test service instead of the bare-name shadow. Resolve portal.remote.test as that given name before trying a suffixed shadow. Preserve (portal.remote.test.) as an absolute lookup. Keep (audit.remote.test.) unresolved even though the same name without its final dot can find a supplied suffixed record. Retain the branch.remote.test search suffix across both DNS snapshots.",
+            "starter": {
+              "resolv.conf": "search branch.remote.test\noptions ndots:4\n"
+            },
+            "cases": [
+              {
+                "id": "snapshot-0",
+                "label": "DNS snapshot 1: compare short, dotted and absolute names",
+                "hostname": "client.legacy0.remote.test",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "status": "192.0.2.51",
+                      "status.branch.remote.test": "192.0.2.50",
+                      "portal.remote.test": "192.0.2.90",
+                      "portal.remote.test.branch.remote.test": "192.0.2.99",
+                      "audit.remote.test.branch.remote.test": "198.51.100.98"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "status",
+                    "address": "192.0.2.50",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "portal.remote.test",
+                    "address": "192.0.2.90",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "portal.remote.test.",
+                    "address": "192.0.2.90",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "audit.remote.test.",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "audit.remote.test",
+                    "address": "198.51.100.98",
+                    "status": "Success",
+                    "via": "Dns"
+                  }
+                ]
+              },
+              {
+                "id": "snapshot-1",
+                "label": "DNS snapshot 2: compare short, dotted and absolute names",
+                "hostname": "client.legacy1.remote.test",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "status": "192.0.2.51",
+                      "status.branch.remote.test": "192.0.2.50",
+                      "portal.remote.test": "192.0.2.92",
+                      "portal.remote.test.branch.remote.test": "192.0.2.99",
+                      "audit.remote.test.branch.remote.test": "198.51.100.98"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "status",
+                    "address": "192.0.2.50",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "portal.remote.test",
+                    "address": "192.0.2.92",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "portal.remote.test.",
+                    "address": "192.0.2.92",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "audit.remote.test.",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "audit.remote.test",
+                    "address": "198.51.100.98",
+                    "status": "Success",
+                    "via": "Dns"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "mode": "search",
+            "id": "practice-lpic1-dns-absolute-precedence",
+            "instructions": "Keep health on the supplied studio.workshop.test service instead of the bare-name shadow. Resolve gallery.workshop.test as that given name before trying a suffixed shadow. Preserve (gallery.workshop.test.) as an absolute lookup. Keep (notes.workshop.test.) unresolved even though the same name without its final dot can find a supplied suffixed record. Retain the studio.workshop.test search suffix across both DNS snapshots.",
+            "starter": {
+              "resolv.conf": "search studio.workshop.test\noptions ndots:4\n"
+            },
+            "cases": [
+              {
+                "id": "snapshot-0",
+                "label": "DNS snapshot 1: compare short, dotted and absolute names",
+                "hostname": "client.legacy0.workshop.test",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "health": "192.0.2.51",
+                      "health.studio.workshop.test": "192.0.2.50",
+                      "gallery.workshop.test": "192.0.2.90",
+                      "gallery.workshop.test.studio.workshop.test": "192.0.2.99",
+                      "notes.workshop.test.studio.workshop.test": "198.51.100.98"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "health",
+                    "address": "192.0.2.50",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "gallery.workshop.test",
+                    "address": "192.0.2.90",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "gallery.workshop.test.",
+                    "address": "192.0.2.90",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "notes.workshop.test.",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "notes.workshop.test",
+                    "address": "198.51.100.98",
+                    "status": "Success",
+                    "via": "Dns"
+                  }
+                ]
+              },
+              {
+                "id": "snapshot-1",
+                "label": "DNS snapshot 2: compare short, dotted and absolute names",
+                "hostname": "client.legacy1.workshop.test",
+                "context": {
+                  "files_available": true,
+                  "dns": {
+                    "status": "Success",
+                    "records": {
+                      "health": "192.0.2.51",
+                      "health.studio.workshop.test": "192.0.2.50",
+                      "gallery.workshop.test": "192.0.2.92",
+                      "gallery.workshop.test.studio.workshop.test": "192.0.2.99",
+                      "notes.workshop.test.studio.workshop.test": "198.51.100.98"
+                    }
+                  }
+                },
+                "probes": [
+                  {
+                    "query": "health",
+                    "address": "192.0.2.50",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "gallery.workshop.test",
+                    "address": "192.0.2.92",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "gallery.workshop.test.",
+                    "address": "192.0.2.92",
+                    "status": "Success",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "notes.workshop.test.",
+                    "address": null,
+                    "status": "NotFound",
+                    "via": "Dns"
+                  },
+                  {
+                    "query": "notes.workshop.test",
+                    "address": "198.51.100.98",
+                    "status": "Success",
+                    "via": "Dns"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "resolv.conf": "search studio.workshop.test\noptions ndots:1\n"
+          }
+        }
+      },
+      "solution": [
+        "NAME SOURCES\n{\"resolv.conf\":\"search branch.remote.test\\noptions ndots:1\\n\"}"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3000 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-guest-driver-migration",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-guest-image-support",
+      "topic": "Guest devices and kernel-matched support",
+      "title": "Repair driver support after a guest image changes",
+      "summary": "Compare a presented virtual adapter with an incomplete image, replace incompatible support and verify current and future loading.",
+      "objective": "Finish with the presented network controller using its matching current-kernel driver. Keep its object files and lookup usable for a separate request from an unloaded sample state. Retain the supplied active storage driver and its effective prerequisite settings. Keep the original installed kernel package version; reinstalling that same supplied archive is allowed. Leave no unmet declared requirements among installed packages.",
+      "retry_guidance": "Read the named failed outcome, then compare the active driver, object presence, lookup and selected package requirements. Repair that state and check again; a quiet command is not completion by itself.",
+      "difficulty": "Beginner",
+      "minutes": 18,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair",
+        "Verify the image handover"
+      ],
+      "guide": [
+        {
+          "title": "Compare the presented device, kernel and support record",
+          "why": "A virtual machine has its own kernel and sees devices presented by its virtualization platform. The image needs a driver for that device and running kernel; an installed support record from another image is not enough.",
+          "action": "Run uname -r and lspci -k separately. In Supplied archive, compare reader-support 1.1-1 with reader-support 2.1-1; read Requires and the recorded object paths.",
+          "commands": [
+            {
+              "command": "uname -r",
+              "explanation": "Read this example guest\u2019s running kernel release.",
+              "simulator_only": false
+            },
+            {
+              "command": "lspci -k",
+              "explanation": "See the presented controllers and drivers actually in use.",
+              "simulator_only": false
+            },
+            {
+              "command": "modinfo /lib/modules/6.6.0-1/kernel/drivers/reader_legacy.ko",
+              "explanation": "Read the older object\u2019s vermagic without loading it.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Replace support, then rebuild and load",
+          "why": "Requires says what must already be supplied; the kernel package\u2019s Provides explains its matching release. Replace / upgrade changes the installed version. These script-free archives only write virtual files. depmod builds lookup; modprobe uses it to resolve and load prerequisites.",
+          "action": "Choose reader-support 2.1-1, select Replace / upgrade and Apply package change. Then run depmod -a and modprobe reader_net, one at a time. Insert command only fills the example input; Run executes it.",
+          "commands": [
+            {
+              "command": "depmod -a",
+              "explanation": "Index the current-release module objects that are actually present.",
+              "simulator_only": false
+            },
+            {
+              "command": "modinfo reader_net",
+              "explanation": "Inspect the now-indexed matching driver before loading.",
+              "simulator_only": false
+            },
+            {
+              "command": "modprobe reader_net",
+              "explanation": "Load the driver and its supplied prerequisites. Quiet output is normal.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify the device and the stored image",
+          "why": "lsmod lists loaded modules; lspci -k associates the actual driver with its device. Check configuration also tries a separate unloaded request from the image\u2019s files and lookup. It leaves the running state alone.",
+          "action": "Run lsmod and lspci -k separately, then select Check configuration. Inspect the passing current and fresh-request outcomes and confirm the storage provider remains available.",
+          "commands": [
+            {
+              "command": "lsmod",
+              "explanation": "Inspect both the target driver and retained storage prerequisites.",
+              "simulator_only": false
+            },
+            {
+              "command": "lspci -k",
+              "explanation": "Confirm the target controller now has a driver in use.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The presented adapter needs guest_net for the supplied 6.8.0-1 kernel. Replacing the older support restored matching files; rebuilding lookup and loading the driver established actual readiness. A separate unloaded request confirms the image does not rely only on an already loaded instance. Storage and the supplied kernel package were retained.",
+      "hints": [
+        "Compare uname -r, the archive\u2019s Requires and the kernel package\u2019s Provides. An installed record from an older image can still be incompatible.",
+        "Install adds a missing package; Replace / upgrade changes an existing version; Reinstall restores that same installed version. Choose the operation matching this image\u2019s record.",
+        "Files alone do not make the adapter active. Inspect lookup and the module command diagnostic, then check both current and fresh-request results."
+      ],
+      "initial": {
+        "kind": "GuestDrivers",
+        "simulation": {
+          "schema_version": 1,
+          "source_id": "lpic1-guest-driver-migration",
+          "view": "introduction",
+          "assignment": {
+            "runtime": {
+              "packages": {
+                "installed": [
+                  {
+                    "identity": {
+                      "name": "kernel-core",
+                      "arch": "x86_64"
+                    },
+                    "archive": "kernel-core"
+                  },
+                  {
+                    "identity": {
+                      "name": "guest-support",
+                      "arch": "x86_64"
+                    },
+                    "archive": "guest-support-old"
+                  }
+                ],
+                "available": [
+                  "guest-emulated-support",
+                  "guest-support-new",
+                  "guest-support-old",
+                  "kernel-core"
+                ],
+                "cached": null,
+                "files": {
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko": {
+                    "contents": "INERT guest module record guest_core 6.8.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.8.0-1/kernel/drivers/volume_io.ko": {
+                    "contents": "INERT guest module record volume_io 6.8.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.7.0-1/kernel/drivers/guest_legacy.ko": {
+                    "contents": "INERT guest module record guest_legacy 6.7.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  }
+                }
+              },
+              "modules": {
+                "index": [
+                  "guest_core",
+                  "volume_io"
+                ],
+                "loaded": {
+                  "guest_core": {
+                    "parameters": {}
+                  },
+                  "volume_io": {
+                    "parameters": {}
+                  }
+                },
+                "config": "# Supplied image options; no additional settings.\n",
+                "diagnostics": []
+              }
+            },
+            "input": "",
+            "output": "",
+            "checked": false,
+            "selected_archive": "",
+            "operation": null
+          },
+          "practice": {
+            "runtime": {
+              "packages": {
+                "installed": [
+                  {
+                    "identity": {
+                      "name": "reader-kernel",
+                      "arch": "x86_64"
+                    },
+                    "archive": "reader-kernel"
+                  },
+                  {
+                    "identity": {
+                      "name": "reader-support",
+                      "arch": "x86_64"
+                    },
+                    "archive": "reader-support-old"
+                  }
+                ],
+                "available": [
+                  "reader-emulated-support",
+                  "reader-kernel",
+                  "reader-support-new",
+                  "reader-support-old"
+                ],
+                "cached": null,
+                "files": {
+                  "/lib/modules/6.9.0-1/kernel/drivers/reader_core.ko": {
+                    "contents": "INERT guest module record reader_core 6.9.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.9.0-1/kernel/drivers/reader_storage.ko": {
+                    "contents": "INERT guest module record reader_storage 6.9.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.6.0-1/kernel/drivers/reader_legacy.ko": {
+                    "contents": "INERT guest module record reader_legacy 6.6.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  }
+                }
+              },
+              "modules": {
+                "index": [
+                  "reader_core",
+                  "reader_storage"
+                ],
+                "loaded": {
+                  "reader_core": {
+                    "parameters": {}
+                  },
+                  "reader_storage": {
+                    "parameters": {}
+                  }
+                },
+                "config": "# Supplied image options; no additional settings.\n",
+                "diagnostics": []
+              }
+            },
+            "input": "",
+            "output": "",
+            "checked": false,
+            "selected_archive": "",
+            "operation": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "GuestDrivers",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic1-guest-driver-migration",
+          "assignment": {
+            "facts": {
+              "modules": {
+                "kernel_release": "6.8.0-1",
+                "modules": {
+                  "guest_core": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko",
+                    "description": "Shared supplied guest device support",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "volume_io": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/volume_io.ko",
+                    "description": "Driver for the supplied virtual storage controller",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guest_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 1
+                  },
+                  "guest_bus": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/guest_bus.ko",
+                    "description": "Transport prerequisite for the supplied paravirtual adapter",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guest_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "guest_net": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/guest_net.ko",
+                    "description": "Driver for the supplied paravirtual network controller",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guest_bus"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "guest_legacy": {
+                    "path": "/lib/modules/6.7.0-1/kernel/drivers/guest_legacy.ko",
+                    "description": "Older-kernel support retained in this incomplete image",
+                    "kernel_release": "6.7.0-1",
+                    "size": 16384,
+                    "dependencies": [],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "guest_emulated": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/guest_emulated.ko",
+                    "description": "Driver for a different emulated network adapter",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guest_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  }
+                },
+                "devices": [
+                  {
+                    "slot": "00:05.0",
+                    "description": "Supplied paravirtual network controller",
+                    "driver": "guest_net"
+                  },
+                  {
+                    "slot": "00:06.0",
+                    "description": "Supplied virtual storage controller",
+                    "driver": "volume_io"
+                  }
+                ]
+              },
+              "objects": [
+                {
+                  "module": "guest_bus",
+                  "contents": "INERT guest module record guest_bus 6.8.0-1"
+                },
+                {
+                  "module": "guest_core",
+                  "contents": "INERT guest module record guest_core 6.8.0-1"
+                },
+                {
+                  "module": "guest_emulated",
+                  "contents": "INERT guest module record guest_emulated 6.8.0-1"
+                },
+                {
+                  "module": "guest_legacy",
+                  "contents": "INERT guest module record guest_legacy 6.7.0-1"
+                },
+                {
+                  "module": "guest_net",
+                  "contents": "INERT guest module record guest_net 6.8.0-1"
+                },
+                {
+                  "module": "volume_io",
+                  "contents": "INERT guest module record volume_io 6.8.0-1"
+                }
+              ],
+              "packages": {
+                "fixture": "guest-image-0",
+                "target": "x86_64",
+                "published": "offline",
+                "snapshots": {
+                  "offline": {
+                    "archives": [
+                      "guest-emulated-support",
+                      "guest-support-new",
+                      "guest-support-old",
+                      "kernel-core"
+                    ]
+                  }
+                },
+                "archives": {
+                  "kernel-core": {
+                    "identity": {
+                      "name": "kernel-core",
+                      "arch": "x86_64"
+                    },
+                    "evr": "6.8.0-1",
+                    "requires": [],
+                    "provides": {
+                      "kernel-api": "6.8.0-1"
+                    },
+                    "files": {
+                      "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_core 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      },
+                      "/lib/modules/6.8.0-1/kernel/drivers/volume_io.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record volume_io 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "guest-support-old": {
+                    "identity": {
+                      "name": "guest-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.7.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.7.0-1/kernel/drivers/guest_legacy.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_legacy 6.7.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "guest-support-new": {
+                    "identity": {
+                      "name": "guest-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "2.0-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.8.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.8.0-1/kernel/drivers/guest_bus.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_bus 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      },
+                      "/lib/modules/6.8.0-1/kernel/drivers/guest_net.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_net 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "guest-emulated-support": {
+                    "identity": {
+                      "name": "guest-emulated-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.8.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.8.0-1/kernel/drivers/guest_emulated.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_emulated 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  }
+                },
+                "allowed_paths": [
+                  "/lib/modules/6.7.0-1/kernel/drivers/guest_legacy.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_bus.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_emulated.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_net.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/volume_io.ko"
+                ]
+              }
+            },
+            "initial": {
+              "packages": {
+                "installed": [
+                  {
+                    "identity": {
+                      "name": "kernel-core",
+                      "arch": "x86_64"
+                    },
+                    "archive": "kernel-core"
+                  },
+                  {
+                    "identity": {
+                      "name": "guest-support",
+                      "arch": "x86_64"
+                    },
+                    "archive": "guest-support-old"
+                  }
+                ],
+                "available": [
+                  "guest-emulated-support",
+                  "guest-support-new",
+                  "guest-support-old",
+                  "kernel-core"
+                ],
+                "cached": null,
+                "files": {
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko": {
+                    "contents": "INERT guest module record guest_core 6.8.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.8.0-1/kernel/drivers/volume_io.ko": {
+                    "contents": "INERT guest module record volume_io 6.8.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.7.0-1/kernel/drivers/guest_legacy.ko": {
+                    "contents": "INERT guest module record guest_legacy 6.7.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  }
+                }
+              },
+              "modules": {
+                "index": [
+                  "guest_core",
+                  "volume_io"
+                ],
+                "loaded": {
+                  "guest_core": {
+                    "parameters": {}
+                  },
+                  "volume_io": {
+                    "parameters": {}
+                  }
+                },
+                "config": "# Supplied image options; no additional settings.\n",
+                "diagnostics": []
+              }
+            },
+            "devices": [
+              "00:05.0"
+            ],
+            "protected_drivers": [
+              "volume_io"
+            ],
+            "protected_packages": [
+              {
+                "name": "kernel-core",
+                "arch": "x86_64"
+              }
+            ]
+          },
+          "example": {
+            "facts": {
+              "modules": {
+                "kernel_release": "6.9.0-1",
+                "modules": {
+                  "reader_core": {
+                    "path": "/lib/modules/6.9.0-1/kernel/drivers/reader_core.ko",
+                    "description": "Shared supplied guest device support",
+                    "kernel_release": "6.9.0-1",
+                    "size": 16384,
+                    "dependencies": [],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "reader_storage": {
+                    "path": "/lib/modules/6.9.0-1/kernel/drivers/reader_storage.ko",
+                    "description": "Driver for the supplied virtual storage controller",
+                    "kernel_release": "6.9.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "reader_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 1
+                  },
+                  "reader_bus": {
+                    "path": "/lib/modules/6.9.0-1/kernel/drivers/reader_bus.ko",
+                    "description": "Transport prerequisite for the supplied paravirtual adapter",
+                    "kernel_release": "6.9.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "reader_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "reader_net": {
+                    "path": "/lib/modules/6.9.0-1/kernel/drivers/reader_net.ko",
+                    "description": "Driver for the supplied paravirtual network controller",
+                    "kernel_release": "6.9.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "reader_bus"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "reader_legacy": {
+                    "path": "/lib/modules/6.6.0-1/kernel/drivers/reader_legacy.ko",
+                    "description": "Older-kernel support retained in this incomplete image",
+                    "kernel_release": "6.6.0-1",
+                    "size": 16384,
+                    "dependencies": [],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "reader_emulated": {
+                    "path": "/lib/modules/6.9.0-1/kernel/drivers/reader_emulated.ko",
+                    "description": "Driver for a different emulated network adapter",
+                    "kernel_release": "6.9.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "reader_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  }
+                },
+                "devices": [
+                  {
+                    "slot": "00:05.0",
+                    "description": "Supplied paravirtual network controller",
+                    "driver": "reader_net"
+                  },
+                  {
+                    "slot": "00:06.0",
+                    "description": "Supplied virtual storage controller",
+                    "driver": "reader_storage"
+                  }
+                ]
+              },
+              "objects": [
+                {
+                  "module": "reader_bus",
+                  "contents": "INERT guest module record reader_bus 6.9.0-1"
+                },
+                {
+                  "module": "reader_core",
+                  "contents": "INERT guest module record reader_core 6.9.0-1"
+                },
+                {
+                  "module": "reader_emulated",
+                  "contents": "INERT guest module record reader_emulated 6.9.0-1"
+                },
+                {
+                  "module": "reader_legacy",
+                  "contents": "INERT guest module record reader_legacy 6.6.0-1"
+                },
+                {
+                  "module": "reader_net",
+                  "contents": "INERT guest module record reader_net 6.9.0-1"
+                },
+                {
+                  "module": "reader_storage",
+                  "contents": "INERT guest module record reader_storage 6.9.0-1"
+                }
+              ],
+              "packages": {
+                "fixture": "reader-image-0",
+                "target": "x86_64",
+                "published": "offline",
+                "snapshots": {
+                  "offline": {
+                    "archives": [
+                      "reader-emulated-support",
+                      "reader-kernel",
+                      "reader-support-new",
+                      "reader-support-old"
+                    ]
+                  }
+                },
+                "archives": {
+                  "reader-kernel": {
+                    "identity": {
+                      "name": "reader-kernel",
+                      "arch": "x86_64"
+                    },
+                    "evr": "6.9.0-1",
+                    "requires": [],
+                    "provides": {
+                      "kernel-api": "6.9.0-1"
+                    },
+                    "files": {
+                      "/lib/modules/6.9.0-1/kernel/drivers/reader_core.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record reader_core 6.9.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      },
+                      "/lib/modules/6.9.0-1/kernel/drivers/reader_storage.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record reader_storage 6.9.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "reader-support-old": {
+                    "identity": {
+                      "name": "reader-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "1.1-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.6.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.6.0-1/kernel/drivers/reader_legacy.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record reader_legacy 6.6.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "reader-support-new": {
+                    "identity": {
+                      "name": "reader-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "2.1-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.9.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.9.0-1/kernel/drivers/reader_bus.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record reader_bus 6.9.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      },
+                      "/lib/modules/6.9.0-1/kernel/drivers/reader_net.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record reader_net 6.9.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "reader-emulated-support": {
+                    "identity": {
+                      "name": "reader-emulated-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.9.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.9.0-1/kernel/drivers/reader_emulated.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record reader_emulated 6.9.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  }
+                },
+                "allowed_paths": [
+                  "/lib/modules/6.6.0-1/kernel/drivers/reader_legacy.ko",
+                  "/lib/modules/6.9.0-1/kernel/drivers/reader_bus.ko",
+                  "/lib/modules/6.9.0-1/kernel/drivers/reader_core.ko",
+                  "/lib/modules/6.9.0-1/kernel/drivers/reader_emulated.ko",
+                  "/lib/modules/6.9.0-1/kernel/drivers/reader_net.ko",
+                  "/lib/modules/6.9.0-1/kernel/drivers/reader_storage.ko"
+                ]
+              }
+            },
+            "initial": {
+              "packages": {
+                "installed": [
+                  {
+                    "identity": {
+                      "name": "reader-kernel",
+                      "arch": "x86_64"
+                    },
+                    "archive": "reader-kernel"
+                  },
+                  {
+                    "identity": {
+                      "name": "reader-support",
+                      "arch": "x86_64"
+                    },
+                    "archive": "reader-support-old"
+                  }
+                ],
+                "available": [
+                  "reader-emulated-support",
+                  "reader-kernel",
+                  "reader-support-new",
+                  "reader-support-old"
+                ],
+                "cached": null,
+                "files": {
+                  "/lib/modules/6.9.0-1/kernel/drivers/reader_core.ko": {
+                    "contents": "INERT guest module record reader_core 6.9.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.9.0-1/kernel/drivers/reader_storage.ko": {
+                    "contents": "INERT guest module record reader_storage 6.9.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.6.0-1/kernel/drivers/reader_legacy.ko": {
+                    "contents": "INERT guest module record reader_legacy 6.6.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  }
+                }
+              },
+              "modules": {
+                "index": [
+                  "reader_core",
+                  "reader_storage"
+                ],
+                "loaded": {
+                  "reader_core": {
+                    "parameters": {}
+                  },
+                  "reader_storage": {
+                    "parameters": {}
+                  }
+                },
+                "config": "# Supplied image options; no additional settings.\n",
+                "diagnostics": []
+              }
+            },
+            "devices": [
+              "00:05.0"
+            ],
+            "protected_drivers": [
+              "reader_storage"
+            ],
+            "protected_packages": [
+              {
+                "name": "reader-kernel",
+                "arch": "x86_64"
+              }
+            ]
+          },
+          "reference": [
+            {
+              "kind": "package",
+              "action": {
+                "kind": "UpgradeSet",
+                "archives": [
+                  "guest-support-new"
+                ]
+              }
+            },
+            {
+              "kind": "run",
+              "input": "depmod -a"
+            },
+            {
+              "kind": "run",
+              "input": "modprobe guest_net"
+            },
+            {
+              "kind": "check"
+            }
+          ],
+          "example_steps": [
+            {
+              "kind": "package",
+              "action": {
+                "kind": "UpgradeSet",
+                "archives": [
+                  "reader-support-new"
+                ]
+              }
+            },
+            {
+              "kind": "run",
+              "input": "depmod -a"
+            },
+            {
+              "kind": "run",
+              "input": "modprobe reader_net"
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "guest-image {\"kind\":\"package\",\"action\":{\"kind\":\"UpgradeSet\",\"archives\":[\"guest-support-new\"]}}",
+        "guest-image {\"kind\":\"run\",\"input\":\"depmod -a\"}",
+        "guest-image {\"kind\":\"run\",\"input\":\"modprobe guest_net\"}",
+        "guest-image {\"kind\":\"check\"}"
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://raw.githubusercontent.com/kmod-project/kmod/master/man/modprobe.8.scd",
+        "https://raw.githubusercontent.com/kmod-project/kmod/master/man/insmod.8.scd",
+        "https://docs.kernel.org/driver-api/virtio/writing_virtio_drivers.html"
+      ],
+      "simplifications": "Only the supplied x86_64 guest records, script-free archive metadata and virtual module objects are modeled. The object contents are inert descriptors, not actual RPM or executable .ko files. Native package actions change image files; they do not run post-install scripts, rebuild lookup or load modules automatically. These supplied transactions require all declared requirements of the resulting modeled installed set to be satisfied; broader real RPM behavior is not emulated. The terminal supports the listed literal module commands only; package work uses the native inspector. No real guest, kernel, driver, host file, network, initramfs or boot runs. A fresh request checks this model from an unloaded sample state, not real startup or connectivity. Supplied kernel release and dependency records do not prove full real ABI, signature, firmware or hardware compatibility. Module options are supplied read-only; aliases, force, shell scripts, arbitrary files and unknown binary contents are unsupported. This is limited LPIC-1 v5.0/102.6 guest-driver practice, not full virtualization/cloud/image/clone identity coverage or vendor endorsement. Sources checked2026-11-13; original text/models, no third-party binaries or learning-material extracts imported."
+    },
+    {
+      "id": "lpic1-guest-object-recovery",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-guest-image-support",
+      "topic": "Installed files versus loaded drivers",
+      "title": "Recover a missing driver file while the device is active",
+      "summary": "Diagnose an installed support record with a missing object, restore that version and verify a fresh load without dismantling storage.",
+      "objective": "Finish with the presented network controller using its matching current-kernel driver. Keep its object files and lookup usable for a separate request from an unloaded sample state. Retain the supplied active storage driver and its effective prerequisite settings. Keep the original installed kernel package version; reinstalling that same supplied archive is allowed. Leave no unmet declared requirements among installed packages.",
+      "retry_guidance": "Read the named failed outcome, then compare the active driver, object presence, lookup and selected package requirements. Repair that state and check again; a quiet command is not completion by itself.",
+      "difficulty": "Beginner",
+      "minutes": 18,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair",
+        "Verify the image handover"
+      ],
+      "guide": [
+        {
+          "title": "Compare the running driver with its missing file",
+          "why": "Loaded means the kernel already holds a driver instance. The instance can keep working after its object file disappears. The package record can also remain installed. These observations describe different states, not contradictory answers.",
+          "action": "Run lsmod and lspci -k separately. Choose sample-support 2.1-1 in Supplied archive. Expand Inspect image objects and lookup, then run modinfo /lib/modules/6.10.0-1/kernel/drivers/sample_net.ko. Select Check configuration before repairing anything.",
+          "commands": [
+            {
+              "command": "lsmod",
+              "explanation": "Observe the driver that is already loaded.",
+              "simulator_only": false
+            },
+            {
+              "command": "lspci -k",
+              "explanation": "The presented adapter still has a driver in use.",
+              "simulator_only": false
+            },
+            {
+              "command": "modinfo /lib/modules/6.10.0-1/kernel/drivers/sample_net.ko",
+              "explanation": "Expected failure: this supplied object file is missing even though a driver instance is loaded.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Restore the same version and repair lookup",
+          "why": "Install is not the right operation for a record already installed at that version. Reinstall restores that exact supplied archive\u2019s files. Lookup was also rebuilt while the object was missing, so restoring the file alone does not restore its lookup entry.",
+          "action": "Keep sample-support 2.1-1 selected, choose Reinstall and Apply package change. Observe that the file is Present but the driver\u2019s lookup is still Absent. Run depmod -a, then modinfo sample_net.",
+          "commands": [
+            {
+              "command": "depmod -a",
+              "explanation": "Rebuild lookup from the now-restored current-release objects.",
+              "simulator_only": false
+            },
+            {
+              "command": "modinfo sample_net",
+              "explanation": "Read the driver by name after lookup is restored.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify a fresh request without stopping storage",
+          "why": "Repeating modprobe on an already loaded module normally does not reload it or prove its file is available. Check configuration tries a separate unloaded sample and leaves your running state alone. The stored image must support that request too.",
+          "action": "Run modprobe sample_net, then select Check configuration. Compare the current-driver and fresh-request outcomes. To explore afterward, remove the example support package and check again; restore it with Install and rebuild lookup if needed.",
+          "commands": [
+            {
+              "command": "modprobe sample_net",
+              "explanation": "A quiet result for an already loaded instance is not proof of image completeness.",
+              "simulator_only": false
+            },
+            {
+              "command": "lspci -k",
+              "explanation": "Confirm the running devices and retained storage provider remain available.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "guest_net was already loaded, but its object and lookup were incomplete. Reinstalling the recorded 2.0-1 support restored the file; rebuilding lookup restored a fresh request. Repeating modprobe alone could not establish that repair. The active storage provider and original kernel package were retained.",
+      "hints": [
+        "Compare all four observations: installed record, object presence, lookup and loaded driver. They need not agree after an incomplete image change.",
+        "An already installed version needs restoration from that same supplied archive. Read the difference between Install and Reinstall before applying a package action.",
+        "If the file is now present but a fresh request still fails, inspect lookup. A quiet request for an existing loaded instance can hide the stored-image fault."
+      ],
+      "initial": {
+        "kind": "GuestDrivers",
+        "simulation": {
+          "schema_version": 1,
+          "source_id": "lpic1-guest-object-recovery",
+          "view": "introduction",
+          "assignment": {
+            "runtime": {
+              "packages": {
+                "installed": [
+                  {
+                    "identity": {
+                      "name": "kernel-core",
+                      "arch": "x86_64"
+                    },
+                    "archive": "kernel-core"
+                  },
+                  {
+                    "identity": {
+                      "name": "guest-support",
+                      "arch": "x86_64"
+                    },
+                    "archive": "guest-support-new"
+                  }
+                ],
+                "available": [
+                  "guest-emulated-support",
+                  "guest-support-new",
+                  "guest-support-old",
+                  "kernel-core"
+                ],
+                "cached": null,
+                "files": {
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko": {
+                    "contents": "INERT guest module record guest_core 6.8.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.8.0-1/kernel/drivers/volume_io.ko": {
+                    "contents": "INERT guest module record volume_io 6.8.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_bus.ko": {
+                    "contents": "INERT guest module record guest_bus 6.8.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  }
+                }
+              },
+              "modules": {
+                "index": [
+                  "guest_bus",
+                  "guest_core",
+                  "volume_io"
+                ],
+                "loaded": {
+                  "guest_core": {
+                    "parameters": {}
+                  },
+                  "volume_io": {
+                    "parameters": {}
+                  },
+                  "guest_bus": {
+                    "parameters": {}
+                  },
+                  "guest_net": {
+                    "parameters": {}
+                  }
+                },
+                "config": "# Supplied image options; no additional settings.\n",
+                "diagnostics": []
+              }
+            },
+            "input": "",
+            "output": "",
+            "checked": false,
+            "selected_archive": "",
+            "operation": null
+          },
+          "practice": {
+            "runtime": {
+              "packages": {
+                "installed": [
+                  {
+                    "identity": {
+                      "name": "sample-kernel",
+                      "arch": "x86_64"
+                    },
+                    "archive": "sample-kernel"
+                  },
+                  {
+                    "identity": {
+                      "name": "sample-support",
+                      "arch": "x86_64"
+                    },
+                    "archive": "sample-support-new"
+                  }
+                ],
+                "available": [
+                  "sample-emulated-support",
+                  "sample-kernel",
+                  "sample-support-new",
+                  "sample-support-old"
+                ],
+                "cached": null,
+                "files": {
+                  "/lib/modules/6.10.0-1/kernel/drivers/sample_core.ko": {
+                    "contents": "INERT guest module record sample_core 6.10.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.10.0-1/kernel/drivers/sample_storage.ko": {
+                    "contents": "INERT guest module record sample_storage 6.10.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.10.0-1/kernel/drivers/sample_bus.ko": {
+                    "contents": "INERT guest module record sample_bus 6.10.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  }
+                }
+              },
+              "modules": {
+                "index": [
+                  "sample_bus",
+                  "sample_core",
+                  "sample_storage"
+                ],
+                "loaded": {
+                  "sample_core": {
+                    "parameters": {}
+                  },
+                  "sample_storage": {
+                    "parameters": {}
+                  },
+                  "sample_bus": {
+                    "parameters": {}
+                  },
+                  "sample_net": {
+                    "parameters": {}
+                  }
+                },
+                "config": "# Supplied image options; no additional settings.\n",
+                "diagnostics": []
+              }
+            },
+            "input": "",
+            "output": "",
+            "checked": false,
+            "selected_archive": "",
+            "operation": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "GuestDrivers",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic1-guest-object-recovery",
+          "assignment": {
+            "facts": {
+              "modules": {
+                "kernel_release": "6.8.0-1",
+                "modules": {
+                  "guest_core": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko",
+                    "description": "Shared supplied guest device support",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "volume_io": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/volume_io.ko",
+                    "description": "Driver for the supplied virtual storage controller",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guest_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 1
+                  },
+                  "guest_bus": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/guest_bus.ko",
+                    "description": "Transport prerequisite for the supplied paravirtual adapter",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guest_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "guest_net": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/guest_net.ko",
+                    "description": "Driver for the supplied paravirtual network controller",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guest_bus"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "guest_legacy": {
+                    "path": "/lib/modules/6.7.0-1/kernel/drivers/guest_legacy.ko",
+                    "description": "Older-kernel support retained in this incomplete image",
+                    "kernel_release": "6.7.0-1",
+                    "size": 16384,
+                    "dependencies": [],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "guest_emulated": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/guest_emulated.ko",
+                    "description": "Driver for a different emulated network adapter",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guest_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  }
+                },
+                "devices": [
+                  {
+                    "slot": "00:05.0",
+                    "description": "Supplied paravirtual network controller",
+                    "driver": "guest_net"
+                  },
+                  {
+                    "slot": "00:06.0",
+                    "description": "Supplied virtual storage controller",
+                    "driver": "volume_io"
+                  }
+                ]
+              },
+              "objects": [
+                {
+                  "module": "guest_bus",
+                  "contents": "INERT guest module record guest_bus 6.8.0-1"
+                },
+                {
+                  "module": "guest_core",
+                  "contents": "INERT guest module record guest_core 6.8.0-1"
+                },
+                {
+                  "module": "guest_emulated",
+                  "contents": "INERT guest module record guest_emulated 6.8.0-1"
+                },
+                {
+                  "module": "guest_legacy",
+                  "contents": "INERT guest module record guest_legacy 6.7.0-1"
+                },
+                {
+                  "module": "guest_net",
+                  "contents": "INERT guest module record guest_net 6.8.0-1"
+                },
+                {
+                  "module": "volume_io",
+                  "contents": "INERT guest module record volume_io 6.8.0-1"
+                }
+              ],
+              "packages": {
+                "fixture": "guest-image-1",
+                "target": "x86_64",
+                "published": "offline",
+                "snapshots": {
+                  "offline": {
+                    "archives": [
+                      "guest-emulated-support",
+                      "guest-support-new",
+                      "guest-support-old",
+                      "kernel-core"
+                    ]
+                  }
+                },
+                "archives": {
+                  "kernel-core": {
+                    "identity": {
+                      "name": "kernel-core",
+                      "arch": "x86_64"
+                    },
+                    "evr": "6.8.0-1",
+                    "requires": [],
+                    "provides": {
+                      "kernel-api": "6.8.0-1"
+                    },
+                    "files": {
+                      "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_core 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      },
+                      "/lib/modules/6.8.0-1/kernel/drivers/volume_io.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record volume_io 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "guest-support-old": {
+                    "identity": {
+                      "name": "guest-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.7.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.7.0-1/kernel/drivers/guest_legacy.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_legacy 6.7.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "guest-support-new": {
+                    "identity": {
+                      "name": "guest-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "2.0-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.8.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.8.0-1/kernel/drivers/guest_bus.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_bus 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      },
+                      "/lib/modules/6.8.0-1/kernel/drivers/guest_net.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_net 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "guest-emulated-support": {
+                    "identity": {
+                      "name": "guest-emulated-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.8.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.8.0-1/kernel/drivers/guest_emulated.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_emulated 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  }
+                },
+                "allowed_paths": [
+                  "/lib/modules/6.7.0-1/kernel/drivers/guest_legacy.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_bus.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_emulated.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_net.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/volume_io.ko"
+                ]
+              }
+            },
+            "initial": {
+              "packages": {
+                "installed": [
+                  {
+                    "identity": {
+                      "name": "kernel-core",
+                      "arch": "x86_64"
+                    },
+                    "archive": "kernel-core"
+                  },
+                  {
+                    "identity": {
+                      "name": "guest-support",
+                      "arch": "x86_64"
+                    },
+                    "archive": "guest-support-new"
+                  }
+                ],
+                "available": [
+                  "guest-emulated-support",
+                  "guest-support-new",
+                  "guest-support-old",
+                  "kernel-core"
+                ],
+                "cached": null,
+                "files": {
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko": {
+                    "contents": "INERT guest module record guest_core 6.8.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.8.0-1/kernel/drivers/volume_io.ko": {
+                    "contents": "INERT guest module record volume_io 6.8.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_bus.ko": {
+                    "contents": "INERT guest module record guest_bus 6.8.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  }
+                }
+              },
+              "modules": {
+                "index": [
+                  "guest_bus",
+                  "guest_core",
+                  "volume_io"
+                ],
+                "loaded": {
+                  "guest_core": {
+                    "parameters": {}
+                  },
+                  "volume_io": {
+                    "parameters": {}
+                  },
+                  "guest_bus": {
+                    "parameters": {}
+                  },
+                  "guest_net": {
+                    "parameters": {}
+                  }
+                },
+                "config": "# Supplied image options; no additional settings.\n",
+                "diagnostics": []
+              }
+            },
+            "devices": [
+              "00:05.0"
+            ],
+            "protected_drivers": [
+              "volume_io"
+            ],
+            "protected_packages": [
+              {
+                "name": "kernel-core",
+                "arch": "x86_64"
+              }
+            ]
+          },
+          "example": {
+            "facts": {
+              "modules": {
+                "kernel_release": "6.10.0-1",
+                "modules": {
+                  "sample_core": {
+                    "path": "/lib/modules/6.10.0-1/kernel/drivers/sample_core.ko",
+                    "description": "Shared supplied guest device support",
+                    "kernel_release": "6.10.0-1",
+                    "size": 16384,
+                    "dependencies": [],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "sample_storage": {
+                    "path": "/lib/modules/6.10.0-1/kernel/drivers/sample_storage.ko",
+                    "description": "Driver for the supplied virtual storage controller",
+                    "kernel_release": "6.10.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "sample_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 1
+                  },
+                  "sample_bus": {
+                    "path": "/lib/modules/6.10.0-1/kernel/drivers/sample_bus.ko",
+                    "description": "Transport prerequisite for the supplied paravirtual adapter",
+                    "kernel_release": "6.10.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "sample_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "sample_net": {
+                    "path": "/lib/modules/6.10.0-1/kernel/drivers/sample_net.ko",
+                    "description": "Driver for the supplied paravirtual network controller",
+                    "kernel_release": "6.10.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "sample_bus"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "sample_legacy": {
+                    "path": "/lib/modules/6.6.0-1/kernel/drivers/sample_legacy.ko",
+                    "description": "Older-kernel support retained in this incomplete image",
+                    "kernel_release": "6.6.0-1",
+                    "size": 16384,
+                    "dependencies": [],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "sample_emulated": {
+                    "path": "/lib/modules/6.10.0-1/kernel/drivers/sample_emulated.ko",
+                    "description": "Driver for a different emulated network adapter",
+                    "kernel_release": "6.10.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "sample_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  }
+                },
+                "devices": [
+                  {
+                    "slot": "00:05.0",
+                    "description": "Supplied paravirtual network controller",
+                    "driver": "sample_net"
+                  },
+                  {
+                    "slot": "00:06.0",
+                    "description": "Supplied virtual storage controller",
+                    "driver": "sample_storage"
+                  }
+                ]
+              },
+              "objects": [
+                {
+                  "module": "sample_bus",
+                  "contents": "INERT guest module record sample_bus 6.10.0-1"
+                },
+                {
+                  "module": "sample_core",
+                  "contents": "INERT guest module record sample_core 6.10.0-1"
+                },
+                {
+                  "module": "sample_emulated",
+                  "contents": "INERT guest module record sample_emulated 6.10.0-1"
+                },
+                {
+                  "module": "sample_legacy",
+                  "contents": "INERT guest module record sample_legacy 6.6.0-1"
+                },
+                {
+                  "module": "sample_net",
+                  "contents": "INERT guest module record sample_net 6.10.0-1"
+                },
+                {
+                  "module": "sample_storage",
+                  "contents": "INERT guest module record sample_storage 6.10.0-1"
+                }
+              ],
+              "packages": {
+                "fixture": "sample-image-1",
+                "target": "x86_64",
+                "published": "offline",
+                "snapshots": {
+                  "offline": {
+                    "archives": [
+                      "sample-emulated-support",
+                      "sample-kernel",
+                      "sample-support-new",
+                      "sample-support-old"
+                    ]
+                  }
+                },
+                "archives": {
+                  "sample-kernel": {
+                    "identity": {
+                      "name": "sample-kernel",
+                      "arch": "x86_64"
+                    },
+                    "evr": "6.10.0-1",
+                    "requires": [],
+                    "provides": {
+                      "kernel-api": "6.10.0-1"
+                    },
+                    "files": {
+                      "/lib/modules/6.10.0-1/kernel/drivers/sample_core.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record sample_core 6.10.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      },
+                      "/lib/modules/6.10.0-1/kernel/drivers/sample_storage.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record sample_storage 6.10.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "sample-support-old": {
+                    "identity": {
+                      "name": "sample-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "1.1-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.6.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.6.0-1/kernel/drivers/sample_legacy.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record sample_legacy 6.6.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "sample-support-new": {
+                    "identity": {
+                      "name": "sample-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "2.1-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.10.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.10.0-1/kernel/drivers/sample_bus.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record sample_bus 6.10.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      },
+                      "/lib/modules/6.10.0-1/kernel/drivers/sample_net.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record sample_net 6.10.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "sample-emulated-support": {
+                    "identity": {
+                      "name": "sample-emulated-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.10.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.10.0-1/kernel/drivers/sample_emulated.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record sample_emulated 6.10.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  }
+                },
+                "allowed_paths": [
+                  "/lib/modules/6.10.0-1/kernel/drivers/sample_bus.ko",
+                  "/lib/modules/6.10.0-1/kernel/drivers/sample_core.ko",
+                  "/lib/modules/6.10.0-1/kernel/drivers/sample_emulated.ko",
+                  "/lib/modules/6.10.0-1/kernel/drivers/sample_net.ko",
+                  "/lib/modules/6.10.0-1/kernel/drivers/sample_storage.ko",
+                  "/lib/modules/6.6.0-1/kernel/drivers/sample_legacy.ko"
+                ]
+              }
+            },
+            "initial": {
+              "packages": {
+                "installed": [
+                  {
+                    "identity": {
+                      "name": "sample-kernel",
+                      "arch": "x86_64"
+                    },
+                    "archive": "sample-kernel"
+                  },
+                  {
+                    "identity": {
+                      "name": "sample-support",
+                      "arch": "x86_64"
+                    },
+                    "archive": "sample-support-new"
+                  }
+                ],
+                "available": [
+                  "sample-emulated-support",
+                  "sample-kernel",
+                  "sample-support-new",
+                  "sample-support-old"
+                ],
+                "cached": null,
+                "files": {
+                  "/lib/modules/6.10.0-1/kernel/drivers/sample_core.ko": {
+                    "contents": "INERT guest module record sample_core 6.10.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.10.0-1/kernel/drivers/sample_storage.ko": {
+                    "contents": "INERT guest module record sample_storage 6.10.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.10.0-1/kernel/drivers/sample_bus.ko": {
+                    "contents": "INERT guest module record sample_bus 6.10.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  }
+                }
+              },
+              "modules": {
+                "index": [
+                  "sample_bus",
+                  "sample_core",
+                  "sample_storage"
+                ],
+                "loaded": {
+                  "sample_core": {
+                    "parameters": {}
+                  },
+                  "sample_storage": {
+                    "parameters": {}
+                  },
+                  "sample_bus": {
+                    "parameters": {}
+                  },
+                  "sample_net": {
+                    "parameters": {}
+                  }
+                },
+                "config": "# Supplied image options; no additional settings.\n",
+                "diagnostics": []
+              }
+            },
+            "devices": [
+              "00:05.0"
+            ],
+            "protected_drivers": [
+              "sample_storage"
+            ],
+            "protected_packages": [
+              {
+                "name": "sample-kernel",
+                "arch": "x86_64"
+              }
+            ]
+          },
+          "reference": [
+            {
+              "kind": "package",
+              "action": {
+                "kind": "ReinstallExact",
+                "archive": "guest-support-new"
+              }
+            },
+            {
+              "kind": "run",
+              "input": "depmod -a"
+            },
+            {
+              "kind": "run",
+              "input": "modprobe guest_net"
+            },
+            {
+              "kind": "check"
+            }
+          ],
+          "example_steps": [
+            {
+              "kind": "package",
+              "action": {
+                "kind": "ReinstallExact",
+                "archive": "sample-support-new"
+              }
+            },
+            {
+              "kind": "run",
+              "input": "depmod -a"
+            },
+            {
+              "kind": "run",
+              "input": "modprobe sample_net"
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "guest-image {\"kind\":\"package\",\"action\":{\"kind\":\"ReinstallExact\",\"archive\":\"guest-support-new\"}}",
+        "guest-image {\"kind\":\"run\",\"input\":\"depmod -a\"}",
+        "guest-image {\"kind\":\"run\",\"input\":\"modprobe guest_net\"}",
+        "guest-image {\"kind\":\"check\"}"
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://raw.githubusercontent.com/kmod-project/kmod/master/man/modprobe.8.scd",
+        "https://raw.githubusercontent.com/kmod-project/kmod/master/man/insmod.8.scd",
+        "https://docs.kernel.org/driver-api/virtio/writing_virtio_drivers.html"
+      ],
+      "simplifications": "Only the supplied x86_64 guest records, script-free archive metadata and virtual module objects are modeled. The object contents are inert descriptors, not actual RPM or executable .ko files. Native package actions change image files; they do not run post-install scripts, rebuild lookup or load modules automatically. These supplied transactions require all declared requirements of the resulting modeled installed set to be satisfied; broader real RPM behavior is not emulated. The terminal supports the listed literal module commands only; package work uses the native inspector. No real guest, kernel, driver, host file, network, initramfs or boot runs. A fresh request checks this model from an unloaded sample state, not real startup or connectivity. Supplied kernel release and dependency records do not prove full real ABI, signature, firmware or hardware compatibility. Module options are supplied read-only; aliases, force, shell scripts, arbitrary files and unknown binary contents are unsupported. This is limited LPIC-1 v5.0/102.6 guest-driver practice, not full virtualization/cloud/image/clone identity coverage or vendor endorsement. Sources checked2026-11-13; original text/models, no third-party binaries or learning-material extracts imported."
+    },
+    {
+      "id": "lpic1-guest-image-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-guest-image-support",
+      "topic": "Guest-image support handover capstone",
+      "title": "Hand over an image with both device drivers ready",
+      "summary": "Combine package compatibility and missing-file recovery while retaining active storage and verifying both device drivers.",
+      "objective": "Finish with both presented network and storage controllers using their matching current-kernel drivers. Keep object files and lookup usable for separate unloaded requests for both controllers. Retain the supplied active storage driver and its effective prerequisite settings. Keep the original installed kernel package version; reinstalling that same supplied archive is allowed. Leave no unmet declared requirements among installed packages.",
+      "retry_guidance": "Read the named failed outcome, then compare the active driver, object presence, lookup and selected package requirements. Repair that state and check again; a quiet command is not completion by itself.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair",
+        "Verify the image handover"
+      ],
+      "guide": [
+        {
+          "title": "Inventory both running devices and the image faults",
+          "why": "This combines the earlier two lessons. Both driver instances are already loaded, but the stored image has an incompatible support record and a missing storage object. Current readiness, fresh requests and declared package requirements must all be checked.",
+          "action": "Run uname -r, lsmod and lspci -k separately. Select Check configuration, then inspect guide-support 1.1-1 and guide-kernel 6.11.0-1. Expand Inspect image objects and lookup to locate the missing records.",
+          "commands": [
+            {
+              "command": "uname -r",
+              "explanation": "Establish this guide image\u2019s running kernel.",
+              "simulator_only": false
+            },
+            {
+              "command": "lsmod",
+              "explanation": "Observe the two existing instances and shared prerequisites.",
+              "simulator_only": false
+            },
+            {
+              "command": "lspci -k",
+              "explanation": "Both controllers can report a driver in use despite stored-image faults.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Repair support and restore the protected archive",
+          "why": "The supplied transactions require a result with declared package requirements satisfied. Replace the incompatible support record first, or remove it before rebuilding the image. Reinstalling the original kernel archive restores its missing object without changing that package\u2019s version or the running drivers.",
+          "action": "Choose guide-support 2.1-1, Replace / upgrade and Apply package change. Then choose guide-kernel 6.11.0-1, Reinstall and Apply package change. Run depmod -a. Do not remove or force-unload the active storage provider.",
+          "commands": [
+            {
+              "command": "depmod -a",
+              "explanation": "Index the restored objects for both represented devices.",
+              "simulator_only": false
+            },
+            {
+              "command": "modinfo guide_storage",
+              "explanation": "Inspect the restored storage object by name.",
+              "simulator_only": false
+            },
+            {
+              "command": "modinfo guide_net",
+              "explanation": "Inspect the matching network object by name.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Check the whole handover and retry a partial repair",
+          "why": "A correct network repair alone cannot earn completion when storage\u2019s fresh request is still broken. Check configuration names each required current and unloaded-request result. Observational commands do not clear a correct configuration, but changing its package files invalidates current success.",
+          "action": "Run lspci -k and select Check configuration. Review both controllers\u2019 current and fresh-request results. If a check fails, use the named package/file/lookup diagnostic to repair only that state and retry; keep guide_storage and its prerequisite settings intact.",
+          "commands": [
+            {
+              "command": "lspci -k",
+              "explanation": "Confirm the current bindings after repairing image files.",
+              "simulator_only": false
+            },
+            {
+              "command": "modprobe guide_net",
+              "explanation": "Observe that an already loaded instance alone does not establish a complete image handover.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The guest still held working driver instances, but its support record and stored objects disagreed with the 6.8.0-1 kernel. Matching support, restoration of the original kernel archive and rebuilt lookup made both fresh requests possible. The current storage instance, its prerequisite settings and kernel package version were retained; repairing only one device would not complete this handover.",
+      "hints": [
+        "Separate the failed outcomes: current bindings, unloaded requests, protected provider/package and declared requirements. Do not repair only the last command\u2019s device.",
+        "Read the incompatible support record\u2019s Requires before restoring other packages. The supplied transaction model rejects a result with unmet declared requirements.",
+        "A package can already be installed while its object is missing. Restore that same archive, retain its version, and ensure lookup includes both required devices."
+      ],
+      "initial": {
+        "kind": "GuestDrivers",
+        "simulation": {
+          "schema_version": 1,
+          "source_id": "lpic1-guest-image-handover",
+          "view": "introduction",
+          "assignment": {
+            "runtime": {
+              "packages": {
+                "installed": [
+                  {
+                    "identity": {
+                      "name": "kernel-core",
+                      "arch": "x86_64"
+                    },
+                    "archive": "kernel-core"
+                  },
+                  {
+                    "identity": {
+                      "name": "guest-support",
+                      "arch": "x86_64"
+                    },
+                    "archive": "guest-support-old"
+                  }
+                ],
+                "available": [
+                  "guest-emulated-support",
+                  "guest-support-new",
+                  "guest-support-old",
+                  "kernel-core"
+                ],
+                "cached": null,
+                "files": {
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko": {
+                    "contents": "INERT guest module record guest_core 6.8.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.7.0-1/kernel/drivers/guest_legacy.ko": {
+                    "contents": "INERT guest module record guest_legacy 6.7.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  }
+                }
+              },
+              "modules": {
+                "index": [
+                  "guest_core"
+                ],
+                "loaded": {
+                  "guest_core": {
+                    "parameters": {}
+                  },
+                  "volume_io": {
+                    "parameters": {}
+                  },
+                  "guest_bus": {
+                    "parameters": {}
+                  },
+                  "guest_net": {
+                    "parameters": {}
+                  }
+                },
+                "config": "# Supplied image options; no additional settings.\n",
+                "diagnostics": []
+              }
+            },
+            "input": "",
+            "output": "",
+            "checked": false,
+            "selected_archive": "",
+            "operation": null
+          },
+          "practice": {
+            "runtime": {
+              "packages": {
+                "installed": [
+                  {
+                    "identity": {
+                      "name": "guide-kernel",
+                      "arch": "x86_64"
+                    },
+                    "archive": "guide-kernel"
+                  },
+                  {
+                    "identity": {
+                      "name": "guide-support",
+                      "arch": "x86_64"
+                    },
+                    "archive": "guide-support-old"
+                  }
+                ],
+                "available": [
+                  "guide-emulated-support",
+                  "guide-kernel",
+                  "guide-support-new",
+                  "guide-support-old"
+                ],
+                "cached": null,
+                "files": {
+                  "/lib/modules/6.11.0-1/kernel/drivers/guide_core.ko": {
+                    "contents": "INERT guest module record guide_core 6.11.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.6.0-1/kernel/drivers/guide_legacy.ko": {
+                    "contents": "INERT guest module record guide_legacy 6.6.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  }
+                }
+              },
+              "modules": {
+                "index": [
+                  "guide_core"
+                ],
+                "loaded": {
+                  "guide_core": {
+                    "parameters": {}
+                  },
+                  "guide_storage": {
+                    "parameters": {}
+                  },
+                  "guide_bus": {
+                    "parameters": {}
+                  },
+                  "guide_net": {
+                    "parameters": {}
+                  }
+                },
+                "config": "# Supplied image options; no additional settings.\n",
+                "diagnostics": []
+              }
+            },
+            "input": "",
+            "output": "",
+            "checked": false,
+            "selected_archive": "",
+            "operation": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "GuestDrivers",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic1-guest-image-handover",
+          "assignment": {
+            "facts": {
+              "modules": {
+                "kernel_release": "6.8.0-1",
+                "modules": {
+                  "guest_core": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko",
+                    "description": "Shared supplied guest device support",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "volume_io": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/volume_io.ko",
+                    "description": "Driver for the supplied virtual storage controller",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guest_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 1
+                  },
+                  "guest_bus": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/guest_bus.ko",
+                    "description": "Transport prerequisite for the supplied paravirtual adapter",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guest_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "guest_net": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/guest_net.ko",
+                    "description": "Driver for the supplied paravirtual network controller",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guest_bus"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "guest_legacy": {
+                    "path": "/lib/modules/6.7.0-1/kernel/drivers/guest_legacy.ko",
+                    "description": "Older-kernel support retained in this incomplete image",
+                    "kernel_release": "6.7.0-1",
+                    "size": 16384,
+                    "dependencies": [],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "guest_emulated": {
+                    "path": "/lib/modules/6.8.0-1/kernel/drivers/guest_emulated.ko",
+                    "description": "Driver for a different emulated network adapter",
+                    "kernel_release": "6.8.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guest_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  }
+                },
+                "devices": [
+                  {
+                    "slot": "00:05.0",
+                    "description": "Supplied paravirtual network controller",
+                    "driver": "guest_net"
+                  },
+                  {
+                    "slot": "00:06.0",
+                    "description": "Supplied virtual storage controller",
+                    "driver": "volume_io"
+                  }
+                ]
+              },
+              "objects": [
+                {
+                  "module": "guest_bus",
+                  "contents": "INERT guest module record guest_bus 6.8.0-1"
+                },
+                {
+                  "module": "guest_core",
+                  "contents": "INERT guest module record guest_core 6.8.0-1"
+                },
+                {
+                  "module": "guest_emulated",
+                  "contents": "INERT guest module record guest_emulated 6.8.0-1"
+                },
+                {
+                  "module": "guest_legacy",
+                  "contents": "INERT guest module record guest_legacy 6.7.0-1"
+                },
+                {
+                  "module": "guest_net",
+                  "contents": "INERT guest module record guest_net 6.8.0-1"
+                },
+                {
+                  "module": "volume_io",
+                  "contents": "INERT guest module record volume_io 6.8.0-1"
+                }
+              ],
+              "packages": {
+                "fixture": "guest-image-2",
+                "target": "x86_64",
+                "published": "offline",
+                "snapshots": {
+                  "offline": {
+                    "archives": [
+                      "guest-emulated-support",
+                      "guest-support-new",
+                      "guest-support-old",
+                      "kernel-core"
+                    ]
+                  }
+                },
+                "archives": {
+                  "kernel-core": {
+                    "identity": {
+                      "name": "kernel-core",
+                      "arch": "x86_64"
+                    },
+                    "evr": "6.8.0-1",
+                    "requires": [],
+                    "provides": {
+                      "kernel-api": "6.8.0-1"
+                    },
+                    "files": {
+                      "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_core 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      },
+                      "/lib/modules/6.8.0-1/kernel/drivers/volume_io.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record volume_io 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "guest-support-old": {
+                    "identity": {
+                      "name": "guest-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.7.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.7.0-1/kernel/drivers/guest_legacy.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_legacy 6.7.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "guest-support-new": {
+                    "identity": {
+                      "name": "guest-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "2.0-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.8.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.8.0-1/kernel/drivers/guest_bus.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_bus 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      },
+                      "/lib/modules/6.8.0-1/kernel/drivers/guest_net.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_net 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "guest-emulated-support": {
+                    "identity": {
+                      "name": "guest-emulated-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.8.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.8.0-1/kernel/drivers/guest_emulated.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guest_emulated 6.8.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  }
+                },
+                "allowed_paths": [
+                  "/lib/modules/6.7.0-1/kernel/drivers/guest_legacy.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_bus.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_emulated.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_net.ko",
+                  "/lib/modules/6.8.0-1/kernel/drivers/volume_io.ko"
+                ]
+              }
+            },
+            "initial": {
+              "packages": {
+                "installed": [
+                  {
+                    "identity": {
+                      "name": "kernel-core",
+                      "arch": "x86_64"
+                    },
+                    "archive": "kernel-core"
+                  },
+                  {
+                    "identity": {
+                      "name": "guest-support",
+                      "arch": "x86_64"
+                    },
+                    "archive": "guest-support-old"
+                  }
+                ],
+                "available": [
+                  "guest-emulated-support",
+                  "guest-support-new",
+                  "guest-support-old",
+                  "kernel-core"
+                ],
+                "cached": null,
+                "files": {
+                  "/lib/modules/6.8.0-1/kernel/drivers/guest_core.ko": {
+                    "contents": "INERT guest module record guest_core 6.8.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.7.0-1/kernel/drivers/guest_legacy.ko": {
+                    "contents": "INERT guest module record guest_legacy 6.7.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  }
+                }
+              },
+              "modules": {
+                "index": [
+                  "guest_core"
+                ],
+                "loaded": {
+                  "guest_core": {
+                    "parameters": {}
+                  },
+                  "volume_io": {
+                    "parameters": {}
+                  },
+                  "guest_bus": {
+                    "parameters": {}
+                  },
+                  "guest_net": {
+                    "parameters": {}
+                  }
+                },
+                "config": "# Supplied image options; no additional settings.\n",
+                "diagnostics": []
+              }
+            },
+            "devices": [
+              "00:05.0",
+              "00:06.0"
+            ],
+            "protected_drivers": [
+              "volume_io"
+            ],
+            "protected_packages": [
+              {
+                "name": "kernel-core",
+                "arch": "x86_64"
+              }
+            ]
+          },
+          "example": {
+            "facts": {
+              "modules": {
+                "kernel_release": "6.11.0-1",
+                "modules": {
+                  "guide_core": {
+                    "path": "/lib/modules/6.11.0-1/kernel/drivers/guide_core.ko",
+                    "description": "Shared supplied guest device support",
+                    "kernel_release": "6.11.0-1",
+                    "size": 16384,
+                    "dependencies": [],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "guide_storage": {
+                    "path": "/lib/modules/6.11.0-1/kernel/drivers/guide_storage.ko",
+                    "description": "Driver for the supplied virtual storage controller",
+                    "kernel_release": "6.11.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guide_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 1
+                  },
+                  "guide_bus": {
+                    "path": "/lib/modules/6.11.0-1/kernel/drivers/guide_bus.ko",
+                    "description": "Transport prerequisite for the supplied paravirtual adapter",
+                    "kernel_release": "6.11.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guide_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "guide_net": {
+                    "path": "/lib/modules/6.11.0-1/kernel/drivers/guide_net.ko",
+                    "description": "Driver for the supplied paravirtual network controller",
+                    "kernel_release": "6.11.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guide_bus"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "guide_legacy": {
+                    "path": "/lib/modules/6.6.0-1/kernel/drivers/guide_legacy.ko",
+                    "description": "Older-kernel support retained in this incomplete image",
+                    "kernel_release": "6.6.0-1",
+                    "size": 16384,
+                    "dependencies": [],
+                    "parameters": {},
+                    "external_users": 0
+                  },
+                  "guide_emulated": {
+                    "path": "/lib/modules/6.11.0-1/kernel/drivers/guide_emulated.ko",
+                    "description": "Driver for a different emulated network adapter",
+                    "kernel_release": "6.11.0-1",
+                    "size": 16384,
+                    "dependencies": [
+                      "guide_core"
+                    ],
+                    "parameters": {},
+                    "external_users": 0
+                  }
+                },
+                "devices": [
+                  {
+                    "slot": "00:05.0",
+                    "description": "Supplied paravirtual network controller",
+                    "driver": "guide_net"
+                  },
+                  {
+                    "slot": "00:06.0",
+                    "description": "Supplied virtual storage controller",
+                    "driver": "guide_storage"
+                  }
+                ]
+              },
+              "objects": [
+                {
+                  "module": "guide_bus",
+                  "contents": "INERT guest module record guide_bus 6.11.0-1"
+                },
+                {
+                  "module": "guide_core",
+                  "contents": "INERT guest module record guide_core 6.11.0-1"
+                },
+                {
+                  "module": "guide_emulated",
+                  "contents": "INERT guest module record guide_emulated 6.11.0-1"
+                },
+                {
+                  "module": "guide_legacy",
+                  "contents": "INERT guest module record guide_legacy 6.6.0-1"
+                },
+                {
+                  "module": "guide_net",
+                  "contents": "INERT guest module record guide_net 6.11.0-1"
+                },
+                {
+                  "module": "guide_storage",
+                  "contents": "INERT guest module record guide_storage 6.11.0-1"
+                }
+              ],
+              "packages": {
+                "fixture": "guide-image-2",
+                "target": "x86_64",
+                "published": "offline",
+                "snapshots": {
+                  "offline": {
+                    "archives": [
+                      "guide-emulated-support",
+                      "guide-kernel",
+                      "guide-support-new",
+                      "guide-support-old"
+                    ]
+                  }
+                },
+                "archives": {
+                  "guide-kernel": {
+                    "identity": {
+                      "name": "guide-kernel",
+                      "arch": "x86_64"
+                    },
+                    "evr": "6.11.0-1",
+                    "requires": [],
+                    "provides": {
+                      "kernel-api": "6.11.0-1"
+                    },
+                    "files": {
+                      "/lib/modules/6.11.0-1/kernel/drivers/guide_core.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guide_core 6.11.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      },
+                      "/lib/modules/6.11.0-1/kernel/drivers/guide_storage.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guide_storage 6.11.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "guide-support-old": {
+                    "identity": {
+                      "name": "guide-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "1.1-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.6.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.6.0-1/kernel/drivers/guide_legacy.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guide_legacy 6.6.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "guide-support-new": {
+                    "identity": {
+                      "name": "guide-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "2.1-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.11.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.11.0-1/kernel/drivers/guide_bus.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guide_bus 6.11.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      },
+                      "/lib/modules/6.11.0-1/kernel/drivers/guide_net.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guide_net 6.11.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  },
+                  "guide-emulated-support": {
+                    "identity": {
+                      "name": "guide-emulated-support",
+                      "arch": "x86_64"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [
+                      {
+                        "capability": "kernel-api",
+                        "constraint": {
+                          "relation": "Eq",
+                          "evr": "6.11.0-1"
+                        }
+                      }
+                    ],
+                    "provides": {},
+                    "files": {
+                      "/lib/modules/6.11.0-1/kernel/drivers/guide_emulated.ko": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "INERT guest module record guide_emulated 6.11.0-1",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 10
+                        }
+                      }
+                    }
+                  }
+                },
+                "allowed_paths": [
+                  "/lib/modules/6.11.0-1/kernel/drivers/guide_bus.ko",
+                  "/lib/modules/6.11.0-1/kernel/drivers/guide_core.ko",
+                  "/lib/modules/6.11.0-1/kernel/drivers/guide_emulated.ko",
+                  "/lib/modules/6.11.0-1/kernel/drivers/guide_net.ko",
+                  "/lib/modules/6.11.0-1/kernel/drivers/guide_storage.ko",
+                  "/lib/modules/6.6.0-1/kernel/drivers/guide_legacy.ko"
+                ]
+              }
+            },
+            "initial": {
+              "packages": {
+                "installed": [
+                  {
+                    "identity": {
+                      "name": "guide-kernel",
+                      "arch": "x86_64"
+                    },
+                    "archive": "guide-kernel"
+                  },
+                  {
+                    "identity": {
+                      "name": "guide-support",
+                      "arch": "x86_64"
+                    },
+                    "archive": "guide-support-old"
+                  }
+                ],
+                "available": [
+                  "guide-emulated-support",
+                  "guide-kernel",
+                  "guide-support-new",
+                  "guide-support-old"
+                ],
+                "cached": null,
+                "files": {
+                  "/lib/modules/6.11.0-1/kernel/drivers/guide_core.ko": {
+                    "contents": "INERT guest module record guide_core 6.11.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  },
+                  "/lib/modules/6.6.0-1/kernel/drivers/guide_legacy.ko": {
+                    "contents": "INERT guest module record guide_legacy 6.6.0-1",
+                    "mode": 420,
+                    "owner": "root",
+                    "group": "root",
+                    "mtime": 10
+                  }
+                }
+              },
+              "modules": {
+                "index": [
+                  "guide_core"
+                ],
+                "loaded": {
+                  "guide_core": {
+                    "parameters": {}
+                  },
+                  "guide_storage": {
+                    "parameters": {}
+                  },
+                  "guide_bus": {
+                    "parameters": {}
+                  },
+                  "guide_net": {
+                    "parameters": {}
+                  }
+                },
+                "config": "# Supplied image options; no additional settings.\n",
+                "diagnostics": []
+              }
+            },
+            "devices": [
+              "00:05.0",
+              "00:06.0"
+            ],
+            "protected_drivers": [
+              "guide_storage"
+            ],
+            "protected_packages": [
+              {
+                "name": "guide-kernel",
+                "arch": "x86_64"
+              }
+            ]
+          },
+          "reference": [
+            {
+              "kind": "package",
+              "action": {
+                "kind": "UpgradeSet",
+                "archives": [
+                  "guest-support-new"
+                ]
+              }
+            },
+            {
+              "kind": "package",
+              "action": {
+                "kind": "ReinstallExact",
+                "archive": "kernel-core"
+              }
+            },
+            {
+              "kind": "run",
+              "input": "depmod -a"
+            },
+            {
+              "kind": "run",
+              "input": "modprobe guest_net"
+            },
+            {
+              "kind": "check"
+            }
+          ],
+          "example_steps": [
+            {
+              "kind": "package",
+              "action": {
+                "kind": "UpgradeSet",
+                "archives": [
+                  "guide-support-new"
+                ]
+              }
+            },
+            {
+              "kind": "package",
+              "action": {
+                "kind": "ReinstallExact",
+                "archive": "guide-kernel"
+              }
+            },
+            {
+              "kind": "run",
+              "input": "depmod -a"
+            },
+            {
+              "kind": "run",
+              "input": "modprobe guide_net"
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "guest-image {\"kind\":\"package\",\"action\":{\"kind\":\"UpgradeSet\",\"archives\":[\"guest-support-new\"]}}",
+        "guest-image {\"kind\":\"package\",\"action\":{\"kind\":\"ReinstallExact\",\"archive\":\"kernel-core\"}}",
+        "guest-image {\"kind\":\"run\",\"input\":\"depmod -a\"}",
+        "guest-image {\"kind\":\"run\",\"input\":\"modprobe guest_net\"}",
+        "guest-image {\"kind\":\"check\"}"
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://raw.githubusercontent.com/kmod-project/kmod/master/man/modprobe.8.scd",
+        "https://raw.githubusercontent.com/kmod-project/kmod/master/man/insmod.8.scd",
+        "https://docs.kernel.org/driver-api/virtio/writing_virtio_drivers.html"
+      ],
+      "simplifications": "Only the supplied x86_64 guest records, script-free archive metadata and virtual module objects are modeled. The object contents are inert descriptors, not actual RPM or executable .ko files. Native package actions change image files; they do not run post-install scripts, rebuild lookup or load modules automatically. These supplied transactions require all declared requirements of the resulting modeled installed set to be satisfied; broader real RPM behavior is not emulated. The terminal supports the listed literal module commands only; package work uses the native inspector. No real guest, kernel, driver, host file, network, initramfs or boot runs. A fresh request checks this model from an unloaded sample state, not real startup or connectivity. Supplied kernel release and dependency records do not prove full real ABI, signature, firmware or hardware compatibility. Module options are supplied read-only; aliases, force, shell scripts, arbitrary files and unknown binary contents are unsupported. This is limited LPIC-1 v5.0/102.6 guest-driver practice, not full virtualization/cloud/image/clone identity coverage or vendor endorsement. Sources checked2026-11-13; original text/models, no third-party binaries or learning-material extracts imported."
+    }
+  ]
+}

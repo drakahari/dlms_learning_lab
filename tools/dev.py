@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Serial, two-job project builds/tests with disk-backed temporary files and memory evidence."""
+"""Serial, at-most-two-job project builds/tests with disk-backed temporary files and memory evidence."""
 import argparse
+import datetime
 import hashlib
 import os
 import re
@@ -36,6 +37,29 @@ def validate_cargo_args(arguments):
     forbidden = ('-j', '--jobs', '--test-threads', '--target-dir', '--manifest-path', '--config', '--out-dir', '--artifact-dir', '--lockfile-path', '-C', '-Z')
     if any(value.startswith(forbidden) for value in arguments):
         raise RuntimeError('Cargo job/test/path/config overrides are not accepted; use the reviewed runner options')
+
+
+def cargo_job_limit(action, requested=None):
+    if requested is None:
+        return JOBS
+    if action not in {'build', 'check', 'test', 'clippy', 'candidate'}:
+        raise RuntimeError('--cargo-jobs is only for build/check/test/clippy/candidate actions')
+    if type(requested) is not int or not 1 <= requested <= JOBS:
+        raise RuntimeError('Cargo compilation stays within one or two jobs')
+    return requested
+
+
+def cargo_command(executable, action, arguments, jobs=None):
+    if action not in {'build', 'check', 'test', 'clippy'}:
+        raise RuntimeError('Expected a supported Cargo action')
+    selected = cargo_job_limit(action, jobs)
+    validate_cargo_args(arguments)
+    command = [executable, action, '--jobs', str(selected), *arguments]
+    if action == 'test':
+        if '--' not in command:
+            command.append('--')
+        command.append(f'--test-threads={TEST_THREADS}')
+    return command
 
 
 def _historical_capture_preflight_9_11(arguments, cwd):
@@ -189,7 +213,7 @@ def _historical_capture_preflight_9_13(arguments, cwd):
         raise RuntimeError('Explicit public13 capture requires --features historical-evaluator13-capture')
 
 
-def historical_capture_preflight(arguments, cwd):
+def _historical_capture_preflight_9_14(arguments, cwd):
     _historical_capture_preflight_9_13(arguments, cwd)
     feature = 'historical-evaluator14-capture'
     enabled, explicit = False, False
@@ -226,6 +250,158 @@ def historical_capture_preflight(arguments, cwd):
         raise RuntimeError('Explicit public14 capture requires --features historical-evaluator14-capture')
 
 
+def _historical_capture_preflight_9_15(arguments, cwd):
+    _historical_capture_preflight_9_14(arguments, cwd)
+    feature = 'historical-evaluator15-capture'
+    enabled, explicit = False, False
+    index = 0
+    while index < len(arguments) and arguments[index] != '--':
+        value = arguments[index]
+        names = None
+        if value in ('--features', '-F'):
+            index += 1
+            if index >= len(arguments):
+                raise RuntimeError('Cargo features require an explicit value')
+            names = arguments[index]
+        elif value.startswith('--features='):
+            names = value.split('=', 1)[1]
+        elif value.startswith('-F'):
+            names = value[2:].removeprefix('=')
+        elif value == '--example':
+            index += 1
+            if index >= len(arguments):
+                raise RuntimeError('Cargo example requires an explicit name')
+            explicit |= arguments[index] == 'scripting_before16_capture'
+        elif value == '--example=scripting_before16_capture':
+            explicit = True
+        if names is not None:
+            enabled |= any(name.rsplit('/', 1)[-1] == feature for name in re.split(r'[,\s]+', names))
+        index += 1
+    if not (enabled or explicit):
+        return
+    with (Path(cwd) / 'src/shell.rs').open('rb') as stream:
+        raw = stream.read(512 * 1024 + 1)
+    if len(raw) > 512 * 1024 or re.findall(rb'^pub const EVALUATOR_REVISION: u32 = ([0-9]+);$', raw, re.MULTILINE) != [b'15']:
+        raise RuntimeError('Frozen scripting_before16_capture requires actual public evaluator15; current evaluator cannot relabel historical observations')
+    if explicit and not enabled:
+        raise RuntimeError('Explicit public15 capture requires --features historical-evaluator15-capture')
+
+
+def _historical_capture_preflight_9_16(arguments, cwd):
+    _historical_capture_preflight_9_15(arguments, cwd)
+    feature = 'historical-evaluator16-capture'
+    enabled, explicit = False, False
+    index = 0
+    while index < len(arguments) and arguments[index] != '--':
+        value = arguments[index]
+        names = None
+        if value in ('--features', '-F'):
+            index += 1
+            if index >= len(arguments):
+                raise RuntimeError('Cargo features require an explicit value')
+            names = arguments[index]
+        elif value.startswith('--features='):
+            names = value.split('=', 1)[1]
+        elif value.startswith('-F'):
+            names = value[2:].removeprefix('=')
+        elif value == '--example':
+            index += 1
+            if index >= len(arguments):
+                raise RuntimeError('Cargo example requires an explicit name')
+            explicit |= arguments[index] == 'scripting_before17_capture'
+        elif value == '--example=scripting_before17_capture':
+            explicit = True
+        if names is not None:
+            enabled |= any(name.rsplit('/', 1)[-1] == feature for name in re.split(r'[,\s]+', names))
+        index += 1
+    if not (enabled or explicit):
+        return
+    with (Path(cwd) / 'src/shell.rs').open('rb') as stream:
+        raw = stream.read(512 * 1024 + 1)
+    if len(raw) > 512 * 1024 or re.findall(rb'^pub const EVALUATOR_REVISION: u32 = ([0-9]+);$', raw, re.MULTILINE) != [b'16']:
+        raise RuntimeError('Frozen scripting_before17_capture requires actual public evaluator16; current evaluator cannot relabel historical observations')
+    if explicit and not enabled:
+        raise RuntimeError('Explicit public16 capture requires --features historical-evaluator16-capture')
+
+
+def historical_capture_preflight(arguments, cwd):
+    _historical_capture_preflight_9_16(arguments, cwd)
+    feature = 'historical-evaluator17-capture'
+    enabled, explicit = False, False
+    index = 0
+    while index < len(arguments) and arguments[index] != '--':
+        value = arguments[index]
+        names = None
+        if value in ('--features', '-F'):
+            index += 1
+            if index >= len(arguments):
+                raise RuntimeError('Cargo features require an explicit value')
+            names = arguments[index]
+        elif value.startswith('--features='):
+            names = value.split('=', 1)[1]
+        elif value.startswith('-F'):
+            names = value[2:].removeprefix('=')
+        elif value == '--example':
+            index += 1
+            if index >= len(arguments):
+                raise RuntimeError('Cargo example requires an explicit name')
+            explicit |= arguments[index] == 'scripting_before18_capture'
+        elif value == '--example=scripting_before18_capture':
+            explicit = True
+        if names is not None:
+            enabled |= any(name.rsplit('/', 1)[-1] == feature for name in re.split(r'[,\s]+', names))
+        index += 1
+    if not (enabled or explicit):
+        return
+    with (Path(cwd) / 'src/shell.rs').open('rb') as stream:
+        raw = stream.read(512 * 1024 + 1)
+    if len(raw) > 512 * 1024 or re.findall(rb'^pub const EVALUATOR_REVISION: u32 = ([0-9]+);$', raw, re.MULTILINE) != [b'17']:
+        raise RuntimeError('Frozen scripting_before18_capture requires actual public evaluator17; current evaluator cannot relabel historical observations')
+    if explicit and not enabled:
+        raise RuntimeError('Explicit public17 capture requires --features historical-evaluator17-capture')
+
+
+
+_historical_capture_preflight_9_17 = historical_capture_preflight
+
+def historical_capture_preflight(arguments, cwd):
+    _historical_capture_preflight_9_17(arguments, cwd)
+    feature = 'historical-evaluator18-capture'
+    enabled, explicit = False, False
+    index = 0
+    while index < len(arguments) and arguments[index] != '--':
+        value = arguments[index]
+        names = None
+        if value in ('--features', '-F'):
+            index += 1
+            if index >= len(arguments):
+                raise RuntimeError('Cargo features require an explicit value')
+            names = arguments[index]
+        elif value.startswith('--features='):
+            names = value.split('=', 1)[1]
+        elif value.startswith('-F'):
+            names = value[2:].removeprefix('=')
+        elif value == '--example':
+            index += 1
+            if index >= len(arguments):
+                raise RuntimeError('Cargo example requires an explicit name')
+            explicit |= arguments[index] == 'scripting_before19_capture'
+        elif value == '--example=scripting_before19_capture':
+            explicit = True
+        if names is not None:
+            enabled |= any(name.rsplit('/', 1)[-1] == feature for name in re.split(r'[,\s]+', names))
+        index += 1
+    if not (enabled or explicit):
+        return
+    with (Path(cwd) / 'src/shell.rs').open('rb') as stream:
+        raw = stream.read(512 * 1024 + 1)
+    if len(raw) > 512 * 1024 or re.findall(rb'^pub const EVALUATOR_REVISION: u32 = ([0-9]+);$', raw, re.MULTILINE) != [b'18']:
+        raise RuntimeError('Frozen scripting_before19_capture requires actual public evaluator18; current evaluator cannot relabel historical observations')
+    if explicit and not enabled:
+        raise RuntimeError('Explicit public18 capture requires --features historical-evaluator18-capture')
+
+
+
 def tool_outputs(arguments, cwd, root):
     result = list(arguments)
     seen = False
@@ -252,13 +428,27 @@ def tool_outputs(arguments, cwd, root):
     return result
 
 
+def python_test_command(arguments, root):
+    command = [sys.executable, '-m', 'unittest', 'discover', '-s', 'tools/tests', '-v']
+    if not arguments:
+        return command
+    if len(arguments) != 2 or arguments[0] != '--pattern' or re.fullmatch(r'test_[A-Za-z0-9_]+\.py', arguments[1]) is None:
+        raise RuntimeError('python-tests accepts no arguments or --pattern test_NAME.py; unknown arguments never launch the full suite')
+    path = root / 'tools/tests' / arguments[1]
+    if any(p.is_symlink() for p in (root / 'tools', root / 'tools/tests', path)) or not path.is_file() or path.resolve().parent != (root / 'tools/tests').resolve():
+        raise RuntimeError('Focused Python tests must name one existing ordinary project test file')
+    return command + ['-p', arguments[1]]
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cwd', type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument('--target-dir', type=Path)
+    parser.add_argument('--cargo-jobs', type=int, choices=(1, JOBS), help='Lower this Cargo invocation to one job; default and maximum are two')
     parser.add_argument('action', choices=['build', 'check', 'test', 'clippy', 'candidate', 'python-tests', 'native', 'tool'])
     parser.add_argument('args', nargs=argparse.REMAINDER)
     args = parser.parse_args()
+    selected_jobs = cargo_job_limit(args.action, args.cargo_jobs)
     root = project_root(args.cwd)
     if root != project_root(Path(__file__).resolve().parents[1]):
         raise RuntimeError('The selected worktree must belong to this project')
@@ -277,16 +467,26 @@ def main():
             raise RuntimeError('Build target must stay in this project on its verified disk volume')
         disk_directory(target)
         os.environ['CARGO_TARGET_DIR'] = str(target)
-        print(f'jobs={JOBS}; test threads={TEST_THREADS}; target={target}; temporary={session.temporary}; memory={session.log}', flush=True)
+        os.environ['CARGO_BUILD_JOBS'] = str(selected_jobs)
+        print(f'jobs={selected_jobs}; test threads={TEST_THREADS}; target={target}; temporary={session.temporary}; memory={session.log}', flush=True)
         if args.action == 'candidate':
             import build_candidate
-            if args.args:
-                raise RuntimeError('candidate uses its reviewed default output; extra arguments are not supported')
-            build_candidate.build(root / 'dist')
+            if args.args == ['--presentation-review']:
+                os.environ['DLMS_CCNA_PILOT'] = '1'  # Preserve accepted review profile; current catalog includes the gateway batch.
+                os.environ['DLMS_PRESENTATION_REVIEW'] = '1'
+                build_candidate.build(root / ('dist/teaching-review-' + datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')), allow_dirty=True, jobs=selected_jobs)
+            elif args.args == ['--ccna-pilot']:
+                # Explicit local-review build: no commit, publication or installed-app changes.
+                os.environ['DLMS_CCNA_PILOT'] = '1'
+                build_candidate.build(root / ('dist/ccna-pilot-' + datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')), allow_dirty=True, jobs=selected_jobs)
+            elif args.args:
+                raise RuntimeError('candidate accepts --presentation-review or --ccna-pilot for isolated local review')
+            else:
+                build_candidate.build(root / 'dist', jobs=selected_jobs)
         elif args.action == 'python-tests':
-            session.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'tools/tests', '-v'], cwd=args.cwd)
+            session.run(python_test_command(args.args, root), cwd=args.cwd)
         elif args.action == 'tool':
-            allowed = {'literal_trim_bash_oracle.py', 'scripting_before15_verify.py', 'links_reference.py', 'shell_ere_reference.py', 'ere_reference.py', 'loop_control_bash_oracle.py', 'scripting_before14_verify.py', 'scripting_before13_verify.py', 'case_classes_bash_oracle.py', 'scripting_before12_verify.py', 'optional_inputs_bash_oracle.py', 'file_backup_reference.py', 'parameter_bash_oracle.py', 'parameters_before11_verify.py', 'rpm_version_oracle.py', 'automation_before10_oracle.py', 'getopts_scope_oracle.py', 'getopts_before9_oracle.py', 'case_bash_oracle.py', 'bash_reference.py', 'filesystem_reference.py', 'ipv4_route_reference.py', 'ipv6_reference.py', 'process_reference.py', 'storage_reference.py', 'native_startup.py', 'native_reopen.py', 'installed_acceptance.py', 'verify_coverage.py', 'verify_palettes.py'}
+            allowed = {'log_filter_reference.py', 'rpm_configuration_reference.py', 'modal_editing_reference.py', 'timezone_reference.py', 'localization_reference.py', 'measurement_scripts_reference.py', 'nm_bridge_keyfile_reference.py', 'nm_bond_keyfile_reference.py', 'find_size_reference.py', 'generate_find_size_bindings.py', 'recursive_tree_reference.py', 'generate_recursive_tree_bindings.py', 'sticky_mode_reference.py', 'generate_sticky_mode_bindings.py', 'links_inode_reference.py', 'generate_links_inode_bindings.py', 'whereis_reference.py', 'generate_whereis_bindings.py', 'file_index_reference.py', 'command_location_reference.py', 'managed_config_reference.py', 'associative_reference.py', 'scripting_before19_verify.py', 'file_lifecycle_reference.py', 'scripting_before18_verify.py', 'startup_reference.py', 'environment_reference.py', 'scripting_before17_verify.py', 'tracing_reference.py', 'scripting_before16_verify.py', 'linux_logging_reference.py', 'debug_recovery_reference.py', 'teaching_inventory.py', 'literal_trim_bash_oracle.py', 'scripting_before15_verify.py', 'links_reference.py', 'shell_ere_reference.py', 'ere_reference.py', 'loop_control_bash_oracle.py', 'scripting_before14_verify.py', 'scripting_before13_verify.py', 'case_classes_bash_oracle.py', 'scripting_before12_verify.py', 'optional_inputs_bash_oracle.py', 'file_backup_reference.py', 'parameter_bash_oracle.py', 'parameters_before11_verify.py', 'rpm_version_oracle.py', 'automation_before10_oracle.py', 'getopts_scope_oracle.py', 'getopts_before9_oracle.py', 'case_bash_oracle.py', 'bash_reference.py', 'filesystem_reference.py', 'ipv4_route_reference.py', 'ipv6_reference.py', 'process_reference.py', 'storage_reference.py', 'native_startup.py', 'native_reopen.py', 'installed_acceptance.py', 'verify_coverage.py', 'verify_palettes.py'}
             if args.cwd.resolve() != root or args.target_dir:
                 raise RuntimeError('Fixed reference tools currently require the main checkout/default target to preserve probe provenance')
             if not args.args or args.args[0] not in allowed:
@@ -306,11 +506,7 @@ def main():
             validate_cargo_args(args.args)
             historical_capture_preflight(args.args, args.cwd)
             cargo = shutil.which('cargo')
-            command = [cargo, args.action, '--jobs', str(JOBS), *args.args]
-            if args.action == 'test':
-                if '--' not in command:
-                    command.append('--')
-                command.append(f'--test-threads={TEST_THREADS}')
+            command = cargo_command(cargo, args.action, args.args, selected_jobs)
             session.run(command, cwd=args.cwd)
     return 0
 

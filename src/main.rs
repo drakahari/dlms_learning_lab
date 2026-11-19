@@ -5,6 +5,23 @@
 )]
 mod startup_trace;
 mod ui;
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum NetworkReviewWindow {
+    Automatic,
+    Wide,
+    Fixed,
+}
+
+pub(crate) const NETWORK_REVIEW_SIZE: [f32; 2] = [1200., 940.];
+
+pub(crate) fn network_review_window() -> NetworkReviewWindow {
+    match std::env::var("DLMS_NATIVE_REVIEW_WINDOW").as_deref() {
+        Ok("wide") => NetworkReviewWindow::Wide,
+        Ok("fixed") => NetworkReviewWindow::Fixed,
+        _ => NetworkReviewWindow::Automatic,
+    }
+}
+
 fn main() -> eframe::Result<()> {
     startup_trace::mark("main");
     let args: Vec<String> = std::env::args().collect();
@@ -13,8 +30,10 @@ fn main() -> eframe::Result<()> {
         return Ok(());
     }
     if args.get(1).map(String::as_str) == Some("--validate-content") {
-        match dlms_learning_lab::pack::bundled().and_then(|labs| {
-            dlms_learning_lab::course::bundled(&labs).map(|units| (labs.len(), units.len()))
+        let labs = dlms_learning_lab::pack::current();
+        match labs.and_then(|labs| {
+            let units = dlms_learning_lab::course::current(&labs);
+            units.map(|units| (labs.len(), units.len()))
         }) {
             Ok((labs, units)) => println!("Validated {labs} authored labs and {units} units"),
             Err(e) => {
@@ -38,11 +57,12 @@ fn main() -> eframe::Result<()> {
         }
         return Ok(());
     }
-    if args
-        .iter()
-        .skip(1)
-        .any(|a| !matches!(a.as_str(), "--ui-smoke" | "--developer"))
-    {
+    if args.iter().skip(1).any(|a| {
+        !matches!(
+            a.as_str(),
+            "--ui-smoke" | "--developer" | "--ccna-pilot" | "--presentation-review"
+        )
+    }) {
         eprintln!(
             "Unsupported launch option. Open without flags for the normal app; --ui-smoke uses isolated test data."
         );
@@ -63,17 +83,61 @@ fn main() -> eframe::Result<()> {
     if !vsync {
         startup_trace::mark("app-swapinterval-zero-requested");
     }
+    let pilot = option_env!("DLMS_CCNA_PILOT") == Some("1")
+        || args
+            .iter()
+            .any(|a| matches!(a.as_str(), "--ccna-pilot" | "--presentation-review"));
+    let mut viewport = eframe::egui::ViewportBuilder::default()
+        .with_app_id(
+            if option_env!("DLMS_PRESENTATION_REVIEW") == Some("1")
+                || args.iter().any(|a| a == "--presentation-review")
+            {
+                "org.dlms.LearningLab.TeachingReview"
+            } else if pilot {
+                "org.dlms.LearningLab.CCNAPilot"
+            } else {
+                "org.dlms.LearningLab"
+            },
+        )
+        .with_inner_size([1200., 850.])
+        .with_min_inner_size([720., 560.]);
+    if args.iter().any(|arg| arg == "--ui-smoke")
+        && matches!(
+            std::env::var("DLMS_SMOKE_STAGE").as_deref(),
+            Ok("network-evidence-review-batch"
+                | "staged-network-batch"
+                | "site-connectivity-batch"
+                | "host-security-batch"
+                | "vlan-gateway-batch"
+                | "nfs-export-operations"
+                | "route-reading-batch"
+                | "ospf-broadcast-batch")
+        )
+        && network_review_window() == NetworkReviewWindow::Fixed
+    {
+        viewport = viewport
+            .with_app_id("org.dlms.LearningLab.FixedReviewWindow")
+            .with_inner_size(NETWORK_REVIEW_SIZE)
+            .with_min_inner_size(NETWORK_REVIEW_SIZE)
+            .with_max_inner_size(NETWORK_REVIEW_SIZE)
+            .with_resizable(false);
+    }
     let options = eframe::NativeOptions {
         vsync,
-        viewport: eframe::egui::ViewportBuilder::default()
-            .with_app_id("org.dlms.LearningLab")
-            .with_inner_size([1200., 850.])
-            .with_min_inner_size([720., 560.]),
+        viewport,
         ..Default::default()
     };
     startup_trace::mark("enter-run-native");
     eframe::run_native(
-        "DLMS Learning Lab",
+        if option_env!("DLMS_PRESENTATION_REVIEW") == Some("1")
+            || args.iter().any(|a| a == "--presentation-review")
+        {
+            "DLMS Learning Lab · Teaching review"
+        } else if pilot {
+            "DLMS Learning Lab · CCNA pilot"
+        } else {
+            "DLMS Learning Lab"
+        },
         options,
         Box::new(move |cc| {
             startup_trace::mark("creation-context-ready");

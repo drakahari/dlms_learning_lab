@@ -156,7 +156,43 @@ fn inodes<'de, D: serde::Deserializer<'de>>(
             mut a: A,
         ) -> std::result::Result<Self::Value, A::Error> {
             let mut r = BTreeMap::new();
-            while let Some(k) = a.next_key::<u32>()? {
+            // Engine State/Goal are internally tagged, so serde can buffer map
+            // keys as strings before this reader runs. Keep the same numeric
+            // identity/bounds through both direct JSON and buffered readers.
+            struct Key(u32);
+            impl<'de> Deserialize<'de> for Key {
+                fn deserialize<D: serde::Deserializer<'de>>(
+                    d: D,
+                ) -> std::result::Result<Self, D::Error> {
+                    struct K;
+                    impl serde::de::Visitor<'_> for K {
+                        type Value = Key;
+                        fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                            f.write_str("bounded unsigned inode ID")
+                        }
+                        fn visit_str<E: serde::de::Error>(
+                            self,
+                            s: &str,
+                        ) -> std::result::Result<Key, E> {
+                            if s.is_empty()
+                                || s.len() > 10
+                                || !s.bytes().all(|c| c.is_ascii_digit())
+                            {
+                                return Err(E::custom("Invalid inode ID"));
+                            }
+                            s.parse().map(Key).map_err(E::custom)
+                        }
+                        fn visit_u64<E: serde::de::Error>(
+                            self,
+                            n: u64,
+                        ) -> std::result::Result<Key, E> {
+                            u32::try_from(n).map(Key).map_err(E::custom)
+                        }
+                    }
+                    d.deserialize_any(K)
+                }
+            }
+            while let Some(Key(k)) = a.next_key::<Key>()? {
                 if k == 0 || r.len() == MAX_ENTRIES || r.contains_key(&k) {
                     return Err(serde::de::Error::custom(
                         "Virtual inode bound, zero or duplicate ID",
@@ -738,6 +774,29 @@ impl State {
             result.push(name.into());
         }
         Ok(result)
+    }
+    /// Read-only immediate names plus each entry's own virtual inode.
+    /// Includes dot names for callers; a terminal's visibility policy is separate.
+    /// Directory operands are followed, but final child links are not dereferenced.
+    pub fn directory_inode_entries(&self, path: &str) -> Result<Vec<(String, u32)>> {
+        self.validate()?;
+        let resolved = self.resolve_raw(path, true)?;
+        if !matches!(self.inodes[&resolved.inode], Inode::Directory) {
+            return Err(error(ErrorKind::NotDirectory, "Not a virtual directory."));
+        }
+        let mut rows = Vec::new();
+        let mut bytes = 0usize;
+        for (p, inode) in self.entries.iter().filter(|(p, _)| {
+            p.as_str() != "/" && parent(p) == resolved.physical_path
+        }) {
+            let name = p.rsplit('/').next().unwrap();
+            bytes += name.len() + 1;
+            if bytes > MAX_OUTPUT_BYTES {
+                return Err(error(ErrorKind::Limit, "Virtual listing exceeds output limit."));
+            }
+            rows.push((name.to_owned(), *inode));
+        }
+        Ok(rows)
     }
     /// Only fixed directory identity/cwd; not permission to alter task-protected files.
     pub fn environment_matches(&self, source: &Self) -> Result<bool> {

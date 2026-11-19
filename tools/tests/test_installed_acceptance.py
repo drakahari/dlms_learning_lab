@@ -1,5 +1,6 @@
 """Read-only candidate-boundary checks; actual lifecycle is an explicit guarded tool."""
 import hashlib
+import copy
 import json
 from pathlib import Path
 import tempfile
@@ -11,7 +12,7 @@ from unittest.mock import patch
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools"))
-from installed_acceptance import candidate, require, installation_base, clean_uninstalled, run_checked, bounded_capture
+from installed_acceptance import candidate, require, installation_base, clean_uninstalled, run_checked, bounded_capture, review_sources, upgrade_identity
 
 
 class InstalledCandidateInput(unittest.TestCase):
@@ -30,6 +31,94 @@ class InstalledCandidateInput(unittest.TestCase):
 
     def test_matching_ordinary_candidate_is_identified_without_execution(self):
         self.assertEqual(candidate(self.root, self.location), (self.location, self.info))
+
+    def review_info(self):
+        return dict(self.info, revision='a' * 40 + '-dirty',
+                    pilot_profile='Separate ccna-presentation-pilot subdirectory; originals never written',
+                    pilot_catalog={'labs': 279, 'units': 84, 'all_existing_review_labs': True},
+                    pilot_source_sha256={name: 'b' * 64 for name in
+                        ('src/main.rs', 'src/lib.rs', 'src/pack.rs', 'src/course.rs', 'scenarios/task.json')},
+                    bundled_content={'task.json': 'b' * 64})
+
+    def test_dirty_review_candidate_requires_explicit_profile_catalog_and_source_closure(self):
+        info = self.review_info()
+        self.manifest.write_text(json.dumps(info))
+        pin = hashlib.sha256(self.manifest.read_bytes()).hexdigest()
+        self.assertEqual(candidate(self.root, self.location, pin), (self.location, info))
+        for rejected_pin in (None, 'c' * 64, 'bad'):
+            with self.assertRaises(ValueError):
+                candidate(self.root, self.location, rejected_pin)
+        for field in ('pilot_profile', 'pilot_catalog', 'pilot_source_sha256'):
+            changed = dict(info)
+            changed.pop(field)
+            self.manifest.write_text(json.dumps(changed))
+            with self.assertRaises(ValueError, msg=field):
+                candidate(self.root, self.location, hashlib.sha256(self.manifest.read_bytes()).hexdigest())
+
+    def test_dirty_review_source_closure_rejects_malformed_names_hashes_and_limits(self):
+        for name in ('/src/main.rs', 'src/../outside', 'src//bad', 'src/./bad',
+                     'src/back\\slash', 'src/line\nfeed', 'tools/foreign.py', 'src/' + 'x' * 260):
+            info = self.review_info()
+            info['pilot_source_sha256'][name] = 'b' * 64
+            with self.assertRaises(ValueError, msg=repr(name)):
+                review_sources(info)
+        for value in ('bad', 'B' * 64, 123, None):
+            info = self.review_info()
+            info['pilot_source_sha256']['src/main.rs'] = value
+            with self.assertRaises(ValueError):
+                review_sources(info)
+        for sources in ({}, [], None, {f'src/file{i}.rs': 'b' * 64 for i in range(2001)}):
+            info = dict(self.review_info(), pilot_source_sha256=sources)
+            with self.assertRaises(ValueError):
+                review_sources(info)
+        info = self.review_info()
+        del info['pilot_source_sha256']['scenarios/task.json']
+        with self.assertRaises(ValueError):
+            review_sources(info)
+        for catalog in ({}, {'labs': True, 'units': 1, 'all_existing_review_labs': True},
+                        {'labs': 2, 'units': 3, 'all_existing_review_labs': True},
+                        {'labs': 279, 'units': 84, 'all_existing_review_labs': False}):
+            with self.assertRaises(ValueError):
+                review_sources(dict(self.review_info(), pilot_catalog=catalog))
+
+    def test_review_upgrade_requires_both_changed_source_and_changed_executable(self):
+        old = self.review_info()
+        new = copy.deepcopy(old)
+        with self.assertRaises(ValueError):
+            upgrade_identity(old, new)
+        new['binary_sha256'] = 'c' * 64
+        with self.assertRaises(ValueError):
+            upgrade_identity(old, new)
+        new['pilot_source_sha256']['src/main.rs'] = 'd' * 64
+        self.assertEqual(upgrade_identity(old, new), 'different-review-source-and-binary')
+        new['binary_sha256'] = old['binary_sha256']
+        with self.assertRaises(ValueError):
+            upgrade_identity(old, new)
+
+    def test_source_addition_or_deletion_alone_does_not_establish_review_upgrade(self):
+        old = self.review_info()
+        for change in ('addition', 'deletion'):
+            new = copy.deepcopy(old)
+            new['binary_sha256'] = 'c' * 64
+            if change == 'addition':
+                new['pilot_source_sha256']['src/new.rs'] = 'd' * 64
+            else:
+                old['pilot_source_sha256']['src/extra.rs'] = 'd' * 64
+            with self.assertRaises(ValueError):
+                upgrade_identity(old, new)
+            new['pilot_source_sha256']['src/main.rs'] = 'e' * 64
+            self.assertEqual(upgrade_identity(old, new), 'different-review-source-and-binary')
+
+    def test_clean_upgrade_keeps_different_revision_and_executable_requirements(self):
+        old = dict(self.info)
+        new = dict(self.info, binary_sha256='c' * 64)
+        with self.assertRaises(ValueError):
+            upgrade_identity(old, new)
+        new['revision'] = 'b' * 40
+        self.assertEqual(upgrade_identity(old, new), 'different-revision')
+        new['binary_sha256'] = old['binary_sha256']
+        with self.assertRaises(ValueError):
+            upgrade_identity(old, new)
 
     def test_foreign_candidate_and_changed_executable_are_rejected(self):
         with self.assertRaises(ValueError):

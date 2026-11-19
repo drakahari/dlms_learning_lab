@@ -1,0 +1,1614 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-shell-startup-priority",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-shell-startup-files",
+      "topic": "Bash startup-file selection",
+      "title": "Repair the login file Bash actually reads",
+      "summary": "Trace login file selection and repair exported settings without losing local values.",
+      "objective": "For every supplied login sample, export APP_NAME as the supplied PROJECT followed by -app. Preserve supplied PROJECT and SITE, including their values and export attributes; retain the system profile\u2019s exported BASE value. Keep LOCAL_NOTE=only-here in sessions that select .bash_profile, without exporting it; leave it unset in fallback sessions. Keep startup quiet, preserve the supplied /work/keep.txt sample files, and let every session and the supplied new-program report finish successfully.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Repair the selected startup files",
+        "Check every session and new program"
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "StartupFiles",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-shell-startup-priority",
+          "view": "introduction",
+          "assignment": {
+            "files": {
+              "~/.bash_profile": {
+                "text": "APP_NAME=legacy\nexport APP_NAME\nLOCAL_NOTE=only-here\n"
+              },
+              "~/.bash_login": {
+                "text": "APP_NAME=\"$PROJECT-app\"\nexport APP_NAME\n"
+              },
+              "~/.profile": {
+                "text": "APP_NAME=\"$PROJECT-app\"\nexport APP_NAME\n"
+              }
+            },
+            "selected": "~/.bash_profile",
+            "case": 0,
+            "tested": null
+          },
+          "practice": {
+            "files": {
+              "~/.bash_profile": {
+                "text": "TOOL_LABEL=legacy\nexport TOOL_LABEL\nLOCAL_NOTE=only-here\n"
+              },
+              "~/.bash_login": {
+                "text": "TOOL_LABEL=\"$WORKSHOP-tool\"\nexport TOOL_LABEL\n"
+              },
+              "~/.profile": {
+                "text": "TOOL_LABEL=\"$WORKSHOP-tool\"\nexport TOOL_LABEL\n"
+              }
+            },
+            "selected": "~/.bash_profile",
+            "case": 0,
+            "tested": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "StartupFiles",
+        "definition": {
+          "initial": {
+            "id": "lpic1-shell-startup-priority",
+            "instructions": "For every supplied login sample, export APP_NAME as the supplied PROJECT followed by -app. Preserve supplied PROJECT and SITE, including their values and export attributes; retain the system profile\u2019s exported BASE value. Keep LOCAL_NOTE=only-here in sessions that select .bash_profile, without exporting it; leave it unset in fallback sessions. Keep startup quiet, preserve the supplied /work/keep.txt sample files, and let every session and the supplied new-program report finish successfully.",
+            "starter": {
+              "~/.bash_profile": {
+                "text": "APP_NAME=legacy\nexport APP_NAME\nLOCAL_NOTE=only-here\n"
+              },
+              "~/.bash_login": {
+                "text": "APP_NAME=\"$PROJECT-app\"\nexport APP_NAME\n"
+              },
+              "~/.profile": {
+                "text": "APP_NAME=\"$PROJECT-app\"\nexport APP_NAME\n"
+              }
+            },
+            "child_source": "printf '%s|%s\\n' \"$APP_NAME\" \"$BASE\"\n",
+            "cases": [
+              {
+                "id": "lpic1-shell-startup-priority-case-1",
+                "label": "Login with .bash_profile, first input",
+                "invocation": {
+                  "kind": "InteractiveLogin",
+                  "noprofile": false
+                },
+                "present": [
+                  "~/.bash_profile",
+                  "~/.bash_login",
+                  "~/.profile"
+                ],
+                "system_profile": "BASE=\"$SITE\"\nexport BASE\n",
+                "input": {
+                  "name": "lpic1-shell-startup-priority-input-1",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PROJECT": "harbor",
+                    "SITE": "site-1"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  }
+                },
+                "parent": {
+                  "APP_NAME": {
+                    "value": "harbor-app",
+                    "exported": true
+                  },
+                  "PROJECT": {
+                    "value": "harbor",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "site-1",
+                    "exported": true
+                  },
+                  "BASE": {
+                    "value": "site-1",
+                    "exported": true
+                  },
+                  "LOCAL_NOTE": {
+                    "value": "only-here",
+                    "exported": false
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-priority-child-1",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  },
+                  "stdout": "harbor-app|site-1\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-priority-case-2",
+                "label": "Login with .bash_profile, spaced input",
+                "invocation": {
+                  "kind": "InteractiveLogin",
+                  "noprofile": false
+                },
+                "present": [
+                  "~/.bash_profile",
+                  "~/.bash_login",
+                  "~/.profile"
+                ],
+                "system_profile": "BASE=\"$SITE\"\nexport BASE\n",
+                "input": {
+                  "name": "lpic1-shell-startup-priority-input-2",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PROJECT": "river team",
+                    "SITE": "site-2"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  }
+                },
+                "parent": {
+                  "APP_NAME": {
+                    "value": "river team-app",
+                    "exported": true
+                  },
+                  "PROJECT": {
+                    "value": "river team",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "site-2",
+                    "exported": true
+                  },
+                  "BASE": {
+                    "value": "site-2",
+                    "exported": true
+                  },
+                  "LOCAL_NOTE": {
+                    "value": "only-here",
+                    "exported": false
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-priority-child-2",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  },
+                  "stdout": "river team-app|site-2\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-priority-case-3",
+                "label": "Login using .bash_login fallback",
+                "invocation": {
+                  "kind": "InteractiveLogin",
+                  "noprofile": false
+                },
+                "present": [
+                  "~/.bash_login",
+                  "~/.profile"
+                ],
+                "system_profile": "BASE=\"$SITE\"\nexport BASE\n",
+                "input": {
+                  "name": "lpic1-shell-startup-priority-input-3",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PROJECT": "niche",
+                    "SITE": "site-3"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                },
+                "parent": {
+                  "APP_NAME": {
+                    "value": "niche-app",
+                    "exported": true
+                  },
+                  "PROJECT": {
+                    "value": "niche",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "site-3",
+                    "exported": true
+                  },
+                  "BASE": {
+                    "value": "site-3",
+                    "exported": true
+                  },
+                  "LOCAL_NOTE": {
+                    "value": null,
+                    "exported": false
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-priority-child-3",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "niche-app|site-3\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-priority-case-4",
+                "label": "Login using .profile fallback",
+                "invocation": {
+                  "kind": "InteractiveLogin",
+                  "noprofile": false
+                },
+                "present": [
+                  "~/.profile"
+                ],
+                "system_profile": "BASE=\"$SITE\"\nexport BASE\n",
+                "input": {
+                  "name": "lpic1-shell-startup-priority-input-4",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PROJECT": "elm",
+                    "SITE": "site-4"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  }
+                },
+                "parent": {
+                  "APP_NAME": {
+                    "value": "elm-app",
+                    "exported": true
+                  },
+                  "PROJECT": {
+                    "value": "elm",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "site-4",
+                    "exported": true
+                  },
+                  "BASE": {
+                    "value": "site-4",
+                    "exported": true
+                  },
+                  "LOCAL_NOTE": {
+                    "value": null,
+                    "exported": false
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-priority-child-4",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  },
+                  "stdout": "elm-app|site-4\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-priority-case-5",
+                "label": "Login using .bash_login fallback \u00b7 another supplied value",
+                "invocation": {
+                  "kind": "InteractiveLogin",
+                  "noprofile": false
+                },
+                "present": [
+                  "~/.bash_login",
+                  "~/.profile"
+                ],
+                "system_profile": "BASE=\"$SITE\"\nexport BASE\n",
+                "input": {
+                  "name": "lpic1-shell-startup-priority-input-3-varied-0",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PROJECT": "quartz desk",
+                    "SITE": "alternate-site-1"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                },
+                "parent": {
+                  "APP_NAME": {
+                    "value": "quartz desk-app",
+                    "exported": true
+                  },
+                  "PROJECT": {
+                    "value": "quartz desk",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "alternate-site-1",
+                    "exported": true
+                  },
+                  "BASE": {
+                    "value": "alternate-site-1",
+                    "exported": true
+                  },
+                  "LOCAL_NOTE": {
+                    "value": null,
+                    "exported": false
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-priority-child-3-varied-0",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "quartz desk-app|alternate-site-1\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-priority-case-6",
+                "label": "Login using .profile fallback \u00b7 another supplied value",
+                "invocation": {
+                  "kind": "InteractiveLogin",
+                  "noprofile": false
+                },
+                "present": [
+                  "~/.profile"
+                ],
+                "system_profile": "BASE=\"$SITE\"\nexport BASE\n",
+                "input": {
+                  "name": "lpic1-shell-startup-priority-input-4-varied-1",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PROJECT": "quartz desk annex",
+                    "SITE": "alternate-site-2"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  }
+                },
+                "parent": {
+                  "APP_NAME": {
+                    "value": "quartz desk annex-app",
+                    "exported": true
+                  },
+                  "PROJECT": {
+                    "value": "quartz desk annex",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "alternate-site-2",
+                    "exported": true
+                  },
+                  "BASE": {
+                    "value": "alternate-site-2",
+                    "exported": true
+                  },
+                  "LOCAL_NOTE": {
+                    "value": null,
+                    "exported": false
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-priority-child-4-varied-1",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  },
+                  "stdout": "quartz desk annex-app|alternate-site-2\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  }
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic1-shell-startup-priority-example",
+            "instructions": "Repair TOOL_LABEL in the personal login file that runs. The new program needs WORKSHOP followed by -tool; retain BASE, the local note and quiet startup.",
+            "starter": {
+              "~/.bash_profile": {
+                "text": "TOOL_LABEL=legacy\nexport TOOL_LABEL\nLOCAL_NOTE=only-here\n"
+              },
+              "~/.bash_login": {
+                "text": "TOOL_LABEL=\"$WORKSHOP-tool\"\nexport TOOL_LABEL\n"
+              },
+              "~/.profile": {
+                "text": "TOOL_LABEL=\"$WORKSHOP-tool\"\nexport TOOL_LABEL\n"
+              }
+            },
+            "child_source": "printf '%s|%s\\n' \"$TOOL_LABEL\" \"$BASE\"\n",
+            "cases": [
+              {
+                "id": "lpic1-shell-startup-priority-example-case-1",
+                "label": "Login with .bash_profile, first input",
+                "invocation": {
+                  "kind": "InteractiveLogin",
+                  "noprofile": false
+                },
+                "present": [
+                  "~/.bash_profile",
+                  "~/.bash_login",
+                  "~/.profile"
+                ],
+                "system_profile": "BASE=\"$SITE\"\nexport BASE\n",
+                "input": {
+                  "name": "lpic1-shell-startup-priority-example-input-1",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "WORKSHOP": "cedar",
+                    "SITE": "site-1"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  }
+                },
+                "parent": {
+                  "TOOL_LABEL": {
+                    "value": "cedar-tool",
+                    "exported": true
+                  },
+                  "WORKSHOP": {
+                    "value": "cedar",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "site-1",
+                    "exported": true
+                  },
+                  "BASE": {
+                    "value": "site-1",
+                    "exported": true
+                  },
+                  "LOCAL_NOTE": {
+                    "value": "only-here",
+                    "exported": false
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-priority-example-child-1",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  },
+                  "stdout": "cedar-tool|site-1\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-priority-example-case-2",
+                "label": "Login with .bash_profile, spaced input",
+                "invocation": {
+                  "kind": "InteractiveLogin",
+                  "noprofile": false
+                },
+                "present": [
+                  "~/.bash_profile",
+                  "~/.bash_login",
+                  "~/.profile"
+                ],
+                "system_profile": "BASE=\"$SITE\"\nexport BASE\n",
+                "input": {
+                  "name": "lpic1-shell-startup-priority-example-input-2",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "WORKSHOP": "fern room",
+                    "SITE": "site-2"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  }
+                },
+                "parent": {
+                  "TOOL_LABEL": {
+                    "value": "fern room-tool",
+                    "exported": true
+                  },
+                  "WORKSHOP": {
+                    "value": "fern room",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "site-2",
+                    "exported": true
+                  },
+                  "BASE": {
+                    "value": "site-2",
+                    "exported": true
+                  },
+                  "LOCAL_NOTE": {
+                    "value": "only-here",
+                    "exported": false
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-priority-example-child-2",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  },
+                  "stdout": "fern room-tool|site-2\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-priority-example-case-3",
+                "label": "Login using .bash_login fallback",
+                "invocation": {
+                  "kind": "InteractiveLogin",
+                  "noprofile": false
+                },
+                "present": [
+                  "~/.bash_login",
+                  "~/.profile"
+                ],
+                "system_profile": "BASE=\"$SITE\"\nexport BASE\n",
+                "input": {
+                  "name": "lpic1-shell-startup-priority-example-input-3",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "WORKSHOP": "granite",
+                    "SITE": "site-3"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                },
+                "parent": {
+                  "TOOL_LABEL": {
+                    "value": "granite-tool",
+                    "exported": true
+                  },
+                  "WORKSHOP": {
+                    "value": "granite",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "site-3",
+                    "exported": true
+                  },
+                  "BASE": {
+                    "value": "site-3",
+                    "exported": true
+                  },
+                  "LOCAL_NOTE": {
+                    "value": null,
+                    "exported": false
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-priority-example-child-3",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "granite-tool|site-3\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-priority-example-case-4",
+                "label": "Login using .profile fallback",
+                "invocation": {
+                  "kind": "InteractiveLogin",
+                  "noprofile": false
+                },
+                "present": [
+                  "~/.profile"
+                ],
+                "system_profile": "BASE=\"$SITE\"\nexport BASE\n",
+                "input": {
+                  "name": "lpic1-shell-startup-priority-example-input-4",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "WORKSHOP": "willow",
+                    "SITE": "site-4"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  }
+                },
+                "parent": {
+                  "TOOL_LABEL": {
+                    "value": "willow-tool",
+                    "exported": true
+                  },
+                  "WORKSHOP": {
+                    "value": "willow",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "site-4",
+                    "exported": true
+                  },
+                  "BASE": {
+                    "value": "site-4",
+                    "exported": true
+                  },
+                  "LOCAL_NOTE": {
+                    "value": null,
+                    "exported": false
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-priority-example-child-4",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  },
+                  "stdout": "willow-tool|site-4\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-priority-example-case-5",
+                "label": "Login using .bash_login fallback \u00b7 another supplied value",
+                "invocation": {
+                  "kind": "InteractiveLogin",
+                  "noprofile": false
+                },
+                "present": [
+                  "~/.bash_login",
+                  "~/.profile"
+                ],
+                "system_profile": "BASE=\"$SITE\"\nexport BASE\n",
+                "input": {
+                  "name": "lpic1-shell-startup-priority-example-input-3-varied-0",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "WORKSHOP": "oak studio",
+                    "SITE": "alternate-site-1"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                },
+                "parent": {
+                  "TOOL_LABEL": {
+                    "value": "oak studio-tool",
+                    "exported": true
+                  },
+                  "WORKSHOP": {
+                    "value": "oak studio",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "alternate-site-1",
+                    "exported": true
+                  },
+                  "BASE": {
+                    "value": "alternate-site-1",
+                    "exported": true
+                  },
+                  "LOCAL_NOTE": {
+                    "value": null,
+                    "exported": false
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-priority-example-child-3-varied-0",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "oak studio-tool|alternate-site-1\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-priority-example-case-6",
+                "label": "Login using .profile fallback \u00b7 another supplied value",
+                "invocation": {
+                  "kind": "InteractiveLogin",
+                  "noprofile": false
+                },
+                "present": [
+                  "~/.profile"
+                ],
+                "system_profile": "BASE=\"$SITE\"\nexport BASE\n",
+                "input": {
+                  "name": "lpic1-shell-startup-priority-example-input-4-varied-1",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "WORKSHOP": "oak studio annex",
+                    "SITE": "alternate-site-2"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  }
+                },
+                "parent": {
+                  "TOOL_LABEL": {
+                    "value": "oak studio annex-tool",
+                    "exported": true
+                  },
+                  "WORKSHOP": {
+                    "value": "oak studio annex",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "alternate-site-2",
+                    "exported": true
+                  },
+                  "BASE": {
+                    "value": "alternate-site-2",
+                    "exported": true
+                  },
+                  "LOCAL_NOTE": {
+                    "value": null,
+                    "exported": false
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-priority-example-child-4-varied-1",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  },
+                  "stdout": "oak studio annex-tool|alternate-site-2\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  }
+                }
+              }
+            ]
+          },
+          "example_worked": {
+            "~/.bash_profile": {
+              "text": "TOOL_LABEL=\"$WORKSHOP-tool\"\nexport TOOL_LABEL\nLOCAL_NOTE=only-here\n"
+            },
+            "~/.bash_login": {
+              "text": "TOOL_LABEL=\"$WORKSHOP-tool\"\nexport TOOL_LABEL\n"
+            },
+            "~/.profile": {
+              "text": "TOOL_LABEL=\"$WORKSHOP-tool\"\nexport TOOL_LABEL\n"
+            }
+          }
+        }
+      },
+      "solution": [
+        "STARTUP FILES\n{\"~/.bash_profile\": {\"text\": \"APP_NAME=\\\"$PROJECT-app\\\"\\nexport APP_NAME\\nLOCAL_NOTE=only-here\\n\"}, \"~/.bash_login\": {\"text\": \"APP_NAME=\\\"$PROJECT-app\\\"\\nexport APP_NAME\\n\"}, \"~/.profile\": {\"text\": \"APP_NAME=\\\"$PROJECT-app\\\"\\nexport APP_NAME\\n\"}}"
+      ],
+      "explanation": "Repair the first personal file that actually runs, then preserve the fallbacks for sessions where it is absent. The system profile runs first, local values stay local, and exported values reach the supplied new program. Printing the desired report cannot replace the required settings.",
+      "hints": [
+        "Check which personal file is first present in each sample; editing .profile alone cannot override .bash_profile.",
+        "An assignment changes a value in this shell. export controls whether the new program receives it. Preserve BASE and the local note.",
+        "Derive APP_NAME from the supplied PROJECT instead of copying one sample\u2019s name; do not export LOCAL_NOTE."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Environment.html"
+      ],
+      "simplifications": "Original bounded in-process startup model around evaluator 17. Fixed virtual HOME /home/learner; supplied readable files, explicit session modes and literal BASH_ENV selection only. Settings, exports, literal-format printf and simple conditions; no source/dot, aliases, history, PATH search, arbitrary files or real profiles. Selection is checked against the Bash manual; fixed developer comparisons cover sourced settings, not automatic host login startup. See SHELL_STARTUP_SUBSET.md.",
+      "prerequisites": [
+        "lpic1-env-parent-note"
+      ]
+    },
+    {
+      "id": "lpic1-shell-startup-quiet",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-shell-startup-files",
+      "topic": "Bash startup-file selection",
+      "title": "Keep interactive greetings out of script output",
+      "summary": "Separate interactive output from settings used by a script.",
+      "objective": "For both interactive non-login samples, print exactly Ready followed by a newline and export APP_NAME as the supplied PROJECT followed by -app. For the script with a selected /work/startup.env file, export that same derived APP_NAME but print nothing during startup. For the script without a selected startup file, preserve the supplied APP_NAME unchanged and print nothing. Preserve PROJECT, its export attribute and the supplied /work/keep.txt sample files. Every session and the supplied new-program report must finish successfully.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Repair the selected startup files",
+        "Check every session and new program"
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "StartupFiles",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-shell-startup-quiet",
+          "view": "introduction",
+          "assignment": {
+            "files": {
+              "~/.bashrc": {
+                "text": "printf 'Ready\\n'\nAPP_NAME=legacy\n"
+              },
+              "/work/startup.env": {
+                "text": "printf 'Ready\\n'\nAPP_NAME=\"$PROJECT-app\"\nexport APP_NAME\n"
+              }
+            },
+            "selected": "~/.bashrc",
+            "case": 0,
+            "tested": null
+          },
+          "practice": {
+            "files": {
+              "~/.bashrc": {
+                "text": "printf 'Ready\\n'\nTOOL_LABEL=legacy\n"
+              },
+              "/work/startup.env": {
+                "text": "printf 'Ready\\n'\nTOOL_LABEL=\"$WORKSHOP-tool\"\nexport TOOL_LABEL\n"
+              }
+            },
+            "selected": "~/.bashrc",
+            "case": 0,
+            "tested": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "StartupFiles",
+        "definition": {
+          "initial": {
+            "id": "lpic1-shell-startup-quiet",
+            "instructions": "For both interactive non-login samples, print exactly Ready followed by a newline and export APP_NAME as the supplied PROJECT followed by -app. For the script with a selected /work/startup.env file, export that same derived APP_NAME but print nothing during startup. For the script without a selected startup file, preserve the supplied APP_NAME unchanged and print nothing. Preserve PROJECT, its export attribute and the supplied /work/keep.txt sample files. Every session and the supplied new-program report must finish successfully.",
+            "starter": {
+              "~/.bashrc": {
+                "text": "printf 'Ready\\n'\nAPP_NAME=legacy\n"
+              },
+              "/work/startup.env": {
+                "text": "printf 'Ready\\n'\nAPP_NAME=\"$PROJECT-app\"\nexport APP_NAME\n"
+              }
+            },
+            "child_source": "printf '%s\\n' \"$APP_NAME\"\n",
+            "cases": [
+              {
+                "id": "lpic1-shell-startup-quiet-case-1",
+                "label": "Interactive window, first input",
+                "invocation": {
+                  "kind": "InteractiveNonLogin",
+                  "norc": false
+                },
+                "present": [
+                  "~/.bashrc",
+                  "/work/startup.env"
+                ],
+                "system_profile": null,
+                "input": {
+                  "name": "lpic1-shell-startup-quiet-input-1",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PROJECT": "harbor"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  },
+                  "stdout": "Ready\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  }
+                },
+                "parent": {
+                  "APP_NAME": {
+                    "value": "harbor-app",
+                    "exported": true
+                  },
+                  "PROJECT": {
+                    "value": "harbor",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-quiet-child-1",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  },
+                  "stdout": "harbor-app\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-quiet-case-2",
+                "label": "Interactive window, spaced input",
+                "invocation": {
+                  "kind": "InteractiveNonLogin",
+                  "norc": false
+                },
+                "present": [
+                  "~/.bashrc",
+                  "/work/startup.env"
+                ],
+                "system_profile": null,
+                "input": {
+                  "name": "lpic1-shell-startup-quiet-input-2",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PROJECT": "river team"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  },
+                  "stdout": "Ready\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  }
+                },
+                "parent": {
+                  "APP_NAME": {
+                    "value": "river team-app",
+                    "exported": true
+                  },
+                  "PROJECT": {
+                    "value": "river team",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-quiet-child-2",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  },
+                  "stdout": "river team-app\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-quiet-case-3",
+                "label": "Script with selected startup file",
+                "invocation": {
+                  "kind": "NonInteractive",
+                  "bash_env": "/work/startup.env"
+                },
+                "present": [
+                  "~/.bashrc",
+                  "/work/startup.env"
+                ],
+                "system_profile": null,
+                "input": {
+                  "name": "lpic1-shell-startup-quiet-input-3",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PROJECT": "niche"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                },
+                "parent": {
+                  "APP_NAME": {
+                    "value": "niche-app",
+                    "exported": true
+                  },
+                  "PROJECT": {
+                    "value": "niche",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-quiet-child-3",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "niche-app\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-quiet-case-4",
+                "label": "Script without a startup file",
+                "invocation": {
+                  "kind": "NonInteractive",
+                  "bash_env": null
+                },
+                "present": [
+                  "~/.bashrc",
+                  "/work/startup.env"
+                ],
+                "system_profile": null,
+                "input": {
+                  "name": "lpic1-shell-startup-quiet-input-4",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PROJECT": "elm",
+                    "APP_NAME": "delegated"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  }
+                },
+                "parent": {
+                  "APP_NAME": {
+                    "value": "delegated",
+                    "exported": true
+                  },
+                  "PROJECT": {
+                    "value": "elm",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-quiet-child-4",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  },
+                  "stdout": "delegated\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-quiet-case-5",
+                "label": "Script with selected startup file \u00b7 another supplied value",
+                "invocation": {
+                  "kind": "NonInteractive",
+                  "bash_env": "/work/startup.env"
+                },
+                "present": [
+                  "~/.bashrc",
+                  "/work/startup.env"
+                ],
+                "system_profile": null,
+                "input": {
+                  "name": "lpic1-shell-startup-quiet-input-3-varied-0",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "PROJECT": "quartz desk"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                },
+                "parent": {
+                  "APP_NAME": {
+                    "value": "quartz desk-app",
+                    "exported": true
+                  },
+                  "PROJECT": {
+                    "value": "quartz desk",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-quiet-child-3-varied-0",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "quartz desk-app\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic1-shell-startup-quiet-example",
+            "instructions": "Keep Ready in interactive startup only. Share WORKSHOP followed by -tool as TOOL_LABEL, keep script startup quiet, and preserve the supplied value when no startup file is selected.",
+            "starter": {
+              "~/.bashrc": {
+                "text": "printf 'Ready\\n'\nTOOL_LABEL=legacy\n"
+              },
+              "/work/startup.env": {
+                "text": "printf 'Ready\\n'\nTOOL_LABEL=\"$WORKSHOP-tool\"\nexport TOOL_LABEL\n"
+              }
+            },
+            "child_source": "printf '%s\\n' \"$TOOL_LABEL\"\n",
+            "cases": [
+              {
+                "id": "lpic1-shell-startup-quiet-example-case-1",
+                "label": "Interactive window, first input",
+                "invocation": {
+                  "kind": "InteractiveNonLogin",
+                  "norc": false
+                },
+                "present": [
+                  "~/.bashrc",
+                  "/work/startup.env"
+                ],
+                "system_profile": null,
+                "input": {
+                  "name": "lpic1-shell-startup-quiet-example-input-1",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "WORKSHOP": "cedar"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  },
+                  "stdout": "Ready\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  }
+                },
+                "parent": {
+                  "TOOL_LABEL": {
+                    "value": "cedar-tool",
+                    "exported": true
+                  },
+                  "WORKSHOP": {
+                    "value": "cedar",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-quiet-example-child-1",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  },
+                  "stdout": "cedar-tool\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 1.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-quiet-example-case-2",
+                "label": "Interactive window, spaced input",
+                "invocation": {
+                  "kind": "InteractiveNonLogin",
+                  "norc": false
+                },
+                "present": [
+                  "~/.bashrc",
+                  "/work/startup.env"
+                ],
+                "system_profile": null,
+                "input": {
+                  "name": "lpic1-shell-startup-quiet-example-input-2",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "WORKSHOP": "fern room"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  },
+                  "stdout": "Ready\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  }
+                },
+                "parent": {
+                  "TOOL_LABEL": {
+                    "value": "fern room-tool",
+                    "exported": true
+                  },
+                  "WORKSHOP": {
+                    "value": "fern room",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-quiet-example-child-2",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  },
+                  "stdout": "fern room-tool\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 2.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-quiet-example-case-3",
+                "label": "Script with selected startup file",
+                "invocation": {
+                  "kind": "NonInteractive",
+                  "bash_env": "/work/startup.env"
+                },
+                "present": [
+                  "~/.bashrc",
+                  "/work/startup.env"
+                ],
+                "system_profile": null,
+                "input": {
+                  "name": "lpic1-shell-startup-quiet-example-input-3",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "WORKSHOP": "granite"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                },
+                "parent": {
+                  "TOOL_LABEL": {
+                    "value": "granite-tool",
+                    "exported": true
+                  },
+                  "WORKSHOP": {
+                    "value": "granite",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-quiet-example-child-3",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "granite-tool\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-quiet-example-case-4",
+                "label": "Script without a startup file",
+                "invocation": {
+                  "kind": "NonInteractive",
+                  "bash_env": null
+                },
+                "present": [
+                  "~/.bashrc",
+                  "/work/startup.env"
+                ],
+                "system_profile": null,
+                "input": {
+                  "name": "lpic1-shell-startup-quiet-example-input-4",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "WORKSHOP": "willow",
+                    "TOOL_LABEL": "delegated"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  }
+                },
+                "parent": {
+                  "TOOL_LABEL": {
+                    "value": "delegated",
+                    "exported": true
+                  },
+                  "WORKSHOP": {
+                    "value": "willow",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-quiet-example-child-4",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  },
+                  "stdout": "delegated\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 4.\n"
+                  }
+                }
+              },
+              {
+                "id": "lpic1-shell-startup-quiet-example-case-5",
+                "label": "Script with selected startup file \u00b7 another supplied value",
+                "invocation": {
+                  "kind": "NonInteractive",
+                  "bash_env": "/work/startup.env"
+                },
+                "present": [
+                  "~/.bashrc",
+                  "/work/startup.env"
+                ],
+                "system_profile": null,
+                "input": {
+                  "name": "lpic1-shell-startup-quiet-example-input-3-varied-0",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "WORKSHOP": "oak studio"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                },
+                "parent": {
+                  "TOOL_LABEL": {
+                    "value": "oak studio-tool",
+                    "exported": true
+                  },
+                  "WORKSHOP": {
+                    "value": "oak studio",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "lpic1-shell-startup-quiet-example-child-3-varied-0",
+                  "args": [],
+                  "stdin": "",
+                  "env": {},
+                  "files": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  },
+                  "stdout": "oak studio-tool\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Preserve sample 3.\n"
+                  }
+                }
+              }
+            ]
+          },
+          "example_worked": {
+            "~/.bashrc": {
+              "text": "printf 'Ready\\n'\nTOOL_LABEL=\"$WORKSHOP-tool\"\nexport TOOL_LABEL\n"
+            },
+            "/work/startup.env": {
+              "text": "TOOL_LABEL=\"$WORKSHOP-tool\"\nexport TOOL_LABEL\n"
+            }
+          }
+        }
+      },
+      "solution": [
+        "STARTUP FILES\n{\"~/.bashrc\": {\"text\": \"printf 'Ready\\\\n'\\nAPP_NAME=\\\"$PROJECT-app\\\"\\nexport APP_NAME\\n\"}, \"/work/startup.env\": {\"text\": \"APP_NAME=\\\"$PROJECT-app\\\"\\nexport APP_NAME\\n\"}}"
+      ],
+      "explanation": "A greeting is output, not a shared setting. Separate interactive .bashrc output from quiet script startup; with no selected file, preserve the inherited setting. Each new-program report receives only exported values.",
+      "hints": [
+        "Read the session type and selected files. .bashrc belongs to non-login interactive startup, not the script samples.",
+        "The script\u2019s startup output must be empty. Inspect /work/startup.env separately from .bashrc.",
+        "Retain a derived APP_NAME in both relevant files, export it, and keep the Ready greeting only for the interactive session."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Environment.html"
+      ],
+      "simplifications": "Original bounded in-process startup model around evaluator 17. Fixed virtual HOME /home/learner; supplied readable files, explicit session modes and literal BASH_ENV selection only. Settings, exports, literal-format printf and simple conditions; no source/dot, aliases, history, PATH search, arbitrary files or real profiles. Selection is checked against the Bash manual; fixed developer comparisons cover sourced settings, not automatic host login startup. See SHELL_STARTUP_SUBSET.md.",
+      "prerequisites": [
+        "lpic1-shell-startup-priority"
+      ]
+    }
+  ]
+}

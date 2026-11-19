@@ -59,20 +59,33 @@ impl LabApp {
         let view = self.acl_view(i);
         match view {
             teaching::View::Introduction => {
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for concept in &lesson.concepts {
-                    ui.label(RichText::new(&concept.title).strong());
-                    ui.label(&concept.text);
+                if ccna_presentation::enabled(&s) {
+                    ccna_presentation::concepts(
+                        ui,
+                        &s,
+                        &lesson.prerequisite_note,
+                        lesson
+                            .concepts
+                            .iter()
+                            .map(|c| (c.title.clone(), c.text.clone())),
+                    );
+                } else {
+                    ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
+                    for concept in &lesson.concepts {
+                        ui.label(RichText::new(&concept.title).strong());
+                        ui.label(&concept.text);
+                    }
                 }
-                ui.label(RichText::new("A different example to try").strong());
-                ui.label(&lesson.example_description);
+                lesson_presentation::worked(ui, &lesson.example_description);
                 for (router, text) in &lesson.example_documents.routers {
                     if !text.trim().is_empty() {
                         ui.label(format!("Virtual router: {router}"));
-                        ui.add(egui::Label::new(RichText::new(text).monospace()).wrap());
+                        lesson_presentation::monospace(ui, text, true);
                     }
                 }
-                ui.label(format!("Try a change: {}", lesson.try_change.description));
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change.description));
+                }
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -87,8 +100,13 @@ impl LabApp {
                 });
             }
             teaching::View::Example => {
-                ui.label("Practice example · Ungraded; your assignment draft stays separate.");
-                ui.label(&lesson.example_description);
+                ccna_presentation::example(ui, &s, true);
+                if !ccna_presentation::enabled(&s) {
+                    ui.label("Practice example · Ungraded; your assignment draft stays separate.");
+                }
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(&lesson.example_description);
+                }
                 let mut l = self.progress.attempts[&s.id]
                     .workspace
                     .as_ref()
@@ -135,10 +153,7 @@ impl LabApp {
                         if l.checked {
                             let checks = l.checks(lesson);
                             if !checks.is_empty() && checks.iter().all(|c| c.0) {
-                                ui.colored_label(
-                                    palette(ui).success,
-                                    "Example checks pass · No assignment credit",
-                                );
+                                ui.colored_label(palette(ui).success, "Example checks pass");
                             }
                             if let Some(error) = l
                                 .draft
@@ -157,7 +172,9 @@ impl LabApp {
                     });
                     self.metrics.feedback = Some(result.response.rect);
                 });
-                ui.label(format!("Try a change: {}", lesson.try_change.description));
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change.description));
+                }
                 let r = ui.add(button("Open full assignment"));
                 self.metrics.assignment_action = Some(r.rect);
                 if r.clicked() {
@@ -182,7 +199,7 @@ impl LabApp {
                     .as_ref()
                     .unwrap()
                     .checked;
-                ui.label(&s.objective);
+                ccna_presentation::assignment(ui, &s);
                 if let engine::Goal::Ipv4Acl { definition } = &s.goal {
                     ui.push_id(("acl-required-traffic", &s.id), |ui| {
                         traffic_table(ui, definition)
@@ -300,7 +317,7 @@ impl LabApp {
                     for (router,text) in &documents.routers {
                         if !text.trim().is_empty() {
                             ui.label(format!("Virtual router: {router}"));
-                            ui.add(egui::Label::new(RichText::new(text).monospace()).wrap());
+                            lesson_presentation::monospace(ui, text, true);
                         }
                     }
                 }

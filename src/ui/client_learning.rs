@@ -38,6 +38,35 @@ impl LabApp {
         }
         ui.add_enabled_ui(active, |ui| self.client_contents(ui, i));
     }
+    fn client_assignment_settings(&mut self, ui: &mut egui::Ui, i: usize) {
+        let s = self.scenarios[i].clone();
+        let a = self.progress.attempts.get_mut(&s.id).unwrap();
+        let draft = a.workspace.as_mut().unwrap().client_draft.as_mut().unwrap();
+        let before = draft.clone();
+        fields(ui, &s.id, false, draft, &mut self.metrics);
+        if before != *draft {
+            self.dirty = true;
+            self.notice = None;
+        }
+        let r = ui.add(button("Apply client settings"));
+        self.metrics.editor_save = Some(r.rect);
+        if r.clicked() {
+            self.notice = Some(match client::apply_assignment(&mut a.state, draft) {
+                Ok(()) => {
+                    *draft = Draft::new(&Client::from_state(&a.state).unwrap());
+                    self.dirty = true;
+                    "Applied to this virtual client. Inspect and test the path below.".into()
+                }
+                Err(e) => e,
+            });
+        }
+        if client::pending_draft(a) {
+            ui.label("Pending client settings · Applied client and path checks still use the previous values.");
+        }
+        if let Some(notice) = &self.notice {
+            ui.add(egui::Label::new(RichText::new(notice).color(palette(ui).accent)).wrap());
+        }
+    }
     fn client_contents(&mut self, ui: &mut egui::Ui, i: usize) {
         let s = self.scenarios[i].clone();
         let lesson = s.client_teaching.as_ref().unwrap();
@@ -60,13 +89,25 @@ impl LabApp {
         }
         match view {
             teaching::View::Introduction => {
-                ui.label(&lesson.prerequisite_note);
-                for concept in &lesson.concepts {
-                    ui.label(RichText::new(&concept.title).strong());
-                    ui.label(&concept.text);
+                if ccna_presentation::enabled(&s) {
+                    ccna_presentation::concepts(
+                        ui,
+                        &s,
+                        &lesson.prerequisite_note,
+                        lesson
+                            .concepts
+                            .iter()
+                            .map(|c| (c.title.clone(), c.text.clone())),
+                    );
+                } else {
+                    ui.label(&lesson.prerequisite_note);
+                    for concept in &lesson.concepts {
+                        ui.label(RichText::new(&concept.title).strong());
+                        ui.label(&concept.text);
+                    }
                 }
-                ui.label(RichText::new("A different client to try").strong());
-                ui.label(&lesson.example_description);
+                lesson_presentation::worked(ui, &lesson.example_description);
+                lesson_presentation::worked_rows(ui, &s);
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -81,47 +122,33 @@ impl LabApp {
                 });
             }
             teaching::View::Assignment => {
-                ui.label(RichText::new("Understand the task").strong());
-                ui.label(&s.objective);
-                let a = self.progress.attempts.get_mut(&s.id).unwrap();
-                let current = Client::from_state(&a.state).unwrap();
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(RichText::new("Understand the task").strong());
+                }
+                ccna_presentation::assignment(ui, &s);
+                let current = Client::from_state(&self.progress.attempts[&s.id].state).unwrap();
                 diagram(ui, &current);
-                let draft = a.workspace.as_mut().unwrap().client_draft.as_mut().unwrap();
-                let before = draft.clone();
-                fields(ui, &s.id, false, draft, &mut self.metrics);
-                if before != *draft {
-                    self.dirty = true;
-                    self.notice = None;
-                }
-                let r = ui.add(button("Apply client settings"));
-                self.metrics.editor_save = Some(r.rect);
-                if r.clicked() {
-                    self.notice = Some(match client::apply_assignment(&mut a.state, draft) {
-                        Ok(()) => {
-                            *draft = Draft::new(&Client::from_state(&a.state).unwrap());
-                            self.dirty = true;
-                            "Applied to this virtual client. Inspect and test the path below."
-                                .into()
-                        }
-                        Err(e) => e,
+                if ui.available_width() >= 850. {
+                    ui.columns(2, |columns| {
+                        self.client_assignment_settings(&mut columns[0], i);
+                        self.terminal(&mut columns[1], i);
                     });
+                } else {
+                    self.client_assignment_settings(ui, i);
+                    self.terminal(ui, i);
                 }
-                if client::pending_draft(a) {
-                    ui.label("Pending client settings · Applied client and path checks still use the previous values.");
-                }
-                if let Some(notice) = &self.notice {
-                    ui.add(
-                        egui::Label::new(RichText::new(notice).color(palette(ui).accent)).wrap(),
-                    );
-                }
-                self.terminal(ui, i);
                 self.check_terminal_work(ui, i);
             }
             teaching::View::Example => {
-                ui.label(
+                ccna_presentation::example(ui, &s, true);
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(
                     "Practice only · Separate client, settings and terminal; no assignment credit.",
                 );
-                ui.label(&lesson.example_description);
+                }
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(&lesson.example_description);
+                }
                 let a = self.progress.attempts.get_mut(&s.id).unwrap();
                 let l = a
                     .workspace
@@ -288,7 +315,9 @@ impl LabApp {
                     }
                 });
                 self.metrics.feedback = Some(feedback.response.rect);
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change));
+                }
                 let r = ui.add(button("Open full assignment"));
                 self.metrics.assignment_action = Some(r.rect);
                 if r.clicked() {

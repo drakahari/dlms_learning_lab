@@ -1,16 +1,84 @@
+mod dkms;
+mod initramfs;
+mod pxe;
+mod iscsi;
+mod ata_smart;
+mod apache_https;
+mod desktop_profile;
+mod security_investigation;
+mod kernel_build;
+mod poe;
+mod sieve;
+mod mailbox;
+mod mailbox_admin;
+mod linux_router;
+mod linux_flow;
+mod linux_v6;
+mod linux_service_router;
+mod linux_v6_admin;
+mod linux_v6_startup;
+mod ftp_identity;
+mod service_exposure;
+mod ids_rule;
+mod auth_filter;
+mod vpn_point;
+mod smtp;
+mod guest_driver;
+mod print_queues;
+mod dns_access;
+mod source_install;
+mod maintenance_notices;
+mod capacity_planning;
+mod resource_observations;
+mod measurement_reports;
+mod aaa_access;
+mod accounts_template;
+mod aging;
+mod arp_inspection;
+mod autofs;
+mod content_backups;
+mod current_catalog;
+mod device_path;
+mod json_inventory;
+mod rest_controller;
+mod dhcp_snooping;
+mod directory_policy;
+mod eui64;
+mod grub_menu;
+mod file_index;
+mod ldap_client;
+mod local_access;
+mod management;
+mod port_security;
+mod raid1_lessons;
+mod raid_assembly;
+mod rollout_bash;
+mod rollout_catalog;
+mod rollout_lpic1;
+mod rollout_lpic2;
+mod storage_swap;
+mod transport;
+mod whereis;
 use super::*;
 use engine::State;
 mod apache_static;
 mod apache_static_lessons;
+pub(in crate::ui) mod ccna_pilot;
 mod client_learning;
+mod client_diagnostic;
+mod direct_dns;
+mod dns_query_tools;
+mod ssh_access;
 mod command_vectors;
 mod completion_index;
 mod cron_lessons_native;
 pub(in crate::ui) mod cron_workspace;
 mod debian_packages;
+mod debian_sources;
 mod dhcpv4;
 mod dhcpv4_lessons;
 mod disk_preparation_native;
+mod disk_layout;
 mod ere_evidence_native;
 mod etherchannel_native;
 pub(in crate::ui) mod etherchannel_workspace;
@@ -200,11 +268,11 @@ fn accounts_fixture_app(view: teaching::View) -> (egui::Context, LabApp, usize) 
     a.set_accounts_view(i, view);
     (ctx, a, i)
 }
-fn accounts_ui_click(
+fn reveal_ui_control(
     ctx: &egui::Context,
     a: &mut LabApp,
     target: fn(&Metrics) -> Option<egui::Rect>,
-) {
+) -> egui::Rect {
     for _ in 0..20 {
         let r = target(&a.metrics).expect("account control present");
         let viewport = a
@@ -213,8 +281,7 @@ fn accounts_ui_click(
             .unwrap()
             .intersect(ctx.content_rect());
         if r.top() >= viewport.top() && r.bottom() <= viewport.bottom() {
-            click(ctx, a, r);
-            return;
+            return r;
         }
         let delta = if r.bottom() > viewport.bottom() {
             viewport.bottom() - r.bottom()
@@ -240,6 +307,14 @@ fn accounts_ui_click(
         }
     }
     panic!("Account control did not become visible");
+}
+fn accounts_ui_click(
+    ctx: &egui::Context,
+    a: &mut LabApp,
+    target: fn(&Metrics) -> Option<egui::Rect>,
+) {
+    let r = reveal_ui_control(ctx, a, target);
+    click(ctx, a, r);
 }
 fn accounts_ui_command(ctx: &egui::Context, a: &mut LabApp, text: &str) {
     a.focus_input = true;
@@ -681,12 +756,24 @@ fn key(key: egui::Key, shift: bool) -> egui::Event {
     }
 }
 fn click(ctx: &egui::Context, a: &mut LabApp, r: egui::Rect) {
+    // A click must not resize the test window between measuring its target and
+    // pressing it. Retain physical dimensions even if this action changes zoom.
+    let size = ctx.viewport_rect().size() * a.scale;
+    // Native pointer arrival precedes a press; otherwise a drag-scroll parent
+    // consumes the synthetic jump as a drag rather than a control click.
+    frame(
+        ctx,
+        a,
+        size.x,
+        size.y,
+        vec![egui::Event::PointerMoved(r.center())],
+    );
     for pressed in [true, false] {
         frame(
             ctx,
             a,
-            1200.,
-            850.,
+            size.x,
+            size.y,
             vec![
                 egui::Event::PointerMoved(r.center()),
                 egui::Event::PointerButton {
@@ -698,11 +785,12 @@ fn click(ctx: &egui::Context, a: &mut LabApp, r: egui::Rect) {
             ],
         );
     }
-    draw(ctx, a);
+    for _ in 0..3 {
+        frame(ctx, a, size.x, size.y, vec![]);
+    }
 }
 fn check(ctx: &egui::Context, a: &mut LabApp) {
-    let r = a.metrics.check.unwrap();
-    click(ctx, a, r);
+    accounts_ui_click(ctx, a, |m| m.check);
 }
 fn solve(a: &mut LabApp, i: usize) {
     for command in a.scenarios[i].solution.clone() {
@@ -882,6 +970,17 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
             .unwrap()
             .state
         {
+            State::Poe { simulation } => {
+                // Break the actual allocation; never preserve success by cached check flags.
+                simulation.assignment.plan.enabled.fill(false);
+            }
+            State::Initramfs { simulation } => {simulation.assignment.work.store.initramfs.clear();simulation.assignment.work.checked=false;},
+            State::Pxe { simulation } => { simulation.assignment.work.checked = false; },
+            State::Dkms { simulation } => {simulation.assignment.work.state.records.clear();simulation.assignment.work.checked=false;},
+            State::KernelBuild { simulation } => {
+                // Breaking actual outputs must defeat a retained checked flag.
+                simulation.assignment.work.outputs.image = None;
+            }
             State::PersistentMounts { storage } => {
                 storage.save_configuration("broken".into()).unwrap()
             }
@@ -940,10 +1039,105 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
                 }
                 simulation.reconfigure(configuration).unwrap();
             }
-            State::PartitionFs { .. }
+            State::SieveFiltering { .. }
+            | State::MailboxAccess { .. }
+            | State::LinuxRouter { .. }
+            | State::LinuxFlow { .. }
+            | State::LinuxV6 { .. }
+            | State::LinuxServiceRouter { .. }
+            | State::LinuxV6Administration { .. }
+            | State::LinuxV6Startup { .. }
+            | State::ServiceExposure { .. }
+            | State::IdsRule { .. }
+            | State::AuthFilter { .. }
+            | State::VpnPoint { .. }
+            | State::FtpIdentity { .. }
+            | State::MailboxAdministration { .. }
+            | State::SmtpRouting { .. }
+            | State::GuestDrivers { .. }
+            | State::VirtualIsolation { .. }
+            | State::SambaShare { .. }
+            | State::CampusArchitecture { .. }
+            | State::NetworkTransfer { .. }
+            | State::EditorHandover { .. }
+            | State::ModalEditing { .. }
+            | State::SshAccess { .. }
+            | State::ServiceClients { .. }
+            | State::ReverseProxy { .. }
+            | State::HttpCache { .. }
+            | State::ProxyPolicy { .. }
+            | State::SnmpMonitor { .. }
+            | State::WlanPaths { .. }
+            | State::WlanProfiles { .. }
+            | State::WirelessChannels { .. }
+            | State::Timezone { .. }
+            | State::Localization { .. }
+            | State::PrintQueues { .. }
+            | State::StartupFiles { .. }
+            | State::FsIntegrity { .. }
+            | State::UserMounts { .. }
+            | State::Environment { .. }
+            | State::DebianSources { .. }
+            | State::ClientNames { .. }
+            | State::RemovableMounts { .. }
+            | State::NmProfiles { .. }
+            | State::PamStack { .. }
+            | State::Aging { .. }
+            | State::PortSecurity { .. }
+            | State::DhcpSnooping { .. }
+            | State::ArpInspection { .. }
+            | State::ManagementPolicy { .. }
+            | State::LocalAccess { .. }
+            | State::AaaAccess { .. }
+            | State::LdapClient { .. }
+            | State::LdapChanges { .. }
+            | State::LdapPassword { .. }
+            | State::LdapAccess { .. }
+            | State::LdapSchema { .. }
+            | State::CopiedJournal { .. }
+            | State::JsonInventory { .. }
+            | State::RestController { .. }
+            | State::DevicePath { .. }
+            | State::LocalMail { .. }
+            | State::Chrony { .. }
+            | State::GrubOnce { .. }
+            | State::EfiLoader { .. }
+            | State::BiosLoader { .. }
+            | State::BootEntry { .. }
+            | State::LdapSchemaQuery { .. }
+            | State::DhcpConfig { .. }
+            | State::Qos { .. }
+            | State::LinuxLogging { .. }
+            | State::Iscsi { .. }
+            | State::AtaSmart { .. }
+            | State::ApacheHttps { .. }
+            | State::Desktop { .. }
+            | State::SecurityInvestigation { .. }
+            | State::AutomationWorkshop { .. }
+            | State::HostNetwork { .. }
+            | State::Repositories { .. }
+            | State::Capacity { .. }
+            | State::DnsAccess { .. }
+            | State::SourceInstall { .. }
+            | State::MaintenanceNotice { .. }
+            | State::CapacityPlanning { .. }
+            | State::ResourceObservations { .. }
+            | State::Links { .. }
+            | State::MagicSubnet { .. }
+            | State::Raid1 { .. }
+            | State::FileIndex { .. }
+            | State::RaidAssembly { .. }
+            | State::Autofs { .. }
+            | State::Transport { .. }
+            | State::KernelModules { .. }
+            | State::RecursiveTree { .. }
+            | State::DirectoryPolicy { .. }
+            | State::SharedLibraries { .. }
+            | State::PartitionFs { .. }
             | State::Hsrp { .. }
             | State::Lvm { .. }
             | State::Ntp { .. }
+            | State::Syslog { .. }
             | State::OneOff { .. }
             | State::FileBackup { .. }
             | State::Cron { .. }
@@ -1533,8 +1727,7 @@ fn learn_examples_are_editable_ungraded_and_drafts_survive_navigation_save_and_r
     assert!(a.metrics.check.is_none());
     assert!(!a.metrics.help_visible);
     let before = a.progress.attempts["shell-handover"].state.clone();
-    let r = a.metrics.example_action.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.example_action);
     assert_eq!(a.script_view(9), teaching::View::Example);
     let editor = a.metrics.focus.unwrap();
     assert_eq!(ctx.memory(|m| m.focused()), Some(editor));
@@ -1597,8 +1790,7 @@ fn learn_examples_are_editable_ungraded_and_drafts_survive_navigation_save_and_r
             .stdout
             .contains("Rowan")
     );
-    let r = a.metrics.assignment_action.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.assignment_action);
     assert_eq!(a.script_view(9), teaching::View::Assignment);
     assert_eq!(a.progress.attempts["shell-handover"].state, before);
     let solution = a.scenarios[9].solution[0].clone();
@@ -2186,8 +2378,7 @@ fn terminal_introduction_practice_and_assignment_keep_drafts_focus_and_credit_se
     assert_eq!(a.terminal_view(i), teaching::View::Introduction);
     assert!(a.metrics.terminal.is_none());
     let original = a.progress.attempts["lpic1-file-navigation"].state.clone();
-    let r = a.metrics.example_action.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.example_action);
     draw(&ctx, &mut a);
     assert_eq!(a.terminal_view(i), teaching::View::Example);
     assert!(ctx.memory(|m| m.has_focus(a.metrics.focus.unwrap())));
@@ -2416,8 +2607,7 @@ fn ipv6_native_typing_check_retry_focus_and_selected_reset() {
     open_assignment(&mut a, 30);
     assert_eq!(a.ipv6_view(30), teaching::View::Introduction);
     draw(&ctx, &mut a);
-    let r = a.metrics.assignment_action.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.assignment_action);
     draw(&ctx, &mut a);
     let id = a.scenarios[30].id.clone();
     assert_eq!(
@@ -2541,8 +2731,7 @@ fn ipv6_examples_apply_without_credit_and_open_assignment_without_overwriting_dr
         assert_eq!(attempt.state, a.scenarios[i].initial);
         assert_eq!(attempt.workspace.as_ref().unwrap().ipv6_draft, assignment);
         assert!(!progress::current_solved(attempt, &a.scenarios[i]));
-        let r = a.metrics.lesson_tabs[2];
-        click(&ctx, &mut a, r);
+        accounts_ui_click(&ctx, &mut a, |m| m.lesson_tabs.get(2).copied());
         assert_eq!(a.ipv6_view(i), teaching::View::Assignment);
     }
 }
@@ -3064,8 +3253,7 @@ fn routing_v4_native_typing_check_retry_focus_and_selected_reset() {
     open_assignment(&mut a, i);
     assert_eq!(a.routing_v4_view(i), teaching::View::Introduction);
     draw(&ctx, &mut a);
-    let r = a.metrics.assignment_action.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.assignment_action);
     draw(&ctx, &mut a);
     let id = a.scenarios[i].id.clone();
     assert_eq!(
@@ -3297,11 +3485,9 @@ fn ipv4_authored_route_entry_supports_keyboard_tab_and_default_distance_without_
             .unwrap();
         open_assignment(&mut a, i);
         draw(&ctx, &mut a);
-        let r = a.metrics.assignment_action.unwrap();
-        click(&ctx, &mut a, r);
+        accounts_ui_click(&ctx, &mut a, |m| m.assignment_action);
         assert!(a.metrics.inputs.is_empty());
-        let r = a.metrics.routing_add.unwrap();
-        click(&ctx, &mut a, r);
+        accounts_ui_click(&ctx, &mut a, |m| m.routing_add);
         let focus = a.metrics.focus.unwrap();
         assert!(ctx.memory(|m| m.has_focus(focus)));
         let select = egui::Event::Key {
@@ -3490,8 +3676,7 @@ fn addressing_introduction_examples_and_assignments_preserve_drafts_and_credit()
         assert!(!a.metrics.help_visible);
         let id = a.scenarios[i].id.clone();
         let original = a.progress.attempts[&id].state.clone();
-        let r = a.metrics.example_action.unwrap();
-        click(&ctx, &mut a, r);
+        accounts_ui_click(&ctx, &mut a, |m| m.example_action);
         assert_eq!(a.address_view(i), teaching::View::Example);
         let example_focus = a.metrics.focus.unwrap();
         assert!(ctx.memory(|m| m.has_focus(example_focus)));
@@ -3534,8 +3719,7 @@ fn addressing_introduction_examples_and_assignments_preserve_drafts_and_credit()
                 ],
             );
         }
-        let r = a.metrics.assignment_action.unwrap();
-        click(&ctx, &mut a, r);
+        accounts_ui_click(&ctx, &mut a, |m| m.assignment_action);
         assert_eq!(
             a.address_view(i),
             teaching::View::Assignment,
@@ -3731,7 +3915,11 @@ fn addressing_views_wrap_and_challenge_keeps_complete_independent_assignments() 
                     );
                 }
                 if w == 1200. && view != teaching::View::Introduction {
-                    assert!(a.metrics.check.unwrap().bottom() < 850.);
+                    assert!(
+                        a.metrics.check.unwrap().bottom() < 850.,
+                        "lab {i} {view:?}: {:?}",
+                        a.metrics.check
+                    );
                 }
                 a.progress
                     .attempts
@@ -3762,8 +3950,7 @@ fn service_fresh_learning_teaches_runs_and_preserves_both_editor_terminal_drafts
     assert_eq!(a.service_view(6), teaching::View::Introduction);
     assert!(a.metrics.check.is_none());
     let original = a.progress.attempts["lpic2-service"].state.clone();
-    let r = a.metrics.example_action.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.example_action);
     assert_eq!(a.service_view(6), teaching::View::Example);
     let example_focus = a.metrics.focus.unwrap();
     assert!(ctx.memory(|m| m.has_focus(example_focus)));
@@ -3971,7 +4158,10 @@ fn service_views_wrap_and_challenge_keeps_the_full_editor_and_terminal() {
             }
             if w == 1200. {
                 if view == teaching::View::Introduction {
-                    assert!(a.metrics.example_action.unwrap().bottom() < 850.);
+                    accounts_ui_click(&ctx, &mut a, |m| m.example_action);
+                    assert_eq!(a.service_view(6), teaching::View::Example);
+                    a.set_service_view(6, view);
+                    draw(&ctx, &mut a);
                 } else {
                     assert!(a.metrics.check.unwrap().bottom() < 850.);
                 }
@@ -4000,12 +4190,11 @@ fn service_example_and_assignment_editor_terminal_undo_histories_are_isolated() 
         a.launch(6);
         a.set_service_view(6, teaching::View::Example);
         draw(&ctx, &mut a);
-        let r = if terminal {
-            a.metrics.terminal.unwrap()
+        if terminal {
+            accounts_ui_click(&ctx, &mut a, |m| m.terminal);
         } else {
-            a.metrics.inputs[0]
-        };
-        click(&ctx, &mut a, r);
+            accounts_ui_click(&ctx, &mut a, |m| m.inputs.first().copied());
+        }
         let command = |key| egui::Event::Key {
             key,
             physical_key: None,
@@ -4043,12 +4232,11 @@ fn service_example_and_assignment_editor_terminal_undo_histories_are_isolated() 
         );
         a.set_service_view(6, teaching::View::Assignment);
         draw(&ctx, &mut a);
-        let r = if terminal {
-            a.metrics.terminal.unwrap()
+        if terminal {
+            accounts_ui_click(&ctx, &mut a, |m| m.terminal);
         } else {
-            a.metrics.inputs[0]
-        };
-        click(&ctx, &mut a, r);
+            accounts_ui_click(&ctx, &mut a, |m| m.inputs.first().copied());
+        }
         let before = serde_json::to_value(&a.progress.attempts["lpic2-service"]).unwrap();
         frame(&ctx, &mut a, 1200., 850., vec![command(egui::Key::Z)]);
         draw(&ctx, &mut a);
@@ -4079,12 +4267,11 @@ fn service_example_and_assignment_editor_terminal_undo_histories_are_isolated() 
         assert_eq!(draft, "assignment-draft");
         a.set_service_view(6, teaching::View::Example);
         draw(&ctx, &mut a);
-        let r = if terminal {
-            a.metrics.terminal.unwrap()
+        if terminal {
+            accounts_ui_click(&ctx, &mut a, |m| m.terminal);
         } else {
-            a.metrics.inputs[0]
-        };
-        click(&ctx, &mut a, r);
+            accounts_ui_click(&ctx, &mut a, |m| m.inputs.first().copied());
+        }
         frame(&ctx, &mut a, 1200., 850., vec![command(egui::Key::Z)]);
         draw(&ctx, &mut a);
         let w = a.progress.attempts["lpic2-service"]
@@ -4819,8 +5006,7 @@ fn dns_workspace_examples_keep_drafts_credit_and_keyboard_focus_separate() {
     assert_eq!(a.dns_view(i), teaching::View::Introduction);
     assert_eq!(a.metrics.lesson_tabs.len(), 3);
     let assignment = serde_json::to_vec(&a.progress.attempts[&a.scenarios[i].id].state).unwrap();
-    let r = a.metrics.example_action.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.example_action);
     draw(&ctx, &mut a);
     assert_eq!(a.dns_view(i), teaching::View::Example);
     let r = a.metrics.insert.unwrap();
@@ -4935,25 +5121,19 @@ fn dns_workspace_save_reload_update_checks_and_unsaved_changes_invalidate_curren
         .unwrap()
         .dns_draft = Some(Draft::new(server));
     draw(&ctx, &mut a);
-    let r = a.metrics.editor_save.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.editor_save);
     draw(&ctx, &mut a);
-    let r = a.metrics.check.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.check);
     draw(&ctx, &mut a);
     assert!(!a.metrics.completion);
-    let r = a.metrics.dns_reload.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.dns_reload);
     draw(&ctx, &mut a);
-    let r = a.metrics.check.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.check);
     draw(&ctx, &mut a);
     assert!(!a.metrics.completion);
-    let r = a.metrics.dns_update.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.dns_update);
     draw(&ctx, &mut a);
-    let r = a.metrics.check.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.check);
     draw(&ctx, &mut a);
     assert!(a.metrics.completion);
     a.progress
@@ -4975,8 +5155,7 @@ fn dns_workspace_save_reload_update_checks_and_unsaved_changes_invalidate_curren
         &a.scenarios[i]
     ));
     let before = a.progress.attempts[&id].state.clone();
-    let r = a.metrics.editor_save.unwrap();
-    click(&ctx, &mut a, r);
+    accounts_ui_click(&ctx, &mut a, |m| m.editor_save);
     draw(&ctx, &mut a);
     assert_eq!(a.progress.attempts[&id].state, before);
     assert!(
@@ -5497,7 +5676,7 @@ fn long_array_script_clicks_use_visible_viewport_and_edits_clear_current_success
         a.metrics.inputs[0].height() > viewport.height(),
         "the full text rectangle extends outside its scroll viewport"
     );
-    click(&ctx, &mut a, viewport.shrink(4.));
+    accounts_ui_click(&ctx, &mut a, |m| m.editor_viewport.map(|r| r.shrink(4.)));
     assert!(ctx.memory(|m| m.has_focus(editor)));
     let modifiers = egui::Modifiers {
         ctrl: true,
@@ -7186,6 +7365,7 @@ mod rpm_lessons_native;
 
 mod lvm_growth;
 mod lvm_lessons_native;
+mod lvm_provisioning;
 
 mod ntp_client_server;
 
@@ -7194,3 +7374,170 @@ mod ntp_lessons_native;
 mod partition_fs_workspace;
 
 mod hsrp_workspace;
+
+mod links_lessons;
+mod syslog_lessons;
+mod syslog_workspace;
+
+mod capacity_lessons;
+
+mod repository_lessons;
+
+mod host_lessons;
+
+mod debug_recovery;
+
+mod linux_logging_lessons;
+
+mod startup_lessons;
+
+mod qos_lessons;
+
+mod backup_selection;
+
+mod dhcp_config_lessons;
+
+mod nm_dhcp;
+mod nm_lessons;
+
+mod optional_mount;
+
+mod client_names;
+
+mod resolver_search;
+
+mod debian_contents;
+
+mod tracing_lessons;
+
+mod environment_lessons;
+
+mod user_mount_lessons;
+
+mod debian_conflicts;
+
+mod fs_integrity;
+
+mod shell_startup;
+
+#[test]
+fn shared_click_keeps_the_measured_window_size_during_arrival_press_and_settling() {
+    for (width, height, scale) in [(1200., 950., 1.), (760., 850., 1.5), (1200., 950., 2.)] {
+        let (ctx, mut a) = app();
+        a.scale = scale;
+        ctx.set_zoom_factor(scale);
+        for _ in 0..6 {
+            frame(&ctx, &mut a, width, height, vec![]);
+        }
+        let before = ctx.viewport_rect();
+        let target = a.metrics.settings.expect("Real Settings button");
+        assert!(ctx.content_rect().contains_rect(target));
+        click(&ctx, &mut a, target);
+        assert_eq!(
+            ctx.viewport_rect(),
+            before,
+            "A click must not resize a {width}×{height} window at {scale}"
+        );
+        assert!(
+            a.settings_open,
+            "The actual measured Settings control was clicked"
+        );
+    }
+}
+
+mod shared_libraries_lessons_native;
+
+mod managed_config;
+
+mod listener_audit;
+
+mod path_lookup;
+
+mod recursive_tree;
+
+mod find_size;
+
+mod kernel_modules;
+
+mod kernel_names;
+
+mod log_triage;
+
+mod lvm_retirement;
+
+mod lvm_activation;
+
+mod lvm_rename;
+
+mod lvm_pv_capacity;
+
+mod partition_mbr;
+
+mod lvm_cow;
+
+mod lvm_device_references;
+
+mod lvm_config_scan;
+mod lvm_mounts;
+
+mod vlan_lessons;
+
+mod bond_vlan;
+
+mod bridge_lan;
+
+mod pam_auth;
+
+mod ldap_access;
+mod ldap_changes;
+mod ldap_password;
+
+mod ldap_configuration;
+
+mod ldap_schema;
+
+mod ldap_schema_query;
+
+mod boot_entry;
+
+mod grub_settings;
+
+mod bios_loader;
+
+mod efi_loader;
+mod grub_once;
+
+mod localization;
+mod timezones;
+
+mod wireless_channels;
+mod wlan_profiles;
+mod wlan_paths;
+
+mod snmp;
+
+mod proxy_policy;
+
+mod http_cache;
+
+mod reverse_proxy;
+
+mod services;
+
+mod mixed_ip;
+
+mod echo_diagnosis;
+
+mod modal_editor;
+
+mod modal_lessons;
+mod editor_handover;
+mod editor_handover_replay;
+
+mod network_transfers;
+
+mod network_architectures;
+
+mod samba_shares;
+
+mod virtual_isolation;

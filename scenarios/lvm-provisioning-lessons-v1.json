@@ -1,0 +1,1491 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-lvm-provision-staging",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "New linear LVM allocations",
+      "unit": "lvm-linear-provisioning",
+      "title": "Allocate a new staging volume without spending the reserve",
+      "summary": "Create a raw harbor/staging LV of 24 MiB in the existing harbor group.",
+      "objective": "Create a raw harbor/staging LV of 24 MiB in the existing harbor group. Keep at least six 4 MiB extents free in harbor. Preserve every existing LV, file and device membership; leave sparea and shareda untouched. Do not create extra groups or volumes. A new raw LV does not need a filesystem in this assignment.",
+      "retry_guidance": "Read the failing group, size or preservation check. A refused command retains prior state. Remove and recreate only a newly allocated raw LV when necessary. Reset only this assignment if you need to restart an incorrect group plan.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/harbora": {
+                "bytes": 68157440,
+                "role": "PhysicalVolume",
+                "group": "harbor"
+              },
+              "/dev/sparea": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/shareda": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "harbor": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "archive": {
+                    "extents": [
+                      {
+                        "pv": "/dev/harbora",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/harbora",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "harbor/archive: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "peer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/harbora",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/harbora",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "harbor/peer: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/harbora": {
+                "bytes": 68157440,
+                "role": "PhysicalVolume",
+                "group": "harbor"
+              },
+              "/dev/sparea": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/shareda": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "harbor": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "archive": {
+                    "extents": [
+                      {
+                        "pv": "/dev/harbora",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/harbora",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "harbor/archive: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "peer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/harbora",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/harbora",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "harbor/peer: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/workshopa": {
+                "bytes": 51380224,
+                "role": "PhysicalVolume",
+                "group": "workshop"
+              },
+              "/dev/workspare": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/workforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "workshop": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "workshop/ledger: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/workshopa": {
+                "bytes": 51380224,
+                "role": "PhysicalVolume",
+                "group": "workshop"
+              },
+              "/dev/workspare": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/workforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "workshop": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "workshop/ledger: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/harbora": {
+                "bytes": 68157440,
+                "role": "PhysicalVolume",
+                "group": "harbor"
+              },
+              "/dev/sparea": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/shareda": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "harbor": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "archive": {
+                    "extents": [
+                      {
+                        "pv": "/dev/harbora",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/harbora",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "harbor/archive: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "peer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/harbora",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/harbora",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "harbor/peer: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "targets": [],
+          "plan": {
+            "groups": [
+              {
+                "name": "harbor",
+                "extent_bytes": 4194304,
+                "devices": [
+                  "/dev/harbora"
+                ],
+                "reserve_extents": 6
+              }
+            ],
+            "volumes": [
+              {
+                "id": "harbor/staging",
+                "bytes": 25165824
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Builds on the existing LVM growth unit: you can read PV, VG and LV reports. New-volume creation, explicit names, whole-extent allocation and raw-storage limits are taught here before the assignment.",
+            "concepts": [
+              {
+                "title": "A new LV is a new allocation, not more space in an old LV",
+                "text": "A physical volume supplies pieces of storage called extents. A volume group pools them. lvcreate reserves some of that pool under a new logical-volume name; lvextend instead grows a volume that already exists. Inspect pvs, vgs and lvs before changing the allocation."
+              },
+              {
+                "title": "Plan with whole pieces and leave the reserve",
+                "text": "With 4 MiB extents, a 12 MiB new volume needs three extents. A 9 MiB request also consumes three because it rounds up. Keep the required free extents for later work; 100%FREE uses everything currently free, not the total group size."
+              },
+              {
+                "title": "Raw storage is not a filesystem",
+                "text": "A new LV in this unit has no filesystem, files or mount. lvs proves its allocation, not that it can hold ordinary files yet. Formatting and mounting are separate skills; neither happens automatically here."
+              },
+              {
+                "title": "Recover only the new raw allocation",
+                "text": "If you allocated a new raw LV incorrectly, this subset supports lvremove -y VG/LV and then a corrected lvcreate. The -y option explicitly skips confirmation. Real lvremove can destroy data. This exercise refuses removal of filesystem-bearing LVs; do not treat that refusal as a safety feature of real Linux."
+              }
+            ],
+            "description": "Workshop has twelve 4 MiB extents. Ledger uses two; ten are free. Create practice at 12 MiB (three extents), leaving seven. The assignment uses another group, names and capacity plan.",
+            "fixture": {
+              "version": 1,
+              "provisioning": "Linear",
+              "devices": {
+                "/dev/workshopa": {
+                  "bytes": 51380224,
+                  "role": "PhysicalVolume",
+                  "group": "workshop"
+                },
+                "/dev/workspare": {
+                  "bytes": 17825792,
+                  "role": "Blank",
+                  "group": ""
+                },
+                "/dev/workforeign": {
+                  "bytes": 34603008,
+                  "role": "Foreign",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "workshop": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "ledger": {
+                      "extents": [
+                        {
+                          "pv": "/dev/workshopa",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/workshopa",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "workshop/ledger: retain this existing record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [],
+            "plan": {
+              "groups": [
+                {
+                  "name": "workshop",
+                  "extent_bytes": 4194304,
+                  "devices": [
+                    "/dev/workshopa"
+                  ],
+                  "reserve_extents": 7
+                }
+              ],
+              "volumes": [
+                {
+                  "id": "workshop/practice",
+                  "bytes": 12582912
+                }
+              ]
+            },
+            "worked": [
+              {
+                "text": "vgs",
+                "explanation": "Read the current free pool before allocating."
+              },
+              {
+                "text": "lvs",
+                "explanation": "Locate the existing ledger that must remain unchanged."
+              },
+              {
+                "text": "lvcreate -l 3 -n practice workshop",
+                "explanation": "Three 4 MiB extents make a new 12 MiB raw LV; seven extents remain free."
+              },
+              {
+                "text": "lvs",
+                "explanation": "Confirm practice exists without replacing ledger."
+              }
+            ],
+            "try_change": "After the separate example passes, run lvremove -y workshop/practice. Check the missing new raw volume, then recreate it with lvcreate -L 12M -n practice workshop and check again. Existing data remains.",
+            "experiment": "lvremove -y workshop/practice",
+            "repair": "lvcreate -L 12M -n practice workshop"
+          }
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect supplied devices and current allocations",
+        "Plan new group membership, sizes and reserves",
+        "Create only the required raw allocations",
+        "Verify all outcomes and retained data"
+      ],
+      "hints": [
+        "Read VFree and the group extent size before allocating a new LV.",
+        "Convert the requested MiB to whole extents; do not grow archive or consume all free space.",
+        "Use an explicit new LV name with lvcreate. If only that new raw allocation is wrong, remove it deliberately and recreate it; keep existing LVs unchanged."
+      ],
+      "explanation": "A group pools physical extents; a new raw LV consumes some of its free pool under a distinct name. Size and remaining reserve must both be right. Existing LVs and files are independent protected state. Reports verify allocations, not formatting, mounting or real-device safety.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/vgcreate.8.html",
+        "https://man7.org/linux/man-pages/man8/lvcreate.8.html",
+        "https://man7.org/linux/man-pages/man8/lvremove.8.html",
+        "https://www.man7.org/linux/man-pages/man8/lvm.8.html"
+      ],
+      "simplifications": "Opt-in bounded linear PV/VG/raw-LV provisioning over supplied virtual devices. Fixed 1 MiB data start; whole PE allocation; supported named command forms only. No host devices/commands, real metadata/activation/zeroing, filesystem creation, mounts, thin/RAID, snapshots, general removal/rename/shrink, mapper aliases or lvm.conf. Raw LV removal requires -y and refuses modeled filesystems; this is not a real-Linux safety guarantee.",
+      "solution": [
+        "vgs",
+        "lvs",
+        "lvcreate -L 24M -n staging harbor",
+        "lvs"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-handover"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-provision-group",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "New linear LVM allocations",
+      "unit": "lvm-linear-provisioning",
+      "title": "Build a separate volume group from the intended blank devices",
+      "summary": "Create intake using only /dev/builda and /dev/buildb, with 2 MiB extents.",
+      "objective": "Create intake using only /dev/builda and /dev/buildb, with 2 MiB extents. Create a raw intake/buffer LV of 20 MiB and keep at least fourteen extents free in intake. Preserve records, its ledger and all unrelated devices. sharedb carries foreign data. Create only the requested new group and volume; formatting and mounting are outside this task.",
+      "retry_guidance": "Read the failing group, size or preservation check. A refused command retains prior state. Remove and recreate only a newly allocated raw LV when necessary. Reset only this assignment if you need to restart an incorrect group plan.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/recordsa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "records"
+              },
+              "/dev/builda": {
+                "bytes": 34603008,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/buildb": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/sharedb": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "records": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 1
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 4096,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "records/ledger: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/recordsa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "records"
+              },
+              "/dev/builda": {
+                "bytes": 34603008,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/buildb": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/sharedb": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "records": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 1
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 4096,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "records/ledger: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/librarya": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "library"
+              },
+              "/dev/worka": {
+                "bytes": 26214400,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/workb": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/foreignb": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "library": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "index": {
+                    "extents": [
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "library/index: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/librarya": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "library"
+              },
+              "/dev/worka": {
+                "bytes": 26214400,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/workb": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/foreignb": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "library": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "index": {
+                    "extents": [
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "library/index: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/recordsa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "records"
+              },
+              "/dev/builda": {
+                "bytes": 34603008,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/buildb": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/sharedb": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "records": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 1
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 4096,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "records/ledger: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "targets": [],
+          "plan": {
+            "groups": [
+              {
+                "name": "intake",
+                "extent_bytes": 2097152,
+                "devices": [
+                  "/dev/builda",
+                  "/dev/buildb"
+                ],
+                "reserve_extents": 14
+              }
+            ],
+            "volumes": [
+              {
+                "id": "intake/buffer",
+                "bytes": 20971520
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Builds on the existing LVM growth unit: you can read PV, VG and LV reports. New-volume creation, explicit names, whole-extent allocation and raw-storage limits are taught here before the assignment.",
+            "concepts": [
+              {
+                "title": "Create the pool on the intended devices",
+                "text": "vgcreate NAME /dev/DEVICE... makes a new group and initializes supplied blank devices as physical volumes if needed. Explicit pvcreate first is another valid method. Its default extent is 4 MiB; -s 2M chooses 2 MiB extents. A device already in another group or carrying foreign data must stay untouched. This teaching profile starts usable data 1 MiB into each PV. Inspect vgs for whole usable extents rather than adding raw device sizes; real LVM metadata and alignment settings vary."
+              },
+              {
+                "title": "A new LV is a new allocation, not more space in an old LV",
+                "text": "A physical volume supplies pieces of storage called extents. A volume group pools them. lvcreate reserves some of that pool under a new logical-volume name; lvextend instead grows a volume that already exists. Inspect pvs, vgs and lvs before changing the allocation."
+              },
+              {
+                "title": "Plan with whole pieces and leave the reserve",
+                "text": "With 4 MiB extents, a 12 MiB new volume needs three extents. A 9 MiB request also consumes three because it rounds up. Keep the required free extents for later work; 100%FREE uses everything currently free, not the total group size."
+              },
+              {
+                "title": "Raw storage is not a filesystem",
+                "text": "A new LV in this unit has no filesystem, files or mount. lvs proves its allocation, not that it can hold ordinary files yet. Formatting and mounting are separate skills; neither happens automatically here."
+              },
+              {
+                "title": "Recover only the new raw allocation",
+                "text": "If you allocated a new raw LV incorrectly, this subset supports lvremove -y VG/LV and then a corrected lvcreate. The -y option explicitly skips confirmation. Real lvremove can destroy data. This exercise refuses removal of filesystem-bearing LVs; do not treat that refusal as a safety feature of real Linux."
+              }
+            ],
+            "description": "The separate workpool example combines two blank devices: six plus four default-size extents. Its 16 MiB sample consumes four, leaving six. Library/index is independent protected data. The assignment specifies a different extent size, so recalculate its pool.",
+            "fixture": {
+              "version": 1,
+              "provisioning": "Linear",
+              "devices": {
+                "/dev/librarya": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "group": "library"
+                },
+                "/dev/worka": {
+                  "bytes": 26214400,
+                  "role": "Blank",
+                  "group": ""
+                },
+                "/dev/workb": {
+                  "bytes": 17825792,
+                  "role": "Blank",
+                  "group": ""
+                },
+                "/dev/foreignb": {
+                  "bytes": 34603008,
+                  "role": "Foreign",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "library": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "index": {
+                      "extents": [
+                        {
+                          "pv": "/dev/librarya",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/librarya",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "library/index: retain this existing record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [],
+            "plan": {
+              "groups": [
+                {
+                  "name": "workpool",
+                  "extent_bytes": 4194304,
+                  "devices": [
+                    "/dev/worka",
+                    "/dev/workb"
+                  ],
+                  "reserve_extents": 6
+                }
+              ],
+              "volumes": [
+                {
+                  "id": "workpool/sample",
+                  "bytes": 16777216
+                }
+              ]
+            },
+            "worked": [
+              {
+                "text": "pvs",
+                "explanation": "Supplied blank devices are not listed as PVs until initialized; inspect the supplied device facts too."
+              },
+              {
+                "text": "vgcreate workpool /dev/worka /dev/workb",
+                "explanation": "Make a separate pool with the default 4 MiB extent; blank supplied devices are initialized as needed."
+              },
+              {
+                "text": "vgs",
+                "explanation": "The new pool has ten extents from the two devices."
+              },
+              {
+                "text": "lvcreate --name sample --size 16M workpool",
+                "explanation": "Four extents form the new raw sample LV; six remain free."
+              },
+              {
+                "text": "lvs",
+                "explanation": "Verify the new LV while the original library/index remains."
+              }
+            ],
+            "try_change": "After the separate example passes, run lvremove -y workpool/sample. Check the missing new raw volume, then recreate it with lvcreate -l 4 -n sample workpool and check again. Existing data remains.",
+            "experiment": "lvremove -y workpool/sample",
+            "repair": "lvcreate -l 4 -n sample workpool"
+          }
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect supplied devices and current allocations",
+        "Plan new group membership, sizes and reserves",
+        "Create only the required raw allocations",
+        "Verify all outcomes and retained data"
+      ],
+      "hints": [
+        "The supplied device facts distinguish blank devices from existing PVs and foreign data.",
+        "vgcreate makes a new pool; vgextend changes an existing one. The requested extent size applies when creating intake.",
+        "After group creation, verify its extent size and free count before creating buffer. Explicit pvcreate first is also valid."
+      ],
+      "explanation": "A group pools physical extents; a new raw LV consumes some of its free pool under a distinct name. Size and remaining reserve must both be right. Existing LVs and files are independent protected state. Reports verify allocations, not formatting, mounting or real-device safety.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/vgcreate.8.html",
+        "https://man7.org/linux/man-pages/man8/lvcreate.8.html",
+        "https://man7.org/linux/man-pages/man8/lvremove.8.html",
+        "https://www.man7.org/linux/man-pages/man8/lvm.8.html"
+      ],
+      "simplifications": "Opt-in bounded linear PV/VG/raw-LV provisioning over supplied virtual devices. Fixed 1 MiB data start; whole PE allocation; supported named command forms only. No host devices/commands, real metadata/activation/zeroing, filesystem creation, mounts, thin/RAID, snapshots, general removal/rename/shrink, mapper aliases or lvm.conf. Raw LV removal requires -y and refuses modeled filesystems; this is not a real-Linux safety guarantee.",
+      "solution": [
+        "pvs",
+        "vgcreate -s 2M intake /dev/builda /dev/buildb",
+        "lvcreate -l 10 -n buffer intake",
+        "vgs",
+        "lvs"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-provision-staging"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-provision-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "New linear LVM allocations",
+      "unit": "lvm-linear-provisioning",
+      "title": "Hand over two raw allocations while retaining future capacity",
+      "summary": "Create raw service/queue at 16 MiB; keep at least six free extents in service.",
+      "objective": "Create raw service/queue at 16 MiB; keep at least six free extents in service. Create delivery using only /dev/deliverya with 4 MiB extents. Create raw delivery/stage at 32 MiB and keep at least eight free extents there. Preserve service/history and its files, every unrelated device, and the unused sparec. sharedc carries foreign data. Create only those two new LVs and the one requested new group. Neither raw allocation needs formatting or mounting in this handover.",
+      "retry_guidance": "Read the failing group, size or preservation check. A refused command retains prior state. Remove and recreate only a newly allocated raw LV when necessary. Reset only this assignment if you need to restart an incorrect group plan.",
+      "difficulty": "Intermediate",
+      "minutes": 28,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/servicea": {
+                "bytes": 51380224,
+                "role": "PhysicalVolume",
+                "group": "service"
+              },
+              "/dev/deliverya": {
+                "bytes": 68157440,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/sparec": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/sharedc": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "service": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "history": {
+                    "extents": [
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "service/history: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/servicea": {
+                "bytes": 51380224,
+                "role": "PhysicalVolume",
+                "group": "service"
+              },
+              "/dev/deliverya": {
+                "bytes": 68157440,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/sparec": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/sharedc": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "service": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "history": {
+                    "extents": [
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "service/history: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/ateliera": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "atelier"
+              },
+              "/dev/outgoinga": {
+                "bytes": 51380224,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/worksparec": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/workforeignc": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "atelier": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "history": {
+                    "extents": [
+                      {
+                        "pv": "/dev/ateliera",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/ateliera",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "atelier/history: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/ateliera": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "atelier"
+              },
+              "/dev/outgoinga": {
+                "bytes": 51380224,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/worksparec": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/workforeignc": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "atelier": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "history": {
+                    "extents": [
+                      {
+                        "pv": "/dev/ateliera",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/ateliera",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "atelier/history: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "provisioning": "Linear",
+            "devices": {
+              "/dev/servicea": {
+                "bytes": 51380224,
+                "role": "PhysicalVolume",
+                "group": "service"
+              },
+              "/dev/deliverya": {
+                "bytes": 68157440,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/sparec": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/sharedc": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "service": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "history": {
+                    "extents": [
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "service/history: retain this existing record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "targets": [],
+          "plan": {
+            "groups": [
+              {
+                "name": "service",
+                "extent_bytes": 4194304,
+                "devices": [
+                  "/dev/servicea"
+                ],
+                "reserve_extents": 6
+              },
+              {
+                "name": "delivery",
+                "extent_bytes": 4194304,
+                "devices": [
+                  "/dev/deliverya"
+                ],
+                "reserve_extents": 8
+              }
+            ],
+            "volumes": [
+              {
+                "id": "service/queue",
+                "bytes": 16777216
+              },
+              {
+                "id": "delivery/stage",
+                "bytes": 33554432
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Builds on the existing LVM growth unit: you can read PV, VG and LV reports. New-volume creation, explicit names, whole-extent allocation and raw-storage limits are taught here before the assignment.",
+            "concepts": [
+              {
+                "title": "Plan two pools without mixing their devices",
+                "text": "Existing service capacity and a new delivery pool have separate free counts. A successful allocation in one does not prove the other. Keep the requested membership, sizes and reserves together in the plan."
+              },
+              {
+                "title": "Create the pool on the intended devices",
+                "text": "vgcreate NAME /dev/DEVICE... makes a new group and initializes supplied blank devices as physical volumes if needed. Explicit pvcreate first is another valid method. Its default extent is 4 MiB; -s 2M chooses 2 MiB extents. A device already in another group or carrying foreign data must stay untouched. This teaching profile starts usable data 1 MiB into each PV. Inspect vgs for whole usable extents rather than adding raw device sizes; real LVM metadata and alignment settings vary."
+              },
+              {
+                "title": "Plan with whole pieces and leave the reserve",
+                "text": "With 4 MiB extents, a 12 MiB new volume needs three extents. A 9 MiB request also consumes three because it rounds up. Keep the required free extents for later work; 100%FREE uses everything currently free, not the total group size."
+              },
+              {
+                "title": "Raw storage is not a filesystem",
+                "text": "A new LV in this unit has no filesystem, files or mount. lvs proves its allocation, not that it can hold ordinary files yet. Formatting and mounting are separate skills; neither happens automatically here."
+              },
+              {
+                "title": "Recover only the new raw allocation",
+                "text": "If you allocated a new raw LV incorrectly, this subset supports lvremove -y VG/LV and then a corrected lvcreate. The -y option explicitly skips confirmation. Real lvremove can destroy data. This exercise refuses removal of filesystem-bearing LVs; do not treat that refusal as a safety feature of real Linux."
+              }
+            ],
+            "description": "Atelier/history already occupies two of eight extents. Add an 8 MiB queue, leaving four. A separate twelve-extent outgoing group gets a 20 MiB package, leaving seven. Verify both pools and retained history before handing the example over.",
+            "fixture": {
+              "version": 1,
+              "provisioning": "Linear",
+              "devices": {
+                "/dev/ateliera": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "group": "atelier"
+                },
+                "/dev/outgoinga": {
+                  "bytes": 51380224,
+                  "role": "Blank",
+                  "group": ""
+                },
+                "/dev/worksparec": {
+                  "bytes": 17825792,
+                  "role": "Blank",
+                  "group": ""
+                },
+                "/dev/workforeignc": {
+                  "bytes": 34603008,
+                  "role": "Foreign",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "atelier": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "history": {
+                      "extents": [
+                        {
+                          "pv": "/dev/ateliera",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/ateliera",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "atelier/history: retain this existing record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [],
+            "plan": {
+              "groups": [
+                {
+                  "name": "atelier",
+                  "extent_bytes": 4194304,
+                  "devices": [
+                    "/dev/ateliera"
+                  ],
+                  "reserve_extents": 4
+                },
+                {
+                  "name": "outgoing",
+                  "extent_bytes": 4194304,
+                  "devices": [
+                    "/dev/outgoinga"
+                  ],
+                  "reserve_extents": 7
+                }
+              ],
+              "volumes": [
+                {
+                  "id": "atelier/queue",
+                  "bytes": 8388608
+                },
+                {
+                  "id": "outgoing/package",
+                  "bytes": 20971520
+                }
+              ]
+            },
+            "worked": [
+              {
+                "text": "vgs",
+                "explanation": "Plan both independent reserves before changing either allocation."
+              },
+              {
+                "text": "lvcreate -L 8M -n queue atelier",
+                "explanation": "Allocate two extents in the existing pool; retain history and four free extents."
+              },
+              {
+                "text": "vgcreate outgoing /dev/outgoinga",
+                "explanation": "Use only the supplied new-work device, not the spare or foreign device."
+              },
+              {
+                "text": "lvcreate -l 5 -n package outgoing",
+                "explanation": "Allocate five extents, leaving seven in the new group."
+              },
+              {
+                "text": "vgs",
+                "explanation": "Verify each group reserve independently."
+              },
+              {
+                "text": "lvs",
+                "explanation": "Both raw LVs and protected history must coexist."
+              }
+            ],
+            "try_change": "After the separate example passes, run lvremove -y outgoing/package. Check the missing new raw volume, then recreate it with lvcreate -L 20M -n package outgoing and check again. Existing data remains.",
+            "experiment": "lvremove -y outgoing/package",
+            "repair": "lvcreate -L 20M -n package outgoing"
+          }
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect supplied devices and current allocations",
+        "Plan new group membership, sizes and reserves",
+        "Create only the required raw allocations",
+        "Verify all outcomes and retained data"
+      ],
+      "hints": [
+        "Inspect both group membership and free counts; do not add every blank device to the first group.",
+        "Each requested raw LV has its own group, size and reserve. Check partial feedback to locate the incomplete pool.",
+        "Supported creation order may differ. A correct first allocation should remain while you repair only a wrong new raw allocation in the other pool."
+      ],
+      "explanation": "A group pools physical extents; a new raw LV consumes some of its free pool under a distinct name. Size and remaining reserve must both be right. Existing LVs and files are independent protected state. Reports verify allocations, not formatting, mounting or real-device safety.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/vgcreate.8.html",
+        "https://man7.org/linux/man-pages/man8/lvcreate.8.html",
+        "https://man7.org/linux/man-pages/man8/lvremove.8.html",
+        "https://www.man7.org/linux/man-pages/man8/lvm.8.html"
+      ],
+      "simplifications": "Opt-in bounded linear PV/VG/raw-LV provisioning over supplied virtual devices. Fixed 1 MiB data start; whole PE allocation; supported named command forms only. No host devices/commands, real metadata/activation/zeroing, filesystem creation, mounts, thin/RAID, snapshots, general removal/rename/shrink, mapper aliases or lvm.conf. Raw LV removal requires -y and refuses modeled filesystems; this is not a real-Linux safety guarantee.",
+      "solution": [
+        "vgs",
+        "lvcreate -l 4 -n queue service",
+        "vgcreate delivery /dev/deliverya",
+        "lvcreate -L 32M -n stage delivery",
+        "vgs",
+        "lvs"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-provision-group"
+      ]
+    }
+  ]
+}

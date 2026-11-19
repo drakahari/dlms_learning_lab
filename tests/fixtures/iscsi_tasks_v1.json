@@ -1,0 +1,372 @@
+[
+  {
+    "definition": {
+      "version": 1,
+      "source_id": "lpic2-iscsi-target-identity",
+      "assignment": {
+        "inventory": {
+          "exports": [
+            {
+              "key": {
+                "target": "iqn.2025-03.example.storage:archive-test",
+                "portal": {
+                  "address": "203.0.113.19",
+                  "port": 3261
+                }
+              },
+              "discovery": {
+                "address": "203.0.113.17",
+                "port": 3260
+              },
+              "group": 1,
+              "login_available": true,
+              "devices": [
+                {
+                  "lun": 0,
+                  "name": "sdb",
+                  "wwn": "0x5000000000000533"
+                }
+              ]
+            },
+            {
+              "key": {
+                "target": "iqn.2025-03.example.storage:archive",
+                "portal": {
+                  "address": "203.0.113.19",
+                  "port": 3261
+                }
+              },
+              "discovery": {
+                "address": "203.0.113.17",
+                "port": 3260
+              },
+              "group": 2,
+              "login_available": true,
+              "devices": [
+                {
+                  "lun": 0,
+                  "name": "sdc",
+                  "wwn": "0x5000000000000531"
+                }
+              ]
+            }
+          ]
+        },
+        "initial": {
+          "nodes": [],
+          "active": [],
+          "next_id": 1
+        },
+        "goal": {
+          "target": {
+            "target": "iqn.2025-03.example.storage:archive",
+            "portal": {
+              "address": "203.0.113.19",
+              "port": 3261
+            }
+          },
+          "lun": 0,
+          "wwn": "0x5000000000000531",
+          "automatic_at_startup": false
+        }
+      },
+      "example": {
+        "inventory": {
+          "exports": [
+            {
+              "key": {
+                "target": "iqn.2024-04.example.training:media-test",
+                "portal": {
+                  "address": "198.51.100.43",
+                  "port": 3261
+                }
+              },
+              "discovery": {
+                "address": "198.51.100.41",
+                "port": 3260
+              },
+              "group": 1,
+              "login_available": true,
+              "devices": [
+                {
+                  "lun": 0,
+                  "name": "sdb",
+                  "wwn": "0x5000000000000233"
+                }
+              ]
+            },
+            {
+              "key": {
+                "target": "iqn.2024-04.example.training:media",
+                "portal": {
+                  "address": "198.51.100.43",
+                  "port": 3261
+                }
+              },
+              "discovery": {
+                "address": "198.51.100.41",
+                "port": 3260
+              },
+              "group": 2,
+              "login_available": true,
+              "devices": [
+                {
+                  "lun": 0,
+                  "name": "sdc",
+                  "wwn": "0x5000000000000231"
+                }
+              ]
+            }
+          ]
+        },
+        "initial": {
+          "nodes": [],
+          "active": [],
+          "next_id": 1
+        },
+        "goal": {
+          "target": {
+            "target": "iqn.2024-04.example.training:media",
+            "portal": {
+              "address": "198.51.100.43",
+              "port": 3261
+            }
+          },
+          "lun": 0,
+          "wwn": "0x5000000000000231",
+          "automatic_at_startup": false
+        }
+      }
+    },
+    "assignment_commands": [
+      "iscsiadm -m discoverydb -t sendtargets -p 203.0.113.17:3260 --discover",
+      "iscsiadm -m node",
+      "iscsiadm -m node -T iqn.2025-03.example.storage:archive -p 203.0.113.19:3261 --login",
+      "iscsiadm -m session -P 3",
+      "lsblk -o NAME,WWN"
+    ],
+    "example_commands": [
+      "iscsiadm -m discoverydb -t sendtargets -p 198.51.100.41:3260 --discover",
+      "iscsiadm -m node",
+      "iscsiadm -m node -T iqn.2024-04.example.training:media -p 198.51.100.43:3261 --login",
+      "iscsiadm -m session -P 3",
+      "lsblk -o NAME,WWN"
+    ]
+  },
+  {
+    "definition": {
+      "version": 1,
+      "source_id": "lpic2-iscsi-startup-policy",
+      "assignment": {
+        "inventory": {
+          "exports": [
+            {
+              "key": {
+                "target": "iqn.2025-03.example.storage:index",
+                "portal": {
+                  "address": "203.0.113.82",
+                  "port": 3260
+                }
+              },
+              "discovery": {
+                "address": "203.0.113.81",
+                "port": 3260
+              },
+              "group": 2,
+              "login_available": true,
+              "devices": [
+                {
+                  "lun": 4,
+                  "name": "sdd",
+                  "wwn": "0x5000000000000a43"
+                }
+              ]
+            },
+            {
+              "key": {
+                "target": "iqn.2025-03.example.storage:audit",
+                "portal": {
+                  "address": "203.0.113.89",
+                  "port": 3260
+                }
+              },
+              "discovery": {
+                "address": "203.0.113.89",
+                "port": 3260
+              },
+              "group": 3,
+              "login_available": true,
+              "devices": [
+                {
+                  "lun": 1,
+                  "name": "sdb",
+                  "wwn": "0x5000000000000524"
+                }
+              ]
+            }
+          ]
+        },
+        "initial": {
+          "nodes": [
+            {
+              "key": {
+                "target": "iqn.2025-03.example.storage:index",
+                "portal": {
+                  "address": "203.0.113.82",
+                  "port": 3260
+                }
+              },
+              "startup": "manual"
+            },
+            {
+              "key": {
+                "target": "iqn.2025-03.example.storage:audit",
+                "portal": {
+                  "address": "203.0.113.89",
+                  "port": 3260
+                }
+              },
+              "startup": "manual"
+            }
+          ],
+          "active": [
+            {
+              "key": {
+                "target": "iqn.2025-03.example.storage:audit",
+                "portal": {
+                  "address": "203.0.113.89",
+                  "port": 3260
+                }
+              },
+              "id": 1
+            }
+          ],
+          "next_id": 2
+        },
+        "goal": {
+          "target": {
+            "target": "iqn.2025-03.example.storage:index",
+            "portal": {
+              "address": "203.0.113.82",
+              "port": 3260
+            }
+          },
+          "lun": 4,
+          "wwn": "0x5000000000000a43",
+          "automatic_at_startup": true
+        }
+      },
+      "example": {
+        "inventory": {
+          "exports": [
+            {
+              "key": {
+                "target": "iqn.2024-04.example.training:reports",
+                "portal": {
+                  "address": "198.51.100.63",
+                  "port": 3260
+                }
+              },
+              "discovery": {
+                "address": "198.51.100.62",
+                "port": 3260
+              },
+              "group": 2,
+              "login_available": true,
+              "devices": [
+                {
+                  "lun": 2,
+                  "name": "sdd",
+                  "wwn": "0x5000000000000773"
+                }
+              ]
+            },
+            {
+              "key": {
+                "target": "iqn.2024-04.example.training:scratch",
+                "portal": {
+                  "address": "198.51.100.69",
+                  "port": 3260
+                }
+              },
+              "discovery": {
+                "address": "198.51.100.69",
+                "port": 3260
+              },
+              "group": 3,
+              "login_available": true,
+              "devices": [
+                {
+                  "lun": 1,
+                  "name": "sdb",
+                  "wwn": "0x5000000000000123"
+                }
+              ]
+            }
+          ]
+        },
+        "initial": {
+          "nodes": [
+            {
+              "key": {
+                "target": "iqn.2024-04.example.training:reports",
+                "portal": {
+                  "address": "198.51.100.63",
+                  "port": 3260
+                }
+              },
+              "startup": "manual"
+            },
+            {
+              "key": {
+                "target": "iqn.2024-04.example.training:scratch",
+                "portal": {
+                  "address": "198.51.100.69",
+                  "port": 3260
+                }
+              },
+              "startup": "manual"
+            }
+          ],
+          "active": [
+            {
+              "key": {
+                "target": "iqn.2024-04.example.training:scratch",
+                "portal": {
+                  "address": "198.51.100.69",
+                  "port": 3260
+                }
+              },
+              "id": 1
+            }
+          ],
+          "next_id": 2
+        },
+        "goal": {
+          "target": {
+            "target": "iqn.2024-04.example.training:reports",
+            "portal": {
+              "address": "198.51.100.63",
+              "port": 3260
+            }
+          },
+          "lun": 2,
+          "wwn": "0x5000000000000773",
+          "automatic_at_startup": true
+        }
+      }
+    },
+    "assignment_commands": [
+      "iscsiadm -m node -T iqn.2025-03.example.storage:index -p 203.0.113.82:3260 --op update -n node.startup -v automatic",
+      "iscsiadm -m node --loginall=automatic",
+      "iscsiadm -m session -P 3",
+      "lsblk -o NAME,WWN"
+    ],
+    "example_commands": [
+      "iscsiadm -m node -T iqn.2024-04.example.training:reports -p 198.51.100.63:3260 --op update -n node.startup -v automatic",
+      "iscsiadm -m node --loginall=automatic",
+      "iscsiadm -m session -P 3",
+      "lsblk -o NAME,WWN"
+    ]
+  }
+]

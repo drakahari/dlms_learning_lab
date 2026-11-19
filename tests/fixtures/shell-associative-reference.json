@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "fresh-map",
+      "source": "declare -A m\nprintf 'count=%s missing=<%s>\\n' \"${#m[@]}\" \"${m[missing]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n"
+      }
+    },
+    {
+      "id": "same-type-redeclaration",
+      "source": "declare -A m\nm[site]=east\nm[owner]='north team'\ndeclare -A m\nprintf '%s|%s|%s\\n' \"${m[site]}\" \"${m[owner]}\" \"${#m[@]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n"
+      }
+    },
+    {
+      "id": "quoted-literal-data",
+      "source": "declare -A m\nm[\"site name\"]='north wing'\nm[note]='cost $5 [ready] *'\nkey='site name'\nprintf '%s|%s\\n' \"${m[$key]}\" \"${m[note]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n",
+        "alpha.txt": "A glob must remain data.\n"
+      }
+    },
+    {
+      "id": "dynamic-key-is-data",
+      "source": "declare -A m\nkey='group ] $cash \"quoted\"'\nvalue='two words * [tag] $amount'\nm[\"$key\"]=\"$value\"\nprintf '<%s>|<%s>|%s\\n' \"$key\" \"${m[$key]}\" \"${#m[@]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n"
+      }
+    },
+    {
+      "id": "numeric-string-keys",
+      "source": "declare -A m\nm[01]=leading\nm[1]=ordinary\nm[0]=zero\nprintf '%s|%s|%s|%s\\n' \"${m[01]}\" \"${m[1]}\" \"${m[0]}\" \"${#m[@]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n"
+      }
+    },
+    {
+      "id": "missing-and-empty-values",
+      "source": "declare -A m\nprintf 'before=%s missing=<%s>\\n' \"${#m[@]}\" \"${m[missing]}\"\nm[empty]=''\nprintf 'after=%s empty=<%s> missing=<%s>\\n' \"${#m[@]}\" \"${m[empty]}\" \"${m[missing]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n"
+      }
+    },
+    {
+      "id": "replacement-retains-count",
+      "source": "declare -A m\nkey=team\nm[\"$key\"]='old value'\nm[other]=kept\nm[\"$key\"]='new value'\nprintf '%s|%s|%s\\n' \"${m[$key]}\" \"${m[other]}\" \"${#m[@]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n"
+      }
+    },
+    {
+      "id": "plain-write-and-read-key-zero",
+      "source": "declare -A m\nm[keep]=retained\nm[0]='old zero'\nm='new zero'\nprintf '%s|%s|%s|%s\\n' \"$m\" \"${m[0]}\" \"${m[keep]}\" \"${#m[@]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n"
+      }
+    },
+    {
+      "id": "read-writes-key-zero",
+      "source": "declare -A m\nm[keep]=retained\nIFS= read -r m < value.txt\nprintf '%s|%s|%s\\n' \"$m\" \"${m[keep]}\" \"${#m[@]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n",
+        "value.txt": "new read value\n"
+      }
+    },
+    {
+      "id": "loop-writes-key-zero",
+      "source": "declare -A m\nm[keep]=retained\nfor m in first 'second item'; do printf '<%s>|%s\\n' \"$m\" \"${m[keep]}\"; done\nprintf 'final=<%s> count=%s\\n' \"${m[0]}\" \"${#m[@]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n"
+      }
+    },
+    {
+      "id": "global-function-write",
+      "source": "declare -A m\nm[site]=old\nupdate() { m[site]='new value'; }\nupdate\nprintf '%s|%s\\n' \"${m[site]}\" \"${#m[@]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n"
+      }
+    },
+    {
+      "id": "capture-isolates-map-bindings",
+      "source": "declare -A m\nm[site]=parent\nchild=$(m[site]=child; printf '%s' \"${m[site]}\")\nprintf '%s|%s|%s\\n' \"$child\" \"${m[site]}\" \"${#m[@]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n"
+      }
+    },
+    {
+      "id": "pipeline-isolates-key-zero",
+      "source": "declare -A m\nm[0]=parent\nm[keep]=retained\nprintf '%s\\n' child | IFS= read -r m\nprintf '%s|%s|%s\\n' \"$m\" \"${m[keep]}\" \"${#m[@]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n"
+      }
+    },
+    {
+      "id": "assignment-context-value",
+      "source": "declare -A m\nvalue='north wing * [tag] $cash'\nm[fixed]=$value\nprintf '<%s>|%s\\n' \"${m[fixed]}\" \"${#m[@]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n",
+        "alpha.txt": "Do not expand to this file.\n"
+      }
+    },
+    {
+      "id": "function-failure-keeps-write",
+      "source": "declare -A m\nm[site]=old\nupdate() { m[site]=changed; return 7; }\nupdate || printf 'status=%s\\n' \"$?\"\nprintf '%s|%s\\n' \"${m[site]}\" \"${#m[@]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n"
+      }
+    },
+    {
+      "id": "utf-eight-key-data",
+      "source": "declare -A m\nkey='site café'\nvalue='équipe nord'\nm[\"$key\"]=\"$value\"\nprintf '<%s>|<%s>|%s\\n' \"$key\" \"${m[$key]}\" \"${#m[@]}\"\n",
+      "files": {
+        "keep.txt": "Retain this unrelated fixture.\n"
+      }
+    }
+  ]
+}

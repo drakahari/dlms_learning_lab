@@ -1,0 +1,410 @@
+//! Actual egui layouts/inputs; separate from native or novice acceptance.
+use super::*;
+use dlms_learning_lab::lvm_workspace as work;
+const IDS: [&str; 2] = smoke::lvm_provisioning::PV_IDS;
+fn opened(id: &str) -> (egui::Context, LabApp, usize) {
+    let ctx = egui::Context::default();
+    let mut a = LabApp::from_context_with_pilot(&ctx, true, false, true);
+    a.smoke = false;
+    let i = a.scenarios.iter().position(|s| s.id == id).unwrap();
+    a.launch(i);
+    draw(&ctx, &mut a);
+    (ctx, a, i)
+}
+fn view(a: &mut LabApp, i: usize, v: teaching::View) {
+    let engine::Goal::Lvm { definition } = a.scenarios[i].goal.clone() else {
+        panic!()
+    };
+    let engine::State::Lvm { simulation } = &mut a
+        .progress
+        .attempts
+        .get_mut(&a.scenarios[i].id)
+        .unwrap()
+        .state
+    else {
+        panic!()
+    };
+    simulation.set_view(&definition, v).unwrap();
+    a.lesson_scroll_reset = true;
+}
+fn sim(a: &LabApp, i: usize) -> &work::Session {
+    let engine::State::Lvm { simulation } = &a.progress.attempts[&a.scenarios[i].id].state else {
+        panic!()
+    };
+    simulation
+}
+fn text(shape: &egui::Shape, out: &mut String) {
+    match shape {
+        egui::Shape::Text(t) => {
+            assert!(!t.galley.job.justify, "Stretched lesson text");
+            out.push_str(&t.galley.job.text);
+            out.push('\n');
+        }
+        egui::Shape::Vec(v) => {
+            for s in v {
+                text(s, out)
+            }
+        }
+        _ => {}
+    }
+}
+fn rendered(ctx: &egui::Context, a: &mut LabApp) -> String {
+    rendered_events(ctx, a, vec![])
+}
+fn rendered_events(ctx: &egui::Context, a: &mut LabApp, events: Vec<egui::Event>) -> String {
+    let out = ctx.run(
+        egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(1500., 7000.),
+            )),
+            events,
+            ..Default::default()
+        },
+        |ctx| a.render(ctx),
+    );
+    let mut s = String::new();
+    for shape in out.shapes {
+        text(&shape.shape, &mut s);
+    }
+    s
+}
+fn target(ctx: &egui::Context, a: &mut LabApp, key: &str, w: f32, h: f32) -> egui::Rect {
+    let mut stable = None;
+    for _ in 0..40 {
+        frame(ctx, a, w, h, vec![]);
+        let r = smoke::lvm_provisioning::control(a, key).unwrap_or_else(|| panic!("Missing {key}"));
+        let clip = a
+            .metrics
+            .main_viewport
+            .unwrap()
+            .intersect(ctx.content_rect());
+        if smoke::smoke_control_visible(r, clip, ctx.pixels_per_point()) {
+            if stable == Some((r, clip)) {
+                return r;
+            }
+            stable = Some((r, clip));
+            frame(ctx, a, w, h, vec![egui::Event::PointerMoved(r.center())]);
+            continue;
+        }
+        stable = None;
+        frame(
+            ctx,
+            a,
+            w,
+            h,
+            vec![
+                egui::Event::PointerMoved(egui::pos2(clip.left() + 1., clip.center().y)),
+                egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., (clip.center().y - r.center().y).clamp(-500., 500.)),
+                    modifiers: Default::default(),
+                },
+            ],
+        );
+        for _ in 0..8 {
+            frame(ctx, a, w, h, vec![]);
+        }
+    }
+    panic!("{key} failed to reflow/scroll at {w}x{h}")
+}
+#[test]
+fn pv_lvm_all_three_views_teach_before_practice_and_hide_independent_solution_commands() {
+    for id in IDS {
+        let (ctx, mut a, i) = opened(id);
+        for v in [
+            teaching::View::Introduction,
+            teaching::View::Example,
+            teaching::View::Assignment,
+        ] {
+            view(&mut a, i, v);
+            let s = rendered(&ctx, &mut a);
+            assert!(a.preview_view_ready(i, v));
+            assert!(a.preview_action_rect().is_some());
+            match v {
+                teaching::View::Introduction => {
+                    assert!(s.contains("Worked example"));
+                    let engine::Goal::Lvm { definition } = &a.scenarios[i].goal else {
+                        panic!()
+                    };
+                    for command in &definition.lesson.worked {
+                        assert!(s.contains(&command.text), "Missing full worked command");
+                        assert!(
+                            s.contains(&command.explanation),
+                            "Missing command explanation"
+                        );
+                    }
+                    assert!(s.contains("Try this example"));
+                    assert!(s.contains("pvresize"));
+                    assert!(s.contains("device"));
+                    assert!(s.contains("PV"));
+                }
+                teaching::View::Example => {
+                    assert!(s.contains("Insert selected command"));
+                    assert!(s.contains("Check separate example"));
+                    assert!(s.contains("Observe:"));
+                    assert!(s.contains("Supplied device facts"));
+                }
+                teaching::View::Assignment => {
+                    assert!(s.contains("Requirements"));
+                    assert!(s.contains("Check work"));
+                    assert!(s.contains("Supplied device facts"));
+                    let engine::Goal::Lvm { definition } = &a.scenarios[i].goal else {
+                        panic!()
+                    };
+                    assert!(!s.contains("Worked example"));
+                    for c in &definition.lesson.worked {
+                        if c.text.starts_with("pvresize")
+                            || c.text.starts_with("lvextend")
+                            || c.text.starts_with("resize2fs")
+                        {
+                            assert!(!s.contains(&c.text), "Assignment exposed a worked command");
+                        }
+                    }
+                }
+            }
+        }
+        a.progress.attempts.get_mut(id).unwrap().challenge = true;
+        let s = rendered(&ctx, &mut a);
+        assert!(!s.contains("Worked example"));
+        assert!(!s.contains("Try this example"));
+        assert!(s.contains("Requirements"));
+    }
+}
+#[test]
+fn pv_lvm_command_height_and_visible_controls_survive_widths_scales_and_both_theme_types() {
+    let (ctx, mut a, i) = opened(IDS[1]);
+    view(&mut a, i, teaching::View::Assignment);
+    for light in [false, true] {
+        a.theme_id = if light {
+            theme::inventory()
+                .iter()
+                .find(|t| t.light)
+                .unwrap()
+                .id
+                .clone()
+        } else {
+            theme::Preferences::default().theme
+        };
+        theme::apply(&ctx, &a.theme_id);
+        for width in [760., 1600.] {
+            for scale in [1., 1.15, 1.25, 1.5, 2.] {
+                a.scale = scale;
+                ctx.set_zoom_factor(scale);
+                a.lesson_scroll_reset = true;
+                let r = target(&ctx, &mut a, "command", width, 900.);
+                let run = smoke::lvm_provisioning::control(&a, "run").unwrap();
+                assert!(
+                    (r.height() - run.height()).abs() < 1.1,
+                    "Control heights {width}/{scale}"
+                );
+                let clip = a
+                    .metrics
+                    .main_viewport
+                    .unwrap()
+                    .intersect(ctx.content_rect());
+                assert!(
+                    r.left() >= clip.left() - 1. && r.right() <= clip.right() + 1.,
+                    "Command clipped {width}/{scale}"
+                );
+                let check = target(&ctx, &mut a, "check", width, 900.);
+                assert!(check.width() > 0.);
+            }
+        }
+    }
+}
+fn edit_enter(ctx: &egui::Context, a: &mut LabApp, value: &str, run: bool) {
+    let r = target(ctx, a, "command", 1200., 950.);
+    click(ctx, a, r);
+    let id = a.metrics.lvm.fields[0].2;
+    assert_eq!(ctx.memory(|m| m.focused()), Some(id));
+    let modifiers = egui::Modifiers {
+        ctrl: true,
+        command: true,
+        ..Default::default()
+    };
+    frame(
+        ctx,
+        a,
+        1200.,
+        950.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers,
+            },
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: false,
+                repeat: false,
+                modifiers,
+            },
+            egui::Event::Paste(value.into()),
+        ],
+    );
+    if run {
+        frame(
+            ctx,
+            a,
+            1200.,
+            950.,
+            vec![egui::Event::Key {
+                key: egui::Key::Enter,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: Default::default(),
+            }],
+        );
+    }
+}
+#[test]
+fn pv_lvm_keyboard_runs_layers_individually_preserves_edit_focus_and_invalidates_current_success() {
+    let (ctx, mut a, i) = opened(IDS[0]);
+    view(&mut a, i, teaching::View::Assignment);
+    let before = sim(&a, i).current.clone();
+    edit_enter(&ctx, &mut a, "pvresize /dev/vaulta", false);
+    assert_eq!(sim(&a, i).current, before);
+    for (c, pass) in [
+        ("pvresize /dev/vaulta", false),
+        ("lvextend -L 24M vault/index", false),
+        ("resize2fs /dev/vault/index", true),
+        ("pvresize --setphysicalvolumesize 33M /dev/vaulta", false),
+    ] {
+        edit_enter(&ctx, &mut a, c, true);
+        assert_eq!(
+            progress::current_solved(&a.progress.attempts[IDS[0]], &a.scenarios[i]),
+            pass
+        );
+    }
+    assert!(!sim(&a, i).checked);
+    edit_enter(&ctx, &mut a, "pvs", false);
+    let field = a.metrics.lvm.fields[0].2;
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        950.,
+        vec![egui::Event::Key {
+            key: egui::Key::Tab,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: Default::default(),
+        }],
+    );
+    assert_ne!(ctx.memory(|m| m.focused()), Some(field));
+    assert!(ctx.memory(|m| m.focused()).is_some());
+}
+#[test]
+fn pv_lvm_visible_device_metadata_placement_and_shifted_feedback_keep_their_meaning() {
+    for (id, device, recognized, high) in [
+        (IDS[0], "65 MiB", "17 MiB", "3"),
+        (IDS[1], "33 MiB", "33 MiB", "4"),
+    ] {
+        let (ctx, mut a, i) = opened(id);
+        view(&mut a, i, teaching::View::Assignment);
+        let body = rendered(&ctx, &mut a);
+        assert!(body.contains("Supplied device facts"));
+        assert!(a.metrics.lvm.physical_facts.iter().any(|t| {
+            t.contains(&format!("Device {device} · recognized PV {recognized}"))
+                && t.contains(&format!("highest allocated PE {high}"))
+        }));
+        if id == IDS[0] {
+            let source = a.scenarios[i].clone();
+            engine::execute_for_goal(
+                &mut a.progress.attempts.get_mut(id).unwrap().state,
+                &source.goal,
+                "pvresize /dev/vaulta",
+            )
+            .unwrap();
+            let r = target(&ctx, &mut a, "check", 1200., 950.);
+            click(&ctx, &mut a, r);
+            let body = rendered(&ctx, &mut a);
+            assert!(body.contains("vault/index: Current LV 8 MiB; required at least 24 MiB"));
+            assert!(
+                body.contains("vault/index: Current filesystem 8 MiB; required at least 24 MiB")
+            );
+            assert!(
+                a.metrics
+                    .lvm
+                    .feedback_texts
+                    .iter()
+                    .any(|t| t.contains("recognized PV 65 MiB; required 65 MiB"))
+            );
+        }
+    }
+}
+#[test]
+fn pv_lvm_retained_reader_uses_actual_model_and_does_not_imply_kernel_mount_or_availability() {
+    let (ctx, mut a, i) = opened(IDS[0]);
+    view(&mut a, i, teaching::View::Assignment);
+    let r = target(&ctx, &mut a, "inspect-files", 1200., 950.);
+    click(&ctx, &mut a, r);
+    let source = a.scenarios[i].clone();
+    for c in &source.solution {
+        engine::execute_for_goal(
+            &mut a.progress.attempts.get_mut(IDS[0]).unwrap().state,
+            &source.goal,
+            c,
+        )
+        .unwrap();
+    }
+    let mut body = String::new();
+    for _ in 0..5 {
+        body = rendered(&ctx, &mut a);
+    }
+    assert!(body.contains("Mount/kernel availability is not modeled here"));
+    assert!(
+        a.metrics
+            .lvm
+            .reader_records
+            .iter()
+            .any(|r| r.0 == "vault/index:/keep.txt" && r.1)
+    );
+    for _ in 0..20 {
+        let (_, rect, clip) = a
+            .metrics
+            .lvm
+            .reader_rows
+            .iter()
+            .find(|r| r.0 == "vault/index:/keep.txt")
+            .unwrap();
+        if smoke::smoke_control_visible(*rect, *clip, ctx.pixels_per_point()) {
+            break;
+        }
+        let events = vec![
+            egui::Event::PointerMoved(clip.center()),
+            egui::Event::MouseWheel {
+                unit: egui::MouseWheelUnit::Point,
+                delta: egui::vec2(0., (clip.center().y - rect.center().y).clamp(-420., 420.)),
+                modifiers: Default::default(),
+            },
+        ];
+        body = rendered_events(&ctx, &mut a, events);
+        for _ in 0..8 {
+            body = rendered(&ctx, &mut a);
+        }
+    }
+    let (_, rect, clip) = a
+        .metrics
+        .lvm
+        .reader_rows
+        .iter()
+        .find(|r| r.0 == "vault/index:/keep.txt")
+        .unwrap();
+    assert!(smoke::smoke_control_visible(
+        *rect,
+        *clip,
+        ctx.pixels_per_point()
+    ));
+    assert!(body.contains("vault/index: retain this original record."));
+    assert!(progress::current_solved(
+        &a.progress.attempts[IDS[0]],
+        &source
+    ));
+}

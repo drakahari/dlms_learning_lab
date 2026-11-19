@@ -1,4 +1,6 @@
 //! Logical script-free Debian package model. No real archive/command/rollback claim.
+mod conffiles;
+pub use conffiles::{ConffileDecision, ConffileSelection, ConffileUpgrade, ConffileDisposition, conffile_disposition};
 use serde::{
     Deserialize, Deserializer, Serialize,
     de::{DeserializeSeed, Error as _, MapAccess, SeqAccess, Visitor},
@@ -26,6 +28,7 @@ pub enum ErrorCode {
     Unavailable,
     Architecture,
     Dependency,
+    Conflict,
     Collision,
     Conffile,
 }
@@ -381,6 +384,8 @@ pub struct Archive {
     pub architecture: Architecture,
     #[serde(deserialize_with = "list::<_,Dependency,8>")]
     pub depends: Vec<Dependency>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty", deserialize_with = "list::<_,Dependency,8>")]
+    pub conflicts: Vec<Dependency>,
     #[serde(deserialize_with = "map::<_,Payload,32,160>")]
     pub files: BTreeMap<String, Payload>,
 }
@@ -455,6 +460,7 @@ impl Catalog {
             if !id(k)
                 || !name(&a.name)
                 || a.depends.len() > 8
+                || a.conflicts.len() > 8
                 || a.files.len() > 32
                 || parts(a.version.as_str()).is_err()
             {
@@ -479,6 +485,11 @@ impl Catalog {
             for d in &a.depends {
                 if !name(&d.name) {
                     return Err(error(ErrorCode::Invalid, "Invalid dependency name"));
+                }
+            }
+            for d in &a.conflicts {
+                if !name(&d.name) {
+                    return Err(error(ErrorCode::Invalid, "Invalid Conflicts package name"));
                 }
             }
         }
@@ -774,6 +785,7 @@ pub struct Request {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Action {
+    UpgradeConffiles { upgrade: ConffileUpgrade },
     RefreshIndex {},
     Install {
         #[serde(deserialize_with = "list::<_,Request,8>")]
@@ -807,6 +819,7 @@ impl Action {
     }
     fn validate(&self) -> Result<()> {
         let good = match self {
+            Self::UpgradeConffiles{upgrade} => upgrade.valid_shape() && within(self,16_384),
             Self::RefreshIndex {} => true,
             Self::Install { packages } => {
                 !packages.is_empty()
@@ -1065,6 +1078,100 @@ impl State {
                 p.cached = Some(&self.catalog.published);
             }
             Action::Install { packages } => {
+                self.prepare_install(&mut p,packages,&mut budget,None)?;
+            }
+            Action::UpgradeConffiles { upgrade } => {
+                self.validate_conffile_upgrade(upgrade,true,&mut budget)?;
+                let version=self.catalog.archives[&upgrade.incoming_archive].version.clone();
+                let request=Request{name:upgrade.package.clone(),version:Some(version)};
+                self.prepare_install(&mut p,std::slice::from_ref(&request),&mut budget,Some(upgrade))?;
+            }
+            Action::Reinstall { name: n } => {
+                ensure_no_conflicts(&self.catalog, &p.records, &mut budget)?;
+                let r = self
+                    .runtime
+                    .records
+                    .get(n)
+                    .filter(|r| r.status == Status::Installed)
+                    .ok_or_else(|| {
+                        error(
+                            ErrorCode::Unavailable,
+                            "Reinstall requires a currently installed record",
+                        )
+                    })?;
+                self.acquire(&mut p, &r.archive)?;
+                self.install_files(&mut p, n, &r.archive, &mut budget,None)?;
+            }
+            Action::Remove { name: n } | Action::Purge { name: n } => {
+                let r = self.runtime.records.get(n).ok_or_else(|| {
+                    error(ErrorCode::Unknown, "No package record for exact removal")
+                })?;
+                let a = &self.catalog.archives[&r.archive];
+                let purge = matches!(action, Action::Purge { .. });
+                if r.status == Status::Installed {
+                    // Existing unrelated broken requirements stay representable, but a
+                    // remaining installed dependent still blocks exact removal, even if its
+                    // version constraint was already broken before this action.
+                    p.records.remove(n.as_str());
+                    for (other, record) in &p.records {
+                        if record.status == Status::Installed {
+                            for d in &self.catalog.archives[record.archive].depends {
+                                budget.charge()?;
+                                if d.name == *n {
+                                    return Err(error(
+                                        ErrorCode::Dependency,
+                                        format!("{other} still requires the package being removed"),
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                    if !purge && a.files.values().any(|v| v.conffile) {
+                        p.records.insert(
+                            &a.name,
+                            RecordRef {
+                                archive: &r.archive,
+                                status: Status::ConfigFiles,
+                            },
+                        );
+                    }
+                }
+                if purge {
+                    p.records.remove(n.as_str());
+                }
+                for (path, payload) in &a.files {
+                    budget.charge()?;
+                    if (r.status == Status::Installed && (purge || !payload.conffile))
+                        || (r.status == Status::ConfigFiles && purge && payload.conffile)
+                    {
+                        p.files.remove(path.as_str());
+                    }
+                }
+            }
+        }
+        p.bounded(&self.catalog)?;
+        Ok(p)
+    }
+    fn acquire<'a>(&'a self, p: &mut Prepared<'a>, id: &'a str) -> Result<()> {
+        if p.local.contains(id) {
+            return Ok(());
+        }
+        let exposed = self.runtime.cached.as_ref().is_some_and(|cache| {
+            self.catalog.publications[cache]
+                .candidates
+                .values()
+                .any(|v| v == id)
+        });
+        if !self.catalog.repository_reachable || !exposed {
+            return Err(error(
+                ErrorCode::Unavailable,
+                "Exact artifact is not locally available or obtainable from this cached source",
+            ));
+        }
+        p.local.insert(id);
+        Ok(())
+    }
+    fn prepare_install<'a>(&'a self,p:&mut Prepared<'a>,packages:&[Request],budget:&mut Budget,upgrade:Option<&ConffileUpgrade>)->Result<()> {
                 let mut selected: BTreeMap<&str, &str> = BTreeMap::new();
                 let mut queue = VecDeque::new();
                 for request in packages {
@@ -1145,6 +1252,7 @@ impl State {
                         }
                     }
                 }
+                ensure_no_conflicts(&self.catalog, &p.records, budget)?;
                 owners(&self.catalog, &p.records)?;
                 for (n, id) in selected {
                     budget.charge()?;
@@ -1156,92 +1264,9 @@ impl State {
                     {
                         continue;
                     }
-                    self.acquire(&mut p, id)?;
-                    self.install_files(&mut p, n, id, &mut budget)?;
+                    self.acquire(p, id)?;
+                    self.install_files(p, n, id, budget, upgrade.filter(|u|u.package==n))?;
                 }
-            }
-            Action::Reinstall { name: n } => {
-                let r = self
-                    .runtime
-                    .records
-                    .get(n)
-                    .filter(|r| r.status == Status::Installed)
-                    .ok_or_else(|| {
-                        error(
-                            ErrorCode::Unavailable,
-                            "Reinstall requires a currently installed record",
-                        )
-                    })?;
-                self.acquire(&mut p, &r.archive)?;
-                self.install_files(&mut p, n, &r.archive, &mut budget)?;
-            }
-            Action::Remove { name: n } | Action::Purge { name: n } => {
-                let r = self.runtime.records.get(n).ok_or_else(|| {
-                    error(ErrorCode::Unknown, "No package record for exact removal")
-                })?;
-                let a = &self.catalog.archives[&r.archive];
-                let purge = matches!(action, Action::Purge { .. });
-                if r.status == Status::Installed {
-                    // Existing unrelated broken requirements stay representable, but a
-                    // remaining installed dependent still blocks exact removal, even if its
-                    // version constraint was already broken before this action.
-                    p.records.remove(n.as_str());
-                    for (other, record) in &p.records {
-                        if record.status == Status::Installed {
-                            for d in &self.catalog.archives[record.archive].depends {
-                                budget.charge()?;
-                                if d.name == *n {
-                                    return Err(error(
-                                        ErrorCode::Dependency,
-                                        format!("{other} still requires the package being removed"),
-                                    ));
-                                }
-                            }
-                        }
-                    }
-                    if !purge && a.files.values().any(|v| v.conffile) {
-                        p.records.insert(
-                            &a.name,
-                            RecordRef {
-                                archive: &r.archive,
-                                status: Status::ConfigFiles,
-                            },
-                        );
-                    }
-                }
-                if purge {
-                    p.records.remove(n.as_str());
-                }
-                for (path, payload) in &a.files {
-                    budget.charge()?;
-                    if (r.status == Status::Installed && (purge || !payload.conffile))
-                        || (r.status == Status::ConfigFiles && purge && payload.conffile)
-                    {
-                        p.files.remove(path.as_str());
-                    }
-                }
-            }
-        }
-        p.bounded(&self.catalog)?;
-        Ok(p)
-    }
-    fn acquire<'a>(&'a self, p: &mut Prepared<'a>, id: &'a str) -> Result<()> {
-        if p.local.contains(id) {
-            return Ok(());
-        }
-        let exposed = self.runtime.cached.as_ref().is_some_and(|cache| {
-            self.catalog.publications[cache]
-                .candidates
-                .values()
-                .any(|v| v == id)
-        });
-        if !self.catalog.repository_reachable || !exposed {
-            return Err(error(
-                ErrorCode::Unavailable,
-                "Exact artifact is not locally available or obtainable from this cached source",
-            ));
-        }
-        p.local.insert(id);
         Ok(())
     }
     fn install_files<'a>(
@@ -1250,6 +1275,7 @@ impl State {
         n: &str,
         id: &'a str,
         budget: &mut Budget,
+        upgrade:Option<&ConffileUpgrade>,
     ) -> Result<()> {
         let new = &self.catalog.archives[id];
         let old_record = self.runtime.records.get(n);
@@ -1299,6 +1325,11 @@ impl State {
             }
             let current = self.runtime.files.get(path);
             if payload.conffile {
+                if let Some(upgrade)=upgrade {
+                    let previous=old.and_then(|a|a.files.get(path)).ok_or_else(||error(ErrorCode::Unsupported,"Configuration path set changed"))?;
+                    self.install_reviewed_conffile(p,path,previous,payload,upgrade)?;
+                    continue;
+                }
                 if let Some(previous) = old.and_then(|a| a.files.get(path)) {
                     match current {
                         None => {
@@ -1398,8 +1429,13 @@ impl State {
                     version: &a.version,
                     architecture: a.architecture,
                     depends: &a.depends,
+                    conflicts: &a.conflicts,
                 }
             }))
+    }
+    pub fn conflict_issues(&self) -> Result<Vec<ConflictIssue>> {
+        self.validate()?;
+        conflict_findings(&self.catalog, &view_records(&self.runtime.records), &mut Budget(MAX_WORK))
     }
     pub fn dependency_issues(&self) -> Result<Vec<DependencyIssue>> {
         self.validate()?;
@@ -1468,6 +1504,38 @@ pub struct Candidate<'a> {
     pub version: &'a Version,
     pub architecture: Architecture,
     pub depends: &'a [Dependency],
+    pub conflicts: &'a [Dependency],
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct ConflictIssue {
+    pub package: String,
+    pub conflict: Dependency,
+    pub installed: Version,
+}
+
+/// The complete selected installed set matters, including reverse declarations.
+/// ConfigFiles leftovers and a package's own real name do not conflict.
+fn conflict_findings(catalog:&Catalog, records:&BTreeMap<&str,RecordRef<'_>>, budget:&mut Budget)->Result<Vec<ConflictIssue>> {
+    let mut out=Vec::new();
+    for (name,record) in records {
+        if record.status!=Status::Installed {continue;}
+        for rule in &catalog.archives[record.archive].conflicts {
+            budget.charge()?;
+            if rule.name==*name {continue;}
+            let Some(other)=records.get(rule.name.as_str()).filter(|r|r.status==Status::Installed) else {continue;};
+            let version=&catalog.archives[other.archive].version;
+            if rule.constraint.as_ref().is_none_or(|c|c.accepts(version)) {
+                out.push(ConflictIssue{package:(*name).into(),conflict:rule.clone(),installed:version.clone()});
+            }
+        }
+    }
+    Ok(out)
+}
+fn ensure_no_conflicts(catalog:&Catalog, records:&BTreeMap<&str,RecordRef<'_>>, budget:&mut Budget)->Result<()> {
+    if let Some(issue)=conflict_findings(catalog,records,budget)?.first() {
+        return Err(error(ErrorCode::Conflict,format!("{} conflicts with installed {} version {}. This closed simulator does not choose automatic removals. Inspect the metadata, then explicitly remove the incompatible package or select a supported compatible version.",issue.package,issue.conflict.name,issue.installed.as_str())));
+    }
+    Ok(())
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct DependencyIssue {

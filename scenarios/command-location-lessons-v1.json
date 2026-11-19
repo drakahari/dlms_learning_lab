@@ -1,0 +1,663 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-command-permission-search",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-command-location-diagnosis",
+      "topic": "Command search and permissions",
+      "title": "Diagnose a command skipped during search",
+      "summary": "Investigate competing command files, restore one owner permission and preserve the fallback and audit tool.",
+      "objective": "The fixed PATH searches /tools/preferred before /tools/fallback. reportctl selects the wrong copy; inspect why. Add only owner execute to /tools/preferred/reportctl; preserve its other permission bits. reportctl must select /tools/preferred/reportctl; auditctl must still select /tools/fallback/auditctl. Preserve all other modes, contents, owners, groups, folders and supplied settings.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "steps": [
+        "Understand the task",
+        "Investigate the skipped file",
+        "Verify lookup and preservation"
+      ],
+      "guide": [
+        {
+          "title": "Inspect both search results and metadata",
+          "why": "Search order alone does not make a non-executable file eligible.",
+          "action": "Use which and type -a -p for the supplied names. Inspect each path with ls -l before changing anything.",
+          "commands": []
+        },
+        {
+          "title": "Make one narrow repair",
+          "why": "The owner can add execute without changing group or other permissions.",
+          "action": "Repair the one owned preferred file. Retain the other original bits and all neighboring files.",
+          "commands": []
+        },
+        {
+          "title": "Verify the handover",
+          "why": "The first selected path can be correct even after an excessive permission change.",
+          "action": "Recheck both command names and all relevant permission letters, then choose Check work.",
+          "commands": []
+        }
+      ],
+      "explanation": "The preferred file originally had mode 0640: Alex could read/write it but could not execute it. Search therefore selected the executable fallback even though the preferred folder came first. Adding owner execute produces mode 0740 without widening group/other access. which then selects the preferred file; type -a -p still lists the preserved fallback second. auditctl is independent and stays in the fallback folder.",
+      "hints": [
+        "Run which reportctl and type -a -p reportctl, then inspect both named files with ls -l. Which copy is eligible now?",
+        "Read the owner’s first three permission letters on /tools/preferred/reportctl. A readable file without owner x is skipped for Alex. Preserve the group and other bits.",
+        "chmod u+x PATH adds only owner execute. Then repeat both reportctl searches and check auditctl; do not change PATH or disable the fallback."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/ (LPIC-1 5.0, 104.7; checked 2026-11-05)",
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html (type -a -p; checked against installed Bash 5.3 manual 2026-11-05)",
+        "https://www.gnu.org/software/coreutils/manual/html_node/Setting-Permissions.html (symbolic owner execute; installed GNU chmod manual checked 2026-11-05; web fetch unavailable)"
+      ],
+      "simplifications": "Bounded literal queries against supplied virtual regular files and fixed canonical PATH only. which prints the first executable match; type -a -p lists all matches. No artifact execution, aliases, builtins, functions, hash state, empty/relative PATH, whereis or arbitrary shell syntax. Only permissions on supplied caller-owned command files may change; directories, root-owned fallback, text and unrelated files stay fixed. Found/Missing are simulator results; exact utility stderr and Bash exit 126/127 are not reproduced.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/tools": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/tools/preferred": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/tools/fallback": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/tools/preferred/reportctl": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/tools/fallback/reportctl": {
+              "directory": false,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/tools/fallback/auditctl": {
+              "directory": false,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work/notes.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/tools/preferred/reportctl": "Supplied preferred command artifact; not executable code.\n",
+            "/tools/fallback/reportctl": "Preserve the fallback artifact.\n",
+            "/tools/fallback/auditctl": "Preserve the independent audit artifact.\n",
+            "/work/notes.txt": "Keep this unrelated handover note.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "previous": null,
+          "umask": 18,
+          "clock": 0,
+          "modified": {},
+          "command_location": {
+            "version": 1,
+            "source_id": "lpic1-command-permission-search-assignment",
+            "path": "/tools/preferred:/tools/fallback",
+            "names": [
+              "reportctl",
+              "auditctl"
+            ]
+          }
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "CommandLocation",
+            "definition": {
+              "version": 1,
+              "initial": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/tools": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/tools/preferred": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/tools/fallback": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/tools/preferred/reportctl": {
+                    "directory": false,
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/tools/fallback/reportctl": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/tools/fallback/auditctl": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work/notes.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "alex",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/tools/preferred/reportctl": "Supplied preferred command artifact; not executable code.\n",
+                  "/tools/fallback/reportctl": "Preserve the fallback artifact.\n",
+                  "/tools/fallback/auditctl": "Preserve the independent audit artifact.\n",
+                  "/work/notes.txt": "Keep this unrelated handover note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "alex": [
+                    "staff"
+                  ]
+                },
+                "user": "alex",
+                "home": "/work",
+                "cwd": "/work",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {},
+                "command_location": {
+                  "version": 1,
+                  "source_id": "lpic1-command-permission-search-assignment",
+                  "path": "/tools/preferred:/tools/fallback",
+                  "names": [
+                    "reportctl",
+                    "auditctl"
+                  ]
+                }
+              },
+              "expected": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/tools": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/tools/preferred": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/tools/fallback": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/tools/preferred/reportctl": {
+                    "directory": false,
+                    "mode": 480,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/tools/fallback/reportctl": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/tools/fallback/auditctl": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work/notes.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "alex",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/tools/preferred/reportctl": "Supplied preferred command artifact; not executable code.\n",
+                  "/tools/fallback/reportctl": "Preserve the fallback artifact.\n",
+                  "/tools/fallback/auditctl": "Preserve the independent audit artifact.\n",
+                  "/work/notes.txt": "Keep this unrelated handover note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "alex": [
+                    "staff"
+                  ]
+                },
+                "user": "alex",
+                "home": "/work",
+                "cwd": "/work",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {},
+                "command_location": {
+                  "version": 1,
+                  "source_id": "lpic1-command-permission-search-assignment",
+                  "path": "/tools/preferred:/tools/fallback",
+                  "names": [
+                    "reportctl",
+                    "auditctl"
+                  ]
+                }
+              },
+              "selected": [
+                {
+                  "name": "reportctl",
+                  "path": "/tools/preferred/reportctl"
+                },
+                {
+                  "name": "auditctl",
+                  "path": "/tools/fallback/auditctl"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "solution": [
+        "chmod u+x /tools/preferred/reportctl"
+      ],
+      "prerequisites": [
+        "lpic1-env-tool-path",
+        "lpic1-traversal"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "Build on file paths, owner/group/other permissions and ordered PATH. Type in the input below the terminal transcript; Run or Enter submits one simulated command. This practice uses different names and folders from the assignment.",
+        "concepts": [
+          {
+            "title": "A name is searched in order",
+            "text": "PATH is an ordered list of folders, separated by colons. A command name can exist in several folders. which NAME prints the first eligible executable file; type -a -p NAME lists all eligible external files in PATH order. The printed paths are search results, not a command run."
+          },
+          {
+            "title": "Present is different from executable",
+            "text": "A regular file can exist and be readable yet lack permission to execute. Search skips that file and may select a later copy. ls -l PATH shows its permission letters and owner. In -rw-r----- the owner has read/write, the group has read and nobody has execute. The x letter means execute for a file; on folders it means permission to search through them."
+          },
+          {
+            "title": "Repair only what the task permits",
+            "text": "Alex owns the preferred file. chmod u+x PATH adds execute for its owner while preserving every other permission bit. u means owner, + means add and x means execute. chmod u-x removes only that bit. A silent chmod is normal; inspect the file and repeat lookup to verify the change. Do not grant permissions to everyone or disable the fallback."
+          },
+          {
+            "title": "Inspect without running a file",
+            "text": "These supplied command files contain sample text. The simulated terminal supports which, type -a -p, ls and chmod for this activity; it does not run a found path or any file contents. The supplied PATH is fixed. Aliases, shell functions, command hashing, plain type and whereis are outside this activity."
+          }
+        ],
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/preferred": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/fallback": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/preferred/demo-report": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/gallery/fallback/demo-report": {
+              "directory": false,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/gallery/fallback/demo-audit": {
+              "directory": false,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work/notes.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/gallery/preferred/demo-report": "Supplied preferred command artifact; not executable code.\n",
+            "/gallery/fallback/demo-report": "Preserve the fallback artifact.\n",
+            "/gallery/fallback/demo-audit": "Preserve the independent audit artifact.\n",
+            "/work/notes.txt": "Keep this unrelated handover note.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "previous": null,
+          "umask": 18,
+          "clock": 0,
+          "modified": {},
+          "command_location": {
+            "version": 1,
+            "source_id": "lpic1-command-permission-search-example",
+            "path": "/gallery/preferred:/gallery/fallback",
+            "names": [
+              "demo-report",
+              "demo-audit"
+            ]
+          }
+        },
+        "example": [
+          "which demo-report",
+          "ls -l /gallery/preferred/demo-report",
+          "type -a -p demo-report",
+          "chmod u+x /gallery/preferred/demo-report",
+          "which demo-report",
+          "type -a -p demo-report"
+        ],
+        "inputs": "Worked PATH: /gallery/preferred:/gallery/fallback. Both folders contain demo-report. The preferred file starts at 0640, so Alex’s search skips it and finds /gallery/fallback/demo-report. Add only owner execute: chmod u+x /gallery/preferred/demo-report. Its mode becomes 0740; which now prints /gallery/preferred/demo-report and type -a -p prints both paths in order. demo-audit stays in the fallback folder.",
+        "try_change": "Remove owner execute again with chmod u-x /gallery/preferred/demo-report. Repeat which demo-report and type -a -p demo-report; observe the fallback alone. Add owner execute again, repeat both searches and compare the paths with the worked result.",
+        "outcomes": [
+          {
+            "kind": "CommandLocation",
+            "definition": {
+              "version": 1,
+              "initial": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/preferred": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/fallback": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/preferred/demo-report": {
+                    "directory": false,
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/fallback/demo-report": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/fallback/demo-audit": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work/notes.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "alex",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/gallery/preferred/demo-report": "Supplied preferred command artifact; not executable code.\n",
+                  "/gallery/fallback/demo-report": "Preserve the fallback artifact.\n",
+                  "/gallery/fallback/demo-audit": "Preserve the independent audit artifact.\n",
+                  "/work/notes.txt": "Keep this unrelated handover note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "alex": [
+                    "staff"
+                  ]
+                },
+                "user": "alex",
+                "home": "/work",
+                "cwd": "/work",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {},
+                "command_location": {
+                  "version": 1,
+                  "source_id": "lpic1-command-permission-search-example",
+                  "path": "/gallery/preferred:/gallery/fallback",
+                  "names": [
+                    "demo-report",
+                    "demo-audit"
+                  ]
+                }
+              },
+              "expected": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/preferred": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/fallback": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/preferred/demo-report": {
+                    "directory": false,
+                    "mode": 480,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/fallback/demo-report": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/gallery/fallback/demo-audit": {
+                    "directory": false,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work/notes.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "alex",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/gallery/preferred/demo-report": "Supplied preferred command artifact; not executable code.\n",
+                  "/gallery/fallback/demo-report": "Preserve the fallback artifact.\n",
+                  "/gallery/fallback/demo-audit": "Preserve the independent audit artifact.\n",
+                  "/work/notes.txt": "Keep this unrelated handover note.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "alex": [
+                    "staff"
+                  ]
+                },
+                "user": "alex",
+                "home": "/work",
+                "cwd": "/work",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {},
+                "command_location": {
+                  "version": 1,
+                  "source_id": "lpic1-command-permission-search-example",
+                  "path": "/gallery/preferred:/gallery/fallback",
+                  "names": [
+                    "demo-report",
+                    "demo-audit"
+                  ]
+                }
+              },
+              "selected": [
+                {
+                  "name": "demo-report",
+                  "path": "/gallery/preferred/demo-report"
+                },
+                {
+                  "name": "demo-audit",
+                  "path": "/gallery/fallback/demo-audit"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "retry_guidance": "A file’s presence does not prove it is selectable. Compare which and type -a -p with ls -l. If lookup is right but the handover check fails, compare the permissions you changed: add only the owner execute bit and preserve the fallback."
+    }
+  ]
+}

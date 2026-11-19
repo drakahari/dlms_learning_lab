@@ -223,6 +223,56 @@ fn action_text(a: &work::Action) -> String {
         }
     }
 }
+/// Coaching is derived from actual modeled state, never a replacement grader.
+pub(super) fn coaching(policy: &work::Policy, current: &core::State) -> Option<String> {
+    if core::RouterId::ALL
+        .iter()
+        .any(|id| !current.router(*id).config.participating)
+    {
+        return Some("A router is not participating. A working Active alone has no ready replacement; keep both candidates enabled before checking failure and return.".into());
+    }
+    for client in current.clients() {
+        if current
+            .client_status(client.id)
+            .is_ok_and(|s| !s.uses_virtual_ip)
+        {
+            return Some(format!(
+                "{} is not using the shared virtual gateway. A real router address stays tied to one box, so a working path now can fail when that box loses power.",
+                client.label
+            ));
+        }
+    }
+    let role_problem = |s: &core::State, expected: Option<core::RouterId>| {
+        expected.filter(|id| s.active() != Some(*id)).map(|id| {
+            let r = s.router(id);
+            if !r.config.preempt {
+                format!("{} has not reclaimed Active. A higher priority alone does not displace a healthy incumbent: the router that should take over needs its own Preempt setting.", r.label)
+            } else {
+                "The required router has not taken over. Preemption needs a strictly higher effective priority than the incumbent; a tie cannot force takeover. Compare priorities in this checkpoint.".into()
+            }
+        })
+    };
+    if let Some(message) = role_problem(current, policy.normal_active) {
+        return Some(message);
+    }
+    for probe in &policy.probes {
+        let mut observed = current.clone();
+        for (step, event) in probe.events.iter().enumerate() {
+            if observed.fault(event.fault()).is_err() {
+                continue;
+            }
+            if let Some(active) = observed.active()
+                && !observed.router(active).facts.wan_link_up
+            {
+                return Some("During WAN loss the Active router is still eligible on the LAN but cannot forward upstream. Compare its tracked effective priority with the healthy peer, and check that peer’s Preempt setting.".into());
+            }
+            if let Some(message) = role_problem(&observed, probe.expected_active[step]) {
+                return Some(format!("{}: {message}", probe.title));
+            }
+        }
+    }
+    None
+}
 fn record(m: &mut Metrics, key: &str, r: &egui::Response, ui: &egui::Ui) {
     m.controls.push((key.into(), r.rect, ui.clip_rect()));
 }
@@ -377,11 +427,12 @@ impl LabApp {
         }
         let mut scope_requested = None;
         let mut scope_conflict = false;
+        lesson_presentation::rich(ui, RichText::new(&source.title).strong().size(22.));
         if !challenge {
             ui.horizontal_wrapped(|ui| {
                 for (v, key, label) in [
                     (View::Introduction, "introduction", "Introduction"),
-                    (View::Example, "example", "Separate example · ungraded"),
+                    (View::Example, "example", "Try example · ungraded"),
                     (View::Assignment, "assignment", "Assignment"),
                 ] {
                     let r = ui.add_enabled(
@@ -398,14 +449,34 @@ impl LabApp {
             });
         }
         if view == View::Introduction {
-            ui.label(&definition.lesson.prerequisite_note);
-            for c in &definition.lesson.concepts {
-                ui.strong(&c.title);
-                ui.label(&c.text);
+            lesson_presentation::concepts(
+                ui,
+                source,
+                &definition.lesson.prerequisite_note,
+                definition
+                    .lesson
+                    .concepts
+                    .iter()
+                    .map(|c| (c.title.clone(), c.text.clone())),
+            );
+            lesson_presentation::worked(
+                ui,
+                "Use these settings in the separate practice network. Insert fills a draft; Apply configuration changes that network; Check example evaluates its actual outcomes.",
+            );
+            if lesson_presentation::entry(source).is_some() {
+                lesson_presentation::worked_rows(ui, source);
+            } else {
+                for worked in &definition.lesson.worked {
+                    lesson_presentation::prose(ui, &action_text(&worked.action));
+                    lesson_presentation::prose(ui, &worked.why);
+                }
             }
-            ui.label("Use the separate example, then configure the complete assignment. Real HSRP uses timers and packet delivery; these displayed roles are already settled simulator outcomes.");
-            // Introduction currently has no help disclosures or configuration
-            // controls. Its complete visible scope has now been rendered.
+            lesson_presentation::prose(
+                ui,
+                "Roles and failure checkpoints are settled simulator observations. Real HSRP also uses packets and timers; this exercise does not measure recovery time.",
+            );
+            // Introduction is read-only; only the admitted navigation below
+            // can change saved scope. Worked settings never enter an assignment.
             #[cfg(test)]
             {
                 self.metrics.hsrp.scope_intents =
@@ -438,7 +509,7 @@ impl LabApp {
             &definition.policy
         };
         if practice {
-            ui.label(&definition.lesson.description);
+            lesson_presentation::practice_step(ui, source, 0);
             let mut selected = s.selected_example;
             let picker = ui
                 .add_enabled_ui(active && !text_packet && !blocked, |ui| {
@@ -506,17 +577,17 @@ impl LabApp {
                     });
                 }
             }
-            ui.label(format!("Try a change: {}", definition.lesson.try_change));
-            ui.label(action_text(&definition.lesson.experiment));
-            ui.label(format!(
-                "Repair: {}",
-                action_text(&definition.lesson.repair)
-            ));
+            lesson_presentation::practice_step(ui, source, 1);
         } else {
-            let r = ui.label(&source.objective);
+            let r = lesson_presentation::assignment(ui, source);
             self.metrics.hsrp.goal = Some(r.rect);
             record(&mut self.metrics.hsrp, "goal", &r, ui);
         }
+        ui.strong(if practice {
+            "Actual practice state · applied settings"
+        } else {
+            "Applied assignment configuration"
+        });
         let current = if practice { &s.example } else { &s.current };
         let a = current.router(core::RouterId::A);
         let b = current.router(core::RouterId::B);
@@ -716,16 +787,24 @@ impl LabApp {
             let failed = rows.iter().filter(|r| !r.0).count();
             let summary = ui.strong(if failed == 0 {
                 format!(
-                    "Passed · all{} current and failure-probe checks",
+                    "Passed · all {} current and failure-probe checks",
                     rows.len()
                 )
             } else {
-                format!("Needs attention · {failed} of{} checks", rows.len())
+                format!("Needs attention · {failed} of {} checks", rows.len())
             });
             self.metrics.hsrp.summary = Some((rows.len(), failed, summary.rect));
-            for (ok, text) in rows.iter().filter(|r| !r.0).take(3) {
-                let r = ui.colored_label(palette(ui).error, format!("Needs attention · {text}"));
-                self.metrics.hsrp.rows.push((*ok, r.rect));
+            if failed > 0
+                && let Some(message) = coaching(policy, current)
+            {
+                let r = lesson_presentation::prose(ui, &message);
+                self.metrics.hsrp.rows.push((false, r.rect));
+            } else {
+                for (ok, text) in rows.iter().filter(|r| !r.0).take(3) {
+                    let r =
+                        ui.colored_label(palette(ui).error, format!("Needs attention · {text}"));
+                    self.metrics.hsrp.rows.push((*ok, r.rect));
+                }
             }
             controls::collapsing_header(ui, "All current and failure checks").show(ui, |ui| {
                 egui::ScrollArea::vertical()
@@ -748,6 +827,14 @@ impl LabApp {
                         }
                     });
             });
+        } else {
+            lesson_presentation::prose(
+                ui,
+                "Not checked. Apply configuration, then check the current settings and failure/return outcomes.",
+            );
+        }
+        if practice {
+            lesson_presentation::practice_step(ui, source, 2);
         }
         if let Some(e) = &self.notice {
             ui.label(e);

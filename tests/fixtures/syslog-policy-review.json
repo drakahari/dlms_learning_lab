@@ -1,0 +1,2505 @@
+{
+  "schema_version": 1,
+  "status": "SOURCE-ONLY mathematical predictions; no model/native/host execution",
+  "capability_manifest": "f4d68a00c2ddc48bdf0710389aab4c8ecec27b6b6ba0b58ebf7c2d06fe58c9f1",
+  "actual": null,
+  "unit_proposal": {
+    "id": "ccna-syslog-policy",
+    "track": "CCNA",
+    "title": "Route useful logging evidence",
+    "summary": "Separate urgency budgets, repair export paths, distinguish facilities and protect a logging handover.",
+    "prerequisites": [
+      "ipv4-foundations"
+    ],
+    "labs": [
+      "ccna-syslog-local-remote",
+      "ccna-syslog-export-path",
+      "ccna-syslog-facility-routing",
+      "ccna-syslog-policy-handover"
+    ]
+  },
+  "labs": [
+    {
+      "id": "ccna-syslog-local-remote",
+      "initial_rows": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "reference": {
+        "actions": [
+          {
+            "action": "apply_source",
+            "device": "10.214.0.10",
+            "policy": {
+              "process_enabled": true,
+              "buffer_threshold": "warning",
+              "remote_threshold": "error",
+              "export_facility": 23,
+              "hosts": [
+                "10.214.0.100"
+              ]
+            }
+          },
+          {
+            "action": "apply_collector",
+            "collector": "10.214.0.100",
+            "policy": {
+              "selectors": {
+                "23": "warning"
+              }
+            }
+          }
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "alternatives": [
+        {
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.214.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "debug",
+                "export_facility": 23,
+                "hosts": [
+                  "10.214.0.100"
+                ]
+              }
+            },
+            {
+              "action": "apply_collector",
+              "collector": "10.214.0.100",
+              "policy": {
+                "selectors": {
+                  "23": "error"
+                }
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.214.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "error",
+                "export_facility": 22,
+                "hosts": [
+                  "10.214.0.100"
+                ]
+              }
+            },
+            {
+              "action": "apply_collector",
+              "collector": "10.214.0.100",
+              "policy": {
+                "selectors": {
+                  "22": "notice"
+                }
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        }
+      ],
+      "wrong_partial": [
+        {
+          "name": "all-debug",
+          "actions": [],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "explanation": "The supplied broad policy admits unwanted local and remote detail.",
+          "actual": null
+        },
+        {
+          "name": "logging-off",
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.214.0.10",
+              "policy": {
+                "process_enabled": false,
+                "buffer_threshold": null,
+                "remote_threshold": null,
+                "export_facility": 23,
+                "hosts": []
+              }
+            }
+          ],
+          "rows": [
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "Disabling both outputs loses required urgent events.",
+          "actual": null
+        },
+        {
+          "name": "remote-only",
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.214.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": null,
+                "remote_threshold": "error",
+                "export_facility": 23,
+                "hosts": [
+                  "10.214.0.100"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "Remote success does not retain local warnings.",
+          "actual": null
+        },
+        {
+          "name": "local-only",
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.214.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": null,
+                "export_facility": 23,
+                "hosts": [
+                  "10.214.0.100"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            false,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "The required remote emergency/error evidence is absent.",
+          "actual": null
+        },
+        {
+          "name": "wrong-facility",
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.214.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "error",
+                "export_facility": 21,
+                "hosts": [
+                  "10.214.0.100"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            false,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "An unaccepted facility cannot substitute for the requested export category.",
+          "actual": null
+        },
+        {
+          "name": "partial-collector",
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.214.0.100",
+              "policy": {
+                "selectors": {
+                  "23": "warning"
+                }
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            true,
+            false,
+            true
+          ],
+          "explanation": "Changing only the collector still leaves noisy local policy and lets the source export a warning.",
+          "actual": null
+        }
+      ],
+      "practice": {
+        "worked_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "experiment_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true
+        ],
+        "repaired_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "damage": {
+        "actions": [
+          {
+            "action": "apply_source",
+            "device": "10.214.0.10",
+            "policy": {
+              "process_enabled": true,
+              "buffer_threshold": "debug",
+              "remote_threshold": "error",
+              "export_facility": 23,
+              "hosts": [
+                "10.214.0.100"
+              ]
+            }
+          }
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false,
+          true
+        ],
+        "repair": [
+          {
+            "action": "apply_source",
+            "device": "10.214.0.10",
+            "policy": {
+              "process_enabled": true,
+              "buffer_threshold": "warning",
+              "remote_threshold": "error",
+              "export_facility": 23,
+              "hosts": [
+                "10.214.0.100"
+              ]
+            }
+          },
+          {
+            "action": "apply_collector",
+            "collector": "10.214.0.100",
+            "policy": {
+              "selectors": {
+                "23": "warning"
+              }
+            }
+          }
+        ],
+        "repaired_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      }
+    },
+    {
+      "id": "ccna-syslog-export-path",
+      "initial_rows": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "reference": {
+        "actions": [
+          {
+            "action": "apply_source",
+            "device": "10.215.0.20",
+            "policy": {
+              "process_enabled": true,
+              "buffer_threshold": "warning",
+              "remote_threshold": "warning",
+              "export_facility": 18,
+              "hosts": [
+                "10.215.0.110"
+              ]
+            }
+          }
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "alternatives": [
+        {
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.215.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "debug",
+                "export_facility": 18,
+                "hosts": [
+                  "10.215.0.110"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.215.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 19,
+                "hosts": [
+                  "10.215.0.110"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        }
+      ],
+      "wrong_partial": [
+        {
+          "name": "no-repair",
+          "actions": [],
+          "rows": [
+            true,
+            false,
+            false,
+            true,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "The source process is still disabled and uses the retired address.",
+          "actual": null
+        },
+        {
+          "name": "address-only",
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.215.0.20",
+              "policy": {
+                "process_enabled": false,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 18,
+                "hosts": [
+                  "10.215.0.110"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            false,
+            false,
+            true,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "A correct destination cannot replace enabling the modeled process.",
+          "actual": null
+        },
+        {
+          "name": "enable-only",
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.215.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 18,
+                "hosts": [
+                  "10.215.0.120"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            false,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "Local logging returns but the available Operations destination is still missing.",
+          "actual": null
+        },
+        {
+          "name": "unknown-address",
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.215.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 18,
+                "hosts": [
+                  "10.215.0.254"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            false,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "An unknown unicast address is not the supplied healthy collector.",
+          "actual": null
+        },
+        {
+          "name": "broad-facility19",
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.215.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "debug",
+                "export_facility": 19,
+                "hosts": [
+                  "10.215.0.110"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "Facility19's protected notice selector would accept an unwanted notice.",
+          "actual": null
+        },
+        {
+          "name": "alter-protected-collector",
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.215.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 18,
+                "hosts": [
+                  "10.215.0.110"
+                ]
+              }
+            },
+            {
+              "action": "apply_collector",
+              "collector": "10.215.0.110",
+              "policy": {
+                "selectors": {
+                  "18": "warning"
+                }
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true
+          ],
+          "explanation": "Equivalent current deliveries do not permit changing a protected collector policy.",
+          "actual": null
+        }
+      ],
+      "practice": {
+        "worked_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "experiment_rows": [
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "repaired_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "damage": {
+        "actions": [
+          {
+            "action": "apply_source",
+            "device": "10.215.0.20",
+            "policy": {
+              "process_enabled": true,
+              "buffer_threshold": "warning",
+              "remote_threshold": "warning",
+              "export_facility": 18,
+              "hosts": [
+                "10.215.0.120"
+              ]
+            }
+          }
+        ],
+        "rows": [
+          true,
+          true,
+          false,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "repair": [
+          {
+            "action": "apply_source",
+            "device": "10.215.0.20",
+            "policy": {
+              "process_enabled": true,
+              "buffer_threshold": "warning",
+              "remote_threshold": "warning",
+              "export_facility": 18,
+              "hosts": [
+                "10.215.0.110"
+              ]
+            }
+          }
+        ],
+        "repaired_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      }
+    },
+    {
+      "id": "ccna-syslog-facility-routing",
+      "initial_rows": [
+        true,
+        false,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "reference": {
+        "actions": [
+          {
+            "action": "apply_collector",
+            "collector": "10.216.0.100",
+            "policy": {
+              "selectors": {
+                "16": "warning"
+              }
+            }
+          },
+          {
+            "action": "apply_collector",
+            "collector": "10.216.0.110",
+            "policy": {
+              "selectors": {
+                "20": "warning"
+              }
+            }
+          }
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "alternatives": [
+        {
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.216.0.100",
+              "policy": {
+                "selectors": {
+                  "16": "debug"
+                }
+              }
+            },
+            {
+              "action": "apply_collector",
+              "collector": "10.216.0.110",
+              "policy": {
+                "selectors": {
+                  "20": "informational"
+                }
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.216.0.110",
+              "policy": {
+                "selectors": {
+                  "20": "debug",
+                  "21": "error"
+                }
+              }
+            },
+            {
+              "action": "apply_collector",
+              "collector": "10.216.0.100",
+              "policy": {
+                "selectors": {
+                  "16": "notice",
+                  "17": "critical"
+                }
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        }
+      ],
+      "wrong_partial": [
+        {
+          "name": "unchanged-selectors",
+          "actions": [],
+          "rows": [
+            true,
+            false,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "Both inboxes are still selecting unrelated facilities.",
+          "actual": null
+        },
+        {
+          "name": "operations-only",
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.216.0.100",
+              "policy": {
+                "selectors": {
+                  "16": "warning"
+                }
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "The Audit pipeline remains incomplete.",
+          "actual": null
+        },
+        {
+          "name": "audit-only",
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.216.0.110",
+              "policy": {
+                "selectors": {
+                  "20": "warning"
+                }
+              }
+            }
+          ],
+          "rows": [
+            true,
+            false,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "The Operations pipeline remains incomplete.",
+          "actual": null
+        },
+        {
+          "name": "swapped-categories",
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.216.0.100",
+              "policy": {
+                "selectors": {
+                  "20": "warning"
+                }
+              }
+            },
+            {
+              "action": "apply_collector",
+              "collector": "10.216.0.110",
+              "policy": {
+                "selectors": {
+                  "16": "warning"
+                }
+              }
+            }
+          ],
+          "rows": [
+            true,
+            false,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "Each collector filters out its intended source's facility.",
+          "actual": null
+        },
+        {
+          "name": "too-strict-error-only",
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.216.0.100",
+              "policy": {
+                "selectors": {
+                  "16": "error"
+                }
+              }
+            },
+            {
+              "action": "apply_collector",
+              "collector": "10.216.0.110",
+              "policy": {
+                "selectors": {
+                  "20": "error"
+                }
+              }
+            }
+          ],
+          "rows": [
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "Authentication errors arrive, but required port warnings do not.",
+          "actual": null
+        },
+        {
+          "name": "change-fixed-source",
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.216.0.100",
+              "policy": {
+                "selectors": {
+                  "16": "warning"
+                }
+              }
+            },
+            {
+              "action": "apply_collector",
+              "collector": "10.216.0.110",
+              "policy": {
+                "selectors": {
+                  "20": "warning"
+                }
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.216.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": null,
+                "remote_threshold": "debug",
+                "export_facility": 16,
+                "hosts": [
+                  "10.216.0.100"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true
+          ],
+          "explanation": "Even unchanged required deliveries cannot authorize altering a protected source policy.",
+          "actual": null
+        }
+      ],
+      "practice": {
+        "worked_rows": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "experiment_rows": [
+          true,
+          false,
+          false,
+          true,
+          true
+        ],
+        "repaired_rows": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "damage": {
+        "actions": [
+          {
+            "action": "apply_collector",
+            "collector": "10.216.0.110",
+            "policy": {
+              "selectors": {
+                "4": "warning"
+              }
+            }
+          }
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "repair": [
+          {
+            "action": "apply_collector",
+            "collector": "10.216.0.100",
+            "policy": {
+              "selectors": {
+                "16": "warning"
+              }
+            }
+          },
+          {
+            "action": "apply_collector",
+            "collector": "10.216.0.110",
+            "policy": {
+              "selectors": {
+                "20": "warning"
+              }
+            }
+          }
+        ],
+        "repaired_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      }
+    },
+    {
+      "id": "ccna-syslog-policy-handover",
+      "initial_rows": [
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "reference": {
+        "actions": [
+          {
+            "action": "apply_collector",
+            "collector": "10.217.0.110",
+            "policy": {
+              "selectors": {
+                "22": "warning",
+                "23": "error"
+              }
+            }
+          },
+          {
+            "action": "apply_source",
+            "device": "10.217.0.10",
+            "policy": {
+              "process_enabled": true,
+              "buffer_threshold": "warning",
+              "remote_threshold": "warning",
+              "export_facility": 22,
+              "hosts": [
+                "10.217.0.110"
+              ]
+            }
+          },
+          {
+            "action": "apply_source",
+            "device": "10.217.0.20",
+            "policy": {
+              "process_enabled": true,
+              "buffer_threshold": "error",
+              "remote_threshold": "error",
+              "export_facility": 23,
+              "hosts": [
+                "10.217.0.110"
+              ]
+            }
+          }
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "alternatives": [
+        {
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.217.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "error",
+                "remote_threshold": "error",
+                "export_facility": 22,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            },
+            {
+              "action": "apply_collector",
+              "collector": "10.217.0.110",
+              "policy": {
+                "selectors": {
+                  "22": "warning"
+                }
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 22,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.217.0.110",
+              "policy": {
+                "selectors": {
+                  "23": "warning"
+                }
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 23,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "error",
+                "remote_threshold": "error",
+                "export_facility": 23,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        }
+      ],
+      "wrong_partial": [
+        {
+          "name": "receiver-only",
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.217.0.110",
+              "policy": {
+                "selectors": {
+                  "22": "warning",
+                  "23": "error"
+                }
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            false,
+            false,
+            true,
+            true,
+            false,
+            false,
+            true,
+            true,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            true,
+            true,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "Both moving sources still name the old inbox.",
+          "actual": null
+        },
+        {
+          "name": "access-only",
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.217.0.110",
+              "policy": {
+                "selectors": {
+                  "22": "warning",
+                  "23": "error"
+                }
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 22,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            true,
+            true,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "Access is handed over, but the branch still exports to retired Operations.",
+          "actual": null
+        },
+        {
+          "name": "sources-only",
+          "actions": [
+            {
+              "action": "apply_source",
+              "device": "10.217.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 22,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "error",
+                "remote_threshold": "error",
+                "export_facility": 23,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "The new inbox has no accepting selector.",
+          "actual": null
+        },
+        {
+          "name": "copy-access-policy-to-branch",
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.217.0.110",
+              "policy": {
+                "selectors": {
+                  "22": "warning",
+                  "23": "error"
+                }
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 22,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "error",
+                "remote_threshold": "error",
+                "export_facility": 23,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 22,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "A copied access policy admits branch warnings and changes its local budget.",
+          "actual": null
+        },
+        {
+          "name": "retain-old-destination",
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.217.0.110",
+              "policy": {
+                "selectors": {
+                  "22": "warning",
+                  "23": "error"
+                }
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 22,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "error",
+                "remote_threshold": "error",
+                "export_facility": 23,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 22,
+                "hosts": [
+                  "10.217.0.100",
+                  "10.217.0.110"
+                ]
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "explanation": "Working new delivery does not permit continued access delivery to the retired inbox.",
+          "actual": null
+        },
+        {
+          "name": "disable-protected-audit",
+          "actions": [
+            {
+              "action": "apply_collector",
+              "collector": "10.217.0.110",
+              "policy": {
+                "selectors": {
+                  "22": "warning",
+                  "23": "error"
+                }
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.10",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "warning",
+                "remote_threshold": "warning",
+                "export_facility": 22,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.20",
+              "policy": {
+                "process_enabled": true,
+                "buffer_threshold": "error",
+                "remote_threshold": "error",
+                "export_facility": 23,
+                "hosts": [
+                  "10.217.0.110"
+                ]
+              }
+            },
+            {
+              "action": "apply_source",
+              "device": "10.217.0.30",
+              "policy": {
+                "process_enabled": false,
+                "buffer_threshold": null,
+                "remote_threshold": null,
+                "export_facility": 20,
+                "hosts": []
+              }
+            }
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true
+          ],
+          "explanation": "A working Operations handover cannot replace the required audit pipeline or its protected policy.",
+          "actual": null
+        }
+      ],
+      "practice": {
+        "worked_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "experiment_rows": [
+          true,
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "repaired_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "damage": {
+        "actions": [
+          {
+            "action": "apply_source",
+            "device": "10.217.0.20",
+            "policy": {
+              "process_enabled": true,
+              "buffer_threshold": "error",
+              "remote_threshold": "error",
+              "export_facility": 23,
+              "hosts": [
+                "10.217.0.100"
+              ]
+            }
+          }
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "repair": [
+          {
+            "action": "apply_collector",
+            "collector": "10.217.0.110",
+            "policy": {
+              "selectors": {
+                "22": "warning",
+                "23": "error"
+              }
+            }
+          },
+          {
+            "action": "apply_source",
+            "device": "10.217.0.10",
+            "policy": {
+              "process_enabled": true,
+              "buffer_threshold": "warning",
+              "remote_threshold": "warning",
+              "export_facility": 22,
+              "hosts": [
+                "10.217.0.110"
+              ]
+            }
+          },
+          {
+            "action": "apply_source",
+            "device": "10.217.0.20",
+            "policy": {
+              "process_enabled": true,
+              "buffer_threshold": "error",
+              "remote_threshold": "error",
+              "export_facility": 23,
+              "hosts": [
+                "10.217.0.110"
+              ]
+            }
+          }
+        ],
+        "repaired_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      }
+    }
+  ]
+}

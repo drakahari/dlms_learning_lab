@@ -15,6 +15,7 @@ fn locate(
     a: &mut LabApp,
     find: impl Fn(&Metrics) -> Option<egui::Rect>,
 ) -> egui::Rect {
+    let mut stable = None;
     for _ in 0..30 {
         let r = find(&a.metrics).expect("actual DHCP control exists");
         let v = a
@@ -24,8 +25,22 @@ fn locate(
             .intersect(ctx.content_rect());
         let tolerance = 1. / ctx.pixels_per_point();
         if v.contains(r.center()) && v.expand(tolerance).contains_rect(r) {
-            return r;
+            // Feedback and client selection can animate the outer scroll. Wait
+            // for the actual target after pointer arrival before pressing it.
+            if stable == Some((r, v)) {
+                return r;
+            }
+            stable = Some((r, v));
+            frame(
+                ctx,
+                a,
+                1200.,
+                850.,
+                vec![egui::Event::PointerMoved(r.center())],
+            );
+            continue;
         }
+        stable = None;
         let delta = if r.bottom() > v.bottom() {
             v.bottom() - r.bottom()
         } else {

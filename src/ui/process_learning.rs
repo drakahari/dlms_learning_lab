@@ -50,17 +50,17 @@ impl LabApp {
         }
         match view {
             teaching::View::Introduction => {
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for concept in &lesson.concepts {
-                    ui.label(RichText::new(&concept.title).strong());
-                    ui.label(&concept.text);
-                }
-                ui.label(RichText::new("A small example to try").strong());
-                for command in &lesson.example {
-                    ui.add(egui::Label::new(RichText::new(command).monospace()).wrap());
-                }
-                ui.label(&lesson.inputs);
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                lesson_presentation::concepts(
+                    ui,
+                    &s,
+                    &lesson.prerequisite_note,
+                    lesson
+                        .concepts
+                        .iter()
+                        .map(|c| (c.title.clone(), c.text.clone())),
+                );
+                lesson_presentation::worked(ui, &lesson.inputs);
+                lesson_presentation::worked_rows(ui, &s);
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -75,8 +75,7 @@ impl LabApp {
                 });
             }
             teaching::View::Example => {
-                ui.label("Practice example · Not graded; your assignment stays separate.");
-                ui.label(&lesson.inputs);
+                lesson_presentation::practice_step(ui, &s, 0);
                 let learning = self
                     .progress
                     .attempts
@@ -132,8 +131,9 @@ impl LabApp {
                 if before != learning.example_command {
                     self.dirty = true;
                 }
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                lesson_presentation::practice_step(ui, &s, 1);
                 self.process_practice_terminal(ui, i);
+                lesson_presentation::practice_step(ui, &s, 2);
                 ui.horizontal_wrapped(|ui| {
                     if ui.add(button("Reset example only")).clicked() {
                         let mut learning = process_teaching::Learning::new(lesson);
@@ -156,7 +156,7 @@ impl LabApp {
                 });
             }
             teaching::View::Assignment => {
-                ui.label(&s.objective);
+                lesson_presentation::assignment(ui, &s);
                 self.terminal(ui, i);
                 self.check_terminal_work(ui, i);
             }
@@ -237,9 +237,9 @@ impl LabApp {
                 self.dirty = true;
             }
             run = r.lost_focus() && ui.input(|input| input.key_pressed(egui::Key::Enter));
-            run |= ui
-                .add_sized([78., controls::height(ui)], button("Run"))
-                .clicked();
+            let run_button = ui.add_sized([78., controls::height(ui)], button("Run"));
+            self.metrics.terminal_run = Some(run_button.rect);
+            run |= run_button.clicked();
         });
         if run {
             l.execute();

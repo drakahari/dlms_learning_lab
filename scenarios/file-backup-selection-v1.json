@@ -1,0 +1,1739 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-backup-directory-selection",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Backup directory selection",
+      "unit": "backup-selection",
+      "title": "Choose and prove an application recovery set",
+      "summary": "Select lasting settings and records, leave out rebuildable/runtime files, and verify both recoveries.",
+      "objective": "Orchard is already stopped, and its supplied files are consistent. Recovery needs its settings and lasting order records; the application rebuilds its cache and recreates current-boot working files. Inspect /etc/orchard, /var/lib/orchard, /var/cache/orchard and /run/orchard, then choose the two sources needed for recovery. Deliver exactly /backups/orchard-config.tar and /backups/orchard-data.tar as full archives, with no other archives or tracking files. Recover settings to /recovery/etc/orchard and records to /recovery/lib/orchard. Preserve text, modes, owners and groups, both local keep-local.txt notes, and all four source trees. Prove the delivered archives recover the right contents: the available folders share member names, so names alone are insufficient.",
+      "retry_guidance": "Find the first failing result. Compare the selected parent directory, the archive members and the restored file text or ownership; repair only that part and check again. Extra delivery files can be removed without erasing either source tree.",
+      "difficulty": "Advanced",
+      "minutes": 30,
+      "steps": [
+        "Understand the recovery requirements",
+        "Select and create the two full archives",
+        "Recover each source separately",
+        "Verify contents and permissions; retry if needed"
+      ],
+      "hints": [
+        "Identify the lasting settings and records in the four supplied source folders before creating anything. A cache can be rebuilt here; runtime state belongs to the current boot.",
+        "Each desired folder is named orchard. Use -C /etc for settings and -C /var/lib for lasting records; choose different archive names.",
+        "List both archives, restore settings under /recovery/etc and records under /recovery/lib, then read each payload.txt and inspect stat output. Keep unrelated local notes.",
+        "A correct-looking recovery folder cannot repair a wrong delivered archive. Re-create the affected archive from its correct source, then verify it again."
+      ],
+      "explanation": "The recovery requirement needs Orchard settings from /etc and persistent records from /var/lib. The fictional application can rebuild /var/cache and recreates /run after boot; those inputs remain untouched but are not delivered. Two full archives keep two identically named top-level folders separate. Recovering them under different parents preserves the settings/data distinction and overlays only their stored entries, retaining unrelated local notes. Actual contents and permissions/ownership, plus independent recovery from both empty and nonempty sample inputs, distinguish correct archives from correctly named files holding the wrong data. This is an application-specific exercise, not a universal whole-system or live-database backup procedure.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/#rdp-we-206.2_Backup_operations_(weight:_3)",
+        "https://specifications.freedesktop.org/fhs/latest-single/",
+        "https://www.gnu.org/software/tar/manual/html_node/Creating-the-archive.html",
+        "https://www.gnu.org/software/tar/manual/html_node/Extracting-Files.html"
+      ],
+      "simplifications": "Fictional quiescent application and bounded UTF-8 virtual files; no host services or live databases. Typed uncompressed archives model names, text, modes and owners, not tar binary bytes, checksums, links, extended attributes, ACLs, compression or off-site storage. Full extraction overlays stored entries without deleting unrelated destination files. Supplied simulated root preserves modeled owners/modes; this does not exercise real privileges or access control. File timestamps are logical counters and are not graded as filesystem times. Only the disclosed existing backup-terminal subset runs.",
+      "initial": {
+        "kind": "FileBackup",
+        "simulation": {
+          "trees": {
+            "/etc/orchard": {
+              "clock": 2,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "root",
+                    "group": "orchard",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 0,
+                  "changed": 0
+                },
+                "manifest.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "root",
+                    "group": "orchard",
+                    "directory": false
+                  },
+                  "text": "Configuration supplied for orchard\n",
+                  "modified": 1,
+                  "changed": 1
+                },
+                "payload.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "root",
+                    "group": "orchard",
+                    "directory": false
+                  },
+                  "text": "listen=127.0.0.1\nretention=90\n",
+                  "modified": 2,
+                  "changed": 2
+                }
+              }
+            },
+            "/var/lib/orchard": {
+              "clock": 2,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 0,
+                  "changed": 0
+                },
+                "manifest.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": false
+                  },
+                  "text": "Persistent records supplied for orchard\n",
+                  "modified": 1,
+                  "changed": 1
+                },
+                "payload.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": false
+                  },
+                  "text": "order_id,status\nR104,approved\nR105,pending\n",
+                  "modified": 2,
+                  "changed": 2
+                }
+              }
+            },
+            "/var/cache/orchard": {
+              "clock": 2,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 0,
+                  "changed": 0
+                },
+                "manifest.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": false
+                  },
+                  "text": "Rebuildable index supplied for orchard\n",
+                  "modified": 1,
+                  "changed": 1
+                },
+                "payload.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": false
+                  },
+                  "text": "generated_index=outdated\n",
+                  "modified": 2,
+                  "changed": 2
+                }
+              }
+            },
+            "/run/orchard": {
+              "clock": 2,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 0,
+                  "changed": 0
+                },
+                "manifest.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": false
+                  },
+                  "text": "Runtime state supplied for orchard\n",
+                  "modified": 1,
+                  "changed": 1
+                },
+                "payload.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": false
+                  },
+                  "text": "process_id=246\n",
+                  "modified": 2,
+                  "changed": 2
+                }
+              }
+            },
+            "/recovery/etc/orchard": {
+              "clock": 1,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 0,
+                  "changed": 0
+                },
+                "keep-local.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": false
+                  },
+                  "text": "Keep the local configuration recovery note\n",
+                  "modified": 1,
+                  "changed": 1
+                },
+                "payload.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": false
+                  },
+                  "text": "Damaged recovery copy\n",
+                  "modified": 1,
+                  "changed": 1
+                }
+              }
+            },
+            "/recovery/lib/orchard": {
+              "clock": 1,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 0,
+                  "changed": 0
+                },
+                "keep-local.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": false
+                  },
+                  "text": "Keep the local data recovery note\n",
+                  "modified": 1,
+                  "changed": 1
+                },
+                "payload.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "orchard",
+                    "group": "orchard",
+                    "directory": false
+                  },
+                  "text": "Damaged recovery copy\n",
+                  "modified": 1,
+                  "changed": 1
+                }
+              }
+            }
+          },
+          "storage": "/backups",
+          "archives": {},
+          "snapshots": {},
+          "cwd": "/"
+        }
+      },
+      "goal": {
+        "kind": "FileBackup",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "trees": {
+              "/etc/orchard": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "root",
+                      "group": "orchard",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "manifest.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "root",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "Configuration supplied for orchard\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "root",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "listen=127.0.0.1\nretention=90\n",
+                    "modified": 2,
+                    "changed": 2
+                  }
+                }
+              },
+              "/var/lib/orchard": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "manifest.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "Persistent records supplied for orchard\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "order_id,status\nR104,approved\nR105,pending\n",
+                    "modified": 2,
+                    "changed": 2
+                  }
+                }
+              },
+              "/var/cache/orchard": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "manifest.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "Rebuildable index supplied for orchard\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "generated_index=outdated\n",
+                    "modified": 2,
+                    "changed": 2
+                  }
+                }
+              },
+              "/run/orchard": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "manifest.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "Runtime state supplied for orchard\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "process_id=246\n",
+                    "modified": 2,
+                    "changed": 2
+                  }
+                }
+              },
+              "/recovery/etc/orchard": {
+                "clock": 1,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "keep-local.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "Keep the local configuration recovery note\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "Damaged recovery copy\n",
+                    "modified": 1,
+                    "changed": 1
+                  }
+                }
+              },
+              "/recovery/lib/orchard": {
+                "clock": 1,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "keep-local.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "Keep the local data recovery note\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "Damaged recovery copy\n",
+                    "modified": 1,
+                    "changed": 1
+                  }
+                }
+              }
+            },
+            "storage": "/backups",
+            "archives": {},
+            "snapshots": {},
+            "cwd": "/"
+          },
+          "protected": [
+            "/etc/orchard",
+            "/var/lib/orchard",
+            "/var/cache/orchard",
+            "/run/orchard"
+          ],
+          "requirements": [
+            {
+              "kind": "ArtifactSet",
+              "name": "Deliver only the two requested full backup files",
+              "archives": [
+                "/backups/orchard-config.tar",
+                "/backups/orchard-data.tar"
+              ],
+              "snapshots": []
+            },
+            {
+              "kind": "Tree",
+              "name": "Recover current configuration and keep the local note",
+              "path": "/recovery/etc/orchard",
+              "expected": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "root",
+                      "group": "orchard",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "manifest.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "root",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "Configuration supplied for orchard\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "root",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "listen=127.0.0.1\nretention=90\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "keep-local.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "Keep the local configuration recovery note\n",
+                    "modified": 1,
+                    "changed": 1
+                  }
+                }
+              }
+            },
+            {
+              "kind": "Tree",
+              "name": "Recover current persistent data and keep the local note",
+              "path": "/recovery/lib/orchard",
+              "expected": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "manifest.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "Persistent records supplied for orchard\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "order_id,status\nR104,approved\nR105,pending\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "keep-local.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "orchard",
+                      "group": "orchard",
+                      "directory": false
+                    },
+                    "text": "Keep the local data recovery note\n",
+                    "modified": 1,
+                    "changed": 1
+                  }
+                }
+              }
+            },
+            {
+              "kind": "Recovery",
+              "name": "Independently recover delivered configuration",
+              "archives": [
+                "/backups/orchard-config.tar"
+              ],
+              "root": "orchard",
+              "probes": [
+                {
+                  "name": "Empty sample destination",
+                  "initial": {
+                    "clock": 0,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 2,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "root",
+                          "group": "orchard",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      },
+                      "manifest.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "root",
+                          "group": "orchard",
+                          "directory": false
+                        },
+                        "text": "Configuration supplied for orchard\n",
+                        "modified": 1,
+                        "changed": 1
+                      },
+                      "payload.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "root",
+                          "group": "orchard",
+                          "directory": false
+                        },
+                        "text": "listen=127.0.0.1\nretention=90\n",
+                        "modified": 2,
+                        "changed": 2
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "Sample destination with an unrelated local file",
+                  "initial": {
+                    "clock": 1,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      },
+                      "keep-local.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": false
+                        },
+                        "text": "Independent configuration destination note\n",
+                        "modified": 1,
+                        "changed": 1
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 2,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "root",
+                          "group": "orchard",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      },
+                      "manifest.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "root",
+                          "group": "orchard",
+                          "directory": false
+                        },
+                        "text": "Configuration supplied for orchard\n",
+                        "modified": 1,
+                        "changed": 1
+                      },
+                      "payload.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "root",
+                          "group": "orchard",
+                          "directory": false
+                        },
+                        "text": "listen=127.0.0.1\nretention=90\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      "keep-local.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": false
+                        },
+                        "text": "Independent configuration destination note\n",
+                        "modified": 1,
+                        "changed": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "Recovery",
+              "name": "Independently recover delivered persistent data",
+              "archives": [
+                "/backups/orchard-data.tar"
+              ],
+              "root": "orchard",
+              "probes": [
+                {
+                  "name": "Empty sample destination",
+                  "initial": {
+                    "clock": 0,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 2,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      },
+                      "manifest.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": false
+                        },
+                        "text": "Persistent records supplied for orchard\n",
+                        "modified": 1,
+                        "changed": 1
+                      },
+                      "payload.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": false
+                        },
+                        "text": "order_id,status\nR104,approved\nR105,pending\n",
+                        "modified": 2,
+                        "changed": 2
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "Sample destination with an unrelated local file",
+                  "initial": {
+                    "clock": 1,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      },
+                      "keep-local.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": false
+                        },
+                        "text": "Independent persistent data destination note\n",
+                        "modified": 1,
+                        "changed": 1
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 2,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      },
+                      "manifest.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": false
+                        },
+                        "text": "Persistent records supplied for orchard\n",
+                        "modified": 1,
+                        "changed": 1
+                      },
+                      "payload.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": false
+                        },
+                        "text": "order_id,status\nR104,approved\nR105,pending\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      "keep-local.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "orchard",
+                          "group": "orchard",
+                          "directory": false
+                        },
+                        "text": "Independent persistent data destination note\n",
+                        "modified": 1,
+                        "changed": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "Payloads",
+              "name": "Deliver a full configuration archive with the requested members",
+              "archive": "/backups/orchard-config.tar",
+              "root": "orchard",
+              "files": [
+                "manifest.txt",
+                "payload.txt"
+              ],
+              "incremental": false
+            },
+            {
+              "kind": "Payloads",
+              "name": "Deliver a full persistent data archive with the requested members",
+              "archive": "/backups/orchard-data.tar",
+              "root": "orchard",
+              "files": [
+                "manifest.txt",
+                "payload.txt"
+              ],
+              "incremental": false
+            }
+          ]
+        }
+      },
+      "file_backup_teaching": {
+        "definition": {
+          "version": 1,
+          "initial": {
+            "trees": {
+              "/etc/willow": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "root",
+                      "group": "willow",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "manifest.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "root",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "Configuration supplied for willow\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "root",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "listen=127.0.0.1\nretention=90\n",
+                    "modified": 2,
+                    "changed": 2
+                  }
+                }
+              },
+              "/var/lib/willow": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "manifest.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "Persistent records supplied for willow\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "order_id,status\nR104,approved\nR105,pending\n",
+                    "modified": 2,
+                    "changed": 2
+                  }
+                }
+              },
+              "/var/cache/willow": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "manifest.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "Rebuildable index supplied for willow\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "generated_index=outdated\n",
+                    "modified": 2,
+                    "changed": 2
+                  }
+                }
+              },
+              "/run/willow": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "manifest.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "Runtime state supplied for willow\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "process_id=246\n",
+                    "modified": 2,
+                    "changed": 2
+                  }
+                }
+              },
+              "/example-recovery/etc/willow": {
+                "clock": 1,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "keep-local.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "Keep the local configuration recovery note\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "Damaged recovery copy\n",
+                    "modified": 1,
+                    "changed": 1
+                  }
+                }
+              },
+              "/example-recovery/lib/willow": {
+                "clock": 1,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "keep-local.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "Keep the local data recovery note\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "Damaged recovery copy\n",
+                    "modified": 1,
+                    "changed": 1
+                  }
+                }
+              }
+            },
+            "storage": "/example-backups",
+            "archives": {},
+            "snapshots": {},
+            "cwd": "/"
+          },
+          "protected": [
+            "/etc/willow",
+            "/var/lib/willow",
+            "/var/cache/willow",
+            "/run/willow"
+          ],
+          "requirements": [
+            {
+              "kind": "ArtifactSet",
+              "name": "Deliver only the two requested full backup files",
+              "archives": [
+                "/example-backups/willow-config.tar",
+                "/example-backups/willow-data.tar"
+              ],
+              "snapshots": []
+            },
+            {
+              "kind": "Tree",
+              "name": "Recover current configuration and keep the local note",
+              "path": "/example-recovery/etc/willow",
+              "expected": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "root",
+                      "group": "willow",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "manifest.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "root",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "Configuration supplied for willow\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "root",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "listen=127.0.0.1\nretention=90\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "keep-local.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "Keep the local configuration recovery note\n",
+                    "modified": 1,
+                    "changed": 1
+                  }
+                }
+              }
+            },
+            {
+              "kind": "Tree",
+              "name": "Recover current persistent data and keep the local note",
+              "path": "/example-recovery/lib/willow",
+              "expected": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  },
+                  "manifest.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "Persistent records supplied for willow\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "payload.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "order_id,status\nR104,approved\nR105,pending\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "keep-local.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "willow",
+                      "group": "willow",
+                      "directory": false
+                    },
+                    "text": "Keep the local data recovery note\n",
+                    "modified": 1,
+                    "changed": 1
+                  }
+                }
+              }
+            },
+            {
+              "kind": "Recovery",
+              "name": "Independently recover delivered configuration",
+              "archives": [
+                "/example-backups/willow-config.tar"
+              ],
+              "root": "willow",
+              "probes": [
+                {
+                  "name": "Empty sample destination",
+                  "initial": {
+                    "clock": 0,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 2,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "root",
+                          "group": "willow",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      },
+                      "manifest.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "root",
+                          "group": "willow",
+                          "directory": false
+                        },
+                        "text": "Configuration supplied for willow\n",
+                        "modified": 1,
+                        "changed": 1
+                      },
+                      "payload.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "root",
+                          "group": "willow",
+                          "directory": false
+                        },
+                        "text": "listen=127.0.0.1\nretention=90\n",
+                        "modified": 2,
+                        "changed": 2
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "Sample destination with an unrelated local file",
+                  "initial": {
+                    "clock": 1,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      },
+                      "keep-local.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": false
+                        },
+                        "text": "Independent configuration destination note\n",
+                        "modified": 1,
+                        "changed": 1
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 2,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "root",
+                          "group": "willow",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      },
+                      "manifest.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "root",
+                          "group": "willow",
+                          "directory": false
+                        },
+                        "text": "Configuration supplied for willow\n",
+                        "modified": 1,
+                        "changed": 1
+                      },
+                      "payload.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "root",
+                          "group": "willow",
+                          "directory": false
+                        },
+                        "text": "listen=127.0.0.1\nretention=90\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      "keep-local.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": false
+                        },
+                        "text": "Independent configuration destination note\n",
+                        "modified": 1,
+                        "changed": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "Recovery",
+              "name": "Independently recover delivered persistent data",
+              "archives": [
+                "/example-backups/willow-data.tar"
+              ],
+              "root": "willow",
+              "probes": [
+                {
+                  "name": "Empty sample destination",
+                  "initial": {
+                    "clock": 0,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 2,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      },
+                      "manifest.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": false
+                        },
+                        "text": "Persistent records supplied for willow\n",
+                        "modified": 1,
+                        "changed": 1
+                      },
+                      "payload.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": false
+                        },
+                        "text": "order_id,status\nR104,approved\nR105,pending\n",
+                        "modified": 2,
+                        "changed": 2
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "Sample destination with an unrelated local file",
+                  "initial": {
+                    "clock": 1,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      },
+                      "keep-local.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": false
+                        },
+                        "text": "Independent persistent data destination note\n",
+                        "modified": 1,
+                        "changed": 1
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 2,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      },
+                      "manifest.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": false
+                        },
+                        "text": "Persistent records supplied for willow\n",
+                        "modified": 1,
+                        "changed": 1
+                      },
+                      "payload.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": false
+                        },
+                        "text": "order_id,status\nR104,approved\nR105,pending\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      "keep-local.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "willow",
+                          "group": "willow",
+                          "directory": false
+                        },
+                        "text": "Independent persistent data destination note\n",
+                        "modified": 1,
+                        "changed": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "Payloads",
+              "name": "Deliver a full configuration archive with the requested members",
+              "archive": "/example-backups/willow-config.tar",
+              "root": "willow",
+              "files": [
+                "manifest.txt",
+                "payload.txt"
+              ],
+              "incremental": false
+            },
+            {
+              "kind": "Payloads",
+              "name": "Deliver a full persistent data archive with the requested members",
+              "archive": "/example-backups/willow-data.tar",
+              "root": "willow",
+              "files": [
+                "manifest.txt",
+                "payload.txt"
+              ],
+              "incremental": false
+            }
+          ]
+        },
+        "prerequisite_note": "Finish Backups: inspect, recover and preserve history first. You should be able to list archive members, create a full archive with tar -cf, restore with tar -xf, read files with cat and inspect permissions with stat. Type one command at a time in the example terminal, then choose Run command. The Willow practice has its own files and command draft.",
+        "concepts": [
+          {
+            "title": "Choose what the application needs to recover",
+            "text": "A backup needs the settings that describe how an application runs and the lasting records it cannot rebuild. The separate Willow example needs both kinds of information; read its source manifests before choosing what to save. The application is already paused consistently. This activity teaches file selection, not how to stop a database or back up an entire operating system."
+          },
+          {
+            "title": "Distinguish lasting records from disposable working files",
+            "text": "The filesystem layout gives useful clues: /etc holds system settings, /var/lib holds application state that survives restarts, /var/cache holds data an application can rebuild, and /run holds information for the current boot. This fictional application explicitly rebuilds its cache and runtime files. Real backup choices also need application documentation and recovery requirements; a pathname alone is not a universal exclusion rule."
+          },
+          {
+            "title": "Keep the two sources separate",
+            "text": "The Willow example folders have the same top-level name and member names, but different text and ownership. The full parent path tells tar which folder to save. Give configuration and record archives different names and restore into separate parents so one kind of information cannot overwrite the other. Apply that reasoning to the independent assignment."
+          },
+          {
+            "title": "Check a delivery, not just a filename",
+            "text": "Only the two requested full archives belong in the delivery folder. Do not create incremental tracking files for this task. Listing archive names proves neither their source nor their contents: read a trial restore and compare its modes and owners. A full restore overlays stored files and retains unrelated destination files. Independent checks repeat recovery with their own empty and nonempty sample destinations."
+          }
+        ],
+        "example_description": "Practice with the separate Willow application: back up its settings and lasting records, recover each independently, and leave its rebuildable cache and runtime files out of the delivery.",
+        "example_commands": [
+          {
+            "command": "cat /etc/willow/manifest.txt",
+            "explanation": "Read which files describe the example application settings."
+          },
+          {
+            "command": "cat /var/lib/willow/manifest.txt",
+            "explanation": "Read which files preserve the example application records."
+          },
+          {
+            "command": "tar -cf /example-backups/willow-config.tar -C /etc willow",
+            "explanation": "Create a full configuration archive. -c creates, -f names its output file, and -C selects the parent; willow names the complete folder."
+          },
+          {
+            "command": "tar -cf /example-backups/willow-data.tar -C /var/lib willow",
+            "explanation": "Create a separate full archive of the persistent records. The parent /var/lib distinguishes this willow folder from /etc/willow."
+          },
+          {
+            "command": "tar -tf /example-backups/willow-config.tar",
+            "explanation": "List the archive members. The willow top-level name alone does not identify which source folder supplied the bytes."
+          },
+          {
+            "command": "tar -xf /example-backups/willow-config.tar -C /example-recovery/etc",
+            "explanation": "Overlay configuration into its separate recovery folder. Unrelated keep-local.txt remains; a full restore is not a purge."
+          },
+          {
+            "command": "tar -xf /example-backups/willow-data.tar -C /example-recovery/lib",
+            "explanation": "Recover persistent records into their own destination, rather than mixing them with settings."
+          },
+          {
+            "command": "cat /example-recovery/etc/willow/payload.txt",
+            "explanation": "Read the restored settings, rather than trusting the archive name."
+          },
+          {
+            "command": "cat /example-recovery/lib/willow/payload.txt",
+            "explanation": "Read the actual persistent records."
+          },
+          {
+            "command": "stat -c %a:%U:%G /example-recovery/lib/willow/payload.txt",
+            "explanation": "Check the restored permission mode, owner and group; %a prints octal mode, %U owner and %G group."
+          }
+        ],
+        "try_change": {
+          "description": "After the worked example succeeds, add an unnecessary cache archive to the example delivery. The recovered files still look correct, but the delivery no longer follows the requested selection. Inspect the first failing result, then remove only the extra archive.",
+          "commands": [
+            {
+              "command": "tar -cf /example-backups/cache.tar -C /var/cache willow",
+              "explanation": "This extra archive contains rebuildable cache data that the example delivery excludes. It must not earn completion just because the other archives recover correctly."
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "command": "rm /example-backups/cache.tar",
+            "explanation": "Remove only the extra delivery file. Keep both correct archives and all source/recovered files."
+          }
+        ]
+      },
+      "solution": [
+        "tar -cf /backups/orchard-config.tar -C /etc orchard",
+        "tar -cf /backups/orchard-data.tar -C /var/lib orchard",
+        "tar -xf /backups/orchard-config.tar -C /recovery/etc",
+        "tar -xf /backups/orchard-data.tar -C /recovery/lib"
+      ],
+      "prerequisites": [
+        "lpic2-backup-recovery-handover"
+      ]
+    }
+  ]
+}

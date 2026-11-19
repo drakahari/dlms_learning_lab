@@ -46,6 +46,14 @@ pub fn execute_in_context(
     *current = candidate;
     Ok(output)
 }
+/// Source-aware entry point for native typed account/template actions. No CLI
+/// spelling is introduced; imported policy cannot authorize itself.
+pub fn apply_in_context(initial:&State,current:&mut State,action:&accounts::Action)->Result<(),String>{
+    if !current.valid_against(initial){return Err("Account template or identity context differs; previous state retained".into());}
+    let mut candidate=current.clone();candidate.apply(action).map_err(|e|e.to_string())?;
+    if !candidate.valid_against(initial){return Err("Account template action differs from its authored context; previous state retained".into());}
+    *current=candidate;Ok(())
+}
 pub fn output_text(output: Output) -> Result<String, String> {
     let text = format!("{}{}", output.stdout, output.stderr);
     if output.status == 0 {
@@ -128,6 +136,8 @@ pub struct Lesson {
     #[serde(deserialize_with = "requirements")]
     pub try_outcomes: Vec<Requirement>,
     pub repair: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub template_teaching: Option<crate::accounts_template::Teaching>,
 }
 fn commands_valid(commands: &[String]) -> bool {
     !commands.is_empty()
@@ -140,8 +150,16 @@ fn reached(initial: &State, state: &State, rs: &[Requirement]) -> bool {
     accounts::checks(initial, state, rs).iter().all(|c| c.0)
 }
 impl Lesson {
+    /// Pack/reference boundary only; caller supplies the held assignment source.
+    pub fn validate_assignment_templates(&self, assignment:&State)->Result<(),String>{
+        match &self.template_teaching {
+            Some(t)=>t.validate_assignment(assignment),
+            None if assignment.policy().editable_skeleton_leaves.is_empty()=>Ok(()),
+            None=>Err("Editable assignment templates require explicit native teaching/reference metadata".into()),
+        }
+    }
     pub fn validate(&self) -> Result<(), String> {
-        if !self.fixture.valid()
+        if !self.fixture.valid_initial()
             || self.concepts.is_empty()
             || self.concepts.len() > 6
             || self.concepts.iter().any(|c| {
@@ -173,7 +191,10 @@ impl Lesson {
         {
             return Err("Invalid accounts teaching, annotated commands or example outcomes".into());
         }
+        if let Some(t)=&self.template_teaching{t.validate_example(&self.fixture)?;}
+        else if !self.fixture.policy().editable_skeleton_leaves.is_empty(){return Err("Editable example templates require explicit native teaching metadata".into());}
         let mut state = self.fixture.clone();
+        if let Some(t)=&self.template_teaching{crate::accounts_template::apply_phase(&self.fixture,&mut state,&t.example)?;}
         for command in &self.example {
             if execute_in_context(&self.fixture, &mut state, command)?.status != 0 {
                 return Err("Account example must explain intentional nonzero results explicitly; default commands must succeed".into());
@@ -183,6 +204,7 @@ impl Lesson {
             return Err("Accounts example does not reach every declared outcome".into());
         }
         let before = state.clone();
+        if let Some(t)=&self.template_teaching{crate::accounts_template::apply_phase(&self.fixture,&mut state,&t.try_steps)?;}
         for command in &self.try_actions {
             if execute_in_context(&self.fixture, &mut state, command)?.status != 0 {
                 return Err(
@@ -195,6 +217,7 @@ impl Lesson {
                 "Accounts try-change must alter state and reach its declared outcomes".into(),
             );
         }
+        if let Some(t)=&self.template_teaching{crate::accounts_template::apply_phase(&self.fixture,&mut state,&t.repair)?;}
         for command in &self.repair {
             if execute_in_context(&self.fixture, &mut state, command)?.status != 0 {
                 return Err("Accounts example repair must succeed".into());
@@ -280,6 +303,8 @@ pub struct Learning {
     #[serde(deserialize_with = "transcript")]
     pub transcript: Vec<String>,
     pub checked: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub template_drafts: Option<crate::accounts_template::Drafts>,
 }
 impl Learning {
     pub fn new(lesson: &Lesson) -> Self {
@@ -291,11 +316,13 @@ impl Learning {
             command: String::new(),
             transcript: vec![],
             checked: false,
+            template_drafts: lesson.template_teaching.as_ref().and_then(|_|crate::accounts_template::Drafts::new(&lesson.fixture,&lesson.fixture).ok()),
         }
     }
     pub fn valid(&self) -> bool {
         self.version == 1
             && self.simulation.valid()
+            && self.template_drafts.as_ref().is_none_or(|d|d.valid()&&self.simulation.valid_against(&d.source))
             && self.example_command < 8
             && self.command.len() <= MAX_COMMAND_BYTES
             && self.transcript.len() <= MAX_TRANSCRIPT_ROWS
@@ -309,6 +336,16 @@ impl Learning {
         self.valid()
             && self.example_command < lesson.example.len()
             && self.simulation.valid_against(&lesson.fixture)
+            && match (&lesson.template_teaching,&self.template_drafts){
+                (None,None)=>lesson.fixture.policy().editable_skeleton_leaves.is_empty(),
+                (Some(_),Some(d))=>d.valid_for(&lesson.fixture,&self.simulation),
+                _=>false,
+            }
+    }
+    pub fn save_template(&mut self,lesson:&Lesson)->Result<(),String>{
+        self.checked=false;
+        if !self.valid_for(lesson){return Err("Template practice differs from its held lesson source; work retained".into());}
+        self.template_drafts.as_mut().ok_or("No native template editor in this lesson")?.save_selected(&lesson.fixture,&mut self.simulation)
     }
     pub fn fill_example(&mut self, lesson: &Lesson) -> Result<(), String> {
         if !self.valid_for(lesson) {
@@ -356,7 +393,11 @@ impl Learning {
                 "Accounts example identities or saved metadata differ from this lesson".into(),
             )];
         }
-        accounts::checks(&lesson.fixture, &self.simulation, &lesson.outcomes)
+        let mut checks=accounts::checks(&lesson.fixture, &self.simulation, &lesson.outcomes);
+        if self.template_drafts.as_ref().is_some_and(|d|!d.matches_state(&lesson.fixture,&self.simulation)){
+            checks.push((false,"Template edits are not saved. Save each changed template or restore its applied values, then check again".into()));
+        }
+        checks
     }
 }
 pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
@@ -366,6 +407,7 @@ pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
             | crate::engine::State::Lvm { .. }
             | crate::engine::State::Ntp { .. }
             | crate::engine::State::Hsrp { .. }
+            | crate::engine::State::Syslog { .. }
     ) || crate::workspace::is_physical_workspace(attempt)
     {
         return;

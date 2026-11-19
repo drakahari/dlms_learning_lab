@@ -7,12 +7,15 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 pub mod binding;
+pub mod mbr;
+pub mod layout;
 pub const HELP: &str = "Virtual disk preparation only: inspect supplied disks, create an empty GPT, add a non-overlapping named partition, then explicitly initialize blank content as ext4 or swap. Draft fields do not change applied state. No delete/resize/overwrite, MBR/logical partitions, mounts, swap activation, host devices or complete utility emulation. Practice can be reset and replayed.";
 /// Human-readable native labels; enum/wire representations remain unchanged.
 pub fn type_hint_name(value: core::TypeHint) -> &'static str {
     match value {
         core::TypeHint::LinuxData => "Linux data",
         core::TypeHint::LinuxSwap => "Linux swap",
+        core::TypeHint::EfiSystem => "EFI System Partition",
     }
 }
 pub fn format_name(value: FormatChoice) -> &'static str {
@@ -86,6 +89,11 @@ fn partition_path(s: &str) -> Result<(&str, u8), String> {
 }
 fn model(s: &core::State) -> Result<(), String> {
     s.validate().map_err(|e| e.to_string())?;
+    if s.disks.values().flat_map(|disk| disk.partitions()).any(|part| {
+        part.type_hint == core::TypeHint::EfiSystem || matches!(part.content, core::Content::Fat32 { .. })
+    }) {
+        return Err("Supplied EFI volume facts belong to the EFI loader model.".into());
+    }
     if !bounded::within(s, MAX_MODEL) {
         return Err(
             "Virtual disk model exceeds the64KiB workspace limit; previous work retained".into(),
@@ -124,10 +132,25 @@ pub struct Target {
 pub struct Plan {
     #[serde(deserialize_with = "bounded::sequence::<_,Target,MAX_TARGETS>")]
     pub targets: Vec<Target>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mbr: Option<mbr::Plan>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub layout: Option<layout::Plan>,
 }
 impl Plan {
     pub fn validate(&self, initial: &core::State) -> Result<(), String> {
         model(initial)?;
+        if let Some(plan) = &self.mbr {
+            if !self.targets.is_empty() || self.layout.is_some() {
+                return Err(
+                    "Named GPT requirements and MBR payload requirements are separate".into(),
+                );
+            }
+            return plan.validate(initial);
+        }
+        if initial.mbr_profile.is_some() {
+            return Err("The old named GPT plan does not admit an MBR source profile".into());
+        }
         if self.targets.is_empty() || self.targets.len() > MAX_TARGETS {
             return Err("Need1–8 meaningful partition requirements".into());
         }
@@ -188,6 +211,7 @@ impl Plan {
                 }
             }
         }
+        if let Some(policy)=&self.layout {policy.validate(&self.targets)?;}
         Ok(())
     }
 }
@@ -269,7 +293,7 @@ pub fn same_problem(initial: &core::State, current: &core::State) -> bool {
             }
         }
     }
-    true
+    mbr::same_problem(initial, current)
 }
 fn all(rows: &[(bool, String)]) -> bool {
     !rows.is_empty() && rows.iter().all(|r| r.0)
@@ -279,6 +303,7 @@ fn content_name(c: &core::Content) -> &'static str {
         core::Content::Blank => "unformatted",
         core::Content::Ext4 { .. } => "ext4",
         core::Content::Swap { .. } => "swap",
+        core::Content::Fat32 { .. } => "FAT32",
         core::Content::Foreign { .. } => "supplied foreign data",
     }
 }
@@ -304,6 +329,12 @@ fn required_content(c: &DesiredContent) -> String {
     }
 }
 fn outcomes(initial: &core::State, current: &core::State, plan: &Plan) -> Vec<(bool, String)> {
+    if let Some(mbr) = &plan.mbr {
+        if !plan.targets.is_empty() {
+            return vec![(false, "Conflicting GPT and MBR task requirements".into())];
+        }
+        return mbr::outcomes(initial, current, mbr);
+    }
     if !same_problem(initial, current) || plan.validate(initial).is_err() {
         return vec![(false,"The supplied disk geometry, existing data or task context differs; current success was not accepted".into())];
     }
@@ -402,6 +433,7 @@ fn outcomes(initial: &core::State, current: &core::State, plan: &Plan) -> Vec<(b
         protected,
         if protected { "Supplied data, unrelated media and all unrequested partition allocations remain unchanged".into() } else { format!("{}. This preparation-only subset cannot delete/undo an allocation; reset the affected practice or lab and replay its intended configuration.", protection_issues.join("; ")) },
     ));
+    if let Some(policy)=&plan.layout {rows.extend(policy.checks(current,&plan.targets));}
     rows
 }
 
@@ -415,6 +447,9 @@ pub enum FormatChoice {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Operation {
+    Mbr {
+        operation: core::mbr::Action,
+    },
     CreateGpt {
         #[serde(deserialize_with = "crate::cron::text::<_,64>")]
         disk: String,
@@ -441,6 +476,16 @@ pub enum Operation {
 impl Operation {
     pub fn shape(&self) -> Result<(), String> {
         match self {
+            Self::Mbr { operation } => {
+                let disk = match operation {
+                    core::mbr::Action::Create { disk } | core::mbr::Action::Add { disk, .. } => {
+                        disk
+                    }
+                };
+                if !disk_ok(disk) {
+                    return Err("Choose a supplied virtual disk for MBR preparation".into());
+                }
+            }
             Self::CreateGpt { disk } => {
                 if !disk_ok(disk) {
                     return Err("Choose a supplied virtual disk".into());
@@ -467,6 +512,7 @@ impl Operation {
     }
     fn core_action(&self) -> core::Action {
         match self {
+            Self::Mbr { operation } => core::Action::Mbr(operation.clone()),
             Self::CreateGpt { disk } => core::Action::CreateGpt { disk: disk.clone() },
             Self::AddPartition {
                 disk,
@@ -505,6 +551,19 @@ impl Operation {
             return "Invalid native preparation action; nothing applied".into();
         }
         match self {
+            Self::Mbr { operation } => match operation {
+                core::mbr::Action::Create { disk } => format!("Create MBR on {disk}"),
+                core::mbr::Action::Add {
+                    disk,
+                    role,
+                    start,
+                    end,
+                    ..
+                } => format!(
+                    "Add {} on {disk}, inclusive sectors {start}..{end}",
+                    mbr::role_name(*role)
+                ),
+            },
             Self::CreateGpt { disk } => format!("Create GPT on {disk}"),
             Self::AddPartition {
                 disk,
@@ -580,6 +639,8 @@ pub struct Origin {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Draft {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mbr_role: Option<core::mbr::Kind>,
     pub selected_partition: Option<u8>,
     #[serde(deserialize_with = "crate::cron::text::<_,36>")]
     pub name: String,
@@ -597,10 +658,16 @@ pub struct Draft {
 impl Draft {
     fn new(d: &core::Disk) -> Self {
         Self {
+            mbr_role: None,
             selected_partition: d
-                .table
-                .as_ref()
-                .and_then(|t| t.partitions.first())
+                .partitions()
+                .find(|p| {
+                    d.mbr.as_ref().is_none_or(|t| {
+                        t.entries.iter().any(|e| {
+                            e.partition.number == p.number && e.kind != core::mbr::Kind::Extended
+                        })
+                    })
+                })
                 .map(|p| p.number),
             name: String::new(),
             start: String::new(),
@@ -640,12 +707,28 @@ impl Draft {
             s.parse::<u64>()
                 .map_err(|_| "Sector number is too large".into())
         };
-        let op = Operation::AddPartition {
-            disk: disk.into(),
-            name: self.name.clone(),
-            start: number(&self.start)?,
-            end: number(&self.end)?,
-            type_hint: self.type_hint,
+        let op = if let Some(role) = self.mbr_role {
+            Operation::Mbr {
+                operation: core::mbr::Action::Add {
+                    disk: disk.into(),
+                    role,
+                    start: number(&self.start)?,
+                    end: number(&self.end)?,
+                    type_hint: if role == core::mbr::Kind::Extended {
+                        core::TypeHint::LinuxData
+                    } else {
+                        self.type_hint
+                    },
+                },
+            }
+        } else {
+            Operation::AddPartition {
+                disk: disk.into(),
+                name: self.name.clone(),
+                start: number(&self.start)?,
+                end: number(&self.end)?,
+                type_hint: self.type_hint,
+            }
         };
         op.shape()?;
         Ok(op)
@@ -714,7 +797,13 @@ impl Editor {
             drafts: model
                 .disks
                 .iter()
-                .map(|(p, d)| (p.clone(), Draft::new(d)))
+                .map(|(p, d)| {
+                    let mut draft = Draft::new(d);
+                    if model.mbr_profile.is_some() {
+                        draft.mbr_role = Some(core::mbr::Kind::Primary);
+                    }
+                    (p.clone(), draft)
+                })
                 .collect(),
         })
     }
@@ -726,6 +815,11 @@ impl Editor {
         }
         for d in self.drafts.values() {
             d.validate()?;
+            if model.mbr_profile.is_some() != d.mbr_role.is_some() {
+                return Err(
+                    "The editor's table-role controls differ from the source profile".into(),
+                );
+            }
         }
         Ok(())
     }
@@ -901,12 +995,8 @@ fn fresh_editor(e: &Editor, model: &core::State) -> bool {
     model.disks.keys().next() == Some(&e.selected)
         && e.validate(model).is_ok()
         && e.drafts.iter().all(|(path, d)| {
-            d.selected_partition
-                == model.disks[path]
-                    .table
-                    .as_ref()
-                    .and_then(|t| t.partitions.first())
-                    .map(|p| p.number)
+            d.selected_partition == Draft::new(&model.disks[path]).selected_partition
+                && d.mbr_role == model.mbr_profile.map(|_| core::mbr::Kind::Primary)
                 && d.name.is_empty()
                 && d.start.is_empty()
                 && d.end.is_empty()
@@ -1054,6 +1144,31 @@ impl Session {
         next.selected_example = index;
         let e = &mut next.example_editor;
         match &step.operation {
+            Operation::Mbr { operation } => match operation {
+                core::mbr::Action::Create { disk } => {
+                    if !e.drafts.contains_key(disk) {
+                        return Err("Worked step uses another disk inventory".into());
+                    }
+                    e.selected = disk.clone();
+                }
+                core::mbr::Action::Add {
+                    disk,
+                    role,
+                    start,
+                    end,
+                    type_hint,
+                } => {
+                    let draft = e
+                        .drafts
+                        .get_mut(disk)
+                        .ok_or("Worked step uses another disk inventory")?;
+                    e.selected = disk.clone();
+                    draft.mbr_role = Some(*role);
+                    draft.start = start.to_string();
+                    draft.end = end.to_string();
+                    draft.type_hint = *type_hint;
+                }
+            },
             Operation::CreateGpt { disk } => {
                 if !e.drafts.contains_key(disk) {
                     return Err("Worked step uses another disk inventory".into());
@@ -1148,6 +1263,27 @@ impl Session {
                 .iter()
                 .find(|p| p.name == *name && p.start == *start && p.end == *end)
                 .map(|p| p.number);
+            editor.drafts.get_mut(disk).unwrap().selected_partition = number;
+        }
+        if let Operation::Mbr {
+            operation:
+                core::mbr::Action::Add {
+                    disk,
+                    role,
+                    start,
+                    end,
+                    ..
+                },
+        } = operation
+        {
+            let number = model.disks[disk]
+                .mbr
+                .as_ref()
+                .unwrap()
+                .entries
+                .iter()
+                .find(|e| e.kind == *role && e.partition.start == *start && e.partition.end == *end)
+                .map(|e| e.partition.number);
             editor.drafts.get_mut(disk).unwrap().selected_partition = number;
         }
         let rows = if practice {

@@ -1,0 +1,132 @@
+[
+  {
+    "id": "lpic2-iscsi-target-identity",
+    "goal": "Discover the virtual storage and connect to the export named in the inventory ticket.",
+    "context": "Builds on inspecting block devices and identifying stable storage. The virtual initiator is the client that connects to network storage.",
+    "concepts": [
+      {
+        "title": "Find the target and its portal",
+        "text": "The target name identifies a storage service. The portal is the address and port for connecting to it. The SendTargets request returns the advertised pairs. A portal may host several targets, and a target may be reachable through more than one portal. Use both parts of the pair shown in your ticket."
+      },
+      {
+        "title": "Separate a saved record from a connection",
+        "text": "Discovery saves the returned pairs as local node records in this exercise. The -m option chooses a mode, such as node or session. Use -T for the target name and -p for its portal. Login opens a session to the selected pair. Until login succeeds, a listed node supplies no attached disk."
+      },
+      {
+        "title": "Compare the LUN and disk identity",
+        "text": "A logical unit number (LUN) identifies an exposed device within a target. Two exports can both show LUN 0. List the session with SCSI details to find the disk name, then compare its WWN (world wide name) with the ticket. A Linux name like sdc can change on a real host."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Discover one storage service",
+        "value": "iscsiadm -m discoverydb -t sendtargets -p 192.0.2.50 --discover",
+        "explanation": "The two rows use the same destination portal with different target names. Neither row indicates an active connection."
+      },
+      {
+        "label": "Choose the portal in the ticket",
+        "value": "iscsiadm -m node -T iqn.2023-06.example.demo:catalog -p 192.0.2.53:3260 --login",
+        "explanation": "The discovery address can differ from the address used for login. Use the returned portal that the ticket specifies."
+      },
+      {
+        "label": "Follow the disk from session to inventory",
+        "value": "iscsiadm -m session -P 3\nlsblk -o NAME,WWN",
+        "explanation": "The session shows LUN 0 attached as sdc. The lsblk row identifies sdc as 0x5000000000000095, the WWN in this example's ticket."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Identify the two addresses",
+        "action": "Compare Discovery address and Required portal below. The inventory ticket tells you what must be attached after login.",
+        "observe": "The discovery address names the directory to query. Its response supplies the actual destination and port."
+      },
+      {
+        "title": "Discover, connect and inspect",
+        "action": "Discover the portal and compare saved nodes with current sessions.\n$ iscsiadm -m discoverydb -t sendtargets -p 198.51.100.41:3260 --discover\n$ iscsiadm -m node\n$ iscsiadm -m session\nConnect to the matching target and portal, then find its disk.\n$ iscsiadm -m node -T iqn.2024-04.example.training:media -p 198.51.100.43:3261 --login\n$ iscsiadm -m session -P 3\n$ lsblk -o NAME,WWN",
+        "observe": "The session list is empty before login. After login, match the attached disk name in the session output to its WWN in the disk listing."
+      },
+      {
+        "title": "Compare what passes",
+        "action": "Select Check configuration. Log out of the practice export using the same target and portal with --logout in place of --login. Check again, then log it back in and recheck.",
+        "observe": "The record remains after logout. The active session and its disk no longer satisfy the task until you log in again."
+      }
+    ],
+    "requirements": [
+      "Save a node record for the supplied target and portal.",
+      "Connect to that export and verify the supplied LUN and disk WWN.",
+      "Leave unintended sessions disconnected."
+    ],
+    "status": "updated",
+    "source": "scenarios/iscsi-lessons-v1.json",
+    "review": {
+      "introduction": "Teaches target/portal, records and sessions, then uses a third set of inputs for the worked explanation.",
+      "example": "Separate simulated commands investigate the virtual initiator and include an intentional incorrect action with a retry.",
+      "assignment": "Gives a precise storage ticket and grades connected identity and any required startup policy as distinct outcomes."
+    }
+  },
+  {
+    "id": "lpic2-iscsi-startup-policy",
+    "goal": "Connect the required disk now and arrange its automatic login later while keeping the existing auxiliary session running.",
+    "context": "Builds on connecting to an exact target and portal. The required and auxiliary node records are already saved. The auxiliary session is running and must stay connected.",
+    "concepts": [
+      {
+        "title": "Read the saved startup policy",
+        "text": "The node record stores node.startup separately from any active session. Use --op show with the target and portal to see that value. The --op option selects an operation on the record. A manual node can be connected right now and still be absent from the automatic startup plan."
+      },
+      {
+        "title": "Update one record",
+        "text": "Use --op update -n node.startup -v automatic for the required record. This policy says a configured iSCSI login service may select it at startup. Changing the record does not establish a new session and does not log out an existing one."
+      },
+      {
+        "title": "Check today and a clean start separately",
+        "text": "You can log in to the selected node or request login for the automatic nodes. Compare the active session and disk, then use Preview automatic logins to see what a later start would select from saved policies. The preview does not modify sessions."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Inspect the selected record",
+        "value": "iscsiadm -m node -T iqn.2023-06.example.demo:index -p 192.0.2.60 --op show",
+        "explanation": "This record says manual. Its current session is a separate fact."
+      },
+      {
+        "label": "Allow automatic login",
+        "value": "iscsiadm -m node -T iqn.2023-06.example.demo:index -p 192.0.2.60 --op update -n node.startup -v automatic",
+        "explanation": "Only the selected record changes. Leave the other running session alone."
+      },
+      {
+        "label": "Connect now and verify",
+        "value": "iscsiadm -m node --loginall=automatic\niscsiadm -m session -P 3\nlsblk -o NAME,WWN",
+        "explanation": "The active sessions show the original auxiliary disk plus the required disk. The startup preview selects only the required record."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Inspect the supplied state",
+        "action": "Use iscsiadm -m node and iscsiadm -m session to see the saved records and the existing connection.",
+        "observe": "The manual auxiliary record already has a live session. The required record exists but does not have a session."
+      },
+      {
+        "title": "Update the required record and connect",
+        "action": "Change the required record. Open Preview automatic logins and check before connecting.\n$ iscsiadm -m node -T iqn.2024-04.example.training:reports -p 198.51.100.63:3260 --op update -n node.startup -v automatic\nConnect the automatic node, then verify the disk.\n$ iscsiadm -m node --loginall=automatic\n$ iscsiadm -m session -P 3\n$ lsblk -o NAME,WWN",
+        "observe": "The preview changes first. The existing session stays connected. Login then adds the required disk."
+      },
+      {
+        "title": "Check the separate results",
+        "action": "Select Check configuration again. Change the required record to manual using the same update with -v manual, and check. Restore automatic and check once more.",
+        "observe": "The required disk stays attached when you choose manual. Only the future startup requirement fails until you restore automatic."
+      }
+    ],
+    "requirements": [
+      "Keep the original auxiliary session running without interruption and leave its startup policy manual.",
+      "Connect to the required target and verify the supplied LUN and disk WWN.",
+      "Save automatic startup for only the required export and confirm the startup preview selects it."
+    ],
+    "status": "updated",
+    "source": "scenarios/iscsi-lessons-v1.json",
+    "review": {
+      "introduction": "Teaches target/portal, records and sessions, then uses a third set of inputs for the worked explanation.",
+      "example": "Separate simulated commands investigate the virtual initiator and include an intentional incorrect action with a retry.",
+      "assignment": "Gives a precise storage ticket and grades connected identity and any required startup policy as distinct outcomes."
+    }
+  }
+]

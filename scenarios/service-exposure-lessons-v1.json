@@ -1,0 +1,3388 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-exposure-client-policy",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Service exposure and TCP evidence",
+      "unit": "linux-service-exposure",
+      "title": "Repair client access using listener and scan evidence",
+      "summary": "Distinguish a filtered service from an absent listener, then repair the whole client-range policy.",
+      "objective": "On virtual server 198.51.100.20, keep TCP ports 22, 443 and 9000 reachable for the whole Admin range 10.20.0.0/24. For the whole Public range 10.30.0.0/24, keep 443 reachable but filter 22 and 9000. A single displayed client address is not the whole range. Keep diagnostic TCP 80 reachable enough to report closed from both observer positions; no service should be started there. Preserve all supplied processes and listener owners. Repair the current host filter, then Check configuration.",
+      "retry_guidance": "Compare ss with both observer views. A filtered connection is inconclusive about whether a listener exists; a blanket drop also breaks required access.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Separate local listeners from client access",
+        "Compare the two observer positions",
+        "Repair the policy and retest the range"
+      ],
+      "guide": [
+        {
+          "title": "Separate local listeners from client access",
+          "why": "ss describes supplied sockets; it does not establish whether a remote connection reaches them. The first INPUT decision may block a healthy listener.",
+          "action": "In Server terminal run ss -lntp and iptables -S INPUT. Note which client range the existing SSH drop names.",
+          "commands": [
+            {
+              "command": "ss -lntp",
+              "explanation": "Run this in the simulated Server terminal; it never operates on host services.",
+              "simulator_only": false
+            },
+            {
+              "command": "iptables -S INPUT",
+              "explanation": "Run this in the simulated Server terminal; it never operates on host services.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Compare the two observer positions",
+          "why": "Open means a modeled connection can reach a retained listener. Closed has a response without a listener. Filtered cannot tell whether the listener exists.",
+          "action": "In Observer terminal select Admin and run nmap -n -Pn -sT -p 22,80,443,9000 192.0.2.10. Select Public and repeat. Compare TCP 22 with 22 in ss, and contrast it with the closed 80 diagnostic.",
+          "commands": [
+            {
+              "command": "nmap -n -Pn -sT -p 22,80,443,9000 192.0.2.10",
+              "explanation": "Run this in Observer terminal; the selected viewpoint supplies its source address.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Repair the policy and retest the range",
+          "why": "The example uses Admin 10.50.0.0/24 and Public 10.60.0.0/24. Correct the range decision; avoid a rule for only one displayed client.",
+          "action": "In Server terminal remove the wrong first rule with iptables -D INPUT 1. Add Public-range drops for TCP 22 and 9000. Repeat both scans and choose Check example. Then try the independent assignment.",
+          "commands": [
+            {
+              "command": "iptables -D INPUT 1",
+              "explanation": "Run this in the simulated Server terminal; it never operates on host services.",
+              "simulator_only": false
+            },
+            {
+              "command": "iptables -A INPUT -s 10.60.0.0/24 -p tcp --dport 22 -j DROP",
+              "explanation": "Run this in the simulated Server terminal; it never operates on host services.",
+              "simulator_only": false
+            },
+            {
+              "command": "iptables -A INPUT -s 10.60.0.0/24 -p tcp --dport 9000 -j DROP",
+              "explanation": "Run this in the simulated Server terminal; it never operates on host services.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The server already has a valid SSH listener; the initial Admin failure is caused by its INPUT policy. Remove or override the wrong source-range decision, filter Public SSH and preview traffic, and preserve Admin access plus HTTPS from both ranges. The deliberately permitted diagnostic port80 has no listener and therefore reports closed. INPUT and OUTPUT both affect the result; successful displayed samples do not establish the policy for an entire /24. Equivalent supported rule arrangements and prefix partitions are accepted.",
+      "hints": [
+        "A TCP 22 listener already exists. Compare its local socket evidence with the rule source and the selected observer.",
+        "The existing SSH drop applies to the wrong client range. Rule order and the entire source prefix matter.",
+        "Keep the unused 80 diagnostic conclusively closed while preserving the real Admin services. Denying everything cannot satisfy the useful-access requirements."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://nmap.org/book/man-port-scanning-basics.html",
+        "https://nmap.org/book/man-host-discovery.html"
+      ],
+      "simplifications": "Only one supplied IPv4 server and two declared reachable observation paths. Numeric TCP connect observations use fixed simulated source port 40000 and the host INPUT/OUTPUT filter plus supplied process/listener metadata. No real Nmap, packets, discovery, DNS, version detection, vulnerability inference, queues, application health, IDS or host actions. Current rules resume as saved exercise state; server boot persistence is a separate topic.",
+      "initial": {
+        "kind": "ServiceExposure",
+        "simulation": {
+          "version": 1,
+          "source_id": "lpic2-exposure-client-policy",
+          "view": "introduction",
+          "assignment": {
+            "source_task": "{\"cases\":[{\"accepted\":[\"open\"],\"id\":\"admin-ssh\",\"label\":\"Admin SSH remains reachable\",\"port\":22,\"viewpoint\":0},{\"accepted\":[\"filtered\"],\"id\":\"public-ssh\",\"label\":\"Public SSH is filtered\",\"port\":22,\"viewpoint\":1},{\"accepted\":[\"open\"],\"id\":\"admin-web\",\"label\":\"Admin HTTPS remains reachable\",\"port\":443,\"viewpoint\":0},{\"accepted\":[\"open\"],\"id\":\"public-web\",\"label\":\"Public HTTPS remains reachable\",\"port\":443,\"viewpoint\":1},{\"accepted\":[\"open\"],\"id\":\"admin-preview\",\"label\":\"Admin preview remains reachable\",\"port\":9000,\"viewpoint\":0},{\"accepted\":[\"filtered\"],\"id\":\"public-preview\",\"label\":\"Public preview is filtered\",\"port\":9000,\"viewpoint\":1},{\"accepted\":[\"closed\"],\"id\":\"admin-absent\",\"label\":\"Unused diagnostic port is conclusively closed from Admin\",\"port\":80,\"viewpoint\":0},{\"accepted\":[\"closed\"],\"id\":\"public-absent\",\"label\":\"Unused diagnostic port is conclusively closed from Public\",\"port\":80,\"viewpoint\":1}],\"initial\":{\"device\":\"eth0\",\"filter\":{\"forward\":{\"policy\":\"Accept\",\"rules\":[]},\"input\":{\"policy\":\"Accept\",\"rules\":[{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Drop\"}]},\"output\":{\"policy\":\"Accept\",\"rules\":[]}},\"processes\":{\"listeners\":[{\"address\":\"0.0.0.0\",\"backlog\":128,\"fd\":3,\"pid\":410,\"port\":9000,\"protocol\":\"tcp\"},{\"address\":\"127.0.0.1\",\"backlog\":128,\"fd\":3,\"pid\":411,\"port\":9001,\"protocol\":\"tcp\"},{\"address\":\"0.0.0.0\",\"backlog\":128,\"fd\":3,\"pid\":500,\"port\":22,\"protocol\":\"tcp\"},{\"address\":\"198.51.100.20\",\"backlog\":128,\"fd\":3,\"pid\":501,\"port\":443,\"protocol\":\"tcp\"}],\"processes\":{\"1\":{\"comm\":\"init\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":0,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":1},\"10\":{\"comm\":\"controller\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"410\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"411\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"500\":{\"comm\":\"sshd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"501\":{\"comm\":\"webd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10}},\"session\":10,\"user\":{\"name\":\"root\",\"uid\":0}},\"server\":\"198.51.100.20\",\"viewpoints\":[{\"address\":\"10.20.0.25\",\"id\":\"admin\"},{\"address\":\"10.30.0.45\",\"id\":\"public\"}]},\"policies\":[{\"allowed\":[{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":80,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":9000,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":80,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"}],\"chain\":\"Input\",\"domains\":[{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":80,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":9000,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":80,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":9000,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"}]},{\"allowed\":[{\"destination\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"}],\"chain\":\"Output\",\"domains\":[{\"destination\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"}]}],\"requirements\":[{\"expected\":{\"comm\":\"controller\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":10},{\"expected\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":410},{\"expected\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":411},{\"expected\":{\"comm\":\"sshd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":500},{\"expected\":{\"comm\":\"webd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":501}],\"version\":1}",
+            "world": {
+              "server": "198.51.100.20",
+              "device": "eth0",
+              "viewpoints": [
+                {
+                  "id": "admin",
+                  "address": "10.20.0.25"
+                },
+                {
+                  "id": "public",
+                  "address": "10.30.0.45"
+                }
+              ],
+              "processes": {
+                "user": {
+                  "name": "root",
+                  "uid": 0
+                },
+                "session": 10,
+                "processes": {
+                  "1": {
+                    "parent": 0,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 1,
+                    "comm": "init",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "10": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "controller",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "410": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "411": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "500": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "sshd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "501": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "webd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  }
+                },
+                "listeners": [
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 9000,
+                    "pid": 410,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "127.0.0.1",
+                    "port": 9001,
+                    "pid": 411,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 22,
+                    "pid": 500,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "198.51.100.20",
+                    "port": 443,
+                    "pid": 501,
+                    "fd": 3,
+                    "backlog": 128
+                  }
+                ]
+              },
+              "filter": {
+                "input": {
+                  "policy": "Accept",
+                  "rules": [
+                    {
+                      "source": {
+                        "network": "10.20.0.0",
+                        "prefix": 24
+                      },
+                      "destination": {
+                        "network": "198.51.100.20",
+                        "prefix": 32
+                      },
+                      "ingress": "eth0",
+                      "egress": null,
+                      "protocol": "Tcp",
+                      "source_port": null,
+                      "destination_port": 22,
+                      "target": "Drop"
+                    }
+                  ]
+                },
+                "forward": {
+                  "policy": "Accept",
+                  "rules": []
+                },
+                "output": {
+                  "policy": "Accept",
+                  "rules": []
+                }
+              }
+            },
+            "viewpoint": 0,
+            "admin_input": "",
+            "scan_input": "",
+            "admin_output": "",
+            "scan_output": "",
+            "admin_status": null,
+            "scan_status": null,
+            "last_scan": null,
+            "checked": false,
+            "history": []
+          },
+          "example": {
+            "source_task": "{\"cases\":[{\"accepted\":[\"open\"],\"id\":\"admin-ssh\",\"label\":\"Admin SSH remains reachable\",\"port\":22,\"viewpoint\":0},{\"accepted\":[\"filtered\"],\"id\":\"public-ssh\",\"label\":\"Public SSH is filtered\",\"port\":22,\"viewpoint\":1},{\"accepted\":[\"open\"],\"id\":\"admin-web\",\"label\":\"Admin HTTPS remains reachable\",\"port\":443,\"viewpoint\":0},{\"accepted\":[\"open\"],\"id\":\"public-web\",\"label\":\"Public HTTPS remains reachable\",\"port\":443,\"viewpoint\":1},{\"accepted\":[\"open\"],\"id\":\"admin-preview\",\"label\":\"Admin preview remains reachable\",\"port\":9000,\"viewpoint\":0},{\"accepted\":[\"filtered\"],\"id\":\"public-preview\",\"label\":\"Public preview is filtered\",\"port\":9000,\"viewpoint\":1},{\"accepted\":[\"closed\"],\"id\":\"admin-absent\",\"label\":\"Unused diagnostic port is conclusively closed from Admin\",\"port\":80,\"viewpoint\":0},{\"accepted\":[\"closed\"],\"id\":\"public-absent\",\"label\":\"Unused diagnostic port is conclusively closed from Public\",\"port\":80,\"viewpoint\":1}],\"initial\":{\"device\":\"eth0\",\"filter\":{\"forward\":{\"policy\":\"Accept\",\"rules\":[]},\"input\":{\"policy\":\"Accept\",\"rules\":[{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Drop\"}]},\"output\":{\"policy\":\"Accept\",\"rules\":[]}},\"processes\":{\"listeners\":[{\"address\":\"0.0.0.0\",\"backlog\":128,\"fd\":3,\"pid\":110,\"port\":9000,\"protocol\":\"tcp\"},{\"address\":\"127.0.0.1\",\"backlog\":128,\"fd\":3,\"pid\":111,\"port\":9001,\"protocol\":\"tcp\"},{\"address\":\"0.0.0.0\",\"backlog\":128,\"fd\":3,\"pid\":120,\"port\":22,\"protocol\":\"tcp\"},{\"address\":\"192.0.2.10\",\"backlog\":128,\"fd\":3,\"pid\":121,\"port\":443,\"protocol\":\"tcp\"}],\"processes\":{\"1\":{\"comm\":\"init\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":0,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":1},\"10\":{\"comm\":\"controller\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"110\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"111\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"120\":{\"comm\":\"sshd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"121\":{\"comm\":\"webd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10}},\"session\":10,\"user\":{\"name\":\"root\",\"uid\":0}},\"server\":\"192.0.2.10\",\"viewpoints\":[{\"address\":\"10.50.0.30\",\"id\":\"admin\"},{\"address\":\"10.60.0.40\",\"id\":\"public\"}]},\"policies\":[{\"allowed\":[{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":80,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":9000,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":80,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"}],\"chain\":\"Input\",\"domains\":[{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":80,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":9000,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":80,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":9000,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"}]},{\"allowed\":[{\"destination\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"}],\"chain\":\"Output\",\"domains\":[{\"destination\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"}]}],\"requirements\":[{\"expected\":{\"comm\":\"controller\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":10},{\"expected\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":110},{\"expected\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":111},{\"expected\":{\"comm\":\"sshd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":120},{\"expected\":{\"comm\":\"webd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":121}],\"version\":1}",
+            "world": {
+              "server": "192.0.2.10",
+              "device": "eth0",
+              "viewpoints": [
+                {
+                  "id": "admin",
+                  "address": "10.50.0.30"
+                },
+                {
+                  "id": "public",
+                  "address": "10.60.0.40"
+                }
+              ],
+              "processes": {
+                "user": {
+                  "name": "root",
+                  "uid": 0
+                },
+                "session": 10,
+                "processes": {
+                  "1": {
+                    "parent": 0,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 1,
+                    "comm": "init",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "10": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "controller",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "110": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "111": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "120": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "sshd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "121": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "webd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  }
+                },
+                "listeners": [
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 9000,
+                    "pid": 110,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "127.0.0.1",
+                    "port": 9001,
+                    "pid": 111,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 22,
+                    "pid": 120,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "192.0.2.10",
+                    "port": 443,
+                    "pid": 121,
+                    "fd": 3,
+                    "backlog": 128
+                  }
+                ]
+              },
+              "filter": {
+                "input": {
+                  "policy": "Accept",
+                  "rules": [
+                    {
+                      "source": {
+                        "network": "10.50.0.0",
+                        "prefix": 24
+                      },
+                      "destination": {
+                        "network": "192.0.2.10",
+                        "prefix": 32
+                      },
+                      "ingress": "eth0",
+                      "egress": null,
+                      "protocol": "Tcp",
+                      "source_port": null,
+                      "destination_port": 22,
+                      "target": "Drop"
+                    }
+                  ]
+                },
+                "forward": {
+                  "policy": "Accept",
+                  "rules": []
+                },
+                "output": {
+                  "policy": "Accept",
+                  "rules": []
+                }
+              }
+            },
+            "viewpoint": 0,
+            "admin_input": "",
+            "scan_input": "",
+            "admin_output": "",
+            "scan_output": "",
+            "admin_status": null,
+            "scan_status": null,
+            "last_scan": null,
+            "checked": false,
+            "history": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "ServiceExposure",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-exposure-client-policy",
+          "assignment": {
+            "version": 1,
+            "initial": {
+              "server": "198.51.100.20",
+              "device": "eth0",
+              "viewpoints": [
+                {
+                  "id": "admin",
+                  "address": "10.20.0.25"
+                },
+                {
+                  "id": "public",
+                  "address": "10.30.0.45"
+                }
+              ],
+              "processes": {
+                "user": {
+                  "name": "root",
+                  "uid": 0
+                },
+                "session": 10,
+                "processes": {
+                  "1": {
+                    "parent": 0,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 1,
+                    "comm": "init",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "10": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "controller",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "410": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "411": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "500": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "sshd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "501": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "webd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  }
+                },
+                "listeners": [
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 9000,
+                    "pid": 410,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "127.0.0.1",
+                    "port": 9001,
+                    "pid": 411,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 22,
+                    "pid": 500,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "198.51.100.20",
+                    "port": 443,
+                    "pid": 501,
+                    "fd": 3,
+                    "backlog": 128
+                  }
+                ]
+              },
+              "filter": {
+                "input": {
+                  "policy": "Accept",
+                  "rules": [
+                    {
+                      "source": {
+                        "network": "10.20.0.0",
+                        "prefix": 24
+                      },
+                      "destination": {
+                        "network": "198.51.100.20",
+                        "prefix": 32
+                      },
+                      "ingress": "eth0",
+                      "egress": null,
+                      "protocol": "Tcp",
+                      "source_port": null,
+                      "destination_port": 22,
+                      "target": "Drop"
+                    }
+                  ]
+                },
+                "forward": {
+                  "policy": "Accept",
+                  "rules": []
+                },
+                "output": {
+                  "policy": "Accept",
+                  "rules": []
+                }
+              }
+            },
+            "policies": [
+              {
+                "chain": "Input",
+                "domains": [
+                  {
+                    "source": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 22,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 80,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 9000,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 22,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 80,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 9000,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 22,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 80,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 9000,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 80,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              {
+                "chain": "Output",
+                "domains": [
+                  {
+                    "source": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  }
+                ]
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Unchanged",
+                "pid": 10,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "controller",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 410,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "previewd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 411,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "previewd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 500,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "sshd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 501,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "webd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              }
+            ],
+            "cases": [
+              {
+                "id": "admin-ssh",
+                "label": "Admin SSH remains reachable",
+                "viewpoint": 0,
+                "port": 22,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "public-ssh",
+                "label": "Public SSH is filtered",
+                "viewpoint": 1,
+                "port": 22,
+                "accepted": [
+                  "filtered"
+                ]
+              },
+              {
+                "id": "admin-web",
+                "label": "Admin HTTPS remains reachable",
+                "viewpoint": 0,
+                "port": 443,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "public-web",
+                "label": "Public HTTPS remains reachable",
+                "viewpoint": 1,
+                "port": 443,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "admin-preview",
+                "label": "Admin preview remains reachable",
+                "viewpoint": 0,
+                "port": 9000,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "public-preview",
+                "label": "Public preview is filtered",
+                "viewpoint": 1,
+                "port": 9000,
+                "accepted": [
+                  "filtered"
+                ]
+              },
+              {
+                "id": "admin-absent",
+                "label": "Unused diagnostic port is conclusively closed from Admin",
+                "viewpoint": 0,
+                "port": 80,
+                "accepted": [
+                  "closed"
+                ]
+              },
+              {
+                "id": "public-absent",
+                "label": "Unused diagnostic port is conclusively closed from Public",
+                "viewpoint": 1,
+                "port": 80,
+                "accepted": [
+                  "closed"
+                ]
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "initial": {
+              "server": "192.0.2.10",
+              "device": "eth0",
+              "viewpoints": [
+                {
+                  "id": "admin",
+                  "address": "10.50.0.30"
+                },
+                {
+                  "id": "public",
+                  "address": "10.60.0.40"
+                }
+              ],
+              "processes": {
+                "user": {
+                  "name": "root",
+                  "uid": 0
+                },
+                "session": 10,
+                "processes": {
+                  "1": {
+                    "parent": 0,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 1,
+                    "comm": "init",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "10": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "controller",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "110": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "111": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "120": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "sshd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "121": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "webd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  }
+                },
+                "listeners": [
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 9000,
+                    "pid": 110,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "127.0.0.1",
+                    "port": 9001,
+                    "pid": 111,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 22,
+                    "pid": 120,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "192.0.2.10",
+                    "port": 443,
+                    "pid": 121,
+                    "fd": 3,
+                    "backlog": 128
+                  }
+                ]
+              },
+              "filter": {
+                "input": {
+                  "policy": "Accept",
+                  "rules": [
+                    {
+                      "source": {
+                        "network": "10.50.0.0",
+                        "prefix": 24
+                      },
+                      "destination": {
+                        "network": "192.0.2.10",
+                        "prefix": 32
+                      },
+                      "ingress": "eth0",
+                      "egress": null,
+                      "protocol": "Tcp",
+                      "source_port": null,
+                      "destination_port": 22,
+                      "target": "Drop"
+                    }
+                  ]
+                },
+                "forward": {
+                  "policy": "Accept",
+                  "rules": []
+                },
+                "output": {
+                  "policy": "Accept",
+                  "rules": []
+                }
+              }
+            },
+            "policies": [
+              {
+                "chain": "Input",
+                "domains": [
+                  {
+                    "source": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 22,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 80,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 9000,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 22,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 80,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 9000,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 22,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 80,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 9000,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 80,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              {
+                "chain": "Output",
+                "domains": [
+                  {
+                    "source": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  }
+                ]
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Unchanged",
+                "pid": 10,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "controller",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 110,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "previewd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 111,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "previewd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 120,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "sshd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 121,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "webd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              }
+            ],
+            "cases": [
+              {
+                "id": "admin-ssh",
+                "label": "Admin SSH remains reachable",
+                "viewpoint": 0,
+                "port": 22,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "public-ssh",
+                "label": "Public SSH is filtered",
+                "viewpoint": 1,
+                "port": 22,
+                "accepted": [
+                  "filtered"
+                ]
+              },
+              {
+                "id": "admin-web",
+                "label": "Admin HTTPS remains reachable",
+                "viewpoint": 0,
+                "port": 443,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "public-web",
+                "label": "Public HTTPS remains reachable",
+                "viewpoint": 1,
+                "port": 443,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "admin-preview",
+                "label": "Admin preview remains reachable",
+                "viewpoint": 0,
+                "port": 9000,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "public-preview",
+                "label": "Public preview is filtered",
+                "viewpoint": 1,
+                "port": 9000,
+                "accepted": [
+                  "filtered"
+                ]
+              },
+              {
+                "id": "admin-absent",
+                "label": "Unused diagnostic port is conclusively closed from Admin",
+                "viewpoint": 0,
+                "port": 80,
+                "accepted": [
+                  "closed"
+                ]
+              },
+              {
+                "id": "public-absent",
+                "label": "Unused diagnostic port is conclusively closed from Public",
+                "viewpoint": 1,
+                "port": 80,
+                "accepted": [
+                  "closed"
+                ]
+              }
+            ]
+          },
+          "worked": [
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Admin",
+                "input": "ss -lntp"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Admin",
+                "input": "iptables -S INPUT"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Scan",
+                "input": "nmap -n -Pn -sT -p 22,80,443,9000 192.0.2.10"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Select",
+                "viewpoint": 1
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Scan",
+                "input": "nmap -n -Pn -sT -p 22,80,443,9000 192.0.2.10"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Admin",
+                "input": "iptables -D INPUT 1"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Admin",
+                "input": "iptables -A INPUT -s 10.60.0.0/24 -p tcp --dport 22 -j DROP"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Admin",
+                "input": "iptables -A INPUT -s 10.60.0.0/24 -p tcp --dport 9000 -j DROP"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Scan",
+                "input": "nmap -n -Pn -sT -p 22,80,443,9000 192.0.2.10"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Select",
+                "viewpoint": 0
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Scan",
+                "input": "nmap -n -Pn -sT -p 22,80,443,9000 192.0.2.10"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Check"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "service-exposure-workspace {\"practice\":false,\"action\":{\"kind\":\"Event\",\"event\":{\"kind\":\"Admin\",\"input\":\"iptables -D INPUT 1\"}}}",
+        "service-exposure-workspace {\"practice\":false,\"action\":{\"kind\":\"Event\",\"event\":{\"kind\":\"Admin\",\"input\":\"iptables -A INPUT -s 10.30.0.0/24 -p tcp --dport 22 -j DROP\"}}}",
+        "service-exposure-workspace {\"practice\":false,\"action\":{\"kind\":\"Event\",\"event\":{\"kind\":\"Admin\",\"input\":\"iptables -A INPUT -s 10.30.0.0/24 -p tcp --dport 9000 -j DROP\"}}}",
+        "service-exposure-workspace {\"practice\":false,\"action\":{\"kind\":\"Event\",\"event\":{\"kind\":\"Check\"}}}"
+      ],
+      "prerequisites": [
+        "lpic1-listener-audit",
+        "lpic2-router-local-transit-policy"
+      ]
+    },
+    {
+      "id": "lpic2-exposure-listener-retirement",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Service exposure and TCP evidence",
+      "unit": "linux-service-exposure",
+      "title": "Retire an exposed listener without taking down the useful services",
+      "summary": "Correlate socket owners, retire only the wildcard preview and verify both client views.",
+      "objective": "Retire the owner of the unused wildcard TCP 9000 preview. A paused owner or a firewall-only concealment is insufficient. Preserve the loopback-only preview on TCP 9001 and every approved owner, including SSH and HTTPS. Keep SSH on TCP 22 reachable for Admin clients 10.20.0.0/24 and filtered for Public clients 10.30.0.0/24; HTTPS on 443 must work from both ranges. TCP 9000 must no longer be open from either observer; closed or filtered is acceptable after its actual owner has ended.",
+      "retry_guidance": "Use the socket bind address and owning process together. Blocking a port and ending its owner are different repairs.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Correlate the two preview instances",
+        "Observe the current exposure",
+        "Retire only the exposed instance"
+      ],
+      "guide": [
+        {
+          "title": "Correlate the two preview instances",
+          "why": "A shared process name does not identify which bind is exposed. The existing listener lesson explains addresses and signal behavior.",
+          "action": "In Server terminal run ss -lntp and pgrep -x previewd. Identify the wildcard 9000 owner separately from the loopback 9001 owner.",
+          "commands": [
+            {
+              "command": "ss -lntp",
+              "explanation": "Run this in the simulated Server terminal; it never operates on host services.",
+              "simulator_only": false
+            },
+            {
+              "command": "pgrep -x previewd",
+              "explanation": "Run this in the simulated Server terminal; it never operates on host services.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Observe the current exposure",
+          "why": "The selected observer sees a connection result, not a full application health or vulnerability report.",
+          "action": "In Observer terminal run nmap -n -Pn -sT -p 22,80,443,9000 192.0.2.10 from Admin, then select Public and run it again. Note that 9000 is open from both positions.",
+          "commands": [
+            {
+              "command": "nmap -n -Pn -sT -p 22,80,443,9000 192.0.2.10",
+              "explanation": "Run this in Observer terminal; the selected viewpoint supplies its source address.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Retire only the exposed instance",
+          "why": "Ending a process removes its supplied sockets; pausing or filtering it does not prove retirement.",
+          "action": "In the example only, run kill -TERM 110. Scan again from both observer positions, then Check example. Try STOP instead after a reset to see why it is insufficient.",
+          "commands": [
+            {
+              "command": "kill -TERM 110",
+              "explanation": "Run this in the simulated Server terminal; it never operates on host services.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The wildcard preview owner is the retired component; the same-name loopback process must remain unchanged. Ending only the correct owner removes its retained listener. A filter alone may hide an open listener, while STOP leaves its socket present. Verify required SSH/HTTPS access from both client ranges as well as the preview being closed or filtered. Supported TERM, INT and KILL approaches are accepted when all required owners and policies remain correct.",
+      "hints": [
+        "A process name can identify more than one instance. Match the wildcard 9000 listener to its owner.",
+        "ss -lntp identifies socket ownership; pgrep -x previewd alone does not distinguish the two instances.",
+        "A paused owner retains its listener. End only the intended owner, preserve the loopback instance, then check both observer views."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://nmap.org/book/man-port-scanning-basics.html",
+        "https://nmap.org/book/man-host-discovery.html"
+      ],
+      "simplifications": "Only one supplied IPv4 server and two declared reachable observation paths. Numeric TCP connect observations use fixed simulated source port 40000 and the host INPUT/OUTPUT filter plus supplied process/listener metadata. No real Nmap, packets, discovery, DNS, version detection, vulnerability inference, queues, application health, IDS or host actions. Current rules resume as saved exercise state; server boot persistence is a separate topic.",
+      "initial": {
+        "kind": "ServiceExposure",
+        "simulation": {
+          "version": 1,
+          "source_id": "lpic2-exposure-listener-retirement",
+          "view": "introduction",
+          "assignment": {
+            "source_task": "{\"cases\":[{\"accepted\":[\"open\"],\"id\":\"admin-ssh\",\"label\":\"Admin SSH remains reachable\",\"port\":22,\"viewpoint\":0},{\"accepted\":[\"filtered\"],\"id\":\"public-ssh\",\"label\":\"Public SSH is filtered\",\"port\":22,\"viewpoint\":1},{\"accepted\":[\"open\"],\"id\":\"admin-web\",\"label\":\"Admin HTTPS remains reachable\",\"port\":443,\"viewpoint\":0},{\"accepted\":[\"open\"],\"id\":\"public-web\",\"label\":\"Public HTTPS remains reachable\",\"port\":443,\"viewpoint\":1},{\"accepted\":[\"closed\",\"filtered\"],\"id\":\"admin-retired\",\"label\":\"Retired preview is not exposed to Admin\",\"port\":9000,\"viewpoint\":0},{\"accepted\":[\"closed\",\"filtered\"],\"id\":\"public-retired\",\"label\":\"Retired preview is not exposed to Public\",\"port\":9000,\"viewpoint\":1}],\"initial\":{\"device\":\"eth0\",\"filter\":{\"forward\":{\"policy\":\"Accept\",\"rules\":[]},\"input\":{\"policy\":\"Accept\",\"rules\":[{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Drop\"}]},\"output\":{\"policy\":\"Accept\",\"rules\":[]}},\"processes\":{\"listeners\":[{\"address\":\"0.0.0.0\",\"backlog\":128,\"fd\":3,\"pid\":410,\"port\":9000,\"protocol\":\"tcp\"},{\"address\":\"127.0.0.1\",\"backlog\":128,\"fd\":3,\"pid\":411,\"port\":9001,\"protocol\":\"tcp\"},{\"address\":\"0.0.0.0\",\"backlog\":128,\"fd\":3,\"pid\":500,\"port\":22,\"protocol\":\"tcp\"},{\"address\":\"198.51.100.20\",\"backlog\":128,\"fd\":3,\"pid\":501,\"port\":443,\"protocol\":\"tcp\"}],\"processes\":{\"1\":{\"comm\":\"init\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":0,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":1},\"10\":{\"comm\":\"controller\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"410\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"411\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"500\":{\"comm\":\"sshd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"501\":{\"comm\":\"webd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10}},\"session\":10,\"user\":{\"name\":\"root\",\"uid\":0}},\"server\":\"198.51.100.20\",\"viewpoints\":[{\"address\":\"10.20.0.25\",\"id\":\"admin\"},{\"address\":\"10.30.0.45\",\"id\":\"public\"}]},\"policies\":[{\"allowed\":[{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"}],\"chain\":\"Input\",\"domains\":[{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"}]},{\"allowed\":[{\"destination\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"}],\"chain\":\"Output\",\"domains\":[{\"destination\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"10.30.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"198.51.100.20\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"}]}],\"requirements\":[{\"expected\":{\"comm\":\"controller\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":10},{\"expected\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":411},{\"expected\":{\"comm\":\"sshd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":500},{\"expected\":{\"comm\":\"webd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":501},{\"expected\":\"Exited\",\"kind\":\"Phase\",\"pid\":410}],\"version\":1}",
+            "world": {
+              "server": "198.51.100.20",
+              "device": "eth0",
+              "viewpoints": [
+                {
+                  "id": "admin",
+                  "address": "10.20.0.25"
+                },
+                {
+                  "id": "public",
+                  "address": "10.30.0.45"
+                }
+              ],
+              "processes": {
+                "user": {
+                  "name": "root",
+                  "uid": 0
+                },
+                "session": 10,
+                "processes": {
+                  "1": {
+                    "parent": 0,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 1,
+                    "comm": "init",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "10": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "controller",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "410": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "411": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "500": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "sshd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "501": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "webd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  }
+                },
+                "listeners": [
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 9000,
+                    "pid": 410,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "127.0.0.1",
+                    "port": 9001,
+                    "pid": 411,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 22,
+                    "pid": 500,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "198.51.100.20",
+                    "port": 443,
+                    "pid": 501,
+                    "fd": 3,
+                    "backlog": 128
+                  }
+                ]
+              },
+              "filter": {
+                "input": {
+                  "policy": "Accept",
+                  "rules": [
+                    {
+                      "source": {
+                        "network": "10.30.0.0",
+                        "prefix": 24
+                      },
+                      "destination": {
+                        "network": "198.51.100.20",
+                        "prefix": 32
+                      },
+                      "ingress": "eth0",
+                      "egress": null,
+                      "protocol": "Tcp",
+                      "source_port": null,
+                      "destination_port": 22,
+                      "target": "Drop"
+                    }
+                  ]
+                },
+                "forward": {
+                  "policy": "Accept",
+                  "rules": []
+                },
+                "output": {
+                  "policy": "Accept",
+                  "rules": []
+                }
+              }
+            },
+            "viewpoint": 0,
+            "admin_input": "",
+            "scan_input": "",
+            "admin_output": "",
+            "scan_output": "",
+            "admin_status": null,
+            "scan_status": null,
+            "last_scan": null,
+            "checked": false,
+            "history": []
+          },
+          "example": {
+            "source_task": "{\"cases\":[{\"accepted\":[\"open\"],\"id\":\"admin-ssh\",\"label\":\"Admin SSH remains reachable\",\"port\":22,\"viewpoint\":0},{\"accepted\":[\"filtered\"],\"id\":\"public-ssh\",\"label\":\"Public SSH is filtered\",\"port\":22,\"viewpoint\":1},{\"accepted\":[\"open\"],\"id\":\"admin-web\",\"label\":\"Admin HTTPS remains reachable\",\"port\":443,\"viewpoint\":0},{\"accepted\":[\"open\"],\"id\":\"public-web\",\"label\":\"Public HTTPS remains reachable\",\"port\":443,\"viewpoint\":1},{\"accepted\":[\"closed\",\"filtered\"],\"id\":\"admin-retired\",\"label\":\"Retired preview is not exposed to Admin\",\"port\":9000,\"viewpoint\":0},{\"accepted\":[\"closed\",\"filtered\"],\"id\":\"public-retired\",\"label\":\"Retired preview is not exposed to Public\",\"port\":9000,\"viewpoint\":1}],\"initial\":{\"device\":\"eth0\",\"filter\":{\"forward\":{\"policy\":\"Accept\",\"rules\":[]},\"input\":{\"policy\":\"Accept\",\"rules\":[{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Drop\"}]},\"output\":{\"policy\":\"Accept\",\"rules\":[]}},\"processes\":{\"listeners\":[{\"address\":\"0.0.0.0\",\"backlog\":128,\"fd\":3,\"pid\":110,\"port\":9000,\"protocol\":\"tcp\"},{\"address\":\"127.0.0.1\",\"backlog\":128,\"fd\":3,\"pid\":111,\"port\":9001,\"protocol\":\"tcp\"},{\"address\":\"0.0.0.0\",\"backlog\":128,\"fd\":3,\"pid\":120,\"port\":22,\"protocol\":\"tcp\"},{\"address\":\"192.0.2.10\",\"backlog\":128,\"fd\":3,\"pid\":121,\"port\":443,\"protocol\":\"tcp\"}],\"processes\":{\"1\":{\"comm\":\"init\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":0,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":1},\"10\":{\"comm\":\"controller\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"110\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"111\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"120\":{\"comm\":\"sshd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"121\":{\"comm\":\"webd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10}},\"session\":10,\"user\":{\"name\":\"root\",\"uid\":0}},\"server\":\"192.0.2.10\",\"viewpoints\":[{\"address\":\"10.50.0.30\",\"id\":\"admin\"},{\"address\":\"10.60.0.40\",\"id\":\"public\"}]},\"policies\":[{\"allowed\":[{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"}],\"chain\":\"Input\",\"domains\":[{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":22,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"destination_port\":443,\"egress\":null,\"ingress\":\"eth0\",\"protocol\":\"Tcp\",\"source\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"source_port\":null,\"target\":\"Accept\"}]},{\"allowed\":[{\"destination\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"}],\"chain\":\"Output\",\"domains\":[{\"destination\":{\"network\":\"10.50.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"},{\"destination\":{\"network\":\"10.60.0.0\",\"prefix\":24},\"destination_port\":null,\"egress\":\"eth0\",\"ingress\":null,\"protocol\":\"Tcp\",\"source\":{\"network\":\"192.0.2.10\",\"prefix\":32},\"source_port\":null,\"target\":\"Accept\"}]}],\"requirements\":[{\"expected\":{\"comm\":\"controller\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":10},{\"expected\":{\"comm\":\"previewd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":111},{\"expected\":{\"comm\":\"sshd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":120},{\"expected\":{\"comm\":\"webd\",\"nice\":0,\"owner\":{\"name\":\"root\",\"uid\":0},\"parent\":1,\"phase\":{\"activity\":\"Sleeping\",\"kind\":\"Active\"},\"session\":10},\"kind\":\"Unchanged\",\"pid\":121},{\"expected\":\"Exited\",\"kind\":\"Phase\",\"pid\":110}],\"version\":1}",
+            "world": {
+              "server": "192.0.2.10",
+              "device": "eth0",
+              "viewpoints": [
+                {
+                  "id": "admin",
+                  "address": "10.50.0.30"
+                },
+                {
+                  "id": "public",
+                  "address": "10.60.0.40"
+                }
+              ],
+              "processes": {
+                "user": {
+                  "name": "root",
+                  "uid": 0
+                },
+                "session": 10,
+                "processes": {
+                  "1": {
+                    "parent": 0,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 1,
+                    "comm": "init",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "10": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "controller",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "110": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "111": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "120": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "sshd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "121": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "webd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  }
+                },
+                "listeners": [
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 9000,
+                    "pid": 110,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "127.0.0.1",
+                    "port": 9001,
+                    "pid": 111,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 22,
+                    "pid": 120,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "192.0.2.10",
+                    "port": 443,
+                    "pid": 121,
+                    "fd": 3,
+                    "backlog": 128
+                  }
+                ]
+              },
+              "filter": {
+                "input": {
+                  "policy": "Accept",
+                  "rules": [
+                    {
+                      "source": {
+                        "network": "10.60.0.0",
+                        "prefix": 24
+                      },
+                      "destination": {
+                        "network": "192.0.2.10",
+                        "prefix": 32
+                      },
+                      "ingress": "eth0",
+                      "egress": null,
+                      "protocol": "Tcp",
+                      "source_port": null,
+                      "destination_port": 22,
+                      "target": "Drop"
+                    }
+                  ]
+                },
+                "forward": {
+                  "policy": "Accept",
+                  "rules": []
+                },
+                "output": {
+                  "policy": "Accept",
+                  "rules": []
+                }
+              }
+            },
+            "viewpoint": 0,
+            "admin_input": "",
+            "scan_input": "",
+            "admin_output": "",
+            "scan_output": "",
+            "admin_status": null,
+            "scan_status": null,
+            "last_scan": null,
+            "checked": false,
+            "history": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "ServiceExposure",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-exposure-listener-retirement",
+          "assignment": {
+            "version": 1,
+            "initial": {
+              "server": "198.51.100.20",
+              "device": "eth0",
+              "viewpoints": [
+                {
+                  "id": "admin",
+                  "address": "10.20.0.25"
+                },
+                {
+                  "id": "public",
+                  "address": "10.30.0.45"
+                }
+              ],
+              "processes": {
+                "user": {
+                  "name": "root",
+                  "uid": 0
+                },
+                "session": 10,
+                "processes": {
+                  "1": {
+                    "parent": 0,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 1,
+                    "comm": "init",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "10": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "controller",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "410": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "411": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "500": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "sshd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "501": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "webd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  }
+                },
+                "listeners": [
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 9000,
+                    "pid": 410,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "127.0.0.1",
+                    "port": 9001,
+                    "pid": 411,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 22,
+                    "pid": 500,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "198.51.100.20",
+                    "port": 443,
+                    "pid": 501,
+                    "fd": 3,
+                    "backlog": 128
+                  }
+                ]
+              },
+              "filter": {
+                "input": {
+                  "policy": "Accept",
+                  "rules": [
+                    {
+                      "source": {
+                        "network": "10.30.0.0",
+                        "prefix": 24
+                      },
+                      "destination": {
+                        "network": "198.51.100.20",
+                        "prefix": 32
+                      },
+                      "ingress": "eth0",
+                      "egress": null,
+                      "protocol": "Tcp",
+                      "source_port": null,
+                      "destination_port": 22,
+                      "target": "Drop"
+                    }
+                  ]
+                },
+                "forward": {
+                  "policy": "Accept",
+                  "rules": []
+                },
+                "output": {
+                  "policy": "Accept",
+                  "rules": []
+                }
+              }
+            },
+            "policies": [
+              {
+                "chain": "Input",
+                "domains": [
+                  {
+                    "source": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 22,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 22,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 22,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              {
+                "chain": "Output",
+                "domains": [
+                  {
+                    "source": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.20.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "198.51.100.20",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  }
+                ]
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Unchanged",
+                "pid": 10,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "controller",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 411,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "previewd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 500,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "sshd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 501,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "webd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Phase",
+                "pid": 410,
+                "expected": "Exited"
+              }
+            ],
+            "cases": [
+              {
+                "id": "admin-ssh",
+                "label": "Admin SSH remains reachable",
+                "viewpoint": 0,
+                "port": 22,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "public-ssh",
+                "label": "Public SSH is filtered",
+                "viewpoint": 1,
+                "port": 22,
+                "accepted": [
+                  "filtered"
+                ]
+              },
+              {
+                "id": "admin-web",
+                "label": "Admin HTTPS remains reachable",
+                "viewpoint": 0,
+                "port": 443,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "public-web",
+                "label": "Public HTTPS remains reachable",
+                "viewpoint": 1,
+                "port": 443,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "admin-retired",
+                "label": "Retired preview is not exposed to Admin",
+                "viewpoint": 0,
+                "port": 9000,
+                "accepted": [
+                  "closed",
+                  "filtered"
+                ]
+              },
+              {
+                "id": "public-retired",
+                "label": "Retired preview is not exposed to Public",
+                "viewpoint": 1,
+                "port": 9000,
+                "accepted": [
+                  "closed",
+                  "filtered"
+                ]
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "initial": {
+              "server": "192.0.2.10",
+              "device": "eth0",
+              "viewpoints": [
+                {
+                  "id": "admin",
+                  "address": "10.50.0.30"
+                },
+                {
+                  "id": "public",
+                  "address": "10.60.0.40"
+                }
+              ],
+              "processes": {
+                "user": {
+                  "name": "root",
+                  "uid": 0
+                },
+                "session": 10,
+                "processes": {
+                  "1": {
+                    "parent": 0,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 1,
+                    "comm": "init",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "10": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "controller",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "110": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "111": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "previewd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "120": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "sshd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  },
+                  "121": {
+                    "parent": 1,
+                    "owner": {
+                      "name": "root",
+                      "uid": 0
+                    },
+                    "session": 10,
+                    "comm": "webd",
+                    "nice": 0,
+                    "phase": {
+                      "kind": "Active",
+                      "activity": "Sleeping"
+                    }
+                  }
+                },
+                "listeners": [
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 9000,
+                    "pid": 110,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "127.0.0.1",
+                    "port": 9001,
+                    "pid": 111,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "0.0.0.0",
+                    "port": 22,
+                    "pid": 120,
+                    "fd": 3,
+                    "backlog": 128
+                  },
+                  {
+                    "protocol": "tcp",
+                    "address": "192.0.2.10",
+                    "port": 443,
+                    "pid": 121,
+                    "fd": 3,
+                    "backlog": 128
+                  }
+                ]
+              },
+              "filter": {
+                "input": {
+                  "policy": "Accept",
+                  "rules": [
+                    {
+                      "source": {
+                        "network": "10.60.0.0",
+                        "prefix": 24
+                      },
+                      "destination": {
+                        "network": "192.0.2.10",
+                        "prefix": 32
+                      },
+                      "ingress": "eth0",
+                      "egress": null,
+                      "protocol": "Tcp",
+                      "source_port": null,
+                      "destination_port": 22,
+                      "target": "Drop"
+                    }
+                  ]
+                },
+                "forward": {
+                  "policy": "Accept",
+                  "rules": []
+                },
+                "output": {
+                  "policy": "Accept",
+                  "rules": []
+                }
+              }
+            },
+            "policies": [
+              {
+                "chain": "Input",
+                "domains": [
+                  {
+                    "source": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 22,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 22,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 22,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "destination": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "ingress": "eth0",
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              {
+                "chain": "Output",
+                "domains": [
+                  {
+                    "source": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.50.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "192.0.2.10",
+                      "prefix": 32
+                    },
+                    "destination": {
+                      "network": "10.60.0.0",
+                      "prefix": 24
+                    },
+                    "ingress": null,
+                    "egress": "eth0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "target": "Accept"
+                  }
+                ]
+              }
+            ],
+            "requirements": [
+              {
+                "kind": "Unchanged",
+                "pid": 10,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "controller",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 111,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "previewd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 120,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "sshd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Unchanged",
+                "pid": 121,
+                "expected": {
+                  "parent": 1,
+                  "owner": {
+                    "name": "root",
+                    "uid": 0
+                  },
+                  "session": 10,
+                  "comm": "webd",
+                  "nice": 0,
+                  "phase": {
+                    "kind": "Active",
+                    "activity": "Sleeping"
+                  }
+                }
+              },
+              {
+                "kind": "Phase",
+                "pid": 110,
+                "expected": "Exited"
+              }
+            ],
+            "cases": [
+              {
+                "id": "admin-ssh",
+                "label": "Admin SSH remains reachable",
+                "viewpoint": 0,
+                "port": 22,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "public-ssh",
+                "label": "Public SSH is filtered",
+                "viewpoint": 1,
+                "port": 22,
+                "accepted": [
+                  "filtered"
+                ]
+              },
+              {
+                "id": "admin-web",
+                "label": "Admin HTTPS remains reachable",
+                "viewpoint": 0,
+                "port": 443,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "public-web",
+                "label": "Public HTTPS remains reachable",
+                "viewpoint": 1,
+                "port": 443,
+                "accepted": [
+                  "open"
+                ]
+              },
+              {
+                "id": "admin-retired",
+                "label": "Retired preview is not exposed to Admin",
+                "viewpoint": 0,
+                "port": 9000,
+                "accepted": [
+                  "closed",
+                  "filtered"
+                ]
+              },
+              {
+                "id": "public-retired",
+                "label": "Retired preview is not exposed to Public",
+                "viewpoint": 1,
+                "port": 9000,
+                "accepted": [
+                  "closed",
+                  "filtered"
+                ]
+              }
+            ]
+          },
+          "worked": [
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Admin",
+                "input": "ss -lntp"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Admin",
+                "input": "pgrep -x previewd"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Scan",
+                "input": "nmap -n -Pn -sT -p 22,80,443,9000 192.0.2.10"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Admin",
+                "input": "kill -TERM 110"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Scan",
+                "input": "nmap -n -Pn -sT -p 22,80,443,9000 192.0.2.10"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Select",
+                "viewpoint": 1
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Scan",
+                "input": "nmap -n -Pn -sT -p 22,80,443,9000 192.0.2.10"
+              }
+            },
+            {
+              "kind": "Event",
+              "event": {
+                "kind": "Check"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "service-exposure-workspace {\"practice\":false,\"action\":{\"kind\":\"Event\",\"event\":{\"kind\":\"Admin\",\"input\":\"kill -TERM 410\"}}}",
+        "service-exposure-workspace {\"practice\":false,\"action\":{\"kind\":\"Event\",\"event\":{\"kind\":\"Check\"}}}"
+      ],
+      "prerequisites": [
+        "lpic2-exposure-client-policy"
+      ]
+    }
+  ]
+}

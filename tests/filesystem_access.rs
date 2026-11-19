@@ -48,6 +48,7 @@ fn tree() -> Tree {
         umask: 0o022,
         clock: 0,
         modified: BTreeMap::new(),
+        command_location: None,
     }
 }
 #[test]

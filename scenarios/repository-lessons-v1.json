@@ -1,0 +1,4049 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-repo-visibility",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Repository metadata and evidence",
+      "unit": "linux-repository-evidence",
+      "title": "Make package metadata visible without installing anything",
+      "summary": "Separate an enabled source, its cached index and package query results.",
+      "objective": "Enable tools using the supplied updates source and cache its current published metadata. Query exact package for parcel and companion. Both must show only the tools candidate from the current snapshot. Inspect candidates only; this task does not install or download packages.",
+      "difficulty": "Intermediate",
+      "minutes": 14,
+      "steps": [
+        "Inspect supplied configuration and cached metadata, perform the required safe changes and queries, then check the whole result."
+      ],
+      "guide": [],
+      "explanation": "One valid approach: apply settings for tools using file:///virtual-repositories/updates, enabled; refresh metadata for tools; query parcel; query companion. Read the actual source and cached snapshot. Safe alternative operation orders that meet every requirement also pass.",
+      "hints": [
+        "Compare enabled state, configured source and cached endpoint before refreshing.",
+        "A missing cache, a matching older cache and a wrong-source cache explain different outcomes. Read the actual omission or candidate rows.",
+        "After the last applied settings or refresh, run both required exact-name queries again. Retain any protected alias configuration/cache."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://manpages.opensuse.org/Leap-16.0/zypper/zypper.8.en.html"
+      ],
+      "simplifications": "Typed virtual repository metadata only. Supplied URI labels are not opened. No actual network, host filesystem, package installation, downloads, trust/signature checks, automatic refresh, full Zypper/Yum CLI or dependency solving. Wrong-source candidate withholding is an explicit simulation policy, not full libzypp conformance.",
+      "initial": {
+        "kind": "Repositories",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_action": 0,
+          "assignment": {
+            "world": {
+              "schema_version": 1,
+              "source": {
+                "schema_version": 1,
+                "catalog": {
+                  "fixture": "repo-visibility",
+                  "target": "x86_64",
+                  "published": "new",
+                  "archives": {
+                    "parcel-old": {
+                      "identity": {
+                        "name": "parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "1.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "parcel old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "parcel-new": {
+                      "identity": {
+                        "name": "parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "2.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "parcel new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "companion-old": {
+                      "identity": {
+                        "name": "companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "1.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "companion old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "companion-new": {
+                      "identity": {
+                        "name": "companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "2.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "companion new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "snapshots": {
+                    "old": {
+                      "archives": [
+                        "parcel-old",
+                        "companion-old"
+                      ]
+                    },
+                    "new": {
+                      "archives": [
+                        "parcel-new",
+                        "companion-new"
+                      ]
+                    }
+                  },
+                  "allowed_paths": [
+                    "/usr/share/parcel.txt",
+                    "/usr/share/companion.txt"
+                  ]
+                },
+                "endpoints": [
+                  {
+                    "id": "updates",
+                    "uri": "file:///virtual-repositories/updates",
+                    "delivery": "available",
+                    "published": "new",
+                    "history": [
+                      "old",
+                      "new"
+                    ]
+                  },
+                  {
+                    "id": "archive",
+                    "uri": "file:///virtual-repositories/archive",
+                    "delivery": "available",
+                    "published": "old",
+                    "history": [
+                      "old"
+                    ]
+                  }
+                ]
+              },
+              "configurations": [
+                {
+                  "alias": "tools",
+                  "uri": "file:///virtual-repositories/updates",
+                  "enabled": false
+                }
+              ],
+              "caches": []
+            },
+            "history": [],
+            "alias": "tools",
+            "uri": "file:///virtual-repositories/updates",
+            "enabled": false,
+            "package": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          },
+          "practice": {
+            "world": {
+              "schema_version": 1,
+              "source": {
+                "schema_version": 1,
+                "catalog": {
+                  "fixture": "sample-repo-visibility",
+                  "target": "x86_64",
+                  "published": "new",
+                  "archives": {
+                    "sample-parcel-old": {
+                      "identity": {
+                        "name": "sample-parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "4.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-parcel old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "sample-parcel-new": {
+                      "identity": {
+                        "name": "sample-parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "5.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-parcel new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "sample-companion-old": {
+                      "identity": {
+                        "name": "sample-companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "4.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-companion old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "sample-companion-new": {
+                      "identity": {
+                        "name": "sample-companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "5.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-companion new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "snapshots": {
+                    "old": {
+                      "archives": [
+                        "sample-parcel-old",
+                        "sample-companion-old"
+                      ]
+                    },
+                    "new": {
+                      "archives": [
+                        "sample-parcel-new",
+                        "sample-companion-new"
+                      ]
+                    }
+                  },
+                  "allowed_paths": [
+                    "/usr/share/sample-parcel.txt",
+                    "/usr/share/sample-companion.txt"
+                  ]
+                },
+                "endpoints": [
+                  {
+                    "id": "sample-updates",
+                    "uri": "file:///virtual-repositories/sample-updates",
+                    "delivery": "available",
+                    "published": "new",
+                    "history": [
+                      "old",
+                      "new"
+                    ]
+                  },
+                  {
+                    "id": "sample-archive",
+                    "uri": "file:///virtual-repositories/sample-archive",
+                    "delivery": "available",
+                    "published": "old",
+                    "history": [
+                      "old"
+                    ]
+                  }
+                ]
+              },
+              "configurations": [
+                {
+                  "alias": "practice",
+                  "uri": "file:///virtual-repositories/sample-updates",
+                  "enabled": false
+                }
+              ],
+              "caches": []
+            },
+            "history": [],
+            "alias": "practice",
+            "uri": "file:///virtual-repositories/sample-updates",
+            "enabled": false,
+            "package": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          }
+        }
+      },
+      "goal": {
+        "kind": "Repositories",
+        "definition": {
+          "initial_source": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "repo-visibility",
+              "target": "x86_64",
+              "published": "new",
+              "archives": {
+                "parcel-old": {
+                  "identity": {
+                    "name": "parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "parcel old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "parcel-new": {
+                  "identity": {
+                    "name": "parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "parcel new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "companion-old": {
+                  "identity": {
+                    "name": "companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "companion old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "companion-new": {
+                  "identity": {
+                    "name": "companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "companion new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "old": {
+                  "archives": [
+                    "parcel-old",
+                    "companion-old"
+                  ]
+                },
+                "new": {
+                  "archives": [
+                    "parcel-new",
+                    "companion-new"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/usr/share/parcel.txt",
+                "/usr/share/companion.txt"
+              ]
+            },
+            "endpoints": [
+              {
+                "id": "updates",
+                "uri": "file:///virtual-repositories/updates",
+                "delivery": "available",
+                "published": "new",
+                "history": [
+                  "old",
+                  "new"
+                ]
+              },
+              {
+                "id": "archive",
+                "uri": "file:///virtual-repositories/archive",
+                "delivery": "available",
+                "published": "old",
+                "history": [
+                  "old"
+                ]
+              }
+            ]
+          },
+          "initial": {
+            "schema_version": 1,
+            "source": {
+              "schema_version": 1,
+              "catalog": {
+                "fixture": "repo-visibility",
+                "target": "x86_64",
+                "published": "new",
+                "archives": {
+                  "parcel-old": {
+                    "identity": {
+                      "name": "parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "parcel old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "parcel-new": {
+                    "identity": {
+                      "name": "parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "2.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "parcel new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "companion-old": {
+                    "identity": {
+                      "name": "companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "companion old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "companion-new": {
+                    "identity": {
+                      "name": "companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "2.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "companion new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  }
+                },
+                "snapshots": {
+                  "old": {
+                    "archives": [
+                      "parcel-old",
+                      "companion-old"
+                    ]
+                  },
+                  "new": {
+                    "archives": [
+                      "parcel-new",
+                      "companion-new"
+                    ]
+                  }
+                },
+                "allowed_paths": [
+                  "/usr/share/parcel.txt",
+                  "/usr/share/companion.txt"
+                ]
+              },
+              "endpoints": [
+                {
+                  "id": "updates",
+                  "uri": "file:///virtual-repositories/updates",
+                  "delivery": "available",
+                  "published": "new",
+                  "history": [
+                    "old",
+                    "new"
+                  ]
+                },
+                {
+                  "id": "archive",
+                  "uri": "file:///virtual-repositories/archive",
+                  "delivery": "available",
+                  "published": "old",
+                  "history": [
+                    "old"
+                  ]
+                }
+              ]
+            },
+            "configurations": [
+              {
+                "alias": "tools",
+                "uri": "file:///virtual-repositories/updates",
+                "enabled": false
+              }
+            ],
+            "caches": []
+          },
+          "example_source": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "sample-repo-visibility",
+              "target": "x86_64",
+              "published": "new",
+              "archives": {
+                "sample-parcel-old": {
+                  "identity": {
+                    "name": "sample-parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "4.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-parcel old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "sample-parcel-new": {
+                  "identity": {
+                    "name": "sample-parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "5.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-parcel new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "sample-companion-old": {
+                  "identity": {
+                    "name": "sample-companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "4.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-companion old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "sample-companion-new": {
+                  "identity": {
+                    "name": "sample-companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "5.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-companion new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "old": {
+                  "archives": [
+                    "sample-parcel-old",
+                    "sample-companion-old"
+                  ]
+                },
+                "new": {
+                  "archives": [
+                    "sample-parcel-new",
+                    "sample-companion-new"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/usr/share/sample-parcel.txt",
+                "/usr/share/sample-companion.txt"
+              ]
+            },
+            "endpoints": [
+              {
+                "id": "sample-updates",
+                "uri": "file:///virtual-repositories/sample-updates",
+                "delivery": "available",
+                "published": "new",
+                "history": [
+                  "old",
+                  "new"
+                ]
+              },
+              {
+                "id": "sample-archive",
+                "uri": "file:///virtual-repositories/sample-archive",
+                "delivery": "available",
+                "published": "old",
+                "history": [
+                  "old"
+                ]
+              }
+            ]
+          },
+          "example": {
+            "schema_version": 1,
+            "source": {
+              "schema_version": 1,
+              "catalog": {
+                "fixture": "sample-repo-visibility",
+                "target": "x86_64",
+                "published": "new",
+                "archives": {
+                  "sample-parcel-old": {
+                    "identity": {
+                      "name": "sample-parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "4.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-parcel old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "sample-parcel-new": {
+                    "identity": {
+                      "name": "sample-parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "5.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-parcel new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "sample-companion-old": {
+                    "identity": {
+                      "name": "sample-companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "4.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-companion old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "sample-companion-new": {
+                    "identity": {
+                      "name": "sample-companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "5.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-companion new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  }
+                },
+                "snapshots": {
+                  "old": {
+                    "archives": [
+                      "sample-parcel-old",
+                      "sample-companion-old"
+                    ]
+                  },
+                  "new": {
+                    "archives": [
+                      "sample-parcel-new",
+                      "sample-companion-new"
+                    ]
+                  }
+                },
+                "allowed_paths": [
+                  "/usr/share/sample-parcel.txt",
+                  "/usr/share/sample-companion.txt"
+                ]
+              },
+              "endpoints": [
+                {
+                  "id": "sample-updates",
+                  "uri": "file:///virtual-repositories/sample-updates",
+                  "delivery": "available",
+                  "published": "new",
+                  "history": [
+                    "old",
+                    "new"
+                  ]
+                },
+                {
+                  "id": "sample-archive",
+                  "uri": "file:///virtual-repositories/sample-archive",
+                  "delivery": "available",
+                  "published": "old",
+                  "history": [
+                    "old"
+                  ]
+                }
+              ]
+            },
+            "configurations": [
+              {
+                "alias": "practice",
+                "uri": "file:///virtual-repositories/sample-updates",
+                "enabled": false
+              }
+            ],
+            "caches": []
+          },
+          "requirements": [
+            {
+              "kind": "Current",
+              "alias": "tools",
+              "endpoint": "updates"
+            },
+            {
+              "kind": "Query",
+              "package": "parcel",
+              "rows": [
+                {
+                  "alias": "tools",
+                  "archive": "parcel-new"
+                }
+              ]
+            },
+            {
+              "kind": "Query",
+              "package": "companion",
+              "rows": [
+                {
+                  "alias": "tools",
+                  "archive": "companion-new"
+                }
+              ]
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "Current",
+              "alias": "practice",
+              "endpoint": "sample-updates"
+            },
+            {
+              "kind": "Query",
+              "package": "sample-parcel",
+              "rows": [
+                {
+                  "alias": "practice",
+                  "archive": "sample-parcel-new"
+                }
+              ]
+            },
+            {
+              "kind": "Query",
+              "package": "sample-companion",
+              "rows": [
+                {
+                  "alias": "practice",
+                  "archive": "sample-companion-new"
+                }
+              ]
+            }
+          ],
+          "example_actions": [
+            {
+              "kind": "Edit",
+              "edit": {
+                "kind": "Settings",
+                "alias": "practice",
+                "enabled": true,
+                "uri": "file:///virtual-repositories/sample-updates"
+              }
+            },
+            {
+              "kind": "Edit",
+              "edit": {
+                "kind": "Refresh",
+                "alias": "practice"
+              }
+            },
+            {
+              "kind": "Query",
+              "package": "sample-parcel"
+            },
+            {
+              "kind": "Query",
+              "package": "sample-companion"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "repository-action {\"kind\":\"Edit\",\"edit\":{\"kind\":\"Settings\",\"alias\":\"tools\",\"enabled\":true,\"uri\":\"file:///virtual-repositories/updates\"}}",
+        "repository-action {\"kind\":\"Edit\",\"edit\":{\"kind\":\"Refresh\",\"alias\":\"tools\"}}",
+        "repository-action {\"kind\":\"Query\",\"package\":\"parcel\"}",
+        "repository-action {\"kind\":\"Query\",\"package\":\"companion\"}"
+      ]
+    },
+    {
+      "id": "lpic1-repo-provenance",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Repository metadata and evidence",
+      "unit": "linux-repository-evidence",
+      "title": "Repair a source address without trusting the wrong index",
+      "summary": "Distinguish cache age from which source produced the cache.",
+      "objective": "Make tools use the supplied updates source, enabled for queries, with matching current metadata. Query parcel and companion; retain only the tools candidates from the current updates snapshot. A matching current cache can be reused. Refresh explicitly only when the applied source and cached metadata require it.",
+      "difficulty": "Intermediate",
+      "minutes": 14,
+      "steps": [
+        "Inspect supplied configuration and cached metadata, perform the required safe changes and queries, then check the whole result."
+      ],
+      "guide": [],
+      "explanation": "One valid approach: apply settings for tools using file:///virtual-repositories/updates, enabled; query parcel; query companion. Read the actual source and cached snapshot. Safe alternative operation orders that meet every requirement also pass.",
+      "hints": [
+        "Compare enabled state, configured source and cached endpoint before refreshing.",
+        "A missing cache, a matching older cache and a wrong-source cache explain different outcomes. Read the actual omission or candidate rows.",
+        "After the last applied settings or refresh, run both required exact-name queries again. Retain any protected alias configuration/cache."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://manpages.opensuse.org/Leap-16.0/zypper/zypper.8.en.html"
+      ],
+      "simplifications": "Typed virtual repository metadata only. Supplied URI labels are not opened. No actual network, host filesystem, package installation, downloads, trust/signature checks, automatic refresh, full Zypper/Yum CLI or dependency solving. Wrong-source candidate withholding is an explicit simulation policy, not full libzypp conformance.",
+      "initial": {
+        "kind": "Repositories",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_action": 0,
+          "assignment": {
+            "world": {
+              "schema_version": 1,
+              "source": {
+                "schema_version": 1,
+                "catalog": {
+                  "fixture": "repo-provenance",
+                  "target": "x86_64",
+                  "published": "new",
+                  "archives": {
+                    "parcel-old": {
+                      "identity": {
+                        "name": "parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "1.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "parcel old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "parcel-new": {
+                      "identity": {
+                        "name": "parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "2.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "parcel new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "companion-old": {
+                      "identity": {
+                        "name": "companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "1.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "companion old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "companion-new": {
+                      "identity": {
+                        "name": "companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "2.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "companion new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "snapshots": {
+                    "old": {
+                      "archives": [
+                        "parcel-old",
+                        "companion-old"
+                      ]
+                    },
+                    "new": {
+                      "archives": [
+                        "parcel-new",
+                        "companion-new"
+                      ]
+                    }
+                  },
+                  "allowed_paths": [
+                    "/usr/share/parcel.txt",
+                    "/usr/share/companion.txt"
+                  ]
+                },
+                "endpoints": [
+                  {
+                    "id": "updates",
+                    "uri": "file:///virtual-repositories/updates",
+                    "delivery": "available",
+                    "published": "new",
+                    "history": [
+                      "old",
+                      "new"
+                    ]
+                  },
+                  {
+                    "id": "archive",
+                    "uri": "file:///virtual-repositories/archive",
+                    "delivery": "available",
+                    "published": "old",
+                    "history": [
+                      "old"
+                    ]
+                  }
+                ]
+              },
+              "configurations": [
+                {
+                  "alias": "tools",
+                  "uri": "file:///virtual-repositories/archive",
+                  "enabled": true
+                }
+              ],
+              "caches": [
+                {
+                  "alias": "tools",
+                  "endpoint": "updates",
+                  "snapshot": "new"
+                }
+              ]
+            },
+            "history": [],
+            "alias": "tools",
+            "uri": "file:///virtual-repositories/archive",
+            "enabled": true,
+            "package": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          },
+          "practice": {
+            "world": {
+              "schema_version": 1,
+              "source": {
+                "schema_version": 1,
+                "catalog": {
+                  "fixture": "sample-repo-provenance",
+                  "target": "x86_64",
+                  "published": "new",
+                  "archives": {
+                    "sample-parcel-old": {
+                      "identity": {
+                        "name": "sample-parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "4.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-parcel old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "sample-parcel-new": {
+                      "identity": {
+                        "name": "sample-parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "5.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-parcel new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "sample-companion-old": {
+                      "identity": {
+                        "name": "sample-companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "4.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-companion old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "sample-companion-new": {
+                      "identity": {
+                        "name": "sample-companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "5.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-companion new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "snapshots": {
+                    "old": {
+                      "archives": [
+                        "sample-parcel-old",
+                        "sample-companion-old"
+                      ]
+                    },
+                    "new": {
+                      "archives": [
+                        "sample-parcel-new",
+                        "sample-companion-new"
+                      ]
+                    }
+                  },
+                  "allowed_paths": [
+                    "/usr/share/sample-parcel.txt",
+                    "/usr/share/sample-companion.txt"
+                  ]
+                },
+                "endpoints": [
+                  {
+                    "id": "sample-updates",
+                    "uri": "file:///virtual-repositories/sample-updates",
+                    "delivery": "available",
+                    "published": "new",
+                    "history": [
+                      "old",
+                      "new"
+                    ]
+                  },
+                  {
+                    "id": "sample-archive",
+                    "uri": "file:///virtual-repositories/sample-archive",
+                    "delivery": "available",
+                    "published": "old",
+                    "history": [
+                      "old"
+                    ]
+                  }
+                ]
+              },
+              "configurations": [
+                {
+                  "alias": "practice",
+                  "uri": "file:///virtual-repositories/sample-archive",
+                  "enabled": true
+                }
+              ],
+              "caches": [
+                {
+                  "alias": "practice",
+                  "endpoint": "sample-updates",
+                  "snapshot": "new"
+                }
+              ]
+            },
+            "history": [],
+            "alias": "practice",
+            "uri": "file:///virtual-repositories/sample-archive",
+            "enabled": true,
+            "package": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          }
+        }
+      },
+      "goal": {
+        "kind": "Repositories",
+        "definition": {
+          "initial_source": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "repo-provenance",
+              "target": "x86_64",
+              "published": "new",
+              "archives": {
+                "parcel-old": {
+                  "identity": {
+                    "name": "parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "parcel old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "parcel-new": {
+                  "identity": {
+                    "name": "parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "parcel new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "companion-old": {
+                  "identity": {
+                    "name": "companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "companion old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "companion-new": {
+                  "identity": {
+                    "name": "companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "companion new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "old": {
+                  "archives": [
+                    "parcel-old",
+                    "companion-old"
+                  ]
+                },
+                "new": {
+                  "archives": [
+                    "parcel-new",
+                    "companion-new"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/usr/share/parcel.txt",
+                "/usr/share/companion.txt"
+              ]
+            },
+            "endpoints": [
+              {
+                "id": "updates",
+                "uri": "file:///virtual-repositories/updates",
+                "delivery": "available",
+                "published": "new",
+                "history": [
+                  "old",
+                  "new"
+                ]
+              },
+              {
+                "id": "archive",
+                "uri": "file:///virtual-repositories/archive",
+                "delivery": "available",
+                "published": "old",
+                "history": [
+                  "old"
+                ]
+              }
+            ]
+          },
+          "initial": {
+            "schema_version": 1,
+            "source": {
+              "schema_version": 1,
+              "catalog": {
+                "fixture": "repo-provenance",
+                "target": "x86_64",
+                "published": "new",
+                "archives": {
+                  "parcel-old": {
+                    "identity": {
+                      "name": "parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "parcel old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "parcel-new": {
+                    "identity": {
+                      "name": "parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "2.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "parcel new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "companion-old": {
+                    "identity": {
+                      "name": "companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "companion old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "companion-new": {
+                    "identity": {
+                      "name": "companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "2.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "companion new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  }
+                },
+                "snapshots": {
+                  "old": {
+                    "archives": [
+                      "parcel-old",
+                      "companion-old"
+                    ]
+                  },
+                  "new": {
+                    "archives": [
+                      "parcel-new",
+                      "companion-new"
+                    ]
+                  }
+                },
+                "allowed_paths": [
+                  "/usr/share/parcel.txt",
+                  "/usr/share/companion.txt"
+                ]
+              },
+              "endpoints": [
+                {
+                  "id": "updates",
+                  "uri": "file:///virtual-repositories/updates",
+                  "delivery": "available",
+                  "published": "new",
+                  "history": [
+                    "old",
+                    "new"
+                  ]
+                },
+                {
+                  "id": "archive",
+                  "uri": "file:///virtual-repositories/archive",
+                  "delivery": "available",
+                  "published": "old",
+                  "history": [
+                    "old"
+                  ]
+                }
+              ]
+            },
+            "configurations": [
+              {
+                "alias": "tools",
+                "uri": "file:///virtual-repositories/archive",
+                "enabled": true
+              }
+            ],
+            "caches": [
+              {
+                "alias": "tools",
+                "endpoint": "updates",
+                "snapshot": "new"
+              }
+            ]
+          },
+          "example_source": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "sample-repo-provenance",
+              "target": "x86_64",
+              "published": "new",
+              "archives": {
+                "sample-parcel-old": {
+                  "identity": {
+                    "name": "sample-parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "4.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-parcel old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "sample-parcel-new": {
+                  "identity": {
+                    "name": "sample-parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "5.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-parcel new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "sample-companion-old": {
+                  "identity": {
+                    "name": "sample-companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "4.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-companion old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "sample-companion-new": {
+                  "identity": {
+                    "name": "sample-companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "5.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-companion new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "old": {
+                  "archives": [
+                    "sample-parcel-old",
+                    "sample-companion-old"
+                  ]
+                },
+                "new": {
+                  "archives": [
+                    "sample-parcel-new",
+                    "sample-companion-new"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/usr/share/sample-parcel.txt",
+                "/usr/share/sample-companion.txt"
+              ]
+            },
+            "endpoints": [
+              {
+                "id": "sample-updates",
+                "uri": "file:///virtual-repositories/sample-updates",
+                "delivery": "available",
+                "published": "new",
+                "history": [
+                  "old",
+                  "new"
+                ]
+              },
+              {
+                "id": "sample-archive",
+                "uri": "file:///virtual-repositories/sample-archive",
+                "delivery": "available",
+                "published": "old",
+                "history": [
+                  "old"
+                ]
+              }
+            ]
+          },
+          "example": {
+            "schema_version": 1,
+            "source": {
+              "schema_version": 1,
+              "catalog": {
+                "fixture": "sample-repo-provenance",
+                "target": "x86_64",
+                "published": "new",
+                "archives": {
+                  "sample-parcel-old": {
+                    "identity": {
+                      "name": "sample-parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "4.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-parcel old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "sample-parcel-new": {
+                    "identity": {
+                      "name": "sample-parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "5.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-parcel new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "sample-companion-old": {
+                    "identity": {
+                      "name": "sample-companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "4.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-companion old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "sample-companion-new": {
+                    "identity": {
+                      "name": "sample-companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "5.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-companion new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  }
+                },
+                "snapshots": {
+                  "old": {
+                    "archives": [
+                      "sample-parcel-old",
+                      "sample-companion-old"
+                    ]
+                  },
+                  "new": {
+                    "archives": [
+                      "sample-parcel-new",
+                      "sample-companion-new"
+                    ]
+                  }
+                },
+                "allowed_paths": [
+                  "/usr/share/sample-parcel.txt",
+                  "/usr/share/sample-companion.txt"
+                ]
+              },
+              "endpoints": [
+                {
+                  "id": "sample-updates",
+                  "uri": "file:///virtual-repositories/sample-updates",
+                  "delivery": "available",
+                  "published": "new",
+                  "history": [
+                    "old",
+                    "new"
+                  ]
+                },
+                {
+                  "id": "sample-archive",
+                  "uri": "file:///virtual-repositories/sample-archive",
+                  "delivery": "available",
+                  "published": "old",
+                  "history": [
+                    "old"
+                  ]
+                }
+              ]
+            },
+            "configurations": [
+              {
+                "alias": "practice",
+                "uri": "file:///virtual-repositories/sample-archive",
+                "enabled": true
+              }
+            ],
+            "caches": [
+              {
+                "alias": "practice",
+                "endpoint": "sample-updates",
+                "snapshot": "new"
+              }
+            ]
+          },
+          "requirements": [
+            {
+              "kind": "Current",
+              "alias": "tools",
+              "endpoint": "updates"
+            },
+            {
+              "kind": "Query",
+              "package": "parcel",
+              "rows": [
+                {
+                  "alias": "tools",
+                  "archive": "parcel-new"
+                }
+              ]
+            },
+            {
+              "kind": "Query",
+              "package": "companion",
+              "rows": [
+                {
+                  "alias": "tools",
+                  "archive": "companion-new"
+                }
+              ]
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "Current",
+              "alias": "practice",
+              "endpoint": "sample-updates"
+            },
+            {
+              "kind": "Query",
+              "package": "sample-parcel",
+              "rows": [
+                {
+                  "alias": "practice",
+                  "archive": "sample-parcel-new"
+                }
+              ]
+            },
+            {
+              "kind": "Query",
+              "package": "sample-companion",
+              "rows": [
+                {
+                  "alias": "practice",
+                  "archive": "sample-companion-new"
+                }
+              ]
+            }
+          ],
+          "example_actions": [
+            {
+              "kind": "Edit",
+              "edit": {
+                "kind": "Settings",
+                "alias": "practice",
+                "enabled": true,
+                "uri": "file:///virtual-repositories/sample-updates"
+              }
+            },
+            {
+              "kind": "Query",
+              "package": "sample-parcel"
+            },
+            {
+              "kind": "Query",
+              "package": "sample-companion"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "repository-action {\"kind\":\"Edit\",\"edit\":{\"kind\":\"Settings\",\"alias\":\"tools\",\"enabled\":true,\"uri\":\"file:///virtual-repositories/updates\"}}",
+        "repository-action {\"kind\":\"Query\",\"package\":\"parcel\"}",
+        "repository-action {\"kind\":\"Query\",\"package\":\"companion\"}"
+      ]
+    },
+    {
+      "id": "lpic1-repo-offline-evidence",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Repository metadata and evidence",
+      "unit": "linux-repository-evidence",
+      "title": "Use an older cached index honestly while a source is offline",
+      "summary": "Preserve useful offline evidence without calling it current metadata.",
+      "objective": "Retain tools configuration and its existing cached source/snapshot exactly. The supplied updates delivery fact is Unavailable. Query parcel and companion using the retained older cache. Both actual results must come only from tools. Read the Older snapshot label and recorded version. This is cached evidence, not proof of current remote contents or a successful installation.",
+      "difficulty": "Intermediate",
+      "minutes": 14,
+      "steps": [
+        "Inspect supplied configuration and cached metadata, perform the required safe changes and queries, then check the whole result."
+      ],
+      "guide": [],
+      "explanation": "One valid approach: query parcel; query companion. Read the actual source and cached snapshot. Safe alternative operation orders that meet every requirement also pass.",
+      "hints": [
+        "Compare enabled state, configured source and cached endpoint before refreshing.",
+        "A missing cache, a matching older cache and a wrong-source cache explain different outcomes. Read the actual omission or candidate rows.",
+        "After the last applied settings or refresh, run both required exact-name queries again. Retain any protected alias configuration/cache."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://manpages.opensuse.org/Leap-16.0/zypper/zypper.8.en.html"
+      ],
+      "simplifications": "Typed virtual repository metadata only. Supplied URI labels are not opened. No actual network, host filesystem, package installation, downloads, trust/signature checks, automatic refresh, full Zypper/Yum CLI or dependency solving. Wrong-source candidate withholding is an explicit simulation policy, not full libzypp conformance.",
+      "initial": {
+        "kind": "Repositories",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_action": 0,
+          "assignment": {
+            "world": {
+              "schema_version": 1,
+              "source": {
+                "schema_version": 1,
+                "catalog": {
+                  "fixture": "repo-offline-evidence",
+                  "target": "x86_64",
+                  "published": "new",
+                  "archives": {
+                    "parcel-old": {
+                      "identity": {
+                        "name": "parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "1.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "parcel old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "parcel-new": {
+                      "identity": {
+                        "name": "parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "2.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "parcel new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "companion-old": {
+                      "identity": {
+                        "name": "companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "1.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "companion old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "companion-new": {
+                      "identity": {
+                        "name": "companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "2.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "companion new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "snapshots": {
+                    "old": {
+                      "archives": [
+                        "parcel-old",
+                        "companion-old"
+                      ]
+                    },
+                    "new": {
+                      "archives": [
+                        "parcel-new",
+                        "companion-new"
+                      ]
+                    }
+                  },
+                  "allowed_paths": [
+                    "/usr/share/parcel.txt",
+                    "/usr/share/companion.txt"
+                  ]
+                },
+                "endpoints": [
+                  {
+                    "id": "updates",
+                    "uri": "file:///virtual-repositories/updates",
+                    "delivery": "unavailable",
+                    "published": "new",
+                    "history": [
+                      "old",
+                      "new"
+                    ]
+                  },
+                  {
+                    "id": "archive",
+                    "uri": "file:///virtual-repositories/archive",
+                    "delivery": "available",
+                    "published": "old",
+                    "history": [
+                      "old"
+                    ]
+                  }
+                ]
+              },
+              "configurations": [
+                {
+                  "alias": "tools",
+                  "uri": "file:///virtual-repositories/updates",
+                  "enabled": true
+                }
+              ],
+              "caches": [
+                {
+                  "alias": "tools",
+                  "endpoint": "updates",
+                  "snapshot": "old"
+                }
+              ]
+            },
+            "history": [],
+            "alias": "tools",
+            "uri": "file:///virtual-repositories/updates",
+            "enabled": true,
+            "package": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          },
+          "practice": {
+            "world": {
+              "schema_version": 1,
+              "source": {
+                "schema_version": 1,
+                "catalog": {
+                  "fixture": "sample-repo-offline-evidence",
+                  "target": "x86_64",
+                  "published": "new",
+                  "archives": {
+                    "sample-parcel-old": {
+                      "identity": {
+                        "name": "sample-parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "4.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-parcel old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "sample-parcel-new": {
+                      "identity": {
+                        "name": "sample-parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "5.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-parcel new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "sample-companion-old": {
+                      "identity": {
+                        "name": "sample-companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "4.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-companion old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "sample-companion-new": {
+                      "identity": {
+                        "name": "sample-companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "5.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-companion new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "snapshots": {
+                    "old": {
+                      "archives": [
+                        "sample-parcel-old",
+                        "sample-companion-old"
+                      ]
+                    },
+                    "new": {
+                      "archives": [
+                        "sample-parcel-new",
+                        "sample-companion-new"
+                      ]
+                    }
+                  },
+                  "allowed_paths": [
+                    "/usr/share/sample-parcel.txt",
+                    "/usr/share/sample-companion.txt"
+                  ]
+                },
+                "endpoints": [
+                  {
+                    "id": "sample-updates",
+                    "uri": "file:///virtual-repositories/sample-updates",
+                    "delivery": "unavailable",
+                    "published": "new",
+                    "history": [
+                      "old",
+                      "new"
+                    ]
+                  },
+                  {
+                    "id": "sample-archive",
+                    "uri": "file:///virtual-repositories/sample-archive",
+                    "delivery": "available",
+                    "published": "old",
+                    "history": [
+                      "old"
+                    ]
+                  }
+                ]
+              },
+              "configurations": [
+                {
+                  "alias": "practice",
+                  "uri": "file:///virtual-repositories/sample-updates",
+                  "enabled": true
+                }
+              ],
+              "caches": [
+                {
+                  "alias": "practice",
+                  "endpoint": "sample-updates",
+                  "snapshot": "old"
+                }
+              ]
+            },
+            "history": [],
+            "alias": "practice",
+            "uri": "file:///virtual-repositories/sample-updates",
+            "enabled": true,
+            "package": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          }
+        }
+      },
+      "goal": {
+        "kind": "Repositories",
+        "definition": {
+          "initial_source": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "repo-offline-evidence",
+              "target": "x86_64",
+              "published": "new",
+              "archives": {
+                "parcel-old": {
+                  "identity": {
+                    "name": "parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "parcel old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "parcel-new": {
+                  "identity": {
+                    "name": "parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "parcel new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "companion-old": {
+                  "identity": {
+                    "name": "companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "companion old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "companion-new": {
+                  "identity": {
+                    "name": "companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "companion new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "old": {
+                  "archives": [
+                    "parcel-old",
+                    "companion-old"
+                  ]
+                },
+                "new": {
+                  "archives": [
+                    "parcel-new",
+                    "companion-new"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/usr/share/parcel.txt",
+                "/usr/share/companion.txt"
+              ]
+            },
+            "endpoints": [
+              {
+                "id": "updates",
+                "uri": "file:///virtual-repositories/updates",
+                "delivery": "unavailable",
+                "published": "new",
+                "history": [
+                  "old",
+                  "new"
+                ]
+              },
+              {
+                "id": "archive",
+                "uri": "file:///virtual-repositories/archive",
+                "delivery": "available",
+                "published": "old",
+                "history": [
+                  "old"
+                ]
+              }
+            ]
+          },
+          "initial": {
+            "schema_version": 1,
+            "source": {
+              "schema_version": 1,
+              "catalog": {
+                "fixture": "repo-offline-evidence",
+                "target": "x86_64",
+                "published": "new",
+                "archives": {
+                  "parcel-old": {
+                    "identity": {
+                      "name": "parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "parcel old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "parcel-new": {
+                    "identity": {
+                      "name": "parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "2.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "parcel new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "companion-old": {
+                    "identity": {
+                      "name": "companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "companion old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "companion-new": {
+                    "identity": {
+                      "name": "companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "2.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "companion new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  }
+                },
+                "snapshots": {
+                  "old": {
+                    "archives": [
+                      "parcel-old",
+                      "companion-old"
+                    ]
+                  },
+                  "new": {
+                    "archives": [
+                      "parcel-new",
+                      "companion-new"
+                    ]
+                  }
+                },
+                "allowed_paths": [
+                  "/usr/share/parcel.txt",
+                  "/usr/share/companion.txt"
+                ]
+              },
+              "endpoints": [
+                {
+                  "id": "updates",
+                  "uri": "file:///virtual-repositories/updates",
+                  "delivery": "unavailable",
+                  "published": "new",
+                  "history": [
+                    "old",
+                    "new"
+                  ]
+                },
+                {
+                  "id": "archive",
+                  "uri": "file:///virtual-repositories/archive",
+                  "delivery": "available",
+                  "published": "old",
+                  "history": [
+                    "old"
+                  ]
+                }
+              ]
+            },
+            "configurations": [
+              {
+                "alias": "tools",
+                "uri": "file:///virtual-repositories/updates",
+                "enabled": true
+              }
+            ],
+            "caches": [
+              {
+                "alias": "tools",
+                "endpoint": "updates",
+                "snapshot": "old"
+              }
+            ]
+          },
+          "example_source": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "sample-repo-offline-evidence",
+              "target": "x86_64",
+              "published": "new",
+              "archives": {
+                "sample-parcel-old": {
+                  "identity": {
+                    "name": "sample-parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "4.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-parcel old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "sample-parcel-new": {
+                  "identity": {
+                    "name": "sample-parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "5.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-parcel new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "sample-companion-old": {
+                  "identity": {
+                    "name": "sample-companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "4.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-companion old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "sample-companion-new": {
+                  "identity": {
+                    "name": "sample-companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "5.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-companion new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "old": {
+                  "archives": [
+                    "sample-parcel-old",
+                    "sample-companion-old"
+                  ]
+                },
+                "new": {
+                  "archives": [
+                    "sample-parcel-new",
+                    "sample-companion-new"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/usr/share/sample-parcel.txt",
+                "/usr/share/sample-companion.txt"
+              ]
+            },
+            "endpoints": [
+              {
+                "id": "sample-updates",
+                "uri": "file:///virtual-repositories/sample-updates",
+                "delivery": "unavailable",
+                "published": "new",
+                "history": [
+                  "old",
+                  "new"
+                ]
+              },
+              {
+                "id": "sample-archive",
+                "uri": "file:///virtual-repositories/sample-archive",
+                "delivery": "available",
+                "published": "old",
+                "history": [
+                  "old"
+                ]
+              }
+            ]
+          },
+          "example": {
+            "schema_version": 1,
+            "source": {
+              "schema_version": 1,
+              "catalog": {
+                "fixture": "sample-repo-offline-evidence",
+                "target": "x86_64",
+                "published": "new",
+                "archives": {
+                  "sample-parcel-old": {
+                    "identity": {
+                      "name": "sample-parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "4.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-parcel old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "sample-parcel-new": {
+                    "identity": {
+                      "name": "sample-parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "5.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-parcel new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "sample-companion-old": {
+                    "identity": {
+                      "name": "sample-companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "4.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-companion old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "sample-companion-new": {
+                    "identity": {
+                      "name": "sample-companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "5.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-companion new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  }
+                },
+                "snapshots": {
+                  "old": {
+                    "archives": [
+                      "sample-parcel-old",
+                      "sample-companion-old"
+                    ]
+                  },
+                  "new": {
+                    "archives": [
+                      "sample-parcel-new",
+                      "sample-companion-new"
+                    ]
+                  }
+                },
+                "allowed_paths": [
+                  "/usr/share/sample-parcel.txt",
+                  "/usr/share/sample-companion.txt"
+                ]
+              },
+              "endpoints": [
+                {
+                  "id": "sample-updates",
+                  "uri": "file:///virtual-repositories/sample-updates",
+                  "delivery": "unavailable",
+                  "published": "new",
+                  "history": [
+                    "old",
+                    "new"
+                  ]
+                },
+                {
+                  "id": "sample-archive",
+                  "uri": "file:///virtual-repositories/sample-archive",
+                  "delivery": "available",
+                  "published": "old",
+                  "history": [
+                    "old"
+                  ]
+                }
+              ]
+            },
+            "configurations": [
+              {
+                "alias": "practice",
+                "uri": "file:///virtual-repositories/sample-updates",
+                "enabled": true
+              }
+            ],
+            "caches": [
+              {
+                "alias": "practice",
+                "endpoint": "sample-updates",
+                "snapshot": "old"
+              }
+            ]
+          },
+          "requirements": [
+            {
+              "kind": "Preserve",
+              "alias": "tools"
+            },
+            {
+              "kind": "Query",
+              "package": "parcel",
+              "rows": [
+                {
+                  "alias": "tools",
+                  "archive": "parcel-old"
+                }
+              ]
+            },
+            {
+              "kind": "Query",
+              "package": "companion",
+              "rows": [
+                {
+                  "alias": "tools",
+                  "archive": "companion-old"
+                }
+              ]
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "Preserve",
+              "alias": "practice"
+            },
+            {
+              "kind": "Query",
+              "package": "sample-parcel",
+              "rows": [
+                {
+                  "alias": "practice",
+                  "archive": "sample-parcel-old"
+                }
+              ]
+            },
+            {
+              "kind": "Query",
+              "package": "sample-companion",
+              "rows": [
+                {
+                  "alias": "practice",
+                  "archive": "sample-companion-old"
+                }
+              ]
+            }
+          ],
+          "example_actions": [
+            {
+              "kind": "Query",
+              "package": "sample-parcel"
+            },
+            {
+              "kind": "Query",
+              "package": "sample-companion"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "repository-action {\"kind\":\"Query\",\"package\":\"parcel\"}",
+        "repository-action {\"kind\":\"Query\",\"package\":\"companion\"}"
+      ]
+    },
+    {
+      "id": "lpic1-repo-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Repository metadata and evidence",
+      "unit": "linux-repository-evidence",
+      "title": "Hand over current package evidence while retaining a held source",
+      "summary": "Repair one repository and preserve another repository\u2019s configuration and cache.",
+      "objective": "Make live use the supplied updates source, enabled with matching current metadata. Keep held disabled at its original address and preserve its original cached source/snapshot. Query parcel and companion after the changes. Each must show only the current live candidate, with no held candidates. Verify both repositories; a successful query for one package is only partial completion.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Inspect supplied configuration and cached metadata, perform the required safe changes and queries, then check the whole result."
+      ],
+      "guide": [],
+      "explanation": "One valid approach: apply settings for live using file:///virtual-repositories/updates, enabled; refresh metadata for live; query parcel; query companion. Read the actual source and cached snapshot. Safe alternative operation orders that meet every requirement also pass.",
+      "hints": [
+        "Compare enabled state, configured source and cached endpoint before refreshing.",
+        "A missing cache, a matching older cache and a wrong-source cache explain different outcomes. Read the actual omission or candidate rows.",
+        "After the last applied settings or refresh, run both required exact-name queries again. Retain any protected alias configuration/cache."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://manpages.opensuse.org/Leap-16.0/zypper/zypper.8.en.html"
+      ],
+      "simplifications": "Typed virtual repository metadata only. Supplied URI labels are not opened. No actual network, host filesystem, package installation, downloads, trust/signature checks, automatic refresh, full Zypper/Yum CLI or dependency solving. Wrong-source candidate withholding is an explicit simulation policy, not full libzypp conformance.",
+      "initial": {
+        "kind": "Repositories",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_action": 0,
+          "assignment": {
+            "world": {
+              "schema_version": 1,
+              "source": {
+                "schema_version": 1,
+                "catalog": {
+                  "fixture": "repo-handover",
+                  "target": "x86_64",
+                  "published": "new",
+                  "archives": {
+                    "parcel-old": {
+                      "identity": {
+                        "name": "parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "1.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "parcel old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "parcel-new": {
+                      "identity": {
+                        "name": "parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "2.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "parcel new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "companion-old": {
+                      "identity": {
+                        "name": "companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "1.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "companion old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "companion-new": {
+                      "identity": {
+                        "name": "companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "2.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "companion new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "snapshots": {
+                    "old": {
+                      "archives": [
+                        "parcel-old",
+                        "companion-old"
+                      ]
+                    },
+                    "new": {
+                      "archives": [
+                        "parcel-new",
+                        "companion-new"
+                      ]
+                    }
+                  },
+                  "allowed_paths": [
+                    "/usr/share/parcel.txt",
+                    "/usr/share/companion.txt"
+                  ]
+                },
+                "endpoints": [
+                  {
+                    "id": "updates",
+                    "uri": "file:///virtual-repositories/updates",
+                    "delivery": "available",
+                    "published": "new",
+                    "history": [
+                      "old",
+                      "new"
+                    ]
+                  },
+                  {
+                    "id": "archive",
+                    "uri": "file:///virtual-repositories/archive",
+                    "delivery": "available",
+                    "published": "old",
+                    "history": [
+                      "old"
+                    ]
+                  }
+                ]
+              },
+              "configurations": [
+                {
+                  "alias": "live",
+                  "uri": "file:///virtual-repositories/archive",
+                  "enabled": true
+                },
+                {
+                  "alias": "held",
+                  "uri": "file:///virtual-repositories/archive",
+                  "enabled": false
+                }
+              ],
+              "caches": [
+                {
+                  "alias": "live",
+                  "endpoint": "archive",
+                  "snapshot": "old"
+                },
+                {
+                  "alias": "held",
+                  "endpoint": "archive",
+                  "snapshot": "old"
+                }
+              ]
+            },
+            "history": [],
+            "alias": "live",
+            "uri": "file:///virtual-repositories/archive",
+            "enabled": true,
+            "package": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          },
+          "practice": {
+            "world": {
+              "schema_version": 1,
+              "source": {
+                "schema_version": 1,
+                "catalog": {
+                  "fixture": "sample-repo-handover",
+                  "target": "x86_64",
+                  "published": "new",
+                  "archives": {
+                    "sample-parcel-old": {
+                      "identity": {
+                        "name": "sample-parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "4.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-parcel old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "sample-parcel-new": {
+                      "identity": {
+                        "name": "sample-parcel",
+                        "arch": "noarch"
+                      },
+                      "evr": "5.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-parcel.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-parcel new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "sample-companion-old": {
+                      "identity": {
+                        "name": "sample-companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "4.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-companion old\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    },
+                    "sample-companion-new": {
+                      "identity": {
+                        "name": "sample-companion",
+                        "arch": "noarch"
+                      },
+                      "evr": "5.0-1",
+                      "requires": [],
+                      "provides": {},
+                      "files": {
+                        "/usr/share/sample-companion.txt": {
+                          "kind": "ordinary",
+                          "file": {
+                            "contents": "sample-companion new\n",
+                            "mode": 420,
+                            "owner": "root",
+                            "group": "root",
+                            "mtime": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "snapshots": {
+                    "old": {
+                      "archives": [
+                        "sample-parcel-old",
+                        "sample-companion-old"
+                      ]
+                    },
+                    "new": {
+                      "archives": [
+                        "sample-parcel-new",
+                        "sample-companion-new"
+                      ]
+                    }
+                  },
+                  "allowed_paths": [
+                    "/usr/share/sample-parcel.txt",
+                    "/usr/share/sample-companion.txt"
+                  ]
+                },
+                "endpoints": [
+                  {
+                    "id": "sample-updates",
+                    "uri": "file:///virtual-repositories/sample-updates",
+                    "delivery": "available",
+                    "published": "new",
+                    "history": [
+                      "old",
+                      "new"
+                    ]
+                  },
+                  {
+                    "id": "sample-archive",
+                    "uri": "file:///virtual-repositories/sample-archive",
+                    "delivery": "available",
+                    "published": "old",
+                    "history": [
+                      "old"
+                    ]
+                  }
+                ]
+              },
+              "configurations": [
+                {
+                  "alias": "practice-live",
+                  "uri": "file:///virtual-repositories/sample-archive",
+                  "enabled": true
+                },
+                {
+                  "alias": "practice-held",
+                  "uri": "file:///virtual-repositories/sample-archive",
+                  "enabled": false
+                }
+              ],
+              "caches": [
+                {
+                  "alias": "practice-live",
+                  "endpoint": "sample-archive",
+                  "snapshot": "old"
+                },
+                {
+                  "alias": "practice-held",
+                  "endpoint": "sample-archive",
+                  "snapshot": "old"
+                }
+              ]
+            },
+            "history": [],
+            "alias": "practice-live",
+            "uri": "file:///virtual-repositories/sample-archive",
+            "enabled": true,
+            "package": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          }
+        }
+      },
+      "goal": {
+        "kind": "Repositories",
+        "definition": {
+          "initial_source": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "repo-handover",
+              "target": "x86_64",
+              "published": "new",
+              "archives": {
+                "parcel-old": {
+                  "identity": {
+                    "name": "parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "parcel old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "parcel-new": {
+                  "identity": {
+                    "name": "parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "parcel new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "companion-old": {
+                  "identity": {
+                    "name": "companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "companion old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "companion-new": {
+                  "identity": {
+                    "name": "companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "companion new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "old": {
+                  "archives": [
+                    "parcel-old",
+                    "companion-old"
+                  ]
+                },
+                "new": {
+                  "archives": [
+                    "parcel-new",
+                    "companion-new"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/usr/share/parcel.txt",
+                "/usr/share/companion.txt"
+              ]
+            },
+            "endpoints": [
+              {
+                "id": "updates",
+                "uri": "file:///virtual-repositories/updates",
+                "delivery": "available",
+                "published": "new",
+                "history": [
+                  "old",
+                  "new"
+                ]
+              },
+              {
+                "id": "archive",
+                "uri": "file:///virtual-repositories/archive",
+                "delivery": "available",
+                "published": "old",
+                "history": [
+                  "old"
+                ]
+              }
+            ]
+          },
+          "initial": {
+            "schema_version": 1,
+            "source": {
+              "schema_version": 1,
+              "catalog": {
+                "fixture": "repo-handover",
+                "target": "x86_64",
+                "published": "new",
+                "archives": {
+                  "parcel-old": {
+                    "identity": {
+                      "name": "parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "parcel old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "parcel-new": {
+                    "identity": {
+                      "name": "parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "2.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "parcel new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "companion-old": {
+                    "identity": {
+                      "name": "companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "1.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "companion old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "companion-new": {
+                    "identity": {
+                      "name": "companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "2.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "companion new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  }
+                },
+                "snapshots": {
+                  "old": {
+                    "archives": [
+                      "parcel-old",
+                      "companion-old"
+                    ]
+                  },
+                  "new": {
+                    "archives": [
+                      "parcel-new",
+                      "companion-new"
+                    ]
+                  }
+                },
+                "allowed_paths": [
+                  "/usr/share/parcel.txt",
+                  "/usr/share/companion.txt"
+                ]
+              },
+              "endpoints": [
+                {
+                  "id": "updates",
+                  "uri": "file:///virtual-repositories/updates",
+                  "delivery": "available",
+                  "published": "new",
+                  "history": [
+                    "old",
+                    "new"
+                  ]
+                },
+                {
+                  "id": "archive",
+                  "uri": "file:///virtual-repositories/archive",
+                  "delivery": "available",
+                  "published": "old",
+                  "history": [
+                    "old"
+                  ]
+                }
+              ]
+            },
+            "configurations": [
+              {
+                "alias": "live",
+                "uri": "file:///virtual-repositories/archive",
+                "enabled": true
+              },
+              {
+                "alias": "held",
+                "uri": "file:///virtual-repositories/archive",
+                "enabled": false
+              }
+            ],
+            "caches": [
+              {
+                "alias": "live",
+                "endpoint": "archive",
+                "snapshot": "old"
+              },
+              {
+                "alias": "held",
+                "endpoint": "archive",
+                "snapshot": "old"
+              }
+            ]
+          },
+          "example_source": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "sample-repo-handover",
+              "target": "x86_64",
+              "published": "new",
+              "archives": {
+                "sample-parcel-old": {
+                  "identity": {
+                    "name": "sample-parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "4.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-parcel old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "sample-parcel-new": {
+                  "identity": {
+                    "name": "sample-parcel",
+                    "arch": "noarch"
+                  },
+                  "evr": "5.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-parcel.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-parcel new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "sample-companion-old": {
+                  "identity": {
+                    "name": "sample-companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "4.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-companion old\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                },
+                "sample-companion-new": {
+                  "identity": {
+                    "name": "sample-companion",
+                    "arch": "noarch"
+                  },
+                  "evr": "5.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/sample-companion.txt": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "sample-companion new\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "old": {
+                  "archives": [
+                    "sample-parcel-old",
+                    "sample-companion-old"
+                  ]
+                },
+                "new": {
+                  "archives": [
+                    "sample-parcel-new",
+                    "sample-companion-new"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/usr/share/sample-parcel.txt",
+                "/usr/share/sample-companion.txt"
+              ]
+            },
+            "endpoints": [
+              {
+                "id": "sample-updates",
+                "uri": "file:///virtual-repositories/sample-updates",
+                "delivery": "available",
+                "published": "new",
+                "history": [
+                  "old",
+                  "new"
+                ]
+              },
+              {
+                "id": "sample-archive",
+                "uri": "file:///virtual-repositories/sample-archive",
+                "delivery": "available",
+                "published": "old",
+                "history": [
+                  "old"
+                ]
+              }
+            ]
+          },
+          "example": {
+            "schema_version": 1,
+            "source": {
+              "schema_version": 1,
+              "catalog": {
+                "fixture": "sample-repo-handover",
+                "target": "x86_64",
+                "published": "new",
+                "archives": {
+                  "sample-parcel-old": {
+                    "identity": {
+                      "name": "sample-parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "4.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-parcel old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "sample-parcel-new": {
+                    "identity": {
+                      "name": "sample-parcel",
+                      "arch": "noarch"
+                    },
+                    "evr": "5.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-parcel.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-parcel new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "sample-companion-old": {
+                    "identity": {
+                      "name": "sample-companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "4.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-companion old\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  },
+                  "sample-companion-new": {
+                    "identity": {
+                      "name": "sample-companion",
+                      "arch": "noarch"
+                    },
+                    "evr": "5.0-1",
+                    "requires": [],
+                    "provides": {},
+                    "files": {
+                      "/usr/share/sample-companion.txt": {
+                        "kind": "ordinary",
+                        "file": {
+                          "contents": "sample-companion new\n",
+                          "mode": 420,
+                          "owner": "root",
+                          "group": "root",
+                          "mtime": 1
+                        }
+                      }
+                    }
+                  }
+                },
+                "snapshots": {
+                  "old": {
+                    "archives": [
+                      "sample-parcel-old",
+                      "sample-companion-old"
+                    ]
+                  },
+                  "new": {
+                    "archives": [
+                      "sample-parcel-new",
+                      "sample-companion-new"
+                    ]
+                  }
+                },
+                "allowed_paths": [
+                  "/usr/share/sample-parcel.txt",
+                  "/usr/share/sample-companion.txt"
+                ]
+              },
+              "endpoints": [
+                {
+                  "id": "sample-updates",
+                  "uri": "file:///virtual-repositories/sample-updates",
+                  "delivery": "available",
+                  "published": "new",
+                  "history": [
+                    "old",
+                    "new"
+                  ]
+                },
+                {
+                  "id": "sample-archive",
+                  "uri": "file:///virtual-repositories/sample-archive",
+                  "delivery": "available",
+                  "published": "old",
+                  "history": [
+                    "old"
+                  ]
+                }
+              ]
+            },
+            "configurations": [
+              {
+                "alias": "practice-live",
+                "uri": "file:///virtual-repositories/sample-archive",
+                "enabled": true
+              },
+              {
+                "alias": "practice-held",
+                "uri": "file:///virtual-repositories/sample-archive",
+                "enabled": false
+              }
+            ],
+            "caches": [
+              {
+                "alias": "practice-live",
+                "endpoint": "sample-archive",
+                "snapshot": "old"
+              },
+              {
+                "alias": "practice-held",
+                "endpoint": "sample-archive",
+                "snapshot": "old"
+              }
+            ]
+          },
+          "requirements": [
+            {
+              "kind": "Current",
+              "alias": "live",
+              "endpoint": "updates"
+            },
+            {
+              "kind": "Preserve",
+              "alias": "held"
+            },
+            {
+              "kind": "Query",
+              "package": "parcel",
+              "rows": [
+                {
+                  "alias": "live",
+                  "archive": "parcel-new"
+                }
+              ]
+            },
+            {
+              "kind": "Query",
+              "package": "companion",
+              "rows": [
+                {
+                  "alias": "live",
+                  "archive": "companion-new"
+                }
+              ]
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "Current",
+              "alias": "practice-live",
+              "endpoint": "sample-updates"
+            },
+            {
+              "kind": "Preserve",
+              "alias": "practice-held"
+            },
+            {
+              "kind": "Query",
+              "package": "sample-parcel",
+              "rows": [
+                {
+                  "alias": "practice-live",
+                  "archive": "sample-parcel-new"
+                }
+              ]
+            },
+            {
+              "kind": "Query",
+              "package": "sample-companion",
+              "rows": [
+                {
+                  "alias": "practice-live",
+                  "archive": "sample-companion-new"
+                }
+              ]
+            }
+          ],
+          "example_actions": [
+            {
+              "kind": "Edit",
+              "edit": {
+                "kind": "Settings",
+                "alias": "practice-live",
+                "enabled": true,
+                "uri": "file:///virtual-repositories/sample-updates"
+              }
+            },
+            {
+              "kind": "Edit",
+              "edit": {
+                "kind": "Refresh",
+                "alias": "practice-live"
+              }
+            },
+            {
+              "kind": "Query",
+              "package": "sample-parcel"
+            },
+            {
+              "kind": "Query",
+              "package": "sample-companion"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "repository-action {\"kind\":\"Edit\",\"edit\":{\"kind\":\"Settings\",\"alias\":\"live\",\"enabled\":true,\"uri\":\"file:///virtual-repositories/updates\"}}",
+        "repository-action {\"kind\":\"Edit\",\"edit\":{\"kind\":\"Refresh\",\"alias\":\"live\"}}",
+        "repository-action {\"kind\":\"Query\",\"package\":\"parcel\"}",
+        "repository-action {\"kind\":\"Query\",\"package\":\"companion\"}"
+      ]
+    }
+  ]
+}

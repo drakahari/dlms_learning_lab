@@ -222,60 +222,17 @@ struct Warm {
     full: serde_json::Value,
     loaded_full: serde_json::Value,
 }
-#[derive(Clone)]
-struct GoalRows {
-    rows: Vec<egui::Rect>,
-    clip: egui::Rect,
-}
+type GoalRows = lesson_presentation::paint::Rows;
 fn painted_goal_rows(
     ctx: &egui::Context,
-    objective: &str,
+    scenario: &Scenario,
     visible: egui::Rect,
 ) -> Option<GoalRows> {
-    fn find(
-        shape: &egui::Shape,
-        clip: egui::Rect,
-        objective: &str,
-        visible: egui::Rect,
-    ) -> Option<GoalRows> {
-        match shape {
-            egui::Shape::Text(text) if text.galley.text() == objective => {
-                assert!(
-                    !text.galley.elided,
-                    "Essential task text must never be elided"
-                );
-                let rows = text
-                    .galley
-                    .rows
-                    .iter()
-                    .filter(|row| !row.text().trim().is_empty())
-                    .map(|row| row.rect().translate(text.pos.to_vec2()))
-                    .collect::<Vec<_>>();
-                assert!(
-                    !rows.is_empty() && rows.len() <= 128,
-                    "Bounded actual task rows"
-                );
-                Some(GoalRows {
-                    rows,
-                    clip: clip.intersect(visible),
-                })
-            }
-            egui::Shape::Vec(shapes) => shapes
-                .iter()
-                .find_map(|s| find(s, clip, objective, visible)),
-            _ => None,
-        }
-    }
-    // CentralPanel uses the background painter. No Context calls within graphics.
-    ctx.graphics(|graphics| {
-        graphics.get(egui::LayerId::background()).and_then(|list| {
-            list.all_entries()
-                .find_map(|s| find(&s.shape, s.clip_rect, objective, visible))
-        })
-    })
+    lesson_presentation::paint::collect(ctx, scenario, visible)
 }
 #[derive(Clone)]
 struct GoalProof {
+    keys: Vec<(usize, usize)>,
     seen: Vec<bool>,
 }
 fn editor_band(viewport: egui::Rect, height: f32) -> egui::Rect {
@@ -324,11 +281,12 @@ impl LabApp {
         }
         self.case_lesson_geometry(ctx)
     }
-    fn ere_evidence_goal_center(
+    fn ere_evidence_goal_align(
         &mut self,
         ctx: &egui::Context,
         row: egui::Rect,
         clip: egui::Rect,
+        at_top: bool,
     ) -> bool {
         let offset = self.metrics.main_scroll_offset.y;
         let key = egui::Id::new(("ere-goal-center", self.smoke_stage));
@@ -348,7 +306,11 @@ impl LabApp {
                 return false;
             }
         }
-        let delta = clip.center().y - row.center().y;
+        let delta = if at_top {
+            clip.top() - row.top()
+        } else {
+            clip.center().y - row.center().y
+        };
         if delta.abs() <= 1. / ctx.pixels_per_point() {
             return true;
         }
@@ -663,10 +625,10 @@ impl LabApp {
     }
     fn ere_evidence_inner(&mut self, ctx: &egui::Context, stage: usize) -> (bool, Option<String>) {
         const {
-            assert!(shell::EVALUATOR_REVISION == 15);
+            assert!(shell::EVALUATOR_REVISION == 19);
         }
         assert!(self.smoke && self._smoke_profile.is_some());
-        assert_eq!(shell::EVALUATOR_REVISION, 15);
+        assert_eq!(shell::EVALUATOR_REVISION, 19);
         // Admit the complete current source on EVERY callback, then reuse only
         // these immutable checked predecessors for the older authority proofs.
         let checked199 =
@@ -1594,7 +1556,7 @@ impl LabApp {
                     .main_viewport
                     .unwrap()
                     .intersect(ctx.content_rect());
-                let Some(rows) = painted_goal_rows(ctx, &scenario.objective, clip) else {
+                let Some(rows) = painted_goal_rows(ctx, &scenario, clip) else {
                     // From the focused editor below the task, scroll upward normally
                     // until the real label contributes a painted galley. Bounded20.
                     assert!(top, "Middle or bottom slice lost the already observed task");
@@ -1619,25 +1581,18 @@ impl LabApp {
                     ctx.request_repaint();
                     return (false, None);
                 };
-                let target = if bottom {
-                    *rows.rows.last().unwrap()
-                } else if middle {
-                    rows.rows[(rows.rows.len() - 1) * slice / 3]
-                } else {
-                    rows.rows[0]
-                };
+                let target_index = lesson_presentation::paint::slice_target(&rows, slice, 4);
+                let target = rows.rows[target_index];
                 if middle || bottom {
                     // A short fully painted goal needs no extra scroll, which
                     // could be impossible at the document's upper boundary.
                     // Center a long goal's final row as well: mere edge containment
                     // can leave its text behind a nested floating scrollbar.
-                    let all_visible = rows.rows.iter().all(|rect| {
-                        rows.clip
-                            .expand(1. / ctx.pixels_per_point())
-                            .contains_rect(*rect)
-                    });
-                    if !all_visible {
-                        if !self.ere_evidence_goal_center(ctx, target, rows.clip) {
+                    let all_visible = rows.all_witnessed();
+                    let final_clearance = target.bottom() + target.height()
+                        <= rows.clip.bottom() + 1. / ctx.pixels_per_point();
+                    if !all_visible || bottom && !final_clearance {
+                        if !self.ere_evidence_goal_align(ctx, target, rows.clip, false) {
                             return (false, None);
                         }
                         assert!(
@@ -1650,7 +1605,7 @@ impl LabApp {
                             "Centered target needs real clearance from edge scrollbars"
                         );
                     }
-                } else if !self.reveal_smoke_control(ctx, target) {
+                } else if !self.ere_evidence_goal_align(ctx, target, rows.clip, true) {
                     return (false, None);
                 }
                 let tolerance = 1. / ctx.pixels_per_point();
@@ -1661,8 +1616,11 @@ impl LabApp {
                     );
                 }
                 assert!(
-                    rows.clip.expand(tolerance).contains_rect(target),
-                    "Target task row must actually paint inside its clip"
+                    rows.clips[target_index]
+                        .expand(tolerance)
+                        .contains_rect(target)
+                        && rows.witnessed[target_index],
+                    "Target task row must have actual unobscured nontransparent glyphs inside its own clip"
                 );
                 let key = egui::Id::new(("ere-goal-proof", setting));
                 let mut proof = if !top {
@@ -1670,6 +1628,7 @@ impl LabApp {
                         .expect("Top slice was actually captured first")
                 } else {
                     GoalProof {
+                        keys: rows.keys.clone(),
                         seen: vec![false; rows.rows.len()],
                     }
                 };
@@ -1678,8 +1637,12 @@ impl LabApp {
                     rows.rows.len(),
                     "Task wraps consistently within this settled setting"
                 );
-                for (seen, rect) in proof.seen.iter_mut().zip(&rows.rows) {
-                    *seen |= rows.clip.expand(tolerance).contains_rect(*rect);
+                assert_eq!(
+                    proof.keys, rows.keys,
+                    "Each required label and wrapped-row identity remains stable"
+                );
+                for (seen, witnessed) in proof.seen.iter_mut().zip(&rows.witnessed) {
+                    *seen |= *witnessed;
                 }
                 eprintln!(
                     "ere-evidence actual goal rows {label}: visible_union={}/{} clip={:?}",

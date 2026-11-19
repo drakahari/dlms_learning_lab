@@ -1,0 +1,2283 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-vlan-profile-commission",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Linux VLAN profiles",
+      "unit": "linux-vlan-profiles",
+      "title": "Commission a saved VLAN profile on a shared NIC",
+      "summary": "A VLAN software interface carries one tagged network over a physical NIC. Match its saved parent, VLAN ID and IPv4 address to the supplied plan, while preserving a second VLAN.",
+      "objective": "Prepare the saved Reports profile on reports0 with 10.150.0.20/24 for the next simulated startup. Reach 10.150.0.50 through reports0 in both supplied cases; an address alone is not enough. Preserve the current Audit selection while re-reading saved files. Keep 10.151.0.50 reachable through audit0 at next startup, with no default route on audit0. Keep audit.nmconnection unchanged and retain the supplied filenames and UUIDs; choose Test startup profiles to check the edited drafts.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "initial": {
+        "kind": "NmProfiles",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-vlan-profile-commission",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000150\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=99\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.150.0.99/24\ngateway=10.150.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000151\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.151.0.20/24\ngateway=10.151.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "reports.nmconnection"
+          },
+          "practice": {
+            "draft": {
+              "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000160\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=99\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.160.0.99/24\ngateway=10.160.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000161\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.161.0.20/24\ngateway=10.161.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "reports.nmconnection"
+          }
+        }
+      },
+      "goal": {
+        "kind": "NmProfiles",
+        "definition": {
+          "initial": {
+            "id": "lpic2-vlan-profile-commission",
+            "instructions": "Prepare the saved Reports profile on reports0 with 10.150.0.20/24 for the next simulated startup. Reach 10.150.0.50 through reports0 in both supplied cases; an address alone is not enough. Preserve the current Audit selection while re-reading saved files. Keep 10.151.0.50 reachable through audit0 at next startup, with no default route on audit0. Keep audit.nmconnection unchanged and retain the supplied filenames and UUIDs; choose Test startup profiles to check the edited drafts.",
+            "starter": {
+              "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000150\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=99\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.150.0.99/24\ngateway=10.150.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000151\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.151.0.20/24\ngateway=10.151.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "protected_profiles": [
+              "audit.nmconnection"
+            ],
+            "cases": [
+              {
+                "id": "normal",
+                "label": "Supplied primary trunk",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-vlan-profile-commission",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.150.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.151.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.150.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.151.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.150.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.151.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "primary": {
+                          "label": "Primary",
+                          "up": true
+                        },
+                        "alternate": {
+                          "label": "Alternate",
+                          "up": true
+                        },
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "primary": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "alternate": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 30,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-primary",
+                          "a": {
+                            "kind": "host",
+                            "host": "primary"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "primary"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-alternate",
+                          "a": {
+                            "kind": "host",
+                            "host": "alternate"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "alternate"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "primary"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "alternate"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.150.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.150.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.151.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.151.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  }
+                },
+                "current_files": {
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000150\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.150.0.20/24\ngateway=10.150.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000151\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.151.0.20/24\ngateway=10.151.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000151"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "reports0",
+                    "address": {
+                      "address": "10.150.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "reports0",
+                    "target": "10.150.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "audit0",
+                    "target": "10.151.0.50"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              },
+              {
+                "id": "changed-native",
+                "label": "Alternate native VLAN changes to 88",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-vlan-profile-commission",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.150.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.151.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.150.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.151.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.150.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.151.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "primary": {
+                          "label": "Primary",
+                          "up": true
+                        },
+                        "alternate": {
+                          "label": "Alternate",
+                          "up": true
+                        },
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "primary": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "alternate": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 88,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-primary",
+                          "a": {
+                            "kind": "host",
+                            "host": "primary"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "primary"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-alternate",
+                          "a": {
+                            "kind": "host",
+                            "host": "alternate"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "alternate"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "primary"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "alternate"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.150.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.150.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.151.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.151.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  }
+                },
+                "current_files": {
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000150\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.150.0.20/24\ngateway=10.150.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000151\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.151.0.20/24\ngateway=10.151.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000151"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "reports0",
+                    "address": {
+                      "address": "10.150.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "reports0",
+                    "target": "10.150.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "audit0",
+                    "target": "10.151.0.50"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-vlan-profile-commission-practice",
+            "instructions": "In the separate practice network, prepare reports0 to reach 10.160.0.50 after startup while keeping Audit unchanged and reachable. Give Reports its supplied address 10.160.0.20/24 and match the Reports VLAN plan before checking both cases.",
+            "starter": {
+              "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000160\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=99\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.160.0.99/24\ngateway=10.160.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000161\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.161.0.20/24\ngateway=10.161.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "protected_profiles": [
+              "audit.nmconnection"
+            ],
+            "cases": [
+              {
+                "id": "normal",
+                "label": "Supplied primary trunk",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-vlan-profile-commission-practice",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.160.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.161.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.160.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.161.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.160.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.161.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "primary": {
+                          "label": "Primary",
+                          "up": true
+                        },
+                        "alternate": {
+                          "label": "Alternate",
+                          "up": true
+                        },
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "primary": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "alternate": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 30,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-primary",
+                          "a": {
+                            "kind": "host",
+                            "host": "primary"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "primary"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-alternate",
+                          "a": {
+                            "kind": "host",
+                            "host": "alternate"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "alternate"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "primary"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "alternate"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.160.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.160.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.161.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.161.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  }
+                },
+                "current_files": {
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000160\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.160.0.20/24\ngateway=10.160.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000161\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.161.0.20/24\ngateway=10.161.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000161"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "reports0",
+                    "address": {
+                      "address": "10.160.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "reports0",
+                    "target": "10.160.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "audit0",
+                    "target": "10.161.0.50"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              },
+              {
+                "id": "changed-native",
+                "label": "Alternate native VLAN changes to 88",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-vlan-profile-commission-practice",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.160.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.161.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.160.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.161.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.160.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.161.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "primary": {
+                          "label": "Primary",
+                          "up": true
+                        },
+                        "alternate": {
+                          "label": "Alternate",
+                          "up": true
+                        },
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "primary": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "alternate": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 88,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-primary",
+                          "a": {
+                            "kind": "host",
+                            "host": "primary"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "primary"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-alternate",
+                          "a": {
+                            "kind": "host",
+                            "host": "alternate"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "alternate"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "primary"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "alternate"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.160.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.160.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.161.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.161.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  }
+                },
+                "current_files": {
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000160\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.160.0.20/24\ngateway=10.160.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000161\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.161.0.20/24\ngateway=10.161.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000161"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FutureAddress",
+                    "interface": "reports0",
+                    "address": {
+                      "address": "10.160.0.20",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "reports0",
+                    "target": "10.160.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "audit0",
+                    "target": "10.161.0.50"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000160\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.160.0.20/24\ngateway=10.160.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+            "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000161\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.161.0.20/24\ngateway=10.161.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+          }
+        }
+      },
+      "steps": [
+        "Edit the supplied virtual profile, inspect each startup case, and verify current preservation plus future two-way paths."
+      ],
+      "guide": [],
+      "explanation": "Reports needs both the supplied IPv4 plan and the correct tagged path. A VLAN subinterface uses a physical parent plus a distinct VLAN ID. Test startup profiles compares the retained current selections with a separate future selection; changing a saved file alone does not repair current connectivity.",
+      "hints": [
+        "Compare the selected Reports parent/tag with the supplied trunk native VLAN and the Reports access VLAN.",
+        "A native VLAN return is untagged. Find a supplied parent that carries Reports as a tag in both directions, and keep Audit untouched."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://networkmanager.dev/docs/api/latest/settings-vlan.html",
+        "https://networkmanager.dev/docs/api/latest/nm-settings-keyfile.html",
+        "https://man7.org/linux/man-pages/man8/ip-link.8.html"
+      ],
+      "simplifications": "Bounded in-process static/manual IPv4 VLAN keyfiles on two provided software interfaces and physical parents. Two-way broadcast delivery composes the supplied switching fabric with the IPv4 path projection, not real ping/ARP/kernel or NetworkManager activation. Only 802.1Q, explicit flags=1, literal parents and data IDs1\u20134094. No priority tag0, reserved4095, nested tags/802.1ad, priority maps, parent UUIDs, discovery, DHCP/IPv6 VLANs, bridge/bond, real boot/reload/daemon/packet or host changes. Conventional interface /1\u201330 only. Other NM lessons retain their original Ethernet subset.",
+      "solution": [
+        "NM PROFILES\n{\"reports.nmconnection\": \"[connection]\\nid=Reports\\nuuid=00000000-0000-4000-8000-000000000150\\ntype=vlan\\ninterface-name=reports0\\nautoconnect=true\\n[vlan]\\nparent=enp1s0\\nid=30\\nflags=1\\nprotocol=802.1Q\\n[ipv4]\\nmethod=manual\\naddress1=10.150.0.20/24\\ngateway=10.150.0.1\\nnever-default=false\\n[ipv6]\\nmethod=disabled\\n\", \"audit.nmconnection\": \"[connection]\\nid=Audit\\nuuid=00000000-0000-4000-8000-000000000151\\ntype=vlan\\ninterface-name=audit0\\nautoconnect=true\\n[vlan]\\nparent=enp1s0\\nid=40\\nflags=1\\nprotocol=802.1Q\\n[ipv4]\\nmethod=manual\\naddress1=10.151.0.20/24\\ngateway=10.151.0.1\\nnever-default=true\\n[ipv6]\\nmethod=disabled\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic1-nm-uplink-handover"
+      ]
+    },
+    {
+      "id": "lpic2-vlan-return-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Linux VLAN profiles",
+      "unit": "linux-vlan-profiles",
+      "title": "Diagnose a VLAN return-path failure before startup",
+      "summary": "Carrier and the IP address can be correct while a VLAN return fails. Diagnose the actual parent/tag path and prepare saved profiles without changing current selections.",
+      "objective": "Prepare Reports for the next simulated startup so 10.154.0.50 is reachable through reports0 in both supplied cases. Preserve the current Reports and Audit selections while re-reading saved files; a working future selection must not be mistaken for a repair of current settings. Keep 10.155.0.50 reachable through audit0 at next startup, with no default route on audit0. Keep audit.nmconnection unchanged and retain the supplied filenames and UUIDs; choose Test startup profiles to check the edited drafts.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "initial": {
+        "kind": "NmProfiles",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-vlan-return-handover",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000154\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp2s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.154.0.20/24\ngateway=10.154.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000155\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.155.0.20/24\ngateway=10.155.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "reports.nmconnection"
+          },
+          "practice": {
+            "draft": {
+              "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000164\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp2s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.164.0.20/24\ngateway=10.164.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000165\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.165.0.20/24\ngateway=10.165.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "reports.nmconnection"
+          }
+        }
+      },
+      "goal": {
+        "kind": "NmProfiles",
+        "definition": {
+          "initial": {
+            "id": "lpic2-vlan-return-handover",
+            "instructions": "Prepare Reports for the next simulated startup so 10.154.0.50 is reachable through reports0 in both supplied cases. Preserve the current Reports and Audit selections while re-reading saved files; a working future selection must not be mistaken for a repair of current settings. Keep 10.155.0.50 reachable through audit0 at next startup, with no default route on audit0. Keep audit.nmconnection unchanged and retain the supplied filenames and UUIDs; choose Test startup profiles to check the edited drafts.",
+            "starter": {
+              "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000154\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp2s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.154.0.20/24\ngateway=10.154.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000155\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.155.0.20/24\ngateway=10.155.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "protected_profiles": [
+              "audit.nmconnection"
+            ],
+            "cases": [
+              {
+                "id": "normal",
+                "label": "Both physical parents have carrier",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-vlan-return-handover",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.154.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.155.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.154.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.155.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.154.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.155.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "primary": {
+                          "label": "Primary",
+                          "up": true
+                        },
+                        "alternate": {
+                          "label": "Alternate",
+                          "up": true
+                        },
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "primary": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "alternate": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 30,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-primary",
+                          "a": {
+                            "kind": "host",
+                            "host": "primary"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "primary"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-alternate",
+                          "a": {
+                            "kind": "host",
+                            "host": "alternate"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "alternate"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "primary"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "alternate"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.154.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.154.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.155.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.155.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  }
+                },
+                "current_files": {
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000154\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp2s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.154.0.20/24\ngateway=10.154.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000155\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.155.0.20/24\ngateway=10.155.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000154",
+                  "00000000-0000-4000-8000-000000000155"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "reports0",
+                    "target": "10.154.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "audit0",
+                    "target": "10.155.0.50"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              },
+              {
+                "id": "alternate-down",
+                "label": "Alternate physical parent unavailable",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-vlan-return-handover",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.154.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.155.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.154.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.155.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.154.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.155.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "primary": {
+                          "label": "Primary",
+                          "up": true
+                        },
+                        "alternate": {
+                          "label": "Alternate",
+                          "up": false
+                        },
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "primary": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "alternate": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 30,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-primary",
+                          "a": {
+                            "kind": "host",
+                            "host": "primary"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "primary"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-alternate",
+                          "a": {
+                            "kind": "host",
+                            "host": "alternate"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "alternate"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "primary"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "alternate"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.154.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.154.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.155.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.155.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  }
+                },
+                "current_files": {
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000154\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp2s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.154.0.20/24\ngateway=10.154.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000155\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.155.0.20/24\ngateway=10.155.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000154",
+                  "00000000-0000-4000-8000-000000000155"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "reports0",
+                    "target": "10.154.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "audit0",
+                    "target": "10.155.0.50"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-vlan-return-handover-practice",
+            "instructions": "In the separate practice network, prepare reports0 to reach 10.164.0.50 after startup while keeping Audit unchanged and reachable. Inspect why a tagged request can leave but an untagged return cannot enter this VLAN interface.",
+            "starter": {
+              "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000164\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp2s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.164.0.20/24\ngateway=10.164.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000165\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.165.0.20/24\ngateway=10.165.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "protected_profiles": [
+              "audit.nmconnection"
+            ],
+            "cases": [
+              {
+                "id": "normal",
+                "label": "Both physical parents have carrier",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-vlan-return-handover-practice",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.164.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.165.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.164.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.165.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.164.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.165.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "primary": {
+                          "label": "Primary",
+                          "up": true
+                        },
+                        "alternate": {
+                          "label": "Alternate",
+                          "up": true
+                        },
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "primary": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "alternate": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 30,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-primary",
+                          "a": {
+                            "kind": "host",
+                            "host": "primary"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "primary"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-alternate",
+                          "a": {
+                            "kind": "host",
+                            "host": "alternate"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "alternate"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "primary"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "alternate"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.164.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.164.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.165.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.165.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  }
+                },
+                "current_files": {
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000164\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp2s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.164.0.20/24\ngateway=10.164.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000165\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.165.0.20/24\ngateway=10.165.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000164",
+                  "00000000-0000-4000-8000-000000000165"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "reports0",
+                    "target": "10.164.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "audit0",
+                    "target": "10.165.0.50"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              },
+              {
+                "id": "alternate-down",
+                "label": "Alternate physical parent unavailable",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-vlan-return-handover-practice",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.164.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.165.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.164.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.165.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.164.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.165.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "primary": {
+                          "label": "Primary",
+                          "up": true
+                        },
+                        "alternate": {
+                          "label": "Alternate",
+                          "up": false
+                        },
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "primary": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "alternate": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 30,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-primary",
+                          "a": {
+                            "kind": "host",
+                            "host": "primary"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "primary"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-alternate",
+                          "a": {
+                            "kind": "host",
+                            "host": "alternate"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "alternate"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "primary"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "alternate"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.164.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.164.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.165.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.165.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  }
+                },
+                "current_files": {
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000164\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp2s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.164.0.20/24\ngateway=10.164.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000165\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.165.0.20/24\ngateway=10.165.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000164",
+                  "00000000-0000-4000-8000-000000000165"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "reports0",
+                    "target": "10.164.0.50"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "interface": "audit0",
+                    "target": "10.165.0.50"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000164\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.164.0.20/24\ngateway=10.164.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+            "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000165\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=enp1s0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.165.0.20/24\ngateway=10.165.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+          }
+        }
+      },
+      "steps": [
+        "Edit the supplied virtual profile, inspect each startup case, and verify current preservation plus future two-way paths."
+      ],
+      "guide": [],
+      "explanation": "Reports needs both the supplied IPv4 plan and the correct tagged path. A VLAN subinterface uses a physical parent plus a distinct VLAN ID. Test startup profiles compares the retained current selections with a separate future selection; changing a saved file alone does not repair current connectivity.",
+      "hints": [
+        "Compare the selected Reports parent/tag with the supplied trunk native VLAN and the Reports access VLAN.",
+        "A native VLAN return is untagged. Find a supplied parent that carries Reports as a tag in both directions, and keep Audit untouched."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://networkmanager.dev/docs/api/latest/settings-vlan.html",
+        "https://networkmanager.dev/docs/api/latest/nm-settings-keyfile.html",
+        "https://man7.org/linux/man-pages/man8/ip-link.8.html"
+      ],
+      "simplifications": "Bounded in-process static/manual IPv4 VLAN keyfiles on two provided software interfaces and physical parents. Two-way broadcast delivery composes the supplied switching fabric with the IPv4 path projection, not real ping/ARP/kernel or NetworkManager activation. Only 802.1Q, explicit flags=1, literal parents and data IDs1\u20134094. No priority tag0, reserved4095, nested tags/802.1ad, priority maps, parent UUIDs, discovery, DHCP/IPv6 VLANs, bridge/bond, real boot/reload/daemon/packet or host changes. Conventional interface /1\u201330 only. Other NM lessons retain their original Ethernet subset.",
+      "solution": [
+        "NM PROFILES\n{\"reports.nmconnection\": \"[connection]\\nid=Reports\\nuuid=00000000-0000-4000-8000-000000000154\\ntype=vlan\\ninterface-name=reports0\\nautoconnect=true\\n[vlan]\\nparent=enp1s0\\nid=30\\nflags=1\\nprotocol=802.1Q\\n[ipv4]\\nmethod=manual\\naddress1=10.154.0.20/24\\ngateway=10.154.0.1\\nnever-default=false\\n[ipv6]\\nmethod=disabled\\n\", \"audit.nmconnection\": \"[connection]\\nid=Audit\\nuuid=00000000-0000-4000-8000-000000000155\\ntype=vlan\\ninterface-name=audit0\\nautoconnect=true\\n[vlan]\\nparent=enp1s0\\nid=40\\nflags=1\\nprotocol=802.1Q\\n[ipv4]\\nmethod=manual\\naddress1=10.155.0.20/24\\ngateway=10.155.0.1\\nnever-default=true\\n[ipv6]\\nmethod=disabled\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic2-vlan-profile-commission"
+      ]
+    }
+  ]
+}

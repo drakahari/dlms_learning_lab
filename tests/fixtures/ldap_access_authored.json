@@ -1,0 +1,2727 @@
+{
+  "version": 1,
+  "initial": {
+    "version": 1,
+    "id": "lpic2-ldap-contact-delegation",
+    "instructions": "Within ou=People,dc=delegation,dc=test, let every established person update only their own mail and description. Let uid=desk,ou=Service,dc=delegation,dc=test update description there, including other people, but never mail. Deny all other writes, including Archive and Service changes. A denied multi-field request must change nothing. Preserve every unrelated entry and value across all samples.",
+    "starter": "access to * by users write by * none\n",
+    "reference": "access to dn.subtree=\"ou=People,dc=delegation,dc=test\" attrs=description\n    by dn.exact=\"uid=desk,ou=Service,dc=delegation,dc=test\" write\n    by self write\n    by * none\naccess to dn.subtree=\"ou=People,dc=delegation,dc=test\" attrs=mail\n    by self write\n    by * none\naccess to * by * none\n",
+    "cases": [
+      {
+        "id": "flat",
+        "label": "Direct People entries",
+        "initial": {
+          "version": 1,
+          "suffix": "dc=delegation,dc=test",
+          "entries": [
+            {
+              "dn": "dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "domain"
+                  ]
+                },
+                {
+                  "name": "dc",
+                  "values": [
+                    "delegation"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=People,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "People"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Service,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Service"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Archive,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Archive"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=People,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "avery@delegation.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=blake,ou=People,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "blake"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Blake Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "blake@delegation.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=desk,ou=Service,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "desk"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Desk Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "desk@delegation.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=Archive,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "archive-contact@delegation.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Preserve archived desk"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "identities": [
+          "uid=avery,ou=People,dc=delegation,dc=test",
+          "uid=blake,ou=People,dc=delegation,dc=test",
+          "uid=desk,ou=Service,dc=delegation,dc=test",
+          "uid=avery,ou=Archive,dc=delegation,dc=test"
+        ],
+        "probes": [
+          {
+            "label": "Own mail update",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "avery.new@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Own description update",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "New contact desk"
+              }
+            ]
+          },
+          {
+            "label": "Own combined update",
+            "actor": "uid=blake,ou=People,dc=delegation,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "blake.new@delegation.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New contact location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates People description",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates another description",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected extension"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change mail",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change description",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested peer change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change mail",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.desk@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk combined request is atomic",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Would otherwise be allowed"
+              },
+              {
+                "attribute": "mail",
+                "value": "unrequested.combined@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Archived self remains protected",
+            "actor": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived self change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Archive",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived change"
+              }
+            ]
+          },
+          {
+            "label": "People cannot change Archive",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.archive@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Service",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested service change"
+              }
+            ]
+          },
+          {
+            "label": "Same uid in another branch is not self",
+            "actor": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.same-uid@delegation.test"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "existing",
+        "label": "Existing optional contact values",
+        "initial": {
+          "version": 1,
+          "suffix": "dc=delegation,dc=test",
+          "entries": [
+            {
+              "dn": "dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "domain"
+                  ]
+                },
+                {
+                  "name": "dc",
+                  "values": [
+                    "delegation"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=People,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "People"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Service,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Service"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Archive,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Archive"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=People,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "avery@delegation.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Original main desk",
+                    "Original backup desk"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=blake,ou=People,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "blake"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Blake Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "blake@delegation.test",
+                    "blake.alias@delegation.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=desk,ou=Service,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "desk"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Desk Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "desk@delegation.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=Archive,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "archive-contact@delegation.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Preserve archived desk"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "identities": [
+          "uid=avery,ou=People,dc=delegation,dc=test",
+          "uid=blake,ou=People,dc=delegation,dc=test",
+          "uid=desk,ou=Service,dc=delegation,dc=test",
+          "uid=avery,ou=Archive,dc=delegation,dc=test"
+        ],
+        "probes": [
+          {
+            "label": "Own mail update",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "avery.corrected@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Own description update",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "New contact desk"
+              }
+            ]
+          },
+          {
+            "label": "Own combined update",
+            "actor": "uid=blake,ou=People,dc=delegation,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "blake.new@delegation.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New contact location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates People description",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates another description",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected extension"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change mail",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change description",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested peer change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change mail",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.desk@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk combined request is atomic",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Would otherwise be allowed"
+              },
+              {
+                "attribute": "mail",
+                "value": "unrequested.combined@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Archived self remains protected",
+            "actor": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived self change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Archive",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived change"
+              }
+            ]
+          },
+          {
+            "label": "People cannot change Archive",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.archive@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Service",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested service change"
+              }
+            ]
+          },
+          {
+            "label": "Same uid in another branch is not self",
+            "actor": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.same-uid@delegation.test"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "nested",
+        "label": "Nested People and a third caller",
+        "initial": {
+          "version": 1,
+          "suffix": "dc=delegation,dc=test",
+          "entries": [
+            {
+              "dn": "dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "domain"
+                  ]
+                },
+                {
+                  "name": "dc",
+                  "values": [
+                    "delegation"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=People,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "People"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Service,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Service"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Archive,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Archive"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=People,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "avery@delegation.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=blake,ou=People,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "blake"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Blake Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "blake@delegation.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=desk,ou=Service,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "desk"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Desk Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "desk@delegation.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=Archive,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "archive-contact@delegation.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Preserve archived desk"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Teams,ou=People,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Teams"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=jules,ou=Teams,ou=People,dc=delegation,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "jules"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Jules Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "jules@delegation.test"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "identities": [
+          "uid=avery,ou=People,dc=delegation,dc=test",
+          "uid=blake,ou=People,dc=delegation,dc=test",
+          "uid=desk,ou=Service,dc=delegation,dc=test",
+          "uid=avery,ou=Archive,dc=delegation,dc=test",
+          "uid=jules,ou=Teams,ou=People,dc=delegation,dc=test"
+        ],
+        "probes": [
+          {
+            "label": "Own mail update",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "avery.new@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Own description update",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "New contact desk"
+              }
+            ]
+          },
+          {
+            "label": "Own combined update",
+            "actor": "uid=blake,ou=People,dc=delegation,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "blake.new@delegation.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New contact location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates People description",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates another description",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected extension"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change mail",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change description",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested peer change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change mail",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.desk@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk combined request is atomic",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Would otherwise be allowed"
+              },
+              {
+                "attribute": "mail",
+                "value": "unrequested.combined@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Archived self remains protected",
+            "actor": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived self change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Archive",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived change"
+              }
+            ]
+          },
+          {
+            "label": "People cannot change Archive",
+            "actor": "uid=avery,ou=People,dc=delegation,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.archive@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Service",
+            "actor": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "target": "uid=desk,ou=Service,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested service change"
+              }
+            ]
+          },
+          {
+            "label": "Same uid in another branch is not self",
+            "actor": "uid=avery,ou=Archive,dc=delegation,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.same-uid@delegation.test"
+              }
+            ]
+          },
+          {
+            "label": "Nested caller updates own fields",
+            "actor": "uid=jules,ou=Teams,ou=People,dc=delegation,dc=test",
+            "target": "uid=jules,ou=Teams,ou=People,dc=delegation,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "jules.new@delegation.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New nested desk"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "example": {
+    "version": 1,
+    "id": "ldap-access-workshop",
+    "instructions": "Within ou=People,dc=delegation-workshop,dc=test, let every established person update only their own mail and description. Let uid=desk,ou=Service,dc=delegation-workshop,dc=test update description there, including other people, but never mail. Deny all other writes, including Archive and Service changes. A denied multi-field request must change nothing. Preserve every unrelated entry and value across all samples.",
+    "starter": "access to * by users write by * none\naccess to dn.subtree=\"ou=People,dc=delegation-workshop,dc=test\" attrs=description\n    by dn.exact=\"uid=desk,ou=Service,dc=delegation-workshop,dc=test\" write\n    by self write\n    by * none\naccess to dn.subtree=\"ou=People,dc=delegation-workshop,dc=test\" attrs=mail\n    by self write\n    by * none\naccess to * by * none\n",
+    "reference": "access to dn.subtree=\"ou=People,dc=delegation-workshop,dc=test\" attrs=description\n    by dn.exact=\"uid=desk,ou=Service,dc=delegation-workshop,dc=test\" write\n    by self write\n    by * none\naccess to dn.subtree=\"ou=People,dc=delegation-workshop,dc=test\" attrs=mail\n    by self write\n    by * none\naccess to * by * none\n",
+    "cases": [
+      {
+        "id": "flat",
+        "label": "Direct People entries",
+        "initial": {
+          "version": 1,
+          "suffix": "dc=delegation-workshop,dc=test",
+          "entries": [
+            {
+              "dn": "dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "domain"
+                  ]
+                },
+                {
+                  "name": "dc",
+                  "values": [
+                    "delegation-workshop"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=People,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "People"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Service,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Service"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Archive,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Archive"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "avery@delegation-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "blake"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Blake Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "blake@delegation-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "desk"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Desk Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "desk@delegation-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "archive-contact@delegation-workshop.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Preserve archived desk"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "identities": [
+          "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+          "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+          "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+          "uid=avery,ou=Archive,dc=delegation-workshop,dc=test"
+        ],
+        "probes": [
+          {
+            "label": "Own mail update",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "avery.new@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Own description update",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "New contact desk"
+              }
+            ]
+          },
+          {
+            "label": "Own combined update",
+            "actor": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "blake.new@delegation-workshop.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New contact location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates People description",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates another description",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected extension"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change mail",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change description",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested peer change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change mail",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.desk@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk combined request is atomic",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Would otherwise be allowed"
+              },
+              {
+                "attribute": "mail",
+                "value": "unrequested.combined@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Archived self remains protected",
+            "actor": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived self change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Archive",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived change"
+              }
+            ]
+          },
+          {
+            "label": "People cannot change Archive",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.archive@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Service",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested service change"
+              }
+            ]
+          },
+          {
+            "label": "Same uid in another branch is not self",
+            "actor": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.same-uid@delegation-workshop.test"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "existing",
+        "label": "Existing optional contact values",
+        "initial": {
+          "version": 1,
+          "suffix": "dc=delegation-workshop,dc=test",
+          "entries": [
+            {
+              "dn": "dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "domain"
+                  ]
+                },
+                {
+                  "name": "dc",
+                  "values": [
+                    "delegation-workshop"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=People,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "People"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Service,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Service"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Archive,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Archive"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "avery@delegation-workshop.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Original main desk",
+                    "Original backup desk"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "blake"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Blake Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "blake@delegation-workshop.test",
+                    "blake.alias@delegation-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "desk"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Desk Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "desk@delegation-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "archive-contact@delegation-workshop.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Preserve archived desk"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "identities": [
+          "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+          "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+          "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+          "uid=avery,ou=Archive,dc=delegation-workshop,dc=test"
+        ],
+        "probes": [
+          {
+            "label": "Own mail update",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "avery.corrected@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Own description update",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "New contact desk"
+              }
+            ]
+          },
+          {
+            "label": "Own combined update",
+            "actor": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "blake.new@delegation-workshop.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New contact location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates People description",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates another description",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected extension"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change mail",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change description",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested peer change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change mail",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.desk@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk combined request is atomic",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Would otherwise be allowed"
+              },
+              {
+                "attribute": "mail",
+                "value": "unrequested.combined@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Archived self remains protected",
+            "actor": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived self change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Archive",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived change"
+              }
+            ]
+          },
+          {
+            "label": "People cannot change Archive",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.archive@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Service",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested service change"
+              }
+            ]
+          },
+          {
+            "label": "Same uid in another branch is not self",
+            "actor": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.same-uid@delegation-workshop.test"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "nested",
+        "label": "Nested People and a third caller",
+        "initial": {
+          "version": 1,
+          "suffix": "dc=delegation-workshop,dc=test",
+          "entries": [
+            {
+              "dn": "dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "domain"
+                  ]
+                },
+                {
+                  "name": "dc",
+                  "values": [
+                    "delegation-workshop"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=People,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "People"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Service,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Service"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Archive,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Archive"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "avery@delegation-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "blake"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Blake Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "blake@delegation-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "desk"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Desk Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "desk@delegation-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "archive-contact@delegation-workshop.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Preserve archived desk"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Teams,ou=People,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Teams"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=jules,ou=Teams,ou=People,dc=delegation-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "jules"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Jules Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "jules@delegation-workshop.test"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "identities": [
+          "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+          "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+          "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+          "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+          "uid=jules,ou=Teams,ou=People,dc=delegation-workshop,dc=test"
+        ],
+        "probes": [
+          {
+            "label": "Own mail update",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "avery.new@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Own description update",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "New contact desk"
+              }
+            ]
+          },
+          {
+            "label": "Own combined update",
+            "actor": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "blake.new@delegation-workshop.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New contact location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates People description",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates another description",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected extension"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change mail",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change description",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested peer change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change mail",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.desk@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk combined request is atomic",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Would otherwise be allowed"
+              },
+              {
+                "attribute": "mail",
+                "value": "unrequested.combined@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Archived self remains protected",
+            "actor": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived self change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Archive",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived change"
+              }
+            ]
+          },
+          {
+            "label": "People cannot change Archive",
+            "actor": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.archive@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Service",
+            "actor": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "target": "uid=desk,ou=Service,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested service change"
+              }
+            ]
+          },
+          {
+            "label": "Same uid in another branch is not self",
+            "actor": "uid=avery,ou=Archive,dc=delegation-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=delegation-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.same-uid@delegation-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Nested caller updates own fields",
+            "actor": "uid=jules,ou=Teams,ou=People,dc=delegation-workshop,dc=test",
+            "target": "uid=jules,ou=Teams,ou=People,dc=delegation-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "jules.new@delegation-workshop.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New nested desk"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

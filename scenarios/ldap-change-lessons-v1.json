@@ -1,0 +1,4485 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-ldap-person-import",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LDAP directory data",
+      "unit": "ldap-directory-changes",
+      "title": "Import new directory people without disturbing the roster",
+      "summary": "Create real simulated person entries with LDIF, then verify the unchanged roster.",
+      "objective": "Import two new inetOrgPerson entries under ou=People,dc=cedar,dc=test. For uid=nova,ou=People,dc=cedar,dc=test, supply cn Nova Chen, sn Chen, mail nova@cedar.test and description helpdesk. For uid=theo,ou=People,dc=cedar,dc=test, supply cn Theo Moss, sn Moss, mail theo@cedar.test and description helpdesk. Preserve every existing entry and attribute; all requests must succeed in every supplied sample.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Write LDIF, apply it to inspect a sample, then check the resulting directory in every case."
+      ],
+      "guide": [],
+      "explanation": "A content record names one new entry with dn and its attributes. inetOrgPerson supplies the person class chain; cn and sn are required, while uid matches this entry's relative name. Repeated attribute lines create multiple values, not multiple people. A blank line starts the next record. Add fails for an existing name, so importing should leave existing people alone.",
+      "hints": [
+        "Read each required field and distinguish a new entry from a change to an existing name.",
+        "Use the record result before inspecting state: a failed request cannot be treated as a successful update.",
+        "Use content records for the two new people; preserve existing entries."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc2849.html",
+        "https://www.rfc-editor.org/rfc/rfc4511.html",
+        "https://www.rfc-editor.org/rfc/rfc4519.html",
+        "https://www.rfc-editor.org/rfc/rfc2798.html"
+      ],
+      "simplifications": "Checked2026-11-09 against LPIC-2v4.5/210.3 and RFC2849/4511/4519/2798. In-memory ASCII LDIF subset; content imports or add/delete/modify, person entries only, mail/description edits, supplied already-established delegated rights. Apply LDIF is a simulator action, not ldapadd/ldapmodify/ldapdelete. No bind, credentials, actual LDAP protocol/server/network, host files, shell execution, controls, rename, passwords, URL loading, complete schema or OpenLDAP ACL configuration. Each test starts with its own sample directory. Utility and server-administration objectives remain unimplemented.",
+      "solution": [
+        "LDAP CHANGE WORK\nversion: 1\n\ndn: uid=nova,ou=People,dc=cedar,dc=test\nobjectClass: top\nobjectClass: person\nobjectClass: organizationalPerson\nobjectClass: inetOrgPerson\nuid: nova\ncn: Nova Chen\nsn: Chen\nmail: nova@cedar.test\ndescription: helpdesk\n\ndn: uid=theo,ou=People,dc=cedar,dc=test\nobjectClass: top\nobjectClass: person\nobjectClass: organizationalPerson\nobjectClass: inetOrgPerson\nuid: theo\ncn: Theo Moss\nsn: Moss\nmail: theo@cedar.test\ndescription: helpdesk\n"
+      ],
+      "prerequisites": [
+        "lpic2-ldap-contact-query"
+      ],
+      "initial": {
+        "kind": "LdapChanges",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-ldap-person-import",
+          "view": "introduction",
+          "assignment": {
+            "draft": "version: 1\n\n# Write the two person entry records here.\n# Separate records with a blank line.\n",
+            "checked_draft": "",
+            "checked": false,
+            "selected_case": 0
+          },
+          "practice": {
+            "draft": "version: 1\n\n# Write the two person entry records here.\n# Separate records with a blank line.\n",
+            "checked_draft": "",
+            "checked": false,
+            "selected_case": 0
+          }
+        }
+      },
+      "goal": {
+        "kind": "LdapChanges",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "id": "lpic2-ldap-person-import",
+            "instructions": "Import two new inetOrgPerson entries under ou=People,dc=cedar,dc=test. For uid=nova,ou=People,dc=cedar,dc=test, supply cn Nova Chen, sn Chen, mail nova@cedar.test and description helpdesk. For uid=theo,ou=People,dc=cedar,dc=test, supply cn Theo Moss, sn Moss, mail theo@cedar.test and description helpdesk. Preserve every existing entry and attribute; all requests must succeed in every supplied sample.",
+            "starter": "version: 1\n\n# Write the two person entry records here.\n# Separate records with a blank line.\n",
+            "reference": "version: 1\n\ndn: uid=nova,ou=People,dc=cedar,dc=test\nobjectClass: top\nobjectClass: person\nobjectClass: organizationalPerson\nobjectClass: inetOrgPerson\nuid: nova\ncn: Nova Chen\nsn: Chen\nmail: nova@cedar.test\ndescription: helpdesk\n\ndn: uid=theo,ou=People,dc=cedar,dc=test\nobjectClass: top\nobjectClass: person\nobjectClass: organizationalPerson\nobjectClass: inetOrgPerson\nuid: theo\ncn: Theo Moss\nsn: Moss\nmail: theo@cedar.test\ndescription: helpdesk\n",
+            "grant": {
+              "principal": "uid=operator,ou=People,dc=cedar,dc=test",
+              "subtree": "ou=People,dc=cedar,dc=test",
+              "add": true,
+              "delete": false,
+              "attributes": []
+            },
+            "cases": [
+              {
+                "id": "single",
+                "label": "One old contact address",
+                "initial": {
+                  "version": 1,
+                  "suffix": "dc=cedar,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "cedar"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam-old@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "day shift"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "expected": {
+                  "version": 1,
+                  "suffix": "dc=cedar,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "cedar"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam-old@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "day shift"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=nova,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "nova"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Nova Chen"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Chen"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "nova@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "helpdesk"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=theo,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "theo"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Theo Moss"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Moss"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "theo@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "helpdesk"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "reason": "Existing entries are not import targets; preserve their data."
+              },
+              {
+                "id": "multiple",
+                "label": "Several old addresses and a changed roster",
+                "initial": {
+                  "version": 1,
+                  "suffix": "dc=cedar,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "cedar"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam-old@cedar.test",
+                            "alias@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "day shift"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor1,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor1"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 1"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor1@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "expected": {
+                  "version": 1,
+                  "suffix": "dc=cedar,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "cedar"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam-old@cedar.test",
+                            "alias@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "day shift"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor1,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor1"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 1"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor1@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=nova,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "nova"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Nova Chen"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Chen"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "nova@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "helpdesk"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=theo,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "theo"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Theo Moss"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Moss"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "theo@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "helpdesk"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "reason": "A changed roster tests whether unrelated people survive the import."
+              },
+              {
+                "id": "absent",
+                "label": "Optional contact fields absent",
+                "initial": {
+                  "version": 1,
+                  "suffix": "dc=cedar,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "cedar"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor2,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor2"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 2"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor2@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "expected": {
+                  "version": 1,
+                  "suffix": "dc=cedar,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "cedar"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor2,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor2"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 2"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor2@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=nova,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "nova"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Nova Chen"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Chen"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "nova@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "helpdesk"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=theo,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "theo"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Theo Moss"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Moss"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "theo@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "helpdesk"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "reason": "An existing person without optional mail/description must remain unchanged."
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "id": "lpic2-ldap-person-import-practice",
+            "instructions": "Import two new inetOrgPerson entries under ou=People,dc=workshop,dc=test. For uid=iris,ou=People,dc=workshop,dc=test, supply cn Iris Stone, sn Stone, mail iris@workshop.test and description helpdesk. For uid=luca,ou=People,dc=workshop,dc=test, supply cn Luca Park, sn Park, mail luca@workshop.test and description helpdesk. Preserve every existing entry and attribute; all requests must succeed in every supplied sample.",
+            "starter": "version: 1\n\n# Write the two person entry records here.\n# Separate records with a blank line.\n",
+            "reference": "version: 1\n\ndn: uid=iris,ou=People,dc=workshop,dc=test\nobjectClass: top\nobjectClass: person\nobjectClass: organizationalPerson\nobjectClass: inetOrgPerson\nuid: iris\ncn: Iris Stone\nsn: Stone\nmail: iris@workshop.test\ndescription: helpdesk\n\ndn: uid=luca,ou=People,dc=workshop,dc=test\nobjectClass: top\nobjectClass: person\nobjectClass: organizationalPerson\nobjectClass: inetOrgPerson\nuid: luca\ncn: Luca Park\nsn: Park\nmail: luca@workshop.test\ndescription: helpdesk\n",
+            "grant": {
+              "principal": "uid=operator,ou=People,dc=workshop,dc=test",
+              "subtree": "ou=People,dc=workshop,dc=test",
+              "add": true,
+              "delete": false,
+              "attributes": []
+            },
+            "cases": [
+              {
+                "id": "single",
+                "label": "One old contact address",
+                "initial": {
+                  "version": 1,
+                  "suffix": "dc=workshop,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "workshop"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam-old@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "day shift"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "expected": {
+                  "version": 1,
+                  "suffix": "dc=workshop,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "workshop"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam-old@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "day shift"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=iris,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "iris"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Iris Stone"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Stone"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "iris@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "helpdesk"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=luca,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "luca"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Luca Park"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Park"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "luca@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "helpdesk"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "reason": "Existing entries are not import targets; preserve their data."
+              },
+              {
+                "id": "multiple",
+                "label": "Several old addresses and a changed roster",
+                "initial": {
+                  "version": 1,
+                  "suffix": "dc=workshop,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "workshop"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam-old@workshop.test",
+                            "alias@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "day shift"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor1,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor1"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 1"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor1@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "expected": {
+                  "version": 1,
+                  "suffix": "dc=workshop,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "workshop"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam-old@workshop.test",
+                            "alias@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "day shift"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor1,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor1"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 1"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor1@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=iris,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "iris"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Iris Stone"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Stone"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "iris@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "helpdesk"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=luca,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "luca"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Luca Park"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Park"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "luca@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "helpdesk"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "reason": "A changed roster tests whether unrelated people survive the import."
+              },
+              {
+                "id": "absent",
+                "label": "Optional contact fields absent",
+                "initial": {
+                  "version": 1,
+                  "suffix": "dc=workshop,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "workshop"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor2,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor2"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 2"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor2@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "expected": {
+                  "version": 1,
+                  "suffix": "dc=workshop,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "workshop"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor2,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor2"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 2"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor2@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=iris,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "iris"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Iris Stone"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Stone"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "iris@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "helpdesk"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=luca,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "luca"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Luca Park"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Park"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "luca@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "helpdesk"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "reason": "An existing person without optional mail/description must remain unchanged."
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "lpic2-ldap-contact-maintenance",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LDAP directory data",
+      "unit": "ldap-directory-changes",
+      "title": "Repair directory contacts and retire an obsolete entry",
+      "summary": "Choose operations that repair optional contact fields safely across different initial states.",
+      "objective": "For uid=sam,ou=People,dc=cedar,dc=test, make mail contain only sam@cedar.test and description contain only on-call. Remove the obsolete leaf entry uid=retired,ou=People,dc=cedar,dc=test. Keep Sam's name, uid and object classes unchanged; preserve every other entry and attribute. Use operations that work when the previous mail list has one value, several values or no value; every request must succeed.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Write LDIF, apply it to inspect a sample, then check the resulting directory in every case."
+      ],
+      "guide": [],
+      "explanation": "Modify changes an existing entry. Replace mail establishes the required complete list even if the old attribute was absent; Add appends and leaves aliases behind. Replace description sets the role without depending on an old value. A separate delete record removes only the obsolete leaf. Edits within one Modify are atomic; separate successful records remain if a later request fails.",
+      "hints": [
+        "Read each required field and distinguish a new entry from a change to an existing name.",
+        "Use the record result before inspecting state: a failed request cannot be treated as a successful update.",
+        "Replace sets a complete attribute list, including when the old attribute is absent. Delete a leaf with its own change record."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc2849.html",
+        "https://www.rfc-editor.org/rfc/rfc4511.html",
+        "https://www.rfc-editor.org/rfc/rfc4519.html",
+        "https://www.rfc-editor.org/rfc/rfc2798.html"
+      ],
+      "simplifications": "Checked2026-11-09 against LPIC-2v4.5/210.3 and RFC2849/4511/4519/2798. In-memory ASCII LDIF subset; content imports or add/delete/modify, person entries only, mail/description edits, supplied already-established delegated rights. Apply LDIF is a simulator action, not ldapadd/ldapmodify/ldapdelete. No bind, credentials, actual LDAP protocol/server/network, host files, shell execution, controls, rename, passwords, URL loading, complete schema or OpenLDAP ACL configuration. Each test starts with its own sample directory. Utility and server-administration objectives remain unimplemented.",
+      "solution": [
+        "LDAP CHANGE WORK\nversion: 1\n\ndn: uid=sam,ou=People,dc=cedar,dc=test\nchangetype: modify\nreplace: mail\nmail: sam@cedar.test\n-\nreplace: description\ndescription: on-call\n-\n\ndn: uid=retired,ou=People,dc=cedar,dc=test\nchangetype: delete\n"
+      ],
+      "prerequisites": [
+        "lpic2-ldap-person-import"
+      ],
+      "initial": {
+        "kind": "LdapChanges",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-ldap-contact-maintenance",
+          "view": "introduction",
+          "assignment": {
+            "draft": "version: 1\n\ndn: uid=sam,ou=People,dc=cedar,dc=test\nchangetype: modify\nadd: mail\nmail: sam@cedar.test\n-\n",
+            "checked_draft": "",
+            "checked": false,
+            "selected_case": 0
+          },
+          "practice": {
+            "draft": "version: 1\n\ndn: uid=sam,ou=People,dc=workshop,dc=test\nchangetype: modify\nadd: mail\nmail: sam@workshop.test\n-\n",
+            "checked_draft": "",
+            "checked": false,
+            "selected_case": 0
+          }
+        }
+      },
+      "goal": {
+        "kind": "LdapChanges",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "id": "lpic2-ldap-contact-maintenance",
+            "instructions": "For uid=sam,ou=People,dc=cedar,dc=test, make mail contain only sam@cedar.test and description contain only on-call. Remove the obsolete leaf entry uid=retired,ou=People,dc=cedar,dc=test. Keep Sam's name, uid and object classes unchanged; preserve every other entry and attribute. Use operations that work when the previous mail list has one value, several values or no value; every request must succeed.",
+            "starter": "version: 1\n\ndn: uid=sam,ou=People,dc=cedar,dc=test\nchangetype: modify\nadd: mail\nmail: sam@cedar.test\n-\n",
+            "reference": "version: 1\n\ndn: uid=sam,ou=People,dc=cedar,dc=test\nchangetype: modify\nreplace: mail\nmail: sam@cedar.test\n-\nreplace: description\ndescription: on-call\n-\n\ndn: uid=retired,ou=People,dc=cedar,dc=test\nchangetype: delete\n",
+            "grant": {
+              "principal": "uid=operator,ou=People,dc=cedar,dc=test",
+              "subtree": "ou=People,dc=cedar,dc=test",
+              "add": false,
+              "delete": true,
+              "attributes": [
+                "mail",
+                "description"
+              ]
+            },
+            "cases": [
+              {
+                "id": "single",
+                "label": "One old contact address",
+                "initial": {
+                  "version": 1,
+                  "suffix": "dc=cedar,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "cedar"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam-old@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "day shift"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=retired,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "retired"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Retired Contact"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Contact"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "unused@cedar.test"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "expected": {
+                  "version": 1,
+                  "suffix": "dc=cedar,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "cedar"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "on-call"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "reason": "Keep existing people and their unrelated attributes intact."
+              },
+              {
+                "id": "multiple",
+                "label": "Several old addresses and a changed roster",
+                "initial": {
+                  "version": 1,
+                  "suffix": "dc=cedar,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "cedar"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam-old@cedar.test",
+                            "alias@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "day shift"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor1,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor1"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 1"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor1@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=retired,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "retired"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Retired Contact"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Contact"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "unused@cedar.test"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "expected": {
+                  "version": 1,
+                  "suffix": "dc=cedar,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "cedar"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "on-call"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor1,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor1"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 1"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor1@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "reason": "Adding a new mail value does not remove old aliases; do not recreate unrelated entries."
+              },
+              {
+                "id": "absent",
+                "label": "Optional contact fields absent",
+                "initial": {
+                  "version": 1,
+                  "suffix": "dc=cedar,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "cedar"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor2,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor2"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 2"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor2@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=retired,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "retired"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Retired Contact"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Contact"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "unused@cedar.test"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "expected": {
+                  "version": 1,
+                  "suffix": "dc=cedar,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "cedar"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "on-call"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor2,ou=People,dc=cedar,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor2"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 2"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor2@cedar.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "reason": "Deleting an absent attribute fails; an empty Replace is a supported way to remove one optionally."
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "id": "lpic2-ldap-contact-maintenance-practice",
+            "instructions": "For uid=sam,ou=People,dc=workshop,dc=test, make mail contain only sam@workshop.test and description contain only on-call. Remove the obsolete leaf entry uid=retired,ou=People,dc=workshop,dc=test. Keep Sam's name, uid and object classes unchanged; preserve every other entry and attribute. Use operations that work when the previous mail list has one value, several values or no value; every request must succeed.",
+            "starter": "version: 1\n\ndn: uid=sam,ou=People,dc=workshop,dc=test\nchangetype: modify\nadd: mail\nmail: sam@workshop.test\n-\n",
+            "reference": "version: 1\n\ndn: uid=sam,ou=People,dc=workshop,dc=test\nchangetype: modify\nreplace: mail\nmail: sam@workshop.test\n-\nreplace: description\ndescription: on-call\n-\n\ndn: uid=retired,ou=People,dc=workshop,dc=test\nchangetype: delete\n",
+            "grant": {
+              "principal": "uid=operator,ou=People,dc=workshop,dc=test",
+              "subtree": "ou=People,dc=workshop,dc=test",
+              "add": false,
+              "delete": true,
+              "attributes": [
+                "mail",
+                "description"
+              ]
+            },
+            "cases": [
+              {
+                "id": "single",
+                "label": "One old contact address",
+                "initial": {
+                  "version": 1,
+                  "suffix": "dc=workshop,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "workshop"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam-old@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "day shift"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=retired,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "retired"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Retired Contact"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Contact"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "unused@workshop.test"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "expected": {
+                  "version": 1,
+                  "suffix": "dc=workshop,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "workshop"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "on-call"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "reason": "Keep existing people and their unrelated attributes intact."
+              },
+              {
+                "id": "multiple",
+                "label": "Several old addresses and a changed roster",
+                "initial": {
+                  "version": 1,
+                  "suffix": "dc=workshop,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "workshop"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam-old@workshop.test",
+                            "alias@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "day shift"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor1,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor1"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 1"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor1@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=retired,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "retired"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Retired Contact"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Contact"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "unused@workshop.test"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "expected": {
+                  "version": 1,
+                  "suffix": "dc=workshop,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "workshop"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "on-call"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor1,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor1"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 1"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor1@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "reason": "Adding a new mail value does not remove old aliases; do not recreate unrelated entries."
+              },
+              {
+                "id": "absent",
+                "label": "Optional contact fields absent",
+                "initial": {
+                  "version": 1,
+                  "suffix": "dc=workshop,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "workshop"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor2,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor2"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 2"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor2@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=retired,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "retired"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Retired Contact"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Contact"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "unused@workshop.test"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "expected": {
+                  "version": 1,
+                  "suffix": "dc=workshop,dc=test",
+                  "entries": [
+                    {
+                      "dn": "dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "domain"
+                          ]
+                        },
+                        {
+                          "name": "dc",
+                          "values": [
+                            "workshop"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "organizationalUnit"
+                          ]
+                        },
+                        {
+                          "name": "ou",
+                          "values": [
+                            "People"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=operator,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "operator"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Directory Operator"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Operator"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=sam,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "sam"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Sam Vale"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Vale"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "sam@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "on-call"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "dn": "uid=visitor2,ou=People,dc=workshop,dc=test",
+                      "attributes": [
+                        {
+                          "name": "objectClass",
+                          "values": [
+                            "top",
+                            "person",
+                            "organizationalPerson",
+                            "inetOrgPerson"
+                          ]
+                        },
+                        {
+                          "name": "uid",
+                          "values": [
+                            "visitor2"
+                          ]
+                        },
+                        {
+                          "name": "cn",
+                          "values": [
+                            "Visitor 2"
+                          ]
+                        },
+                        {
+                          "name": "sn",
+                          "values": [
+                            "Visitor"
+                          ]
+                        },
+                        {
+                          "name": "mail",
+                          "values": [
+                            "visitor2@workshop.test"
+                          ]
+                        },
+                        {
+                          "name": "description",
+                          "values": [
+                            "preserve this entry"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "reason": "Deleting an absent attribute fails; an empty Replace is a supported way to remove one optionally."
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

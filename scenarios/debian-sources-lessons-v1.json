@@ -1,0 +1,1099 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-package-source-selection",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Debian source configuration",
+      "unit": "debian-source-metadata",
+      "title": "Choose Debian sources without losing updates",
+      "summary": "Edit source targets, preserve the update source, and verify package availability without installing software.",
+      "objective": "Select studio/main and studio/tools, retain studio-updates/main, and retire archive/main. Keep only these three required targets. Refresh the selected metadata so desk-viewer 1.4-2 is visible from studio/main, desk-indexer 2.1-1 from studio/tools, and base-security 1.1-1 from studio-updates/main. No package installation is needed.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "prerequisites": [
+        "lpic1-package-file-provider"
+      ],
+      "retry_guidance": "Read each unmet requirement and the source\u2019s actual cache state. Correct the editor, Save sources, refresh when needed, and check again. Reset affects only this attempt; other work is retained.",
+      "steps": [
+        "Understand the selected targets.",
+        "Save and refresh metadata deliberately.",
+        "Inspect package provenance and check work."
+      ],
+      "guide": [],
+      "hints": [
+        "Compare each URI/suite/component target with the task requirements. One stanza selects every combination of its values.",
+        "Saving does not fetch. Read Missing, Current and Retained matching cache separately.",
+        "Use the exact package name and read its source/version; a same-named package from a retired target does not meet this task."
+      ],
+      "explanation": "A deb822 stanza selects the product of its URIs, Suites and Components. Keep the updates suite separate so only its main component is selected. Saving fixes selection; only refreshing supplies the new lists. Query evidence must come from the required selected source, not the retired archive or an unselected cache.",
+      "sources": [
+        "https://manpages.debian.org/trixie/apt/sources.list.5.en.html",
+        "https://manpages.debian.org/trixie/apt/apt-get.8.en.html",
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/"
+      ],
+      "simplifications": "Only the supplied deb822 selection excerpt and fixed offline publication snapshots are modeled; this is not a full secure .sources file. Other fields, trust/key/signature policy, real acquisition, APT policy/solver, installation and host files/commands are unsupported. Native Save, Refresh and Look up are simulator actions; the data-only internal reference is not a Linux command. This narrow source-selection/metadata practice does not complete objective 102.4 or prove real APT runtime conformance.",
+      "initial": {
+        "kind": "DebianSources",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-package-source-selection",
+          "view": "introduction",
+          "assignment": {
+            "origin": "lpic1-package-source-selection",
+            "draft": "Types: deb\nURIs: https://packages.office.test/debian/\nSuites: archive\nComponents: main\n\nTypes: deb\nURIs: https://packages.office.test/debian/\nSuites: studio-updates\nComponents: main\n",
+            "state": {
+              "saved": "Types: deb\nURIs: https://packages.office.test/debian/\nSuites: archive\nComponents: main\n\nTypes: deb\nURIs: https://packages.office.test/debian/\nSuites: studio-updates\nComponents: main\n",
+              "cache": [
+                {
+                  "key": {
+                    "uri": "https://packages.office.test/debian/",
+                    "suite": "studio",
+                    "component": "main"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://packages.office.test/debian/",
+                    "suite": "studio-updates",
+                    "component": "main"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://packages.office.test/debian/",
+                    "suite": "archive",
+                    "component": "main"
+                  },
+                  "snapshot": "current-list"
+                }
+              ]
+            },
+            "checked": false,
+            "query": "",
+            "observed": null
+          },
+          "practice": {
+            "origin": "lpic1-package-source-selection-practice",
+            "draft": "Types: deb\nURIs: https://repo.gallery.test/debian/\nSuites: old-studio\nComponents: main\n\nTypes: deb\nURIs: https://repo.gallery.test/debian/\nSuites: practice-updates\nComponents: main\n",
+            "state": {
+              "saved": "Types: deb\nURIs: https://repo.gallery.test/debian/\nSuites: old-studio\nComponents: main\n\nTypes: deb\nURIs: https://repo.gallery.test/debian/\nSuites: practice-updates\nComponents: main\n",
+              "cache": [
+                {
+                  "key": {
+                    "uri": "https://repo.gallery.test/debian/",
+                    "suite": "practice",
+                    "component": "main"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://repo.gallery.test/debian/",
+                    "suite": "practice-updates",
+                    "component": "main"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://repo.gallery.test/debian/",
+                    "suite": "old-studio",
+                    "component": "main"
+                  },
+                  "snapshot": "current-list"
+                }
+              ]
+            },
+            "checked": false,
+            "query": "",
+            "observed": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "DebianSources",
+        "definition": {
+          "initial": {
+            "id": "lpic1-package-source-selection",
+            "instructions": "Select studio/main and studio/tools, retain studio-updates/main, and retire archive/main. Keep only these three required targets. Refresh the selected metadata so desk-viewer 1.4-2 is visible from studio/main, desk-indexer 2.1-1 from studio/tools, and base-security 1.1-1 from studio-updates/main. No package installation is needed.",
+            "model": {
+              "native": "amd64",
+              "targets": [
+                {
+                  "key": {
+                    "uri": "https://packages.office.test/debian/",
+                    "suite": "studio",
+                    "component": "main"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": [
+                        {
+                          "name": "desk-viewer",
+                          "version": "1.4-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "desk-viewer",
+                          "version": "1.4-2",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": "current-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://packages.office.test/debian/",
+                    "suite": "studio",
+                    "component": "tools"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": []
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "desk-indexer",
+                          "version": "2.1-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": "current-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://packages.office.test/debian/",
+                    "suite": "studio-updates",
+                    "component": "main"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": [
+                        {
+                          "name": "base-security",
+                          "version": "1.0-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "base-security",
+                          "version": "1.1-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": "current-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://packages.office.test/debian/",
+                    "suite": "archive",
+                    "component": "main"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": [
+                        {
+                          "name": "desk-indexer",
+                          "version": "9.9-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "desk-indexer",
+                          "version": "9.9-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": "current-list"
+                }
+              ]
+            },
+            "starter": {
+              "saved": "Types: deb\nURIs: https://packages.office.test/debian/\nSuites: archive\nComponents: main\n\nTypes: deb\nURIs: https://packages.office.test/debian/\nSuites: studio-updates\nComponents: main\n",
+              "cache": [
+                {
+                  "key": {
+                    "uri": "https://packages.office.test/debian/",
+                    "suite": "studio",
+                    "component": "main"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://packages.office.test/debian/",
+                    "suite": "studio-updates",
+                    "component": "main"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://packages.office.test/debian/",
+                    "suite": "archive",
+                    "component": "main"
+                  },
+                  "snapshot": "current-list"
+                }
+              ]
+            },
+            "requirements": [
+              {
+                "kind": "Selected",
+                "targets": [
+                  {
+                    "uri": "https://packages.office.test/debian/",
+                    "suite": "studio",
+                    "component": "main"
+                  },
+                  {
+                    "uri": "https://packages.office.test/debian/",
+                    "suite": "studio",
+                    "component": "tools"
+                  },
+                  {
+                    "uri": "https://packages.office.test/debian/",
+                    "suite": "studio-updates",
+                    "component": "main"
+                  }
+                ]
+              },
+              {
+                "kind": "Cached",
+                "target": {
+                  "uri": "https://packages.office.test/debian/",
+                  "suite": "studio",
+                  "component": "main"
+                },
+                "snapshot": "current-list"
+              },
+              {
+                "kind": "Cached",
+                "target": {
+                  "uri": "https://packages.office.test/debian/",
+                  "suite": "studio",
+                  "component": "tools"
+                },
+                "snapshot": "current-list"
+              },
+              {
+                "kind": "Cached",
+                "target": {
+                  "uri": "https://packages.office.test/debian/",
+                  "suite": "studio-updates",
+                  "component": "main"
+                },
+                "snapshot": "current-list"
+              },
+              {
+                "kind": "Available",
+                "target": {
+                  "uri": "https://packages.office.test/debian/",
+                  "suite": "studio",
+                  "component": "main"
+                },
+                "package": "desk-viewer",
+                "version": "1.4-2"
+              },
+              {
+                "kind": "Available",
+                "target": {
+                  "uri": "https://packages.office.test/debian/",
+                  "suite": "studio",
+                  "component": "tools"
+                },
+                "package": "desk-indexer",
+                "version": "2.1-1"
+              },
+              {
+                "kind": "Available",
+                "target": {
+                  "uri": "https://packages.office.test/debian/",
+                  "suite": "studio-updates",
+                  "component": "main"
+                },
+                "package": "base-security",
+                "version": "1.1-1"
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic1-package-source-selection-practice",
+            "instructions": "Workshop: replace old-studio/main with practice/main and practice/tools while retaining practice-updates/main. Save, then refresh and look up gallery-search, gallery-browser and gallery-fix from their required sources.",
+            "model": {
+              "native": "amd64",
+              "targets": [
+                {
+                  "key": {
+                    "uri": "https://repo.gallery.test/debian/",
+                    "suite": "practice",
+                    "component": "main"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": [
+                        {
+                          "name": "gallery-browser",
+                          "version": "1.4-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "gallery-browser",
+                          "version": "1.4-2",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": "current-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://repo.gallery.test/debian/",
+                    "suite": "practice",
+                    "component": "tools"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": []
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "gallery-search",
+                          "version": "2.1-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": "current-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://repo.gallery.test/debian/",
+                    "suite": "practice-updates",
+                    "component": "main"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": [
+                        {
+                          "name": "gallery-fix",
+                          "version": "1.0-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "gallery-fix",
+                          "version": "1.1-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": "current-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://repo.gallery.test/debian/",
+                    "suite": "old-studio",
+                    "component": "main"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": [
+                        {
+                          "name": "gallery-search",
+                          "version": "9.9-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "gallery-search",
+                          "version": "9.9-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": "current-list"
+                }
+              ]
+            },
+            "starter": {
+              "saved": "Types: deb\nURIs: https://repo.gallery.test/debian/\nSuites: old-studio\nComponents: main\n\nTypes: deb\nURIs: https://repo.gallery.test/debian/\nSuites: practice-updates\nComponents: main\n",
+              "cache": [
+                {
+                  "key": {
+                    "uri": "https://repo.gallery.test/debian/",
+                    "suite": "practice",
+                    "component": "main"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://repo.gallery.test/debian/",
+                    "suite": "practice-updates",
+                    "component": "main"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://repo.gallery.test/debian/",
+                    "suite": "old-studio",
+                    "component": "main"
+                  },
+                  "snapshot": "current-list"
+                }
+              ]
+            },
+            "requirements": [
+              {
+                "kind": "Selected",
+                "targets": [
+                  {
+                    "uri": "https://repo.gallery.test/debian/",
+                    "suite": "practice",
+                    "component": "main"
+                  },
+                  {
+                    "uri": "https://repo.gallery.test/debian/",
+                    "suite": "practice",
+                    "component": "tools"
+                  },
+                  {
+                    "uri": "https://repo.gallery.test/debian/",
+                    "suite": "practice-updates",
+                    "component": "main"
+                  }
+                ]
+              },
+              {
+                "kind": "Cached",
+                "target": {
+                  "uri": "https://repo.gallery.test/debian/",
+                  "suite": "practice",
+                  "component": "main"
+                },
+                "snapshot": "current-list"
+              },
+              {
+                "kind": "Cached",
+                "target": {
+                  "uri": "https://repo.gallery.test/debian/",
+                  "suite": "practice",
+                  "component": "tools"
+                },
+                "snapshot": "current-list"
+              },
+              {
+                "kind": "Cached",
+                "target": {
+                  "uri": "https://repo.gallery.test/debian/",
+                  "suite": "practice-updates",
+                  "component": "main"
+                },
+                "snapshot": "current-list"
+              },
+              {
+                "kind": "Available",
+                "target": {
+                  "uri": "https://repo.gallery.test/debian/",
+                  "suite": "practice",
+                  "component": "main"
+                },
+                "package": "gallery-browser",
+                "version": "1.4-2"
+              },
+              {
+                "kind": "Available",
+                "target": {
+                  "uri": "https://repo.gallery.test/debian/",
+                  "suite": "practice",
+                  "component": "tools"
+                },
+                "package": "gallery-search",
+                "version": "2.1-1"
+              },
+              {
+                "kind": "Available",
+                "target": {
+                  "uri": "https://repo.gallery.test/debian/",
+                  "suite": "practice-updates",
+                  "component": "main"
+                },
+                "package": "gallery-fix",
+                "version": "1.1-1"
+              }
+            ]
+          },
+          "example_worked": {
+            "sources": "Types: deb\nURIs: https://repo.gallery.test/debian/\nSuites: practice\nComponents: main tools\n\nTypes: deb\nURIs: https://repo.gallery.test/debian/\nSuites: practice-updates\nComponents: main\n",
+            "refresh": true
+          },
+          "assignment_reference": {
+            "sources": "Types: deb\nURIs: https://packages.office.test/debian/\nSuites: studio\nComponents: main tools\n\nTypes: deb\nURIs: https://packages.office.test/debian/\nSuites: studio-updates\nComponents: main\n",
+            "refresh": true
+          }
+        }
+      },
+      "solution": [
+        "APT SOURCES\n{\"action\":\"Save\",\"sources\":\"Types: deb\\nURIs: https://packages.office.test/debian/\\nSuites: studio\\nComponents: main tools\\n\\nTypes: deb\\nURIs: https://packages.office.test/debian/\\nSuites: studio-updates\\nComponents: main\\n\"}",
+        "APT SOURCES\n{\"action\":\"Refresh\"}",
+        "APT SOURCES\n{\"action\":\"Query\",\"name\":\"desk-indexer\"}",
+        "APT SOURCES\n{\"action\":\"Check\"}"
+      ]
+    },
+    {
+      "id": "lpic1-package-source-recovery",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Debian source configuration",
+      "unit": "debian-source-metadata",
+      "title": "Recover useful metadata when one source is offline",
+      "summary": "Repair source selection and inspect current versus retained cached metadata.",
+      "objective": "Retire retired/main and select only campus/main plus campus/tools. Refresh the available metadata without losing the retained campus/main list while its publication is unavailable. Make campus-helper 2.0-1 visible from campus/tools and campus-viewer 1.0-1 visible from campus/main. No package installation is needed.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "prerequisites": [
+        "lpic1-package-source-selection"
+      ],
+      "retry_guidance": "Read each unmet requirement and the source\u2019s actual cache state. Correct the editor, Save sources, refresh when needed, and check again. Reset affects only this attempt; other work is retained.",
+      "steps": [
+        "Understand the selected targets.",
+        "Save and refresh metadata deliberately.",
+        "Inspect package provenance and check work."
+      ],
+      "guide": [],
+      "hints": [
+        "Compare each URI/suite/component target with the task requirements. One stanza selects every combination of its values.",
+        "Saving does not fetch. Read Missing, Current and Retained matching cache separately.",
+        "Use the exact package name and read its source/version; a same-named package from a retired target does not meet this task."
+      ],
+      "explanation": "The unavailable main publication does not erase its matching cached list. Retiring the old source changes eligibility immediately. Refresh can therefore update tools while retaining main; inspect each package\u2019s source and version rather than treating a partial refresh as one blanket result.",
+      "sources": [
+        "https://manpages.debian.org/trixie/apt/sources.list.5.en.html",
+        "https://manpages.debian.org/trixie/apt/apt-get.8.en.html",
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/"
+      ],
+      "simplifications": "Only the supplied deb822 selection excerpt and fixed offline publication snapshots are modeled; this is not a full secure .sources file. Other fields, trust/key/signature policy, real acquisition, APT policy/solver, installation and host files/commands are unsupported. Native Save, Refresh and Look up are simulator actions; the data-only internal reference is not a Linux command. This narrow source-selection/metadata practice does not complete objective 102.4 or prove real APT runtime conformance.",
+      "initial": {
+        "kind": "DebianSources",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-package-source-recovery",
+          "view": "introduction",
+          "assignment": {
+            "origin": "lpic1-package-source-recovery",
+            "draft": "Types: deb\nURIs: https://mirror.campus.test/debian/\nSuites: campus\nComponents: main\n\nTypes: deb\nURIs: https://mirror.campus.test/debian/\nSuites: retired\nComponents: main\n",
+            "state": {
+              "saved": "Types: deb\nURIs: https://mirror.campus.test/debian/\nSuites: campus\nComponents: main\n\nTypes: deb\nURIs: https://mirror.campus.test/debian/\nSuites: retired\nComponents: main\n",
+              "cache": [
+                {
+                  "key": {
+                    "uri": "https://mirror.campus.test/debian/",
+                    "suite": "campus",
+                    "component": "main"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://mirror.campus.test/debian/",
+                    "suite": "campus",
+                    "component": "tools"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://mirror.campus.test/debian/",
+                    "suite": "retired",
+                    "component": "main"
+                  },
+                  "snapshot": "current-list"
+                }
+              ]
+            },
+            "checked": false,
+            "query": "",
+            "observed": null
+          },
+          "practice": {
+            "origin": "lpic1-package-source-recovery-practice",
+            "draft": "Types: deb\nURIs: https://mirror.arts.test/debian/\nSuites: arts\nComponents: main\n\nTypes: deb\nURIs: https://mirror.arts.test/debian/\nSuites: retired\nComponents: main\n",
+            "state": {
+              "saved": "Types: deb\nURIs: https://mirror.arts.test/debian/\nSuites: arts\nComponents: main\n\nTypes: deb\nURIs: https://mirror.arts.test/debian/\nSuites: retired\nComponents: main\n",
+              "cache": [
+                {
+                  "key": {
+                    "uri": "https://mirror.arts.test/debian/",
+                    "suite": "arts",
+                    "component": "main"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://mirror.arts.test/debian/",
+                    "suite": "arts",
+                    "component": "tools"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://mirror.arts.test/debian/",
+                    "suite": "retired",
+                    "component": "main"
+                  },
+                  "snapshot": "current-list"
+                }
+              ]
+            },
+            "checked": false,
+            "query": "",
+            "observed": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "DebianSources",
+        "definition": {
+          "initial": {
+            "id": "lpic1-package-source-recovery",
+            "instructions": "Retire retired/main and select only campus/main plus campus/tools. Refresh the available metadata without losing the retained campus/main list while its publication is unavailable. Make campus-helper 2.0-1 visible from campus/tools and campus-viewer 1.0-1 visible from campus/main. No package installation is needed.",
+            "model": {
+              "native": "amd64",
+              "targets": [
+                {
+                  "key": {
+                    "uri": "https://mirror.campus.test/debian/",
+                    "suite": "campus",
+                    "component": "main"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": [
+                        {
+                          "name": "campus-viewer",
+                          "version": "1.0-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "campus-viewer",
+                          "version": "1.1-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": null
+                },
+                {
+                  "key": {
+                    "uri": "https://mirror.campus.test/debian/",
+                    "suite": "campus",
+                    "component": "tools"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": [
+                        {
+                          "name": "campus-helper",
+                          "version": "1.0-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "campus-helper",
+                          "version": "2.0-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": "current-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://mirror.campus.test/debian/",
+                    "suite": "retired",
+                    "component": "main"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": [
+                        {
+                          "name": "campus-helper",
+                          "version": "3.0-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "campus-helper",
+                          "version": "3.0-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": "current-list"
+                }
+              ]
+            },
+            "starter": {
+              "saved": "Types: deb\nURIs: https://mirror.campus.test/debian/\nSuites: campus\nComponents: main\n\nTypes: deb\nURIs: https://mirror.campus.test/debian/\nSuites: retired\nComponents: main\n",
+              "cache": [
+                {
+                  "key": {
+                    "uri": "https://mirror.campus.test/debian/",
+                    "suite": "campus",
+                    "component": "main"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://mirror.campus.test/debian/",
+                    "suite": "campus",
+                    "component": "tools"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://mirror.campus.test/debian/",
+                    "suite": "retired",
+                    "component": "main"
+                  },
+                  "snapshot": "current-list"
+                }
+              ]
+            },
+            "requirements": [
+              {
+                "kind": "Selected",
+                "targets": [
+                  {
+                    "uri": "https://mirror.campus.test/debian/",
+                    "suite": "campus",
+                    "component": "main"
+                  },
+                  {
+                    "uri": "https://mirror.campus.test/debian/",
+                    "suite": "campus",
+                    "component": "tools"
+                  }
+                ]
+              },
+              {
+                "kind": "Cached",
+                "target": {
+                  "uri": "https://mirror.campus.test/debian/",
+                  "suite": "campus",
+                  "component": "main"
+                },
+                "snapshot": "retained-list"
+              },
+              {
+                "kind": "Cached",
+                "target": {
+                  "uri": "https://mirror.campus.test/debian/",
+                  "suite": "campus",
+                  "component": "tools"
+                },
+                "snapshot": "current-list"
+              },
+              {
+                "kind": "Available",
+                "target": {
+                  "uri": "https://mirror.campus.test/debian/",
+                  "suite": "campus",
+                  "component": "main"
+                },
+                "package": "campus-viewer",
+                "version": "1.0-1"
+              },
+              {
+                "kind": "Available",
+                "target": {
+                  "uri": "https://mirror.campus.test/debian/",
+                  "suite": "campus",
+                  "component": "tools"
+                },
+                "package": "campus-helper",
+                "version": "2.0-1"
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic1-package-source-recovery-practice",
+            "instructions": "Workshop: retire retired/main, enable arts/tools beside arts/main, and refresh. Keep arts-viewer 1.0-1 available from the retained main list while arts-helper 2.0-1 becomes available from tools. Expect a partial refresh, not total failure or total success.",
+            "model": {
+              "native": "amd64",
+              "targets": [
+                {
+                  "key": {
+                    "uri": "https://mirror.arts.test/debian/",
+                    "suite": "arts",
+                    "component": "main"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": [
+                        {
+                          "name": "arts-viewer",
+                          "version": "1.0-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "arts-viewer",
+                          "version": "1.1-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": null
+                },
+                {
+                  "key": {
+                    "uri": "https://mirror.arts.test/debian/",
+                    "suite": "arts",
+                    "component": "tools"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": [
+                        {
+                          "name": "arts-helper",
+                          "version": "1.0-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "arts-helper",
+                          "version": "2.0-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": "current-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://mirror.arts.test/debian/",
+                    "suite": "retired",
+                    "component": "main"
+                  },
+                  "snapshots": [
+                    {
+                      "id": "retained-list",
+                      "rows": [
+                        {
+                          "name": "arts-helper",
+                          "version": "3.0-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "current-list",
+                      "rows": [
+                        {
+                          "name": "arts-helper",
+                          "version": "3.0-1",
+                          "architecture": "all"
+                        }
+                      ]
+                    }
+                  ],
+                  "published": "current-list"
+                }
+              ]
+            },
+            "starter": {
+              "saved": "Types: deb\nURIs: https://mirror.arts.test/debian/\nSuites: arts\nComponents: main\n\nTypes: deb\nURIs: https://mirror.arts.test/debian/\nSuites: retired\nComponents: main\n",
+              "cache": [
+                {
+                  "key": {
+                    "uri": "https://mirror.arts.test/debian/",
+                    "suite": "arts",
+                    "component": "main"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://mirror.arts.test/debian/",
+                    "suite": "arts",
+                    "component": "tools"
+                  },
+                  "snapshot": "retained-list"
+                },
+                {
+                  "key": {
+                    "uri": "https://mirror.arts.test/debian/",
+                    "suite": "retired",
+                    "component": "main"
+                  },
+                  "snapshot": "current-list"
+                }
+              ]
+            },
+            "requirements": [
+              {
+                "kind": "Selected",
+                "targets": [
+                  {
+                    "uri": "https://mirror.arts.test/debian/",
+                    "suite": "arts",
+                    "component": "main"
+                  },
+                  {
+                    "uri": "https://mirror.arts.test/debian/",
+                    "suite": "arts",
+                    "component": "tools"
+                  }
+                ]
+              },
+              {
+                "kind": "Cached",
+                "target": {
+                  "uri": "https://mirror.arts.test/debian/",
+                  "suite": "arts",
+                  "component": "main"
+                },
+                "snapshot": "retained-list"
+              },
+              {
+                "kind": "Cached",
+                "target": {
+                  "uri": "https://mirror.arts.test/debian/",
+                  "suite": "arts",
+                  "component": "tools"
+                },
+                "snapshot": "current-list"
+              },
+              {
+                "kind": "Available",
+                "target": {
+                  "uri": "https://mirror.arts.test/debian/",
+                  "suite": "arts",
+                  "component": "main"
+                },
+                "package": "arts-viewer",
+                "version": "1.0-1"
+              },
+              {
+                "kind": "Available",
+                "target": {
+                  "uri": "https://mirror.arts.test/debian/",
+                  "suite": "arts",
+                  "component": "tools"
+                },
+                "package": "arts-helper",
+                "version": "2.0-1"
+              }
+            ]
+          },
+          "example_worked": {
+            "sources": "Types: deb\nURIs: https://mirror.arts.test/debian/\nSuites: arts\nComponents: main tools\n",
+            "refresh": true
+          },
+          "assignment_reference": {
+            "sources": "Types: deb\nURIs: https://mirror.campus.test/debian/\nSuites: campus\nComponents: main tools\n",
+            "refresh": true
+          }
+        }
+      },
+      "solution": [
+        "APT SOURCES\n{\"action\":\"Save\",\"sources\":\"Types: deb\\nURIs: https://mirror.campus.test/debian/\\nSuites: campus\\nComponents: main tools\\n\"}",
+        "APT SOURCES\n{\"action\":\"Refresh\"}",
+        "APT SOURCES\n{\"action\":\"Query\",\"name\":\"campus-helper\"}",
+        "APT SOURCES\n{\"action\":\"Check\"}"
+      ]
+    }
+  ]
+}

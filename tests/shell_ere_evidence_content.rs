@@ -62,7 +62,7 @@ fn texts(all: &[Scenario]) -> Vec<String> {
 fn catalog() -> &'static Vec<Scenario> {
     static ALL: OnceLock<Vec<Scenario>> = OnceLock::new();
     ALL.get_or_init(|| {
-        assert_eq!(shell::EVALUATOR_REVISION, 15);
+        assert_eq!(shell::EVALUATOR_REVISION, 19);
         let full201=pack::bundled().unwrap();
         let current199=disk_registration::literal_registration::snapshot_registration::before_scenarios(&full201).to_vec();
         let all = disk_registration::literal_registration::before_scenarios(&current199).to_vec();
@@ -432,13 +432,10 @@ fn actual_run_edit_invalidation_retry_save_resume_and_selected_reset_preserve_ot
     assert_eq!(full(&p), caller);
     let mut resumed = progress::load(&path, all).unwrap();
     assert_eq!(value(&resumed), value(&p));
-    assert!(
-        resumed
-            .migration_receipts
-            .as_ref()
-            .unwrap()
-            .shell
-            .contains(&15)
+    assert_eq!(
+        resumed.migration_receipts.as_ref().unwrap().shell,
+        vec![19],
+        "A fresh current run records only the actual current evaluator; no invented historical receipt"
     );
     let before = full(&resumed);
     let visited = resumed.attempts[&first.id].visited;

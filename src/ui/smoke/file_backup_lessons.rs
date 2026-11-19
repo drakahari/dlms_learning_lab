@@ -21,6 +21,7 @@ enum Target {
     Run,
     Output,
     Failure,
+    Success,
     Heading,
     GoalStart,
     GoalEnd,
@@ -185,7 +186,7 @@ fn plan() -> &'static Vec<Step> {
             p.push(Step::Rows(serde_json::from_value(v["partial"].clone()).unwrap()));
             p.push(Step::Shot(name("partial-progress"),Target::Failure));reset(&mut p);
             commands(&mut p,&s.solution,false);check(&mut p,true,false);
-            p.push(Step::Shot(name("objectives-complete"),Target::Control("check")));
+            p.push(Step::Shot(name("objectives-complete"),Target::Success));
             // Cancel an actual Reset dialog and preserve all portable fields and receipts.
             p.extend([Step::Snapshot,Step::Click(Target::Reset),Step::Click(Target::Cancel),Step::Retained]);
             if n==0 {
@@ -287,6 +288,22 @@ pub(in crate::ui) fn immediate_stop(stage: usize) -> bool {
             )
         })
 }
+fn goal_proof_key(ctx: &egui::Context, source: &Scenario) -> egui::Id {
+    egui::Id::new((
+        "backup-task-proof",
+        source.id.as_str(),
+        ctx.zoom_factor().to_bits(),
+        ctx.content_rect().width().to_bits(),
+        ctx.style().visuals.dark_mode,
+    ))
+}
+#[cfg(test)]
+pub(in crate::ui) fn goal_stage(stage: usize) -> bool {
+    let p = plan();
+    stage >= FIRST
+        && p.get(stage - FIRST)
+            .is_some_and(|s| matches!(s, Step::Shot(_, Target::GoalStart | Target::GoalEnd)))
+}
 impl LabApp {
     pub(in crate::ui) fn file_backup_lessons_stage(
         smoke: bool,
@@ -355,23 +372,17 @@ impl LabApp {
             );
         }
         if matches!(t, Target::GoalStart | Target::GoalEnd) {
-            let (goal, body_row) = m
-                .goal
-                .expect("Actual current objective Label and body row height");
-            assert!(
-                body_row.is_finite() && body_row > 0. && goal.is_finite() && goal.height() > 0.
-            );
-            let height = body_row.min(goal.height());
-            let top = if matches!(t, Target::GoalStart) {
-                goal.top()
+            let source = &self.scenarios[self.selected.unwrap()];
+            let rows = lesson_presentation::paint::collect(ctx, source, root)
+                .expect("Actual current-pass complete backup task layouts");
+            let proof =
+                lesson_presentation::paint::observe(ctx, goal_proof_key(ctx, source), &rows);
+            let index = if matches!(t, Target::GoalEnd) {
+                proof.first_missing().unwrap_or(rows.rows.len() - 1)
             } else {
-                goal.bottom() - height
+                0
             };
-            let edge = egui::Rect::from_min_size(
-                egui::pos2(goal.left(), top),
-                egui::vec2(goal.width(), height),
-            );
-            return (edge, root, false);
+            return (rows.rows[index], rows.clips[index], false);
         }
         if matches!(t, Target::Input) {
             return (
@@ -387,6 +398,7 @@ impl LabApp {
             Target::Run => m.terminal.run,
             Target::Output => m.terminal.output,
             Target::Failure => m.rows.iter().find(|r| !r.1).map(|r| r.2),
+            Target::Success => m.success,
             Target::Heading => m.heading,
             Target::Card(f) => {
                 assert_eq!(self.metrics.card_actions.len(), 1);
@@ -929,6 +941,7 @@ impl LabApp {
                 }
             }
             Step::Open => {
+                lesson_presentation::paint::request(ctx, &self.scenarios[self.selected.unwrap()]);
                 let a = &self.progress.attempts[id];
                 assert_eq!(self.selected, Some(i));
                 assert_eq!(learning(a).view, View::Introduction);
@@ -1274,6 +1287,30 @@ impl LabApp {
                 }
             }
             Step::Shot(name, target) => {
+                if matches!(target, Target::GoalStart | Target::GoalEnd) {
+                    let source = &self.scenarios[self.selected.unwrap()];
+                    let visible = self
+                        .metrics
+                        .main_viewport
+                        .unwrap()
+                        .intersect(ctx.content_rect());
+                    if lesson_presentation::paint::collect(ctx, source, visible).is_none() {
+                        let key = egui::Id::new(("backup-unavailable-goal-layout", stage));
+                        let attempts = ctx.data(|d| d.get_temp::<usize>(key)).unwrap_or(0) + 1;
+                        ctx.data_mut(|d| d.insert_temp(key, attempts));
+                        if matches!(attempts, 1 | 20) {
+                            eprintln!(
+                                "Backup goal capture waits for real current layout: stage={stage} source={} viewport={visible:?} screen={:?} zoom={} discard={}",
+                                source.id,
+                                ctx.content_rect(),
+                                ctx.zoom_factor(),
+                                ctx.will_discard()
+                            );
+                        }
+                        ctx.request_repaint();
+                        return (false, None);
+                    }
+                }
                 let narrow = ctx
                     .data(|d| d.get_temp::<bool>(key("narrow")))
                     .unwrap_or(false);
@@ -1287,9 +1324,47 @@ impl LabApp {
                     assert!(ctx.memory(|m| m.has_focus(id)));
                 }
                 if matches!(target, Target::GoalStart | Target::GoalEnd) {
-                    let (goal, body_row) = self.metrics.backup.goal.unwrap();
+                    let source = &self.scenarios[self.selected.unwrap()];
+                    let rows = lesson_presentation::paint::collect(
+                        ctx,
+                        source,
+                        self.metrics
+                            .main_viewport
+                            .unwrap()
+                            .intersect(ctx.content_rect()),
+                    )
+                    .unwrap();
+                    let proof = lesson_presentation::paint::observe(
+                        ctx,
+                        goal_proof_key(ctx, source),
+                        &rows,
+                    );
+                    if matches!(target, Target::GoalEnd) && !proof.complete() {
+                        self.started = Instant::now();
+                        ctx.request_repaint();
+                        return (false, None);
+                    }
+                    let index = if matches!(target, Target::GoalEnd) {
+                        rows.rows.len() - 1
+                    } else {
+                        0
+                    };
+                    assert!(
+                        rows.witnessed[index],
+                        "Actual first/final backup task glyphs paint inside their own clip"
+                    );
                     println!(
-                        "Backup capstone current goal label={goal:?}; body row={body_row}; fully visible measured edge={r:?}; clip={v:?}. This proves reachability of this edge, not all vertical text at once."
+                        "Backup capstone task labels={} actualrows={} witnessed={}/{} endpoint={r:?} clip={v:?}",
+                        lesson_presentation::assignment_texts(source).len(),
+                        rows.keys.len(),
+                        rows.witnessed.iter().filter(|v| **v).count(),
+                        rows.keys.len()
+                    );
+                }
+                if matches!(target, Target::Success) {
+                    assert!(
+                        self.metrics.backup.complete,
+                        "Success target requires actual current complete grading"
                     );
                 }
                 let content = ctx.content_rect();

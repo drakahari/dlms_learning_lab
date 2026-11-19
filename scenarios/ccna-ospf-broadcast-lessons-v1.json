@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-ospf-broadcast-handover",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ospf-broadcast-designated-roles",
+      "topic": "Broadcast OSPF designated roles",
+      "title": "Plan designated roles through a router outage",
+      "summary": "Prepare a shared OSPF segment for a later high-priority router and the loss of the first designated router.",
+      "objective": "On a fresh Research segment, make North the designated router and West the backup. Set their priorities below Relay’s supplied priority. Keep Observer on the segment without allowing it to become a designated router or backup. Check that Relay’s later arrival leaves the incumbent roles in place, then verify that West takes over when North goes down.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "On a shared broadcast segment, OSPF chooses a designated router (DR) and a backup (BDR). An interface priority of zero excludes that router from those roles. It can still be an OSPF neighbor. For a fresh election among these supplied routers, the larger priority wins. If priorities tie, compare numerical Router IDs.",
+          "action": "Compare the settled roles on the supplied virtual segment.",
+          "commands": []
+        },
+        {
+          "title": "Try the separate example",
+          "why": "The priority determines eligibility and helps choose an open role. A router joining this established segment with a higher priority keeps the current DR and BDR in place. Compare a fresh election with a later arrival before planning any interruption.",
+          "action": "Compare the settled roles on the supplied virtual segment.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "If the DR goes down, the eligible BDR takes over and a new backup can be chosen. A pair of compatible routers involving a DR or BDR would attempt full adjacency. Two other routers can stay two-way neighbors. This exercise shows that decision from the settled roles.",
+          "action": "Compare the settled roles on the supplied virtual segment.",
+          "commands": []
+        }
+      ],
+      "retry_guidance": "Check which routers are present and eligible at each stage.",
+      "hints": [
+        "Set the observer’s interface priority so it remains a neighbor without being eligible.",
+        "Choose the fresh DR and BDR before comparing the late arrival.",
+        "The initial BDR is the first candidate to take over after the DR goes down."
+      ],
+      "explanation": "The fresh plan chooses North and West. Relay joins as a neighbor without displacing them. After North goes down, West takes over and Relay fills the backup role.",
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc2328",
+        "https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/13689-17.html"
+      ],
+      "simplifications": "Known compatible two-way neighbors on one virtual broadcast segment with consistent settled roles. No packets, OSPF neighbor state machine, elections across differing declarations, LSA exchange, timer behavior, live convergence or real equipment.",
+      "prerequisites": [
+        "ccna-route-reading-backup"
+      ],
+      "initial": {
+        "kind": "AutomationWorkshop",
+        "simulation": {
+          "version": 1,
+          "source_id": "ccna-ospf-broadcast-handover",
+          "view": "introduction",
+          "example": {
+            "source": "{\"activity\":\"ospf_broadcast\",\"supplied\":{\"members\":[{\"label\":\"Library\",\"present\":true,\"priority\":10,\"router_id\":\"192.0.2.15\"},{\"label\":\"Workshop\",\"present\":true,\"priority\":70,\"router_id\":\"192.0.2.9\"},{\"label\":\"Desk\",\"present\":true,\"priority\":85,\"router_id\":\"192.0.2.5\"},{\"label\":\"Annex\",\"present\":false,\"priority\":180,\"router_id\":\"192.0.2.20\"}],\"segment\":\"Training\"}}",
+            "work": {
+              "checked": false,
+              "current": {
+                "activity": "ospf_broadcast",
+                "draft": {
+                  "priorities": [
+                    "10",
+                    "70",
+                    "85"
+                  ]
+                }
+              }
+            }
+          },
+          "assignment": {
+            "source": "{\"activity\":\"ospf_broadcast\",\"supplied\":{\"members\":[{\"label\":\"North\",\"present\":true,\"priority\":45,\"router_id\":\"192.0.2.48\"},{\"label\":\"West\",\"present\":true,\"priority\":90,\"router_id\":\"192.0.2.38\"},{\"label\":\"Observer\",\"present\":true,\"priority\":40,\"router_id\":\"192.0.2.81\"},{\"label\":\"Relay\",\"present\":false,\"priority\":210,\"router_id\":\"192.0.2.62\"}],\"segment\":\"Research\"}}",
+            "work": {
+              "checked": false,
+              "current": {
+                "activity": "ospf_broadcast",
+                "draft": {
+                  "priorities": [
+                    "45",
+                    "90",
+                    "40"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "AutomationWorkshop",
+        "definition": {
+          "version": 1,
+          "source_id": "ccna-ospf-broadcast-handover",
+          "example": {
+            "activity": "ospf_broadcast",
+            "supplied": {
+              "segment": "Training",
+              "members": [
+                {
+                  "label": "Library",
+                  "router_id": "192.0.2.15",
+                  "priority": 10,
+                  "present": true
+                },
+                {
+                  "label": "Workshop",
+                  "router_id": "192.0.2.9",
+                  "priority": 70,
+                  "present": true
+                },
+                {
+                  "label": "Desk",
+                  "router_id": "192.0.2.5",
+                  "priority": 85,
+                  "present": true
+                },
+                {
+                  "label": "Annex",
+                  "router_id": "192.0.2.20",
+                  "priority": 180,
+                  "present": false
+                }
+              ]
+            }
+          },
+          "assignment": {
+            "activity": "ospf_broadcast",
+            "supplied": {
+              "segment": "Research",
+              "members": [
+                {
+                  "label": "North",
+                  "router_id": "192.0.2.48",
+                  "priority": 45,
+                  "present": true
+                },
+                {
+                  "label": "West",
+                  "router_id": "192.0.2.38",
+                  "priority": 90,
+                  "present": true
+                },
+                {
+                  "label": "Observer",
+                  "router_id": "192.0.2.81",
+                  "priority": 40,
+                  "present": true
+                },
+                {
+                  "label": "Relay",
+                  "router_id": "192.0.2.62",
+                  "priority": 210,
+                  "present": false
+                }
+              ]
+            }
+          }
+        }
+      },
+      "solution": [
+        "automation-workshop {\"op\":\"ChangeOspfBroadcast\",\"draft\":{\"priorities\":[\"140\",\"85\",\"0\"]}}",
+        "automation-workshop {\"op\":\"Check\"}"
+      ]
+    }
+  ]
+}

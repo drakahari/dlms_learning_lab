@@ -1,0 +1,2174 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-conffile-retain",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "debian-conffile-upgrades",
+      "topic": "Configuration preservation during Debian upgrades",
+      "title": "Keep site settings during an upgrade",
+      "summary": "Upgrade the report program while retaining the site destination and saving the incoming default for review.",
+      "objective": "Install harbor-report 2.0-1 with its intact ordinary program files and satisfied dependencies/conflicts. For /etc/harbor/queue.conf, keep the site destination exactly and retain the incoming default as .dpkg-dist. Leave no opposite or unfinished configuration sidecars; preserve the supplied viewer record/program and the handover note.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Investigate and apply the configuration upgrade",
+        "Verify the package and protected files"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the available upgrade",
+          "why": "The installed version and cached candidate can differ. A metadata refresh changes availability, not installed files.",
+          "action": "Inspect versions and refresh the supplied metadata before reviewing.",
+          "commands": []
+        },
+        {
+          "title": "Compare the actual configuration versions",
+          "why": "A local site setting is different from a package default. Automatic cases need no dropdown selection; real conflicts need a deliberate choice.",
+          "action": "Prepare the native review, compare the three texts and apply the required result.",
+          "commands": []
+        },
+        {
+          "title": "Verify actual files",
+          "why": "A new package version alone does not prove that live settings and review/recovery copies are correct. Preserve unrelated working software and notes.",
+          "action": "Inspect the virtual files, then Check work; use the specific unmet requirement to retry.",
+          "commands": []
+        }
+      ],
+      "explanation": "The package baseline changes to the incoming archive. Automatic branches depend on exact old/local/incoming equality; true conflicts preserve either the local live text with an incoming .dpkg-dist copy or the incoming live text with a previous-local .dpkg-old copy. Actual files, ordinary payload and protected siblings determine completion, not the selected menu or a printed message.",
+      "hints": [
+        "Compare the installed version, cached candidate and local file before deciding. A refresh or review alone changes no package files.",
+        "The active path and its suffixed copy have different roles. Match the task\u2019s required live content first, then verify the review or recovery copy.",
+        "Check work identifies the first wrong live file or copy. A correct version does not excuse lost site settings or removed protected software."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://manpages.debian.org/trixie/dpkg/dpkg.1.en.html",
+        "https://www.debian.org/doc/debian-policy/ap-pkg-conffiles.html",
+        "https://sources.debian.org/src/dpkg/1.22.22/src/main/configure.c"
+      ],
+      "simplifications": "Checked2026-11-04: partial LPIC-1 v5.0 102.4, dpkg1.22.22 and Debian Policy4.7.4.1. Fictional script-free packages; one installed package,1\u20134 unchanged present regular conffiles. Native per-file decisions are not global --force flags or dpkg -i support. Existing sidecars/protected collisions, deleted/new/obsolete conffiles, repeated upgrades with sidecars and Remove/Purge sidecar cleanup refuse honestly. No host package operation, scripts, real archives, permissions, symlinks, crashes or real transactional rollback. Primary-source-derived behavior; no executed dpkg conformance claim.",
+      "retry_guidance": "Use the named failed requirement to distinguish version/payload problems from wrong live settings, missing review/recovery text or lost protected work. If the reviewed upgrade has already been applied, this bounded activity requires Reset of only this attempt to try a different decision.",
+      "initial": {
+        "kind": "DebianPackages",
+        "simulation": {
+          "catalog": {
+            "architecture": "amd64",
+            "repository_reachable": true,
+            "published": "harbor-current",
+            "archives": {
+              "harbor-lib-1": {
+                "name": "harbor-lib",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/lib/harbor/library.txt": {
+                    "contents": "library one\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "harbor-lib-2": {
+                "name": "harbor-lib",
+                "version": "2.0-1",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/lib/harbor/library.txt": {
+                    "contents": "library two\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "harbor-report-1": {
+                "name": "harbor-report",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "harbor-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/harbor-report": {
+                    "contents": "report version 1.0-1\n",
+                    "conffile": false
+                  },
+                  "/etc/harbor/queue.conf": {
+                    "contents": "destination=default\n",
+                    "conffile": true
+                  }
+                }
+              },
+              "harbor-report-2": {
+                "name": "harbor-report",
+                "version": "2.0-1",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "harbor-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "2.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/harbor-report": {
+                    "contents": "report version 2.0-1\n",
+                    "conffile": false
+                  },
+                  "/etc/harbor/queue.conf": {
+                    "contents": "destination=harbor-central\n",
+                    "conffile": true
+                  }
+                }
+              },
+              "harbor-viewer-1": {
+                "name": "harbor-viewer",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "harbor-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/harbor-viewer": {
+                    "contents": "viewer stays available\n",
+                    "conffile": false
+                  }
+                }
+              }
+            },
+            "publications": {
+              "harbor-old": {
+                "candidates": {
+                  "harbor-report": "harbor-report-1",
+                  "harbor-lib": "harbor-lib-1",
+                  "harbor-viewer": "harbor-viewer-1"
+                }
+              },
+              "harbor-current": {
+                "candidates": {
+                  "harbor-report": "harbor-report-2",
+                  "harbor-lib": "harbor-lib-2",
+                  "harbor-viewer": "harbor-viewer-1"
+                }
+              }
+            },
+            "extra_paths": [
+              "/work/harbor-handover.txt",
+              "/etc/harbor/queue.conf.dpkg-old",
+              "/etc/harbor/queue.conf.dpkg-dist",
+              "/etc/harbor/queue.conf.dpkg-new",
+              "/etc/harbor/queue.conf.dpkg-tmp"
+            ]
+          },
+          "runtime": {
+            "cached": "harbor-old",
+            "local_archives": [
+              "harbor-report-1",
+              "harbor-lib-1",
+              "harbor-viewer-1"
+            ],
+            "records": {
+              "harbor-report": {
+                "archive": "harbor-report-1",
+                "status": "Installed"
+              },
+              "harbor-lib": {
+                "archive": "harbor-lib-1",
+                "status": "Installed"
+              },
+              "harbor-viewer": {
+                "archive": "harbor-viewer-1",
+                "status": "Installed"
+              }
+            },
+            "files": {
+              "/usr/lib/harbor/library.txt": "library one\n",
+              "/usr/bin/harbor-report": "older report program\n",
+              "/usr/bin/harbor-viewer": "viewer stays available\n",
+              "/work/harbor-handover.txt": "Keep the site handover note.\n",
+              "/etc/harbor/queue.conf": "destination=harbor-north\n"
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "DebianPackages",
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "harbor-current",
+              "archives": {
+                "harbor-lib-1": {
+                  "name": "harbor-lib",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/harbor/library.txt": {
+                      "contents": "library one\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "harbor-lib-2": {
+                  "name": "harbor-lib",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/harbor/library.txt": {
+                      "contents": "library two\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "harbor-report-1": {
+                  "name": "harbor-report",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "harbor-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/harbor-report": {
+                      "contents": "report version 1.0-1\n",
+                      "conffile": false
+                    },
+                    "/etc/harbor/queue.conf": {
+                      "contents": "destination=default\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "harbor-report-2": {
+                  "name": "harbor-report",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "harbor-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "2.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/harbor-report": {
+                      "contents": "report version 2.0-1\n",
+                      "conffile": false
+                    },
+                    "/etc/harbor/queue.conf": {
+                      "contents": "destination=harbor-central\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "harbor-viewer-1": {
+                  "name": "harbor-viewer",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "harbor-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/harbor-viewer": {
+                      "contents": "viewer stays available\n",
+                      "conffile": false
+                    }
+                  }
+                }
+              },
+              "publications": {
+                "harbor-old": {
+                  "candidates": {
+                    "harbor-report": "harbor-report-1",
+                    "harbor-lib": "harbor-lib-1",
+                    "harbor-viewer": "harbor-viewer-1"
+                  }
+                },
+                "harbor-current": {
+                  "candidates": {
+                    "harbor-report": "harbor-report-2",
+                    "harbor-lib": "harbor-lib-2",
+                    "harbor-viewer": "harbor-viewer-1"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/work/harbor-handover.txt",
+                "/etc/harbor/queue.conf.dpkg-old",
+                "/etc/harbor/queue.conf.dpkg-dist",
+                "/etc/harbor/queue.conf.dpkg-new",
+                "/etc/harbor/queue.conf.dpkg-tmp"
+              ]
+            },
+            "runtime": {
+              "cached": "harbor-old",
+              "local_archives": [
+                "harbor-report-1",
+                "harbor-lib-1",
+                "harbor-viewer-1"
+              ],
+              "records": {
+                "harbor-report": {
+                  "archive": "harbor-report-1",
+                  "status": "Installed"
+                },
+                "harbor-lib": {
+                  "archive": "harbor-lib-1",
+                  "status": "Installed"
+                },
+                "harbor-viewer": {
+                  "archive": "harbor-viewer-1",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/usr/lib/harbor/library.txt": "library one\n",
+                "/usr/bin/harbor-report": "older report program\n",
+                "/usr/bin/harbor-viewer": "viewer stays available\n",
+                "/work/harbor-handover.txt": "Keep the site handover note.\n",
+                "/etc/harbor/queue.conf": "destination=harbor-north\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "ConfigurationUpgrade",
+              "outcome": {
+                "package": "harbor-report",
+                "incoming_archive": "harbor-report-2",
+                "choices": [
+                  {
+                    "path": "/etc/harbor/queue.conf",
+                    "decision": "KeepLocal"
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "harbor-report"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            },
+            {
+              "kind": "ConflictsSatisfied"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "harbor-viewer"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/work/harbor-handover.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/harbor-viewer"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "packages {\"kind\":\"RefreshIndex\"}",
+        "packages {\"kind\":\"UpgradeConffiles\",\"upgrade\":{\"package\":\"harbor-report\",\"expected_archive\":\"harbor-report-1\",\"incoming_archive\":\"harbor-report-2\",\"files\":[{\"path\":\"/etc/harbor/queue.conf\",\"expected_local\":\"destination=harbor-north\\n\",\"decision\":\"KeepLocal\"}]}}"
+      ],
+      "prerequisites": [
+        "lpic1-package-conflict-upgrade"
+      ],
+      "debian_packages_teaching": {
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "gallery-current",
+              "archives": {
+                "gallery-lib-1": {
+                  "name": "gallery-lib",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/gallery/library.txt": {
+                      "contents": "library one\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "gallery-lib-2": {
+                  "name": "gallery-lib",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/gallery/library.txt": {
+                      "contents": "library two\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "gallery-report-1": {
+                  "name": "gallery-report",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "gallery-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/gallery-report": {
+                      "contents": "report version 1.0-1\n",
+                      "conffile": false
+                    },
+                    "/etc/gallery/queue.conf": {
+                      "contents": "destination=default\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "gallery-report-2": {
+                  "name": "gallery-report",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "gallery-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "2.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/gallery-report": {
+                      "contents": "report version 2.0-1\n",
+                      "conffile": false
+                    },
+                    "/etc/gallery/queue.conf": {
+                      "contents": "destination=gallery-central\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "gallery-viewer-1": {
+                  "name": "gallery-viewer",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "gallery-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/gallery-viewer": {
+                      "contents": "viewer stays available\n",
+                      "conffile": false
+                    }
+                  }
+                }
+              },
+              "publications": {
+                "gallery-old": {
+                  "candidates": {
+                    "gallery-report": "gallery-report-1",
+                    "gallery-lib": "gallery-lib-1",
+                    "gallery-viewer": "gallery-viewer-1"
+                  }
+                },
+                "gallery-current": {
+                  "candidates": {
+                    "gallery-report": "gallery-report-2",
+                    "gallery-lib": "gallery-lib-2",
+                    "gallery-viewer": "gallery-viewer-1"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/work/gallery-handover.txt",
+                "/etc/gallery/queue.conf.dpkg-old",
+                "/etc/gallery/queue.conf.dpkg-dist",
+                "/etc/gallery/queue.conf.dpkg-new",
+                "/etc/gallery/queue.conf.dpkg-tmp"
+              ]
+            },
+            "runtime": {
+              "cached": "gallery-old",
+              "local_archives": [
+                "gallery-report-1",
+                "gallery-lib-1",
+                "gallery-viewer-1"
+              ],
+              "records": {
+                "gallery-report": {
+                  "archive": "gallery-report-1",
+                  "status": "Installed"
+                },
+                "gallery-lib": {
+                  "archive": "gallery-lib-1",
+                  "status": "Installed"
+                },
+                "gallery-viewer": {
+                  "archive": "gallery-viewer-1",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/usr/lib/gallery/library.txt": "library one\n",
+                "/usr/bin/gallery-report": "older report program\n",
+                "/usr/bin/gallery-viewer": "viewer stays available\n",
+                "/work/gallery-handover.txt": "Keep the site handover note.\n",
+                "/etc/gallery/queue.conf": "destination=gallery-north\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "ConfigurationUpgrade",
+              "outcome": {
+                "package": "gallery-report",
+                "incoming_archive": "gallery-report-2",
+                "choices": [
+                  {
+                    "path": "/etc/gallery/queue.conf",
+                    "decision": "KeepLocal"
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "gallery-report"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            },
+            {
+              "kind": "ConflictsSatisfied"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "gallery-viewer"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/work/gallery-handover.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/gallery-viewer"
+            }
+          ]
+        },
+        "prerequisite_note": "Builds on Debian package installation, cached metadata, dependency repair and compatible upgrades. These are fictional script-free packages; all commands and configuration changes stay inside the simulator.",
+        "concepts": [
+          {
+            "title": "A package default is not always your active setting",
+            "text": "A conffile is a configuration file that the package manager treats specially. Compare three versions: the previous packaged default, the local file used at this site, and the incoming packaged default. A program upgrade and a configuration decision are related but different outcomes."
+          },
+          {
+            "title": "Use the comparison before choosing",
+            "text": "An untouched local file can follow a changed package default automatically. A local-only edit remains when the package default has not changed. Identical local and incoming text needs no choice. When both differ from the previous default and from each other, choose deliberately. The native review labels these cases; a review alone changes no files."
+          },
+          {
+            "title": "Keep a review copy or a recovery copy",
+            "text": "Keep current site settings leaves the live file in place and saves the new default as .dpkg-dist. Use incoming package default installs the new text and saves the former local file as .dpkg-old. These suffix files are review or recovery copies, not the active configuration, and are not ordinary package-owned payloads. The recorded package baseline advances in either case."
+          },
+          {
+            "title": "Apply, inspect and verify the whole handover",
+            "text": "First refresh the supplied metadata so the upgrade is available. Review configuration upgrade prepares a draft; choose each real conflict, then Apply reviewed upgrade changes only the simulated system. Inspect actual files and Check work. This activity models one clean-sidecar upgrade; after applying, use Reset example only or the assignment Reset control to explore a different choice. It does not model real maintainer scripts, secure backups or crash rollback."
+          }
+        ],
+        "example_description": "The separate gallery example starts with report 1.0-1 and local settings that differ from the previous default. Run apt-get --error-on=any update, compare the three texts, then retain the workshop site destination and inspect the .dpkg-dist copy.",
+        "example_actions": [
+          {
+            "action": {
+              "kind": "RefreshIndex"
+            },
+            "command": "apt-get --error-on=any update",
+            "explanation": "Refresh the supplied repository metadata before reviewing gallery-report; querying versions or preparing a draft does not upgrade it."
+          },
+          {
+            "action": {
+              "kind": "UpgradeConffiles",
+              "upgrade": {
+                "package": "gallery-report",
+                "expected_archive": "gallery-report-1",
+                "incoming_archive": "gallery-report-2",
+                "files": [
+                  {
+                    "path": "/etc/gallery/queue.conf",
+                    "expected_local": "destination=gallery-north\n",
+                    "decision": "KeepLocal"
+                  }
+                ]
+              }
+            },
+            "explanation": "Use the native Review configuration upgrade panel. Compare /etc/gallery/queue.conf, choose Keep current site settings, then Apply reviewed upgrade. This is a per-file simulated decision, not a dpkg command to paste."
+          }
+        ],
+        "try_change": {
+          "description": "Preservation is part of the result: removing gallery-viewer breaks the handover even when the configuration and report version are correct.",
+          "actions": [
+            {
+              "kind": "Remove",
+              "name": "gallery-viewer"
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Install",
+            "packages": [
+              {
+                "name": "gallery-viewer",
+                "version": null
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-conffile-adopt",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "debian-conffile-upgrades",
+      "topic": "Configuration preservation during Debian upgrades",
+      "title": "Adopt a new default without losing recovery data",
+      "summary": "Install the required new configuration and preserve the former local settings as a recovery copy.",
+      "objective": "Install clinic-report 2.0-1 with its intact ordinary program files and satisfied dependencies/conflicts. For /etc/clinic/api.conf, install the incoming package configuration exactly and preserve the previous local text as .dpkg-old. Leave no opposite or unfinished configuration sidecars; preserve the supplied viewer record/program and the handover note.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Investigate and apply the configuration upgrade",
+        "Verify the package and protected files"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the available upgrade",
+          "why": "The installed version and cached candidate can differ. A metadata refresh changes availability, not installed files.",
+          "action": "Inspect versions and refresh the supplied metadata before reviewing.",
+          "commands": []
+        },
+        {
+          "title": "Compare the actual configuration versions",
+          "why": "A local site setting is different from a package default. Automatic cases need no dropdown selection; real conflicts need a deliberate choice.",
+          "action": "Prepare the native review, compare the three texts and apply the required result.",
+          "commands": []
+        },
+        {
+          "title": "Verify actual files",
+          "why": "A new package version alone does not prove that live settings and review/recovery copies are correct. Preserve unrelated working software and notes.",
+          "action": "Inspect the virtual files, then Check work; use the specific unmet requirement to retry.",
+          "commands": []
+        }
+      ],
+      "explanation": "The package baseline changes to the incoming archive. Automatic branches depend on exact old/local/incoming equality; true conflicts preserve either the local live text with an incoming .dpkg-dist copy or the incoming live text with a previous-local .dpkg-old copy. Actual files, ordinary payload and protected siblings determine completion, not the selected menu or a printed message.",
+      "hints": [
+        "Compare the installed version, cached candidate and local file before deciding. A refresh or review alone changes no package files.",
+        "The active path and its suffixed copy have different roles. Match the task\u2019s required live content first, then verify the review or recovery copy.",
+        "Check work identifies the first wrong live file or copy. A correct version does not excuse lost site settings or removed protected software."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://manpages.debian.org/trixie/dpkg/dpkg.1.en.html",
+        "https://www.debian.org/doc/debian-policy/ap-pkg-conffiles.html",
+        "https://sources.debian.org/src/dpkg/1.22.22/src/main/configure.c"
+      ],
+      "simplifications": "Checked2026-11-04: partial LPIC-1 v5.0 102.4, dpkg1.22.22 and Debian Policy4.7.4.1. Fictional script-free packages; one installed package,1\u20134 unchanged present regular conffiles. Native per-file decisions are not global --force flags or dpkg -i support. Existing sidecars/protected collisions, deleted/new/obsolete conffiles, repeated upgrades with sidecars and Remove/Purge sidecar cleanup refuse honestly. No host package operation, scripts, real archives, permissions, symlinks, crashes or real transactional rollback. Primary-source-derived behavior; no executed dpkg conformance claim.",
+      "retry_guidance": "Use the named failed requirement to distinguish version/payload problems from wrong live settings, missing review/recovery text or lost protected work. If the reviewed upgrade has already been applied, this bounded activity requires Reset of only this attempt to try a different decision.",
+      "initial": {
+        "kind": "DebianPackages",
+        "simulation": {
+          "catalog": {
+            "architecture": "amd64",
+            "repository_reachable": true,
+            "published": "clinic-current",
+            "archives": {
+              "clinic-lib-1": {
+                "name": "clinic-lib",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/lib/clinic/library.txt": {
+                    "contents": "library one\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "clinic-lib-2": {
+                "name": "clinic-lib",
+                "version": "2.0-1",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/lib/clinic/library.txt": {
+                    "contents": "library two\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "clinic-report-1": {
+                "name": "clinic-report",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "clinic-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/clinic-report": {
+                    "contents": "report version 1.0-1\n",
+                    "conffile": false
+                  },
+                  "/etc/clinic/api.conf": {
+                    "contents": "protocol=legacy\n",
+                    "conffile": true
+                  }
+                }
+              },
+              "clinic-report-2": {
+                "name": "clinic-report",
+                "version": "2.0-1",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "clinic-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "2.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/clinic-report": {
+                    "contents": "report version 2.0-1\n",
+                    "conffile": false
+                  },
+                  "/etc/clinic/api.conf": {
+                    "contents": "protocol=v2\naccess=clinic-restricted\n",
+                    "conffile": true
+                  }
+                }
+              },
+              "clinic-viewer-1": {
+                "name": "clinic-viewer",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "clinic-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/clinic-viewer": {
+                    "contents": "viewer stays available\n",
+                    "conffile": false
+                  }
+                }
+              }
+            },
+            "publications": {
+              "clinic-old": {
+                "candidates": {
+                  "clinic-report": "clinic-report-1",
+                  "clinic-lib": "clinic-lib-1",
+                  "clinic-viewer": "clinic-viewer-1"
+                }
+              },
+              "clinic-current": {
+                "candidates": {
+                  "clinic-report": "clinic-report-2",
+                  "clinic-lib": "clinic-lib-2",
+                  "clinic-viewer": "clinic-viewer-1"
+                }
+              }
+            },
+            "extra_paths": [
+              "/work/clinic-handover.txt",
+              "/etc/clinic/api.conf.dpkg-old",
+              "/etc/clinic/api.conf.dpkg-dist",
+              "/etc/clinic/api.conf.dpkg-new",
+              "/etc/clinic/api.conf.dpkg-tmp"
+            ]
+          },
+          "runtime": {
+            "cached": "clinic-old",
+            "local_archives": [
+              "clinic-report-1",
+              "clinic-lib-1",
+              "clinic-viewer-1"
+            ],
+            "records": {
+              "clinic-report": {
+                "archive": "clinic-report-1",
+                "status": "Installed"
+              },
+              "clinic-lib": {
+                "archive": "clinic-lib-1",
+                "status": "Installed"
+              },
+              "clinic-viewer": {
+                "archive": "clinic-viewer-1",
+                "status": "Installed"
+              }
+            },
+            "files": {
+              "/usr/lib/clinic/library.txt": "library one\n",
+              "/usr/bin/clinic-report": "older report program\n",
+              "/usr/bin/clinic-viewer": "viewer stays available\n",
+              "/work/clinic-handover.txt": "Keep the site handover note.\n",
+              "/etc/clinic/api.conf": "protocol=clinic-legacy\n"
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "DebianPackages",
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "clinic-current",
+              "archives": {
+                "clinic-lib-1": {
+                  "name": "clinic-lib",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/clinic/library.txt": {
+                      "contents": "library one\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "clinic-lib-2": {
+                  "name": "clinic-lib",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/clinic/library.txt": {
+                      "contents": "library two\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "clinic-report-1": {
+                  "name": "clinic-report",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "clinic-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/clinic-report": {
+                      "contents": "report version 1.0-1\n",
+                      "conffile": false
+                    },
+                    "/etc/clinic/api.conf": {
+                      "contents": "protocol=legacy\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "clinic-report-2": {
+                  "name": "clinic-report",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "clinic-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "2.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/clinic-report": {
+                      "contents": "report version 2.0-1\n",
+                      "conffile": false
+                    },
+                    "/etc/clinic/api.conf": {
+                      "contents": "protocol=v2\naccess=clinic-restricted\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "clinic-viewer-1": {
+                  "name": "clinic-viewer",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "clinic-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/clinic-viewer": {
+                      "contents": "viewer stays available\n",
+                      "conffile": false
+                    }
+                  }
+                }
+              },
+              "publications": {
+                "clinic-old": {
+                  "candidates": {
+                    "clinic-report": "clinic-report-1",
+                    "clinic-lib": "clinic-lib-1",
+                    "clinic-viewer": "clinic-viewer-1"
+                  }
+                },
+                "clinic-current": {
+                  "candidates": {
+                    "clinic-report": "clinic-report-2",
+                    "clinic-lib": "clinic-lib-2",
+                    "clinic-viewer": "clinic-viewer-1"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/work/clinic-handover.txt",
+                "/etc/clinic/api.conf.dpkg-old",
+                "/etc/clinic/api.conf.dpkg-dist",
+                "/etc/clinic/api.conf.dpkg-new",
+                "/etc/clinic/api.conf.dpkg-tmp"
+              ]
+            },
+            "runtime": {
+              "cached": "clinic-old",
+              "local_archives": [
+                "clinic-report-1",
+                "clinic-lib-1",
+                "clinic-viewer-1"
+              ],
+              "records": {
+                "clinic-report": {
+                  "archive": "clinic-report-1",
+                  "status": "Installed"
+                },
+                "clinic-lib": {
+                  "archive": "clinic-lib-1",
+                  "status": "Installed"
+                },
+                "clinic-viewer": {
+                  "archive": "clinic-viewer-1",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/usr/lib/clinic/library.txt": "library one\n",
+                "/usr/bin/clinic-report": "older report program\n",
+                "/usr/bin/clinic-viewer": "viewer stays available\n",
+                "/work/clinic-handover.txt": "Keep the site handover note.\n",
+                "/etc/clinic/api.conf": "protocol=clinic-legacy\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "ConfigurationUpgrade",
+              "outcome": {
+                "package": "clinic-report",
+                "incoming_archive": "clinic-report-2",
+                "choices": [
+                  {
+                    "path": "/etc/clinic/api.conf",
+                    "decision": "InstallNew"
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "clinic-report"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            },
+            {
+              "kind": "ConflictsSatisfied"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "clinic-viewer"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/work/clinic-handover.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/clinic-viewer"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "packages {\"kind\":\"RefreshIndex\"}",
+        "packages {\"kind\":\"UpgradeConffiles\",\"upgrade\":{\"package\":\"clinic-report\",\"expected_archive\":\"clinic-report-1\",\"incoming_archive\":\"clinic-report-2\",\"files\":[{\"path\":\"/etc/clinic/api.conf\",\"expected_local\":\"protocol=clinic-legacy\\n\",\"decision\":\"InstallNew\"}]}}"
+      ],
+      "prerequisites": [
+        "lpic1-conffile-retain"
+      ],
+      "debian_packages_teaching": {
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "studio-current",
+              "archives": {
+                "studio-lib-1": {
+                  "name": "studio-lib",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/studio/library.txt": {
+                      "contents": "library one\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "studio-lib-2": {
+                  "name": "studio-lib",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/studio/library.txt": {
+                      "contents": "library two\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "studio-report-1": {
+                  "name": "studio-report",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "studio-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/studio-report": {
+                      "contents": "report version 1.0-1\n",
+                      "conffile": false
+                    },
+                    "/etc/studio/api.conf": {
+                      "contents": "protocol=legacy\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "studio-report-2": {
+                  "name": "studio-report",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "studio-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "2.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/studio-report": {
+                      "contents": "report version 2.0-1\n",
+                      "conffile": false
+                    },
+                    "/etc/studio/api.conf": {
+                      "contents": "protocol=v2\naccess=studio-restricted\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "studio-viewer-1": {
+                  "name": "studio-viewer",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "studio-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/studio-viewer": {
+                      "contents": "viewer stays available\n",
+                      "conffile": false
+                    }
+                  }
+                }
+              },
+              "publications": {
+                "studio-old": {
+                  "candidates": {
+                    "studio-report": "studio-report-1",
+                    "studio-lib": "studio-lib-1",
+                    "studio-viewer": "studio-viewer-1"
+                  }
+                },
+                "studio-current": {
+                  "candidates": {
+                    "studio-report": "studio-report-2",
+                    "studio-lib": "studio-lib-2",
+                    "studio-viewer": "studio-viewer-1"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/work/studio-handover.txt",
+                "/etc/studio/api.conf.dpkg-old",
+                "/etc/studio/api.conf.dpkg-dist",
+                "/etc/studio/api.conf.dpkg-new",
+                "/etc/studio/api.conf.dpkg-tmp"
+              ]
+            },
+            "runtime": {
+              "cached": "studio-old",
+              "local_archives": [
+                "studio-report-1",
+                "studio-lib-1",
+                "studio-viewer-1"
+              ],
+              "records": {
+                "studio-report": {
+                  "archive": "studio-report-1",
+                  "status": "Installed"
+                },
+                "studio-lib": {
+                  "archive": "studio-lib-1",
+                  "status": "Installed"
+                },
+                "studio-viewer": {
+                  "archive": "studio-viewer-1",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/usr/lib/studio/library.txt": "library one\n",
+                "/usr/bin/studio-report": "older report program\n",
+                "/usr/bin/studio-viewer": "viewer stays available\n",
+                "/work/studio-handover.txt": "Keep the site handover note.\n",
+                "/etc/studio/api.conf": "protocol=studio-legacy\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "ConfigurationUpgrade",
+              "outcome": {
+                "package": "studio-report",
+                "incoming_archive": "studio-report-2",
+                "choices": [
+                  {
+                    "path": "/etc/studio/api.conf",
+                    "decision": "InstallNew"
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "studio-report"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            },
+            {
+              "kind": "ConflictsSatisfied"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "studio-viewer"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/work/studio-handover.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/studio-viewer"
+            }
+          ]
+        },
+        "prerequisite_note": "Builds on Debian package installation, cached metadata, dependency repair and compatible upgrades. These are fictional script-free packages; all commands and configuration changes stay inside the simulator.",
+        "concepts": [
+          {
+            "title": "A package default is not always your active setting",
+            "text": "A conffile is a configuration file that the package manager treats specially. Compare three versions: the previous packaged default, the local file used at this site, and the incoming packaged default. A program upgrade and a configuration decision are related but different outcomes."
+          },
+          {
+            "title": "Use the comparison before choosing",
+            "text": "An untouched local file can follow a changed package default automatically. A local-only edit remains when the package default has not changed. Identical local and incoming text needs no choice. When both differ from the previous default and from each other, choose deliberately. The native review labels these cases; a review alone changes no files."
+          },
+          {
+            "title": "Keep a review copy or a recovery copy",
+            "text": "Keep current site settings leaves the live file in place and saves the new default as .dpkg-dist. Use incoming package default installs the new text and saves the former local file as .dpkg-old. These suffix files are review or recovery copies, not the active configuration, and are not ordinary package-owned payloads. The recorded package baseline advances in either case."
+          },
+          {
+            "title": "Apply, inspect and verify the whole handover",
+            "text": "First refresh the supplied metadata so the upgrade is available. Review configuration upgrade prepares a draft; choose each real conflict, then Apply reviewed upgrade changes only the simulated system. Inspect actual files and Check work. This activity models one clean-sidecar upgrade; after applying, use Reset example only or the assignment Reset control to explore a different choice. It does not model real maintainer scripts, secure backups or crash rollback."
+          }
+        ],
+        "example_description": "The separate studio example starts with report 1.0-1 and local settings that differ from the previous default. Run apt-get --error-on=any update, compare the three texts, then adopt the incoming workshop default and inspect the .dpkg-old recovery copy.",
+        "example_actions": [
+          {
+            "action": {
+              "kind": "RefreshIndex"
+            },
+            "command": "apt-get --error-on=any update",
+            "explanation": "Refresh the supplied repository metadata before reviewing studio-report; querying versions or preparing a draft does not upgrade it."
+          },
+          {
+            "action": {
+              "kind": "UpgradeConffiles",
+              "upgrade": {
+                "package": "studio-report",
+                "expected_archive": "studio-report-1",
+                "incoming_archive": "studio-report-2",
+                "files": [
+                  {
+                    "path": "/etc/studio/api.conf",
+                    "expected_local": "protocol=studio-legacy\n",
+                    "decision": "InstallNew"
+                  }
+                ]
+              }
+            },
+            "explanation": "Use the native Review configuration upgrade panel. Compare /etc/studio/api.conf, choose Use incoming package default, then Apply reviewed upgrade. This is a per-file simulated decision, not a dpkg command to paste."
+          }
+        ],
+        "try_change": {
+          "description": "Preservation is part of the result: removing studio-viewer breaks the handover even when the configuration and report version are correct.",
+          "actions": [
+            {
+              "kind": "Remove",
+              "name": "studio-viewer"
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Install",
+            "packages": [
+              {
+                "name": "studio-viewer",
+                "version": null
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-conffile-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "debian-conffile-upgrades",
+      "topic": "Configuration preservation during Debian upgrades",
+      "title": "Hand over automatic updates and a configuration conflict",
+      "summary": "Deliver the new package while distinguishing untouched settings, local-only edits, matching content and one genuine conflict.",
+      "objective": "Install archive-report 2.0-1 with its intact ordinary program files and satisfied dependencies/conflicts. For /etc/archive/output.conf, install the incoming package configuration exactly and preserve the previous local text as .dpkg-old. Let the untouched timeout follow the incoming default, preserve the independently edited site setting, and keep the already-matching ready setting without unnecessary backups. Leave no opposite or unfinished configuration sidecars; preserve the supplied viewer record/program and the handover note.",
+      "difficulty": "Advanced",
+      "minutes": 35,
+      "steps": [
+        "Understand the task",
+        "Investigate and apply the configuration upgrade",
+        "Verify the package and protected files"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the available upgrade",
+          "why": "The installed version and cached candidate can differ. A metadata refresh changes availability, not installed files.",
+          "action": "Inspect versions and refresh the supplied metadata before reviewing.",
+          "commands": []
+        },
+        {
+          "title": "Compare the actual configuration versions",
+          "why": "A local site setting is different from a package default. Automatic cases need no dropdown selection; real conflicts need a deliberate choice.",
+          "action": "Prepare the native review, compare the three texts and apply the required result.",
+          "commands": []
+        },
+        {
+          "title": "Verify actual files",
+          "why": "A new package version alone does not prove that live settings and review/recovery copies are correct. Preserve unrelated working software and notes.",
+          "action": "Inspect the virtual files, then Check work; use the specific unmet requirement to retry.",
+          "commands": []
+        }
+      ],
+      "explanation": "The package baseline changes to the incoming archive. Automatic branches depend on exact old/local/incoming equality; true conflicts preserve either the local live text with an incoming .dpkg-dist copy or the incoming live text with a previous-local .dpkg-old copy. Actual files, ordinary payload and protected siblings determine completion, not the selected menu or a printed message.",
+      "hints": [
+        "Compare the installed version, cached candidate and local file before deciding. A refresh or review alone changes no package files.",
+        "The active path and its suffixed copy have different roles. Match the task\u2019s required live content first, then verify the review or recovery copy.",
+        "Check work identifies the first wrong live file or copy. A correct version does not excuse lost site settings or removed protected software."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://manpages.debian.org/trixie/dpkg/dpkg.1.en.html",
+        "https://www.debian.org/doc/debian-policy/ap-pkg-conffiles.html",
+        "https://sources.debian.org/src/dpkg/1.22.22/src/main/configure.c"
+      ],
+      "simplifications": "Checked2026-11-04: partial LPIC-1 v5.0 102.4, dpkg1.22.22 and Debian Policy4.7.4.1. Fictional script-free packages; one installed package,1\u20134 unchanged present regular conffiles. Native per-file decisions are not global --force flags or dpkg -i support. Existing sidecars/protected collisions, deleted/new/obsolete conffiles, repeated upgrades with sidecars and Remove/Purge sidecar cleanup refuse honestly. No host package operation, scripts, real archives, permissions, symlinks, crashes or real transactional rollback. Primary-source-derived behavior; no executed dpkg conformance claim.",
+      "retry_guidance": "Use the named failed requirement to distinguish version/payload problems from wrong live settings, missing review/recovery text or lost protected work. If the reviewed upgrade has already been applied, this bounded activity requires Reset of only this attempt to try a different decision.",
+      "initial": {
+        "kind": "DebianPackages",
+        "simulation": {
+          "catalog": {
+            "architecture": "amd64",
+            "repository_reachable": true,
+            "published": "archive-current",
+            "archives": {
+              "archive-lib-1": {
+                "name": "archive-lib",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/lib/archive/library.txt": {
+                    "contents": "library one\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "archive-lib-2": {
+                "name": "archive-lib",
+                "version": "2.0-1",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/lib/archive/library.txt": {
+                    "contents": "library two\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "archive-report-1": {
+                "name": "archive-report",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "archive-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/archive-report": {
+                    "contents": "report version 1.0-1\n",
+                    "conffile": false
+                  },
+                  "/etc/archive/output.conf": {
+                    "contents": "format=legacy\n",
+                    "conffile": true
+                  },
+                  "/etc/archive/timeout.conf": {
+                    "contents": "timeout=20\n",
+                    "conffile": true
+                  },
+                  "/etc/archive/site.conf": {
+                    "contents": "zone=default\n",
+                    "conffile": true
+                  },
+                  "/etc/archive/ready.conf": {
+                    "contents": "feature=off\n",
+                    "conffile": true
+                  }
+                }
+              },
+              "archive-report-2": {
+                "name": "archive-report",
+                "version": "2.0-1",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "archive-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "2.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/archive-report": {
+                    "contents": "report version 2.0-1\n",
+                    "conffile": false
+                  },
+                  "/etc/archive/output.conf": {
+                    "contents": "format=reviewed-v2\n",
+                    "conffile": true
+                  },
+                  "/etc/archive/timeout.conf": {
+                    "contents": "timeout=45\n",
+                    "conffile": true
+                  },
+                  "/etc/archive/site.conf": {
+                    "contents": "zone=default\n",
+                    "conffile": true
+                  },
+                  "/etc/archive/ready.conf": {
+                    "contents": "feature=on\n",
+                    "conffile": true
+                  }
+                }
+              },
+              "archive-viewer-1": {
+                "name": "archive-viewer",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "archive-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/archive-viewer": {
+                    "contents": "viewer stays available\n",
+                    "conffile": false
+                  }
+                }
+              }
+            },
+            "publications": {
+              "archive-old": {
+                "candidates": {
+                  "archive-report": "archive-report-1",
+                  "archive-lib": "archive-lib-1",
+                  "archive-viewer": "archive-viewer-1"
+                }
+              },
+              "archive-current": {
+                "candidates": {
+                  "archive-report": "archive-report-2",
+                  "archive-lib": "archive-lib-2",
+                  "archive-viewer": "archive-viewer-1"
+                }
+              }
+            },
+            "extra_paths": [
+              "/work/archive-handover.txt",
+              "/etc/archive/output.conf.dpkg-old",
+              "/etc/archive/output.conf.dpkg-dist",
+              "/etc/archive/output.conf.dpkg-new",
+              "/etc/archive/output.conf.dpkg-tmp",
+              "/etc/archive/timeout.conf.dpkg-old",
+              "/etc/archive/timeout.conf.dpkg-dist",
+              "/etc/archive/timeout.conf.dpkg-new",
+              "/etc/archive/timeout.conf.dpkg-tmp",
+              "/etc/archive/site.conf.dpkg-old",
+              "/etc/archive/site.conf.dpkg-dist",
+              "/etc/archive/site.conf.dpkg-new",
+              "/etc/archive/site.conf.dpkg-tmp",
+              "/etc/archive/ready.conf.dpkg-old",
+              "/etc/archive/ready.conf.dpkg-dist",
+              "/etc/archive/ready.conf.dpkg-new",
+              "/etc/archive/ready.conf.dpkg-tmp"
+            ]
+          },
+          "runtime": {
+            "cached": "archive-old",
+            "local_archives": [
+              "archive-report-1",
+              "archive-lib-1",
+              "archive-viewer-1"
+            ],
+            "records": {
+              "archive-report": {
+                "archive": "archive-report-1",
+                "status": "Installed"
+              },
+              "archive-lib": {
+                "archive": "archive-lib-1",
+                "status": "Installed"
+              },
+              "archive-viewer": {
+                "archive": "archive-viewer-1",
+                "status": "Installed"
+              }
+            },
+            "files": {
+              "/usr/lib/archive/library.txt": "library one\n",
+              "/usr/bin/archive-report": "older report program\n",
+              "/usr/bin/archive-viewer": "viewer stays available\n",
+              "/work/archive-handover.txt": "Keep the site handover note.\n",
+              "/etc/archive/output.conf": "format=site-custom\n",
+              "/etc/archive/timeout.conf": "timeout=20\n",
+              "/etc/archive/site.conf": "zone=archive-west\n",
+              "/etc/archive/ready.conf": "feature=on\n"
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "DebianPackages",
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "archive-current",
+              "archives": {
+                "archive-lib-1": {
+                  "name": "archive-lib",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/archive/library.txt": {
+                      "contents": "library one\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "archive-lib-2": {
+                  "name": "archive-lib",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/archive/library.txt": {
+                      "contents": "library two\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "archive-report-1": {
+                  "name": "archive-report",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "archive-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/archive-report": {
+                      "contents": "report version 1.0-1\n",
+                      "conffile": false
+                    },
+                    "/etc/archive/output.conf": {
+                      "contents": "format=legacy\n",
+                      "conffile": true
+                    },
+                    "/etc/archive/timeout.conf": {
+                      "contents": "timeout=20\n",
+                      "conffile": true
+                    },
+                    "/etc/archive/site.conf": {
+                      "contents": "zone=default\n",
+                      "conffile": true
+                    },
+                    "/etc/archive/ready.conf": {
+                      "contents": "feature=off\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "archive-report-2": {
+                  "name": "archive-report",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "archive-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "2.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/archive-report": {
+                      "contents": "report version 2.0-1\n",
+                      "conffile": false
+                    },
+                    "/etc/archive/output.conf": {
+                      "contents": "format=reviewed-v2\n",
+                      "conffile": true
+                    },
+                    "/etc/archive/timeout.conf": {
+                      "contents": "timeout=45\n",
+                      "conffile": true
+                    },
+                    "/etc/archive/site.conf": {
+                      "contents": "zone=default\n",
+                      "conffile": true
+                    },
+                    "/etc/archive/ready.conf": {
+                      "contents": "feature=on\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "archive-viewer-1": {
+                  "name": "archive-viewer",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "archive-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/archive-viewer": {
+                      "contents": "viewer stays available\n",
+                      "conffile": false
+                    }
+                  }
+                }
+              },
+              "publications": {
+                "archive-old": {
+                  "candidates": {
+                    "archive-report": "archive-report-1",
+                    "archive-lib": "archive-lib-1",
+                    "archive-viewer": "archive-viewer-1"
+                  }
+                },
+                "archive-current": {
+                  "candidates": {
+                    "archive-report": "archive-report-2",
+                    "archive-lib": "archive-lib-2",
+                    "archive-viewer": "archive-viewer-1"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/work/archive-handover.txt",
+                "/etc/archive/output.conf.dpkg-old",
+                "/etc/archive/output.conf.dpkg-dist",
+                "/etc/archive/output.conf.dpkg-new",
+                "/etc/archive/output.conf.dpkg-tmp",
+                "/etc/archive/timeout.conf.dpkg-old",
+                "/etc/archive/timeout.conf.dpkg-dist",
+                "/etc/archive/timeout.conf.dpkg-new",
+                "/etc/archive/timeout.conf.dpkg-tmp",
+                "/etc/archive/site.conf.dpkg-old",
+                "/etc/archive/site.conf.dpkg-dist",
+                "/etc/archive/site.conf.dpkg-new",
+                "/etc/archive/site.conf.dpkg-tmp",
+                "/etc/archive/ready.conf.dpkg-old",
+                "/etc/archive/ready.conf.dpkg-dist",
+                "/etc/archive/ready.conf.dpkg-new",
+                "/etc/archive/ready.conf.dpkg-tmp"
+              ]
+            },
+            "runtime": {
+              "cached": "archive-old",
+              "local_archives": [
+                "archive-report-1",
+                "archive-lib-1",
+                "archive-viewer-1"
+              ],
+              "records": {
+                "archive-report": {
+                  "archive": "archive-report-1",
+                  "status": "Installed"
+                },
+                "archive-lib": {
+                  "archive": "archive-lib-1",
+                  "status": "Installed"
+                },
+                "archive-viewer": {
+                  "archive": "archive-viewer-1",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/usr/lib/archive/library.txt": "library one\n",
+                "/usr/bin/archive-report": "older report program\n",
+                "/usr/bin/archive-viewer": "viewer stays available\n",
+                "/work/archive-handover.txt": "Keep the site handover note.\n",
+                "/etc/archive/output.conf": "format=site-custom\n",
+                "/etc/archive/timeout.conf": "timeout=20\n",
+                "/etc/archive/site.conf": "zone=archive-west\n",
+                "/etc/archive/ready.conf": "feature=on\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "ConfigurationUpgrade",
+              "outcome": {
+                "package": "archive-report",
+                "incoming_archive": "archive-report-2",
+                "choices": [
+                  {
+                    "path": "/etc/archive/output.conf",
+                    "decision": "InstallNew"
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "archive-report"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            },
+            {
+              "kind": "ConflictsSatisfied"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "archive-viewer"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/work/archive-handover.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/archive-viewer"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "packages {\"kind\":\"RefreshIndex\"}",
+        "packages {\"kind\":\"UpgradeConffiles\",\"upgrade\":{\"package\":\"archive-report\",\"expected_archive\":\"archive-report-1\",\"incoming_archive\":\"archive-report-2\",\"files\":[{\"path\":\"/etc/archive/output.conf\",\"expected_local\":\"format=site-custom\\n\",\"decision\":\"InstallNew\"},{\"path\":\"/etc/archive/timeout.conf\",\"expected_local\":\"timeout=20\\n\",\"decision\":null},{\"path\":\"/etc/archive/site.conf\",\"expected_local\":\"zone=archive-west\\n\",\"decision\":null},{\"path\":\"/etc/archive/ready.conf\",\"expected_local\":\"feature=on\\n\",\"decision\":null}]}}"
+      ],
+      "prerequisites": [
+        "lpic1-conffile-adopt"
+      ],
+      "debian_packages_teaching": {
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "workshop-current",
+              "archives": {
+                "workshop-lib-1": {
+                  "name": "workshop-lib",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/workshop/library.txt": {
+                      "contents": "library one\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "workshop-lib-2": {
+                  "name": "workshop-lib",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/workshop/library.txt": {
+                      "contents": "library two\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "workshop-report-1": {
+                  "name": "workshop-report",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "workshop-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/workshop-report": {
+                      "contents": "report version 1.0-1\n",
+                      "conffile": false
+                    },
+                    "/etc/workshop/output.conf": {
+                      "contents": "format=legacy\n",
+                      "conffile": true
+                    },
+                    "/etc/workshop/timeout.conf": {
+                      "contents": "timeout=20\n",
+                      "conffile": true
+                    },
+                    "/etc/workshop/site.conf": {
+                      "contents": "zone=default\n",
+                      "conffile": true
+                    },
+                    "/etc/workshop/ready.conf": {
+                      "contents": "feature=off\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "workshop-report-2": {
+                  "name": "workshop-report",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "workshop-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "2.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/workshop-report": {
+                      "contents": "report version 2.0-1\n",
+                      "conffile": false
+                    },
+                    "/etc/workshop/output.conf": {
+                      "contents": "format=reviewed-v2\n",
+                      "conffile": true
+                    },
+                    "/etc/workshop/timeout.conf": {
+                      "contents": "timeout=45\n",
+                      "conffile": true
+                    },
+                    "/etc/workshop/site.conf": {
+                      "contents": "zone=default\n",
+                      "conffile": true
+                    },
+                    "/etc/workshop/ready.conf": {
+                      "contents": "feature=on\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "workshop-viewer-1": {
+                  "name": "workshop-viewer",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "workshop-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/workshop-viewer": {
+                      "contents": "viewer stays available\n",
+                      "conffile": false
+                    }
+                  }
+                }
+              },
+              "publications": {
+                "workshop-old": {
+                  "candidates": {
+                    "workshop-report": "workshop-report-1",
+                    "workshop-lib": "workshop-lib-1",
+                    "workshop-viewer": "workshop-viewer-1"
+                  }
+                },
+                "workshop-current": {
+                  "candidates": {
+                    "workshop-report": "workshop-report-2",
+                    "workshop-lib": "workshop-lib-2",
+                    "workshop-viewer": "workshop-viewer-1"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/work/workshop-handover.txt",
+                "/etc/workshop/output.conf.dpkg-old",
+                "/etc/workshop/output.conf.dpkg-dist",
+                "/etc/workshop/output.conf.dpkg-new",
+                "/etc/workshop/output.conf.dpkg-tmp",
+                "/etc/workshop/timeout.conf.dpkg-old",
+                "/etc/workshop/timeout.conf.dpkg-dist",
+                "/etc/workshop/timeout.conf.dpkg-new",
+                "/etc/workshop/timeout.conf.dpkg-tmp",
+                "/etc/workshop/site.conf.dpkg-old",
+                "/etc/workshop/site.conf.dpkg-dist",
+                "/etc/workshop/site.conf.dpkg-new",
+                "/etc/workshop/site.conf.dpkg-tmp",
+                "/etc/workshop/ready.conf.dpkg-old",
+                "/etc/workshop/ready.conf.dpkg-dist",
+                "/etc/workshop/ready.conf.dpkg-new",
+                "/etc/workshop/ready.conf.dpkg-tmp"
+              ]
+            },
+            "runtime": {
+              "cached": "workshop-old",
+              "local_archives": [
+                "workshop-report-1",
+                "workshop-lib-1",
+                "workshop-viewer-1"
+              ],
+              "records": {
+                "workshop-report": {
+                  "archive": "workshop-report-1",
+                  "status": "Installed"
+                },
+                "workshop-lib": {
+                  "archive": "workshop-lib-1",
+                  "status": "Installed"
+                },
+                "workshop-viewer": {
+                  "archive": "workshop-viewer-1",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/usr/lib/workshop/library.txt": "library one\n",
+                "/usr/bin/workshop-report": "older report program\n",
+                "/usr/bin/workshop-viewer": "viewer stays available\n",
+                "/work/workshop-handover.txt": "Keep the site handover note.\n",
+                "/etc/workshop/output.conf": "format=site-custom\n",
+                "/etc/workshop/timeout.conf": "timeout=20\n",
+                "/etc/workshop/site.conf": "zone=workshop-west\n",
+                "/etc/workshop/ready.conf": "feature=on\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "ConfigurationUpgrade",
+              "outcome": {
+                "package": "workshop-report",
+                "incoming_archive": "workshop-report-2",
+                "choices": [
+                  {
+                    "path": "/etc/workshop/output.conf",
+                    "decision": "InstallNew"
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "workshop-report"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            },
+            {
+              "kind": "ConflictsSatisfied"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "workshop-viewer"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/work/workshop-handover.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/workshop-viewer"
+            }
+          ]
+        },
+        "prerequisite_note": "Builds on Debian package installation, cached metadata, dependency repair and compatible upgrades. These are fictional script-free packages; all commands and configuration changes stay inside the simulator.",
+        "concepts": [
+          {
+            "title": "A package default is not always your active setting",
+            "text": "A conffile is a configuration file that the package manager treats specially. Compare three versions: the previous packaged default, the local file used at this site, and the incoming packaged default. A program upgrade and a configuration decision are related but different outcomes."
+          },
+          {
+            "title": "Use the comparison before choosing",
+            "text": "An untouched local file can follow a changed package default automatically. A local-only edit remains when the package default has not changed. Identical local and incoming text needs no choice. When both differ from the previous default and from each other, choose deliberately. The native review labels these cases; a review alone changes no files."
+          },
+          {
+            "title": "Keep a review copy or a recovery copy",
+            "text": "Keep current site settings leaves the live file in place and saves the new default as .dpkg-dist. Use incoming package default installs the new text and saves the former local file as .dpkg-old. These suffix files are review or recovery copies, not the active configuration, and are not ordinary package-owned payloads. The recorded package baseline advances in either case."
+          },
+          {
+            "title": "Apply, inspect and verify the whole handover",
+            "text": "First refresh the supplied metadata so the upgrade is available. Review configuration upgrade prepares a draft; choose each real conflict, then Apply reviewed upgrade changes only the simulated system. Inspect actual files and Check work. This activity models one clean-sidecar upgrade; after applying, use Reset example only or the assignment Reset control to explore a different choice. It does not model real maintainer scripts, secure backups or crash rollback."
+          }
+        ],
+        "example_description": "The separate workshop example starts with report 1.0-1 and local settings that differ from the previous default. Run apt-get --error-on=any update, compare the three texts, then adopt the incoming workshop default and inspect the .dpkg-old recovery copy. Three other workshop files demonstrate the automatic cases.",
+        "example_actions": [
+          {
+            "action": {
+              "kind": "RefreshIndex"
+            },
+            "command": "apt-get --error-on=any update",
+            "explanation": "Refresh the supplied repository metadata before reviewing workshop-report; querying versions or preparing a draft does not upgrade it."
+          },
+          {
+            "action": {
+              "kind": "UpgradeConffiles",
+              "upgrade": {
+                "package": "workshop-report",
+                "expected_archive": "workshop-report-1",
+                "incoming_archive": "workshop-report-2",
+                "files": [
+                  {
+                    "path": "/etc/workshop/output.conf",
+                    "expected_local": "format=site-custom\n",
+                    "decision": "InstallNew"
+                  },
+                  {
+                    "path": "/etc/workshop/timeout.conf",
+                    "expected_local": "timeout=20\n",
+                    "decision": null
+                  },
+                  {
+                    "path": "/etc/workshop/site.conf",
+                    "expected_local": "zone=workshop-west\n",
+                    "decision": null
+                  },
+                  {
+                    "path": "/etc/workshop/ready.conf",
+                    "expected_local": "feature=on\n",
+                    "decision": null
+                  }
+                ]
+              }
+            },
+            "explanation": "Use the native Review configuration upgrade panel. Compare /etc/workshop/output.conf, choose Use incoming package default, then Apply reviewed upgrade. This is a per-file simulated decision, not a dpkg command to paste."
+          }
+        ],
+        "try_change": {
+          "description": "Preservation is part of the result: removing workshop-viewer breaks the handover even when the configuration and report version are correct.",
+          "actions": [
+            {
+              "kind": "Remove",
+              "name": "workshop-viewer"
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Install",
+            "packages": [
+              {
+                "name": "workshop-viewer",
+                "version": null
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -17,6 +17,8 @@ old-project edits, desktop/GPU/swap/service/model changes or public release.
   Build candidates only from main.
 - Cargo maximum is **2 jobs**. Rust test maximum is **2 runtime threads**;
   Cargo jobs do not limit test parallelism. Do not override either upward.
+  Use `--cargo-jobs 1` before the action for expensive all-target checks after
+  observed two-job pressure; this keeps the same lock and guard, never bypasses it.
 - Future large build/cache/package/test data belongs on the verified disk volume:
   `.build-artifacts/`, `target/`, or `dist/` in the main checkout. Never use RAM
   `/tmp` for new large artifacts. The runner supplies private disk TMPDIR/TMP/TEMP

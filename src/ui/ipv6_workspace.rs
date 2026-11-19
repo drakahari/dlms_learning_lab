@@ -56,14 +56,28 @@ impl LabApp {
         match view {
             teaching::View::Introduction => {
                 let lesson = s.ipv6_teaching.as_ref().unwrap();
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for concept in &lesson.concepts {
-                    ui.label(RichText::new(&concept.title).strong());
-                    ui.label(&concept.text);
+                if ccna_presentation::enabled(&s) {
+                    ccna_presentation::concepts(
+                        ui,
+                        &s,
+                        &lesson.prerequisite_note,
+                        lesson
+                            .concepts
+                            .iter()
+                            .map(|c| (c.title.clone(), c.text.clone())),
+                    );
+                } else {
+                    ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
+                    for concept in &lesson.concepts {
+                        ui.label(RichText::new(&concept.title).strong());
+                        ui.label(&concept.text);
+                    }
                 }
-                ui.label(RichText::new("A configuration example to try").strong());
-                ui.label(&lesson.example_description);
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                lesson_presentation::worked(ui, &lesson.example_description);
+                lesson_presentation::worked_rows(ui, &s);
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change));
+                }
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -78,9 +92,14 @@ impl LabApp {
                 });
             }
             teaching::View::Example => {
+                ccna_presentation::example(ui, &s, true);
                 let lesson = s.ipv6_teaching.as_ref().unwrap();
-                ui.label("Practice example · Not graded; your assignment stays separate.");
-                ui.label(&lesson.example_description);
+                if !ccna_presentation::enabled(&s) {
+                    ui.label("Practice example · Not graded; your assignment stays separate.");
+                }
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(&lesson.example_description);
+                }
                 let mut learning = self.progress.attempts[&s.id]
                     .workspace
                     .as_ref()
@@ -105,7 +124,9 @@ impl LabApp {
                     learning.view = teaching::View::Assignment;
                     self.set_ipv6_view(i, teaching::View::Assignment);
                 }
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change));
+                }
                 let old = learning.draft.clone();
                 configuration_editor(
                     ui,
@@ -152,7 +173,7 @@ impl LabApp {
                     .ipv6_learning = Some(learning);
             }
             teaching::View::Assignment => {
-                ui.label(&s.objective);
+                ccna_presentation::assignment(ui, &s);
                 let State::Ipv6 { topology } = self.progress.attempts[&s.id].state.clone() else {
                     return;
                 };
@@ -294,7 +315,11 @@ fn configuration_editor(
                 egui::Layout::top_down(egui::Align::Min),
                 |ui| {
                     ui.set_width(250.);
-                    device_cards(ui, topology, draft, true);
+                    let height = ui.text_style_height(&egui::TextStyle::Body) * 15.;
+                    egui::ScrollArea::vertical()
+                        .id_salt(("ipv6-topology-cards", index, practice))
+                        .max_height(height)
+                        .show(ui, |ui| device_cards(ui, topology, draft, true));
                 },
             );
             ui.allocate_ui_with_layout(
@@ -399,25 +424,88 @@ fn device_controls(
     } else {
         ui.label(RichText::new("Manual assignment includes an on-link prefix by default; optional settings can change that declaration.").small().color(palette(ui).muted));
         let before_focus = *focus;
-        for (port, iface) in &mut device.interfaces {
-            ui.horizontal_wrapped(|ui| {
-                controls::label(ui, RichText::new(port).strong(), 165.);
-                ui.checkbox(&mut iface.up, "Interface up");
-            });
-            field(
-                ui,
-                "Manual address/prefix",
-                &mut iface.address,
-                64,
-                (index, practice, &name, port, "address"),
-                metrics,
-                focus,
-            );
-            ui.label(
-                RichText::new(format!("Link-local: {}", iface.link_local))
-                    .small()
-                    .color(palette(ui).muted),
-            );
+        // Reserve enough native text space for a complete IPv6 address. Measure
+        // the same font used by TextEdit; keep its padding/cursor/focus geometry.
+        let font = egui::TextStyle::Body.resolve(ui.style());
+        let text_color = ui.visuals().text_color();
+        let address_width = ui
+            .fonts_mut(|f| {
+                let widest_hex = "0123456789abcdefABCDEF"
+                    .chars()
+                    .map(|c| {
+                        f.layout_no_wrap(c.to_string(), font.clone(), text_color)
+                            .size()
+                            .x
+                    })
+                    .fold(0_f32, f32::max);
+                let colon = f
+                    .layout_no_wrap(":".into(), font.clone(), text_color)
+                    .size()
+                    .x;
+                let suffix = f.layout_no_wrap("/128".into(), font, text_color).size().x;
+                32. * widest_hex + 7. * colon + suffix
+            })
+            .ceil()
+            + 2. * controls::PAD_X as f32;
+        let address_width = address_width.min((ui.available_width() - 250.).max(0.));
+        if ui.available_width() >= 650. {
+            egui::Grid::new(("ipv6-interface-table", index, practice, &name))
+                .num_columns(4)
+                .spacing([12., 8.])
+                .max_col_width(address_width.max(270.))
+                .show(ui, |ui| {
+                    for label in ["Interface", "State", "Manual address/prefix", "Link-local"] {
+                        ui.strong(label);
+                    }
+                    ui.end_row();
+                    for (port, iface) in &mut device.interfaces {
+                        controls::label(ui, RichText::new(port).strong(), 70.);
+                        ui.checkbox(&mut iface.up, "Up");
+                        let r = ui.add_sized(
+                            [address_width, controls::height(ui)],
+                            controls::singleline_fitting(ui, &mut iface.address, address_width)
+                                .id(egui::Id::new((index, practice, &name, port, "address")))
+                                .char_limit(64),
+                        );
+                        name_control(&r, format!("{name}/{port} · Manual address/prefix"));
+                        metrics.inputs.push(r.rect);
+                        metrics.focus.get_or_insert(r.id);
+                        if *focus
+                            && !ui.input(|i| i.pointer.any_pressed() || i.pointer.any_released())
+                        {
+                            r.request_focus();
+                            *focus = false;
+                        }
+                        if r.changed() {
+                            workspace::bound(&mut iface.address, 64);
+                        }
+                        ui.add(
+                            egui::Label::new(RichText::new(&iface.link_local).monospace()).wrap(),
+                        );
+                        ui.end_row();
+                    }
+                });
+        } else {
+            for (port, iface) in &mut device.interfaces {
+                ui.horizontal_wrapped(|ui| {
+                    controls::label(ui, RichText::new(port).strong(), 165.);
+                    ui.checkbox(&mut iface.up, "Interface up");
+                });
+                field(
+                    ui,
+                    "Manual address/prefix",
+                    &mut iface.address,
+                    64,
+                    (index, practice, &name, port, "address"),
+                    metrics,
+                    focus,
+                );
+                ui.label(
+                    RichText::new(format!("Link-local: {}", iface.link_local))
+                        .small()
+                        .color(palette(ui).muted),
+                );
+            }
         }
         if before_focus && *focus {
             ui.ctx().request_repaint();
@@ -459,7 +547,7 @@ pub(super) fn field(
                 controls::height(ui),
             ],
             controls::singleline(ui, value)
-                .id_salt(id)
+                .id(egui::Id::new(id))
                 .char_limit(limit),
         );
         metrics.inputs.push(r.rect);

@@ -1,0 +1,314 @@
+[
+  {
+    "definition": {
+      "version": 1,
+      "source_id": "lpic2-smart-short-diagnosis",
+      "assignment": {
+        "inventory": {
+          "disks": [
+            {
+              "model": "Workshop ATA 500",
+              "serial": "WORK-INDEX-86",
+              "stable": "/dev/disk/by-id/ata-Workshop_WORK-INDEX-86",
+              "current_name": "/dev/sda",
+              "maintenance_name": "/dev/sda",
+              "health": "passed",
+              "hours": 1754,
+              "short_test_minutes": 2,
+              "new_short_result": "completed",
+              "log": [
+                {
+                  "hours": 1740,
+                  "result": "completed"
+                }
+              ]
+            },
+            {
+              "model": "Workshop ATA 500",
+              "serial": "WORK-ARCHIVE-81",
+              "stable": "/dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81",
+              "current_name": "/dev/sdb",
+              "maintenance_name": "/dev/sdb",
+              "health": "passed",
+              "hours": 1754,
+              "short_test_minutes": 3,
+              "new_short_result": {
+                "read_failure": {
+                  "first_lba": 497616
+                }
+              },
+              "log": [
+                {
+                  "hours": 1661,
+                  "result": {
+                    "read_failure": {
+                      "first_lba": 491520
+                    }
+                  }
+                },
+                {
+                  "hours": 1600,
+                  "result": "completed"
+                }
+              ]
+            }
+          ]
+        },
+        "goal": {
+          "kind": "diagnostic",
+          "primary_serial": "WORK-ARCHIVE-81"
+        }
+      },
+      "example": {
+        "inventory": {
+          "disks": [
+            {
+              "model": "Workshop ATA 500",
+              "serial": "TRAIN-CACHE-19",
+              "stable": "/dev/disk/by-id/ata-Workshop_TRAIN-CACHE-19",
+              "current_name": "/dev/sdd",
+              "maintenance_name": "/dev/sdd",
+              "health": "passed",
+              "hours": 1754,
+              "short_test_minutes": 3,
+              "new_short_result": "completed",
+              "log": [
+                {
+                  "hours": 1720,
+                  "result": "completed"
+                }
+              ]
+            },
+            {
+              "model": "Workshop ATA 500",
+              "serial": "TRAIN-MEDIA-14",
+              "stable": "/dev/disk/by-id/ata-Workshop_TRAIN-MEDIA-14",
+              "current_name": "/dev/sdc",
+              "maintenance_name": "/dev/sdc",
+              "health": "passed",
+              "hours": 1754,
+              "short_test_minutes": 2,
+              "new_short_result": "completed",
+              "log": [
+                {
+                  "hours": 1600,
+                  "result": {
+                    "read_failure": {
+                      "first_lba": 8192
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "goal": {
+          "kind": "diagnostic",
+          "primary_serial": "TRAIN-MEDIA-14"
+        }
+      }
+    },
+    "assignment_actions": [
+      {
+        "op": "Run",
+        "input": "smartctl -i /dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81"
+      },
+      {
+        "op": "Run",
+        "input": "smartctl -H /dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81"
+      },
+      {
+        "op": "Run",
+        "input": "smartctl -l selftest /dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81"
+      },
+      {
+        "op": "Run",
+        "input": "smartctl -t short /dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81"
+      },
+      {
+        "op": "Run",
+        "input": "smartctl -c /dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81"
+      },
+      {
+        "op": "Advance"
+      },
+      {
+        "op": "Advance"
+      },
+      {
+        "op": "Advance"
+      },
+      {
+        "op": "Run",
+        "input": "smartctl -l selftest /dev/disk/by-id/ata-Workshop_WORK-ARCHIVE-81"
+      },
+      {
+        "op": "Record",
+        "ticket": {
+          "disposition": "read_failure",
+          "first_lba": "497616"
+        }
+      },
+      {
+        "op": "Check"
+      }
+    ],
+    "example_actions": [
+      {
+        "op": "Run",
+        "input": "smartctl -i /dev/disk/by-id/ata-Workshop_TRAIN-MEDIA-14"
+      },
+      {
+        "op": "Run",
+        "input": "smartctl -H /dev/disk/by-id/ata-Workshop_TRAIN-MEDIA-14"
+      },
+      {
+        "op": "Run",
+        "input": "smartctl -l selftest /dev/disk/by-id/ata-Workshop_TRAIN-MEDIA-14"
+      },
+      {
+        "op": "Run",
+        "input": "smartctl -t short /dev/disk/by-id/ata-Workshop_TRAIN-MEDIA-14"
+      },
+      {
+        "op": "Run",
+        "input": "smartctl -c /dev/disk/by-id/ata-Workshop_TRAIN-MEDIA-14"
+      },
+      {
+        "op": "Advance"
+      },
+      {
+        "op": "Advance"
+      },
+      {
+        "op": "Run",
+        "input": "smartctl -l selftest /dev/disk/by-id/ata-Workshop_TRAIN-MEDIA-14"
+      },
+      {
+        "op": "Record",
+        "ticket": {
+          "disposition": "completed",
+          "first_lba": ""
+        }
+      },
+      {
+        "op": "Check"
+      }
+    ]
+  },
+  {
+    "definition": {
+      "version": 1,
+      "source_id": "lpic2-smart-monitor-identity",
+      "assignment": {
+        "inventory": {
+          "disks": [
+            {
+              "model": "Workshop ATA 500",
+              "serial": "WORK-PRIMARY-92",
+              "stable": "/dev/disk/by-id/ata-Workshop_WORK-PRIMARY-92",
+              "current_name": "/dev/sda",
+              "maintenance_name": "/dev/sdb",
+              "health": "passed",
+              "hours": 1754,
+              "short_test_minutes": 3,
+              "new_short_result": {
+                "read_failure": {
+                  "first_lba": 871614
+                }
+              },
+              "log": []
+            },
+            {
+              "model": "Workshop ATA 500",
+              "serial": "WORK-HISTORY-99",
+              "stable": "/dev/disk/by-id/ata-Workshop_WORK-HISTORY-99",
+              "current_name": "/dev/sdb",
+              "maintenance_name": "/dev/sda",
+              "health": "passed",
+              "hours": 1754,
+              "short_test_minutes": 2,
+              "new_short_result": "completed",
+              "log": [
+                {
+                  "hours": 1710,
+                  "result": "completed"
+                }
+              ]
+            }
+          ]
+        },
+        "goal": {
+          "kind": "monitoring",
+          "primary_serial": "WORK-PRIMARY-92",
+          "auxiliary_serial": "WORK-HISTORY-99",
+          "initial_config": "# Local disk monitoring\n/dev/sda -H -l selftest\n/dev/sdb -H\n"
+        }
+      },
+      "example": {
+        "inventory": {
+          "disks": [
+            {
+              "model": "Workshop ATA 500",
+              "serial": "TRAIN-PRIMARY-25",
+              "stable": "/dev/disk/by-id/ata-Workshop_TRAIN-PRIMARY-25",
+              "current_name": "/dev/sdc",
+              "maintenance_name": "/dev/sdf",
+              "health": "passed",
+              "hours": 1754,
+              "short_test_minutes": 2,
+              "new_short_result": {
+                "read_failure": {
+                  "first_lba": 15462
+                }
+              },
+              "log": []
+            },
+            {
+              "model": "Workshop ATA 500",
+              "serial": "TRAIN-AUX-26",
+              "stable": "/dev/disk/by-id/ata-Workshop_TRAIN-AUX-26",
+              "current_name": "/dev/sde",
+              "maintenance_name": "/dev/sde",
+              "health": "passed",
+              "hours": 1754,
+              "short_test_minutes": 2,
+              "new_short_result": "completed",
+              "log": []
+            }
+          ]
+        },
+        "goal": {
+          "kind": "monitoring",
+          "primary_serial": "TRAIN-PRIMARY-25",
+          "auxiliary_serial": "TRAIN-AUX-26",
+          "initial_config": "# Local disk monitoring\n/dev/sdc -H -l selftest\n/dev/disk/by-id/ata-Workshop_TRAIN-AUX-26 -H\n"
+        }
+      }
+    },
+    "assignment_actions": [
+      {
+        "op": "Draft",
+        "contents": "/dev/disk/by-id/ata-Workshop_WORK-PRIMARY-92 -H -l selftest\n/dev/disk/by-id/ata-Workshop_WORK-HISTORY-99 -H\n"
+      },
+      {
+        "op": "Save"
+      },
+      {
+        "op": "Check"
+      }
+    ],
+    "example_actions": [
+      {
+        "op": "Draft",
+        "contents": "/dev/disk/by-id/ata-Workshop_TRAIN-PRIMARY-25 -H -l selftest\n/dev/disk/by-id/ata-Workshop_TRAIN-AUX-26 -H\n"
+      },
+      {
+        "op": "Save"
+      },
+      {
+        "op": "Check"
+      }
+    ]
+  }
+]

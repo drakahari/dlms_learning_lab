@@ -49,11 +49,20 @@ impl LabApp {
                 .as_ref()
                 .unwrap()
                 .checked;
-            ui.label(&s.objective);
+            lesson_presentation::assignment(ui, &s);
             self.terminal(ui, i);
             self.accounts_assignment_check(ui, i);
             return;
         };
+        if lesson.template_teaching.is_some()
+            && let Err(error) = dlms_learning_lab::accounts_template_workspace::context(
+                &self.progress.attempts[&s.id],
+                &s,
+            )
+        {
+            ui.colored_label(palette(ui).error, error);
+            return;
+        }
         if !self.progress.attempts[&s.id].challenge {
             let view = self.accounts_view(i);
             ui.horizontal_wrapped(|ui| {
@@ -72,25 +81,20 @@ impl LabApp {
         }
         match self.accounts_view(i) {
             teaching::View::Introduction => {
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for c in &lesson.concepts {
-                    ui.label(RichText::new(&c.title).strong());
-                    ui.label(&c.text);
+                lesson_presentation::concepts(
+                    ui,
+                    &s,
+                    &lesson.prerequisite_note,
+                    lesson
+                        .concepts
+                        .iter()
+                        .map(|c| (c.title.clone(), c.text.clone())),
+                );
+                lesson_presentation::worked(ui, &lesson.inputs);
+                if let Some(native) = &lesson.template_teaching {
+                    accounts_template_page::worked(ui, &native.example);
                 }
-                ui.label(RichText::new("A different example to try").strong());
-                ui.label(&lesson.inputs);
-                for c in &lesson.example_commands {
-                    ui.add(egui::Label::new(RichText::new(&c.command).monospace()).wrap());
-                    ui.label(&c.explanation);
-                    if c.simulator_only {
-                        ui.label(
-                            RichText::new("Simulator-only helper")
-                                .small()
-                                .color(palette(ui).muted),
-                        );
-                    }
-                }
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                lesson_presentation::worked_rows(ui, &s);
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -105,8 +109,7 @@ impl LabApp {
                 });
             }
             teaching::View::Example => {
-                ui.label("Practice example · Ungraded; assignment state, input and command history stay separate.");
-                ui.label(&lesson.inputs);
+                lesson_presentation::practice_step(ui, &s, 0);
                 let mut l = self.progress.attempts[&s.id]
                     .workspace
                     .as_ref()
@@ -115,6 +118,19 @@ impl LabApp {
                     .clone()
                     .unwrap();
                 let before = serde_json::to_vec(&l).unwrap();
+                if let Some(drafts) = &mut l.template_drafts {
+                    let edited = accounts_template_page::editor(
+                        ui,
+                        (&s.id, "example"),
+                        &lesson.fixture,
+                        &mut l.simulation,
+                        drafts,
+                        &mut self.metrics,
+                    );
+                    if edited {
+                        l.checked = false;
+                    }
+                }
                 ui.horizontal_wrapped(|ui| {
                     let width = (ui.available_width() - 145.)
                         .clamp(80., 500.)
@@ -148,6 +164,7 @@ impl LabApp {
                 let c = &lesson.example_commands[l.example_command];
                 ui.add(egui::Label::new(RichText::new(&c.command).monospace()).wrap());
                 ui.label(&c.explanation);
+                lesson_presentation::practice_step(ui, &s, 1);
                 self.accounts_practice_terminal(ui, &s.id, &mut l, lesson);
                 let r = ui.add(primary(ui, "Check example"));
                 self.metrics.check = Some(r.rect);
@@ -158,20 +175,18 @@ impl LabApp {
                     if l.checked {
                         let checks = l.checks(lesson);
                         if checks.iter().all(|c| c.0) {
-                            ui.colored_label(
-                                palette(ui).success,
-                                "Example checks pass · No assignment credit",
-                            );
+                            ui.colored_label(palette(ui).success, "Current example checks pass");
                         }
                         account_checks(ui, &checks);
                     }
                 });
                 self.metrics.feedback = Some(result.response.rect);
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                lesson_presentation::practice_step(ui, &s, 2);
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(button("Reset example only"));
                     self.metrics.example_reset = Some(r.rect);
                     if r.clicked() {
+                        accounts_template_page::clear_save_status(ui.ctx(), &s.id, "example");
                         l = Learning::new(lesson);
                         l.view = teaching::View::Example;
                         self.focus_input = true;
@@ -201,7 +216,10 @@ impl LabApp {
                     .as_ref()
                     .unwrap()
                     .checked;
-                ui.label(&s.objective);
+                lesson_presentation::assignment(ui, &s);
+                if lesson.template_teaching.is_some() {
+                    self.accounts_assignment_templates(ui, i);
+                }
                 self.terminal(ui, i);
                 self.accounts_assignment_check(ui, i);
             }
@@ -237,6 +255,19 @@ impl LabApp {
                 );
             }
             account_checks(ui, &engine::checks(&a.state, &s.goal));
+            if !dlms_learning_lab::accounts_template_workspace::ready(a, &s) {
+                ui.colored_label(
+                    palette(ui).error,
+                    "Unsaved template changes · Save each changed file, then check again.",
+                );
+            }
+            if !complete
+                && s.accounts_teaching
+                    .as_ref()
+                    .is_some_and(|l| l.template_teaching.is_some())
+            {
+                lesson_presentation::prose(ui, &s.retry_guidance);
+            }
             if complete {
                 if !a.challenge {
                     ui.label(&s.explanation);

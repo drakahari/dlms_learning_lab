@@ -1,0 +1,451 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-removable-startup-policy",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Removable filesystem policy",
+      "unit": "linux-removable-startup",
+      "title": "Make removable storage optional without hiding required failures",
+      "summary": "Repair a saved mount table and verify the correct volumes, access policy and required-storage failures across available and missing-media samples.",
+      "objective": "Configure only /project and /media/audit using the supplied intended filesystems. Make /project a required automatic read/write mount, and /media/audit an optional automatic read-only mount. Both correct volumes must mount when available. If only the removable audit medium is absent, required-storage checks must still succeed. If the project filesystem is absent, its required-storage problem must remain visible. Do not hide that failure with nofail or skip the requested automatic mounts with noauto.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "prerequisites": [],
+      "steps": [
+        "Edit the virtual mount table, test all supplied media samples and explain failures before retrying."
+      ],
+      "guide": [],
+      "hints": [
+        "Separate whether a request is automatic from whether it is required. Read/write or read-only is another independent setting.",
+        "Check all-present results as well as missing-media results: a policy that can continue may still have failed to mount the intended volume.",
+        "Keep the project request required. Mark only the automatic audit request optional, and compare its actual read-only state."
+      ],
+      "explanation": "The reference keeps the project entry rw,auto and gives the audit entry ro,auto,nofail. The supplied UUIDs retain identity when device aliases change. With both media available, both correct volumes mount. Missing audit media leaves a visible optional failure while required checks succeed. Missing project storage still fails a required request; that is the protective behavior the task asks you to retain. ro,nofail with implicit auto, or defaults for the required rw/auto entry, are supported alternatives. This is a finite request/dependency projection, not actual boot timing.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.man7.org/linux/man-pages/man5/fstab.5.html",
+        "https://www.freedesktop.org/software/systemd/man/256/systemd.mount.html"
+      ],
+      "simplifications": "Pure in-process six-field fstab subset:16KiB/128lines/eight entries, ext4/xfs metadata, supplied lowercase UUID/device identities, fixed non-nested targets and defaults/ro/rw/auto/noauto/nofail. Media presence and aliases are explicit sample inputs. Wanted/Required/Not enrolled policy is separate from actual finite attempt outcomes; no real boot, device waits, systemd generator, kernel, files, mount commands, filesystem checks or hotplug. Optional mounts are not guaranteed ready when a target proceeds. user/users/owner privileges, implicit executable/security flags, labels, escaping, network/FUSE/stacked/nested mounts and automount are unsupported. Broad104.3 remains incomplete.",
+      "initial": {
+        "kind": "RemovableMounts",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-removable-startup-policy",
+          "view": "introduction",
+          "assignment": {
+            "draft": "UUID=00000000-0000-4000-8000-000000000090 /project xfs rw,auto,nofail 0 2\nUUID=00000000-0000-4000-8000-000000000091 /media/audit ext4 rw,noauto 0 0\n",
+            "tested": null
+          },
+          "practice": {
+            "draft": "UUID=00000000-0000-4000-8000-000000000100 /workshop xfs rw,auto,nofail 0 2\nUUID=00000000-0000-4000-8000-000000000101 /media/camera ext4 rw,noauto 0 0\n",
+            "tested": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "RemovableMounts",
+        "definition": {
+          "initial": {
+            "id": "lpic1-removable-startup-policy",
+            "instructions": "Configure only /project and /media/audit using the supplied intended filesystems. Make /project a required automatic read/write mount, and /media/audit an optional automatic read-only mount. Both correct volumes must mount when available. If only the removable audit medium is absent, required-storage checks must still succeed. If the project filesystem is absent, its required-storage problem must remain visible. Do not hide that failure with nofail or skip the requested automatic mounts with noauto.",
+            "starter": "UUID=00000000-0000-4000-8000-000000000090 /project xfs rw,auto,nofail 0 2\nUUID=00000000-0000-4000-8000-000000000091 /media/audit ext4 rw,noauto 0 0\n",
+            "cases": [
+              {
+                "id": "lpic1-removable-startup-policy-case-0",
+                "label": "Both media available",
+                "environment": {
+                  "inventory": {
+                    "volumes": {
+                      "project": {
+                        "uuid": "00000000-0000-4000-8000-000000000090",
+                        "filesystem": "xfs"
+                      },
+                      "audit": {
+                        "uuid": "00000000-0000-4000-8000-000000000091",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/sim-a": "project",
+                      "/dev/sim-b": "audit"
+                    },
+                    "mountpoints": [
+                      "/project",
+                      "/media/audit"
+                    ]
+                  },
+                  "present": [
+                    "project",
+                    "audit"
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Policy",
+                    "target": "/project",
+                    "mode": "required"
+                  },
+                  {
+                    "kind": "Policy",
+                    "target": "/media/audit",
+                    "mode": "wanted"
+                  },
+                  {
+                    "kind": "EntriesOnly",
+                    "targets": [
+                      "/project",
+                      "/media/audit"
+                    ]
+                  },
+                  {
+                    "kind": "RequiredAttempts",
+                    "satisfied": true
+                  },
+                  {
+                    "kind": "Mounted",
+                    "target": "/project",
+                    "volume": "project",
+                    "read_only": false
+                  },
+                  {
+                    "kind": "Mounted",
+                    "target": "/media/audit",
+                    "volume": "audit",
+                    "read_only": true
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-removable-startup-policy-case-1",
+                "label": "Removable audit medium absent",
+                "environment": {
+                  "inventory": {
+                    "volumes": {
+                      "project": {
+                        "uuid": "00000000-0000-4000-8000-000000000090",
+                        "filesystem": "xfs"
+                      },
+                      "audit": {
+                        "uuid": "00000000-0000-4000-8000-000000000091",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/sim-a": "audit",
+                      "/dev/sim-b": "project"
+                    },
+                    "mountpoints": [
+                      "/project",
+                      "/media/audit"
+                    ]
+                  },
+                  "present": [
+                    "project"
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Policy",
+                    "target": "/project",
+                    "mode": "required"
+                  },
+                  {
+                    "kind": "Policy",
+                    "target": "/media/audit",
+                    "mode": "wanted"
+                  },
+                  {
+                    "kind": "EntriesOnly",
+                    "targets": [
+                      "/project",
+                      "/media/audit"
+                    ]
+                  },
+                  {
+                    "kind": "RequiredAttempts",
+                    "satisfied": true
+                  },
+                  {
+                    "kind": "Mounted",
+                    "target": "/project",
+                    "volume": "project",
+                    "read_only": false
+                  },
+                  {
+                    "kind": "NotMounted",
+                    "target": "/media/audit"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-removable-startup-policy-case-2",
+                "label": "Required project filesystem absent",
+                "environment": {
+                  "inventory": {
+                    "volumes": {
+                      "project": {
+                        "uuid": "00000000-0000-4000-8000-000000000090",
+                        "filesystem": "xfs"
+                      },
+                      "audit": {
+                        "uuid": "00000000-0000-4000-8000-000000000091",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/sim-a": "audit",
+                      "/dev/sim-b": "project"
+                    },
+                    "mountpoints": [
+                      "/project",
+                      "/media/audit"
+                    ]
+                  },
+                  "present": [
+                    "audit"
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Policy",
+                    "target": "/project",
+                    "mode": "required"
+                  },
+                  {
+                    "kind": "Policy",
+                    "target": "/media/audit",
+                    "mode": "wanted"
+                  },
+                  {
+                    "kind": "EntriesOnly",
+                    "targets": [
+                      "/project",
+                      "/media/audit"
+                    ]
+                  },
+                  {
+                    "kind": "RequiredAttempts",
+                    "satisfied": false
+                  },
+                  {
+                    "kind": "NotMounted",
+                    "target": "/project"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "target": "/media/audit",
+                    "volume": "audit",
+                    "read_only": true
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "optional-mount-workshop",
+            "instructions": "Configure only /workshop and /media/camera using the supplied intended filesystems. Make /workshop a required automatic read/write mount, and /media/camera an optional automatic read-only mount. Both correct volumes must mount when available. If only the removable camera medium is absent, required-storage checks must still succeed. If the workshop filesystem is absent, its required-storage problem must remain visible. Do not hide that failure with nofail or skip the requested automatic mounts with noauto.",
+            "starter": "UUID=00000000-0000-4000-8000-000000000100 /workshop xfs rw,auto,nofail 0 2\nUUID=00000000-0000-4000-8000-000000000101 /media/camera ext4 rw,noauto 0 0\n",
+            "cases": [
+              {
+                "id": "optional-mount-workshop-case-0",
+                "label": "Both workshop media available",
+                "environment": {
+                  "inventory": {
+                    "volumes": {
+                      "workshop": {
+                        "uuid": "00000000-0000-4000-8000-000000000100",
+                        "filesystem": "xfs"
+                      },
+                      "camera": {
+                        "uuid": "00000000-0000-4000-8000-000000000101",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/sim-a": "workshop",
+                      "/dev/sim-b": "camera"
+                    },
+                    "mountpoints": [
+                      "/workshop",
+                      "/media/camera"
+                    ]
+                  },
+                  "present": [
+                    "workshop",
+                    "camera"
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Policy",
+                    "target": "/workshop",
+                    "mode": "required"
+                  },
+                  {
+                    "kind": "Policy",
+                    "target": "/media/camera",
+                    "mode": "wanted"
+                  },
+                  {
+                    "kind": "EntriesOnly",
+                    "targets": [
+                      "/workshop",
+                      "/media/camera"
+                    ]
+                  },
+                  {
+                    "kind": "RequiredAttempts",
+                    "satisfied": true
+                  },
+                  {
+                    "kind": "Mounted",
+                    "target": "/workshop",
+                    "volume": "workshop",
+                    "read_only": false
+                  },
+                  {
+                    "kind": "Mounted",
+                    "target": "/media/camera",
+                    "volume": "camera",
+                    "read_only": true
+                  }
+                ]
+              },
+              {
+                "id": "optional-mount-workshop-case-1",
+                "label": "Camera medium absent",
+                "environment": {
+                  "inventory": {
+                    "volumes": {
+                      "workshop": {
+                        "uuid": "00000000-0000-4000-8000-000000000100",
+                        "filesystem": "xfs"
+                      },
+                      "camera": {
+                        "uuid": "00000000-0000-4000-8000-000000000101",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/sim-a": "camera",
+                      "/dev/sim-b": "workshop"
+                    },
+                    "mountpoints": [
+                      "/workshop",
+                      "/media/camera"
+                    ]
+                  },
+                  "present": [
+                    "workshop"
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Policy",
+                    "target": "/workshop",
+                    "mode": "required"
+                  },
+                  {
+                    "kind": "Policy",
+                    "target": "/media/camera",
+                    "mode": "wanted"
+                  },
+                  {
+                    "kind": "EntriesOnly",
+                    "targets": [
+                      "/workshop",
+                      "/media/camera"
+                    ]
+                  },
+                  {
+                    "kind": "RequiredAttempts",
+                    "satisfied": true
+                  },
+                  {
+                    "kind": "Mounted",
+                    "target": "/workshop",
+                    "volume": "workshop",
+                    "read_only": false
+                  },
+                  {
+                    "kind": "NotMounted",
+                    "target": "/media/camera"
+                  }
+                ]
+              },
+              {
+                "id": "optional-mount-workshop-case-2",
+                "label": "Required workshop filesystem absent",
+                "environment": {
+                  "inventory": {
+                    "volumes": {
+                      "workshop": {
+                        "uuid": "00000000-0000-4000-8000-000000000100",
+                        "filesystem": "xfs"
+                      },
+                      "camera": {
+                        "uuid": "00000000-0000-4000-8000-000000000101",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/sim-a": "camera",
+                      "/dev/sim-b": "workshop"
+                    },
+                    "mountpoints": [
+                      "/workshop",
+                      "/media/camera"
+                    ]
+                  },
+                  "present": [
+                    "camera"
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Policy",
+                    "target": "/workshop",
+                    "mode": "required"
+                  },
+                  {
+                    "kind": "Policy",
+                    "target": "/media/camera",
+                    "mode": "wanted"
+                  },
+                  {
+                    "kind": "EntriesOnly",
+                    "targets": [
+                      "/workshop",
+                      "/media/camera"
+                    ]
+                  },
+                  {
+                    "kind": "RequiredAttempts",
+                    "satisfied": false
+                  },
+                  {
+                    "kind": "NotMounted",
+                    "target": "/workshop"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "target": "/media/camera",
+                    "volume": "camera",
+                    "read_only": true
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": "UUID=00000000-0000-4000-8000-000000000100 /workshop xfs rw,auto 0 2\nUUID=00000000-0000-4000-8000-000000000101 /media/camera ext4 ro,auto,nofail 0 0\n"
+        }
+      },
+      "solution": [
+        "MOUNT POLICY\nUUID=00000000-0000-4000-8000-000000000090 /project xfs rw,auto 0 2\nUUID=00000000-0000-4000-8000-000000000091 /media/audit ext4 ro,auto,nofail 0 0\n"
+      ]
+    }
+  ]
+}

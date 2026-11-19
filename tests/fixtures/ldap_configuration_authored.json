@@ -1,0 +1,2803 @@
+{
+  "version": 1,
+  "initial": {
+    "version": 1,
+    "id": "lpic2-ldap-config-deployment",
+    "instructions": "Apply an LDIF Modify to the backend serving dc=deployment,dc=test, replacing only its olcAccess values. Within its People branch, let established people update only their own mail and description; let uid=desk,ou=Service,dc=deployment,dc=test update description there but never mail. Deny other writes, including Archive and Service; a denied multi-field request must change nothing. Preserve every other configuration entry and every unrelated directory value across all samples.",
+    "starter": "version: 1\n\ndn: olcDatabase={1}mdb,cn=config\nchangetype: modify\nreplace: olcAccess\nolcAccess: to * by users write by * none\n-\n",
+    "reference": "version: 1\n\ndn: olcDatabase={2}mdb,cn=config\nchangetype: modify\nreplace: olcAccess\nolcAccess: to dn.subtree=\"ou=People,dc=deployment,dc=test\" attrs=description by dn.exact=\"uid=desk,ou=Service,dc=deployment,dc=test\" write by self write by * none\nolcAccess: to dn.subtree=\"ou=People,dc=deployment,dc=test\" attrs=mail by self write by * none\nolcAccess: to * by * none\n-\n",
+    "cases": [
+      {
+        "id": "flat",
+        "label": "Direct People entries",
+        "initial": {
+          "version": 1,
+          "suffix": "dc=deployment,dc=test",
+          "entries": [
+            {
+              "dn": "dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "domain"
+                  ]
+                },
+                {
+                  "name": "dc",
+                  "values": [
+                    "deployment"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=People,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "People"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Service,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Service"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Archive,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Archive"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=People,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "avery@deployment.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=blake,ou=People,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "blake"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Blake Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "blake@deployment.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=desk,ou=Service,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "desk"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Desk Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "desk@deployment.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=Archive,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "archive-contact@deployment.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Preserve archived desk"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "identities": [
+          "uid=avery,ou=People,dc=deployment,dc=test",
+          "uid=blake,ou=People,dc=deployment,dc=test",
+          "uid=desk,ou=Service,dc=deployment,dc=test",
+          "uid=avery,ou=Archive,dc=deployment,dc=test"
+        ],
+        "probes": [
+          {
+            "label": "Own mail update",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "avery.new@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Own description update",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "New contact desk"
+              }
+            ]
+          },
+          {
+            "label": "Own combined update",
+            "actor": "uid=blake,ou=People,dc=deployment,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "blake.new@deployment.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New contact location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates People description",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates another description",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected extension"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change mail",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change description",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested peer change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change mail",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.desk@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk combined request is atomic",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Would otherwise be allowed"
+              },
+              {
+                "attribute": "mail",
+                "value": "unrequested.combined@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Archived self remains protected",
+            "actor": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived self change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Archive",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived change"
+              }
+            ]
+          },
+          {
+            "label": "People cannot change Archive",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.archive@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Service",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested service change"
+              }
+            ]
+          },
+          {
+            "label": "Same uid in another branch is not self",
+            "actor": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.same-uid@deployment.test"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "existing",
+        "label": "Existing optional contact values",
+        "initial": {
+          "version": 1,
+          "suffix": "dc=deployment,dc=test",
+          "entries": [
+            {
+              "dn": "dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "domain"
+                  ]
+                },
+                {
+                  "name": "dc",
+                  "values": [
+                    "deployment"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=People,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "People"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Service,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Service"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Archive,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Archive"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=People,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "avery@deployment.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Original main desk",
+                    "Original backup desk"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=blake,ou=People,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "blake"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Blake Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "blake@deployment.test",
+                    "blake.alias@deployment.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=desk,ou=Service,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "desk"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Desk Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "desk@deployment.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=Archive,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "archive-contact@deployment.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Preserve archived desk"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "identities": [
+          "uid=avery,ou=People,dc=deployment,dc=test",
+          "uid=blake,ou=People,dc=deployment,dc=test",
+          "uid=desk,ou=Service,dc=deployment,dc=test",
+          "uid=avery,ou=Archive,dc=deployment,dc=test"
+        ],
+        "probes": [
+          {
+            "label": "Own mail update",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "avery.corrected@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Own description update",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "New contact desk"
+              }
+            ]
+          },
+          {
+            "label": "Own combined update",
+            "actor": "uid=blake,ou=People,dc=deployment,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "blake.new@deployment.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New contact location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates People description",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates another description",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected extension"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change mail",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change description",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested peer change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change mail",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.desk@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk combined request is atomic",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Would otherwise be allowed"
+              },
+              {
+                "attribute": "mail",
+                "value": "unrequested.combined@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Archived self remains protected",
+            "actor": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived self change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Archive",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived change"
+              }
+            ]
+          },
+          {
+            "label": "People cannot change Archive",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.archive@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Service",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested service change"
+              }
+            ]
+          },
+          {
+            "label": "Same uid in another branch is not self",
+            "actor": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.same-uid@deployment.test"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "nested",
+        "label": "Nested People and a third caller",
+        "initial": {
+          "version": 1,
+          "suffix": "dc=deployment,dc=test",
+          "entries": [
+            {
+              "dn": "dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "domain"
+                  ]
+                },
+                {
+                  "name": "dc",
+                  "values": [
+                    "deployment"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=People,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "People"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Service,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Service"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Archive,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Archive"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=People,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "avery@deployment.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=blake,ou=People,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "blake"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Blake Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "blake@deployment.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=desk,ou=Service,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "desk"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Desk Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "desk@deployment.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=Archive,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "archive-contact@deployment.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Preserve archived desk"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Teams,ou=People,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Teams"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=jules,ou=Teams,ou=People,dc=deployment,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "jules"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Jules Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "jules@deployment.test"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "identities": [
+          "uid=avery,ou=People,dc=deployment,dc=test",
+          "uid=blake,ou=People,dc=deployment,dc=test",
+          "uid=desk,ou=Service,dc=deployment,dc=test",
+          "uid=avery,ou=Archive,dc=deployment,dc=test",
+          "uid=jules,ou=Teams,ou=People,dc=deployment,dc=test"
+        ],
+        "probes": [
+          {
+            "label": "Own mail update",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "avery.new@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Own description update",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "New contact desk"
+              }
+            ]
+          },
+          {
+            "label": "Own combined update",
+            "actor": "uid=blake,ou=People,dc=deployment,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "blake.new@deployment.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New contact location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates People description",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates another description",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected extension"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change mail",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change description",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested peer change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change mail",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.desk@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk combined request is atomic",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Would otherwise be allowed"
+              },
+              {
+                "attribute": "mail",
+                "value": "unrequested.combined@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Archived self remains protected",
+            "actor": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived self change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Archive",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived change"
+              }
+            ]
+          },
+          {
+            "label": "People cannot change Archive",
+            "actor": "uid=avery,ou=People,dc=deployment,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.archive@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Service",
+            "actor": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "target": "uid=desk,ou=Service,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested service change"
+              }
+            ]
+          },
+          {
+            "label": "Same uid in another branch is not self",
+            "actor": "uid=avery,ou=Archive,dc=deployment,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.same-uid@deployment.test"
+              }
+            ]
+          },
+          {
+            "label": "Nested caller updates own fields",
+            "actor": "uid=jules,ou=Teams,ou=People,dc=deployment,dc=test",
+            "target": "uid=jules,ou=Teams,ou=People,dc=deployment,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "jules.new@deployment.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New nested desk"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "configuration": {
+      "initial": {
+        "version": 1,
+        "databases": [
+          {
+            "name": "olcDatabase={-1}frontend,cn=config",
+            "suffix": null,
+            "root_dn": null,
+            "access": []
+          },
+          {
+            "name": "olcDatabase={0}config,cn=config",
+            "suffix": null,
+            "root_dn": null,
+            "access": [
+              "to * by * none"
+            ]
+          },
+          {
+            "name": "olcDatabase={1}mdb,cn=config",
+            "suffix": "dc=audit,dc=test",
+            "root_dn": null,
+            "access": [
+              "to * by * read"
+            ]
+          },
+          {
+            "name": "olcDatabase={2}mdb,cn=config",
+            "suffix": "dc=deployment,dc=test",
+            "root_dn": null,
+            "access": [
+              "to * by users write by * none"
+            ]
+          }
+        ]
+      },
+      "target": "olcDatabase={2}mdb,cn=config"
+    }
+  },
+  "example": {
+    "version": 1,
+    "id": "lpic2-ldap-config-deployment-practice",
+    "instructions": "Apply the workshop contact policy to the backend serving dc=deployment-workshop,dc=test. Keep the other databases unchanged, then verify both allowed updates and protected requests in all samples.",
+    "starter": "version: 1\n\ndn: olcDatabase={2}mdb,cn=config\nchangetype: modify\nreplace: olcAccess\nolcAccess: to dn.subtree=\"ou=People,dc=deployment-workshop,dc=test\" attrs=description by dn.exact=\"uid=desk,ou=Service,dc=deployment-workshop,dc=test\" write by self write by * none\nolcAccess: to dn.subtree=\"ou=People,dc=deployment-workshop,dc=test\" attrs=mail by self write by * none\nolcAccess: to * by * none\n-\n",
+    "reference": "version: 1\n\ndn: olcDatabase={1}mdb,cn=config\nchangetype: modify\nreplace: olcAccess\nolcAccess: to dn.subtree=\"ou=People,dc=deployment-workshop,dc=test\" attrs=description by dn.exact=\"uid=desk,ou=Service,dc=deployment-workshop,dc=test\" write by self write by * none\nolcAccess: to dn.subtree=\"ou=People,dc=deployment-workshop,dc=test\" attrs=mail by self write by * none\nolcAccess: to * by * none\n-\n",
+    "cases": [
+      {
+        "id": "flat",
+        "label": "Direct People entries",
+        "initial": {
+          "version": 1,
+          "suffix": "dc=deployment-workshop,dc=test",
+          "entries": [
+            {
+              "dn": "dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "domain"
+                  ]
+                },
+                {
+                  "name": "dc",
+                  "values": [
+                    "deployment-workshop"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=People,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "People"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Service,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Service"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Archive,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Archive"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "avery@deployment-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "blake"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Blake Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "blake@deployment-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "desk"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Desk Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "desk@deployment-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "archive-contact@deployment-workshop.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Preserve archived desk"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "identities": [
+          "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+          "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+          "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+          "uid=avery,ou=Archive,dc=deployment-workshop,dc=test"
+        ],
+        "probes": [
+          {
+            "label": "Own mail update",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "avery.new@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Own description update",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "New contact desk"
+              }
+            ]
+          },
+          {
+            "label": "Own combined update",
+            "actor": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "blake.new@deployment-workshop.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New contact location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates People description",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates another description",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected extension"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change mail",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change description",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested peer change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change mail",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.desk@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk combined request is atomic",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Would otherwise be allowed"
+              },
+              {
+                "attribute": "mail",
+                "value": "unrequested.combined@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Archived self remains protected",
+            "actor": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived self change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Archive",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived change"
+              }
+            ]
+          },
+          {
+            "label": "People cannot change Archive",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.archive@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Service",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested service change"
+              }
+            ]
+          },
+          {
+            "label": "Same uid in another branch is not self",
+            "actor": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.same-uid@deployment-workshop.test"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "existing",
+        "label": "Existing optional contact values",
+        "initial": {
+          "version": 1,
+          "suffix": "dc=deployment-workshop,dc=test",
+          "entries": [
+            {
+              "dn": "dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "domain"
+                  ]
+                },
+                {
+                  "name": "dc",
+                  "values": [
+                    "deployment-workshop"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=People,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "People"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Service,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Service"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Archive,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Archive"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "avery@deployment-workshop.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Original main desk",
+                    "Original backup desk"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "blake"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Blake Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "blake@deployment-workshop.test",
+                    "blake.alias@deployment-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "desk"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Desk Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "desk@deployment-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "archive-contact@deployment-workshop.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Preserve archived desk"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "identities": [
+          "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+          "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+          "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+          "uid=avery,ou=Archive,dc=deployment-workshop,dc=test"
+        ],
+        "probes": [
+          {
+            "label": "Own mail update",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "avery.corrected@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Own description update",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "New contact desk"
+              }
+            ]
+          },
+          {
+            "label": "Own combined update",
+            "actor": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "blake.new@deployment-workshop.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New contact location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates People description",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates another description",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected extension"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change mail",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change description",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested peer change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change mail",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.desk@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk combined request is atomic",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Would otherwise be allowed"
+              },
+              {
+                "attribute": "mail",
+                "value": "unrequested.combined@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Archived self remains protected",
+            "actor": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived self change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Archive",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived change"
+              }
+            ]
+          },
+          {
+            "label": "People cannot change Archive",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.archive@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Service",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested service change"
+              }
+            ]
+          },
+          {
+            "label": "Same uid in another branch is not self",
+            "actor": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.same-uid@deployment-workshop.test"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "nested",
+        "label": "Nested People and a third caller",
+        "initial": {
+          "version": 1,
+          "suffix": "dc=deployment-workshop,dc=test",
+          "entries": [
+            {
+              "dn": "dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "domain"
+                  ]
+                },
+                {
+                  "name": "dc",
+                  "values": [
+                    "deployment-workshop"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=People,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "People"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Service,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Service"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Archive,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Archive"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "avery@deployment-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "blake"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Blake Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "blake@deployment-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "desk"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Desk Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "desk@deployment-workshop.test"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "avery"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Avery Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "archive-contact@deployment-workshop.test"
+                  ]
+                },
+                {
+                  "name": "description",
+                  "values": [
+                    "Preserve archived desk"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "ou=Teams,ou=People,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "organizationalUnit"
+                  ]
+                },
+                {
+                  "name": "ou",
+                  "values": [
+                    "Teams"
+                  ]
+                }
+              ]
+            },
+            {
+              "dn": "uid=jules,ou=Teams,ou=People,dc=deployment-workshop,dc=test",
+              "attributes": [
+                {
+                  "name": "objectClass",
+                  "values": [
+                    "top",
+                    "person",
+                    "organizationalPerson",
+                    "inetOrgPerson"
+                  ]
+                },
+                {
+                  "name": "uid",
+                  "values": [
+                    "jules"
+                  ]
+                },
+                {
+                  "name": "cn",
+                  "values": [
+                    "Jules Practice"
+                  ]
+                },
+                {
+                  "name": "sn",
+                  "values": [
+                    "Practice"
+                  ]
+                },
+                {
+                  "name": "mail",
+                  "values": [
+                    "jules@deployment-workshop.test"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "identities": [
+          "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+          "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+          "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+          "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+          "uid=jules,ou=Teams,ou=People,dc=deployment-workshop,dc=test"
+        ],
+        "probes": [
+          {
+            "label": "Own mail update",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "avery.new@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Own description update",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "New contact desk"
+              }
+            ]
+          },
+          {
+            "label": "Own combined update",
+            "actor": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "blake.new@deployment-workshop.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New contact location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates People description",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected location"
+              }
+            ]
+          },
+          {
+            "label": "Desk updates another description",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Desk corrected extension"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change mail",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Peer cannot change description",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=blake,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested peer change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change mail",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.desk@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk combined request is atomic",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Would otherwise be allowed"
+              },
+              {
+                "attribute": "mail",
+                "value": "unrequested.combined@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Archived self remains protected",
+            "actor": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived self change"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Archive",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested archived change"
+              }
+            ]
+          },
+          {
+            "label": "People cannot change Archive",
+            "actor": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.archive@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Desk cannot change Service",
+            "actor": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "target": "uid=desk,ou=Service,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "description",
+                "value": "Unrequested service change"
+              }
+            ]
+          },
+          {
+            "label": "Same uid in another branch is not self",
+            "actor": "uid=avery,ou=Archive,dc=deployment-workshop,dc=test",
+            "target": "uid=avery,ou=People,dc=deployment-workshop,dc=test",
+            "allow": false,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "unrequested.same-uid@deployment-workshop.test"
+              }
+            ]
+          },
+          {
+            "label": "Nested caller updates own fields",
+            "actor": "uid=jules,ou=Teams,ou=People,dc=deployment-workshop,dc=test",
+            "target": "uid=jules,ou=Teams,ou=People,dc=deployment-workshop,dc=test",
+            "allow": true,
+            "fields": [
+              {
+                "attribute": "mail",
+                "value": "jules.new@deployment-workshop.test"
+              },
+              {
+                "attribute": "description",
+                "value": "New nested desk"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "configuration": {
+      "initial": {
+        "version": 1,
+        "databases": [
+          {
+            "name": "olcDatabase={-1}frontend,cn=config",
+            "suffix": null,
+            "root_dn": null,
+            "access": []
+          },
+          {
+            "name": "olcDatabase={0}config,cn=config",
+            "suffix": null,
+            "root_dn": null,
+            "access": [
+              "to * by * none"
+            ]
+          },
+          {
+            "name": "olcDatabase={1}mdb,cn=config",
+            "suffix": "dc=deployment-workshop,dc=test",
+            "root_dn": null,
+            "access": [
+              "to * by users write by * none"
+            ]
+          },
+          {
+            "name": "olcDatabase={2}mdb,cn=config",
+            "suffix": "dc=audit,dc=test",
+            "root_dn": null,
+            "access": [
+              "to * by * read"
+            ]
+          }
+        ]
+      },
+      "target": "olcDatabase={1}mdb,cn=config"
+    }
+  }
+}

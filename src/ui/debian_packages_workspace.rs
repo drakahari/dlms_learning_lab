@@ -87,15 +87,14 @@ impl LabApp {
                 let Some(l) = s.debian_packages_teaching.as_ref() else {
                     return;
                 };
-                ui.label(RichText::new(&l.prerequisite_note).color(palette(ui).muted));
-                for c in &l.concepts {
-                    ui.label(RichText::new(&c.title).strong());
-                    ui.label(&c.text);
-                }
-                ui.label(RichText::new("A separate example to investigate").strong());
-                ui.label(&l.example_description);
-                ui.label("The terminal accepts the disclosed Debian command subset. Inspect records before changing them. Insert fills a command; only Run submits it.");
-                ui.label(format!("Try a change: {}", l.try_change.description));
+                lesson_presentation::concepts(
+                    ui,
+                    s,
+                    &l.prerequisite_note,
+                    l.concepts.iter().map(|c| (c.title.clone(), c.text.clone())),
+                );
+                lesson_presentation::worked(ui, &l.example_description);
+                lesson_presentation::worked_rows(ui, s);
                 let mut next = None;
                 ui.add_enabled_ui(!blocked, |ui| {
                     ui.horizontal_wrapped(|ui| {
@@ -119,8 +118,7 @@ impl LabApp {
                 let Some(lesson) = s.debian_packages_teaching.as_ref() else {
                     return;
                 };
-                ui.label("Practice example · Ungraded; assignment packages, command drafts and transcripts stay separate.");
-                ui.label(&lesson.example_description);
+                lesson_presentation::practice_step(ui, s, 0);
                 let l = self
                     .progress
                     .attempts
@@ -150,7 +148,7 @@ impl LabApp {
                         let width=(available-button_width-controls::GAP).max(0.).min(available);
                         controls::cell(ui,width,|ui|{
                             let r=egui::ComboBox::from_id_salt(("package-example-action",&s.id)).width(width).truncate().selected_text(format!("Example action {} of {}",l.selected_action+1,lesson.example_actions.len())).show_ui(ui,|ui|{
-                                for(n,a)in lesson.example_actions.iter().enumerate(){let option=ui.selectable_value(&mut l.selected_action,n,a.command.as_deref().unwrap_or("Read this example explanation"));self.metrics.package_example_items.push((n,option.rect));} self.metrics.package_example_popup=Some(controls::popup_content_clip(ui));
+                                for(n,a)in lesson.example_actions.iter().enumerate(){let option=ui.selectable_value(&mut l.selected_action,n,a.command.as_deref().unwrap_or(if matches!(a.action,dlms_learning_lab::debian_packages::Action::UpgradeConffiles{..}){"Review configuration choices (native)"}else{"Read this example explanation"}));self.metrics.package_example_items.push((n,option.rect));} self.metrics.package_example_popup=Some(controls::popup_content_clip(ui));
                             });
                             self.metrics.package_example=Some(r.response.rect);name_control(&r.response,"Ungraded package example action");
                         });
@@ -160,8 +158,21 @@ impl LabApp {
                     let selected=&lesson.example_actions[l.selected_action];
                     ui.label(&selected.explanation);
                     if let Some(c)=&selected.command{ui.add(egui::Label::new(RichText::new(c).monospace()).wrap());}
-                    ui.label(RichText::new("Insert changes the example command field only. Read it, then use Run command.").small().color(palette(ui).muted));
+                    let insertion=if selected.command.is_none()&&matches!(selected.action,dlms_learning_lab::debian_packages::Action::UpgradeConffiles{..}){"Use the native configuration review below; this per-file decision inserts no terminal command."}else{"Insert changes the example command field only. Read it, then use Run command."};
+                    ui.label(RichText::new(insertion).small().color(palette(ui).muted));
                     if chosen && let Some(command)=&selected.command{match l.insert_command(lesson,command){Ok(())=>{inserted=true;self.dirty=true;self.notice=None;},Err(e)=>self.notice=Some(e)}}
+                    lesson_presentation::practice_step(ui,s,1);
+                    let configuration=debian_conffiles::panel(ui,&lesson.definition,&l.simulation,&l.draft,(&s.id,true),&mut self.metrics);
+                    for edit in configuration {
+                        let mut proposed=l.draft.clone();
+                        match debian_conffiles::edit(&lesson.definition,&l.simulation,&mut proposed,edit){
+                            Ok(Some(action))=>match l.execute(lesson,&action){Ok(_)=>{self.dirty=true;self.notice=None;},Err(e)=>self.notice=Some(e)},
+                            Ok(None)=>{let checked=l.checked;l.checked=false;
+                                match l.save_draft(lesson,&proposed){Ok(())=>{self.dirty=true;self.notice=None;},Err(e)=>{l.checked=checked;self.notice=Some(e);}}
+                            },
+                            Err(e)=>self.notice=Some(e),
+                        }
+                    }
                     let old_command=l.terminal.as_ref().unwrap().command.clone();
                     let old_path=l.terminal.as_ref().unwrap().selected_path.clone();
                     let mut focus=self.focus_input&&!inserted;
@@ -175,18 +186,18 @@ impl LabApp {
                         }
                     }
                     if let Some(e)=effects.error {self.notice=Some(e);} else if effects.dirty&&!rejected_edit {self.notice=None;}
-                    if effects.run&&!rejected_edit{match l.submit_command(lesson){Ok(_)=>{self.dirty=true;self.notice=None;},Err(e)=>self.notice=Some(e)}}
+                    if effects.run&&!rejected_edit{match l.submit_command(lesson){Ok(_)=>{request_output_end(ui,(&s.id,true));self.dirty=true;self.notice=None;},Err(e)=>self.notice=Some(e)}}
                     let r=ui.add(primary(ui,"Check example · ungraded"));self.metrics.check=Some(r.rect);
                     if r.clicked(){l.checked=true;self.dirty=true;}
                     let feedback=controls::feedback(ui,r.clicked(),|ui|{
                         if l.checked{
                             let rows=l.checks(lesson);let solved=rows.iter().all(|r|r.0);
-                            if solved{self.metrics.package_result=Some(ui.colored_label(palette(ui).success,"Example checks pass · No assignment credit").rect);}
+                            if solved{self.metrics.package_result=Some(ui.colored_label(palette(ui).success,"Current example checks pass").rect);}
                             let first = current_rows(ui,&rows,(&s.id,true));
                             if !solved { self.metrics.package_result=first; }
                         }
                     });self.metrics.feedback=Some(feedback.response.rect);
-                    ui.label(format!("Try a change: {}",lesson.try_change.description));
+                    lesson_presentation::practice_step(ui,s,2);
                     ui.horizontal_wrapped(|ui|{
                         let r=ui.add(button("Reset example only"));self.metrics.example_reset=Some(r.rect);reset=r.clicked();
                         let r=ui.add(button("Open full assignment"));self.metrics.assignment_action=Some(r.rect);assignment=r.clicked();
@@ -212,7 +223,7 @@ impl LabApp {
                 }
             }
             teaching::View::Assignment => {
-                ui.label(&s.objective);
+                lesson_presentation::assignment(ui, s);
                 let engine::Goal::DebianPackages { definition } = &s.goal else {
                     return;
                 };
@@ -224,6 +235,58 @@ impl LabApp {
                 if w.debian_packages_terminal.is_none() {
                     w.debian_packages_terminal = Some(Session::default());
                     self.dirty = true;
+                }
+                if w.debian_packages_draft.is_none() {
+                    match dlms_learning_lab::debian_packages_workspace::Draft::new(simulation) {
+                        Ok(d) => w.debian_packages_draft = Some(d),
+                        Err(e) => {
+                            self.notice = Some(e);
+                            return;
+                        }
+                    }
+                }
+                let configuration = ui
+                    .add_enabled_ui(!blocked, |ui| {
+                        debian_conffiles::panel(
+                            ui,
+                            definition,
+                            simulation,
+                            w.debian_packages_draft.as_ref().unwrap(),
+                            (&s.id, false),
+                            &mut self.metrics,
+                        )
+                    })
+                    .inner;
+                for edit in configuration {
+                    let mut proposed = w.debian_packages_draft.as_ref().unwrap().clone();
+                    match debian_conffiles::edit(definition, simulation, &mut proposed, edit) {
+                        Ok(Some(action)) => {
+                            match dlms_learning_lab::debian_packages_workspace::apply(
+                                definition, simulation, &action,
+                            ) {
+                                Ok(_) => {
+                                    w.checked = false;
+                                    self.checked = false;
+                                    self.dirty = true;
+                                    self.notice = None;
+                                }
+                                Err(e) => self.notice = Some(e),
+                            }
+                        }
+                        Ok(None) => {
+                            let old = w.debian_packages_draft.replace(proposed);
+                            if w.valid() {
+                                w.checked = false;
+                                self.checked = false;
+                                self.dirty = true;
+                                self.notice = None;
+                            } else {
+                                w.debian_packages_draft = old;
+                                self.notice=Some("Configuration review exceeds saved-work limits; previous draft retained".into());
+                            }
+                        }
+                        Err(e) => self.notice = Some(e),
+                    }
                 }
                 let t = w.debian_packages_terminal.as_mut().unwrap();
                 let effects = ui
@@ -247,6 +310,7 @@ impl LabApp {
                 if effects.run {
                     match t.submit(definition, simulation) {
                         Ok(changed) => {
+                            request_output_end(ui, (&s.id, false));
                             if changed {
                                 w.checked = false;
                                 self.checked = false;
@@ -421,6 +485,10 @@ fn displayed(s: &str, command: bool) -> Cow<'_, str> {
     }
     Cow::Owned(out)
 }
+fn request_output_end(ui: &egui::Ui, scope: (&str, bool)) {
+    ui.ctx()
+        .data_mut(|d| d.insert_temp(egui::Id::new(("package-output-follow", scope)), true));
+}
 fn terminal_panel(
     ui: &mut egui::Ui,
     scope: (&str, bool),
@@ -450,6 +518,12 @@ fn terminal_panel(
     );
     let height =
         ui.text_style_height(&egui::TextStyle::Monospace) * 7. + 2. * f32::from(controls::PAD_Y);
+    let follow = ui.ctx().data_mut(|d| {
+        let key = egui::Id::new(("package-output-follow", scope));
+        let follow = d.get_temp::<bool>(key).unwrap_or(false);
+        d.remove::<bool>(key);
+        follow
+    });
     let output = egui::Frame::new()
         .fill(palette(ui).input)
         .inner_margin(controls::PAD_X)
@@ -458,7 +532,7 @@ fn terminal_panel(
             let diagnostic_width =
                 (ui.available_width() - ui.spacing().scroll.allocated_width()).max(1.);
             ui.set_min_width(diagnostic_width);
-            egui::ScrollArea::both()
+            let area = egui::ScrollArea::both()
                 .id_salt(("package-output", scope))
                 .min_scrolled_height(height)
                 .max_height(height)
@@ -524,7 +598,15 @@ fn terminal_panel(
                             .small(),
                         );
                     }
+                    if follow {
+                        ui.scroll_to_cursor(Some(egui::Align::BOTTOM));
+                    }
                 });
+            metrics.package_output_scroll = Some((
+                area.state.offset.y,
+                (area.content_size.y - area.inner_rect.height()).max(0.),
+                area.inner_rect,
+            ));
         });
     metrics.output = Some(output.response.rect);
     let id = egui::Id::new(("package-command", scope));

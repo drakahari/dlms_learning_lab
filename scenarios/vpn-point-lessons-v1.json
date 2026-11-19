@@ -1,0 +1,1339 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-vpn-peer-profile",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "OpenVPN: peer configuration",
+      "unit": "linux-vpn-point",
+      "title": "Repair a VPN peer's endpoint and identity references",
+      "summary": "Compare outside endpoints and supplied identity facts, repair one peer, and preserve both LAN paths.",
+      "objective": "Restore the warehouse peer's outside endpoint and identity references using the supplied server and virtual file facts. Trust the training authority and use the warehouse certificate with its matching key. Preserve the assigned roles, explicit peer-name/purpose checks, reciprocal tunnel addresses and both full LAN route policies. Save, apply and verify the virtual profiles; do not disable verification or redirect unrelated traffic through the VPN.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Separate outside and tunnel addresses",
+        "Match identity references",
+        "Save, apply and verify"
+      ],
+      "guide": [
+        {
+          "title": "Separate outside and tunnel addresses",
+          "why": "An outside peer endpoint identifies the virtual transport destination; ifconfig names the inside endpoints.",
+          "action": "Read the supplied endpoints and both profile fragments.",
+          "commands": []
+        },
+        {
+          "title": "Match identity references",
+          "why": "Authority, certificate identity, key pair and peer-purpose requests are different facts.",
+          "action": "Use the supplied virtual file table to inspect the client references.",
+          "commands": []
+        },
+        {
+          "title": "Save, apply and verify",
+          "why": "An edited or saved profile has not necessarily become the applied configuration.",
+          "action": "Save the changed profile, Apply profiles, test both directions and Check configuration.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Compare the client remote port with the supplied server port; compare outside addresses with outside addresses.",
+        "The CA must match the supplied training authority. The client certificate and key need the same provided key-pair ID.",
+        "Keep the explicit server-purpose and exact peer-name checks; disabling verification does not repair a wrong reference."
+      ],
+      "sources": [
+        "https://openvpn.net/community-docs/community-articles/openvpn-2-6-manual/",
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/"
+      ],
+      "explanation": "An outside endpoint and port select the other supplied peer. Authority, own certificate/key and explicit expected identity checks serve different purposes. Once those metadata checks and the reciprocal tunnel addresses pass, both LAN route directions must still be correct.",
+      "simplifications": "Finite OpenVPN2.6-style editable profile subset with supplied identity/validity/key-pair facts and IPv4 UDP/TUN point-to-point routes. These fragments are not deployable profiles. No PEM/crypto/TLS handshake, certificate creation, actual interfaces, host files, routing, packets, daemon, DCO, multipoint/push/iroute, TCP transport or external connectivity is performed. Unknown directives fail. Conventional supplied LANs use /1–/30; general route destinations support /0–/32.",
+      "initial": {
+        "kind": "VpnPoint",
+        "simulation": {
+          "version": 1,
+          "source_id": "lpic2-vpn-peer-profile",
+          "view": "introduction",
+          "assignment": {
+            "source_task": "{\"cases\":[{\"destination\":\"10.60.0.41\",\"expected\":\"Reachable\",\"from\":0,\"id\":\"lan-0-host-0\",\"label\":\"head-office host 1: outward and return path\",\"source\":\"10.24.0.21\"},{\"destination\":\"10.60.0.205\",\"expected\":\"Reachable\",\"from\":0,\"id\":\"lan-0-host-1\",\"label\":\"head-office host 2: outward and return path\",\"source\":\"10.24.0.221\"},{\"destination\":\"203.0.113.200\",\"expected\":\"OutsideTunnel\",\"from\":0,\"id\":\"outside-0\",\"label\":\"head-office: unrelated destination stays outside VPN\",\"source\":\"10.24.0.21\"},{\"destination\":\"10.24.0.41\",\"expected\":\"Reachable\",\"from\":1,\"id\":\"lan-1-host-0\",\"label\":\"warehouse host 1: outward and return path\",\"source\":\"10.60.0.21\"},{\"destination\":\"10.24.0.205\",\"expected\":\"Reachable\",\"from\":1,\"id\":\"lan-1-host-1\",\"label\":\"warehouse host 2: outward and return path\",\"source\":\"10.60.0.221\"},{\"destination\":\"203.0.113.201\",\"expected\":\"OutsideTunnel\",\"from\":1,\"id\":\"outside-1\",\"label\":\"warehouse: unrelated destination stays outside VPN\",\"source\":\"10.60.0.21\"}],\"initial\":{\"applied\":null,\"applied_source\":null,\"lans\":[{\"address\":\"10.24.0.0\",\"prefix\":24},{\"address\":\"10.60.0.0\",\"prefix\":24}],\"saved\":[\"# Editable simulated peer settings; not a host deployment.\\ndev tun\\nproto udp\\ntls-server\\nport 1194\\nifconfig 10.88.0.1 10.88.0.2\\nca /etc/openvpn/training-ca.crt\\ncert /etc/openvpn/head-office.crt\\nkey /etc/openvpn/head-office.key\\nremote-cert-tls client\\nverify-x509-name warehouse-vpn name\\nroute 10.60.0.0 255.255.255.0\\n\",\"# Editable simulated peer settings; not a host deployment.\\ndev tun\\nproto udp\\ntls-client\\nport 1194\\nremote 198.51.100.10 1195\\nifconfig 10.88.0.2 10.88.0.1\\nca /etc/openvpn/other-ca.crt\\ncert /etc/openvpn/warehouse.crt\\nkey /etc/openvpn/head-office.key\\nremote-cert-tls server\\nverify-x509-name head-office-vpn name\\nroute 10.24.0.0 255.255.255.0\\n\"],\"supplied\":{\"files\":[{\"material\":{\"id\":\"training-ca\",\"kind\":\"Ca\"},\"path\":\"/etc/openvpn/training-ca.crt\"},{\"material\":{\"id\":\"other-ca\",\"kind\":\"Ca\"},\"path\":\"/etc/openvpn/other-ca.crt\"},{\"material\":{\"id\":\"training-ca\",\"kind\":\"Ca\"},\"path\":\"/etc/openvpn/training-ca-alias.crt\"},{\"material\":{\"issuer\":\"training-ca\",\"key_id\":\"head-office-pair\",\"kind\":\"Certificate\",\"role\":\"Server\",\"subject\":\"head-office-vpn\",\"valid\":true},\"path\":\"/etc/openvpn/head-office.crt\"},{\"material\":{\"key_id\":\"head-office-pair\",\"kind\":\"Key\"},\"path\":\"/etc/openvpn/head-office.key\"},{\"material\":{\"issuer\":\"training-ca\",\"key_id\":\"warehouse-pair\",\"kind\":\"Certificate\",\"role\":\"Client\",\"subject\":\"warehouse-vpn\",\"valid\":true},\"path\":\"/etc/openvpn/warehouse.crt\"},{\"material\":{\"key_id\":\"warehouse-pair\",\"kind\":\"Key\"},\"path\":\"/etc/openvpn/warehouse.key\"}],\"peers\":[{\"endpoint\":\"198.51.100.10\",\"label\":\"head-office\"},{\"endpoint\":\"198.51.100.20\",\"label\":\"warehouse\"}],\"underlay_available\":true}},\"requirements\":[{\"authority\":\"training-ca\",\"destinations\":[{\"address\":\"10.60.0.0\",\"prefix\":24}],\"role\":\"Server\",\"subject\":\"head-office-vpn\"},{\"authority\":\"training-ca\",\"destinations\":[{\"address\":\"10.24.0.0\",\"prefix\":24}],\"role\":\"Client\",\"subject\":\"warehouse-vpn\"}],\"version\":1}",
+            "world": {
+              "supplied": {
+                "peers": [
+                  {
+                    "label": "head-office",
+                    "endpoint": "198.51.100.10"
+                  },
+                  {
+                    "label": "warehouse",
+                    "endpoint": "198.51.100.20"
+                  }
+                ],
+                "underlay_available": true,
+                "files": [
+                  {
+                    "path": "/etc/openvpn/training-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "training-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/other-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "other-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/training-ca-alias.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "training-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/head-office.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "head-office-vpn",
+                      "issuer": "training-ca",
+                      "key_id": "head-office-pair",
+                      "role": "Server",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/head-office.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "head-office-pair"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/warehouse.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "warehouse-vpn",
+                      "issuer": "training-ca",
+                      "key_id": "warehouse-pair",
+                      "role": "Client",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/warehouse.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "warehouse-pair"
+                    }
+                  }
+                ]
+              },
+              "lans": [
+                {
+                  "address": "10.24.0.0",
+                  "prefix": 24
+                },
+                {
+                  "address": "10.60.0.0",
+                  "prefix": 24
+                }
+              ],
+              "saved": [
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-server\nport 1194\nifconfig 10.88.0.1 10.88.0.2\nca /etc/openvpn/training-ca.crt\ncert /etc/openvpn/head-office.crt\nkey /etc/openvpn/head-office.key\nremote-cert-tls client\nverify-x509-name warehouse-vpn name\nroute 10.60.0.0 255.255.255.0\n",
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 198.51.100.10 1195\nifconfig 10.88.0.2 10.88.0.1\nca /etc/openvpn/other-ca.crt\ncert /etc/openvpn/warehouse.crt\nkey /etc/openvpn/head-office.key\nremote-cert-tls server\nverify-x509-name head-office-vpn name\nroute 10.24.0.0 255.255.255.0\n"
+              ],
+              "applied": null,
+              "applied_source": null
+            },
+            "editors": [
+              "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-server\nport 1194\nifconfig 10.88.0.1 10.88.0.2\nca /etc/openvpn/training-ca.crt\ncert /etc/openvpn/head-office.crt\nkey /etc/openvpn/head-office.key\nremote-cert-tls client\nverify-x509-name warehouse-vpn name\nroute 10.60.0.0 255.255.255.0\n",
+              "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 198.51.100.10 1195\nifconfig 10.88.0.2 10.88.0.1\nca /etc/openvpn/other-ca.crt\ncert /etc/openvpn/warehouse.crt\nkey /etc/openvpn/head-office.key\nremote-cert-tls server\nverify-x509-name head-office-vpn name\nroute 10.24.0.0 255.255.255.0\n"
+            ],
+            "query": {
+              "from": 0,
+              "source": "10.24.0.21",
+              "destination": "10.60.0.41"
+            },
+            "notice": null,
+            "last_probe": null,
+            "checked": false,
+            "history": []
+          },
+          "example": {
+            "source_task": "{\"cases\":[{\"destination\":\"10.20.0.41\",\"expected\":\"Reachable\",\"from\":0,\"id\":\"lan-0-host-0\",\"label\":\"studio host 1: outward and return path\",\"source\":\"10.10.0.21\"},{\"destination\":\"10.20.0.205\",\"expected\":\"Reachable\",\"from\":0,\"id\":\"lan-0-host-1\",\"label\":\"studio host 2: outward and return path\",\"source\":\"10.10.0.221\"},{\"destination\":\"203.0.113.200\",\"expected\":\"OutsideTunnel\",\"from\":0,\"id\":\"outside-0\",\"label\":\"studio: unrelated destination stays outside VPN\",\"source\":\"10.10.0.21\"},{\"destination\":\"10.10.0.41\",\"expected\":\"Reachable\",\"from\":1,\"id\":\"lan-1-host-0\",\"label\":\"demo-branch host 1: outward and return path\",\"source\":\"10.20.0.21\"},{\"destination\":\"10.10.0.205\",\"expected\":\"Reachable\",\"from\":1,\"id\":\"lan-1-host-1\",\"label\":\"demo-branch host 2: outward and return path\",\"source\":\"10.20.0.221\"},{\"destination\":\"203.0.113.201\",\"expected\":\"OutsideTunnel\",\"from\":1,\"id\":\"outside-1\",\"label\":\"demo-branch: unrelated destination stays outside VPN\",\"source\":\"10.20.0.21\"}],\"initial\":{\"applied\":null,\"applied_source\":null,\"lans\":[{\"address\":\"10.10.0.0\",\"prefix\":24},{\"address\":\"10.20.0.0\",\"prefix\":24}],\"saved\":[\"# Editable simulated peer settings; not a host deployment.\\ndev tun\\nproto udp\\ntls-server\\nport 1194\\nifconfig 10.89.0.1 10.89.0.2\\nca /etc/openvpn/example-ca.crt\\ncert /etc/openvpn/studio.crt\\nkey /etc/openvpn/studio.key\\nremote-cert-tls client\\nverify-x509-name demo-branch-vpn name\\nroute 10.20.0.0 255.255.255.0\\n\",\"# Editable simulated peer settings; not a host deployment.\\ndev tun\\nproto udp\\ntls-client\\nport 1194\\nremote 192.0.2.10 1195\\nifconfig 10.89.0.2 10.89.0.1\\nca /etc/openvpn/other-ca.crt\\ncert /etc/openvpn/demo-branch.crt\\nkey /etc/openvpn/studio.key\\nremote-cert-tls server\\nverify-x509-name studio-vpn name\\nroute 10.10.0.0 255.255.255.0\\n\"],\"supplied\":{\"files\":[{\"material\":{\"id\":\"example-ca\",\"kind\":\"Ca\"},\"path\":\"/etc/openvpn/example-ca.crt\"},{\"material\":{\"id\":\"other-ca\",\"kind\":\"Ca\"},\"path\":\"/etc/openvpn/other-ca.crt\"},{\"material\":{\"id\":\"example-ca\",\"kind\":\"Ca\"},\"path\":\"/etc/openvpn/example-ca-alias.crt\"},{\"material\":{\"issuer\":\"example-ca\",\"key_id\":\"studio-pair\",\"kind\":\"Certificate\",\"role\":\"Server\",\"subject\":\"studio-vpn\",\"valid\":true},\"path\":\"/etc/openvpn/studio.crt\"},{\"material\":{\"key_id\":\"studio-pair\",\"kind\":\"Key\"},\"path\":\"/etc/openvpn/studio.key\"},{\"material\":{\"issuer\":\"example-ca\",\"key_id\":\"demo-branch-pair\",\"kind\":\"Certificate\",\"role\":\"Client\",\"subject\":\"demo-branch-vpn\",\"valid\":true},\"path\":\"/etc/openvpn/demo-branch.crt\"},{\"material\":{\"key_id\":\"demo-branch-pair\",\"kind\":\"Key\"},\"path\":\"/etc/openvpn/demo-branch.key\"}],\"peers\":[{\"endpoint\":\"192.0.2.10\",\"label\":\"studio\"},{\"endpoint\":\"192.0.2.20\",\"label\":\"demo-branch\"}],\"underlay_available\":true}},\"requirements\":[{\"authority\":\"example-ca\",\"destinations\":[{\"address\":\"10.20.0.0\",\"prefix\":24}],\"role\":\"Server\",\"subject\":\"studio-vpn\"},{\"authority\":\"example-ca\",\"destinations\":[{\"address\":\"10.10.0.0\",\"prefix\":24}],\"role\":\"Client\",\"subject\":\"demo-branch-vpn\"}],\"version\":1}",
+            "world": {
+              "supplied": {
+                "peers": [
+                  {
+                    "label": "studio",
+                    "endpoint": "192.0.2.10"
+                  },
+                  {
+                    "label": "demo-branch",
+                    "endpoint": "192.0.2.20"
+                  }
+                ],
+                "underlay_available": true,
+                "files": [
+                  {
+                    "path": "/etc/openvpn/example-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "example-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/other-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "other-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/example-ca-alias.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "example-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/studio.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "studio-vpn",
+                      "issuer": "example-ca",
+                      "key_id": "studio-pair",
+                      "role": "Server",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/studio.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "studio-pair"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/demo-branch.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "demo-branch-vpn",
+                      "issuer": "example-ca",
+                      "key_id": "demo-branch-pair",
+                      "role": "Client",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/demo-branch.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "demo-branch-pair"
+                    }
+                  }
+                ]
+              },
+              "lans": [
+                {
+                  "address": "10.10.0.0",
+                  "prefix": 24
+                },
+                {
+                  "address": "10.20.0.0",
+                  "prefix": 24
+                }
+              ],
+              "saved": [
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-server\nport 1194\nifconfig 10.89.0.1 10.89.0.2\nca /etc/openvpn/example-ca.crt\ncert /etc/openvpn/studio.crt\nkey /etc/openvpn/studio.key\nremote-cert-tls client\nverify-x509-name demo-branch-vpn name\nroute 10.20.0.0 255.255.255.0\n",
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 192.0.2.10 1195\nifconfig 10.89.0.2 10.89.0.1\nca /etc/openvpn/other-ca.crt\ncert /etc/openvpn/demo-branch.crt\nkey /etc/openvpn/studio.key\nremote-cert-tls server\nverify-x509-name studio-vpn name\nroute 10.10.0.0 255.255.255.0\n"
+              ],
+              "applied": null,
+              "applied_source": null
+            },
+            "editors": [
+              "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-server\nport 1194\nifconfig 10.89.0.1 10.89.0.2\nca /etc/openvpn/example-ca.crt\ncert /etc/openvpn/studio.crt\nkey /etc/openvpn/studio.key\nremote-cert-tls client\nverify-x509-name demo-branch-vpn name\nroute 10.20.0.0 255.255.255.0\n",
+              "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 192.0.2.10 1195\nifconfig 10.89.0.2 10.89.0.1\nca /etc/openvpn/other-ca.crt\ncert /etc/openvpn/demo-branch.crt\nkey /etc/openvpn/studio.key\nremote-cert-tls server\nverify-x509-name studio-vpn name\nroute 10.10.0.0 255.255.255.0\n"
+            ],
+            "query": {
+              "from": 0,
+              "source": "10.10.0.21",
+              "destination": "10.20.0.41"
+            },
+            "notice": null,
+            "last_probe": null,
+            "checked": false,
+            "history": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "VpnPoint",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-vpn-peer-profile",
+          "assignment": {
+            "version": 1,
+            "initial": {
+              "supplied": {
+                "peers": [
+                  {
+                    "label": "head-office",
+                    "endpoint": "198.51.100.10"
+                  },
+                  {
+                    "label": "warehouse",
+                    "endpoint": "198.51.100.20"
+                  }
+                ],
+                "underlay_available": true,
+                "files": [
+                  {
+                    "path": "/etc/openvpn/training-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "training-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/other-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "other-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/training-ca-alias.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "training-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/head-office.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "head-office-vpn",
+                      "issuer": "training-ca",
+                      "key_id": "head-office-pair",
+                      "role": "Server",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/head-office.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "head-office-pair"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/warehouse.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "warehouse-vpn",
+                      "issuer": "training-ca",
+                      "key_id": "warehouse-pair",
+                      "role": "Client",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/warehouse.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "warehouse-pair"
+                    }
+                  }
+                ]
+              },
+              "lans": [
+                {
+                  "address": "10.24.0.0",
+                  "prefix": 24
+                },
+                {
+                  "address": "10.60.0.0",
+                  "prefix": 24
+                }
+              ],
+              "saved": [
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-server\nport 1194\nifconfig 10.88.0.1 10.88.0.2\nca /etc/openvpn/training-ca.crt\ncert /etc/openvpn/head-office.crt\nkey /etc/openvpn/head-office.key\nremote-cert-tls client\nverify-x509-name warehouse-vpn name\nroute 10.60.0.0 255.255.255.0\n",
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 198.51.100.10 1195\nifconfig 10.88.0.2 10.88.0.1\nca /etc/openvpn/other-ca.crt\ncert /etc/openvpn/warehouse.crt\nkey /etc/openvpn/head-office.key\nremote-cert-tls server\nverify-x509-name head-office-vpn name\nroute 10.24.0.0 255.255.255.0\n"
+              ],
+              "applied": null,
+              "applied_source": null
+            },
+            "requirements": [
+              {
+                "role": "Server",
+                "subject": "head-office-vpn",
+                "authority": "training-ca",
+                "destinations": [
+                  {
+                    "address": "10.60.0.0",
+                    "prefix": 24
+                  }
+                ]
+              },
+              {
+                "role": "Client",
+                "subject": "warehouse-vpn",
+                "authority": "training-ca",
+                "destinations": [
+                  {
+                    "address": "10.24.0.0",
+                    "prefix": 24
+                  }
+                ]
+              }
+            ],
+            "cases": [
+              {
+                "id": "lan-0-host-0",
+                "label": "head-office host 1: outward and return path",
+                "source": "10.24.0.21",
+                "destination": "10.60.0.41",
+                "expected": "Reachable",
+                "from": 0
+              },
+              {
+                "id": "lan-0-host-1",
+                "label": "head-office host 2: outward and return path",
+                "source": "10.24.0.221",
+                "destination": "10.60.0.205",
+                "expected": "Reachable",
+                "from": 0
+              },
+              {
+                "id": "outside-0",
+                "label": "head-office: unrelated destination stays outside VPN",
+                "source": "10.24.0.21",
+                "destination": "203.0.113.200",
+                "expected": "OutsideTunnel",
+                "from": 0
+              },
+              {
+                "id": "lan-1-host-0",
+                "label": "warehouse host 1: outward and return path",
+                "source": "10.60.0.21",
+                "destination": "10.24.0.41",
+                "expected": "Reachable",
+                "from": 1
+              },
+              {
+                "id": "lan-1-host-1",
+                "label": "warehouse host 2: outward and return path",
+                "source": "10.60.0.221",
+                "destination": "10.24.0.205",
+                "expected": "Reachable",
+                "from": 1
+              },
+              {
+                "id": "outside-1",
+                "label": "warehouse: unrelated destination stays outside VPN",
+                "source": "10.60.0.21",
+                "destination": "203.0.113.201",
+                "expected": "OutsideTunnel",
+                "from": 1
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "initial": {
+              "supplied": {
+                "peers": [
+                  {
+                    "label": "studio",
+                    "endpoint": "192.0.2.10"
+                  },
+                  {
+                    "label": "demo-branch",
+                    "endpoint": "192.0.2.20"
+                  }
+                ],
+                "underlay_available": true,
+                "files": [
+                  {
+                    "path": "/etc/openvpn/example-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "example-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/other-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "other-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/example-ca-alias.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "example-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/studio.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "studio-vpn",
+                      "issuer": "example-ca",
+                      "key_id": "studio-pair",
+                      "role": "Server",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/studio.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "studio-pair"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/demo-branch.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "demo-branch-vpn",
+                      "issuer": "example-ca",
+                      "key_id": "demo-branch-pair",
+                      "role": "Client",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/demo-branch.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "demo-branch-pair"
+                    }
+                  }
+                ]
+              },
+              "lans": [
+                {
+                  "address": "10.10.0.0",
+                  "prefix": 24
+                },
+                {
+                  "address": "10.20.0.0",
+                  "prefix": 24
+                }
+              ],
+              "saved": [
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-server\nport 1194\nifconfig 10.89.0.1 10.89.0.2\nca /etc/openvpn/example-ca.crt\ncert /etc/openvpn/studio.crt\nkey /etc/openvpn/studio.key\nremote-cert-tls client\nverify-x509-name demo-branch-vpn name\nroute 10.20.0.0 255.255.255.0\n",
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 192.0.2.10 1195\nifconfig 10.89.0.2 10.89.0.1\nca /etc/openvpn/other-ca.crt\ncert /etc/openvpn/demo-branch.crt\nkey /etc/openvpn/studio.key\nremote-cert-tls server\nverify-x509-name studio-vpn name\nroute 10.10.0.0 255.255.255.0\n"
+              ],
+              "applied": null,
+              "applied_source": null
+            },
+            "requirements": [
+              {
+                "role": "Server",
+                "subject": "studio-vpn",
+                "authority": "example-ca",
+                "destinations": [
+                  {
+                    "address": "10.20.0.0",
+                    "prefix": 24
+                  }
+                ]
+              },
+              {
+                "role": "Client",
+                "subject": "demo-branch-vpn",
+                "authority": "example-ca",
+                "destinations": [
+                  {
+                    "address": "10.10.0.0",
+                    "prefix": 24
+                  }
+                ]
+              }
+            ],
+            "cases": [
+              {
+                "id": "lan-0-host-0",
+                "label": "studio host 1: outward and return path",
+                "source": "10.10.0.21",
+                "destination": "10.20.0.41",
+                "expected": "Reachable",
+                "from": 0
+              },
+              {
+                "id": "lan-0-host-1",
+                "label": "studio host 2: outward and return path",
+                "source": "10.10.0.221",
+                "destination": "10.20.0.205",
+                "expected": "Reachable",
+                "from": 0
+              },
+              {
+                "id": "outside-0",
+                "label": "studio: unrelated destination stays outside VPN",
+                "source": "10.10.0.21",
+                "destination": "203.0.113.200",
+                "expected": "OutsideTunnel",
+                "from": 0
+              },
+              {
+                "id": "lan-1-host-0",
+                "label": "demo-branch host 1: outward and return path",
+                "source": "10.20.0.21",
+                "destination": "10.10.0.41",
+                "expected": "Reachable",
+                "from": 1
+              },
+              {
+                "id": "lan-1-host-1",
+                "label": "demo-branch host 2: outward and return path",
+                "source": "10.20.0.221",
+                "destination": "10.10.0.205",
+                "expected": "Reachable",
+                "from": 1
+              },
+              {
+                "id": "outside-1",
+                "label": "demo-branch: unrelated destination stays outside VPN",
+                "source": "10.20.0.21",
+                "destination": "203.0.113.201",
+                "expected": "OutsideTunnel",
+                "from": 1
+              }
+            ]
+          },
+          "worked": [
+            {
+              "kind": "Edit",
+              "peer": 1,
+              "text": "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 192.0.2.10 1194\nifconfig 10.89.0.2 10.89.0.1\nca /etc/openvpn/example-ca.crt\ncert /etc/openvpn/demo-branch.crt\nkey /etc/openvpn/demo-branch.key\nremote-cert-tls server\nverify-x509-name studio-vpn name\nroute 10.10.0.0 255.255.255.0\n"
+            },
+            {
+              "kind": "Save",
+              "peer": 1
+            },
+            {
+              "kind": "Apply"
+            },
+            {
+              "kind": "Query",
+              "query": {
+                "from": 0,
+                "source": "10.10.0.21",
+                "destination": "10.20.0.41"
+              }
+            },
+            {
+              "kind": "Probe"
+            },
+            {
+              "kind": "Query",
+              "query": {
+                "from": 1,
+                "source": "10.20.0.21",
+                "destination": "10.10.0.41"
+              }
+            },
+            {
+              "kind": "Probe"
+            },
+            {
+              "kind": "Check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Edit\",\"peer\":1,\"text\":\"# Editable simulated peer settings; not a host deployment.\\ndev tun\\nproto udp\\ntls-client\\nport 1194\\nremote 198.51.100.10 1194\\nifconfig 10.88.0.2 10.88.0.1\\nca /etc/openvpn/training-ca.crt\\ncert /etc/openvpn/warehouse.crt\\nkey /etc/openvpn/warehouse.key\\nremote-cert-tls server\\nverify-x509-name head-office-vpn name\\nroute 10.24.0.0 255.255.255.0\\n\"}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Save\",\"peer\":1}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Apply\"}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Query\",\"query\":{\"from\":0,\"source\":\"10.24.0.21\",\"destination\":\"10.60.0.41\"}}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Probe\"}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Query\",\"query\":{\"from\":1,\"source\":\"10.60.0.21\",\"destination\":\"10.24.0.41\"}}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Probe\"}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Check\"}}"
+      ],
+      "prerequisites": [
+        "lpic2-exposure-client-policy",
+        "lpic2-router-local-transit-policy"
+      ]
+    },
+    {
+      "id": "lpic2-vpn-lan-return",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "OpenVPN: site-to-site routes",
+      "unit": "linux-vpn-point",
+      "title": "Restore outward and return routes across a site-to-site VPN",
+      "summary": "Repair both profile fragments so every required host in two /20 LANs has an outward and return route.",
+      "objective": "Restore both directions between central LAN 172.20.16.0/20 and depot LAN 172.21.32.0/20. Cover every ordinary host in both LANs, including hosts beyond the first /24. Keep unrelated destinations outside the VPN. Preserve the supplied peer identities, authority, transport and reciprocal tunnel addresses. Save and apply the current profiles, investigate the modeled paths and check the complete configuration.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Verify the peer prerequisites first",
+        "Read outward and return routes",
+        "Cover the whole range without redirecting unrelated traffic"
+      ],
+      "guide": [
+        {
+          "title": "Verify the peer prerequisites first",
+          "why": "Correct peer settings do not automatically create every LAN route.",
+          "action": "Apply the supplied settings and inspect the actual prerequisite results.",
+          "commands": []
+        },
+        {
+          "title": "Read outward and return routes",
+          "why": "A request and its reply need the appropriate route on different peers.",
+          "action": "Compare each route network and mask with the opposite LAN.",
+          "commands": []
+        },
+        {
+          "title": "Cover the whole range without redirecting unrelated traffic",
+          "why": "A sample host can work even though most of its subnet has no return route.",
+          "action": "Test a host beyond the first /24, preserve the outside-path cases, then Check configuration.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Apply first: if peer prerequisites pass, inspect the route covering the destination on the source side.",
+        "A request can leave correctly while the other peer has no route back to a source outside its first /24.",
+        "Use each entire opposite /20 LAN; a default route changes unrelated traffic and is not an acceptable shortcut."
+      ],
+      "sources": [
+        "https://openvpn.net/community-docs/community-articles/openvpn-2-6-manual/",
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/"
+      ],
+      "explanation": "The peer prerequisites were already correct. The outward route must select the destination LAN, while the other peer needs a route back to the original source LAN. The full /20 includes several /24 blocks; exact interval comparison prevents a few working hosts or a broad default from standing in for the required policy.",
+      "simplifications": "Finite OpenVPN2.6-style editable profile subset with supplied identity/validity/key-pair facts and IPv4 UDP/TUN point-to-point routes. These fragments are not deployable profiles. No PEM/crypto/TLS handshake, certificate creation, actual interfaces, host files, routing, packets, daemon, DCO, multipoint/push/iroute, TCP transport or external connectivity is performed. Unknown directives fail. Conventional supplied LANs use /1–/30; general route destinations support /0–/32.",
+      "initial": {
+        "kind": "VpnPoint",
+        "simulation": {
+          "version": 1,
+          "source_id": "lpic2-vpn-lan-return",
+          "view": "introduction",
+          "assignment": {
+            "source_task": "{\"cases\":[{\"destination\":\"172.21.32.41\",\"expected\":\"Reachable\",\"from\":0,\"id\":\"lan-0-host-0\",\"label\":\"central host 1: outward and return path\",\"source\":\"172.20.16.21\"},{\"destination\":\"172.21.47.205\",\"expected\":\"Reachable\",\"from\":0,\"id\":\"lan-0-host-1\",\"label\":\"central host 2: outward and return path\",\"source\":\"172.20.31.221\"},{\"destination\":\"203.0.113.200\",\"expected\":\"OutsideTunnel\",\"from\":0,\"id\":\"outside-0\",\"label\":\"central: unrelated destination stays outside VPN\",\"source\":\"172.20.16.21\"},{\"destination\":\"172.20.16.41\",\"expected\":\"Reachable\",\"from\":1,\"id\":\"lan-1-host-0\",\"label\":\"depot host 1: outward and return path\",\"source\":\"172.21.32.21\"},{\"destination\":\"172.20.31.205\",\"expected\":\"Reachable\",\"from\":1,\"id\":\"lan-1-host-1\",\"label\":\"depot host 2: outward and return path\",\"source\":\"172.21.47.221\"},{\"destination\":\"203.0.113.201\",\"expected\":\"OutsideTunnel\",\"from\":1,\"id\":\"outside-1\",\"label\":\"depot: unrelated destination stays outside VPN\",\"source\":\"172.21.32.21\"}],\"initial\":{\"applied\":null,\"applied_source\":null,\"lans\":[{\"address\":\"172.20.16.0\",\"prefix\":20},{\"address\":\"172.21.32.0\",\"prefix\":20}],\"saved\":[\"# Editable simulated peer settings; not a host deployment.\\ndev tun\\nproto udp\\ntls-server\\nport 1194\\nifconfig 10.90.0.1 10.90.0.2\\nca /etc/openvpn/route-ca.crt\\ncert /etc/openvpn/central.crt\\nkey /etc/openvpn/central.key\\nremote-cert-tls client\\nverify-x509-name depot-vpn name\\nroute 172.21.48.0 255.255.240.0\\n\",\"# Editable simulated peer settings; not a host deployment.\\ndev tun\\nproto udp\\ntls-client\\nport 1194\\nremote 198.51.100.30 1194\\nifconfig 10.90.0.2 10.90.0.1\\nca /etc/openvpn/route-ca.crt\\ncert /etc/openvpn/depot.crt\\nkey /etc/openvpn/depot.key\\nremote-cert-tls server\\nverify-x509-name central-vpn name\\nroute 172.20.16.0 255.255.255.0\\n\"],\"supplied\":{\"files\":[{\"material\":{\"id\":\"route-ca\",\"kind\":\"Ca\"},\"path\":\"/etc/openvpn/route-ca.crt\"},{\"material\":{\"id\":\"other-ca\",\"kind\":\"Ca\"},\"path\":\"/etc/openvpn/other-ca.crt\"},{\"material\":{\"id\":\"route-ca\",\"kind\":\"Ca\"},\"path\":\"/etc/openvpn/route-ca-alias.crt\"},{\"material\":{\"issuer\":\"route-ca\",\"key_id\":\"central-pair\",\"kind\":\"Certificate\",\"role\":\"Server\",\"subject\":\"central-vpn\",\"valid\":true},\"path\":\"/etc/openvpn/central.crt\"},{\"material\":{\"key_id\":\"central-pair\",\"kind\":\"Key\"},\"path\":\"/etc/openvpn/central.key\"},{\"material\":{\"issuer\":\"route-ca\",\"key_id\":\"depot-pair\",\"kind\":\"Certificate\",\"role\":\"Client\",\"subject\":\"depot-vpn\",\"valid\":true},\"path\":\"/etc/openvpn/depot.crt\"},{\"material\":{\"key_id\":\"depot-pair\",\"kind\":\"Key\"},\"path\":\"/etc/openvpn/depot.key\"}],\"peers\":[{\"endpoint\":\"198.51.100.30\",\"label\":\"central\"},{\"endpoint\":\"198.51.100.40\",\"label\":\"depot\"}],\"underlay_available\":true}},\"requirements\":[{\"authority\":\"route-ca\",\"destinations\":[{\"address\":\"172.21.32.0\",\"prefix\":20}],\"role\":\"Server\",\"subject\":\"central-vpn\"},{\"authority\":\"route-ca\",\"destinations\":[{\"address\":\"172.20.16.0\",\"prefix\":20}],\"role\":\"Client\",\"subject\":\"depot-vpn\"}],\"version\":1}",
+            "world": {
+              "supplied": {
+                "peers": [
+                  {
+                    "label": "central",
+                    "endpoint": "198.51.100.30"
+                  },
+                  {
+                    "label": "depot",
+                    "endpoint": "198.51.100.40"
+                  }
+                ],
+                "underlay_available": true,
+                "files": [
+                  {
+                    "path": "/etc/openvpn/route-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "route-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/other-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "other-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/route-ca-alias.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "route-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/central.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "central-vpn",
+                      "issuer": "route-ca",
+                      "key_id": "central-pair",
+                      "role": "Server",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/central.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "central-pair"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/depot.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "depot-vpn",
+                      "issuer": "route-ca",
+                      "key_id": "depot-pair",
+                      "role": "Client",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/depot.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "depot-pair"
+                    }
+                  }
+                ]
+              },
+              "lans": [
+                {
+                  "address": "172.20.16.0",
+                  "prefix": 20
+                },
+                {
+                  "address": "172.21.32.0",
+                  "prefix": 20
+                }
+              ],
+              "saved": [
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-server\nport 1194\nifconfig 10.90.0.1 10.90.0.2\nca /etc/openvpn/route-ca.crt\ncert /etc/openvpn/central.crt\nkey /etc/openvpn/central.key\nremote-cert-tls client\nverify-x509-name depot-vpn name\nroute 172.21.48.0 255.255.240.0\n",
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 198.51.100.30 1194\nifconfig 10.90.0.2 10.90.0.1\nca /etc/openvpn/route-ca.crt\ncert /etc/openvpn/depot.crt\nkey /etc/openvpn/depot.key\nremote-cert-tls server\nverify-x509-name central-vpn name\nroute 172.20.16.0 255.255.255.0\n"
+              ],
+              "applied": null,
+              "applied_source": null
+            },
+            "editors": [
+              "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-server\nport 1194\nifconfig 10.90.0.1 10.90.0.2\nca /etc/openvpn/route-ca.crt\ncert /etc/openvpn/central.crt\nkey /etc/openvpn/central.key\nremote-cert-tls client\nverify-x509-name depot-vpn name\nroute 172.21.48.0 255.255.240.0\n",
+              "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 198.51.100.30 1194\nifconfig 10.90.0.2 10.90.0.1\nca /etc/openvpn/route-ca.crt\ncert /etc/openvpn/depot.crt\nkey /etc/openvpn/depot.key\nremote-cert-tls server\nverify-x509-name central-vpn name\nroute 172.20.16.0 255.255.255.0\n"
+            ],
+            "query": {
+              "from": 0,
+              "source": "172.20.16.21",
+              "destination": "172.21.32.41"
+            },
+            "notice": null,
+            "last_probe": null,
+            "checked": false,
+            "history": []
+          },
+          "example": {
+            "source_task": "{\"cases\":[{\"destination\":\"10.48.16.41\",\"expected\":\"Reachable\",\"from\":0,\"id\":\"lan-0-host-0\",\"label\":\"practice-hub host 1: outward and return path\",\"source\":\"10.32.0.21\"},{\"destination\":\"10.48.31.205\",\"expected\":\"Reachable\",\"from\":0,\"id\":\"lan-0-host-1\",\"label\":\"practice-hub host 2: outward and return path\",\"source\":\"10.32.15.221\"},{\"destination\":\"203.0.113.200\",\"expected\":\"OutsideTunnel\",\"from\":0,\"id\":\"outside-0\",\"label\":\"practice-hub: unrelated destination stays outside VPN\",\"source\":\"10.32.0.21\"},{\"destination\":\"10.32.0.41\",\"expected\":\"Reachable\",\"from\":1,\"id\":\"lan-1-host-0\",\"label\":\"practice-office host 1: outward and return path\",\"source\":\"10.48.16.21\"},{\"destination\":\"10.32.15.205\",\"expected\":\"Reachable\",\"from\":1,\"id\":\"lan-1-host-1\",\"label\":\"practice-office host 2: outward and return path\",\"source\":\"10.48.31.221\"},{\"destination\":\"203.0.113.201\",\"expected\":\"OutsideTunnel\",\"from\":1,\"id\":\"outside-1\",\"label\":\"practice-office: unrelated destination stays outside VPN\",\"source\":\"10.48.16.21\"}],\"initial\":{\"applied\":null,\"applied_source\":null,\"lans\":[{\"address\":\"10.32.0.0\",\"prefix\":20},{\"address\":\"10.48.16.0\",\"prefix\":20}],\"saved\":[\"# Editable simulated peer settings; not a host deployment.\\ndev tun\\nproto udp\\ntls-server\\nport 1194\\nifconfig 10.91.0.1 10.91.0.2\\nca /etc/openvpn/practice-ca.crt\\ncert /etc/openvpn/practice-hub.crt\\nkey /etc/openvpn/practice-hub.key\\nremote-cert-tls client\\nverify-x509-name practice-office-vpn name\\nroute 10.48.32.0 255.255.240.0\\n\",\"# Editable simulated peer settings; not a host deployment.\\ndev tun\\nproto udp\\ntls-client\\nport 1194\\nremote 192.0.2.30 1194\\nifconfig 10.91.0.2 10.91.0.1\\nca /etc/openvpn/practice-ca.crt\\ncert /etc/openvpn/practice-office.crt\\nkey /etc/openvpn/practice-office.key\\nremote-cert-tls server\\nverify-x509-name practice-hub-vpn name\\nroute 10.32.0.0 255.255.255.0\\n\"],\"supplied\":{\"files\":[{\"material\":{\"id\":\"practice-ca\",\"kind\":\"Ca\"},\"path\":\"/etc/openvpn/practice-ca.crt\"},{\"material\":{\"id\":\"other-ca\",\"kind\":\"Ca\"},\"path\":\"/etc/openvpn/other-ca.crt\"},{\"material\":{\"id\":\"practice-ca\",\"kind\":\"Ca\"},\"path\":\"/etc/openvpn/practice-ca-alias.crt\"},{\"material\":{\"issuer\":\"practice-ca\",\"key_id\":\"practice-hub-pair\",\"kind\":\"Certificate\",\"role\":\"Server\",\"subject\":\"practice-hub-vpn\",\"valid\":true},\"path\":\"/etc/openvpn/practice-hub.crt\"},{\"material\":{\"key_id\":\"practice-hub-pair\",\"kind\":\"Key\"},\"path\":\"/etc/openvpn/practice-hub.key\"},{\"material\":{\"issuer\":\"practice-ca\",\"key_id\":\"practice-office-pair\",\"kind\":\"Certificate\",\"role\":\"Client\",\"subject\":\"practice-office-vpn\",\"valid\":true},\"path\":\"/etc/openvpn/practice-office.crt\"},{\"material\":{\"key_id\":\"practice-office-pair\",\"kind\":\"Key\"},\"path\":\"/etc/openvpn/practice-office.key\"}],\"peers\":[{\"endpoint\":\"192.0.2.30\",\"label\":\"practice-hub\"},{\"endpoint\":\"192.0.2.40\",\"label\":\"practice-office\"}],\"underlay_available\":true}},\"requirements\":[{\"authority\":\"practice-ca\",\"destinations\":[{\"address\":\"10.48.16.0\",\"prefix\":20}],\"role\":\"Server\",\"subject\":\"practice-hub-vpn\"},{\"authority\":\"practice-ca\",\"destinations\":[{\"address\":\"10.32.0.0\",\"prefix\":20}],\"role\":\"Client\",\"subject\":\"practice-office-vpn\"}],\"version\":1}",
+            "world": {
+              "supplied": {
+                "peers": [
+                  {
+                    "label": "practice-hub",
+                    "endpoint": "192.0.2.30"
+                  },
+                  {
+                    "label": "practice-office",
+                    "endpoint": "192.0.2.40"
+                  }
+                ],
+                "underlay_available": true,
+                "files": [
+                  {
+                    "path": "/etc/openvpn/practice-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "practice-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/other-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "other-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/practice-ca-alias.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "practice-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/practice-hub.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "practice-hub-vpn",
+                      "issuer": "practice-ca",
+                      "key_id": "practice-hub-pair",
+                      "role": "Server",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/practice-hub.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "practice-hub-pair"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/practice-office.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "practice-office-vpn",
+                      "issuer": "practice-ca",
+                      "key_id": "practice-office-pair",
+                      "role": "Client",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/practice-office.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "practice-office-pair"
+                    }
+                  }
+                ]
+              },
+              "lans": [
+                {
+                  "address": "10.32.0.0",
+                  "prefix": 20
+                },
+                {
+                  "address": "10.48.16.0",
+                  "prefix": 20
+                }
+              ],
+              "saved": [
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-server\nport 1194\nifconfig 10.91.0.1 10.91.0.2\nca /etc/openvpn/practice-ca.crt\ncert /etc/openvpn/practice-hub.crt\nkey /etc/openvpn/practice-hub.key\nremote-cert-tls client\nverify-x509-name practice-office-vpn name\nroute 10.48.32.0 255.255.240.0\n",
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 192.0.2.30 1194\nifconfig 10.91.0.2 10.91.0.1\nca /etc/openvpn/practice-ca.crt\ncert /etc/openvpn/practice-office.crt\nkey /etc/openvpn/practice-office.key\nremote-cert-tls server\nverify-x509-name practice-hub-vpn name\nroute 10.32.0.0 255.255.255.0\n"
+              ],
+              "applied": null,
+              "applied_source": null
+            },
+            "editors": [
+              "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-server\nport 1194\nifconfig 10.91.0.1 10.91.0.2\nca /etc/openvpn/practice-ca.crt\ncert /etc/openvpn/practice-hub.crt\nkey /etc/openvpn/practice-hub.key\nremote-cert-tls client\nverify-x509-name practice-office-vpn name\nroute 10.48.32.0 255.255.240.0\n",
+              "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 192.0.2.30 1194\nifconfig 10.91.0.2 10.91.0.1\nca /etc/openvpn/practice-ca.crt\ncert /etc/openvpn/practice-office.crt\nkey /etc/openvpn/practice-office.key\nremote-cert-tls server\nverify-x509-name practice-hub-vpn name\nroute 10.32.0.0 255.255.255.0\n"
+            ],
+            "query": {
+              "from": 0,
+              "source": "10.32.0.21",
+              "destination": "10.48.16.41"
+            },
+            "notice": null,
+            "last_probe": null,
+            "checked": false,
+            "history": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "VpnPoint",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-vpn-lan-return",
+          "assignment": {
+            "version": 1,
+            "initial": {
+              "supplied": {
+                "peers": [
+                  {
+                    "label": "central",
+                    "endpoint": "198.51.100.30"
+                  },
+                  {
+                    "label": "depot",
+                    "endpoint": "198.51.100.40"
+                  }
+                ],
+                "underlay_available": true,
+                "files": [
+                  {
+                    "path": "/etc/openvpn/route-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "route-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/other-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "other-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/route-ca-alias.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "route-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/central.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "central-vpn",
+                      "issuer": "route-ca",
+                      "key_id": "central-pair",
+                      "role": "Server",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/central.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "central-pair"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/depot.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "depot-vpn",
+                      "issuer": "route-ca",
+                      "key_id": "depot-pair",
+                      "role": "Client",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/depot.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "depot-pair"
+                    }
+                  }
+                ]
+              },
+              "lans": [
+                {
+                  "address": "172.20.16.0",
+                  "prefix": 20
+                },
+                {
+                  "address": "172.21.32.0",
+                  "prefix": 20
+                }
+              ],
+              "saved": [
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-server\nport 1194\nifconfig 10.90.0.1 10.90.0.2\nca /etc/openvpn/route-ca.crt\ncert /etc/openvpn/central.crt\nkey /etc/openvpn/central.key\nremote-cert-tls client\nverify-x509-name depot-vpn name\nroute 172.21.48.0 255.255.240.0\n",
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 198.51.100.30 1194\nifconfig 10.90.0.2 10.90.0.1\nca /etc/openvpn/route-ca.crt\ncert /etc/openvpn/depot.crt\nkey /etc/openvpn/depot.key\nremote-cert-tls server\nverify-x509-name central-vpn name\nroute 172.20.16.0 255.255.255.0\n"
+              ],
+              "applied": null,
+              "applied_source": null
+            },
+            "requirements": [
+              {
+                "role": "Server",
+                "subject": "central-vpn",
+                "authority": "route-ca",
+                "destinations": [
+                  {
+                    "address": "172.21.32.0",
+                    "prefix": 20
+                  }
+                ]
+              },
+              {
+                "role": "Client",
+                "subject": "depot-vpn",
+                "authority": "route-ca",
+                "destinations": [
+                  {
+                    "address": "172.20.16.0",
+                    "prefix": 20
+                  }
+                ]
+              }
+            ],
+            "cases": [
+              {
+                "id": "lan-0-host-0",
+                "label": "central host 1: outward and return path",
+                "source": "172.20.16.21",
+                "destination": "172.21.32.41",
+                "expected": "Reachable",
+                "from": 0
+              },
+              {
+                "id": "lan-0-host-1",
+                "label": "central host 2: outward and return path",
+                "source": "172.20.31.221",
+                "destination": "172.21.47.205",
+                "expected": "Reachable",
+                "from": 0
+              },
+              {
+                "id": "outside-0",
+                "label": "central: unrelated destination stays outside VPN",
+                "source": "172.20.16.21",
+                "destination": "203.0.113.200",
+                "expected": "OutsideTunnel",
+                "from": 0
+              },
+              {
+                "id": "lan-1-host-0",
+                "label": "depot host 1: outward and return path",
+                "source": "172.21.32.21",
+                "destination": "172.20.16.41",
+                "expected": "Reachable",
+                "from": 1
+              },
+              {
+                "id": "lan-1-host-1",
+                "label": "depot host 2: outward and return path",
+                "source": "172.21.47.221",
+                "destination": "172.20.31.205",
+                "expected": "Reachable",
+                "from": 1
+              },
+              {
+                "id": "outside-1",
+                "label": "depot: unrelated destination stays outside VPN",
+                "source": "172.21.32.21",
+                "destination": "203.0.113.201",
+                "expected": "OutsideTunnel",
+                "from": 1
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "initial": {
+              "supplied": {
+                "peers": [
+                  {
+                    "label": "practice-hub",
+                    "endpoint": "192.0.2.30"
+                  },
+                  {
+                    "label": "practice-office",
+                    "endpoint": "192.0.2.40"
+                  }
+                ],
+                "underlay_available": true,
+                "files": [
+                  {
+                    "path": "/etc/openvpn/practice-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "practice-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/other-ca.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "other-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/practice-ca-alias.crt",
+                    "material": {
+                      "kind": "Ca",
+                      "id": "practice-ca"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/practice-hub.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "practice-hub-vpn",
+                      "issuer": "practice-ca",
+                      "key_id": "practice-hub-pair",
+                      "role": "Server",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/practice-hub.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "practice-hub-pair"
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/practice-office.crt",
+                    "material": {
+                      "kind": "Certificate",
+                      "subject": "practice-office-vpn",
+                      "issuer": "practice-ca",
+                      "key_id": "practice-office-pair",
+                      "role": "Client",
+                      "valid": true
+                    }
+                  },
+                  {
+                    "path": "/etc/openvpn/practice-office.key",
+                    "material": {
+                      "kind": "Key",
+                      "key_id": "practice-office-pair"
+                    }
+                  }
+                ]
+              },
+              "lans": [
+                {
+                  "address": "10.32.0.0",
+                  "prefix": 20
+                },
+                {
+                  "address": "10.48.16.0",
+                  "prefix": 20
+                }
+              ],
+              "saved": [
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-server\nport 1194\nifconfig 10.91.0.1 10.91.0.2\nca /etc/openvpn/practice-ca.crt\ncert /etc/openvpn/practice-hub.crt\nkey /etc/openvpn/practice-hub.key\nremote-cert-tls client\nverify-x509-name practice-office-vpn name\nroute 10.48.32.0 255.255.240.0\n",
+                "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 192.0.2.30 1194\nifconfig 10.91.0.2 10.91.0.1\nca /etc/openvpn/practice-ca.crt\ncert /etc/openvpn/practice-office.crt\nkey /etc/openvpn/practice-office.key\nremote-cert-tls server\nverify-x509-name practice-hub-vpn name\nroute 10.32.0.0 255.255.255.0\n"
+              ],
+              "applied": null,
+              "applied_source": null
+            },
+            "requirements": [
+              {
+                "role": "Server",
+                "subject": "practice-hub-vpn",
+                "authority": "practice-ca",
+                "destinations": [
+                  {
+                    "address": "10.48.16.0",
+                    "prefix": 20
+                  }
+                ]
+              },
+              {
+                "role": "Client",
+                "subject": "practice-office-vpn",
+                "authority": "practice-ca",
+                "destinations": [
+                  {
+                    "address": "10.32.0.0",
+                    "prefix": 20
+                  }
+                ]
+              }
+            ],
+            "cases": [
+              {
+                "id": "lan-0-host-0",
+                "label": "practice-hub host 1: outward and return path",
+                "source": "10.32.0.21",
+                "destination": "10.48.16.41",
+                "expected": "Reachable",
+                "from": 0
+              },
+              {
+                "id": "lan-0-host-1",
+                "label": "practice-hub host 2: outward and return path",
+                "source": "10.32.15.221",
+                "destination": "10.48.31.205",
+                "expected": "Reachable",
+                "from": 0
+              },
+              {
+                "id": "outside-0",
+                "label": "practice-hub: unrelated destination stays outside VPN",
+                "source": "10.32.0.21",
+                "destination": "203.0.113.200",
+                "expected": "OutsideTunnel",
+                "from": 0
+              },
+              {
+                "id": "lan-1-host-0",
+                "label": "practice-office host 1: outward and return path",
+                "source": "10.48.16.21",
+                "destination": "10.32.0.41",
+                "expected": "Reachable",
+                "from": 1
+              },
+              {
+                "id": "lan-1-host-1",
+                "label": "practice-office host 2: outward and return path",
+                "source": "10.48.31.221",
+                "destination": "10.32.15.205",
+                "expected": "Reachable",
+                "from": 1
+              },
+              {
+                "id": "outside-1",
+                "label": "practice-office: unrelated destination stays outside VPN",
+                "source": "10.48.16.21",
+                "destination": "203.0.113.201",
+                "expected": "OutsideTunnel",
+                "from": 1
+              }
+            ]
+          },
+          "worked": [
+            {
+              "kind": "Edit",
+              "peer": 0,
+              "text": "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-server\nport 1194\nifconfig 10.91.0.1 10.91.0.2\nca /etc/openvpn/practice-ca.crt\ncert /etc/openvpn/practice-hub.crt\nkey /etc/openvpn/practice-hub.key\nremote-cert-tls client\nverify-x509-name practice-office-vpn name\nroute 10.48.16.0 255.255.240.0\n"
+            },
+            {
+              "kind": "Save",
+              "peer": 0
+            },
+            {
+              "kind": "Edit",
+              "peer": 1,
+              "text": "# Editable simulated peer settings; not a host deployment.\ndev tun\nproto udp\ntls-client\nport 1194\nremote 192.0.2.30 1194\nifconfig 10.91.0.2 10.91.0.1\nca /etc/openvpn/practice-ca.crt\ncert /etc/openvpn/practice-office.crt\nkey /etc/openvpn/practice-office.key\nremote-cert-tls server\nverify-x509-name practice-hub-vpn name\nroute 10.32.0.0 255.255.240.0\n"
+            },
+            {
+              "kind": "Save",
+              "peer": 1
+            },
+            {
+              "kind": "Apply"
+            },
+            {
+              "kind": "Query",
+              "query": {
+                "from": 0,
+                "source": "10.32.0.21",
+                "destination": "10.48.16.41"
+              }
+            },
+            {
+              "kind": "Probe"
+            },
+            {
+              "kind": "Query",
+              "query": {
+                "from": 1,
+                "source": "10.48.16.21",
+                "destination": "10.32.0.41"
+              }
+            },
+            {
+              "kind": "Probe"
+            },
+            {
+              "kind": "Check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Edit\",\"peer\":0,\"text\":\"# Editable simulated peer settings; not a host deployment.\\ndev tun\\nproto udp\\ntls-server\\nport 1194\\nifconfig 10.90.0.1 10.90.0.2\\nca /etc/openvpn/route-ca.crt\\ncert /etc/openvpn/central.crt\\nkey /etc/openvpn/central.key\\nremote-cert-tls client\\nverify-x509-name depot-vpn name\\nroute 172.21.32.0 255.255.240.0\\n\"}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Save\",\"peer\":0}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Edit\",\"peer\":1,\"text\":\"# Editable simulated peer settings; not a host deployment.\\ndev tun\\nproto udp\\ntls-client\\nport 1194\\nremote 198.51.100.30 1194\\nifconfig 10.90.0.2 10.90.0.1\\nca /etc/openvpn/route-ca.crt\\ncert /etc/openvpn/depot.crt\\nkey /etc/openvpn/depot.key\\nremote-cert-tls server\\nverify-x509-name central-vpn name\\nroute 172.20.16.0 255.255.240.0\\n\"}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Save\",\"peer\":1}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Apply\"}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Query\",\"query\":{\"from\":0,\"source\":\"172.20.16.21\",\"destination\":\"172.21.32.41\"}}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Probe\"}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Query\",\"query\":{\"from\":1,\"source\":\"172.21.32.21\",\"destination\":\"172.20.16.41\"}}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Probe\"}}",
+        "vpn-point-workspace {\"practice\":false,\"action\":{\"kind\":\"Check\"}}"
+      ],
+      "prerequisites": [
+        "lpic2-vpn-peer-profile"
+      ]
+    }
+  ]
+}

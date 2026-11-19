@@ -4,23 +4,36 @@ use super::{name, readable_variable};
 pub(super) enum Value {
     Scalar(String),
     Indexed(Vec<String>),
+    Associative(std::collections::BTreeMap<String, String>),
 }
 impl Value {
     pub fn scalar(&self) -> &str {
         match self {
             Self::Scalar(s) => s,
             Self::Indexed(v) => v.first().map_or("", String::as_str),
+            Self::Associative(v) => v.get("0").map_or("", String::as_str),
         }
     }
-    pub fn elements(&self) -> &[String] {
+    pub fn elements(&self) -> Option<&[String]> {
         match self {
-            Self::Scalar(s) => std::slice::from_ref(s),
-            Self::Indexed(v) => v,
+            Self::Scalar(s) => Some(std::slice::from_ref(s)),
+            Self::Indexed(v) => Some(v),
+            Self::Associative(_) => None,
+        }
+    }
+    pub fn count(&self) -> usize {
+        match self {
+            Self::Associative(v) => v.len(),
+            _ => self.elements().unwrap().len(),
         }
     }
     pub fn bytes(&self) -> usize {
         match self {
             Self::Scalar(s) => s.len(),
+            Self::Associative(v) => v
+                .iter()
+                .map(|(k, v)| k.len() + v.len() + super::associative::ENTRY_BYTES)
+                .sum(),
             Self::Indexed(v) => {
                 v.iter().map(String::len).sum::<usize>() + v.len() * std::mem::size_of::<String>()
             }
@@ -29,6 +42,9 @@ impl Value {
     pub fn assign_scalar(&mut self, value: String) {
         match self {
             Self::Scalar(s) => *s = value,
+            Self::Associative(v) => {
+                v.insert("0".into(), value);
+            }
             Self::Indexed(v) if v.is_empty() => v.push(value),
             Self::Indexed(v) => v[0] = value,
         }

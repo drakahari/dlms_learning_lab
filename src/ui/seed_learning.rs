@@ -64,13 +64,37 @@ impl LabApp {
                     let l = s.seed_mount_teaching.as_ref().unwrap();
                     (&l.prerequisite_note, &l.concepts, &l.example_description)
                 };
-                ui.label(RichText::new(note).color(palette(ui).muted));
-                for c in concepts {
-                    ui.label(RichText::new(&c.title).strong());
-                    ui.label(&c.text);
-                }
-                ui.label(RichText::new("A different example to try").strong());
-                ui.label(description);
+                lesson_presentation::concepts(
+                    ui,
+                    &s,
+                    note,
+                    concepts.iter().map(|c| (c.title.clone(), c.text.clone())),
+                );
+                lesson_presentation::worked(ui, description);
+                lesson_presentation::worked_rows(ui, &s);
+                let actions = s
+                    .seed_dns_teaching
+                    .as_ref()
+                    .map(|l| {
+                        l.example_actions
+                            .iter()
+                            .map(|a| (a.title.as_str(), a.explanation.as_str()))
+                            .collect::<Vec<_>>()
+                    })
+                    .unwrap_or_else(|| {
+                        s.seed_mount_teaching
+                            .as_ref()
+                            .unwrap()
+                            .example_actions
+                            .iter()
+                            .map(|a| (a.title.as_str(), a.explanation.as_str()))
+                            .collect()
+                    });
+                controls::collapsing_header(ui, "Full worked sequence").show(ui, |ui| {
+                    for (n, (title, text)) in actions.iter().enumerate() {
+                        lesson_presentation::section(ui, n + 1, title, text);
+                    }
+                });
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -96,7 +120,7 @@ impl LabApp {
                 }
             }
             teaching::View::Assignment => {
-                ui.label(&s.objective);
+                lesson_presentation::assignment(ui, &s);
                 let active = ui.is_enabled()
                     && !(self.reset_pending
                         || self.settings_open
@@ -119,8 +143,8 @@ impl LabApp {
                 || self.settings_open
                 || self.theme_preview
                 || self.data_tools.modal_open());
-        ui.label("Practice example · Independent; no assignment credit.");
-        ui.label(&lesson.example_description);
+        let source = &self.scenarios[i];
+        lesson_presentation::practice_step(ui, source, 0);
         let l = self
             .progress
             .attempts
@@ -168,6 +192,7 @@ impl LabApp {
                 l.current.name, l.current.saved, l.current.serial, served, l.current.loaded_serial
             ));
             self.metrics.seed_summary = Some(summary.rect);
+            lesson_presentation::practice_step(ui, &self.scenarios[i], 1);
             changed |= workspace::editor_row(
                 ui,
                 "IPv4 address",
@@ -204,7 +229,7 @@ impl LabApp {
             if let Some(note) = &self.notice {
                 ui.label(note);
             }
-            ui.label(format!("Try a change: {}", lesson.try_change));
+            lesson_presentation::practice_step(ui, &self.scenarios[i], 2);
             let (run, edited) = seed_terminal(
                 ui,
                 &mut l.command,
@@ -257,8 +282,8 @@ impl LabApp {
                 || self.settings_open
                 || self.theme_preview
                 || self.data_tools.modal_open());
-        ui.label("Practice example · Independent; no assignment credit.");
-        ui.label(&lesson.example_description);
+        let source = &self.scenarios[i];
+        lesson_presentation::practice_step(ui, source, 0);
         let l = self
             .progress
             .attempts
@@ -304,6 +329,7 @@ impl LabApp {
                 l.current.device, l.current.configured_device, l.current.used, l.current.capacity
             ));
             self.metrics.seed_summary = Some(summary.rect);
+            lesson_presentation::practice_step(ui, &self.scenarios[i], 1);
             changed |= workspace::editor_row(
                 ui,
                 "Device",
@@ -331,7 +357,7 @@ impl LabApp {
             if let Some(note) = &self.notice {
                 ui.label(note);
             }
-            ui.label(format!("Try a change: {}", lesson.try_change));
+            lesson_presentation::practice_step(ui, &self.scenarios[i], 2);
             let (run, edited) = seed_terminal(
                 ui,
                 &mut l.command,

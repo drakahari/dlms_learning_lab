@@ -1,10 +1,12 @@
 # Inode and symbolic-link foundation
 
-Checked2026-10-29. This is a separate, original, bounded teaching VFS. It does not
-rewrite the existing `filesystem::Tree`, add an engine State/Goal, change progress
-schemas, register labs or provide a shell command parser. LPIC-1v5.0 objective
-104.6 remains **Open** until meaningful taught assignments and native acceptance
-exist. Foundation tests alone do not provide practical curriculum coverage.
+Original foundation checked2026-10-29; scope updated2026-11-05. This separate,
+original, bounded VFS does not rewrite `filesystem::Tree`. Four existing authored
+Links assignments now use its native terminal/editor and source-bound progress;
+104.6 has **partial practice**, not complete-objective coverage. The original
+foundation alone was not curriculum. No new labs or progress schema are added by
+the later inode-listing extension. Its actual GNU comparison is recorded in
+LINKS_REFERENCE.md; updated teaching/native acceptance is tracked separately.
 
 ## State and supported operations
 
@@ -55,6 +57,23 @@ inode, while `ln -L` follows it. The model will not silently approximate either
 behavior. Multiple references to a raw directory/symlink inode are rejected on
 restore. Regular-file aliases are first-class shared references, not repeated
 path→text copies.
+
+## Directory inode listing in the existing terminal
+
+`ls -i [DIRECTORY]` shows each visible immediate name with its own **virtual** inode
+number. The default directory is the fixed cwd. It follows a symbolic directory
+operand, but does not follow symbolic children or read their file data. Hard-link
+names share an ID; a copy and a symbolic link have separate IDs. A dangling link
+still has an ID, so use `readlink` and `cat`/`stat -L` to inspect its target.
+
+The new view omits dot names, returns no lines for an empty visible directory and
+right-aligns the inode column. Quotes and `--` permit literal spaces/leading dashes.
+Only this short `-i` flag and zero/one directory are supported: FILE operands,
+`-a`, `-l`, combined flags, multiple operands and shell composition are honest
+refusals. Existing bare `ls [DIRECTORY]` deliberately keeps its older simplified
+all-names output and empty newline for compatibility; it is not GNU ls fidelity.
+`directory_inode_entries` is the typed, readonly names-and-own-IDs API underlying
+this view. Neither query adds a state-changing history action.
 
 ## Physical path rules and diagnostics
 

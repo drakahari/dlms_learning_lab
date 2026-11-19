@@ -1,0 +1,749 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-proxy-uri-mapping",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Reverse-proxy routing",
+      "unit": "linux-reverse-proxy-routing",
+      "title": "Repair a reverse proxy that forwards the wrong application path",
+      "summary": "Diagnose prefix replacement while preserving the health response and unrelated paths.",
+      "objective": "On public port 8080, forward every supported /reports/ path to 192.0.2.40:9000 with /reports/ replaced by /. For example, /reports/team/q1.csv must reach /team/q1.csv. Redirect the bare /reports path to /reports/. Return 200 with the literal body ready at the exact /healthz path; return 404 for other paths, including /reports-old. Save and apply the corrected server fragment. Both the saved configuration and the applied routing must meet the complete path policy, not only the named request samples.",
+      "retry_guidance": "Read the failing request’s required and actual route. Check the selected location and saved/applied configuration, then repair and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Repair the workshop mapping",
+        "Save, diagnose and apply",
+        "Observe what the final slash does"
+      ],
+      "guide": [
+        {
+          "title": "Repair the workshop mapping",
+          "why": "The editor changes, while the applied configuration remains unchanged until you save and apply.",
+          "action": "In the /charts/ location, set proxy_pass to http://198.51.100.60:9100/v1/;. Fill worked configuration can populate this separate example.",
+          "commands": []
+        },
+        {
+          "title": "Save, diagnose and apply",
+          "why": "The single and nested documents now forward under /v1/. The bare application path redirects and the exact health response stays local.",
+          "action": "Choose Save configuration, Check syntax, Apply saved configuration, then Check routing.",
+          "commands": []
+        },
+        {
+          "title": "Observe what the final slash does",
+          "why": "The literal replacement now joins /v1 directly to team/q1.csv. Read the expected and actual paths; a syntax-valid configuration can still route incorrectly.",
+          "action": "Select Nested document in Request and expand Inspect current applied route. Remove the final slash after /v1 in the editor, then save, apply and check again. Repair it afterward.",
+          "commands": []
+        }
+      ],
+      "explanation": "Select the location first, then construct the backend target. A proxy_pass URL with no URI preserves the client path; a supplied URI replaces the matched location prefix. The exact health response and explicit fallback preserve unrelated behavior. Saving changes the virtual document, while applying changes the active route. Neither a successful syntax check nor a few passing sample requests prove that the whole path policy is correct.",
+      "hints": [
+        "Separate the public listener from the backend endpoint. Which location handles the failed path?",
+        "Compare the required backend path with the applied path. Does proxy_pass contain a URI or only an endpoint?",
+        "A slash in the replacement URI is literal. Save and apply the correction, and preserve the health and fallback locations."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://nginx.org/en/docs/http/ngx_http_core_module.html#location",
+        "https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass"
+      ],
+      "simplifications": "Bounded Linux-style Nginx server fragment for one explicit public port; normalized ASCII GET paths, literal prefix/exact locations, return responses and IPv4 HTTP proxy targets only. Routing targets are calculated, not contacted. No real Nginx, host files, service, HTTP bytes, backend response, DNS, TLS, variables, regex, includes, filesystem serving, headers, auth, load balancing or URI normalization. Unsupported features fail honestly. Each separate example and assignment preserves its own virtual saved/applied configuration.",
+      "initial": {
+        "kind": "ReverseProxy",
+        "simulation": {
+          "version": 1,
+          "source": {
+            "initial": {
+              "version": 1,
+              "id": "lpic2-proxy-uri-mapping",
+              "port": 8080,
+              "initial_config": "server {\n    listen 8080;\n    location / { return 404; }\n    location /reports/ { proxy_pass http://192.0.2.40:9000; }\n    location = /healthz { return 200 \"ready\"; }\n}\n",
+              "required_config": "server {\n    listen 8080;\n    location / { return 404; }\n    location /reports/ { proxy_pass http://192.0.2.40:9000/; }\n    location = /healthz { return 200 \"ready\"; }\n}\n",
+              "cases": [
+                {
+                  "id": "document",
+                  "label": "Single document",
+                  "path": "/reports/daily.csv",
+                  "expected": {
+                    "kind": "Forward",
+                    "endpoint": {
+                      "address": "192.0.2.40",
+                      "port": 9000
+                    },
+                    "path": "/daily.csv"
+                  }
+                },
+                {
+                  "id": "nested-document",
+                  "label": "Nested document",
+                  "path": "/reports/team/q1.csv",
+                  "expected": {
+                    "kind": "Forward",
+                    "endpoint": {
+                      "address": "192.0.2.40",
+                      "port": 9000
+                    },
+                    "path": "/team/q1.csv"
+                  }
+                },
+                {
+                  "id": "bare-prefix",
+                  "label": "Bare application path",
+                  "path": "/reports",
+                  "expected": {
+                    "kind": "Redirect",
+                    "path": "/reports/"
+                  }
+                },
+                {
+                  "id": "health",
+                  "label": "Local health response",
+                  "path": "/healthz",
+                  "expected": {
+                    "kind": "Return",
+                    "status": 200,
+                    "body": "ready"
+                  }
+                },
+                {
+                  "id": "similar-name",
+                  "label": "Similar name outside the application",
+                  "path": "/reports-old",
+                  "expected": {
+                    "kind": "Return",
+                    "status": 404,
+                    "body": null
+                  }
+                }
+              ]
+            },
+            "example": {
+              "version": 1,
+              "id": "nginx-mapping-workshop",
+              "port": 8090,
+              "initial_config": "server {\n    listen 8090;\n    location / { return 404; }\n    location /charts/ { proxy_pass http://198.51.100.60:9100; }\n    location = /healthz { return 200 \"available\"; }\n}\n",
+              "required_config": "server {\n    listen 8090;\n    location / { return 404; }\n    location /charts/ { proxy_pass http://198.51.100.60:9100/v1/; }\n    location = /healthz { return 200 \"available\"; }\n}\n",
+              "cases": [
+                {
+                  "id": "document",
+                  "label": "Single document",
+                  "path": "/charts/daily.csv",
+                  "expected": {
+                    "kind": "Forward",
+                    "endpoint": {
+                      "address": "198.51.100.60",
+                      "port": 9100
+                    },
+                    "path": "/v1/daily.csv"
+                  }
+                },
+                {
+                  "id": "nested-document",
+                  "label": "Nested document",
+                  "path": "/charts/team/q1.csv",
+                  "expected": {
+                    "kind": "Forward",
+                    "endpoint": {
+                      "address": "198.51.100.60",
+                      "port": 9100
+                    },
+                    "path": "/v1/team/q1.csv"
+                  }
+                },
+                {
+                  "id": "bare-prefix",
+                  "label": "Bare application path",
+                  "path": "/charts",
+                  "expected": {
+                    "kind": "Redirect",
+                    "path": "/charts/"
+                  }
+                },
+                {
+                  "id": "health",
+                  "label": "Local health response",
+                  "path": "/healthz",
+                  "expected": {
+                    "kind": "Return",
+                    "status": 200,
+                    "body": "available"
+                  }
+                },
+                {
+                  "id": "similar-name",
+                  "label": "Similar name outside the application",
+                  "path": "/charts-old",
+                  "expected": {
+                    "kind": "Return",
+                    "status": 404,
+                    "body": null
+                  }
+                }
+              ]
+            }
+          },
+          "view": "introduction",
+          "practice": {
+            "task_id": "nginx-mapping-workshop",
+            "editor": "server {\n    listen 8090;\n    location / { return 404; }\n    location /charts/ { proxy_pass http://198.51.100.60:9100; }\n    location = /healthz { return 200 \"available\"; }\n}\n",
+            "world": {
+              "saved": "server {\n    listen 8090;\n    location / { return 404; }\n    location /charts/ { proxy_pass http://198.51.100.60:9100; }\n    location = /healthz { return 200 \"available\"; }\n}\n",
+              "applied": "server {\n    listen 8090;\n    location / { return 404; }\n    location /charts/ { proxy_pass http://198.51.100.60:9100; }\n    location = /healthz { return 200 \"available\"; }\n}\n"
+            },
+            "selected_case": "document",
+            "checked_stamp": null
+          },
+          "assignment": {
+            "task_id": "lpic2-proxy-uri-mapping",
+            "editor": "server {\n    listen 8080;\n    location / { return 404; }\n    location /reports/ { proxy_pass http://192.0.2.40:9000; }\n    location = /healthz { return 200 \"ready\"; }\n}\n",
+            "world": {
+              "saved": "server {\n    listen 8080;\n    location / { return 404; }\n    location /reports/ { proxy_pass http://192.0.2.40:9000; }\n    location = /healthz { return 200 \"ready\"; }\n}\n",
+              "applied": "server {\n    listen 8080;\n    location / { return 404; }\n    location /reports/ { proxy_pass http://192.0.2.40:9000; }\n    location = /healthz { return 200 \"ready\"; }\n}\n"
+            },
+            "selected_case": "document",
+            "checked_stamp": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "ReverseProxy",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "id": "lpic2-proxy-uri-mapping",
+            "port": 8080,
+            "initial_config": "server {\n    listen 8080;\n    location / { return 404; }\n    location /reports/ { proxy_pass http://192.0.2.40:9000; }\n    location = /healthz { return 200 \"ready\"; }\n}\n",
+            "required_config": "server {\n    listen 8080;\n    location / { return 404; }\n    location /reports/ { proxy_pass http://192.0.2.40:9000/; }\n    location = /healthz { return 200 \"ready\"; }\n}\n",
+            "cases": [
+              {
+                "id": "document",
+                "label": "Single document",
+                "path": "/reports/daily.csv",
+                "expected": {
+                  "kind": "Forward",
+                  "endpoint": {
+                    "address": "192.0.2.40",
+                    "port": 9000
+                  },
+                  "path": "/daily.csv"
+                }
+              },
+              {
+                "id": "nested-document",
+                "label": "Nested document",
+                "path": "/reports/team/q1.csv",
+                "expected": {
+                  "kind": "Forward",
+                  "endpoint": {
+                    "address": "192.0.2.40",
+                    "port": 9000
+                  },
+                  "path": "/team/q1.csv"
+                }
+              },
+              {
+                "id": "bare-prefix",
+                "label": "Bare application path",
+                "path": "/reports",
+                "expected": {
+                  "kind": "Redirect",
+                  "path": "/reports/"
+                }
+              },
+              {
+                "id": "health",
+                "label": "Local health response",
+                "path": "/healthz",
+                "expected": {
+                  "kind": "Return",
+                  "status": 200,
+                  "body": "ready"
+                }
+              },
+              {
+                "id": "similar-name",
+                "label": "Similar name outside the application",
+                "path": "/reports-old",
+                "expected": {
+                  "kind": "Return",
+                  "status": 404,
+                  "body": null
+                }
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "id": "nginx-mapping-workshop",
+            "port": 8090,
+            "initial_config": "server {\n    listen 8090;\n    location / { return 404; }\n    location /charts/ { proxy_pass http://198.51.100.60:9100; }\n    location = /healthz { return 200 \"available\"; }\n}\n",
+            "required_config": "server {\n    listen 8090;\n    location / { return 404; }\n    location /charts/ { proxy_pass http://198.51.100.60:9100/v1/; }\n    location = /healthz { return 200 \"available\"; }\n}\n",
+            "cases": [
+              {
+                "id": "document",
+                "label": "Single document",
+                "path": "/charts/daily.csv",
+                "expected": {
+                  "kind": "Forward",
+                  "endpoint": {
+                    "address": "198.51.100.60",
+                    "port": 9100
+                  },
+                  "path": "/v1/daily.csv"
+                }
+              },
+              {
+                "id": "nested-document",
+                "label": "Nested document",
+                "path": "/charts/team/q1.csv",
+                "expected": {
+                  "kind": "Forward",
+                  "endpoint": {
+                    "address": "198.51.100.60",
+                    "port": 9100
+                  },
+                  "path": "/v1/team/q1.csv"
+                }
+              },
+              {
+                "id": "bare-prefix",
+                "label": "Bare application path",
+                "path": "/charts",
+                "expected": {
+                  "kind": "Redirect",
+                  "path": "/charts/"
+                }
+              },
+              {
+                "id": "health",
+                "label": "Local health response",
+                "path": "/healthz",
+                "expected": {
+                  "kind": "Return",
+                  "status": 200,
+                  "body": "available"
+                }
+              },
+              {
+                "id": "similar-name",
+                "label": "Similar name outside the application",
+                "path": "/charts-old",
+                "expected": {
+                  "kind": "Return",
+                  "status": 404,
+                  "body": null
+                }
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "@reverse-proxy {\"action\":\"edit\",\"config\":\"server {\\n    listen 8080;\\n    location / { return 404; }\\n    location /reports/ { proxy_pass http://192.0.2.40:9000/; }\\n    location = /healthz { return 200 \\\"ready\\\"; }\\n}\\n\"}",
+        "@reverse-proxy {\"action\":\"save\"}",
+        "@reverse-proxy {\"action\":\"validate\"}",
+        "@reverse-proxy {\"action\":\"apply\"}",
+        "@reverse-proxy {\"action\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-proxy-client-boundary"
+      ]
+    },
+    {
+      "id": "lpic2-proxy-private-paths",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Reverse-proxy routing",
+      "unit": "linux-reverse-proxy-routing",
+      "title": "Protect private paths without blocking similarly named public pages",
+      "summary": "Repair overlapping private-path rules while preserving public routes and an exact health exception.",
+      "objective": "On port 8080, return 403 for the exact /admin path and for every /admin/ path except the exact /admin/health path, which must return 200 with the literal body ready. Forward all other supported paths to 198.51.100.20:8088 without changing the path. Similar public names such as /administrator/start and /admin-guide must remain usable. Repair the overlapping locations, then save, apply and check the complete routing policy. Moving lines alone must not be treated as a fix.",
+      "retry_guidance": "Read the failing request’s required and actual route. Check the selected location and saved/applied configuration, then repair and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Repair the workshop’s path boundaries",
+        "Apply and check both sides of the rule",
+        "Investigate an overlapping exception"
+      ],
+      "guide": [
+        {
+          "title": "Repair the workshop’s path boundaries",
+          "why": "The restriction now describes a subtree and a separate bare path, rather than every public name beginning with staff.",
+          "action": "Replace the broad /staff restriction with a /staff/ refusal plus an exact /staff refusal. Remove the forwarding exception for /staff/reports; keep the exact /staff/health response. Fill worked configuration can show one solution.",
+          "commands": []
+        },
+        {
+          "title": "Apply and check both sides of the rule",
+          "why": "Private reports are refused, the exact health path responds locally, and similarly named public paths still forward.",
+          "action": "Choose Save configuration, Check syntax, Apply saved configuration, then Check routing.",
+          "commands": []
+        },
+        {
+          "title": "Investigate an overlapping exception",
+          "why": "A longer prefix wins even when placed earlier in the fragment. Read the failed request and the full-path witness; moving the broad refusal does not repair the exception.",
+          "action": "Inspect Nested private report in Request. Add location /staff/reports { proxy_pass http://203.0.113.50:8082; }, then save, apply and check. Remove the exception and retry.",
+          "commands": []
+        }
+      ],
+      "explanation": "The longer matching prefix takes precedence, regardless of file order, and an exact match takes precedence for its one path. A slash-ended private prefix covers descendants; the bare path needs its own exact rule if similarly named public paths must remain available. Remove or correct the more specific forwarding exception. Preserve the exact health response and unchanged public forwarding. This is a bounded normalized-path exercise, not proof of production access-control security.",
+      "hints": [
+        "A location prefix is a string: /admin includes names such as /admin-guide.",
+        "An exact match can handle one bare private path without widening the subtree restriction.",
+        "Check the longest matching private-path location; a more specific forwarding exception defeats a broad refusal regardless of line order."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://nginx.org/en/docs/http/ngx_http_core_module.html#location",
+        "https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass"
+      ],
+      "simplifications": "Bounded Linux-style Nginx server fragment for one explicit public port; normalized ASCII GET paths, literal prefix/exact locations, return responses and IPv4 HTTP proxy targets only. Routing targets are calculated, not contacted. No real Nginx, host files, service, HTTP bytes, backend response, DNS, TLS, variables, regex, includes, filesystem serving, headers, auth, load balancing or URI normalization. Unsupported features fail honestly. Each separate example and assignment preserves its own virtual saved/applied configuration.",
+      "initial": {
+        "kind": "ReverseProxy",
+        "simulation": {
+          "version": 1,
+          "source": {
+            "initial": {
+              "version": 1,
+              "id": "lpic2-proxy-private-paths",
+              "port": 8080,
+              "initial_config": "server {\n    listen 8080;\n    location / { proxy_pass http://198.51.100.20:8088; }\n    location /admin { return 403; }\n    location /admin/reports { proxy_pass http://198.51.100.20:8088; }\n    location = /admin/health { return 200 \"ready\"; }\n}\n",
+              "required_config": "server {\n    listen 8080;\n    location / { proxy_pass http://198.51.100.20:8088; }\n    location /admin/ { return 403; }\n    location = /admin { return 403; }\n    location = /admin/health { return 200 \"ready\"; }\n}\n",
+              "cases": [
+                {
+                  "id": "public-root",
+                  "label": "Public home",
+                  "path": "/",
+                  "expected": {
+                    "kind": "Forward",
+                    "endpoint": {
+                      "address": "198.51.100.20",
+                      "port": 8088
+                    },
+                    "path": "/"
+                  }
+                },
+                {
+                  "id": "similar-name",
+                  "label": "Similar public name",
+                  "path": "/administrator/start",
+                  "expected": {
+                    "kind": "Forward",
+                    "endpoint": {
+                      "address": "198.51.100.20",
+                      "port": 8088
+                    },
+                    "path": "/administrator/start"
+                  }
+                },
+                {
+                  "id": "bare-private",
+                  "label": "Bare private path",
+                  "path": "/admin",
+                  "expected": {
+                    "kind": "Return",
+                    "status": 403,
+                    "body": null
+                  }
+                },
+                {
+                  "id": "nested-private",
+                  "label": "Nested private report",
+                  "path": "/admin/reports/weekly.csv",
+                  "expected": {
+                    "kind": "Return",
+                    "status": 403,
+                    "body": null
+                  }
+                },
+                {
+                  "id": "private-tools",
+                  "label": "Private tools",
+                  "path": "/admin/tools",
+                  "expected": {
+                    "kind": "Return",
+                    "status": 403,
+                    "body": null
+                  }
+                },
+                {
+                  "id": "health",
+                  "label": "Exact health exception",
+                  "path": "/admin/health",
+                  "expected": {
+                    "kind": "Return",
+                    "status": 200,
+                    "body": "ready"
+                  }
+                }
+              ]
+            },
+            "example": {
+              "version": 1,
+              "id": "nginx-private-workshop",
+              "port": 8090,
+              "initial_config": "server {\n    listen 8090;\n    location / { proxy_pass http://203.0.113.50:8082; }\n    location /staff { return 403; }\n    location /staff/reports { proxy_pass http://203.0.113.50:8082; }\n    location = /staff/health { return 200 \"available\"; }\n}\n",
+              "required_config": "server {\n    listen 8090;\n    location / { proxy_pass http://203.0.113.50:8082; }\n    location /staff/ { return 403; }\n    location = /staff { return 403; }\n    location = /staff/health { return 200 \"available\"; }\n}\n",
+              "cases": [
+                {
+                  "id": "public-root",
+                  "label": "Public home",
+                  "path": "/",
+                  "expected": {
+                    "kind": "Forward",
+                    "endpoint": {
+                      "address": "203.0.113.50",
+                      "port": 8082
+                    },
+                    "path": "/"
+                  }
+                },
+                {
+                  "id": "similar-name",
+                  "label": "Similar public name",
+                  "path": "/staff-directory/start",
+                  "expected": {
+                    "kind": "Forward",
+                    "endpoint": {
+                      "address": "203.0.113.50",
+                      "port": 8082
+                    },
+                    "path": "/staff-directory/start"
+                  }
+                },
+                {
+                  "id": "bare-private",
+                  "label": "Bare private path",
+                  "path": "/staff",
+                  "expected": {
+                    "kind": "Return",
+                    "status": 403,
+                    "body": null
+                  }
+                },
+                {
+                  "id": "nested-private",
+                  "label": "Nested private report",
+                  "path": "/staff/reports/weekly.csv",
+                  "expected": {
+                    "kind": "Return",
+                    "status": 403,
+                    "body": null
+                  }
+                },
+                {
+                  "id": "private-tools",
+                  "label": "Private tools",
+                  "path": "/staff/tools",
+                  "expected": {
+                    "kind": "Return",
+                    "status": 403,
+                    "body": null
+                  }
+                },
+                {
+                  "id": "health",
+                  "label": "Exact health exception",
+                  "path": "/staff/health",
+                  "expected": {
+                    "kind": "Return",
+                    "status": 200,
+                    "body": "available"
+                  }
+                }
+              ]
+            }
+          },
+          "view": "introduction",
+          "practice": {
+            "task_id": "nginx-private-workshop",
+            "editor": "server {\n    listen 8090;\n    location / { proxy_pass http://203.0.113.50:8082; }\n    location /staff { return 403; }\n    location /staff/reports { proxy_pass http://203.0.113.50:8082; }\n    location = /staff/health { return 200 \"available\"; }\n}\n",
+            "world": {
+              "saved": "server {\n    listen 8090;\n    location / { proxy_pass http://203.0.113.50:8082; }\n    location /staff { return 403; }\n    location /staff/reports { proxy_pass http://203.0.113.50:8082; }\n    location = /staff/health { return 200 \"available\"; }\n}\n",
+              "applied": "server {\n    listen 8090;\n    location / { proxy_pass http://203.0.113.50:8082; }\n    location /staff { return 403; }\n    location /staff/reports { proxy_pass http://203.0.113.50:8082; }\n    location = /staff/health { return 200 \"available\"; }\n}\n"
+            },
+            "selected_case": "public-root",
+            "checked_stamp": null
+          },
+          "assignment": {
+            "task_id": "lpic2-proxy-private-paths",
+            "editor": "server {\n    listen 8080;\n    location / { proxy_pass http://198.51.100.20:8088; }\n    location /admin { return 403; }\n    location /admin/reports { proxy_pass http://198.51.100.20:8088; }\n    location = /admin/health { return 200 \"ready\"; }\n}\n",
+            "world": {
+              "saved": "server {\n    listen 8080;\n    location / { proxy_pass http://198.51.100.20:8088; }\n    location /admin { return 403; }\n    location /admin/reports { proxy_pass http://198.51.100.20:8088; }\n    location = /admin/health { return 200 \"ready\"; }\n}\n",
+              "applied": "server {\n    listen 8080;\n    location / { proxy_pass http://198.51.100.20:8088; }\n    location /admin { return 403; }\n    location /admin/reports { proxy_pass http://198.51.100.20:8088; }\n    location = /admin/health { return 200 \"ready\"; }\n}\n"
+            },
+            "selected_case": "public-root",
+            "checked_stamp": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "ReverseProxy",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "id": "lpic2-proxy-private-paths",
+            "port": 8080,
+            "initial_config": "server {\n    listen 8080;\n    location / { proxy_pass http://198.51.100.20:8088; }\n    location /admin { return 403; }\n    location /admin/reports { proxy_pass http://198.51.100.20:8088; }\n    location = /admin/health { return 200 \"ready\"; }\n}\n",
+            "required_config": "server {\n    listen 8080;\n    location / { proxy_pass http://198.51.100.20:8088; }\n    location /admin/ { return 403; }\n    location = /admin { return 403; }\n    location = /admin/health { return 200 \"ready\"; }\n}\n",
+            "cases": [
+              {
+                "id": "public-root",
+                "label": "Public home",
+                "path": "/",
+                "expected": {
+                  "kind": "Forward",
+                  "endpoint": {
+                    "address": "198.51.100.20",
+                    "port": 8088
+                  },
+                  "path": "/"
+                }
+              },
+              {
+                "id": "similar-name",
+                "label": "Similar public name",
+                "path": "/administrator/start",
+                "expected": {
+                  "kind": "Forward",
+                  "endpoint": {
+                    "address": "198.51.100.20",
+                    "port": 8088
+                  },
+                  "path": "/administrator/start"
+                }
+              },
+              {
+                "id": "bare-private",
+                "label": "Bare private path",
+                "path": "/admin",
+                "expected": {
+                  "kind": "Return",
+                  "status": 403,
+                  "body": null
+                }
+              },
+              {
+                "id": "nested-private",
+                "label": "Nested private report",
+                "path": "/admin/reports/weekly.csv",
+                "expected": {
+                  "kind": "Return",
+                  "status": 403,
+                  "body": null
+                }
+              },
+              {
+                "id": "private-tools",
+                "label": "Private tools",
+                "path": "/admin/tools",
+                "expected": {
+                  "kind": "Return",
+                  "status": 403,
+                  "body": null
+                }
+              },
+              {
+                "id": "health",
+                "label": "Exact health exception",
+                "path": "/admin/health",
+                "expected": {
+                  "kind": "Return",
+                  "status": 200,
+                  "body": "ready"
+                }
+              }
+            ]
+          },
+          "example": {
+            "version": 1,
+            "id": "nginx-private-workshop",
+            "port": 8090,
+            "initial_config": "server {\n    listen 8090;\n    location / { proxy_pass http://203.0.113.50:8082; }\n    location /staff { return 403; }\n    location /staff/reports { proxy_pass http://203.0.113.50:8082; }\n    location = /staff/health { return 200 \"available\"; }\n}\n",
+            "required_config": "server {\n    listen 8090;\n    location / { proxy_pass http://203.0.113.50:8082; }\n    location /staff/ { return 403; }\n    location = /staff { return 403; }\n    location = /staff/health { return 200 \"available\"; }\n}\n",
+            "cases": [
+              {
+                "id": "public-root",
+                "label": "Public home",
+                "path": "/",
+                "expected": {
+                  "kind": "Forward",
+                  "endpoint": {
+                    "address": "203.0.113.50",
+                    "port": 8082
+                  },
+                  "path": "/"
+                }
+              },
+              {
+                "id": "similar-name",
+                "label": "Similar public name",
+                "path": "/staff-directory/start",
+                "expected": {
+                  "kind": "Forward",
+                  "endpoint": {
+                    "address": "203.0.113.50",
+                    "port": 8082
+                  },
+                  "path": "/staff-directory/start"
+                }
+              },
+              {
+                "id": "bare-private",
+                "label": "Bare private path",
+                "path": "/staff",
+                "expected": {
+                  "kind": "Return",
+                  "status": 403,
+                  "body": null
+                }
+              },
+              {
+                "id": "nested-private",
+                "label": "Nested private report",
+                "path": "/staff/reports/weekly.csv",
+                "expected": {
+                  "kind": "Return",
+                  "status": 403,
+                  "body": null
+                }
+              },
+              {
+                "id": "private-tools",
+                "label": "Private tools",
+                "path": "/staff/tools",
+                "expected": {
+                  "kind": "Return",
+                  "status": 403,
+                  "body": null
+                }
+              },
+              {
+                "id": "health",
+                "label": "Exact health exception",
+                "path": "/staff/health",
+                "expected": {
+                  "kind": "Return",
+                  "status": 200,
+                  "body": "available"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "@reverse-proxy {\"action\":\"edit\",\"config\":\"server {\\n    listen 8080;\\n    location / { proxy_pass http://198.51.100.20:8088; }\\n    location /admin/ { return 403; }\\n    location = /admin { return 403; }\\n    location = /admin/health { return 200 \\\"ready\\\"; }\\n}\\n\"}",
+        "@reverse-proxy {\"action\":\"save\"}",
+        "@reverse-proxy {\"action\":\"validate\"}",
+        "@reverse-proxy {\"action\":\"apply\"}",
+        "@reverse-proxy {\"action\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-proxy-uri-mapping"
+      ]
+    }
+  ]
+}

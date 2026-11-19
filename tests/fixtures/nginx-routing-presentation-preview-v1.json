@@ -1,0 +1,155 @@
+[
+  {
+    "id": "lpic2-proxy-uri-mapping",
+    "goal": "Route an application correctly while preserving unrelated behavior.",
+    "requirements": [
+      "On public port 8080, forward every supported /reports/ path to 192.0.2.40:9000 with /reports/ replaced by /. For example, /reports/team/q1.csv must reach /team/q1.csv.",
+      "Redirect the bare /reports path to /reports/. Return 200 with the literal body ready at the exact /healthz path; return 404 for other paths, including /reports-old.",
+      "Save and apply the corrected server fragment. Both the saved configuration and the applied routing must meet the complete path policy, not only the named request samples."
+    ],
+    "practice": [
+      {
+        "title": "Repair the workshop mapping",
+        "action": "In the /charts/ location, set proxy_pass to http://198.51.100.60:9100/v1/;. Fill worked configuration can populate this separate example.",
+        "observe": "The editor changes, while the applied configuration remains unchanged until you save and apply."
+      },
+      {
+        "title": "Save, diagnose and apply",
+        "action": "Choose Save configuration, Check syntax, Apply saved configuration, then Check routing.",
+        "observe": "The single and nested documents now forward under /v1/. The bare application path redirects and the exact health response stays local."
+      },
+      {
+        "title": "Observe what the final slash does",
+        "action": "Select Nested document in Request and expand Inspect current applied route. Remove the final slash after /v1 in the editor, then save, apply and check again. Repair it afterward.",
+        "observe": "The literal replacement now joins /v1 directly to team/q1.csv. Read the expected and actual paths; a syntax-valid configuration can still route incorrectly."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Public request",
+        "value": "GET /charts/team/q1.csv · port 8090",
+        "explanation": "The client addresses the proxy; the virtual application listens elsewhere."
+      },
+      {
+        "label": "Selected prefix",
+        "value": "location /charts/",
+        "explanation": "The health exact match does not apply to this request."
+      },
+      {
+        "label": "Backend URL",
+        "value": "http://198.51.100.60:9100/v1/",
+        "explanation": "The /v1/ URI replaces the selected prefix."
+      },
+      {
+        "label": "Forwarded target",
+        "value": "198.51.100.60:9100 · /v1/team/q1.csv",
+        "explanation": "Keep the remainder team/q1.csv; do not keep /charts/ as well."
+      },
+      {
+        "label": "Bare prefix",
+        "value": "/charts → /charts/ ·301",
+        "explanation": "A proxied slash-ended prefix adds this redirect unless an exact override handles the bare path."
+      }
+    ],
+    "concepts": [
+      {
+        "title": "One request has two addresses to understand",
+        "text": "A reverse proxy accepts a client request and chooses where to send it. The public port belongs to the proxy; the backend address and port identify the application behind it. Here you calculate those virtual routing decisions; no server or network starts."
+      },
+      {
+        "title": "Read the small server fragment",
+        "text": "server { ... } groups this site’s settings in an HTTP configuration. The listen 8090; directive selects its public port. Each location chooses an action for a path. Directives end with a semicolon; braces group a block. Edit only this fragment in the workspace."
+      },
+      {
+        "title": "Match the path, then construct the backend path",
+        "text": "A prefix location /charts/ matches /charts/daily.csv and deeper paths. The optional path portion after the endpoint is called the URI here. With proxy_pass http://198.51.100.60:9100/v1/, replace /charts/ with /v1/. Without that path portion, keep the entire client path. The final slash is literal."
+      },
+      {
+        "title": "Saving and applying do different jobs",
+        "text": "Save configuration keeps your virtual document. Check syntax diagnoses supported syntax without changing routing. Apply saved configuration activates that document only if it parses. Check routing then compares the saved and applied behavior with the requirements. An exact location uses = before its path."
+      }
+    ],
+    "context": "Builds on static web requests, IP endpoints and editing the preceding proxy-policy fragment. The supplied configuration is a server block for an HTTP context, not a complete nginx.conf.",
+    "review": {
+      "introduction": "Pending compiled/native review of concept sequence and separate worked example.",
+      "example": "Pending compiled/native editor, apply and request-inspection review.",
+      "assignment": "Pending native independent requirements, labels and failure feedback review."
+    },
+    "status": "pending",
+    "source": "scenarios/boot-entry-lessons-v30.json"
+  },
+  {
+    "id": "lpic2-proxy-private-paths",
+    "goal": "Restrict a private subtree without breaking the public site.",
+    "requirements": [
+      "On port 8080, return 403 for the exact /admin path and for every /admin/ path except the exact /admin/health path, which must return 200 with the literal body ready.",
+      "Forward all other supported paths to 198.51.100.20:8088 without changing the path. Similar public names such as /administrator/start and /admin-guide must remain usable.",
+      "Repair the overlapping locations, then save, apply and check the complete routing policy. Moving lines alone must not be treated as a fix."
+    ],
+    "practice": [
+      {
+        "title": "Repair the workshop’s path boundaries",
+        "action": "Replace the broad /staff restriction with a /staff/ refusal plus an exact /staff refusal. Remove the forwarding exception for /staff/reports; keep the exact /staff/health response. Fill worked configuration can show one solution.",
+        "observe": "The restriction now describes a subtree and a separate bare path, rather than every public name beginning with staff."
+      },
+      {
+        "title": "Apply and check both sides of the rule",
+        "action": "Choose Save configuration, Check syntax, Apply saved configuration, then Check routing.",
+        "observe": "Private reports are refused, the exact health path responds locally, and similarly named public paths still forward."
+      },
+      {
+        "title": "Investigate an overlapping exception",
+        "action": "Inspect Nested private report in Request. Add location /staff/reports { proxy_pass http://203.0.113.50:8082; }, then save, apply and check. Remove the exception and retry.",
+        "observe": "A longer prefix wins even when placed earlier in the fragment. Read the failed request and the full-path witness; moving the broad refusal does not repair the exception."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Private descendants",
+        "value": "location /staff/ → return 403",
+        "explanation": "Descendants are refused; a more specific forwarding location would override this."
+      },
+      {
+        "label": "Bare private path",
+        "value": "location = /staff → return 403",
+        "explanation": "Handle this exact path without blocking staff-directory-like public names."
+      },
+      {
+        "label": "Health exception",
+        "value": "= /staff/health · 200",
+        "explanation": "Only this exact path returns 200 with the literal body available."
+      },
+      {
+        "label": "Public fallback",
+        "value": "location / →203.0.113.50:8082",
+        "explanation": "A URL with no URI preserves the client path, including /staff-directory/start."
+      }
+    ],
+    "concepts": [
+      {
+        "title": "Match a location before judging its action",
+        "text": "An exact location such as = /staff/health wins for that one path. Otherwise, the longest matching prefix wins. A later broad location does not override a longer prefix; moving configuration lines is not a reliable repair."
+      },
+      {
+        "title": "A prefix is a string, not a directory boundary",
+        "text": "The prefix /staff also matches /staff-directory/start. To protect the staff subtree, use /staff/ for descendants and an exact /staff for the bare path. A narrow health exception can still return a deliberate local response."
+      },
+      {
+        "title": "Read overlapping locations as a policy",
+        "text": "A longer /staff/reports location can override the broader staff restriction and forward private reports. Inspect both public and private requests after applying a repair. The full routing check also examines supported paths absent from the named request table."
+      },
+      {
+        "title": "Keep an explicit public fallback",
+        "text": "The / location forwards the public site to 203.0.113.50:8082. A proxy URL with no URI preserves the complete path. return 403 is a local refusal; return 200 \"available\" supplies that literal health text. Backend responses and actual authentication are not modeled."
+      }
+    ],
+    "context": "Builds on static web requests, IP endpoints and editing the preceding proxy-policy fragment. The supplied configuration is a server block for an HTTP context, not a complete nginx.conf.",
+    "review": {
+      "introduction": "Pending compiled/native review of concept sequence and separate worked example.",
+      "example": "Pending compiled/native editor, apply and request-inspection review.",
+      "assignment": "Pending native independent requirements, labels and failure feedback review."
+    },
+    "status": "pending",
+    "source": "scenarios/boot-entry-lessons-v30.json"
+  }
+]

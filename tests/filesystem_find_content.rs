@@ -277,6 +277,14 @@ fn break_row(state: &mut State, requirement: &Requirement) {
         panic!()
     };
     match requirement {
+        Requirement::WhereisDeployment {definition} => {
+            let path=definition.mutable_files.iter().find(|p|definition.expected.files.contains_key(*p)).unwrap();
+            t.files.insert(path.clone(),"Wrong published release, despite matching filename.\n".into());
+        }
+        Requirement::CommandLocation {definition} => {
+            let path=&definition.selected[0].path;
+            t.nodes.get_mut(path).unwrap().mode ^= 0o100;
+        }
         Requirement::DirectoryEntries { path, .. } => {
             let name = format!("{path}/.unrequested-counterexample");
             let mut n = t.nodes[path].clone();

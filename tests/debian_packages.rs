@@ -726,6 +726,7 @@ fn maximum_escaped_admitted_state_roundtrips_compact_and_pretty_without_truncati
                     version: Version::parse(&format!("{v}.0")).unwrap(),
                     architecture: Architecture::All,
                     depends: vec![],
+                    conflicts: vec![],
                     files: payload,
                 },
             );

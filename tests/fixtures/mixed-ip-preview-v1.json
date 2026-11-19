@@ -1,0 +1,1074 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-host-mixed-ip",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-mixed-ip-foundations",
+      "topic": "IPv4 and IPv6 foundations",
+      "title": "Repair both families of a Linux connection",
+      "summary": "Repair IPv4 and IPv6 address and route decisions while keeping a separate management connection intact.",
+      "objective": "Keep ens3 up and give it one unused conventional IPv4 host address in 10.24.0.0/26 and one unused IPv6 primary address in 2001:db8:24::/64. Do not use supplied peer/router addresses or the IPv6 subnet-router anycast address. Select the lowest-metric IPv4 default through 10.24.0.1 on ens3 and the IPv6 default through fe80::1 on ens3. Restore the supplied application paths to 203.0.113.80 and 2001:db8:80::80 through ens3. Preserve ens4’s IPv4 and IPv6 primary settings, both interface Up states, and all supplied management-route entries for 198.51.100.0/24 and 2001:db8:99::/64. Management paths to 198.51.100.10 and 2001:db8:99::10 must still use ens4.",
+      "retry_guidance": "Compare the address family and selected outgoing device in the failing path. Repair only that family, then recheck the other application and both management paths.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "prerequisites": [],
+      "steps": [
+        "Read IPv4 and IPv6 addresses and their separate route tables",
+        "Repair both application address/route decisions",
+        "Verify both families and preserve management"
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "HostNetwork",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_action": 0,
+          "assignment": {
+            "world": {
+              "version": 1,
+              "profile": {
+                "id": "mixed-ip-assignment",
+                "links": [
+                  {
+                    "name": "ens3",
+                    "network": {
+                      "address": "10.24.0.0",
+                      "length": 26
+                    },
+                    "carrier": true
+                  },
+                  {
+                    "name": "ens4",
+                    "network": {
+                      "address": "192.0.2.0",
+                      "length": 24
+                    },
+                    "carrier": true
+                  }
+                ],
+                "gateways": [
+                  {
+                    "address": "10.24.0.1",
+                    "device": "ens3",
+                    "available": true,
+                    "exports": [
+                      {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      }
+                    ]
+                  },
+                  {
+                    "address": "192.0.2.1",
+                    "device": "ens4",
+                    "available": true,
+                    "exports": [
+                      {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      }
+                    ]
+                  }
+                ],
+                "nodes": [
+                  {
+                    "address": "10.24.0.20",
+                    "available": true
+                  },
+                  {
+                    "address": "203.0.113.80",
+                    "available": true
+                  },
+                  {
+                    "address": "198.51.100.10",
+                    "available": true
+                  }
+                ],
+                "resolvers": [],
+                "ipv6": {
+                  "lans": [
+                    {
+                      "device": "ens3",
+                      "network": {
+                        "address": "2001:db8:24::",
+                        "length": 64
+                      },
+                      "link_local": "fe80::a"
+                    },
+                    {
+                      "device": "ens4",
+                      "network": {
+                        "address": "2001:db8:2::",
+                        "length": 64
+                      },
+                      "link_local": "fe80::b"
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "device": "ens3",
+                      "address": "fe80::1",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "2001:db8:80::",
+                          "length": 64
+                        }
+                      ]
+                    },
+                    {
+                      "device": "ens4",
+                      "address": "fe80::1",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "2001:db8:99::",
+                          "length": 64
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "2001:db8:24::20",
+                      "available": true
+                    },
+                    {
+                      "address": "2001:db8:80::80",
+                      "available": true
+                    },
+                    {
+                      "address": "2001:db8:99::10",
+                      "available": true
+                    }
+                  ]
+                }
+              },
+              "configuration": {
+                "interfaces": [
+                  {
+                    "name": "ens3",
+                    "up": true,
+                    "address": {
+                      "address": "10.24.0.77",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "name": "ens4",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.10",
+                      "prefix": 24
+                    }
+                  }
+                ],
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "198.51.100.0",
+                      "length": 24
+                    },
+                    "via": "192.0.2.1",
+                    "device": "ens4",
+                    "metric": 50
+                  },
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "via": "192.0.2.1",
+                    "device": "ens4",
+                    "metric": 100
+                  }
+                ],
+                "nameservers": [],
+                "ipv6": {
+                  "interfaces": [
+                    {
+                      "device": "ens3",
+                      "address": {
+                        "address": "2001:db8:25::77",
+                        "prefix": 64
+                      }
+                    },
+                    {
+                      "device": "ens4",
+                      "address": {
+                        "address": "2001:db8:2::10",
+                        "prefix": 64
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "2001:db8:99::",
+                        "length": 64
+                      },
+                      "via": "fe80::1",
+                      "device": "ens4",
+                      "metric": 50
+                    },
+                    {
+                      "destination": {
+                        "address": "::",
+                        "length": 0
+                      },
+                      "via": "fe80::1",
+                      "device": "ens4",
+                      "metric": 100
+                    }
+                  ]
+                }
+              },
+              "generation": 0
+            },
+            "history": [],
+            "command": "",
+            "transcript": [],
+            "resolver_draft": "",
+            "resolver_applied": "",
+            "probe_input": "",
+            "probe_result": "",
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "profile": {
+                "id": "mixed-ip-example",
+                "links": [
+                  {
+                    "name": "ens3",
+                    "network": {
+                      "address": "10.60.5.0",
+                      "length": 27
+                    },
+                    "carrier": true
+                  },
+                  {
+                    "name": "ens4",
+                    "network": {
+                      "address": "192.0.2.0",
+                      "length": 24
+                    },
+                    "carrier": true
+                  }
+                ],
+                "gateways": [
+                  {
+                    "address": "10.60.5.1",
+                    "device": "ens3",
+                    "available": true,
+                    "exports": [
+                      {
+                        "address": "203.0.113.0",
+                        "length": 24
+                      }
+                    ]
+                  },
+                  {
+                    "address": "192.0.2.1",
+                    "device": "ens4",
+                    "available": true,
+                    "exports": [
+                      {
+                        "address": "198.51.100.0",
+                        "length": 24
+                      }
+                    ]
+                  }
+                ],
+                "nodes": [
+                  {
+                    "address": "10.60.5.20",
+                    "available": true
+                  },
+                  {
+                    "address": "203.0.113.90",
+                    "available": true
+                  },
+                  {
+                    "address": "198.51.100.10",
+                    "available": true
+                  }
+                ],
+                "resolvers": [],
+                "ipv6": {
+                  "lans": [
+                    {
+                      "device": "ens3",
+                      "network": {
+                        "address": "2001:db8:60::",
+                        "length": 64
+                      },
+                      "link_local": "fe80::a"
+                    },
+                    {
+                      "device": "ens4",
+                      "network": {
+                        "address": "2001:db8:2::",
+                        "length": 64
+                      },
+                      "link_local": "fe80::b"
+                    }
+                  ],
+                  "gateways": [
+                    {
+                      "device": "ens3",
+                      "address": "fe80::1",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "2001:db8:86::",
+                          "length": 64
+                        }
+                      ]
+                    },
+                    {
+                      "device": "ens4",
+                      "address": "fe80::1",
+                      "available": true,
+                      "exports": [
+                        {
+                          "address": "2001:db8:99::",
+                          "length": 64
+                        }
+                      ]
+                    }
+                  ],
+                  "nodes": [
+                    {
+                      "address": "2001:db8:60::20",
+                      "available": true
+                    },
+                    {
+                      "address": "2001:db8:86::90",
+                      "available": true
+                    },
+                    {
+                      "address": "2001:db8:99::10",
+                      "available": true
+                    }
+                  ]
+                }
+              },
+              "configuration": {
+                "interfaces": [
+                  {
+                    "name": "ens3",
+                    "up": true,
+                    "address": {
+                      "address": "10.60.5.90",
+                      "prefix": 24
+                    }
+                  },
+                  {
+                    "name": "ens4",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.10",
+                      "prefix": 24
+                    }
+                  }
+                ],
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "198.51.100.0",
+                      "length": 24
+                    },
+                    "via": "192.0.2.1",
+                    "device": "ens4",
+                    "metric": 50
+                  },
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "via": "192.0.2.1",
+                    "device": "ens4",
+                    "metric": 100
+                  }
+                ],
+                "nameservers": [],
+                "ipv6": {
+                  "interfaces": [
+                    {
+                      "device": "ens3",
+                      "address": {
+                        "address": "2001:db8:61::90",
+                        "prefix": 64
+                      }
+                    },
+                    {
+                      "device": "ens4",
+                      "address": {
+                        "address": "2001:db8:2::10",
+                        "prefix": 64
+                      }
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "2001:db8:99::",
+                        "length": 64
+                      },
+                      "via": "fe80::1",
+                      "device": "ens4",
+                      "metric": 50
+                    },
+                    {
+                      "destination": {
+                        "address": "::",
+                        "length": 0
+                      },
+                      "via": "fe80::1",
+                      "device": "ens4",
+                      "metric": 100
+                    }
+                  ]
+                }
+              },
+              "generation": 0
+            },
+            "history": [],
+            "command": "",
+            "transcript": [],
+            "resolver_draft": "",
+            "resolver_applied": "",
+            "probe_input": "",
+            "probe_result": "",
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "HostNetwork",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "profile": {
+              "id": "mixed-ip-assignment",
+              "links": [
+                {
+                  "name": "ens3",
+                  "network": {
+                    "address": "10.24.0.0",
+                    "length": 26
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "ens4",
+                  "network": {
+                    "address": "192.0.2.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "10.24.0.1",
+                  "device": "ens3",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "203.0.113.0",
+                      "length": 24
+                    }
+                  ]
+                },
+                {
+                  "address": "192.0.2.1",
+                  "device": "ens4",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "198.51.100.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "10.24.0.20",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.80",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.10",
+                  "available": true
+                }
+              ],
+              "resolvers": [],
+              "ipv6": {
+                "lans": [
+                  {
+                    "device": "ens3",
+                    "network": {
+                      "address": "2001:db8:24::",
+                      "length": 64
+                    },
+                    "link_local": "fe80::a"
+                  },
+                  {
+                    "device": "ens4",
+                    "network": {
+                      "address": "2001:db8:2::",
+                      "length": 64
+                    },
+                    "link_local": "fe80::b"
+                  }
+                ],
+                "gateways": [
+                  {
+                    "device": "ens3",
+                    "address": "fe80::1",
+                    "available": true,
+                    "exports": [
+                      {
+                        "address": "2001:db8:80::",
+                        "length": 64
+                      }
+                    ]
+                  },
+                  {
+                    "device": "ens4",
+                    "address": "fe80::1",
+                    "available": true,
+                    "exports": [
+                      {
+                        "address": "2001:db8:99::",
+                        "length": 64
+                      }
+                    ]
+                  }
+                ],
+                "nodes": [
+                  {
+                    "address": "2001:db8:24::20",
+                    "available": true
+                  },
+                  {
+                    "address": "2001:db8:80::80",
+                    "available": true
+                  },
+                  {
+                    "address": "2001:db8:99::10",
+                    "available": true
+                  }
+                ]
+              }
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "ens3",
+                  "up": true,
+                  "address": {
+                    "address": "10.24.0.77",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "ens4",
+                  "up": true,
+                  "address": {
+                    "address": "192.0.2.10",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "198.51.100.0",
+                    "length": 24
+                  },
+                  "via": "192.0.2.1",
+                  "device": "ens4",
+                  "metric": 50
+                },
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "192.0.2.1",
+                  "device": "ens4",
+                  "metric": 100
+                }
+              ],
+              "nameservers": [],
+              "ipv6": {
+                "interfaces": [
+                  {
+                    "device": "ens3",
+                    "address": {
+                      "address": "2001:db8:25::77",
+                      "prefix": 64
+                    }
+                  },
+                  {
+                    "device": "ens4",
+                    "address": {
+                      "address": "2001:db8:2::10",
+                      "prefix": 64
+                    }
+                  }
+                ],
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "2001:db8:99::",
+                      "length": 64
+                    },
+                    "via": "fe80::1",
+                    "device": "ens4",
+                    "metric": 50
+                  },
+                  {
+                    "destination": {
+                      "address": "::",
+                      "length": 0
+                    },
+                    "via": "fe80::1",
+                    "device": "ens4",
+                    "metric": 100
+                  }
+                ]
+              }
+            },
+            "generation": 0
+          },
+          "example": {
+            "version": 1,
+            "profile": {
+              "id": "mixed-ip-example",
+              "links": [
+                {
+                  "name": "ens3",
+                  "network": {
+                    "address": "10.60.5.0",
+                    "length": 27
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "ens4",
+                  "network": {
+                    "address": "192.0.2.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "10.60.5.1",
+                  "device": "ens3",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "203.0.113.0",
+                      "length": 24
+                    }
+                  ]
+                },
+                {
+                  "address": "192.0.2.1",
+                  "device": "ens4",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "198.51.100.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "10.60.5.20",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.90",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.10",
+                  "available": true
+                }
+              ],
+              "resolvers": [],
+              "ipv6": {
+                "lans": [
+                  {
+                    "device": "ens3",
+                    "network": {
+                      "address": "2001:db8:60::",
+                      "length": 64
+                    },
+                    "link_local": "fe80::a"
+                  },
+                  {
+                    "device": "ens4",
+                    "network": {
+                      "address": "2001:db8:2::",
+                      "length": 64
+                    },
+                    "link_local": "fe80::b"
+                  }
+                ],
+                "gateways": [
+                  {
+                    "device": "ens3",
+                    "address": "fe80::1",
+                    "available": true,
+                    "exports": [
+                      {
+                        "address": "2001:db8:86::",
+                        "length": 64
+                      }
+                    ]
+                  },
+                  {
+                    "device": "ens4",
+                    "address": "fe80::1",
+                    "available": true,
+                    "exports": [
+                      {
+                        "address": "2001:db8:99::",
+                        "length": 64
+                      }
+                    ]
+                  }
+                ],
+                "nodes": [
+                  {
+                    "address": "2001:db8:60::20",
+                    "available": true
+                  },
+                  {
+                    "address": "2001:db8:86::90",
+                    "available": true
+                  },
+                  {
+                    "address": "2001:db8:99::10",
+                    "available": true
+                  }
+                ]
+              }
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "ens3",
+                  "up": true,
+                  "address": {
+                    "address": "10.60.5.90",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "ens4",
+                  "up": true,
+                  "address": {
+                    "address": "192.0.2.10",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "198.51.100.0",
+                    "length": 24
+                  },
+                  "via": "192.0.2.1",
+                  "device": "ens4",
+                  "metric": 50
+                },
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "192.0.2.1",
+                  "device": "ens4",
+                  "metric": 100
+                }
+              ],
+              "nameservers": [],
+              "ipv6": {
+                "interfaces": [
+                  {
+                    "device": "ens3",
+                    "address": {
+                      "address": "2001:db8:61::90",
+                      "prefix": 64
+                    }
+                  },
+                  {
+                    "device": "ens4",
+                    "address": {
+                      "address": "2001:db8:2::10",
+                      "prefix": 64
+                    }
+                  }
+                ],
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "2001:db8:99::",
+                      "length": 64
+                    },
+                    "via": "fe80::1",
+                    "device": "ens4",
+                    "metric": 50
+                  },
+                  {
+                    "destination": {
+                      "address": "::",
+                      "length": 0
+                    },
+                    "via": "fe80::1",
+                    "device": "ens4",
+                    "metric": 100
+                  }
+                ]
+              }
+            },
+            "generation": 0
+          },
+          "requirements": [
+            {
+              "kind": "Up",
+              "device": "ens3"
+            },
+            {
+              "kind": "Address",
+              "device": "ens3",
+              "network": {
+                "address": "10.24.0.0",
+                "length": 26
+              }
+            },
+            {
+              "kind": "Default",
+              "device": "ens3",
+              "via": "10.24.0.1"
+            },
+            {
+              "kind": "Reach",
+              "target": "203.0.113.80",
+              "device": "ens3"
+            },
+            {
+              "kind": "Ipv6Address",
+              "device": "ens3",
+              "network": {
+                "address": "2001:db8:24::",
+                "length": 64
+              }
+            },
+            {
+              "kind": "Ipv6Default",
+              "device": "ens3",
+              "via": "fe80::1"
+            },
+            {
+              "kind": "Ipv6Reach",
+              "target": "2001:db8:80::80",
+              "device": "ens3"
+            },
+            {
+              "kind": "PreserveInterface",
+              "device": "ens4"
+            },
+            {
+              "kind": "PreserveRoutes",
+              "destination": {
+                "address": "198.51.100.0",
+                "length": 24
+              }
+            },
+            {
+              "kind": "PreserveIpv6Interface",
+              "device": "ens4"
+            },
+            {
+              "kind": "PreserveIpv6Routes",
+              "destination": {
+                "address": "2001:db8:99::",
+                "length": 64
+              }
+            },
+            {
+              "kind": "Reach",
+              "target": "198.51.100.10",
+              "device": "ens4"
+            },
+            {
+              "kind": "Ipv6Reach",
+              "target": "2001:db8:99::10",
+              "device": "ens4"
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "Up",
+              "device": "ens3"
+            },
+            {
+              "kind": "Address",
+              "device": "ens3",
+              "network": {
+                "address": "10.60.5.0",
+                "length": 27
+              }
+            },
+            {
+              "kind": "Default",
+              "device": "ens3",
+              "via": "10.60.5.1"
+            },
+            {
+              "kind": "Reach",
+              "target": "203.0.113.90",
+              "device": "ens3"
+            },
+            {
+              "kind": "Ipv6Address",
+              "device": "ens3",
+              "network": {
+                "address": "2001:db8:60::",
+                "length": 64
+              }
+            },
+            {
+              "kind": "Ipv6Default",
+              "device": "ens3",
+              "via": "fe80::1"
+            },
+            {
+              "kind": "Ipv6Reach",
+              "target": "2001:db8:86::90",
+              "device": "ens3"
+            },
+            {
+              "kind": "PreserveInterface",
+              "device": "ens4"
+            },
+            {
+              "kind": "PreserveRoutes",
+              "destination": {
+                "address": "198.51.100.0",
+                "length": 24
+              }
+            },
+            {
+              "kind": "PreserveIpv6Interface",
+              "device": "ens4"
+            },
+            {
+              "kind": "PreserveIpv6Routes",
+              "destination": {
+                "address": "2001:db8:99::",
+                "length": 64
+              }
+            },
+            {
+              "kind": "Reach",
+              "target": "198.51.100.10",
+              "device": "ens4"
+            },
+            {
+              "kind": "Ipv6Reach",
+              "target": "2001:db8:99::10",
+              "device": "ens4"
+            }
+          ],
+          "example_actions": [
+            {
+              "kind": "Command",
+              "input": "ip -4 address show"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -6 address show"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -4 route show"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -6 route show"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -4 address del 10.60.5.90/24 dev ens3"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -4 address add 10.60.5.12/27 dev ens3"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -4 route replace default via 10.60.5.1 dev ens3 metric 100"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -6 address del 2001:db8:61::90/64 dev ens3"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -6 address add 2001:db8:60::12/64 dev ens3"
+            },
+            {
+              "kind": "Command",
+              "input": "ip -6 route replace default via fe80::1 dev ens3 metric 100"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "host-action {\"kind\":\"Command\",\"input\":\"ip -4 address del 10.24.0.77/24 dev ens3\"}",
+        "host-action {\"kind\":\"Command\",\"input\":\"ip -4 address add 10.24.0.50/26 dev ens3\"}",
+        "host-action {\"kind\":\"Command\",\"input\":\"ip -4 route replace default via 10.24.0.1 dev ens3 metric 100\"}",
+        "host-action {\"kind\":\"Command\",\"input\":\"ip -6 address del 2001:db8:25::77/64 dev ens3\"}",
+        "host-action {\"kind\":\"Command\",\"input\":\"ip -6 address add 2001:db8:24::50/64 dev ens3\"}",
+        "host-action {\"kind\":\"Command\",\"input\":\"ip -6 route replace default via fe80::1 dev ens3 metric 100\"}"
+      ],
+      "hints": [
+        "ip -4 and ip -6 select different address families. A successful IPv4 path says nothing about IPv6.",
+        "An address and a prefix belong together. Compare ens3 with each supplied LAN before changing a default.",
+        "The two gateways share the text fe80::1 but live on different links. The device names distinguish them. Keep the more-specific management routes unchanged."
+      ],
+      "explanation": "The workstation has a wrong application address/prefix in each family and defaults through the management link. An address-only repair leaves the defaults wrong; an IPv4-only repair leaves IPv6 broken. Independent tables and correctly scoped next hops restore both application paths while the longer management prefixes keep their separate route. Unused alternatives inside each supplied LAN are valid; copying one shown address is not required.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc1918.html",
+        "https://www.rfc-editor.org/rfc/rfc4291.html",
+        "https://www.rfc-editor.org/rfc/rfc5737.html",
+        "https://www.rfc-editor.org/rfc/rfc3849.html"
+      ],
+      "simplifications": "Existing bounded static IPv4/IPv6 host reducer and supplied path facts only. IPv4 addresses are private or documentation addresses; 2001:db8::/32 is documentation, not a real public target. One chosen primary address per family/interface plus supplied IPv6 link-local facts; no host kernel, packets, ICMP, neighbor discovery, SLAAC, DHCP, DNS transport, policy routing, boot persistence or actual network activity. IPv4 host exercises exclude /31 and /32; IPv6 has no broadcast and does not use the IPv4 subtract-two rule. Source-held management and gateway availability remain fixed."
+    }
+  ]
+}

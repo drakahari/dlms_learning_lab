@@ -11,6 +11,41 @@ const IDS: [&str; 3] = [
     "lpic1-search-incomplete-intake",
     "lpic1-search-private-handover",
 ];
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Selection {
+    Find,
+    FileLocations,
+}
+impl Selection {
+    fn ids(self) -> &'static [&'static str] {
+        match self {
+            Self::Find => &IDS,
+            Self::FileLocations => &[
+                "lpic1-fhs-application-layout",
+                "lpic1-fhs-locate-active-files",
+            ],
+        }
+    }
+    fn unit(self) -> &'static str {
+        match self {
+            Self::Find => "linux-file-search",
+            Self::FileLocations => "linux-file-locations",
+        }
+    }
+    fn prefix(self) -> &'static str {
+        match self {
+            Self::Find => "find",
+            Self::FileLocations => "fhs",
+        }
+    }
+    fn reviews(self) -> Vec<Review> {
+        serde_json::from_str(match self {
+            Self::Find => include_str!("../../../tests/fixtures/linux-find-content-review.json"),
+            Self::FileLocations => include_str!("../../../tests/fixtures/fhs-content-review.json"),
+        })
+        .expect("fixed authored native review cases")
+    }
+}
 #[derive(Deserialize)]
 struct Review {
     id: String,
@@ -51,6 +86,7 @@ enum Step {
     Select(usize),
     Wait,
     Click(Target),
+    Reveal(Target),
     Type(String),
     ExampleChoice(usize),
     RecordPractice,
@@ -106,26 +142,31 @@ fn reset(p: &mut Vec<Step>) {
     ]);
 }
 fn plan(scenarios: &[Scenario]) -> Vec<Step> {
-    let reviews: Vec<Review> = serde_json::from_str(include_str!(
-        "../../../tests/fixtures/linux-find-content-review.json"
-    ))
-    .unwrap();
+    plan_for(scenarios, Selection::Find)
+}
+fn plan_for(scenarios: &[Scenario], selection: Selection) -> Vec<Step> {
+    let reviews = selection.reviews();
     let mut p = Vec::new();
-    for (n, id) in IDS.iter().enumerate() {
+    for (n, id) in selection.ids().iter().enumerate() {
         let s = scenarios
             .iter()
             .find(|s| s.id == *id)
             .expect("normal registered Find lesson");
         let lesson = s.terminal_teaching.as_ref().unwrap();
         let review = reviews.iter().find(|r| r.id == *id).unwrap();
-        let name = |suffix: &str| format!("find-{n}-{suffix}");
+        let name = |suffix: &str| format!("{}-{n}-{suffix}", selection.prefix());
         p.extend([
             Step::Select(n),
             Step::Wait,
             Step::Shot(name("introduction"), false),
-            Step::Click(Target::Try),
-            Step::Wait,
         ]);
+        if selection == Selection::FileLocations {
+            p.extend([
+                Step::Reveal(Target::Try),
+                Step::Shot(name("worked-example"), false),
+            ]);
+        }
+        p.extend([Step::Click(Target::Try), Step::Wait]);
         for (index, command) in lesson.example.iter().enumerate() {
             p.extend([
                 Step::Click(Target::Picker),
@@ -185,8 +226,20 @@ fn plan(scenarios: &[Scenario]) -> Vec<Step> {
         let engine::Goal::Filesystem { requirements } = &s.goal else {
             panic!("file goal")
         };
-        let dlms_learning_lab::filesystem::Requirement::DirectoryEntries { path, .. } =
+        let directory = if selection == Selection::Find {
             &requirements[0]
+        } else {
+            requirements
+                .iter()
+                .find(|r| {
+                    matches!(
+                        r,
+                        dlms_learning_lab::filesystem::Requirement::DirectoryEntries { .. }
+                    )
+                })
+                .expect("FHS handover has an exact directory outcome")
+        };
+        let dlms_learning_lab::filesystem::Requirement::DirectoryEntries { path, .. } = directory
         else {
             panic!("exact named handover folder")
         };
@@ -242,7 +295,7 @@ fn plan(scenarios: &[Scenario]) -> Vec<Step> {
         Step::Geometry(1.),
         Step::Wait,
         Step::Library,
-        Step::Shot("find-unit-library".into(), false),
+        Step::Shot(format!("{}-unit-library", selection.prefix()), false),
         Step::Finish,
     ]);
     assert!(p.len() < END - START, "separate bounded range before22000");
@@ -328,8 +381,24 @@ impl LabApp {
         ctx: &egui::Context,
         stage: usize,
     ) -> (bool, Option<String>) {
+        let selection = if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("fhs-batch") {
+            Selection::FileLocations
+        } else {
+            Selection::Find
+        };
+        self.file_lessons_native_for(ctx, stage, selection)
+    }
+    fn file_lessons_native_for(
+        &mut self,
+        ctx: &egui::Context,
+        stage: usize,
+        selection: Selection,
+    ) -> (bool, Option<String>) {
         assert!((START..END).contains(&stage));
-        let p = plan(&self.scenarios);
+        let p = match selection {
+            Selection::Find => plan(&self.scenarios),
+            Selection::FileLocations => plan_for(&self.scenarios, selection),
+        };
         let step = &p[stage - START];
         let n = p[..=stage - START]
             .iter()
@@ -342,7 +411,7 @@ impl LabApp {
                 }
             })
             .unwrap();
-        let id = IDS[n];
+        let id = selection.ids()[n];
         let i = self.scenarios.iter().position(|s| s.id == id).unwrap();
         let s = self.scenarios[i].clone();
         let l = s.terminal_teaching.as_ref().unwrap();
@@ -374,6 +443,12 @@ impl LabApp {
                     self.click_visible_smoke_control(ctx, self.find_target(target))
                 };
                 if !ready {
+                    return (false, None);
+                }
+            }
+            Step::Reveal(target) => {
+                let rect = self.find_target(target).expect("rendered lesson action");
+                if !self.reveal_smoke_control(ctx, rect) {
                     return (false, None);
                 }
             }
@@ -472,10 +547,7 @@ impl LabApp {
                 if *pass {
                     assert!(checks.iter().all(|c| c.0), "{id} {checks:?}");
                 } else {
-                    let reviews: Vec<Review> = serde_json::from_str(include_str!(
-                        "../../../tests/fixtures/linux-find-content-review.json"
-                    ))
-                    .unwrap();
+                    let reviews = selection.reviews();
                     for row in &reviews
                         .iter()
                         .find(|r| r.id == id)
@@ -701,7 +773,7 @@ impl LabApp {
             Step::LibraryFilter => {
                 assert!(self.selected.is_none());
                 self.filter = Filter::default();
-                self.filter.unit = "linux-file-search".into();
+                self.filter.unit = selection.unit().into();
                 self.filter.max_minutes = 120;
                 self.page = 0;
                 self.scale = 1.;
@@ -711,27 +783,33 @@ impl LabApp {
             Step::Library => {
                 assert!(self.selected.is_none());
                 assert!(self.filter.search.is_empty());
-                assert_eq!(self.filter.unit, "linux-file-search");
+                assert_eq!(self.filter.unit, selection.unit());
                 assert_eq!(
                     self.metrics.card_actions.len(),
-                    3,
-                    "all three actual unit cards rendered"
+                    selection.ids().len(),
+                    "all actual unit cards rendered"
                 );
                 let unit = self
                     .units
                     .iter()
-                    .find(|u| u.id == "linux-file-search")
+                    .find(|u| u.id == selection.unit())
                     .unwrap();
-                assert_eq!(unit.labs, IDS);
+                assert_eq!(unit.labs, selection.ids());
             }
             Step::Finish => {
-                assert!(IDS.iter().all(|id| {
+                assert!(selection.ids().iter().all(|id| {
                     let s = self.scenarios.iter().find(|s| s.id == *id).unwrap();
                     progress::current_solved(&self.progress.attempts[*id], s)
                 }));
-                println!(
-                    "PASS normal three Find lessons: actual Intro, example picker/Insert-only/Run, experiment/repair, full assignment wrong/partial/reference/manual alternatives, current invalidation/repair, exact save/readback, independent drafts/resume, selected Reset/Cancel, Challenge, actual Light150/Dark200 typing. Fixed synthetic inputs only; no reference-State publication, cold-process, novice or other-platform claim."
-                );
+                if selection == Selection::Find {
+                    println!(
+                        "PASS normal three Find lessons: actual Intro, example picker/Insert-only/Run, experiment/repair, full assignment wrong/partial/reference/manual alternatives, current invalidation/repair, exact save/readback, independent drafts/resume, selected Reset/Cancel, Challenge, actual Light150/Dark200 typing. Fixed synthetic inputs only; no reference-State publication, cold-process, novice or other-platform claim."
+                    );
+                } else {
+                    println!(
+                        "PASS two FHS lessons: actual native Insert/Run, separate practice, wrong/partial/alternate assignments, invalidation, warm save/resume, reset/cancel, Challenge, Light150/Dark200 typing. No cold-process or independent novice acceptance."
+                    );
+                }
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
         }
@@ -819,6 +897,160 @@ mod tests {
             draw(ctx, a);
         }
         panic!("actual control must become visible");
+    }
+    #[test]
+    fn fhs_worked_paths_are_fully_painted_in_normal_width_table_cells() {
+        fn collect<'a>(
+            shape: &'a egui::Shape,
+            clip: egui::Rect,
+            found: &mut Vec<(egui::Rect, &'a egui::epaint::TextShape)>,
+        ) {
+            match shape {
+                egui::Shape::Vec(shapes) => {
+                    for shape in shapes {
+                        collect(shape, clip, found);
+                    }
+                }
+                egui::Shape::Text(text) => found.push((clip, text)),
+                _ => (),
+            }
+        }
+        for id in Selection::FileLocations.ids() {
+            let ctx = egui::Context::default();
+            let mut a = LabApp::from_context_with_pilot(&ctx, true, false, true);
+            a.smoke = false;
+            let i = a.scenarios.iter().position(|s| s.id == *id).unwrap();
+            a.launch(i);
+            let values = lesson_presentation::entry(&a.scenarios[i])
+                .unwrap()
+                .worked
+                .iter()
+                .map(|row| row.value.clone())
+                .collect::<Vec<_>>();
+            assert_eq!(values.len(), 4);
+            for n in 0..6 {
+                let output = ctx.run(
+                    egui::RawInput {
+                        screen_rect: Some(egui::Rect::from_min_size(
+                            egui::Pos2::ZERO,
+                            egui::vec2(1200., 1800.),
+                        )),
+                        time: Some(n as f64 / 10.),
+                        ..Default::default()
+                    },
+                    |ctx| a.render(ctx),
+                );
+                if n == 5 {
+                    let mut text = vec![];
+                    for shape in &output.shapes {
+                        collect(&shape.shape, shape.clip_rect, &mut text);
+                    }
+                    for value in &values {
+                        let (clip, glyphs) = text
+                            .iter()
+                            .find(|(_, s)| s.galley.text() == value)
+                            .unwrap_or_else(|| panic!("Missing worked path: {id} {value}"));
+                        assert!(!glyphs.galley.elided && glyphs.opacity_factor > 0.);
+                        assert!(
+                            clip.expand(1. / output.pixels_per_point)
+                                .contains_rect(glyphs.visual_bounding_rect()),
+                            "Worked path is clipped and would require a horizontal scroll: {id} {value}"
+                        );
+                    }
+                }
+            }
+        }
+    }
+    #[test]
+    fn fhs_native_plan_retains_separate_work_real_controls_and_bounded_actions() {
+        let all = pack::ccna_pilot().unwrap();
+        let p = plan_for(&all, Selection::FileLocations);
+        assert!(START + p.len() < END);
+        assert_eq!(p.iter().filter(|s| matches!(s, Step::Select(_))).count(), 2);
+        assert_eq!(p.iter().filter(|s| matches!(s, Step::Resume)).count(), 2);
+        assert_eq!(
+            p.iter().filter(|s| matches!(s, Step::ResetExact)).count(),
+            6
+        );
+        assert_eq!(p.iter().filter(|s| matches!(s, Step::Challenge)).count(), 2);
+        assert_eq!(
+            p.iter()
+                .filter(|s| matches!(s, Step::InsertOnly(_)))
+                .count(),
+            16
+        );
+        assert!(p.iter().all(|s| !matches!(s,Step::Type(x) if x.len()>4096)));
+        let source = include_str!("find_lessons.rs")
+            .split("#[cfg(test)]")
+            .next()
+            .unwrap();
+        assert!(!source.contains("engine::execute") && !source.contains(".state ="));
+    }
+    #[test]
+    fn fhs_native_fixed_flow_uses_real_widgets_under_constrained_enlarged_rendering() {
+        let ctx = egui::Context::default();
+        let mut a = LabApp::from_context_with_pilot(&ctx, true, false, true);
+        a.smoke = false;
+        let p = plan_for(&a.scenarios, Selection::FileLocations);
+        let initial_catalog = serde_json::to_value(&a.scenarios).unwrap();
+        let mut at = 0;
+        let mut shots = std::collections::BTreeSet::new();
+        for n in 0..20_000 {
+            let events = std::mem::take(&mut a.pending_events);
+            let modifiers = events
+                .iter()
+                .rev()
+                .find_map(|e| match e {
+                    egui::Event::Key { modifiers, .. } => Some(*modifiers),
+                    _ => None,
+                })
+                .unwrap_or_default();
+            let mut advance = false;
+            let mut capture = None;
+            let output = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(1268., 632.) / a.scale,
+                    )),
+                    time: Some(n as f64 * 0.05),
+                    events,
+                    modifiers,
+                    ..Default::default()
+                },
+                |ctx| {
+                    a.render(ctx);
+                    a.smoke_stage = START + at;
+                    (advance, capture) =
+                        a.file_lessons_native_for(ctx, START + at, Selection::FileLocations);
+                },
+            );
+            if let Some(name) = capture {
+                assert!(shots.insert(name));
+                assert!(
+                    output
+                        .shapes
+                        .iter()
+                        .any(|s| matches!(s.shape, egui::Shape::Text(_) | egui::Shape::Vec(_)))
+                );
+            }
+            if advance {
+                at += 1;
+            }
+            if at == p.len() {
+                break;
+            }
+        }
+        assert_eq!(at, p.len(), "stalled actual stage: {:?}", p.get(at));
+        assert_eq!(
+            shots.len(),
+            p.iter().filter(|s| matches!(s, Step::Shot(..))).count()
+        );
+        assert_eq!(serde_json::to_value(&a.scenarios).unwrap(), initial_catalog);
+        assert!(Selection::FileLocations.ids().iter().all(|id| {
+            let s = a.scenarios.iter().find(|s| s.id == *id).unwrap();
+            progress::current_solved(&a.progress.attempts[*id], s)
+        }));
     }
     #[test]
     fn find_native_plan_is_bounded_separate_and_uses_real_controls_for_every_task() {

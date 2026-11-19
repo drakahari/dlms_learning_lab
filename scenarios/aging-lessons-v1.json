@@ -1,0 +1,943 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-aging-rotation",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Password aging",
+      "unit": "linux-password-aging",
+      "title": "Set password rotation with useful advance warnings",
+      "summary": "Inspect aging metadata, set a rotation deadline and warn before it, without inventing a password change.",
+      "objective": "For morgan, set the maximum password age to 45 days and the warning window to 10 days. Retain the supplied last-change date 2026-01-01, minimum age 3 days, inactivity 5 days and no account-expiry date. Keep the other supplied account unchanged. Check every supplied date, including warning start, password expiry and grace end.",
+      "difficulty": "Beginner",
+      "minutes": 25,
+      "initial": {
+        "kind": "Aging",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-aging-rotation",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "entries": [
+                {
+                  "login": "morgan",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20454
+                    },
+                    "minimum": 3,
+                    "maximum": 90,
+                    "warning": 2,
+                    "inactive": 5,
+                    "account_expires": null
+                  }
+                },
+                {
+                  "login": "morgan_protected",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20393
+                    },
+                    "minimum": 0,
+                    "maximum": null,
+                    "warning": 0,
+                    "inactive": null,
+                    "account_expires": 21549
+                  }
+                }
+              ]
+            },
+            "input": "",
+            "transcript": [],
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "entries": [
+                {
+                  "login": "taylor",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20887
+                    },
+                    "minimum": 3,
+                    "maximum": 90,
+                    "warning": 2,
+                    "inactive": 5,
+                    "account_expires": null
+                  }
+                },
+                {
+                  "login": "taylor_protected",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20393
+                    },
+                    "minimum": 0,
+                    "maximum": null,
+                    "warning": 0,
+                    "inactive": null,
+                    "account_expires": 21549
+                  }
+                }
+              ]
+            },
+            "input": "",
+            "transcript": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "Aging",
+        "definition": {
+          "initial": {
+            "id": "lpic1-aging-rotation",
+            "instructions": "For morgan, set the maximum password age to 45 days and the warning window to 10 days. Retain the supplied last-change date 2026-01-01, minimum age 3 days, inactivity 5 days and no account-expiry date. Keep the other supplied account unchanged. Check every supplied date, including warning start, password expiry and grace end.",
+            "target": "morgan",
+            "initial": {
+              "entries": [
+                {
+                  "login": "morgan",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20454
+                    },
+                    "minimum": 3,
+                    "maximum": 90,
+                    "warning": 2,
+                    "inactive": 5,
+                    "account_expires": null
+                  }
+                },
+                {
+                  "login": "morgan_protected",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20393
+                    },
+                    "minimum": 0,
+                    "maximum": null,
+                    "warning": 0,
+                    "inactive": null,
+                    "account_expires": 21549
+                  }
+                }
+              ]
+            },
+            "expected": {
+              "last_change": {
+                "kind": "day",
+                "day": 20454
+              },
+              "minimum": 3,
+              "maximum": 45,
+              "warning": 10,
+              "inactive": 5,
+              "account_expires": null
+            },
+            "expiry_range": null,
+            "cases": [
+              {
+                "label": "Minimum age reached",
+                "day": 20457,
+                "expected": {
+                  "verdict": "Usable",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Warning begins",
+                "day": 20489,
+                "expected": {
+                  "verdict": "Usable",
+                  "warning_days": 10,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "One day remains",
+                "day": 20498,
+                "expected": {
+                  "verdict": "Usable",
+                  "warning_days": 1,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Maximum age reached",
+                "day": 20499,
+                "expected": {
+                  "verdict": "PasswordChangeRequired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Grace ends",
+                "day": 20504,
+                "expected": {
+                  "verdict": "PasswordGraceEnded",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "aging-rotation-practice",
+            "instructions": "For taylor, set a maximum password age of 20 days and a 4 day warning window. Keep the supplied last-change date, minimum 3 days, inactivity 5 days, no account expiry and the other account unchanged.",
+            "target": "taylor",
+            "initial": {
+              "entries": [
+                {
+                  "login": "taylor",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20887
+                    },
+                    "minimum": 3,
+                    "maximum": 90,
+                    "warning": 2,
+                    "inactive": 5,
+                    "account_expires": null
+                  }
+                },
+                {
+                  "login": "taylor_protected",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20393
+                    },
+                    "minimum": 0,
+                    "maximum": null,
+                    "warning": 0,
+                    "inactive": null,
+                    "account_expires": 21549
+                  }
+                }
+              ]
+            },
+            "expected": {
+              "last_change": {
+                "kind": "day",
+                "day": 20887
+              },
+              "minimum": 3,
+              "maximum": 20,
+              "warning": 4,
+              "inactive": 5,
+              "account_expires": null
+            },
+            "expiry_range": null,
+            "cases": [
+              {
+                "label": "Minimum age reached",
+                "day": 20890,
+                "expected": {
+                  "verdict": "Usable",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Warning begins",
+                "day": 20903,
+                "expected": {
+                  "verdict": "Usable",
+                  "warning_days": 4,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "One day remains",
+                "day": 20906,
+                "expected": {
+                  "verdict": "Usable",
+                  "warning_days": 1,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Maximum age reached",
+                "day": 20907,
+                "expected": {
+                  "verdict": "PasswordChangeRequired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Grace ends",
+                "day": 20912,
+                "expected": {
+                  "verdict": "PasswordGraceEnded",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              }
+            ]
+          },
+          "example_worked": [
+            "chage -M 20 -W 4 taylor"
+          ]
+        }
+      },
+      "steps": [
+        "Inspect the supplied aging record, apply the requested policy and check every dated observation while preserving history and protected accounts."
+      ],
+      "guide": [],
+      "explanation": "The maximum and warning are independent metadata fields. With the supplied last-change history,45 days reaches the assignment deadline and 10 days gives advance notice. -M and -W change those fields without faking a recent password change. The state and all dated cases, including the end of the existing grace, are checked; all-disabled policy is not an equivalent solution.",
+      "hints": [
+        "First list morgan with chage -l morgan. Maximum age and warning are two separate fields.",
+        "Use capital -M for maximum days and -W for warning days; changing -d would alter the supplied history.",
+        "Compare the warning-start date with the maximum-age date. The warning adds notice, not more valid days."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://github.com/shadow-maint/shadow/blob/4.18.0/man/chage.1.xml",
+        "https://github.com/linux-pam/linux-pam/blob/v1.7.1/modules/pam_unix/passverify.c"
+      ],
+      "simplifications": "Checked 2026-11-08: LPIC-1 v5.0 / 107.1 and 110.1; shadow 4.18.0 metadata options and Linux-PAM v1.7.1 expiry-helper ordering. Supplied non-secret virtual records and explicit UTC dates only. chage lists metadata; the separate observation table models one versioned aging policy, not universal login access. The pinned helper uses >= at exact expiry dates; manual wording differs. No passwords/hashes, actual password change, PAM/NSS/LDAP, host accounts/files/clock/processes or real authentication. ISO-only query output; bounded disclosed options, no interactive/root/prefix/short clusters/shell syntax. Ordinary day 0 / 1970-01-01 is excluded; lastday 0 is the explicit reset marker. Other account utilities stay in their existing workspaces.",
+      "prerequisites": [
+        "lpic1-account-team-handover"
+      ],
+      "solution": [
+        "AGING PLAN\n[\"chage -M 45 -W 10 morgan\"]"
+      ]
+    },
+    {
+      "id": "lpic1-aging-grace",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Password aging",
+      "unit": "linux-password-aging",
+      "title": "Repair a password-change grace without erasing rotation",
+      "summary": "Distinguish a required password change from an ended grace period, then repair only the grace.",
+      "objective": "For river, set inactivity grace to 7 days after password expiry. Retain last change 2026-05-01, minimum 1 day, maximum 30 days, warning 5 days and no account-expiry date. Keep the other supplied account unchanged. Verify password change is still required during grace and that grace ends at the supplied boundary.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "initial": {
+        "kind": "Aging",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-aging-grace",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "entries": [
+                {
+                  "login": "river",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20574
+                    },
+                    "minimum": 1,
+                    "maximum": 30,
+                    "warning": 5,
+                    "inactive": 0,
+                    "account_expires": null
+                  }
+                },
+                {
+                  "login": "river_protected",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20393
+                    },
+                    "minimum": 0,
+                    "maximum": null,
+                    "warning": 0,
+                    "inactive": null,
+                    "account_expires": 21549
+                  }
+                }
+              ]
+            },
+            "input": "",
+            "transcript": [],
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "entries": [
+                {
+                  "login": "lee",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 21040
+                    },
+                    "minimum": 1,
+                    "maximum": 14,
+                    "warning": 3,
+                    "inactive": 1,
+                    "account_expires": null
+                  }
+                },
+                {
+                  "login": "lee_protected",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20393
+                    },
+                    "minimum": 0,
+                    "maximum": null,
+                    "warning": 0,
+                    "inactive": null,
+                    "account_expires": 21549
+                  }
+                }
+              ]
+            },
+            "input": "",
+            "transcript": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "Aging",
+        "definition": {
+          "initial": {
+            "id": "lpic1-aging-grace",
+            "instructions": "For river, set inactivity grace to 7 days after password expiry. Retain last change 2026-05-01, minimum 1 day, maximum 30 days, warning 5 days and no account-expiry date. Keep the other supplied account unchanged. Verify password change is still required during grace and that grace ends at the supplied boundary.",
+            "target": "river",
+            "initial": {
+              "entries": [
+                {
+                  "login": "river",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20574
+                    },
+                    "minimum": 1,
+                    "maximum": 30,
+                    "warning": 5,
+                    "inactive": 0,
+                    "account_expires": null
+                  }
+                },
+                {
+                  "login": "river_protected",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20393
+                    },
+                    "minimum": 0,
+                    "maximum": null,
+                    "warning": 0,
+                    "inactive": null,
+                    "account_expires": 21549
+                  }
+                }
+              ]
+            },
+            "expected": {
+              "last_change": {
+                "kind": "day",
+                "day": 20574
+              },
+              "minimum": 1,
+              "maximum": 30,
+              "warning": 5,
+              "inactive": 7,
+              "account_expires": null
+            },
+            "expiry_range": null,
+            "cases": [
+              {
+                "label": "Before password expiry",
+                "day": 20603,
+                "expected": {
+                  "verdict": "Usable",
+                  "warning_days": 1,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Password change required",
+                "day": 20604,
+                "expected": {
+                  "verdict": "PasswordChangeRequired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Last day of grace",
+                "day": 20610,
+                "expected": {
+                  "verdict": "PasswordChangeRequired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Grace has ended",
+                "day": 20611,
+                "expected": {
+                  "verdict": "PasswordGraceEnded",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "aging-grace-practice",
+            "instructions": "For lee, extend inactivity grace to 4 days after password expiry. Keep last change 2027-08-10, minimum 1 day, maximum 14 days, warning 3 days, no account expiry and the other record unchanged.",
+            "target": "lee",
+            "initial": {
+              "entries": [
+                {
+                  "login": "lee",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 21040
+                    },
+                    "minimum": 1,
+                    "maximum": 14,
+                    "warning": 3,
+                    "inactive": 1,
+                    "account_expires": null
+                  }
+                },
+                {
+                  "login": "lee_protected",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20393
+                    },
+                    "minimum": 0,
+                    "maximum": null,
+                    "warning": 0,
+                    "inactive": null,
+                    "account_expires": 21549
+                  }
+                }
+              ]
+            },
+            "expected": {
+              "last_change": {
+                "kind": "day",
+                "day": 21040
+              },
+              "minimum": 1,
+              "maximum": 14,
+              "warning": 3,
+              "inactive": 4,
+              "account_expires": null
+            },
+            "expiry_range": null,
+            "cases": [
+              {
+                "label": "Before password expiry",
+                "day": 21053,
+                "expected": {
+                  "verdict": "Usable",
+                  "warning_days": 1,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Password change required",
+                "day": 21054,
+                "expected": {
+                  "verdict": "PasswordChangeRequired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Last day of grace",
+                "day": 21057,
+                "expected": {
+                  "verdict": "PasswordChangeRequired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Grace has ended",
+                "day": 21058,
+                "expected": {
+                  "verdict": "PasswordGraceEnded",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              }
+            ]
+          },
+          "example_worked": [
+            "chage -I 4 lee"
+          ]
+        }
+      },
+      "steps": [
+        "Inspect the supplied aging record, apply the requested policy and check every dated observation while preserving history and protected accounts."
+      ],
+      "guide": [],
+      "explanation": "The password deadline remains last change plus maximum age. Only the inactivity field changes, so the requirement to change a password remains during the authorized 7 day grace. At its exact end the pinned model returns grace ended. Removing maximum age or changing the recorded last change would hide the problem rather than repair it.",
+      "hints": [
+        "List river and compare Password expires with Password inactive.",
+        "The requested field is capital -I. It counts days after expiry, not after the last login.",
+        "Keep the maximum and last-change date. Check the first expired day and the exact end of grace separately."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://github.com/shadow-maint/shadow/blob/4.18.0/man/chage.1.xml",
+        "https://github.com/linux-pam/linux-pam/blob/v1.7.1/modules/pam_unix/passverify.c"
+      ],
+      "simplifications": "Checked 2026-11-08: LPIC-1 v5.0 / 107.1 and 110.1; shadow 4.18.0 metadata options and Linux-PAM v1.7.1 expiry-helper ordering. Supplied non-secret virtual records and explicit UTC dates only. chage lists metadata; the separate observation table models one versioned aging policy, not universal login access. The pinned helper uses >= at exact expiry dates; manual wording differs. No passwords/hashes, actual password change, PAM/NSS/LDAP, host accounts/files/clock/processes or real authentication. ISO-only query output; bounded disclosed options, no interactive/root/prefix/short clusters/shell syntax. Ordinary day 0 / 1970-01-01 is excluded; lastday 0 is the explicit reset marker. Other account utilities stay in their existing workspaces.",
+      "prerequisites": [
+        "lpic1-aging-rotation"
+      ],
+      "solution": [
+        "AGING PLAN\n[\"chage -I 7 river\"]"
+      ]
+    },
+    {
+      "id": "lpic1-aging-contract-reset",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Password aging",
+      "unit": "linux-password-aging",
+      "title": "Extend a contract account while retaining its password reset",
+      "summary": "Combine a finite account-date handover with a preserved password-reset requirement and protected records.",
+      "objective": "Set sage’s account-expiry date to any date from 2026-10-10 through 2026-10-20 inclusive. Preserve the intentional password-reset marker, minimum 3 days, maximum 45 days, warning 7 days and inactivity 10 days. Keep the other supplied account unchanged; do not disable account expiry or invent a password change. Check every supplied date: before the new expiry a password change is still required, and after it the account date has expired.",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "initial": {
+        "kind": "Aging",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-aging-contract-reset",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "entries": [
+                {
+                  "login": "sage",
+                  "record": {
+                    "last_change": {
+                      "kind": "force_change"
+                    },
+                    "minimum": 3,
+                    "maximum": 45,
+                    "warning": 7,
+                    "inactive": 10,
+                    "account_expires": 20697
+                  }
+                },
+                {
+                  "login": "sage_protected",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20393
+                    },
+                    "minimum": 0,
+                    "maximum": null,
+                    "warning": 0,
+                    "inactive": null,
+                    "account_expires": 21549
+                  }
+                }
+              ]
+            },
+            "input": "",
+            "transcript": [],
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "entries": [
+                {
+                  "login": "casey",
+                  "record": {
+                    "last_change": {
+                      "kind": "force_change"
+                    },
+                    "minimum": 2,
+                    "maximum": 20,
+                    "warning": 4,
+                    "inactive": 6,
+                    "account_expires": 20850
+                  }
+                },
+                {
+                  "login": "casey_protected",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20393
+                    },
+                    "minimum": 0,
+                    "maximum": null,
+                    "warning": 0,
+                    "inactive": null,
+                    "account_expires": 21549
+                  }
+                }
+              ]
+            },
+            "input": "",
+            "transcript": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "Aging",
+        "definition": {
+          "initial": {
+            "id": "lpic1-aging-contract-reset",
+            "instructions": "Set sage’s account-expiry date to any date from 2026-10-10 through 2026-10-20 inclusive. Preserve the intentional password-reset marker, minimum 3 days, maximum 45 days, warning 7 days and inactivity 10 days. Keep the other supplied account unchanged; do not disable account expiry or invent a password change. Check every supplied date: before the new expiry a password change is still required, and after it the account date has expired.",
+            "target": "sage",
+            "initial": {
+              "entries": [
+                {
+                  "login": "sage",
+                  "record": {
+                    "last_change": {
+                      "kind": "force_change"
+                    },
+                    "minimum": 3,
+                    "maximum": 45,
+                    "warning": 7,
+                    "inactive": 10,
+                    "account_expires": 20697
+                  }
+                },
+                {
+                  "login": "sage_protected",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20393
+                    },
+                    "minimum": 0,
+                    "maximum": null,
+                    "warning": 0,
+                    "inactive": null,
+                    "account_expires": 21549
+                  }
+                }
+              ]
+            },
+            "expected": {
+              "last_change": {
+                "kind": "force_change"
+              },
+              "minimum": 3,
+              "maximum": 45,
+              "warning": 7,
+              "inactive": 10,
+              "account_expires": 20741
+            },
+            "expiry_range": {
+              "first": 20736,
+              "last": 20746
+            },
+            "cases": [
+              {
+                "label": "Before the old account date",
+                "day": 20696,
+                "expected": {
+                  "verdict": "PasswordChangeRequired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Extension is needed",
+                "day": 20711,
+                "expected": {
+                  "verdict": "PasswordChangeRequired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Before any authorized expiry",
+                "day": 20735,
+                "expected": {
+                  "verdict": "PasswordChangeRequired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "After every authorized expiry",
+                "day": 20747,
+                "expected": {
+                  "verdict": "AccountExpired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "aging-contract-practice",
+            "instructions": "Extend casey’s account expiry to any date from 2027-02-20 through 2027-02-25 inclusive. Preserve the intentional password-reset marker, minimum 2 days, maximum 20 days, warning 4 days, inactivity 6 days and the other record.",
+            "target": "casey",
+            "initial": {
+              "entries": [
+                {
+                  "login": "casey",
+                  "record": {
+                    "last_change": {
+                      "kind": "force_change"
+                    },
+                    "minimum": 2,
+                    "maximum": 20,
+                    "warning": 4,
+                    "inactive": 6,
+                    "account_expires": 20850
+                  }
+                },
+                {
+                  "login": "casey_protected",
+                  "record": {
+                    "last_change": {
+                      "kind": "day",
+                      "day": 20393
+                    },
+                    "minimum": 0,
+                    "maximum": null,
+                    "warning": 0,
+                    "inactive": null,
+                    "account_expires": 21549
+                  }
+                }
+              ]
+            },
+            "expected": {
+              "last_change": {
+                "kind": "force_change"
+              },
+              "minimum": 2,
+              "maximum": 20,
+              "warning": 4,
+              "inactive": 6,
+              "account_expires": 20871
+            },
+            "expiry_range": {
+              "first": 20869,
+              "last": 20874
+            },
+            "cases": [
+              {
+                "label": "Before the old account date",
+                "day": 20849,
+                "expected": {
+                  "verdict": "PasswordChangeRequired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Extension is needed",
+                "day": 20864,
+                "expected": {
+                  "verdict": "PasswordChangeRequired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "Before any authorized expiry",
+                "day": 20868,
+                "expected": {
+                  "verdict": "PasswordChangeRequired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              },
+              {
+                "label": "After every authorized expiry",
+                "day": 20875,
+                "expected": {
+                  "verdict": "AccountExpired",
+                  "warning_days": null,
+                  "change_too_soon": false,
+                  "future_last_change": false
+                }
+              }
+            ]
+          },
+          "example_worked": [
+            "chage -E 2027-02-22 casey"
+          ]
+        }
+      },
+      "steps": [
+        "Inspect the supplied aging record, apply the requested policy and check every dated observation while preserving history and protected accounts."
+      ],
+      "guide": [],
+      "explanation": "The assignment accepts any finite account date inside the authorized interval, including an equivalent positive epoch-day input. Only -E needs to change. The 0last-change marker remains, so an unexpired account still requires a password change; after the chosen finite date the account-expiry result takes precedence. Clearing either restriction or faking a new last-change date fails.",
+      "hints": [
+        "List sage. Account expires is independent of the Password must be changed marker.",
+        "Use -E for a finite account date inside the authorized range. -E -1 removes the limit instead of extending it.",
+        "Keep -d 0 and all age fields as supplied. Check both a date during the extension and the final date after all allowed expiries."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://github.com/shadow-maint/shadow/blob/4.18.0/man/chage.1.xml",
+        "https://github.com/linux-pam/linux-pam/blob/v1.7.1/modules/pam_unix/passverify.c"
+      ],
+      "simplifications": "Checked 2026-11-08: LPIC-1 v5.0 / 107.1 and 110.1; shadow 4.18.0 metadata options and Linux-PAM v1.7.1 expiry-helper ordering. Supplied non-secret virtual records and explicit UTC dates only. chage lists metadata; the separate observation table models one versioned aging policy, not universal login access. The pinned helper uses >= at exact expiry dates; manual wording differs. No passwords/hashes, actual password change, PAM/NSS/LDAP, host accounts/files/clock/processes or real authentication. ISO-only query output; bounded disclosed options, no interactive/root/prefix/short clusters/shell syntax. Ordinary day 0 / 1970-01-01 is excluded; lastday 0 is the explicit reset marker. Other account utilities stay in their existing workspaces.",
+      "prerequisites": [
+        "lpic1-aging-grace"
+      ],
+      "solution": [
+        "AGING PLAN\n[\"chage -E 2026-10-15 sage\"]"
+      ]
+    }
+  ]
+}

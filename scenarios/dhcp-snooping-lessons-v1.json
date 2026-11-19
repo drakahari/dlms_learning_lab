@@ -1,0 +1,3300 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-dhcp-server-boundary",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "DHCP security",
+      "unit": "dhcp-snooping-foundations",
+      "title": "Keep DHCP replies on the approved server path",
+      "summary": "Protect address offers without blocking the real server, and distinguish an Offer from a recorded lease.",
+      "objective": "Protect the supplied client's VLAN from server replies on user-facing ports while the approved server's full exchange still reaches the client. Observe that an Offer creates no address record, an ACK does, and the record expires after its supplied lease time.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Inspect the supplied network, repair the policy, replay its traffic and check the resulting behavior."
+      ],
+      "guide": [],
+      "explanation": "Enable DHCP snooping and inspect VLAN10. Trust the server port, while client and peer remain untrusted. Replay the approved exchange and the unexpected server reply; check that only a delivered ACK records the address and that the supplied expiry sample removes it.",
+      "hints": [
+        "Is the feature enabled for the switch and for the supplied client VLAN? A bypassed exchange is not inspected.",
+        "Follow the approved server’s physical path. User-facing ports should not become a way for server replies to enter.",
+        "Compare the Offer-only result with the full exchange and expiry sample. Look for an observed record after ACK, not after Offer."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/ip/b_1712_ip_9300_cg/configuring_dhcp.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/dynamic-host-configuration-protocol-dhcp-dhcpv6/217055-operate-and-troubleshoot-dhcp-snooping.html"
+      ],
+      "simplifications": "Checked2026-11-08: CCNA200-301v1.1/5.7; Catalyst9300 IOS XE Dublin17.12 DHCP chapter2023-07-28. Supplemental Cisco217055 trace2024-06-12 is explicitly16.12.X, not a17.12 runtime test. One supplied access-only LAN; typed initial messages and observed leases, no real packets, allocator, IOS, host interfaces or authentication. Option82 insertion is explicitly disabled in the supplied setup; relay/transformations, other exchange states, rate limits, stacks/trunks and database-agent persistence are excluded. The60-second pending sample cache is a simulator bound, not a protocol timer. Unsupported/ambiguous replies and failed downstream ACK handling diagnose their limits instead of inventing equipment behavior. Checks use separate sample inputs and do not train the displayed state.",
+      "initial": {
+        "kind": "DhcpSnooping",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-dhcp-server-boundary",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-reply-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-reply-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "assigned-reply-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "assigned-reply-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "assigned-reply-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-reply-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-reply-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-reply-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-reply-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-reply-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-reply-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-reply-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-reply-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-reply-client": "02:00:00:00:00:01",
+                  "assigned-reply-peer": "02:00:00:00:00:03",
+                  "assigned-reply-server": "02:00:00:00:00:02"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-reply-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-reply-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "assigned-reply-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "assigned-reply-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "assigned-reply-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-reply-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-reply-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-reply-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-reply-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-reply-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-reply-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-reply-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-reply-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-reply-client": "02:00:00:00:00:01",
+                  "assigned-reply-peer": "02:00:00:00:00:03",
+                  "assigned-reply-server": "02:00:00:00:00:02"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "information_option_disabled": true,
+              "config": {
+                "enabled": false,
+                "vlans": [],
+                "ports": [
+                  {
+                    "port": "client",
+                    "trusted": false
+                  },
+                  {
+                    "port": "peer",
+                    "trusted": false
+                  },
+                  {
+                    "port": "server",
+                    "trusted": false
+                  }
+                ],
+                "verify_source": true
+              },
+              "pending": [],
+              "bindings": []
+            },
+            "draft": {
+              "enabled": false,
+              "verify_source": true,
+              "vlans": "",
+              "ports": [
+                {
+                  "port": "client",
+                  "trusted": false
+                },
+                {
+                  "port": "peer",
+                  "trusted": false
+                },
+                {
+                  "port": "server",
+                  "trusted": false
+                }
+              ]
+            },
+            "sample": 0,
+            "output": [],
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-reply-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-reply-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "sample-reply-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "sample-reply-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "sample-reply-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-reply-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-reply-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-reply-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-reply-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-reply-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-reply-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-reply-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-reply-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-reply-client": "02:00:00:00:00:15",
+                  "sample-reply-peer": "02:00:00:00:00:17",
+                  "sample-reply-server": "02:00:00:00:00:16"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-reply-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-reply-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "sample-reply-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "sample-reply-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "sample-reply-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-reply-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-reply-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-reply-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-reply-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-reply-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-reply-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-reply-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-reply-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-reply-client": "02:00:00:00:00:15",
+                  "sample-reply-peer": "02:00:00:00:00:17",
+                  "sample-reply-server": "02:00:00:00:00:16"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "information_option_disabled": true,
+              "config": {
+                "enabled": false,
+                "vlans": [],
+                "ports": [
+                  {
+                    "port": "client",
+                    "trusted": false
+                  },
+                  {
+                    "port": "peer",
+                    "trusted": false
+                  },
+                  {
+                    "port": "server",
+                    "trusted": false
+                  }
+                ],
+                "verify_source": true
+              },
+              "pending": [],
+              "bindings": []
+            },
+            "draft": {
+              "enabled": false,
+              "verify_source": true,
+              "vlans": "",
+              "ports": [
+                {
+                  "port": "client",
+                  "trusted": false
+                },
+                {
+                  "port": "peer",
+                  "trusted": false
+                },
+                {
+                  "port": "server",
+                  "trusted": false
+                }
+              ]
+            },
+            "sample": 0,
+            "output": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "DhcpSnooping",
+        "definition": {
+          "initial": {
+            "id": "ccna-dhcp-server-boundary",
+            "instructions": "Protect the supplied client's VLAN from server replies on user-facing ports while the approved server's full exchange still reaches the client. Observe that an Offer creates no address record, an ACK does, and the record expires after its supplied lease time.",
+            "initial": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-reply-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-reply-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "assigned-reply-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "assigned-reply-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "assigned-reply-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-reply-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-reply-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-reply-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-reply-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-reply-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-reply-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-reply-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-reply-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-reply-client": "02:00:00:00:00:01",
+                  "assigned-reply-peer": "02:00:00:00:00:03",
+                  "assigned-reply-server": "02:00:00:00:00:02"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-reply-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-reply-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "assigned-reply-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "assigned-reply-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "assigned-reply-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-reply-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-reply-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-reply-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-reply-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-reply-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-reply-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-reply-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-reply-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-reply-client": "02:00:00:00:00:01",
+                  "assigned-reply-peer": "02:00:00:00:00:03",
+                  "assigned-reply-server": "02:00:00:00:00:02"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "information_option_disabled": true,
+              "config": {
+                "enabled": false,
+                "vlans": [],
+                "ports": [
+                  {
+                    "port": "client",
+                    "trusted": false
+                  },
+                  {
+                    "port": "peer",
+                    "trusted": false
+                  },
+                  {
+                    "port": "server",
+                    "trusted": false
+                  }
+                ],
+                "verify_source": true
+              },
+              "pending": [],
+              "bindings": []
+            },
+            "reference": {
+              "enabled": true,
+              "vlans": [
+                10
+              ],
+              "ports": [
+                {
+                  "port": "client",
+                  "trusted": false
+                },
+                {
+                  "port": "peer",
+                  "trusted": false
+                },
+                {
+                  "port": "server",
+                  "trusted": true
+                }
+              ],
+              "verify_source": true
+            },
+            "cases": [
+              {
+                "label": "Approved initial exchange",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:01",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "discover"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-reply-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:02",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "10.25.0.90"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-reply-client"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:01",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-reply-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:02",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "ack",
+                        "address": "10.25.0.90",
+                        "lease": 120
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-reply-client"
+                      ],
+                      "learned": true,
+                      "removed": false
+                    }
+                  }
+                ],
+                "leases_after": 1
+              },
+              {
+                "label": "Unexpected server reply",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:01",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-reply-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-peer",
+                    "packet": {
+                      "source": "02:00:00:00:00:03",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "10.99.0.7"
+                      }
+                    },
+                    "expected": {
+                      "kind": "rejected",
+                      "cause": "untrusted_server"
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:01",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "10.99.0.7"
+                      }
+                    },
+                    "expected": {
+                      "kind": "rejected",
+                      "cause": "untrusted_server"
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:02",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "ack",
+                        "address": "10.25.0.90",
+                        "lease": 120
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-reply-client"
+                      ],
+                      "learned": true,
+                      "removed": false
+                    }
+                  }
+                ],
+                "leases_after": 1
+              },
+              {
+                "label": "An Offer does not record a lease",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:01",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "discover"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-reply-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:02",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "10.25.0.90"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-reply-client"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  }
+                ],
+                "leases_after": 0
+              },
+              {
+                "label": "Recorded lease expires",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:01",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "discover"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-reply-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:02",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "10.25.0.90"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-reply-client"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:01",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-reply-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-reply-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:02",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "ack",
+                        "address": "10.25.0.90",
+                        "lease": 120
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-reply-client"
+                      ],
+                      "learned": true,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "advance",
+                    "seconds": 120
+                  }
+                ],
+                "leases_after": 0
+              }
+            ]
+          },
+          "example": {
+            "id": "ccna-dhcp-server-boundary-example",
+            "instructions": "In the sample network, enable inspection for the client VLAN and trust the approved server path. Replay the approved exchange, an unexpected server and the Offer-only sample; compare which messages arrive and when an address record appears.",
+            "initial": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-reply-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-reply-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "sample-reply-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "sample-reply-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "sample-reply-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-reply-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-reply-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-reply-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-reply-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-reply-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-reply-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-reply-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-reply-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-reply-client": "02:00:00:00:00:15",
+                  "sample-reply-peer": "02:00:00:00:00:17",
+                  "sample-reply-server": "02:00:00:00:00:16"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-reply-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-reply-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "sample-reply-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "sample-reply-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "sample-reply-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-reply-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-reply-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-reply-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-reply-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-reply-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-reply-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-reply-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-reply-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-reply-client": "02:00:00:00:00:15",
+                  "sample-reply-peer": "02:00:00:00:00:17",
+                  "sample-reply-server": "02:00:00:00:00:16"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "information_option_disabled": true,
+              "config": {
+                "enabled": false,
+                "vlans": [],
+                "ports": [
+                  {
+                    "port": "client",
+                    "trusted": false
+                  },
+                  {
+                    "port": "peer",
+                    "trusted": false
+                  },
+                  {
+                    "port": "server",
+                    "trusted": false
+                  }
+                ],
+                "verify_source": true
+              },
+              "pending": [],
+              "bindings": []
+            },
+            "reference": {
+              "enabled": true,
+              "vlans": [
+                10
+              ],
+              "ports": [
+                {
+                  "port": "client",
+                  "trusted": false
+                },
+                {
+                  "port": "peer",
+                  "trusted": false
+                },
+                {
+                  "port": "server",
+                  "trusted": true
+                }
+              ],
+              "verify_source": true
+            },
+            "cases": [
+              {
+                "label": "Approved initial exchange",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:15",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "discover"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-reply-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:16",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "172.18.20.50"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-reply-client"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:15",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-reply-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:16",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "ack",
+                        "address": "172.18.20.50",
+                        "lease": 120
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-reply-client"
+                      ],
+                      "learned": true,
+                      "removed": false
+                    }
+                  }
+                ],
+                "leases_after": 1
+              },
+              {
+                "label": "Unexpected server reply",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:15",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-reply-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-peer",
+                    "packet": {
+                      "source": "02:00:00:00:00:17",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "10.99.0.7"
+                      }
+                    },
+                    "expected": {
+                      "kind": "rejected",
+                      "cause": "untrusted_server"
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:15",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "10.99.0.7"
+                      }
+                    },
+                    "expected": {
+                      "kind": "rejected",
+                      "cause": "untrusted_server"
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:16",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "ack",
+                        "address": "172.18.20.50",
+                        "lease": 120
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-reply-client"
+                      ],
+                      "learned": true,
+                      "removed": false
+                    }
+                  }
+                ],
+                "leases_after": 1
+              },
+              {
+                "label": "An Offer does not record a lease",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:15",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "discover"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-reply-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:16",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "172.18.20.50"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-reply-client"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  }
+                ],
+                "leases_after": 0
+              },
+              {
+                "label": "Recorded lease expires",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:15",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "discover"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-reply-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:16",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "172.18.20.50"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-reply-client"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:15",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-reply-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-reply-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:16",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "ack",
+                        "address": "172.18.20.50",
+                        "lease": 120
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-reply-client"
+                      ],
+                      "learned": true,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "advance",
+                    "seconds": 120
+                  }
+                ],
+                "leases_after": 0
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "DHCP OBSERVER CONFIG\n{\"enabled\":true,\"vlans\":[10],\"ports\":[{\"port\":\"client\",\"trusted\":false},{\"port\":\"peer\",\"trusted\":false},{\"port\":\"server\",\"trusted\":true}],\"verify_source\":true}"
+      ],
+      "prerequisites": [
+        "ccna-security-recover",
+        "ccna-dhcp-lease-handover"
+      ]
+    },
+    {
+      "id": "ccna-dhcp-client-mac-check",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "DHCP security",
+      "unit": "dhcp-snooping-foundations",
+      "title": "Compare Ethernet and DHCP client MAC fields",
+      "summary": "Diagnose inconsistent sender details while keeping legitimate DHCP traffic working and understanding the check’s limits.",
+      "objective": "Reject the supplied request whose Ethernet source MAC and DHCP client MAC disagree, while approved exchanges and protection from unexpected servers continue working. Matching sender fields must still be forwarded; this consistency check does not authenticate a device.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Inspect the supplied network, repair the policy, replay its traffic and check the resulting behavior."
+      ],
+      "guide": [],
+      "explanation": "Keep snooping active on VLAN10 with only the server path trusted. Enable Compare the two client MAC fields. The mismatched request is rejected, a valid exchange still records its ACK, and matching copied fields are permitted because consistency is not authentication.",
+      "hints": [
+        "Open the mismatched sample and compare Ethernet source MAC with DHCP client MAC before changing settings.",
+        "Check the comparison control, while preserving the approved server path and untrusted user ports.",
+        "A request with matching copied fields is intentionally permitted by this consistency check. It is not a device-authentication test."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/ip/b_1712_ip_9300_cg/configuring_dhcp.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/dynamic-host-configuration-protocol-dhcp-dhcpv6/217055-operate-and-troubleshoot-dhcp-snooping.html"
+      ],
+      "simplifications": "Checked2026-11-08: CCNA200-301v1.1/5.7; Catalyst9300 IOS XE Dublin17.12 DHCP chapter2023-07-28. Supplemental Cisco217055 trace2024-06-12 is explicitly16.12.X, not a17.12 runtime test. One supplied access-only LAN; typed initial messages and observed leases, no real packets, allocator, IOS, host interfaces or authentication. Option82 insertion is explicitly disabled in the supplied setup; relay/transformations, other exchange states, rate limits, stacks/trunks and database-agent persistence are excluded. The60-second pending sample cache is a simulator bound, not a protocol timer. Unsupported/ambiguous replies and failed downstream ACK handling diagnose their limits instead of inventing equipment behavior. Checks use separate sample inputs and do not train the displayed state.",
+      "initial": {
+        "kind": "DhcpSnooping",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-dhcp-client-mac-check",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-fields-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-fields-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "assigned-fields-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "assigned-fields-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "assigned-fields-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-fields-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-fields-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-fields-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-fields-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-fields-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-fields-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-fields-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-fields-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-fields-client": "02:00:00:00:00:01",
+                  "assigned-fields-peer": "02:00:00:00:00:03",
+                  "assigned-fields-server": "02:00:00:00:00:02"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-fields-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-fields-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "assigned-fields-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "assigned-fields-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "assigned-fields-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-fields-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-fields-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-fields-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-fields-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-fields-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-fields-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-fields-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-fields-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-fields-client": "02:00:00:00:00:01",
+                  "assigned-fields-peer": "02:00:00:00:00:03",
+                  "assigned-fields-server": "02:00:00:00:00:02"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "information_option_disabled": true,
+              "config": {
+                "enabled": true,
+                "vlans": [
+                  10
+                ],
+                "ports": [
+                  {
+                    "port": "client",
+                    "trusted": false
+                  },
+                  {
+                    "port": "peer",
+                    "trusted": false
+                  },
+                  {
+                    "port": "server",
+                    "trusted": true
+                  }
+                ],
+                "verify_source": false
+              },
+              "pending": [],
+              "bindings": []
+            },
+            "draft": {
+              "enabled": true,
+              "verify_source": false,
+              "vlans": "10",
+              "ports": [
+                {
+                  "port": "client",
+                  "trusted": false
+                },
+                {
+                  "port": "peer",
+                  "trusted": false
+                },
+                {
+                  "port": "server",
+                  "trusted": true
+                }
+              ]
+            },
+            "sample": 0,
+            "output": [],
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-fields-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-fields-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "sample-fields-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "sample-fields-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "sample-fields-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-fields-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-fields-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-fields-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-fields-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-fields-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-fields-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-fields-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-fields-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-fields-client": "02:00:00:00:00:15",
+                  "sample-fields-peer": "02:00:00:00:00:17",
+                  "sample-fields-server": "02:00:00:00:00:16"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-fields-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-fields-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "sample-fields-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "sample-fields-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "sample-fields-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-fields-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-fields-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-fields-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-fields-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-fields-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-fields-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-fields-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-fields-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-fields-client": "02:00:00:00:00:15",
+                  "sample-fields-peer": "02:00:00:00:00:17",
+                  "sample-fields-server": "02:00:00:00:00:16"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "information_option_disabled": true,
+              "config": {
+                "enabled": true,
+                "vlans": [
+                  10
+                ],
+                "ports": [
+                  {
+                    "port": "client",
+                    "trusted": false
+                  },
+                  {
+                    "port": "peer",
+                    "trusted": false
+                  },
+                  {
+                    "port": "server",
+                    "trusted": true
+                  }
+                ],
+                "verify_source": false
+              },
+              "pending": [],
+              "bindings": []
+            },
+            "draft": {
+              "enabled": true,
+              "verify_source": false,
+              "vlans": "10",
+              "ports": [
+                {
+                  "port": "client",
+                  "trusted": false
+                },
+                {
+                  "port": "peer",
+                  "trusted": false
+                },
+                {
+                  "port": "server",
+                  "trusted": true
+                }
+              ]
+            },
+            "sample": 0,
+            "output": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "DhcpSnooping",
+        "definition": {
+          "initial": {
+            "id": "ccna-dhcp-client-mac-check",
+            "instructions": "Reject the supplied request whose Ethernet source MAC and DHCP client MAC disagree, while approved exchanges and protection from unexpected servers continue working. Matching sender fields must still be forwarded; this consistency check does not authenticate a device.",
+            "initial": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-fields-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-fields-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "assigned-fields-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "assigned-fields-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "assigned-fields-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-fields-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-fields-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-fields-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-fields-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-fields-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-fields-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-fields-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-fields-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-fields-client": "02:00:00:00:00:01",
+                  "assigned-fields-peer": "02:00:00:00:00:03",
+                  "assigned-fields-server": "02:00:00:00:00:02"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "assigned-fields-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "assigned-fields-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "assigned-fields-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "assigned-fields-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "assigned-fields-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-fields-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-fields-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-fields-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-fields-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-fields-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "assigned-fields-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "assigned-fields-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "assigned-fields-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "assigned-fields-client": "02:00:00:00:00:01",
+                  "assigned-fields-peer": "02:00:00:00:00:03",
+                  "assigned-fields-server": "02:00:00:00:00:02"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "information_option_disabled": true,
+              "config": {
+                "enabled": true,
+                "vlans": [
+                  10
+                ],
+                "ports": [
+                  {
+                    "port": "client",
+                    "trusted": false
+                  },
+                  {
+                    "port": "peer",
+                    "trusted": false
+                  },
+                  {
+                    "port": "server",
+                    "trusted": true
+                  }
+                ],
+                "verify_source": false
+              },
+              "pending": [],
+              "bindings": []
+            },
+            "reference": {
+              "enabled": true,
+              "vlans": [
+                10
+              ],
+              "ports": [
+                {
+                  "port": "client",
+                  "trusted": false
+                },
+                {
+                  "port": "peer",
+                  "trusted": false
+                },
+                {
+                  "port": "server",
+                  "trusted": true
+                }
+              ],
+              "verify_source": true
+            },
+            "cases": [
+              {
+                "label": "Client identifiers disagree",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "assigned-fields-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:01",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:03",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "rejected",
+                      "cause": "source_mismatch"
+                    }
+                  }
+                ],
+                "leases_after": 0
+              },
+              {
+                "label": "Approved initial exchange",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "assigned-fields-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:01",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "discover"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-fields-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-fields-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:02",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "10.25.0.90"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-fields-client"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-fields-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:01",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-fields-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-fields-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:02",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "ack",
+                        "address": "10.25.0.90",
+                        "lease": 120
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-fields-client"
+                      ],
+                      "learned": true,
+                      "removed": false
+                    }
+                  }
+                ],
+                "leases_after": 1
+              },
+              {
+                "label": "Unexpected server reply",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "assigned-fields-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:01",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-fields-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-fields-peer",
+                    "packet": {
+                      "source": "02:00:00:00:00:03",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "10.99.0.7"
+                      }
+                    },
+                    "expected": {
+                      "kind": "rejected",
+                      "cause": "untrusted_server"
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-fields-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:01",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "10.99.0.7"
+                      }
+                    },
+                    "expected": {
+                      "kind": "rejected",
+                      "cause": "untrusted_server"
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "assigned-fields-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:02",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:01",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "ack",
+                        "address": "10.25.0.90",
+                        "lease": 120
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-fields-client"
+                      ],
+                      "learned": true,
+                      "removed": false
+                    }
+                  }
+                ],
+                "leases_after": 1
+              },
+              {
+                "label": "Matching fields are not authentication",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "assigned-fields-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:03",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 91,
+                      "client": "02:00:00:00:00:03",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "assigned-fields-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  }
+                ],
+                "leases_after": 0
+              }
+            ]
+          },
+          "example": {
+            "id": "ccna-dhcp-client-mac-check-example",
+            "instructions": "Investigate the sample request's two different MAC fields. Repair the comparison policy and replay it, then confirm that an approved exchange and a request with matching copied fields still pass the appropriate checks.",
+            "initial": {
+              "schema_version": 1,
+              "baseline": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-fields-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-fields-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "sample-fields-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "sample-fields-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "sample-fields-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-fields-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-fields-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-fields-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-fields-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-fields-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-fields-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-fields-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-fields-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-fields-client": "02:00:00:00:00:15",
+                  "sample-fields-peer": "02:00:00:00:00:17",
+                  "sample-fields-server": "02:00:00:00:00:16"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "active": {
+                "schema_version": 1,
+                "fabric": {
+                  "switches": {
+                    "sample-fields-switch": {
+                      "label": "Access switch",
+                      "vlans": [
+                        10
+                      ],
+                      "ports": {
+                        "client": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "peer": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        },
+                        "server": {
+                          "up": true,
+                          "mode": {
+                            "kind": "access",
+                            "vlan": 10
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "hosts": {
+                    "sample-fields-client": {
+                      "label": "Client workstation",
+                      "up": true
+                    },
+                    "sample-fields-peer": {
+                      "label": "User workstation",
+                      "up": true
+                    },
+                    "sample-fields-server": {
+                      "label": "Approved DHCP server",
+                      "up": true
+                    }
+                  },
+                  "cables": [
+                    {
+                      "id": "sample-fields-wire-client",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-fields-client"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-fields-switch",
+                        "port": "client"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-fields-wire-peer",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-fields-peer"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-fields-switch",
+                        "port": "peer"
+                      },
+                      "up": true
+                    },
+                    {
+                      "id": "sample-fields-wire-server",
+                      "a": {
+                        "kind": "host",
+                        "host": "sample-fields-server"
+                      },
+                      "b": {
+                        "kind": "switch",
+                        "switch": "sample-fields-switch",
+                        "port": "server"
+                      },
+                      "up": true
+                    }
+                  ]
+                },
+                "host_addresses": {
+                  "sample-fields-client": "02:00:00:00:00:15",
+                  "sample-fields-peer": "02:00:00:00:00:17",
+                  "sample-fields-server": "02:00:00:00:00:16"
+                },
+                "entries": [],
+                "now": 0,
+                "aging_seconds": 300
+              },
+              "information_option_disabled": true,
+              "config": {
+                "enabled": true,
+                "vlans": [
+                  10
+                ],
+                "ports": [
+                  {
+                    "port": "client",
+                    "trusted": false
+                  },
+                  {
+                    "port": "peer",
+                    "trusted": false
+                  },
+                  {
+                    "port": "server",
+                    "trusted": true
+                  }
+                ],
+                "verify_source": false
+              },
+              "pending": [],
+              "bindings": []
+            },
+            "reference": {
+              "enabled": true,
+              "vlans": [
+                10
+              ],
+              "ports": [
+                {
+                  "port": "client",
+                  "trusted": false
+                },
+                {
+                  "port": "peer",
+                  "trusted": false
+                },
+                {
+                  "port": "server",
+                  "trusted": true
+                }
+              ],
+              "verify_source": true
+            },
+            "cases": [
+              {
+                "label": "Client identifiers disagree",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "sample-fields-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:15",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:17",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "rejected",
+                      "cause": "source_mismatch"
+                    }
+                  }
+                ],
+                "leases_after": 0
+              },
+              {
+                "label": "Approved initial exchange",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "sample-fields-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:15",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "discover"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-fields-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-fields-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:16",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "172.18.20.50"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-fields-client"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-fields-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:15",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-fields-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-fields-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:16",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "ack",
+                        "address": "172.18.20.50",
+                        "lease": 120
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-fields-client"
+                      ],
+                      "learned": true,
+                      "removed": false
+                    }
+                  }
+                ],
+                "leases_after": 1
+              },
+              {
+                "label": "Unexpected server reply",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "sample-fields-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:15",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-fields-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-fields-peer",
+                    "packet": {
+                      "source": "02:00:00:00:00:17",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "10.99.0.7"
+                      }
+                    },
+                    "expected": {
+                      "kind": "rejected",
+                      "cause": "untrusted_server"
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-fields-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:15",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "offer",
+                        "address": "10.99.0.7"
+                      }
+                    },
+                    "expected": {
+                      "kind": "rejected",
+                      "cause": "untrusted_server"
+                    }
+                  },
+                  {
+                    "kind": "message",
+                    "host": "sample-fields-server",
+                    "packet": {
+                      "source": "02:00:00:00:00:16",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:15",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "ack",
+                        "address": "172.18.20.50",
+                        "lease": 120
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-fields-client"
+                      ],
+                      "learned": true,
+                      "removed": false
+                    }
+                  }
+                ],
+                "leases_after": 1
+              },
+              {
+                "label": "Matching fields are not authentication",
+                "steps": [
+                  {
+                    "kind": "message",
+                    "host": "sample-fields-client",
+                    "packet": {
+                      "source": "02:00:00:00:00:17",
+                      "destination": "ff:ff:ff:ff:ff:ff",
+                      "transaction": 111,
+                      "client": "02:00:00:00:00:17",
+                      "relay": "0.0.0.0",
+                      "option82": false,
+                      "message": {
+                        "kind": "request"
+                      }
+                    },
+                    "expected": {
+                      "kind": "forwarded",
+                      "accepted_by": [
+                        "sample-fields-server"
+                      ],
+                      "learned": false,
+                      "removed": false
+                    }
+                  }
+                ],
+                "leases_after": 0
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "DHCP OBSERVER CONFIG\n{\"enabled\":true,\"vlans\":[10],\"ports\":[{\"port\":\"client\",\"trusted\":false},{\"port\":\"peer\",\"trusted\":false},{\"port\":\"server\",\"trusted\":true}],\"verify_source\":true}"
+      ],
+      "prerequisites": [
+        "ccna-dhcp-server-boundary"
+      ]
+    }
+  ]
+}

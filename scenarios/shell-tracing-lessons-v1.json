@@ -1,0 +1,651 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-trace-delivery",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-tracing-diagnosis",
+      "topic": "Tracing and branch diagnosis",
+      "title": "Trace and repair a delivery decision",
+      "summary": "Repair the decision and argument handling so each request produces the right report and status.",
+      "objective": "Accept exactly MODE DESTINATION, with MODE send or hold; reject other argument counts with Usage: delivery send-or-hold DESTINATION on standard error and status2. Reject an empty DESTINATION with Destination required on standard error and status2. For send, print Ready: DESTINATION on standard output and finish with status0. For hold, print Queued: DESTINATION and finish with status3. For any other mode, including an empty MODE with a nonempty DESTINATION, print Unsupported mode: MODE on standard error and finish with status2. Keep each destination as one value, preserving its spaces, backslashes and literal wildcard text. End each report or diagnostic with a newline. Successful send/hold runs have no standard error; errors have no standard output. Keep every simulated file unchanged. Turn diagnostic tracing off for the final checks.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Inspect and repair the script",
+        "Verify every input set"
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "Script",
+        "source": "if test \"$#\" -ne 2; then\n  printf 'Usage: delivery send-or-hold DESTINATION\\n' >&2\n  exit 2\nfi\nmode=$1\nplace=$2\nif test -z \"$place\"; then\n  printf 'Destination required\\n' >&2\n  exit 2\nfi\nif test \"$mode\" = hold; then\n  printf 'Ready: %s\\n' $place\n  exit 0\nelse\n  printf 'Queued: %s\\n' $place\n  exit 3\nfi\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Send to a named site",
+            "args": [
+              "send",
+              "North Annex"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            },
+            "stdout": "Ready: North Annex\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            }
+          },
+          {
+            "name": "Hold has its own status",
+            "args": [
+              "hold",
+              "East Bay"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            },
+            "stdout": "Queued: East Bay\n",
+            "stderr": "",
+            "status": 3,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            }
+          },
+          {
+            "name": "Preserve repeated spaces",
+            "args": [
+              "send",
+              "Bay  Seven"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            },
+            "stdout": "Ready: Bay  Seven\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            }
+          },
+          {
+            "name": "Literal wildcard destination",
+            "args": [
+              "hold",
+              "Room *"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/one": "Do not expand a destination.\n"
+            },
+            "stdout": "Queued: Room *\n",
+            "stderr": "",
+            "status": 3,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/one": "Do not expand a destination.\n"
+            }
+          },
+          {
+            "name": "Unicode and backslash data",
+            "args": [
+              "send",
+              "café\\west"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            },
+            "stdout": "Ready: café\\west\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            }
+          },
+          {
+            "name": "A leading dash is data",
+            "args": [
+              "hold",
+              "-West"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            },
+            "stdout": "Queued: -West\n",
+            "stderr": "",
+            "status": 3,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            }
+          },
+          {
+            "name": "Unsupported mode",
+            "args": [
+              "later",
+              "East"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Unsupported mode: later\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            }
+          },
+          {
+            "name": "Empty destination",
+            "args": [
+              "send",
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Destination required\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            }
+          },
+          {
+            "name": "No arguments",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: delivery send-or-hold DESTINATION\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            }
+          },
+          {
+            "name": "Missing destination",
+            "args": [
+              "send"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: delivery send-or-hold DESTINATION\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            }
+          },
+          {
+            "name": "Too many arguments",
+            "args": [
+              "hold",
+              "East",
+              "extra"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: delivery send-or-hold DESTINATION\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            }
+          },
+          {
+            "name": "Held destination is also required",
+            "args": [
+              "hold",
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Destination required\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if test \"$#\" -ne 2; then\n  printf 'Usage: delivery send-or-hold DESTINATION\\n' >&2\n  exit 2\nfi\nmode=$1\nplace=$2\nif test -z \"$place\"; then\n  printf 'Destination required\\n' >&2\n  exit 2\nfi\nif test \"$mode\" = send; then\n  printf 'Ready: %s\\n' \"$place\"\n  exit 0\nelse\n  if test \"$mode\" = hold; then\n    printf 'Queued: %s\\n' \"$place\"\n    exit 3\n  else\n    printf 'Unsupported mode: %s\\n' \"$mode\" >&2\n    exit 2\n  fi\nfi\n"
+      ],
+      "explanation": "The branch must use the supplied mode and reject unsupported values. Quoting keeps a destination intact; explicit exit statuses distinguish ready, queued and invalid requests. Tracing exposes those expanded tests and arguments but is not the requested report.",
+      "hints": [
+        "Temporarily add set -x before the decision, then Run script and inspect the first failing input set. What value does the test receive?",
+        "Compare the branch selected for send with the branch selected for hold. The status is part of the task, not just the printed label.",
+        "Quote the destination when passing it to printf. Finish the independent checks without tracing output."
+      ],
+      "sources": [
+        "https://www.gnu.org/s/bash/manual/html_node/The-Set-Builtin.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Quoting.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Conditional-Constructs.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Redirections.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cat-invocation.html"
+      ],
+      "simplifications": "In-process evaluator16; fixed C-locale scalar/simple-command xtrace, if/else and &&/|| only. Enabling tracing refuses a program containing loops, pipelines, case, functions, arrays, substitutions or prefixed commands, even outside the traced region. Ordinary nontracing support is preserved. Default + prefix only; no custom PS4/BASH_XTRACEFD, verbose mode, traps or host execution. Flat virtual UTF-8 files and shared instruction/memory/output limits. This unit is a narrow debugging slice, not full Bash tracing.",
+      "retry_guidance": "Compare the first failing input set with its expected and actual results. Lines beginning + are expanded command traces, not the required report; remove set -x or turn tracing off for the final independent checks. Then inspect the branch values and quoted filenames or destinations.",
+      "teaching": {
+        "prerequisite_note": "Complete Reliable shell foundations first: this lesson uses arguments, variables, printf, tests and if/else. The lab supplies the test arguments; mode and place are names your script creates.",
+        "concepts": [
+          {
+            "title": "See the values a command receives",
+            "text": "set -x turns command tracing on; set +x turns it off. The separate example prints a destination. A trace line starts with + and shows the expanded values just before a command runs. The trace replaces variable names with their current values; this is expansion. The + is a diagnostic marker, not a command to type."
+          },
+          {
+            "title": "A value can become several arguments",
+            "text": "With double quotes around \"$place\", Workshop East stays one argument. Without those quotes it becomes two. Unquoted * may also select simulated filenames instead of staying literal text. The quotes shown in a trace group an argument; they are not extra characters printed in the report. printf reuses its format when it receives more values."
+          },
+          {
+            "title": "Use the trace to explain a decision",
+            "text": "Trace output goes to standard error, while the requested report goes to standard output. A trace shows what was reached, not that it was correct. This task deliberately uses status3 for a held delivery; it is part of the required result. Run script still checks the whole program: traces add extra error output. Remove the enabling set -x for the final run; a set +x at the end does not erase earlier trace lines. Here, tracing works with ordinary variable assignments, one command at a time and if/else decisions. Later forms such as loops and functions need tracing disabled for the whole program."
+          }
+        ],
+        "example": "place='Workshop East'\nset -x\nprintf 'Board: %s\\n' \"$place\"\nset +x\n",
+        "inputs": "The workshop starts with place set to Workshop East; it uses no assignment arguments. Expected standard output has one Board line. Standard error shows the expanded printf and set +x commands.",
+        "try_change": "Remove only the double quotes around $place and select Run example. Compare the two actual Board lines and the two trace arguments; restore the quotes and run again.",
+        "fixture": {
+          "name": "Workshop argument boundaries",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated work stays unchanged.\n"
+          },
+          "stdout": "Board: Workshop East\n",
+          "stderr": "+ printf 'Board: %s\\n' 'Workshop East'\n+ set +x\n",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated work stays unchanged.\n"
+          }
+        }
+      },
+      "prerequisites": [
+        "shell-capstone"
+      ]
+    },
+    {
+      "id": "shell-trace-fallback",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-tracing-diagnosis",
+      "topic": "Tracing and branch diagnosis",
+      "title": "Diagnose a snapshot fallback that hides newer work",
+      "summary": "Repair source preference and strict-mode behavior, then return the selected snapshot without changing files.",
+      "objective": "Accept exactly MODE PRIMARY BACKUP, where MODE is strict or fallback and both filenames are nonempty; otherwise print Usage: snapshot strict-or-fallback PRIMARY BACKUP on standard error and finish with status2. Always prefer an existing PRIMARY, including an empty file. In fallback mode only, use BACKUP when PRIMARY is missing and BACKUP exists. When neither permitted source exists, print No usable snapshot on standard error and finish with status2; print no standard output. On success, print Source: FILENAME followed by a newline, then the chosen file content exactly, and finish with status0. Do not add a newline to the file content. Treat supplied ordinary virtual filenames as literal values, including spaces, wildcard text and a leading dash. Keep every simulated file unchanged. Successful runs have no standard error. Turn diagnostic tracing off for the final checks.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Inspect and repair the script",
+        "Verify every input set"
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "Script",
+        "source": "if test \"$#\" -ne 3; then\n  printf 'Usage: snapshot strict-or-fallback PRIMARY BACKUP\\n' >&2\n  exit 2\nfi\nmode=$1\nfirst=$2\nspare=$3\nif test -z \"$first\"; then\n  printf 'Usage: snapshot strict-or-fallback PRIMARY BACKUP\\n' >&2\n  exit 2\nfi\nif test -z \"$spare\"; then\n  printf 'Usage: snapshot strict-or-fallback PRIMARY BACKUP\\n' >&2\n  exit 2\nfi\nif test \"$mode\" != strict; then\n  if test \"$mode\" != fallback; then\n    printf 'Usage: snapshot strict-or-fallback PRIMARY BACKUP\\n' >&2\n    exit 2\n  fi\nfi\nif test -f \"$spare\"; then\n  chosen=$spare\nelse\n  if test -f \"$first\"; then\n    chosen=$first\n  else\n    printf 'No usable snapshot\\n' >&2\n    exit 2\n  fi\nfi\nprintf 'Source: %s\\n' $chosen\ncat < $chosen\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Both snapshots prefer primary",
+            "args": [
+              "fallback",
+              "current.log",
+              "spare.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/current.log": "CURRENT\n",
+              "/work/spare.log": "SPARE\n"
+            },
+            "stdout": "Source: current.log\nCURRENT\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/current.log": "CURRENT\n",
+              "/work/spare.log": "SPARE\n"
+            }
+          },
+          {
+            "name": "Fallback is permitted",
+            "args": [
+              "fallback",
+              "missing.log",
+              "spare.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/spare.log": "SPARE\n"
+            },
+            "stdout": "Source: spare.log\nSPARE\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/spare.log": "SPARE\n"
+            }
+          },
+          {
+            "name": "Strict forbids a backup",
+            "args": [
+              "strict",
+              "missing.log",
+              "spare.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/spare.log": "SPARE\n"
+            },
+            "stdout": "",
+            "stderr": "No usable snapshot\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/spare.log": "SPARE\n"
+            }
+          },
+          {
+            "name": "A missing backup cannot hide primary",
+            "args": [
+              "fallback",
+              "current.log",
+              "missing.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/current.log": "LIVE"
+            },
+            "stdout": "Source: current.log\nLIVE",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/current.log": "LIVE"
+            }
+          },
+          {
+            "name": "Empty primary is still a snapshot",
+            "args": [
+              "fallback",
+              "empty.log",
+              "spare.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/empty.log": "",
+              "/work/spare.log": "NOT SELECTED\n"
+            },
+            "stdout": "Source: empty.log\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/empty.log": "",
+              "/work/spare.log": "NOT SELECTED\n"
+            }
+          },
+          {
+            "name": "No permitted snapshot exists",
+            "args": [
+              "fallback",
+              "missing.log",
+              "absent.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "No usable snapshot\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n"
+            }
+          },
+          {
+            "name": "Whitespace names stay literal",
+            "args": [
+              "strict",
+              "current log",
+              "spare log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/current log": "TWO WORDS\n",
+              "/work/spare log": "OLD\n"
+            },
+            "stdout": "Source: current log\nTWO WORDS\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/current log": "TWO WORDS\n",
+              "/work/spare log": "OLD\n"
+            }
+          },
+          {
+            "name": "Wildcard text is not a file selection",
+            "args": [
+              "fallback",
+              "snapshot*",
+              "spare.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/snapshot*": "LITERAL\n",
+              "/work/snapshot-other": "OTHER\n",
+              "/work/spare.log": "OLD\n"
+            },
+            "stdout": "Source: snapshot*\nLITERAL\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/snapshot*": "LITERAL\n",
+              "/work/snapshot-other": "OTHER\n",
+              "/work/spare.log": "OLD\n"
+            }
+          },
+          {
+            "name": "A file named dash is not standard input",
+            "args": [
+              "strict",
+              "-",
+              "spare.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/-": "DASH\n"
+            },
+            "stdout": "Source: -\nDASH\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/-": "DASH\n"
+            }
+          },
+          {
+            "name": "Unrecognized mode",
+            "args": [
+              "maybe",
+              "current.log",
+              "spare.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/current.log": "KEEP\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: snapshot strict-or-fallback PRIMARY BACKUP\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/current.log": "KEEP\n"
+            }
+          },
+          {
+            "name": "Empty name is not a usable interface",
+            "args": [
+              "fallback",
+              "",
+              "spare.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/spare.log": "KEEP\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: snapshot strict-or-fallback PRIMARY BACKUP\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/spare.log": "KEEP\n"
+            }
+          },
+          {
+            "name": "Extra argument is rejected",
+            "args": [
+              "strict",
+              "current.log",
+              "spare.log",
+              "extra"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/current.log": "KEEP\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: snapshot strict-or-fallback PRIMARY BACKUP\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated work stays unchanged.\n",
+              "/work/current.log": "KEEP\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if test \"$#\" -ne 3; then\n  printf 'Usage: snapshot strict-or-fallback PRIMARY BACKUP\\n' >&2\n  exit 2\nfi\nmode=$1\nfirst=$2\nspare=$3\nif test -z \"$first\"; then\n  printf 'Usage: snapshot strict-or-fallback PRIMARY BACKUP\\n' >&2\n  exit 2\nfi\nif test -z \"$spare\"; then\n  printf 'Usage: snapshot strict-or-fallback PRIMARY BACKUP\\n' >&2\n  exit 2\nfi\nif test \"$mode\" != strict; then\n  if test \"$mode\" != fallback; then\n    printf 'Usage: snapshot strict-or-fallback PRIMARY BACKUP\\n' >&2\n    exit 2\n  fi\nfi\nif test -f \"$first\"; then\n  chosen=$first\nelse\n  if test \"$mode\" = strict; then\n    printf 'No usable snapshot\\n' >&2\n    exit 2\n  fi\n  if test -f \"$spare\"; then\n    chosen=$spare\n  else\n    printf 'No usable snapshot\\n' >&2\n    exit 2\n  fi\nfi\nprintf 'Source: %s\\n' \"$chosen\"\ncat < \"$chosen\"\n"
+      ],
+      "explanation": "Checking the primary first preserves preference even when both files exist or the primary is empty. Only an allowed fallback may consult the backup. Quoted filenames and input redirection preserve literal file selection; printing a header separately does not alter or normalize the chosen file bytes.",
+      "hints": [
+        "Temporarily enable tracing and inspect the Both snapshots input set. Which file does the first test examine?",
+        "An empty file exists. Strict mode must not consult a backup just because the preferred source is missing.",
+        "Quote the chosen filename. Use an input redirection to open it literally, including a file named -; a bare cat - operand means standard input. Remove debugging traces before final checks."
+      ],
+      "sources": [
+        "https://www.gnu.org/s/bash/manual/html_node/The-Set-Builtin.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Quoting.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Conditional-Constructs.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Redirections.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cat-invocation.html"
+      ],
+      "simplifications": "In-process evaluator16; fixed C-locale scalar/simple-command xtrace, if/else and &&/|| only. Enabling tracing refuses a program containing loops, pipelines, case, functions, arrays, substitutions or prefixed commands, even outside the traced region. Ordinary nontracing support is preserved. Default + prefix only; no custom PS4/BASH_XTRACEFD, verbose mode, traps or host execution. Flat virtual UTF-8 files and shared instruction/memory/output limits. This unit is a narrow debugging slice, not full Bash tracing.",
+      "retry_guidance": "Compare the first failing input set with its expected and actual results. Lines beginning + are expanded command traces, not the required report; remove set -x or turn tracing off for the final independent checks. Then inspect the branch values and quoted filenames or destinations.",
+      "teaching": {
+        "prerequisite_note": "Builds on the delivery tracing lesson and foundation file tests/redirection. The lab supplies three arguments and simulated files; first, spare and chosen are names created by your script.",
+        "concepts": [
+          {
+            "title": "Check existence before choosing a source",
+            "text": "test -f asks whether a supplied virtual regular file exists. An existing empty file still passes. The example has no gallery.log, so the trace shows the failed test and the reserve.log choice."
+          },
+          {
+            "title": "A fallback is a policy, not a second primary",
+            "text": "The independent task has a strict mode and a fallback mode. First inspect whether the preferred source exists; consult a backup only when the mode permits it. Trace the test values to diagnose why the wrong branch was reached."
+          },
+          {
+            "title": "Preserve the chosen file exactly",
+            "text": "printf prints the identifying header; cat prints the file bytes. Double quotes keep a filename together. In cat < \"$chosen\", < opens the named file as command input, even when the filename is exactly -. The trace shows cat without that redirection; the preceding chosen= line identifies the file. Files reset for each supplied test; your script draft remains saved."
+          }
+        ],
+        "example": "first='gallery.log'\nspare='reserve.log'\nset -x\nif test -f \"$first\"; then\n  chosen=$first\nelse\n  chosen=$spare\nfi\nprintf 'Preview: %s\\n' \"$chosen\"\ncat < \"$chosen\"\nset +x\n",
+        "inputs": "This workshop has reserve.log and live.log; gallery.log is absent. The original example selects reserve.log. Expected output and actual results stay separate.",
+        "try_change": "Change first='gallery.log' to first='live.log' and Run example. Read the changed test, chosen value and file content; then restore gallery.log and retry.",
+        "fixture": {
+          "name": "Separate gallery fallback",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated work stays unchanged.\n",
+            "/work/reserve.log": "Saved gallery copy\n",
+            "/work/live.log": "Fresh gallery copy\n"
+          },
+          "stdout": "Preview: reserve.log\nSaved gallery copy\n",
+          "stderr": "+ test -f gallery.log\n+ chosen=reserve.log\n+ printf 'Preview: %s\\n' reserve.log\n+ cat\n+ set +x\n",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated work stays unchanged.\n",
+            "/work/reserve.log": "Saved gallery copy\n",
+            "/work/live.log": "Fresh gallery copy\n"
+          }
+        }
+      },
+      "prerequisites": [
+        "shell-trace-delivery"
+      ]
+    }
+  ]
+}

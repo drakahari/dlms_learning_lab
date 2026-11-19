@@ -18,7 +18,7 @@ import tomllib
 import zipfile
 
 from dependency_notices import collect
-from build_safety import workflow, project_root, disk_directory, run as safe_run, checkpoint, capture
+from build_safety import JOBS, TEST_THREADS, workflow, project_root, disk_directory, run as safe_run, checkpoint, capture
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -56,7 +56,9 @@ def copy_tracked_tree(relative, destination):
         shutil.copyfile(source, target)
 
 
-def compile_native(cargo, target, binary_name, env):
+def compile_native(cargo, target, binary_name, env, *, jobs=JOBS):
+    if type(jobs) is not int or not 1 <= jobs <= JOBS:
+        raise ValueError('Candidate compilation stays within one or two jobs')
     # Explicit CLI options override Cargo environment and config target settings.
     common = project_root(ROOT)
     if ROOT.resolve() != common:
@@ -66,8 +68,8 @@ def compile_native(cargo, target, binary_name, env):
         raise ValueError('Candidate build target escaped the project volume')
     disk_directory(build_dir)
     env = {k: v for k, v in env.items() if k not in ('CARGO_BUILD_TARGET', 'CARGO_TARGET_DIR')}
-    env = {**env, 'CARGO_BUILD_JOBS': '2', 'RUST_TEST_THREADS': '2'}
-    safe_run([cargo, 'build', '--jobs', '2', '--release', '--locked', '--offline', '--target', target,
+    env = {**env, 'CARGO_BUILD_JOBS': str(jobs), 'RUST_TEST_THREADS': str(TEST_THREADS)}
+    safe_run([cargo, 'build', '--jobs', str(jobs), '--release', '--locked', '--offline', '--target', target,
                     '--target-dir', str(build_dir)], cwd=ROOT, env=env)
     artifact = build_dir / target / 'release' / binary_name
     if not artifact.is_file() or artifact.is_symlink():
@@ -75,10 +77,32 @@ def compile_native(cargo, target, binary_name, env):
     return artifact
 
 
+def presentation_sources():
+    declaration = ROOT / 'src/ui/lesson_presentation.rs'
+    if not declaration.is_file():
+        return []
+    names = sorted(set(re.findall(r'include_str!\(\s*"../../scenarios/presentation/([A-Za-z0-9_.-]+\.json)"\s*\)', declaration.read_text())))
+    sources = []
+    for name in names:
+        path = ROOT / 'scenarios/presentation' / name
+        for component in (ROOT / 'scenarios', ROOT / 'scenarios/presentation', path):
+            if component.is_symlink():
+                raise ValueError('Presentation resources must not follow links')
+        if not path.is_file() or not path.resolve().is_relative_to(ROOT.resolve()):
+            raise ValueError('Presentation resources must be ordinary contained files')
+        sources.append(path)
+    return sources
+
+
 def embedded_content_hashes():
     names = set()
-    for filename in ('src/pack.rs', 'src/course.rs'):
-        names.update(re.findall(r'include_str!\(\s*"../scenarios/([A-Za-z0-9_.-]+\.json)"\s*\)', (ROOT / filename).read_text()))
+    for filename, prefix in (('src/pack.rs', '../'), ('src/course.rs', '../'),
+                             ('src/course/metadata.rs', '../../')):
+        declaration = ROOT / filename
+        if not declaration.exists() and filename == 'src/course/metadata.rs':
+            continue
+        names.update(re.findall(r'include_str!\(\s*"' + re.escape(prefix) +
+                                r'scenarios/([A-Za-z0-9_.-]+\.json)"\s*\)', declaration.read_text()))
     if not names:
         raise ValueError('Embedded content declarations unavailable')
     result = {}
@@ -87,7 +111,33 @@ def embedded_content_hashes():
         if path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(ROOT):
             raise ValueError('Embedded content must be ordinary contained data')
         result[name] = sha256(path)
+    for path in presentation_sources():
+        result[path.relative_to(ROOT / 'scenarios').as_posix()] = sha256(path)
     return result
+
+
+def review_catalog_identity():
+    # Use declarations, not a guessed lab-count target or directory sweep.
+    from teaching_inventory import catalog
+    labs = catalog()
+    names = set()
+    for filename, prefix in (('src/course.rs', '../'), ('src/course/metadata.rs', '../../')):
+        declaration = ROOT / filename
+        if not declaration.exists() and filename == 'src/course/metadata.rs':
+            continue
+        names.update(re.findall(r'include_str!\(\s*"' + re.escape(prefix) +
+                                r'scenarios/([A-Za-z0-9_.-]+\.json)"\s*\)', declaration.read_text()))
+    units = []
+    for name in sorted(names):
+        index = json.loads((ROOT / 'scenarios' / name).read_text())
+        if index.get('version') != 1:
+            raise ValueError('Unsupported bundled review unit version')
+        units.extend(index['units'])
+    if len({u['id'] for u in units}) != len(units):
+        raise ValueError('Duplicate bundled review unit')
+    if {u['id'] for u in units} != {lab['unit'] for lab, _ in labs}:
+        raise ValueError('Review unit metadata differs from the registered lab catalog')
+    return {'labs': len(labs), 'units': len(units), 'all_existing_review_labs': True}
 
 
 def write_candidate_readme(stage, system, version, revision, target):
@@ -180,12 +230,12 @@ def write_candidate_readme(stage, system, version, revision, target):
         stream.write(text)
 
 
-def build(output, allow_dirty=False):
+def build(output, allow_dirty=False, *, jobs=JOBS):
     with workflow(ROOT, 'candidate'):
-        return _build(output, allow_dirty)
+        return _build(output, allow_dirty, jobs)
 
 
-def _build(output, allow_dirty=False):
+def _build(output, allow_dirty, jobs):
     if platform.system() not in ('Linux', 'Windows', 'Darwin'):
         raise ValueError('Unsupported native build OS')
     revision = command(['git', 'rev-parse', 'HEAD'])
@@ -234,7 +284,7 @@ def _build(output, allow_dirty=False):
     env['CARGO_ENCODED_RUSTFLAGS'] = '\x1f'.join([*existing_flags, *remaps])
     binary_name = 'dlms-learning-lab.exe' if platform.system() == 'Windows' else 'dlms-learning-lab'
     checkpoint()
-    binary = compile_native(cargo, target, binary_name, env)
+    binary = compile_native(cargo, target, binary_name, env, jobs=jobs)
     # Use fresh staging; a failed notice check cannot leave a candidate labeled complete.
     with tempfile.TemporaryDirectory(prefix='dlms-candidate-', dir=project_root(ROOT) / '.build-artifacts/tmp') as temporary:
         stage = Path(temporary) / identity
@@ -283,6 +333,41 @@ def _build(output, allow_dirty=False):
                 'rust_notice_sha256': sha256(rust_notice)}
         (resources / 'BUILD_INFO.json').write_text(json.dumps(info, indent=2) + '\n')
         write_candidate_readme(stage, platform.system(), version, revision, target)
+        if env.get('DLMS_CCNA_PILOT') == '1':
+            # Review builds retain a separate progress profile; all app builds use the current catalog.
+            info['scope'] = ('Curriculum continuation on approved teaching baseline; review pending' if env.get('DLMS_PRESENTATION_REVIEW') == '1' else 'CCNA instructional presentation pilot; owner review pending')
+            info['pilot_profile'] = 'Separate ccna-presentation-pilot subdirectory; originals never written'
+            info['pilot_catalog'] = review_catalog_identity()
+            source_paths = sorted([p for p in (ROOT / 'src').rglob('*.rs') if p.is_file()] +
+                                  [ROOT / 'scenarios' / name for name in embedded_content_hashes()])
+            info['pilot_source_sha256'] = {p.relative_to(ROOT).as_posix(): sha256(p) for p in source_paths}
+            (resources / 'BUILD_INFO.json').write_text(json.dumps(info, indent=2) + '\n')
+            if env.get('DLMS_PRESENTATION_REVIEW') == '1':
+                info['pilot_catalog'] = review_catalog_identity()
+                (resources / 'BUILD_INFO.json').write_text(json.dumps(info, indent=2) + '\n')
+                for name in ('TEACHING_PRESENTATION.md', 'CAMPUS_ARCHITECTURE_SUBSET.md', "LEAF_SPINE_SUBSET.md", "SAMBA_SHARE_SUBSET.md", "VIRTUAL_ISOLATION_SUBSET.md", "GUEST_DRIVER_SUBSET.md", "SMTP_ROUTING_SUBSET.md", "SIEVE_SUBSET.md", "SIEVE_ADDRESS_SUBSET.md", "SIEVE_DELIVERY_SUBSET.md", "SIEVE_VACATION_SUBSET.md", "PROCMAIL_MIGRATION_LESSON.md", "MAILBOX_ACCESS_SUBSET.md", "MAILBOX_ADMIN_SUBSET.md", "LINUX_ROUTER_SUBSET.md", "LINUX_CONNECTIONS_SUBSET.md", "LINUX_IPV6_ROUTER_SUBSET.md", "LINUX_IPV6_LESSONS.md", "LINUX_SERVICE_RULES_SUBSET.md", "LINUX_SERVICES_ROUTER_LESSON.md", "LINUX_IPV6_ADMIN_SUBSET.md", "LINUX_IPV6_STARTUP_SUBSET.md", "FTP_IDENTITY_SUBSET.md", "SERVICE_EXPOSURE_SUBSET.md", "VPN_POINT_SUBSET.md", "RPM_CONFIG_UPDATES_SUBSET.md", "RPM_PATCH_LESSONS.md",
+        "AUTH_FILTER_SUBSET.md",
+        "IDS_RULE_SUBSET.md", "TCP_PROBE_SUBSET.md", "TELNET_TRANSPORT_SUBSET.md", "POE_SUBSET.md", "KERNEL_BUILD_SUBSET.md", "DKMS_SUBSET.md", "INITRAMFS_SUBSET.md", "PXE_SUBSET.md", "ISCSI_SUBSET.md", "ATA_SMART_SUBSET.md", "APACHE_HTTPS_SUBSET.md", "DESKTOP_PROFILE_SUBSET.md", "SECURITY_INVESTIGATION_SUBSET.md", "CREDENTIALS_VPN_SUBSET.md", "STAGED_NETWORK_SUBSET.md", "NETWORK_EVIDENCE_REVIEW_SUBSET.md", "SITE_CONNECTIVITY_SUBSET.md", "HOST_AND_DNS_SECURITY_SUBSET.md", "CCNA_VLAN_GATEWAY_SUBSET.md", "NFS_EXPORT_OPERATIONS_SUBSET.md", "ROUTE_READING_SUBSET.md", "OSPF_BROADCAST_SUBSET.md",
+        "IDS_RULE_LESSONS.md",
+        "AUTH_FILTER_LESSONS.md", 'TEACHING_INVENTORY.md', 'TEACHING_INVENTORY.csv', 'GATEWAY_BATCH.md', 'CONTINUATION.md', 'CONTINUATION_COVERAGE.csv', 'SYSLOG_SUBSET.md', 'SYSLOG_WORKSPACE.md', 'SYSLOG_POLICY_LESSONS.md', 'CAPACITY_LESSONS.md', 'FS_CAPACITY_SUBSET.md', 'RPM_REPOSITORIES_SUBSET.md', 'REPOSITORY_LESSONS.md', 'LINUX_HOST_SUBSET.md', 'HOST_NETWORK_LESSONS.md', 'LINUX_HOST_IPV6_SUBSET.md', 'HOST_IPV6_LESSONS.md', 'SWAP_SUBSET.md', 'SWAP_POLICY_LESSONS.md', 'LVM_SUBSET.md', 'LVM_PROVISIONING_SUBSET.md', 'LVM_PROVISIONING_LESSONS.md', 'LVM_RETIREMENT_SUBSET.md', 'LVM_RETIREMENT_LESSONS.md', 'LVM_ACTIVATION_SUBSET.md', 'LVM_ACTIVATION_LESSONS.md', 'LVM_RENAME_SUBSET.md', 'LVM_RENAME_LESSONS.md', 'LVM_PV_CAPACITY_SUBSET.md', 'LVM_PV_CAPACITY_LESSONS.md', 'MBR_LAYOUT_SUBSET.md', 'MBR_LAYOUT_LESSONS.md', 'LVM_COW_MODEL.md', 'LVM_COW_LESSONS.md', 'LVM_DEVICE_PATH_MODEL.md', 'LVM_REFERENCE_LESSONS.md', 'LVM_CONFIG_SCAN_SUBSET.md', 'LVM_CONFIG_LESSONS.md', 'LVM_MOUNT_MODEL.md', 'LVM_MOUNT_LESSONS.md', 'RAID_ASSEMBLY_SUBSET.md', 'RAID_ASSEMBLY_LESSONS.md', 'VLAN_HOST_SUBSET.md', 'VLAN_LESSONS.md', 'BOND_CONTROL_SUBSET.md', 'BOND_VLAN_LESSON.md', 'BRIDGE_FABRIC_SUBSET.md', 'BRIDGE_CONTROL_SUBSET.md', 'BRIDGE_LAN_LESSON.md', 'PAM_CONTROL_SUBSET.md', 'PAM_AUTH_LESSON.md', 'AGING_SUBSET.md', 'AGING_LESSONS.md', 'STATIC_CAM_SUBSET.md', 'PORT_SECURITY_SUBSET.md', 'PORT_SECURITY_LESSONS.md', 'ACCESS_OUTPUTS_SUBSET.md', 'DHCP_SNOOPING_SUBSET.md', 'DHCP_SNOOPING_LESSONS.md', 'DAI_SUBSET.md', 'ARP_INSPECTION_LESSONS.md', 'MANAGEMENT_POLICY_SUBSET.md', 'MANAGEMENT_POLICY_LESSONS.md', 'LOCAL_ACCESS_SUBSET.md', 'LOCAL_ACCESS_LESSONS.md', 'AAA_METHODS_SUBSET.md', 'AAA_DECISIONS_LESSONS.md', 'LDAP_QUERY_SUBSET.md', 'LDAP_CLIENT_LESSONS.md', 'LDAP_CHANGE_SUBSET.md', 'LDAP_CHANGE_LESSONS.md', 'LDAP_UTILITY_SUBSET.md', 'LDAP_UTILITY_LESSONS.md', 'LDAP_RETIREMENT_LESSON.md', 'LDAP_PROTECTED_AUTH_SUBSET.md', 'LDAP_PASSWORD_LESSON.md', 'LDAP_ACCESS_SUBSET.md', 'LDAP_ACCESS_LESSON.md', 'LDAP_CONFIGURATION_SUBSET.md', 'LDAP_CONFIGURATION_LESSON.md', 'LDAP_SCHEMA_SUBSET.md', 'LDAP_SCHEMA_LESSON.md', 'LDAP_SCHEMA_QUERY_SUBSET.md', 'LDAP_SCHEMA_QUERY_LESSON.md', 'IPV6_INTERFACE_IDS.md', 'BOOT_ENTRY_LESSONS.md', 'GRUB_MENU_LESSONS.md', 'GRUB_SETTINGS_LESSONS.md', 'BIOS_LOADER_LESSON.md', 'EFI_LOADER_LESSON.md', 'EFI_REMOVABLE_LESSON.md', 'GRUB_TEMPORARY_LESSON.md', 'RESCUE_STARTUP_LESSON.md', 'CHRONY_SOURCE_LESSON.md', 'COPIED_JOURNAL_LESSON.md', 'LOCAL_MAIL_SUBSET.md', 'LOCAL_MAIL_LESSONS.md', 'DEVICE_PATH_LESSONS.md', 'JSON_INVENTORY_LESSONS.md', 'DISK_LAYOUT_LESSONS.md', 'MEASUREMENT_REPORT_LESSONS.md', 'RESOURCE_OBSERVATION_LESSONS.md', 'CAPACITY_PLANNING_LESSONS.md', 'MAINTENANCE_NOTICES_SUBSET.md', 'MAINTENANCE_NOTICE_LESSONS.md', 'SOURCE_INSTALL_LESSONS.md', 'SOURCE_INSTALL_SUBSET.md', 'DNS_ACCESS_LESSONS.md', 'PRINT_QUEUE_SUBSET.md', 'PRINT_QUEUE_LESSONS.md', 'LOCALIZATION_SUBSET.md', 'LOCALIZATION_LESSONS.md', 'TIMEZONE_SUBSET.md', 'TIMEZONE_LESSONS.md', 'WIRELESS_CHANNEL_SUBSET.md', 'WIRELESS_CHANNEL_LESSONS.md', 'PROXY_POLICY_SUBSET.md', 'PROXY_POLICY_LESSONS.md', 'LINUX_EXISTING_COVERAGE_RECONCILIATION.md', 'HTTP_CACHE_SUBSET.md', 'HTTP_CACHE_LESSONS.md', 'REVERSE_PROXY_SUBSET.md', 'REVERSE_PROXY_LESSONS.md', 'INTERNET_SERVICES_SUBSET.md', 'SERVICE_NAME_LESSONS.md', 'MIXED_IP_LESSONS.md', 'PROTOCOL_EVIDENCE_SUBSET.md', 'HOST_ECHO_DIAGNOSIS.md', "REST_CONTROLLER_SUBSET.md", "CLIENT_DIAGNOSTIC_LESSON.md", "HOST_DIRECT_DNS.md", "HOST_QUERY_EXTENSION.md", "AUTHORITATIVE_QUERY_TOOLS.md", "SSH_ACCESS_SUBSET.md", "MODAL_EDITING_SUBSET.md", "EDITOR_HANDOVER_SUBSET.md", "NETWORK_TRANSFER_SUBSET.md", 'SNMP_SUBSET.md', 'SNMP_MONITOR_LESSONS.md', 'MANAGEMENT_ACCESS_RECONCILIATION.md', 'WLAN_PROFILE_SUBSET.md', 'WLAN_PROFILE_LESSONS.md', "WLAN_PATH_SUBSET.md", "WLAN_PATH_LESSONS.md", 'DNS_ACCESS_SUBSET.md', 'REMAINING_SCOPE_RECONCILIATION.md', 'SCOPE_RECONCILIATION_PASS1.md', 'AUTOFS_SUBSET.md', 'AUTOFS_LESSONS.md', 'DEBUG_RECOVERY_LESSONS.md', 'LINUX_LOGGING_SUBSET.md', 'LINUX_LOGGING_LESSONS.md', 'STARTUP_LESSONS.md', 'QOS_SUBSET.md', 'QOS_LESSONS.md', 'FILE_BACKUP_SUBSET.md', 'FILE_BACKUP_LESSONS.md', 'BACKUP_SELECTION_LESSON.md', 'DHCP_CONFIG_SUBSET.md', 'DHCP_SERVER_LESSONS.md', 'NM_PROFILES_SUBSET.md', 'NM_PROFILE_LESSONS.md', 'REMOVABLE_MOUNT_SUBSET.md', 'REMOVABLE_MOUNT_LESSON.md', 'CLIENT_NAMES_SUBSET.md', 'CLIENT_NAME_LESSONS.md', 'RESOLVER_SEARCH_SUBSET.md', 'RESOLVER_SEARCH_LESSONS.md', 'DEBIAN_CONTENTS_SUBSET.md', 'DEBIAN_CONTENTS_LESSON.md', 'DEBIAN_SOURCES_SUBSET.md', 'DEBIAN_SOURCES_LESSONS.md', 'SHELL_TRACING_SUBSET.md', 'SHELL_TRACING_LESSONS.md', 'SHELL_ENVIRONMENT_SUBSET.md', 'ENVIRONMENT_LESSONS.md', 'USER_MOUNT_SUBSET.md', 'USER_MOUNT_LESSONS.md', 'DEBIAN_CONFLICTS_SUBSET.md', 'DEBIAN_CONFLICT_LESSONS.md', 'NM_DHCP_SUBSET.md', 'NM_DHCP_LESSONS.md', 'FS_INTEGRITY_SUBSET.md', 'FS_INTEGRITY_LESSONS.md', 'SHELL_STARTUP_SUBSET.md', 'SHELL_STARTUP_LESSONS.md', 'SHELL_FILE_LIFECYCLE_SUBSET.md', 'SHELL_FILE_LIFECYCLE_LESSONS.md', 'DEBIAN_CONFFILES_SUBSET.md', 'DEBIAN_CONFFILE_LESSONS.md', 'RAID1_SUBSET.md', 'RAID1_LESSONS.md', 'SHELL_EVALUATOR18_BASELINE.md', 'SHELL_ASSOCIATIVE_SUBSET.md', 'SHELL_ASSOCIATIVE_REFERENCE.md', 'SHELL_ASSOCIATIVE_LESSONS.md', 'COURSE_METADATA_LOADING.md', 'SHARED_LIBRARIES_SUBSET.md', 'SHARED_LIBRARIES_LESSONS.md', 'FHS_LESSONS.md', 'SHELL_MANAGED_CONFIG_LESSON.md', 'SHELL_CONTENT_BACKUPS.md', 'TRANSPORT_SUBSET.md', 'TRANSPORT_LESSONS.md', 'RECURSIVE_TREE_SUBSET.md', 'RECURSIVE_TREE_LESSONS.md', 'FIND_SIZE_SUBSET.md', 'FIND_SIZE_LESSONS.md', 'KERNEL_MODULE_SUBSET.md', 'KERNEL_MODULE_LESSONS.md', 'KERNEL_MODULE_NAMES.md', 'SHELL_LOG_TRIAGE_LESSON.md', 'RPM_METADATA_SUBSET.md', 'RPM_METADATA_LESSONS.md', 'LISTENER_AUDIT_LESSON.md', 'ACCOUNT_SKELETON_SUBSET.md', 'ACCOUNT_SKELETON_LESSON.md', 'COMMAND_LOCATION_SUBSET.md', 'COMMAND_LOCATION_LESSON.md', 'WHEREIS_SUBSET.md', 'WHEREIS_LESSON.md', 'LINKS_INODE_TEACHING.md', 'DIRECTORY_POLICY_SUBSET.md', 'DIRECTORY_POLICY_LESSONS.md', 'FILE_INDEX_SUBSET.md', 'FILE_INDEX_LESSON.md', 'PATH_LOOKUP_SUBSET.md', 'PATH_LOOKUP_LESSON.md'):
+                    shutil.copyfile(ROOT / 'docs' / name, resources / 'docs' / name)
+                presentation = resources / 'scenarios/presentation'
+                presentation.mkdir(parents=True, exist_ok=True)
+                for source in presentation_sources():
+                    shutil.copyfile(source, presentation / source.name)
+                (stage / 'TEACHING-REVIEW-READ-ME.txt').write_text(
+                    'LOCAL REVIEW ONLY. Run ./dlms-learning-lab directly. Do not run install.sh.\n'
+                    'Current registered review labs use the approved teaching pattern; BUILD_INFO.json records this catalog identity.\n'
+                    'Uses the existing separate ccna-presentation-pilot review profile for continuity; originals never written.\n'
+                    'No independent novice, screen-reader or cross-platform acceptance. No public release.\nSee docs/TEACHING_PRESENTATION.md and docs/TEACHING_INVENTORY.md.\n')
+            else:
+                shutil.copyfile(ROOT / 'docs/CCNA_PILOT.md', resources / 'CCNA_PILOT.md')
+                (stage / 'CCNA-PILOT-READ-ME.txt').write_text(
+                'LOCAL REVIEW ONLY. Run ./dlms-learning-lab directly. Do not run install.sh.\n'
+                'The binary uses a separate progress/preferences copy by default. Your installed app is unchanged.\n'
+                'The approved foundations lessons appear first in CCNA; current source also includes the all-track presentation rollout.\n'
+                'This uncommitted pilot has no release or cross-platform acceptance. See CCNA_PILOT.md.\n')
+
         files = [p for p in stage.rglob('*') if p.is_file()]
         if any(p.is_symlink() for p in stage.rglob('*')):
             raise ValueError('Candidate may contain ordinary resources only')

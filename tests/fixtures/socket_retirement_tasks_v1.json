@@ -1,0 +1,170 @@
+{
+  "example": {
+    "initial": {
+      "services": {
+        "schema_version": 1,
+        "inventory": {
+          "schema_version": 1,
+          "fixture": "practice-listener-inventory",
+          "units": [
+            "boot-relay.service",
+            "practice.target",
+            "status-desk.service"
+          ],
+          "programs": {
+            "/sim/bin/boot-relay": {
+              "kind": "PortDaemon",
+              "config": "/etc/practice/boot-relay.conf",
+              "key": "PORT",
+              "prerequisite": null
+            },
+            "/sim/bin/status-desk": {
+              "kind": "PortDaemon",
+              "config": "/etc/practice/status-desk.conf",
+              "key": "PORT",
+              "prerequisite": null
+            }
+          },
+          "config_paths": [
+            "/etc/practice/boot-relay.conf",
+            "/etc/practice/status-desk.conf"
+          ],
+          "artifact_ids": []
+        },
+        "documents": {
+          "practice.target": "[Unit]\nDescription=Workshop virtual startup\n",
+          "boot-relay.service": "[Unit]\nDescription=Supplied boot-relay service\n[Service]\nType=simple\nExecStart=/sim/bin/boot-relay\n[Install]\nWantedBy=practice.target\n",
+          "status-desk.service": "[Unit]\nDescription=Supplied status-desk service\n[Service]\nType=simple\nExecStart=/sim/bin/status-desk\n[Install]\nWantedBy=practice.target\n"
+        },
+        "configuration": {
+          "/etc/practice/boot-relay.conf": "PORT=8055\n",
+          "/etc/practice/status-desk.conf": "PORT=9101\n"
+        },
+        "loaded": {
+          "practice.target": "[Unit]\nDescription=Workshop virtual startup\n",
+          "boot-relay.service": "[Unit]\nDescription=Supplied boot-relay service\n[Service]\nType=simple\nExecStart=/sim/bin/boot-relay\n[Install]\nWantedBy=practice.target\n",
+          "status-desk.service": "[Unit]\nDescription=Supplied status-desk service\n[Service]\nType=simple\nExecStart=/sim/bin/status-desk\n[Install]\nWantedBy=practice.target\n"
+        },
+        "runtime": {
+          "boot-relay.service": {
+            "kind": "Running",
+            "snapshot": {
+              "unit_source": "[Unit]\nDescription=Supplied boot-relay service\n[Service]\nType=simple\nExecStart=/sim/bin/boot-relay\n[Install]\nWantedBy=practice.target\n",
+              "configuration": "PORT=8055\n",
+              "artifact_input": null
+            }
+          },
+          "status-desk.service": {
+            "kind": "Running",
+            "snapshot": {
+              "unit_source": "[Unit]\nDescription=Supplied status-desk service\n[Service]\nType=simple\nExecStart=/sim/bin/status-desk\n[Install]\nWantedBy=practice.target\n",
+              "configuration": "PORT=9101\n",
+              "artifact_input": null
+            }
+          }
+        },
+        "artifacts": {},
+        "boot_links": {
+          "practice.target": [
+            "boot-relay.service",
+            "status-desk.service"
+          ]
+        },
+        "default_target": "practice.target"
+      },
+      "activation": {
+        "enabled": true,
+        "listening": true
+      }
+    },
+    "obsolete_service": "boot-relay.service",
+    "obsolete_port": 8055,
+    "activating_socket": "boot-relay.socket",
+    "required_service": "status-desk.service",
+    "required_port": 9101
+  },
+  "assignment": {
+    "initial": {
+      "services": {
+        "schema_version": 1,
+        "inventory": {
+          "schema_version": 1,
+          "fixture": "handover-listener-inventory",
+          "units": [
+            "handover.target",
+            "inventory-status.service",
+            "legacy-import.service"
+          ],
+          "programs": {
+            "/sim/bin/legacy-import": {
+              "kind": "PortDaemon",
+              "config": "/etc/handover/legacy-import.conf",
+              "key": "PORT",
+              "prerequisite": null
+            },
+            "/sim/bin/inventory-status": {
+              "kind": "PortDaemon",
+              "config": "/etc/handover/inventory-status.conf",
+              "key": "PORT",
+              "prerequisite": null
+            }
+          },
+          "config_paths": [
+            "/etc/handover/legacy-import.conf",
+            "/etc/handover/inventory-status.conf"
+          ],
+          "artifact_ids": []
+        },
+        "documents": {
+          "handover.target": "[Unit]\nDescription=Workshop virtual startup\n",
+          "legacy-import.service": "[Unit]\nDescription=Supplied legacy-import service\n[Service]\nType=simple\nExecStart=/sim/bin/legacy-import\n[Install]\nWantedBy=handover.target\n",
+          "inventory-status.service": "[Unit]\nDescription=Supplied inventory-status service\n[Service]\nType=simple\nExecStart=/sim/bin/inventory-status\n[Install]\nWantedBy=handover.target\n"
+        },
+        "configuration": {
+          "/etc/handover/legacy-import.conf": "PORT=7055\n",
+          "/etc/handover/inventory-status.conf": "PORT=9102\n"
+        },
+        "loaded": {
+          "handover.target": "[Unit]\nDescription=Workshop virtual startup\n",
+          "legacy-import.service": "[Unit]\nDescription=Supplied legacy-import service\n[Service]\nType=simple\nExecStart=/sim/bin/legacy-import\n[Install]\nWantedBy=handover.target\n",
+          "inventory-status.service": "[Unit]\nDescription=Supplied inventory-status service\n[Service]\nType=simple\nExecStart=/sim/bin/inventory-status\n[Install]\nWantedBy=handover.target\n"
+        },
+        "runtime": {
+          "legacy-import.service": {
+            "kind": "Running",
+            "snapshot": {
+              "unit_source": "[Unit]\nDescription=Supplied legacy-import service\n[Service]\nType=simple\nExecStart=/sim/bin/legacy-import\n[Install]\nWantedBy=handover.target\n",
+              "configuration": "PORT=7055\n",
+              "artifact_input": null
+            }
+          },
+          "inventory-status.service": {
+            "kind": "Running",
+            "snapshot": {
+              "unit_source": "[Unit]\nDescription=Supplied inventory-status service\n[Service]\nType=simple\nExecStart=/sim/bin/inventory-status\n[Install]\nWantedBy=handover.target\n",
+              "configuration": "PORT=9102\n",
+              "artifact_input": null
+            }
+          }
+        },
+        "artifacts": {},
+        "boot_links": {
+          "handover.target": [
+            "inventory-status.service",
+            "legacy-import.service"
+          ]
+        },
+        "default_target": "handover.target"
+      },
+      "activation": {
+        "enabled": true,
+        "listening": true
+      }
+    },
+    "obsolete_service": "legacy-import.service",
+    "obsolete_port": 7055,
+    "activating_socket": "legacy-import.socket",
+    "required_service": "inventory-status.service",
+    "required_port": 9102
+  }
+}

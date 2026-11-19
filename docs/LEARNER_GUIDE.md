@@ -13,7 +13,8 @@ shows its goal and estimated time before you start. Favorites keep useful labs
 close; recent work and Continue return to saved attempts. Prerequisites recommend
 preparation without locking experienced learners out of later work.
 
-If networking is new, start with **Read an IPv4 address**. For Linux access, try
+If networking is new, start with **IPv4 foundations: the magic-number method**
+in CCNA. For Linux access, try
 **Share a report safely**. For scripting, begin with the first Bash/Shell unit
 and its introduction. You do not need a VM or an existing shell environment.
 
@@ -42,6 +43,13 @@ Stop cancels a running operation where that workspace provides it. Some
 configuration editors have a separate Save or Apply action: read its label to
 distinguish a draft from the configuration being tested. Each lab discloses its
 supported commands or syntax. Unsupported input reports a limitation.
+
+In **Measure before diagnosing resource pressure**, commands replay supplied
+observations rather than measuring your computer. Choose the recording's boot
+and time, run a supported command, then choose a **Result row**. Enter each
+measurement in the report and use **Attach row** to identify its evidence.
+**Check report** checks the values, time windows, units and source together.
+The separate example recording is available if you need practice first.
 
 Check configuration or Check work evaluates the current result. In scripting,
 the whole run can fail even when the selected individual case passes. Inspect
@@ -84,3 +92,18 @@ These are authored practice scenarios within disclosed models. Full exam
 coverage, real-equipment experience and certification outcomes are not promised.
 Current coverage and remaining limitations are recorded in
 [the objective map](OBJECTIVE_MAPPING.md).
+
+## Controller request practice
+
+In CCNA, complete JSON network inventories before **REST requests: inspect, change
+and verify**. Use the native Method, Resource path, Authorization, Content-Type and
+Body fields, then **Send request**. Only this lesson's simulated resources change.
+The supplied lab-reader and lab-operator labels are examples, not real credentials.
+
+Read the actual response to diagnose a request, then **Check network** to evaluate
+its applied effect. A successful request can still leave the assignment incomplete.
+GET observes resources; editing a request does not apply it. Current results clear
+after edits and are recomputed when you check. Applied changes and separate example
+drafts are retained on leaving. On reopening, no response is invented; send a request
+again if you want to inspect its response. Optional worked requests only populate
+the practice editor until you choose Send request.

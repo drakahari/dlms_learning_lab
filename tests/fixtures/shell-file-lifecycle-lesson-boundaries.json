@@ -1,0 +1,309 @@
+{
+  "shell-cleanup-preview": [
+    {
+      "name": "Empty filename",
+      "args": [
+        "apply",
+        ""
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/cache-old": "old cache\n",
+        "/work/cache spare": "spare\n",
+        "/work/-cache": "dash cache\n",
+        "/work/report.txt": "Protected report\n"
+      },
+      "stdout": "",
+      "stderr": "Unsafe cleanup request\n",
+      "status": 2,
+      "after": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/cache-old": "old cache\n",
+        "/work/cache spare": "spare\n",
+        "/work/-cache": "dash cache\n",
+        "/work/report.txt": "Protected report\n"
+      }
+    },
+    {
+      "name": "Traversal refused",
+      "args": [
+        "apply",
+        "../cache-old"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/cache-old": "old cache\n",
+        "/work/cache spare": "spare\n",
+        "/work/-cache": "dash cache\n",
+        "/work/report.txt": "Protected report\n"
+      },
+      "stdout": "",
+      "stderr": "Unsafe cleanup request\n",
+      "status": 2,
+      "after": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/cache-old": "old cache\n",
+        "/work/cache spare": "spare\n",
+        "/work/-cache": "dash cache\n",
+        "/work/report.txt": "Protected report\n"
+      }
+    }
+  ],
+  "shell-recover-publication": [
+    {
+      "name": "Header without final newline",
+      "args": [
+        "deploy",
+        "candidate",
+        "current",
+        "backup"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "approved",
+        "/work/current": "old"
+      },
+      "stdout": "Deployed: current\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "approved",
+        "/work/current": "approved",
+        "/work/backup": "old"
+      }
+    },
+    {
+      "name": "Empty backup is valid",
+      "args": [
+        "restore",
+        "candidate",
+        "current",
+        "backup"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/current": "bad",
+        "/work/backup": ""
+      },
+      "stdout": "Restored: current\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/current": "",
+        "/work/backup": ""
+      }
+    },
+    {
+      "name": "Empty candidate label",
+      "args": [
+        "restore",
+        "",
+        "current",
+        "backup"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "approved\nnew\n",
+        "/work/current": "old\n",
+        "/work/backup": "older\n"
+      },
+      "stdout": "",
+      "stderr": "Choose three different files\n",
+      "status": 2,
+      "after": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "approved\nnew\n",
+        "/work/current": "old\n",
+        "/work/backup": "older\n"
+      }
+    },
+    {
+      "name": "Same candidate and current",
+      "args": [
+        "deploy",
+        "current",
+        "current",
+        "backup"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "approved\nnew\n",
+        "/work/current": "old\n",
+        "/work/backup": "older\n"
+      },
+      "stdout": "",
+      "stderr": "Choose three different files\n",
+      "status": 2,
+      "after": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "approved\nnew\n",
+        "/work/current": "old\n",
+        "/work/backup": "older\n"
+      }
+    },
+    {
+      "name": "Same candidate and backup",
+      "args": [
+        "deploy",
+        "backup",
+        "current",
+        "backup"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "approved\nnew\n",
+        "/work/current": "old\n",
+        "/work/backup": "older\n"
+      },
+      "stdout": "",
+      "stderr": "Choose three different files\n",
+      "status": 2,
+      "after": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "approved\nnew\n",
+        "/work/current": "old\n",
+        "/work/backup": "older\n"
+      }
+    },
+    {
+      "name": "Empty candidate",
+      "args": [
+        "deploy",
+        "candidate",
+        "current",
+        "backup"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "",
+        "/work/current": "old\n",
+        "/work/backup": "older\n"
+      },
+      "stdout": "",
+      "stderr": "Candidate not approved\n",
+      "status": 2,
+      "after": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "",
+        "/work/current": "old\n",
+        "/work/backup": "older\n"
+      }
+    },
+    {
+      "name": "Backup cannot alias the publication stage",
+      "args": [
+        "deploy",
+        "candidate",
+        "current",
+        "rollout.000001"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "approved\nnew",
+        "/work/current": "old"
+      },
+      "stdout": "Deployed: current\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "approved\nnew",
+        "/work/current": "approved\nnew",
+        "/work/rollout.000001": "old"
+      }
+    },
+    {
+      "name": "Restoration name already is current",
+      "args": [
+        "restore",
+        "unused",
+        "recovery.000000",
+        "backup"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/backup": "restore exact"
+      },
+      "stdout": "Restored: recovery.000000\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/backup": "restore exact",
+        "/work/recovery.000000": "restore exact"
+      }
+    },
+    {
+      "name": "Backup name already allocated",
+      "args": [
+        "deploy",
+        "candidate",
+        "current",
+        "snapshot.000000"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "approved\nnew",
+        "/work/current": "old"
+      },
+      "stdout": "Deployed: current\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/candidate": "approved\nnew",
+        "/work/current": "approved\nnew",
+        "/work/snapshot.000000": "old"
+      }
+    }
+  ],
+  "shell-stage-report": [
+    {
+      "name": "Returned name already is target",
+      "args": [
+        "draft",
+        "report.000001"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/draft": "exact",
+        "/work/report.000000": "collision"
+      },
+      "stdout": "Published: report.000001\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "Keep this unrelated note.\n",
+        "/work/draft": "exact",
+        "/work/report.000000": "collision",
+        "/work/report.000001": "exact"
+      }
+    }
+  ]
+}

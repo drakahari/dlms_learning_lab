@@ -7,6 +7,7 @@ use dlms_learning_lab::{
 };
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
+mod query_tools;
 const START: usize = 27000;
 const END: usize = 28000;
 const IDS: [&str; 3] = [
@@ -19,6 +20,7 @@ enum Field {
     Records,
     Serial,
     Query,
+    Command,
 }
 impl Field {
     fn key(self) -> &'static str {
@@ -26,6 +28,7 @@ impl Field {
             Self::Records => "records",
             Self::Serial => "serial",
             Self::Query => "query",
+            Self::Command => "lookup-command",
         }
     }
 }
@@ -44,6 +47,7 @@ enum Target {
     Copy,
     Choice(String),
     Lookup,
+    Commands,
     Reset,
     Confirm,
     Cancel,
@@ -64,6 +68,7 @@ enum Step {
     AppliedSnapshot,
     UnchangedApplied,
     Lookup(String),
+    CommandOutput(String),
     Remember,
     Resume,
     SaveReadback,
@@ -522,6 +527,12 @@ impl LabApp {
                 .find(|(name, _)| name == k)
                 .map(|(_, r)| *r),
             Target::Lookup => self.metrics.probe,
+            Target::Commands => self
+                .metrics
+                .dns_choices
+                .iter()
+                .find(|r| r.0 == "lookup:commands")
+                .map(|r| r.1),
             Target::Reset => self.metrics.reset,
             Target::Confirm => self.metrics.confirm_reset,
             Target::Cancel => self.metrics.reset_cancel,
@@ -615,7 +626,14 @@ impl LabApp {
         stage: usize,
     ) -> (bool, Option<String>) {
         assert!((START..END).contains(&stage));
-        let p = plan(&self.scenarios);
+        let query_tools =
+            std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-query-tools-batch");
+        let ids = if query_tools { query_tools::IDS } else { IDS };
+        let p = if query_tools {
+            query_tools::plan(&self.scenarios)
+        } else {
+            plan(&self.scenarios)
+        };
         let offset = stage - START;
         let step = &p[offset];
         let n = p[..=offset]
@@ -629,7 +647,7 @@ impl LabApp {
                 }
             })
             .unwrap_or(0);
-        let id = IDS[n];
+        let id = ids[n];
         let i = self.scenarios.iter().position(|s| s.id == id).unwrap();
         let scenario = self.scenarios[i].clone();
         if std::env::var_os("DLMS_SMOKE_DIAGNOSTICS").is_some() {
@@ -778,6 +796,12 @@ impl LabApp {
                     &scenario
                 ));
             }
+            Step::CommandOutput(value) => {
+                let d = self.ptr_draft(i);
+                assert!(d.utility.as_ref().unwrap().enabled);
+                assert!(d.output.contains(value), "Expected {value}: {}", d.output);
+                assert!(self.metrics.output.is_some());
+            }
             Step::Lookup(value) => {
                 let d = self.ptr_draft(i);
                 assert_eq!(d.query_type, QueryType::Ptr);
@@ -914,6 +938,15 @@ impl LabApp {
                     0 => None,
                     1 => Some(self.metrics.dns_result.expect("measured current feedback")),
                     2 => Some(self.metrics.output.expect("measured current lookup output")),
+                    5 => self.metrics.example_action,
+                    4 => Some(
+                        self.metrics
+                            .dns_fields
+                            .iter()
+                            .find(|r| r.0 == "lookup-command")
+                            .unwrap()
+                            .1,
+                    ),
                     3 => Some(
                         self.metrics
                             .dns_notice
@@ -929,15 +962,21 @@ impl LabApp {
                 return (true, Some(name.clone()));
             }
             Step::Finish => {
-                for id in IDS {
+                for id in ids {
                     let s = self.scenarios.iter().find(|s| s.id == id).unwrap();
                     assert!(progress::current_solved(&self.progress.attempts[id], s));
                 }
                 let key = egui::Id::new("ptr-finish-announced");
                 if !ctx.data(|d| d.get_temp::<bool>(key)).unwrap_or(false) {
-                    println!(
-                        "PASS three normal PTR lessons: actual controls, independent practice, saved-only/wrong/current/alternate states, query/negative-copy, typed150/200 retry, exact drafts/navigation/reset/readback. No novice/cold/other-platform claim."
-                    );
+                    if query_tools {
+                        println!(
+                            "PASS three authoritative query lessons: actual optional inputs, negative/type/alias/copy distinctions, separate practice, editor publication, save/readback, light150/dark200. No cold/novice/other-platform claim."
+                        );
+                    } else {
+                        println!(
+                            "PASS three normal PTR lessons: actual controls, independent practice, saved-only/wrong/current/alternate states, query/negative-copy, typed150/200 retry, exact drafts/navigation/reset/readback. No novice/cold/other-platform claim."
+                        );
+                    }
                     ctx.data_mut(|d| d.insert_temp(key, true));
                 }
                 return hold_close(ctx);

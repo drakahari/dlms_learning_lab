@@ -1,4 +1,5 @@
 //! Real egui events on the four normally registered authored RPM activities.
+mod patch;
 use super::*;
 use dlms_learning_lab::{
     rpm_packages_teaching as learn, rpm_packages_terminal as terminal, script_teaching::View,
@@ -815,4 +816,131 @@ fn rpm_actual_challenge_and_independent_undo_keep_practice_data_separate() {
     frame(&ctx, &mut a, 1200., 850., vec![]);
     assert_eq!(console(&a, true).command, "rpm -q gallery-client");
     assert!(serde_json::to_value(chosen(&a)).unwrap() == before_practice_undo);
+}
+
+#[test]
+fn metadata_recovery_real_controls_keep_practice_separate_and_clear_current_success() {
+    for id in ["lpic1-rpm-metadata-preserve", "lpic1-rpm-mixed-recovery"] {
+        let (ctx, mut a, i) = super::debug_recovery::opened(id);
+        draw(&ctx, &mut a);
+        let initial = chosen(&a).state.clone();
+        let source = a.scenarios[i].rpm_packages_teaching.clone().unwrap();
+        tab(&ctx, &mut a, View::Example);
+        let insert = reveal(&ctx, &mut a, 1200., 850., |m| m.rpm.insert);
+        tap(&ctx, &mut a, 1200., 850., insert);
+        assert!(!console(&a, true).command.is_empty());
+        assert!(console(&a, true).entries.is_empty(), "Insert does not run");
+        for c in &source.example_commands {
+            submit(&ctx, &mut a, &c.command, true);
+        }
+        assert!(learning(&a).checks(&source).iter().all(|r| r.0));
+        for c in &source.try_change.commands {
+            submit(&ctx, &mut a, &c.command, false);
+        }
+        assert_eq!(
+            learning(&a)
+                .checks(&source)
+                .iter()
+                .map(|r| r.0)
+                .collect::<Vec<_>>(),
+            source.try_change.expected
+        );
+        for c in &source.repair {
+            submit(&ctx, &mut a, &c.command, true);
+        }
+        assert!(learning(&a).checks(&source).iter().all(|r| r.0));
+        assert_eq!(chosen(&a).state, initial);
+        tab(&ctx, &mut a, View::Assignment);
+        assert!(console(&a, false).command.is_empty());
+        assert!(console(&a, false).entries.is_empty());
+        let before_inspect = chosen(&a).clone();
+        let inspector = reveal(&ctx, &mut a, 1200., 850., |m| m.rpm.inspector);
+        tap(&ctx, &mut a, 1200., 850., inspector);
+        choose_inspector(&ctx, &mut a, "queue-agent-v1", |m| m.rpm.inspect_header);
+        choose_inspector(&ctx, &mut a, "/srv/teaching/queue-agent.conf", |m| {
+            m.rpm.inspect_path
+        });
+        assert!(
+            a.metrics
+                .rpm
+                .inspection_text
+                .iter()
+                .any(|text| text.contains("style=site"))
+        );
+        assert_eq!(
+            serde_json::to_value(chosen(&a)).unwrap(),
+            serde_json::to_value(before_inspect).unwrap(),
+            "Inspection is read-only"
+        );
+        let inspector = reveal(&ctx, &mut a, 1200., 850., |m| m.rpm.inspector);
+        tap(&ctx, &mut a, 1200., 850., inspector);
+        assert!(!progress::current_solved(chosen(&a), &a.scenarios[i]));
+        submit(&ctx, &mut a, "rpm -V queue-agent", false);
+        assert!(matches!(
+            &console(&a, false).entries.last().unwrap().output,
+            terminal::Outcome::SimulatorUnsupported { .. }
+        ));
+        assert_eq!(chosen(&a).state, initial);
+        submit(&ctx, &mut a, "rpm --restore queue-agent", true);
+        assert_eq!(
+            progress::current_solved(chosen(&a), &a.scenarios[i]),
+            id == "lpic1-rpm-metadata-preserve"
+        );
+        if id == "lpic1-rpm-mixed-recovery" {
+            let r = reveal(&ctx, &mut a, 1200., 850., |m| m.rpm.check);
+            tap(&ctx, &mut a, 1200., 850., r);
+            assert!(!a.metrics.completion);
+            assert!(a.metrics.rpm.result_rows.iter().any(|r| !r.1));
+            submit(
+                &ctx,
+                &mut a,
+                "rpm --reinstall /rpms/report-pages-v1.rpm",
+                false,
+            );
+        }
+        let r = reveal(&ctx, &mut a, 1200., 850., |m| m.rpm.check);
+        tap(&ctx, &mut a, 1200., 850., r);
+        assert!(progress::current_solved(chosen(&a), &a.scenarios[i]));
+        assert!(a.metrics.completion);
+        submit(&ctx, &mut a, "rpm -e desk-notes", true);
+        assert!(!progress::current_solved(chosen(&a), &a.scenarios[i]));
+        assert!(!a.rpm_presentation.memo.prepared(id).unwrap());
+        assert!(!a.metrics.completion);
+        submit(&ctx, &mut a, "rpm -i /rpms/desk-notes-v1.rpm", true);
+        assert!(progress::current_solved(chosen(&a), &a.scenarios[i]));
+    }
+}
+
+#[test]
+fn metadata_recovery_fields_and_actions_reflow_without_revealing_assignment_answers() {
+    for id in ["lpic1-rpm-metadata-preserve", "lpic1-rpm-mixed-recovery"] {
+        for (w, h, scale, theme) in [
+            (1280., 900., 1., "dlms-dark"),
+            (800., 750., 1.5, "dlms-light"),
+            (720., 760., 2., "dlms-dark"),
+        ] {
+            let (ctx, mut a, _) = super::debug_recovery::opened(id);
+            draw(&ctx, &mut a);
+            tab(&ctx, &mut a, View::Assignment);
+            a.scale = scale;
+            ctx.set_zoom_factor(scale);
+            a.theme_id = theme.into();
+            theme::apply(&ctx, theme);
+            for _ in 0..3 {
+                frame(&ctx, &mut a, w, h, vec![]);
+            }
+            let r = reveal(&ctx, &mut a, w, h, |m| m.rpm.command.map(|r| r.0));
+            assert!(r.width() > 120. && r.height() > 15.);
+            type_command(&ctx, &mut a, w, h, "rpm -q queue-agent");
+            assert_eq!(console(&a, false).command, "rpm -q queue-agent");
+            assert!(console(&a, false).entries.is_empty());
+            let run = reveal(&ctx, &mut a, w, h, |m| m.rpm.run.map(|r| r.0));
+            assert!(run.height() > 15.);
+            assert!(!progress::current_solved(
+                chosen(&a),
+                &a.scenarios[a.selected.unwrap()]
+            ));
+            assert!(!a.metrics.completion);
+        }
+    }
 }

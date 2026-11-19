@@ -1,0 +1,968 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-syslog-threshold",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Syslog routing",
+      "unit": "linux-syslog-routing",
+      "title": "Keep warnings and urgent events, without routine noise",
+      "summary": "Configure a severity threshold and check both included and excluded events.",
+      "objective": "Route every facility at warning(4) or more urgent levels0\u20133 exactly once to /var/log/operations.log. Do not deliver notice, info or debug events, and do not use other destinations.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "steps": [
+        "Edit the supplied configuration, run the routing test, inspect specific failures and retry."
+      ],
+      "guide": [],
+      "explanation": "Each matching selector line independently delivers one copy. Compare required and actual routes, repair the smallest selector mistake, then rerun the whole routing policy. The test covers every source/severity combination, not only the displayed events.",
+      "hints": [
+        "The policy says warning or more urgent, rather than warning only.",
+        "A plain severity includes levels with smaller numbers. * before the dot means every facility."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://docs.rsyslog.com/doc/configuration/filters.html",
+        "https://www.rfc-editor.org/rfc/rfc5424.html"
+      ],
+      "simplifications": "Bounded classic rsyslog selector subset and supplied virtual log destinations. No daemon, host logs, network, timestamps, encoding, includes, RainerScript, rotation or journald. Unsupported syntax is diagnosed. Displayed sample records illustrate replay; grading checks all24 facilities and8 severities.",
+      "initial": {
+        "kind": "LinuxLogging",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "assignment": {
+            "draft": "*.=warning /var/log/operations.log\n",
+            "last_run": null,
+            "diagnostic": null
+          },
+          "practice": {
+            "draft": "mail.=crit /var/log/service.log\n",
+            "last_run": null,
+            "diagnostic": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "LinuxLogging",
+        "definition": {
+          "destinations": [
+            "/var/log/operations.log",
+            "/var/log/service.log",
+            "/var/log/private.log"
+          ],
+          "initial": {
+            "starter": "*.=warning /var/log/operations.log\n",
+            "events": [
+              {
+                "facility": 3,
+                "severity": 3,
+                "message": "Worker failed to start"
+              },
+              {
+                "facility": 0,
+                "severity": 4,
+                "message": "Link counters changing"
+              },
+              {
+                "facility": 9,
+                "severity": 6,
+                "message": "Scheduled report started"
+              },
+              {
+                "facility": 10,
+                "severity": 7,
+                "message": "Authentication debug detail"
+              },
+              {
+                "facility": 3,
+                "severity": 6,
+                "message": "Worker ready"
+              },
+              {
+                "facility": 1,
+                "severity": 5,
+                "message": "User session opened"
+              }
+            ],
+            "policy": [
+              {
+                "destination": "/var/log/operations.log",
+                "facilities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23
+                ],
+                "severities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "copies": 1
+              }
+            ],
+            "task": "Route every facility at warning(4) or more urgent levels0\u20133 exactly once to /var/log/operations.log. Do not deliver notice, info or debug events, and do not use other destinations."
+          },
+          "example": {
+            "starter": "mail.=crit /var/log/service.log\n",
+            "events": [
+              {
+                "facility": 2,
+                "severity": 2,
+                "message": "Mail queue unavailable"
+              },
+              {
+                "facility": 0,
+                "severity": 4,
+                "message": "Storage warning"
+              },
+              {
+                "facility": 3,
+                "severity": 5,
+                "message": "Practice daemon restart"
+              },
+              {
+                "facility": 10,
+                "severity": 1,
+                "message": "Private authentication alert"
+              },
+              {
+                "facility": 9,
+                "severity": 6,
+                "message": "Practice schedule started"
+              },
+              {
+                "facility": 3,
+                "severity": 7,
+                "message": "Practice diagnostic detail"
+              },
+              {
+                "facility": 2,
+                "severity": 0,
+                "message": "Mail transport emergency"
+              },
+              {
+                "facility": 2,
+                "severity": 1,
+                "message": "Mail transport alert"
+              }
+            ],
+            "policy": [
+              {
+                "destination": "/var/log/service.log",
+                "facilities": [
+                  2
+                ],
+                "severities": [
+                  0,
+                  1,
+                  2
+                ],
+                "copies": 1
+              }
+            ],
+            "task": "Route mail events at crit(2) or more urgent exactly once to /var/log/service.log; deliver nothing else."
+          },
+          "example_worked": "mail.crit /var/log/service.log\n"
+        }
+      },
+      "solution": [
+        "SYSLOG CONFIG\n*.warning /var/log/operations.log\n"
+      ],
+      "prerequisites": [
+        "lpic1-logs"
+      ]
+    },
+    {
+      "id": "lpic1-syslog-exact",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Syslog routing",
+      "unit": "linux-syslog-routing",
+      "title": "Separate routine service information from urgent alerts",
+      "summary": "Use an exact level without losing the broader urgent-event stream.",
+      "objective": "Route daemon events at exactly info(6) once to /var/log/service.log. Independently route all facilities at err(3) or more urgent once to /var/log/operations.log. Deliver no other copies or records.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "steps": [
+        "Edit the supplied configuration, run the routing test, inspect specific failures and retry."
+      ],
+      "guide": [],
+      "explanation": "Each matching selector line independently delivers one copy. Compare required and actual routes, repair the smallest selector mistake, then rerun the whole routing policy. The test covers every source/severity combination, not only the displayed events.",
+      "hints": [
+        "The service report asks for exactly info, while urgent alerts need a threshold.",
+        "An = belongs before the exact severity name, after the dot."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://docs.rsyslog.com/doc/configuration/filters.html",
+        "https://www.rfc-editor.org/rfc/rfc5424.html"
+      ],
+      "simplifications": "Bounded classic rsyslog selector subset and supplied virtual log destinations. No daemon, host logs, network, timestamps, encoding, includes, RainerScript, rotation or journald. Unsupported syntax is diagnosed. Displayed sample records illustrate replay; grading checks all24 facilities and8 severities.",
+      "initial": {
+        "kind": "LinuxLogging",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "assignment": {
+            "draft": "daemon.info /var/log/service.log\n*.err /var/log/operations.log\n",
+            "last_run": null,
+            "diagnostic": null
+          },
+          "practice": {
+            "draft": "cron.notice /var/log/service.log\n*.crit /var/log/operations.log\n",
+            "last_run": null,
+            "diagnostic": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "LinuxLogging",
+        "definition": {
+          "destinations": [
+            "/var/log/operations.log",
+            "/var/log/service.log",
+            "/var/log/private.log"
+          ],
+          "initial": {
+            "starter": "daemon.info /var/log/service.log\n*.err /var/log/operations.log\n",
+            "events": [
+              {
+                "facility": 3,
+                "severity": 3,
+                "message": "Worker failed to start"
+              },
+              {
+                "facility": 0,
+                "severity": 4,
+                "message": "Link counters changing"
+              },
+              {
+                "facility": 9,
+                "severity": 6,
+                "message": "Scheduled report started"
+              },
+              {
+                "facility": 10,
+                "severity": 7,
+                "message": "Authentication debug detail"
+              },
+              {
+                "facility": 3,
+                "severity": 6,
+                "message": "Worker ready"
+              },
+              {
+                "facility": 1,
+                "severity": 5,
+                "message": "User session opened"
+              }
+            ],
+            "policy": [
+              {
+                "destination": "/var/log/service.log",
+                "facilities": [
+                  3
+                ],
+                "severities": [
+                  6
+                ],
+                "copies": 1
+              },
+              {
+                "destination": "/var/log/operations.log",
+                "facilities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23
+                ],
+                "severities": [
+                  0,
+                  1,
+                  2,
+                  3
+                ],
+                "copies": 1
+              }
+            ],
+            "task": "Route daemon events at exactly info(6) once to /var/log/service.log. Independently route all facilities at err(3) or more urgent once to /var/log/operations.log. Deliver no other copies or records."
+          },
+          "example": {
+            "starter": "cron.notice /var/log/service.log\n*.crit /var/log/operations.log\n",
+            "events": [
+              {
+                "facility": 2,
+                "severity": 2,
+                "message": "Mail queue unavailable"
+              },
+              {
+                "facility": 0,
+                "severity": 4,
+                "message": "Storage warning"
+              },
+              {
+                "facility": 3,
+                "severity": 5,
+                "message": "Practice daemon restart"
+              },
+              {
+                "facility": 10,
+                "severity": 1,
+                "message": "Private authentication alert"
+              },
+              {
+                "facility": 9,
+                "severity": 6,
+                "message": "Practice schedule started"
+              },
+              {
+                "facility": 3,
+                "severity": 7,
+                "message": "Practice diagnostic detail"
+              },
+              {
+                "facility": 9,
+                "severity": 5,
+                "message": "Practice schedule notice"
+              },
+              {
+                "facility": 9,
+                "severity": 3,
+                "message": "Practice schedule error"
+              }
+            ],
+            "policy": [
+              {
+                "destination": "/var/log/service.log",
+                "facilities": [
+                  9
+                ],
+                "severities": [
+                  5
+                ],
+                "copies": 1
+              },
+              {
+                "destination": "/var/log/operations.log",
+                "facilities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23
+                ],
+                "severities": [
+                  0,
+                  1,
+                  2
+                ],
+                "copies": 1
+              }
+            ],
+            "task": "Route cron at exactly notice(5) once to /var/log/service.log, and every facility at crit(2) or more urgent once to /var/log/operations.log; deliver nothing else."
+          },
+          "example_worked": "cron.=notice /var/log/service.log\n*.crit /var/log/operations.log\n"
+        }
+      },
+      "solution": [
+        "SYSLOG CONFIG\ndaemon.=info /var/log/service.log\n*.err /var/log/operations.log\n"
+      ],
+      "prerequisites": [
+        "lpic1-logs",
+        "lpic1-syslog-threshold"
+      ]
+    },
+    {
+      "id": "lpic1-syslog-privacy",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Syslog routing",
+      "unit": "linux-syslog-routing",
+      "title": "Keep private authentication out of the general log",
+      "summary": "Exclude one source from a broad rule while retaining its private records.",
+      "objective": "Route all authpriv levels0\u20137 exactly once to /var/log/private.log. Route all other facilities at info(6) or more urgent exactly once to /var/log/operations.log. Keep authpriv out of operations.log, exclude other-facility debug, and leave service.log empty.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "steps": [
+        "Edit the supplied configuration, run the routing test, inspect specific failures and retry."
+      ],
+      "guide": [],
+      "explanation": "Each matching selector line independently delivers one copy. Compare required and actual routes, repair the smallest selector mistake, then rerun the whole routing policy. The test covers every source/severity combination, not only the displayed events.",
+      "hints": [
+        "Exclude authpriv from the broad selector itself; a separate private rule does not stop other matches.",
+        "Use a facility.none clause on the general rule and an all-level selector for the private destination."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://docs.rsyslog.com/doc/configuration/filters.html",
+        "https://www.rfc-editor.org/rfc/rfc5424.html"
+      ],
+      "simplifications": "Bounded classic rsyslog selector subset and supplied virtual log destinations. No daemon, host logs, network, timestamps, encoding, includes, RainerScript, rotation or journald. Unsupported syntax is diagnosed. Displayed sample records illustrate replay; grading checks all24 facilities and8 severities.",
+      "initial": {
+        "kind": "LinuxLogging",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "assignment": {
+            "draft": "*.info /var/log/operations.log\nauthpriv.info /var/log/private.log\n",
+            "last_run": null,
+            "diagnostic": null
+          },
+          "practice": {
+            "draft": "*.notice /var/log/operations.log\nauthpriv.notice /var/log/private.log\n",
+            "last_run": null,
+            "diagnostic": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "LinuxLogging",
+        "definition": {
+          "destinations": [
+            "/var/log/operations.log",
+            "/var/log/service.log",
+            "/var/log/private.log"
+          ],
+          "initial": {
+            "starter": "*.info /var/log/operations.log\nauthpriv.info /var/log/private.log\n",
+            "events": [
+              {
+                "facility": 3,
+                "severity": 3,
+                "message": "Worker failed to start"
+              },
+              {
+                "facility": 0,
+                "severity": 4,
+                "message": "Link counters changing"
+              },
+              {
+                "facility": 9,
+                "severity": 6,
+                "message": "Scheduled report started"
+              },
+              {
+                "facility": 10,
+                "severity": 7,
+                "message": "Authentication debug detail"
+              },
+              {
+                "facility": 3,
+                "severity": 6,
+                "message": "Worker ready"
+              },
+              {
+                "facility": 1,
+                "severity": 5,
+                "message": "User session opened"
+              }
+            ],
+            "policy": [
+              {
+                "destination": "/var/log/private.log",
+                "facilities": [
+                  10
+                ],
+                "severities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7
+                ],
+                "copies": 1
+              },
+              {
+                "destination": "/var/log/operations.log",
+                "facilities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23
+                ],
+                "severities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6
+                ],
+                "copies": 1
+              }
+            ],
+            "task": "Route all authpriv levels0\u20137 exactly once to /var/log/private.log. Route all other facilities at info(6) or more urgent exactly once to /var/log/operations.log. Keep authpriv out of operations.log, exclude other-facility debug, and leave service.log empty."
+          },
+          "example": {
+            "starter": "*.notice /var/log/operations.log\nauthpriv.notice /var/log/private.log\n",
+            "events": [
+              {
+                "facility": 2,
+                "severity": 2,
+                "message": "Mail queue unavailable"
+              },
+              {
+                "facility": 0,
+                "severity": 4,
+                "message": "Storage warning"
+              },
+              {
+                "facility": 3,
+                "severity": 5,
+                "message": "Practice daemon restart"
+              },
+              {
+                "facility": 10,
+                "severity": 1,
+                "message": "Private authentication alert"
+              },
+              {
+                "facility": 9,
+                "severity": 6,
+                "message": "Practice schedule started"
+              },
+              {
+                "facility": 3,
+                "severity": 7,
+                "message": "Practice diagnostic detail"
+              },
+              {
+                "facility": 10,
+                "severity": 7,
+                "message": "Private authentication diagnostic detail"
+              }
+            ],
+            "policy": [
+              {
+                "destination": "/var/log/private.log",
+                "facilities": [
+                  10
+                ],
+                "severities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7
+                ],
+                "copies": 1
+              },
+              {
+                "destination": "/var/log/operations.log",
+                "facilities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23
+                ],
+                "severities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5
+                ],
+                "copies": 1
+              }
+            ],
+            "task": "Route all authpriv levels once to /var/log/private.log; route every other facility at notice(5) or more urgent once to /var/log/operations.log. Deliver nothing else."
+          },
+          "example_worked": "*.notice;authpriv.none /var/log/operations.log\nauthpriv.* /var/log/private.log\n"
+        }
+      },
+      "solution": [
+        "SYSLOG CONFIG\n*.info;authpriv.none /var/log/operations.log\nauthpriv.* /var/log/private.log\n"
+      ],
+      "prerequisites": [
+        "lpic1-logs",
+        "lpic1-syslog-exact"
+      ]
+    },
+    {
+      "id": "lpic1-syslog-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Syslog routing",
+      "unit": "linux-syslog-routing",
+      "title": "Repair a logging policy without leaks, noise or duplicates",
+      "summary": "Combine thresholds, exact reports and exclusions in a whole-policy handover.",
+      "objective": "Route authpriv levels0\u20137 once to /var/log/private.log. Route every other facility at notice(5) or more urgent once to /var/log/operations.log. Also route daemon and cron events at exactly info(6) once to /var/log/service.log. Deliver nothing else; no duplicate copies are permitted.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Edit the supplied configuration, run the routing test, inspect specific failures and retry."
+      ],
+      "guide": [],
+      "explanation": "Each matching selector line independently delivers one copy. Compare required and actual routes, repair the smallest selector mistake, then rerun the whole routing policy. The test covers every source/severity combination, not only the displayed events.",
+      "hints": [
+        "Check one destination at a time: private all levels, non-private general threshold, two-source exact info.",
+        "A comma joins facilities sharing a level selection. Redundant matching rules create extra copies."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://docs.rsyslog.com/doc/configuration/filters.html",
+        "https://www.rfc-editor.org/rfc/rfc5424.html"
+      ],
+      "simplifications": "Bounded classic rsyslog selector subset and supplied virtual log destinations. No daemon, host logs, network, timestamps, encoding, includes, RainerScript, rotation or journald. Unsupported syntax is diagnosed. Displayed sample records illustrate replay; grading checks all24 facilities and8 severities.",
+      "initial": {
+        "kind": "LinuxLogging",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "assignment": {
+            "draft": "*.debug /var/log/operations.log\ndaemon.notice /var/log/operations.log\nauthpriv.err /var/log/private.log\ndaemon.info /var/log/service.log\n",
+            "last_run": null,
+            "diagnostic": null
+          },
+          "practice": {
+            "draft": "*.info /var/log/operations.log\nauthpriv.warning /var/log/private.log\nmail.notice /var/log/service.log\n",
+            "last_run": null,
+            "diagnostic": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "LinuxLogging",
+        "definition": {
+          "destinations": [
+            "/var/log/operations.log",
+            "/var/log/service.log",
+            "/var/log/private.log"
+          ],
+          "initial": {
+            "starter": "*.debug /var/log/operations.log\ndaemon.notice /var/log/operations.log\nauthpriv.err /var/log/private.log\ndaemon.info /var/log/service.log\n",
+            "events": [
+              {
+                "facility": 3,
+                "severity": 3,
+                "message": "Worker failed to start"
+              },
+              {
+                "facility": 0,
+                "severity": 4,
+                "message": "Link counters changing"
+              },
+              {
+                "facility": 9,
+                "severity": 6,
+                "message": "Scheduled report started"
+              },
+              {
+                "facility": 10,
+                "severity": 7,
+                "message": "Authentication debug detail"
+              },
+              {
+                "facility": 3,
+                "severity": 6,
+                "message": "Worker ready"
+              },
+              {
+                "facility": 1,
+                "severity": 5,
+                "message": "User session opened"
+              }
+            ],
+            "policy": [
+              {
+                "destination": "/var/log/private.log",
+                "facilities": [
+                  10
+                ],
+                "severities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7
+                ],
+                "copies": 1
+              },
+              {
+                "destination": "/var/log/operations.log",
+                "facilities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23
+                ],
+                "severities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5
+                ],
+                "copies": 1
+              },
+              {
+                "destination": "/var/log/service.log",
+                "facilities": [
+                  3,
+                  9
+                ],
+                "severities": [
+                  6
+                ],
+                "copies": 1
+              }
+            ],
+            "task": "Route authpriv levels0\u20137 once to /var/log/private.log. Route every other facility at notice(5) or more urgent once to /var/log/operations.log. Also route daemon and cron events at exactly info(6) once to /var/log/service.log. Deliver nothing else; no duplicate copies are permitted."
+          },
+          "example": {
+            "starter": "*.info /var/log/operations.log\nauthpriv.warning /var/log/private.log\nmail.notice /var/log/service.log\n",
+            "events": [
+              {
+                "facility": 2,
+                "severity": 2,
+                "message": "Mail queue unavailable"
+              },
+              {
+                "facility": 0,
+                "severity": 4,
+                "message": "Storage warning"
+              },
+              {
+                "facility": 3,
+                "severity": 5,
+                "message": "Practice daemon restart"
+              },
+              {
+                "facility": 10,
+                "severity": 1,
+                "message": "Private authentication alert"
+              },
+              {
+                "facility": 9,
+                "severity": 6,
+                "message": "Practice schedule started"
+              },
+              {
+                "facility": 3,
+                "severity": 7,
+                "message": "Practice diagnostic detail"
+              },
+              {
+                "facility": 2,
+                "severity": 5,
+                "message": "Practice mail notice"
+              },
+              {
+                "facility": 3,
+                "severity": 4,
+                "message": "Practice service warning"
+              }
+            ],
+            "policy": [
+              {
+                "destination": "/var/log/private.log",
+                "facilities": [
+                  10
+                ],
+                "severities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7
+                ],
+                "copies": 1
+              },
+              {
+                "destination": "/var/log/operations.log",
+                "facilities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18,
+                  19,
+                  20,
+                  21,
+                  22,
+                  23
+                ],
+                "severities": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ],
+                "copies": 1
+              },
+              {
+                "destination": "/var/log/service.log",
+                "facilities": [
+                  2
+                ],
+                "severities": [
+                  5
+                ],
+                "copies": 1
+              }
+            ],
+            "task": "Route all authpriv levels once to /var/log/private.log, every other facility through warning(4) once to /var/log/operations.log, and mail at exactly notice(5) once to /var/log/service.log. Deliver nothing else."
+          },
+          "example_worked": "*.warning;authpriv.none /var/log/operations.log\nauthpriv.* /var/log/private.log\nmail.=notice /var/log/service.log\n"
+        }
+      },
+      "solution": [
+        "SYSLOG CONFIG\n*.notice;authpriv.none /var/log/operations.log\nauthpriv.* /var/log/private.log\ndaemon,cron.=info /var/log/service.log\n"
+      ],
+      "prerequisites": [
+        "lpic1-logs",
+        "lpic1-syslog-privacy"
+      ]
+    }
+  ]
+}

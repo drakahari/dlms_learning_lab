@@ -1,0 +1,132 @@
+[
+  {
+    "id": "ccna-management-change-evidence",
+    "goal": "Correlate the approved change and the observed behavior, then restore the relay’s management boundary.",
+    "context": "Builds on reading event logs and checking remote management from known client addresses. All records and probes are supplied for the virtual network.",
+    "concepts": [
+      {
+        "title": "Separate risk, weakness and evidence",
+        "text": "A threat is something that could harm the network. A vulnerability is a weakness that could make that possible. An exploit uses a weakness to cause an unauthorized result. Here the broadened management rule is the weakness. The journal and virtual client probes show what was observed."
+      },
+      {
+        "title": "Follow the same device and time",
+        "text": "Compare the approved revision, the revision that was applied and a later probe on the affected relay. A probe that reaches the sign-in boundary does not establish that the client successfully signed in. Look for a separate sign-in record for that client."
+      },
+      {
+        "title": "Check that the mitigation preserves real work",
+        "text": "Restore the approved access boundary. Verify that approved systems still reach the sign-in prompt. Check the restricted clients as well. A broad permit and a blanket block both fail part of the job."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Compare two records",
+        "value": "West relay · Approved 17\nWest relay · Applied 19",
+        "explanation": "Both records concern the same device. The second revision differs from the ticket."
+      },
+      {
+        "label": "Distinguish two observations",
+        "value": "Guest trial · sign-in boundary reachable\nSuccessful guest sign-in · no supplied record",
+        "explanation": "The practice probe shows broader access. The supplied record does not establish a successful sign-in for the guest."
+      },
+      {
+        "label": "Verify the boundary after mitigation",
+        "value": "Operations → allowed to attempt sign-in\nGuest → denied before sign-in",
+        "explanation": "Check both the continued approved access and the restored restriction."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Read the training relay journal",
+        "action": "Compare record 102 (approved revision), 104 (applied revision) and 106 (shared-desk observation). Look for other sign-in evidence on the same device.",
+        "observe": "Record 107 contains a successful sign-in for the shared desk. The unrelated aggregation note belongs to another device."
+      },
+      {
+        "title": "Complete the evidence report",
+        "action": "Choose the approval, applied and post-change evidence records, then answer whether the restricted client has a separate successful sign-in record.",
+        "observe": "Your report should distinguish the client that reached the sign-in boundary and the independent sign-in observation."
+      },
+      {
+        "title": "Restore and test the management boundary",
+        "action": "In the policy editor, allow only the two approved addresses, 192.0.2.53 and 192.0.2.54, in standard list 21. Keep SSH v2 and the incoming list. Apply and select Check workspace.",
+        "observe": "The two approved clients keep their access. The shared desk and visitor no longer reach sign-in."
+      }
+    ],
+    "requirements": [
+      "Use the affected relay’s journal to identify the approved revision, applied revision and post-change restricted-client observation.",
+      "Record whether the supplied journal establishes a successful sign-in for the same restricted client.",
+      "Restore access only for the two approved systems and verify the four supplied client trials."
+    ],
+    "status": "updated",
+    "source": "scenarios/security-investigation-lessons-v1.json",
+    "review": {
+      "introduction": "Uses a worked example with independent devices, evidence and action choices.",
+      "example": "Provides a separate editable profile and specific trials before the independent assignment.",
+      "assignment": "Grades the actual virtual evidence and policy outcomes with targeted feedback."
+    }
+  },
+  {
+    "id": "ccna-facility-access-plan",
+    "goal": "Set a virtual facility policy that keeps necessary work possible while limiting and recording access to the network room.",
+    "context": "Builds on tying a safeguard to evidence. This unit supplies work roles, approved times and visitor conditions.",
+    "concepts": [
+      {
+        "title": "Give people the access their role needs",
+        "text": "Assign permissions for routine work and on-call faults separately. Restrict when maintenance can happen. A full block can stop needed work, while broadly available access exposes the room."
+      },
+      {
+        "title": "Require and verify an escort",
+        "text": "Registration identifies a visitor in the supplied profile. In the default policy for the example, a visit also needs a present escort and a staffed time window. Check a legitimate visit as well as the failed case."
+      },
+      {
+        "title": "Give people a clear reporting route",
+        "text": "An awareness procedure tells staff how to report an unexpected access request. Configure the destination, then inspect whether the supplied report reaches the security desk. Record denied access events for review."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Define two permissions",
+        "value": "Network operator · Any window\nVisitor · Staffed with escort",
+        "explanation": "The operator can respond to the supplied fault. A visitor needs a registered identity and an escort at a staffed time."
+      },
+      {
+        "label": "Verify different outcomes",
+        "value": "Escorted visit · Allowed\nUnescorted visit · Denied",
+        "explanation": "Compare a normal visit and a denied attempt. The permitted visit should still work."
+      },
+      {
+        "label": "Route and retain evidence",
+        "value": "Denied entries · recorded\nReport destination · Security desk",
+        "explanation": "The reviewer gets the supplied event record and the staff report."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Set the operator and technician windows",
+        "action": "Allow the workshop operator and facilities technician during staffed hours. Read the operator after-hours case as well.",
+        "observe": "This session does not require after-hours operator access."
+      },
+      {
+        "title": "Require a present escort",
+        "action": "Set visitor access to Staffed with escort. Compare the escorted, unescorted and unverified visitor trials.",
+        "observe": "Only the escorted, registered visit during the staffed window is allowed."
+      },
+      {
+        "title": "Retain and route evidence",
+        "action": "Record denied events and route the supplied suspicious-contact report to the security desk. Select Check workspace. Try a blanket visitor denial, review the allowed visit, then restore the working settings.",
+        "observe": "The expected event records are present. Denying every visit breaks the legitimate trial."
+      }
+    ],
+    "requirements": [
+      "Keep on-call operator access for the supplied after-hours fault.",
+      "Allow technician access during staffed hours and allow a registered visitor only with an escort during staffed hours.",
+      "Keep the denied-event records and route the supplied staff report to the security desk."
+    ],
+    "status": "updated",
+    "source": "scenarios/security-investigation-lessons-v1.json",
+    "review": {
+      "introduction": "Uses a worked example with independent devices, evidence and action choices.",
+      "example": "Provides a separate editable profile and specific trials before the independent assignment.",
+      "assignment": "Grades the actual virtual evidence and policy outcomes with targeted feedback."
+    }
+  }
+]

@@ -1,0 +1,157 @@
+[
+  {
+    "id": "lpic2-initramfs-root-drivers",
+    "goal": "Use saved driver choices and dracut to repair an initramfs that cannot reach its root disk.",
+    "context": "Builds on prepared kernel/module outputs, Type #1 boot entries and a known working fallback. The console assumes an administrator of the simulated system.",
+    "concepts": [
+      {
+        "title": "Drivers are needed before the main filesystem is available",
+        "text": "The kernel starts the system. An initramfs supplies a small early environment that can load storage and filesystem drivers before the main root filesystem is available. In these exercises the disk uses NVMe and the root filesystem uses ext4. The boot entry chooses both the kernel and its early-userspace image."
+      },
+      {
+        "title": "Work from the supplied generic profile",
+        "text": "The kernel images and matching module trees are already prepared. The supplied base sets hostonly=\"no\": it uses a fixed generic inventory, with nvme_core/nvme for storage and ext4/jbd2/mbcache for the filesystem. This is the lab’s baseline, not a claim about another distribution’s defaults. No machine setup is needed."
+      },
+      {
+        "title": "An omission is a saved choice, not an immediate rebuild",
+        "text": "omit_drivers names kernel drivers to leave out. In this fragment, = replaces a literal value and += appends literal text; spaces separate names. Adding an empty string cannot clear a prior value. Type in Driver configuration and select Save configuration. Only the saved fragment affects the next generation."
+      },
+      {
+        "title": "Generate explicitly, then inspect what was produced",
+        "text": "Run dracut with --kver and an output, or with output then kernel version. -f/--force allows replacing an existing image; use it deliberately. dracut -k means a module directory, unlike dkms -k. Run lsinitrd with an explicit image path to inspect the modeled release/driver files. The console does not unpack or read a real archive."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Supplied example target",
+        "value": "6.1.121; fallback 6.1.120",
+        "explanation": "The example’s kernels, root UUID and state are separate from the independent assignment."
+      },
+      {
+        "label": "Inspect actual contents",
+        "value": "lsinitrd /boot/initramfs-6.1.121.img",
+        "explanation": "Expected: the modeled driver listing lacks nvme. Actual output appears only after Run."
+      },
+      {
+        "label": "Replace the omission",
+        "value": "omit_drivers=\"\"",
+        "explanation": "Save this example fragment. Replacing the value clears its driver omissions; an empty += would only append nothing."
+      },
+      {
+        "label": "Regenerate the selected image",
+        "value": "dracut --force --kver 6.1.121 /boot/initramfs-6.1.121.img",
+        "explanation": "Expected after generation and inspection: the five prepared driver files are included for 6.1.121. Check configuration verifies the root handoff and fallback."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Inspect and change the driver choices",
+        "action": "Run lsinitrd /boot/initramfs-6.1.121.img. In Driver configuration, try appending omit_drivers+=\"\" and save it; then replace the omission with omit_drivers=\"\" and save again.",
+        "observe": "Appending empty text leaves the omission in place. Replacing its value changes the saved choices, but the image does not change yet."
+      },
+      {
+        "title": "Regenerate from the saved fragment",
+        "action": "Enter dracut --force --kver 6.1.121 /boot/initramfs-6.1.121.img in the console and select Run. Then run lsinitrd /boot/initramfs-6.1.121.img.",
+        "observe": "The actual image now reflects the saved choices. A generation message alone is not proof that the root can be reached."
+      },
+      {
+        "title": "Verify, break and retry",
+        "action": "Select Check configuration. Omit nvme again, save and regenerate the image, then check. Remove that omission, save, regenerate and retry.",
+        "observe": "Specific results separate unsaved choices, stale images and missing root-driver support. A broken state cannot keep an earlier successful check."
+      }
+    ],
+    "requirements": [
+      "Save the driver-selection fragment and regenerate early userspace for supplied kernel 6.6.61.",
+      "Make the selected candidate reach the supplied NVMe/ext4 root and keep every working fallback file unchanged."
+    ],
+    "status": "updated",
+    "source": "scenarios/initramfs-lessons-v1.json",
+    "review": {
+      "introduction": "Read each early-userspace, generic base, driver choice, saved-file/generation and tool-option concept against the finite model. Different-input worked examples precede assessment. Source review complete; native rendering pending.",
+      "example": "Read each named editor/Run/Save/Check action against the reference, including += empty versus replacement, real image inspection and alternative output/entry choices. Separate source snapshots are tested; native interactions pending.",
+      "assignment": "Read each requirement against saved-source, target release, actual selected image contents, root/init handoff and protected fallback checks. Legitimate in-place and new-file alternatives pass at the task layer. Authored integration and native validation pending."
+    }
+  },
+  {
+    "id": "lpic2-initramfs-kernel-handover",
+    "goal": "Inspect a misleading image filename, prepare matching early userspace and preserve a working fallback.",
+    "context": "Builds on prepared kernel/module outputs, Type #1 boot entries and a known working fallback. The console assumes an administrator of the simulated system.",
+    "concepts": [
+      {
+        "title": "Drivers are needed before the main filesystem is available",
+        "text": "The kernel starts the system. An initramfs supplies a small early environment that can load storage and filesystem drivers before the main root filesystem is available. In these exercises the disk uses NVMe and the root filesystem uses ext4. The boot entry chooses both the kernel and its early-userspace image."
+      },
+      {
+        "title": "Work from the supplied generic profile",
+        "text": "The kernel images and matching module trees are already prepared. The supplied base sets hostonly=\"no\": it uses a fixed generic inventory, with nvme_core/nvme for storage and ext4/jbd2/mbcache for the filesystem. This is the lab’s baseline, not a claim about another distribution’s defaults. No machine setup is needed."
+      },
+      {
+        "title": "An omission is a saved choice, not an immediate rebuild",
+        "text": "omit_drivers names kernel drivers to leave out. In this fragment, = replaces a literal value and += appends literal text; spaces separate names. Adding an empty string cannot clear a prior value. Type in Driver configuration and select Save configuration. Only the saved fragment affects the next generation."
+      },
+      {
+        "title": "Generate explicitly, then inspect what was produced",
+        "text": "Run dracut with --kver and an output, or with output then kernel version. -f/--force allows replacing an existing image; use it deliberately. dracut -k means a module directory, unlike dkms -k. Run lsinitrd with an explicit image path to inspect the modeled release/driver files. The console does not unpack or read a real archive."
+      },
+      {
+        "title": "The entry must select the files you repaired",
+        "text": "An initrd line names an early-userspace image relative to the supplied boot directory. A new image elsewhere is unused until the entry selects it. You may repair the current output in place or save an entry using a new output. Keep the working fallback intact. Check configuration tests the selected files, not the filename’s appearance."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Supplied example target",
+        "value": "6.1.121; fallback 6.1.120",
+        "explanation": "The example’s kernels, root UUID and state are separate from the independent assignment."
+      },
+      {
+        "label": "Inspect actual contents",
+        "value": "lsinitrd /boot/initramfs-6.1.121.img",
+        "explanation": "Expected: Kernel reports 6.1.120, even though the filename contains 6.1.121. Actual output appears only after Run."
+      },
+      {
+        "label": "Generate a matching alternative",
+        "value": "dracut /boot/repaired.img 6.1.121",
+        "explanation": "Expected: a new modeled image for 6.1.121. The existing entry still points to the older wrong image."
+      },
+      {
+        "label": "Select it in a new entry",
+        "value": "filename: trial.conf\ninitrd /repaired.img",
+        "explanation": "Keep the supplied target linux path and root UUID in the entry. Save entry, then Check configuration. Rebuilding the existing selected image with --force is also a supported alternative."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Investigate the selected image",
+        "action": "Run lsinitrd /boot/initramfs-6.1.121.img in the console. Compare its Kernel line with supplied target 6.1.121.",
+        "observe": "The image belongs to 6.1.120. Its version-looking filename did not prove that its contents matched the target."
+      },
+      {
+        "title": "Prepare matching early userspace",
+        "action": "Run dracut /boot/repaired.img 6.1.121, then lsinitrd /boot/repaired.img.",
+        "observe": "The generated image matches the target, but it remains unused until the entry selects it."
+      },
+      {
+        "title": "Save the selection",
+        "action": "In Candidate entry, use a new filename such as trial.conf and change the initrd line to /repaired.img. Keep the target linux line and supplied root UUID. Select Save entry.",
+        "observe": "The saved entry selects the new image. Alternatively, rebuild the original selected image with --force and keep its existing entry."
+      },
+      {
+        "title": "Check the actual handoff",
+        "action": "Select Check configuration. Generate 6.1.120 into /boot/repaired.img with --force and check again; regenerate it for 6.1.121 to repair the mismatch.",
+        "observe": "The result follows the internal image identity and selected files; a once-correct filename or an unused good image cannot preserve success."
+      }
+    ],
+    "requirements": [
+      "Prepare early userspace matching supplied kernel 6.6.61 and select it with a saved candidate entry.",
+      "Verify root and init handoff; preserve the working 6.6.60 fallback files."
+    ],
+    "status": "updated",
+    "source": "scenarios/initramfs-lessons-v1.json",
+    "review": {
+      "introduction": "Read each early-userspace, generic base, driver choice, saved-file/generation and tool-option concept against the finite model. Different-input worked examples precede assessment. Source review complete; native rendering pending.",
+      "example": "Read each named editor/Run/Save/Check action against the reference, including += empty versus replacement, real image inspection and alternative output/entry choices. Separate source snapshots are tested; native interactions pending.",
+      "assignment": "Read each requirement against saved-source, target release, actual selected image contents, root/init handoff and protected fallback checks. Legitimate in-place and new-file alternatives pass at the task layer. Authored integration and native validation pending."
+    }
+  }
+]

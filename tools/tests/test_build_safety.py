@@ -249,6 +249,25 @@ class BuildSafety(unittest.TestCase):
                 dev.validate_cargo_args(flags)
         dev.validate_cargo_args(['--offline', '--all-targets', '--', '-D', 'warnings'])
 
+    def test_per_run_cargo_limit_only_lowers_compilation_and_keeps_runtime_bound(self):
+        import dev
+        self.assertEqual(dev.cargo_job_limit('clippy'), 2)
+        self.assertEqual(dev.cargo_job_limit('clippy', 1), 1)
+        self.assertEqual(dev.cargo_command('cargo','clippy',['--locked','--offline','--all-targets','--','-D','warnings'],1),
+                         ['cargo','clippy','--jobs','1','--locked','--offline','--all-targets','--','-D','warnings'])
+        command=dev.cargo_command('cargo','test',['--locked','--offline','--lib'],1)
+        self.assertEqual(command[2:4],['--jobs','1'])
+        self.assertEqual(command[-2:],['--','--test-threads=2'])
+        self.assertEqual(dev.cargo_command('cargo','build',['--locked'])[2:4],['--jobs','2'])
+        for value in [0,3,99,-1,True,'1']:
+            with self.assertRaises(RuntimeError):dev.cargo_job_limit('clippy',value)
+        self.assertEqual(dev.cargo_job_limit('candidate'), 2)
+        self.assertEqual(dev.cargo_job_limit('candidate', 1), 1)
+        for action in ['native','python-tests','tool']:
+            with self.assertRaises(RuntimeError):dev.cargo_job_limit(action,1)
+        with self.assertRaises(RuntimeError):dev.cargo_command('cargo','clippy',['--jobs=99'],1)
+        with self.assertRaises(RuntimeError):dev.cargo_command('cargo','test',['--','--test-threads=99'],1)
+
     def test_all_output_forms_are_contained_normalized_and_duplicates_rejected(self):
         import dev
         cwd = self.fixture / 'worktree'

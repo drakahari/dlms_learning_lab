@@ -123,6 +123,7 @@ enum Kind {
     Install { paths: Vec<String>, upgrade: bool },
     Reinstall(String),
     Erase(Vec<String>),
+    RestoreMetadata(String),
 }
 #[derive(Clone, Debug)]
 pub struct Command {
@@ -141,6 +142,9 @@ fn path(s: &str) -> Result<String, String> {
     Ok(s.into())
 }
 pub fn parse(input: &str) -> Result<Command, String> {
+    parse_with_metadata(input,false)
+}
+fn parse_with_metadata(input:&str,metadata:bool)->Result<Command,String>{
     if input.len() > MAX_COMMAND {
         return Err("RPM command exceeds2048 bytes before trimming".into());
     }
@@ -167,12 +171,17 @@ pub fn parse(input: &str) -> Result<Command, String> {
  [mode,"--queryformat",f,n] if (*mode=="-q"||*mode=="-qp")&&*f==FORMAT=>Kind::Query(if *mode=="-q"{Select::Installed(scalar(n)?)}else{Select::Archive(path(n)?)},Query::Identity{format:true}),
  [mode,operands @ ..] if (*mode=="-i"||*mode=="-U")&&!operands.is_empty()&&operands.len()<=8=>{let paths=operands.iter().map(|s|path(s)).collect::<Result<Vec<_>,_>>()?;if paths.iter().enumerate().any(|(n,p)|paths[..n].contains(p)){return Err("Duplicate archive operand is unsupported".into());}Kind::Install{paths,upgrade:*mode=="-U"}},
  ["--reinstall",p]=>Kind::Reinstall(path(p)?),
+ ["--restore",n] if metadata=>Kind::RestoreMetadata(scalar(n)?),
  ["-e",names @ ..] if !names.is_empty()&&names.len()<=8=>{let names=names.iter().map(|s|scalar(s)).collect::<Result<Vec<_>,_>>()?;if names.iter().enumerate().any(|(n,p)|names[..n].contains(p)){return Err("Duplicate package operand is unsupported".into());}Kind::Erase(names)},
  _=>return Err("Unsupported RPM spelling/options; no -V, force, solver, macro, source, shell or host operation".into()),};
     Ok(Command { kind })
 }
 pub fn validate_guidance(input: &str) -> Result<(), String> {
     parse(input).map(|_| ())
+}
+pub fn validate_guidance_for(d:&Definition,input:&str)->Result<(),String>{
+    d.validate()?;
+    parse_with_metadata(input,d.allow_metadata_restore).map(|_|())
 }
 fn installed<'a>(s: &'a State, n: &str) -> Option<&'a core::Archive> {
     s.runtime()
@@ -329,7 +338,7 @@ fn action(d: &Definition, s: &State, k: &Kind) -> Result<core::Action, String> {
     }
 }
 pub fn execute(d: &Definition, s: &mut State, input: &str) -> Outcome {
-    let c = match parse(input) {
+    let c = match parse_with_metadata(input,d.allow_metadata_restore) {
         Ok(c) => c,
         Err(e) => return unsupported(e),
     };
@@ -341,6 +350,15 @@ pub fn execute(d: &Definition, s: &mut State, input: &str) -> Outcome {
             Ok(out) => utility(out, None),
             Err(e) => unsupported(e),
         },
+        Kind::RestoreMetadata(name) => {
+            let Some(package)=installed(s,name).map(|a|a.identity.clone()) else {
+                return unsupported("No exact installed package; RPM no-match restore output/status is not modeled");
+            };
+            match work::restore_metadata(d,s,&package) {
+                Ok(())=>utility(String::new(),Some("Simulation restored declared mode, owner, group and modified time; file contents and installed versions are unchanged. No host RPM operation.".into())),
+                Err(e)=>unsupported(e),
+            }
+        }
         _ => match action(d, s, &c.kind).and_then(|a| work::apply(d, s, &a)) {
             Ok(p) => utility(
                 String::new(),

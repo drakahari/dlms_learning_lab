@@ -1,0 +1,1385 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-sieve-envelope-recipient",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-sieve-envelope-delivery",
+      "topic": "Sieve envelope recipient routing",
+      "title": "Route the delivery recipient, not the visible header",
+      "summary": "Repair filing when a visible recipient differs from the actual delivery recipient.",
+      "objective": "File only actual envelope deliveries to tickets@dispatch.test in Tickets, ignoring ASCII letter case in the full address. The visible From/To/Subject fields must not decide whether the recipient matches. Keep all other delivery recipients in INBOX only, including longer names and other domains. A null return address does not change recipient routing. Repair the supplied filter and run every sample without extra copies, forwards or refusals. Equivalent supported conditions are accepted.",
+      "retry_guidance": "Read the failed sample’s actual delivery envelope, then compare Expected and Actual effects. Refusal, discard, local filing and virtual forwarding are different outcomes. Edit the filter and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Understand the task",
+        "Diagnose and repair the delivery rules",
+        "Verify all sample outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Compare labels and delivery",
+          "why": "To and Cc are visible message fields. A group or hidden-copy delivery can reach another mailbox. The simulated delivery envelope states the actual recipient for this user: RCPT TO. MAIL FROM supplies a return address and can be empty; it is not the visible From field. Neither field authenticates the sender.",
+          "action": "Run the supplied example. Select Delivered behind a group header, then Shown but delivered elsewhere. Compare Actual delivery envelope with the visible To field.",
+          "commands": []
+        },
+        {
+          "title": "Read the actual envelope",
+          "why": "Declare require [\"envelope\", \"fileinto\"]; before using an envelope test. In the studio example, envelope :is \"to\" \"orders@studio.guide.test\" compares the actual recipient. The existing default comparison ignores ASCII letter case; :all, :localpart and :domain select parts just as for address tests.",
+          "action": "Select Fill worked example and Run filter. Find the envelope test in Filter; compare those two samples again.",
+          "commands": []
+        },
+        {
+          "title": "Distinguish sender from recipient",
+          "why": "The worked rule files actual orders deliveries in Orders, including a hidden delivery or one with a null return address. Other recipients retain the default INBOX copy even when their To header mentions orders. Envelope :is \"from\" \"\" would test a null sender; it would not identify a recipient.",
+          "action": "Change the quoted envelope part to from and run. Select The same delivery with a null sender. Restore to and retry.",
+          "commands": []
+        }
+      ],
+      "explanation": "The repaired filter uses actual delivery metadata, preserves unrelated messages, and chooses the required effect without contradictory extra actions. Compare each failed case rather than relying on one matching sample.",
+      "hints": [
+        "Read RCPT TO for a failed sample before comparing visible message fields.",
+        "Declare the envelope extension, then choose its recipient part. An empty MAIL FROM is a null sender, not a missing recipient.",
+        "Use a complete recipient comparison. Leave other deliveries alone so the default INBOX copy remains."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc5228.html",
+        "https://www.rfc-editor.org/rfc/rfc5429.html"
+      ],
+      "simplifications": "Bounded plain-ASCII Sieve delivery subset. Only the supplied bare dot-atom envelope and one delivery recipient are represented. Forwarding is virtual single-hop to named targets with direct-loop detection and a four-action limit; no full SMTP graph, actual network, host files or subprocess. Refusal is a recorded decision, not generated SMTP/DSN/MDN messages. This site forbids mixed refusal/delivery effects. Vacation, MIME, procmail and other extensions remain unsupported. Resource/runtime errors retain the original in virtual INBOX and never earn credit. See SIEVE_DELIVERY_SUBSET.md.",
+      "initial": {
+        "kind": "SieveFiltering",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-envelope-recipient",
+          "view": "introduction",
+          "assignment": {
+            "draft": "require \"fileinto\";\n# A visible recipient is not always the delivery recipient.\nif address :is \"To\" \"tickets@dispatch.test\" { fileinto \"Tickets\"; }\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          },
+          "practice": {
+            "draft": "require \"fileinto\";\nif address :is \"To\" \"orders@studio.guide.test\" { fileinto \"Orders\"; }\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SieveFiltering",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-envelope-recipient",
+          "assignment": {
+            "address_tests": true,
+            "delivery_actions": true,
+            "starter": "require \"fileinto\";\n# A visible recipient is not always the delivery recipient.\nif address :is \"To\" \"tickets@dispatch.test\" { fileinto \"Tickets\"; }\n",
+            "reference": "require [\"envelope\", \"fileinto\"];\nif envelope :is \"to\" \"tickets@dispatch.test\" {\n    fileinto \"Tickets\";\n}\n",
+            "cases": [
+              {
+                "id": "visible-and-delivered",
+                "label": "The desk in both places",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "tickets@dispatch.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "Tickets"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "tickets@dispatch.test"
+                }
+              },
+              {
+                "id": "hidden-delivery",
+                "label": "A hidden delivery recipient",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "group@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "Tickets"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "tickets@dispatch.test"
+                }
+              },
+              {
+                "id": "header-decoy",
+                "label": "A visible desk but another delivery",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "tickets@dispatch.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "other@dispatch.test"
+                }
+              },
+              {
+                "id": "null-sender",
+                "label": "A delivery with no return address",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "Tickets"
+                ],
+                "envelope": {
+                  "from": "",
+                  "to": "tickets@dispatch.test"
+                }
+              },
+              {
+                "id": "other-domain",
+                "label": "The same name at another domain",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "tickets@elsewhere.test"
+                }
+              },
+              {
+                "id": "longer-name",
+                "label": "A longer recipient name",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "tickets-extra@dispatch.test"
+                }
+              },
+              {
+                "id": "domain-case",
+                "label": "Different letter case",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "Tickets"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "TICKETS@DISPATCH.TEST"
+                }
+              },
+              {
+                "id": "sender-only",
+                "label": "The desk is only the return address",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "tickets@dispatch.test",
+                  "to": "other@dispatch.test"
+                }
+              }
+            ],
+            "mailboxes": [
+              "INBOX",
+              "Tickets"
+            ]
+          },
+          "example": {
+            "address_tests": true,
+            "delivery_actions": true,
+            "starter": "require \"fileinto\";\nif address :is \"To\" \"orders@studio.guide.test\" { fileinto \"Orders\"; }\n",
+            "reference": "require [\"envelope\", \"fileinto\"];\nif envelope :is \"to\" \"orders@studio.guide.test\" {\n    fileinto \"Orders\";\n}\n",
+            "cases": [
+              {
+                "id": "shown",
+                "label": "Shown and delivered",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "orders@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "Orders"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "orders@studio.guide.test"
+                }
+              },
+              {
+                "id": "hidden",
+                "label": "Delivered behind a group header",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "all@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "Orders"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "orders@studio.guide.test"
+                }
+              },
+              {
+                "id": "decoy",
+                "label": "Shown but delivered elsewhere",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "orders@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "other@studio.guide.test"
+                }
+              },
+              {
+                "id": "null",
+                "label": "The same delivery with a null sender",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "Orders"
+                ],
+                "envelope": {
+                  "from": "",
+                  "to": "orders@studio.guide.test"
+                }
+              }
+            ],
+            "mailboxes": [
+              "INBOX",
+              "Orders"
+            ]
+          }
+        }
+      },
+      "solution": [
+        "sieve-workspace {\"kind\":\"edit\",\"script\":\"require [\\\"envelope\\\", \\\"fileinto\\\"];\\nif envelope :is \\\"to\\\" \\\"tickets@dispatch.test\\\" {\\n    fileinto \\\"Tickets\\\";\\n}\\n\"}",
+        "sieve-workspace {\"kind\":\"run\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "lpic2-sieve-redirect-recovery",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-sieve-envelope-delivery",
+      "topic": "Sieve redirect and implicit keep",
+      "title": "Repair selective forwarding without extra copies",
+      "summary": "Forward an alias to its virtual archive while preserving unrelated local deliveries.",
+      "objective": "Forward actual envelope deliveries to alerts@dispatch.test to the supplied virtual target archive@dispatch.test, ignoring ASCII letter case in the full alias comparison. Do not retain a local mailbox copy for these matches. Keep every other recipient in INBOX only, especially mail already addressed to the archive, a longer alias, or the alias at another domain. Visible headers must not trigger a forward. Preserve the source and return address, including null senders. Repair the extra-copy error, run every sample and avoid refused or silently discarded mail. Equivalent supported rules are accepted.",
+      "retry_guidance": "Read the failed sample’s actual delivery envelope, then compare Expected and Actual effects. Refusal, discard, local filing and virtual forwarding are different outcomes. Edit the filter and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 26,
+      "steps": [
+        "Understand the task",
+        "Diagnose and repair the delivery rules",
+        "Verify all sample outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Find the unwanted local copy",
+          "why": "redirect records a virtual forward to a named destination. It is a base Sieve action: require \"envelope\" enables the recipient test, not redirect. The source message and return address are unchanged, including a null sender.",
+          "action": "Run the initial example and select Photos alias. Read Expected and Actual results.",
+          "commands": []
+        },
+        {
+          "title": "Try the worked repair",
+          "why": "A redirect cancels the default INBOX copy. It does not end processing: an unconditional keep later in the script adds INBOX back. Use a suitable branch or stop when that is the intended policy. Other unmatched deliveries still need their default local copy.",
+          "action": "Select Fill worked example and Run filter. Compare Photos alias with An unrelated recipient and The album itself.",
+          "commands": []
+        },
+        {
+          "title": "Observe a direct loop error",
+          "why": "The studio example forwards photos@studio.guide.test to album@studio.guide.test. An album delivery itself stays local. This site rejects direct forwarding to the current recipient and unknown destinations, and permits at most four forwarding actions per sample. An error cancels all proposed effects and keeps the original in INBOX with a diagnostic.",
+          "action": "In the worked example, change the redirect target from album@studio.guide.test to photos@studio.guide.test and run. Read the error, then restore the worked example.",
+          "commands": []
+        }
+      ],
+      "explanation": "The repaired filter uses actual delivery metadata, preserves unrelated messages, and chooses the required effect without contradictory extra actions. Compare each failed case rather than relying on one matching sample.",
+      "hints": [
+        "Inspect both the forward list and local mailbox list for a failing alias sample.",
+        "An explicit keep after a redirect adds a copy even though implicit keep was cancelled. Check which branch executes it.",
+        "Do not forward mail addressed to the archive back to itself. Restrict the forwarding rule to the required alias."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc5228.html",
+        "https://www.rfc-editor.org/rfc/rfc5429.html"
+      ],
+      "simplifications": "Bounded plain-ASCII Sieve delivery subset. Only the supplied bare dot-atom envelope and one delivery recipient are represented. Forwarding is virtual single-hop to named targets with direct-loop detection and a four-action limit; no full SMTP graph, actual network, host files or subprocess. Refusal is a recorded decision, not generated SMTP/DSN/MDN messages. This site forbids mixed refusal/delivery effects. Vacation, MIME, procmail and other extensions remain unsupported. Resource/runtime errors retain the original in virtual INBOX and never earn credit. See SIEVE_DELIVERY_SUBSET.md.",
+      "initial": {
+        "kind": "SieveFiltering",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-redirect-recovery",
+          "view": "introduction",
+          "assignment": {
+            "draft": "require \"envelope\";\n# A matching alias should forward, but this keep adds an unwanted copy.\nif envelope :is \"to\" \"alerts@dispatch.test\" {\n    redirect \"archive@dispatch.test\";\n}\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          },
+          "practice": {
+            "draft": "require \"envelope\";\nif envelope :is \"to\" \"photos@studio.guide.test\" {redirect \"album@studio.guide.test\";}\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SieveFiltering",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-redirect-recovery",
+          "assignment": {
+            "address_tests": true,
+            "delivery_actions": true,
+            "starter": "require \"envelope\";\n# A matching alias should forward, but this keep adds an unwanted copy.\nif envelope :is \"to\" \"alerts@dispatch.test\" {\n    redirect \"archive@dispatch.test\";\n}\nkeep;\n",
+            "reference": "require \"envelope\";\nif envelope :is \"to\" \"alerts@dispatch.test\" {\n    redirect \"archive@dispatch.test\";\n}\n",
+            "cases": [
+              {
+                "id": "alias",
+                "label": "An alias delivery",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "alerts@dispatch.test"
+                },
+                "expected_redirects": [
+                  "archive@dispatch.test"
+                ]
+              },
+              {
+                "id": "hidden",
+                "label": "An alias behind another visible recipient",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "team@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "alerts@dispatch.test"
+                },
+                "expected_redirects": [
+                  "archive@dispatch.test"
+                ]
+              },
+              {
+                "id": "header-only",
+                "label": "An alias only in the visible header",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "alerts@dispatch.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "other@dispatch.test"
+                }
+              },
+              {
+                "id": "null",
+                "label": "A null sender stays a null sender",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [],
+                "envelope": {
+                  "from": "",
+                  "to": "alerts@dispatch.test"
+                },
+                "expected_redirects": [
+                  "archive@dispatch.test"
+                ]
+              },
+              {
+                "id": "archive-delivery",
+                "label": "Mail already addressed to the archive",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "archive@dispatch.test"
+                }
+              },
+              {
+                "id": "other-domain",
+                "label": "An alias name at another domain",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "alerts@elsewhere.test"
+                }
+              },
+              {
+                "id": "longer-local",
+                "label": "A longer alias name",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "alerts-extra@dispatch.test"
+                }
+              },
+              {
+                "id": "case",
+                "label": "The alias in another letter case",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "ALERTS@DISPATCH.TEST"
+                },
+                "expected_redirects": [
+                  "archive@dispatch.test"
+                ]
+              }
+            ],
+            "mailboxes": [
+              "INBOX"
+            ],
+            "redirect_targets": [
+              "archive@dispatch.test"
+            ]
+          },
+          "example": {
+            "address_tests": true,
+            "delivery_actions": true,
+            "starter": "require \"envelope\";\nif envelope :is \"to\" \"photos@studio.guide.test\" {redirect \"album@studio.guide.test\";}\nkeep;\n",
+            "reference": "require \"envelope\";\nif envelope :is \"to\" \"photos@studio.guide.test\" {\n    redirect \"album@studio.guide.test\";\n}\n",
+            "cases": [
+              {
+                "id": "alias",
+                "label": "Photos alias",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "photos@studio.guide.test"
+                },
+                "expected_redirects": [
+                  "album@studio.guide.test"
+                ]
+              },
+              {
+                "id": "other",
+                "label": "An unrelated recipient",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "photos@studio.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "other@studio.guide.test"
+                }
+              },
+              {
+                "id": "album",
+                "label": "The album itself",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "album@studio.guide.test"
+                }
+              },
+              {
+                "id": "null",
+                "label": "Photos from a null sender",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [],
+                "envelope": {
+                  "from": "",
+                  "to": "photos@studio.guide.test"
+                },
+                "expected_redirects": [
+                  "album@studio.guide.test"
+                ]
+              }
+            ],
+            "mailboxes": [
+              "INBOX"
+            ],
+            "redirect_targets": [
+              "album@studio.guide.test"
+            ]
+          }
+        }
+      },
+      "solution": [
+        "sieve-workspace {\"kind\":\"edit\",\"script\":\"require \\\"envelope\\\";\\nif envelope :is \\\"to\\\" \\\"alerts@dispatch.test\\\" {\\n    redirect \\\"archive@dispatch.test\\\";\\n}\\n\"}",
+        "sieve-workspace {\"kind\":\"run\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "lpic2-sieve-rejection-priority",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-sieve-envelope-delivery",
+      "topic": "Sieve refusal and rule priority",
+      "title": "Refuse a retired mailbox without silently discarding mail",
+      "summary": "Give a retired delivery recipient a clear refusal while preserving normal update filing.",
+      "objective": "Refuse actual envelope deliveries to retired@dispatch.test with a nonblank reason of your choice, ignoring ASCII letter case. Leave no local copy or virtual forward for those recipients, even when their Subject matches the update rule. For every other recipient, file Subject exactly Dispatch update in Updates, ignoring ASCII letter case. Keep other messages in INBOX only; similar longer subjects must not match. Repair silent discard and conflicting rule priority. Run every sample. A mention of the retired address only in visible headers must not trigger refusal. Equivalent supported branching or stop logic is accepted.",
+      "retry_guidance": "Read the failed sample’s actual delivery envelope, then compare Expected and Actual effects. Refusal, discard, local filing and virtual forwarding are different outcomes. Edit the filter and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 29,
+      "steps": [
+        "Understand the task",
+        "Diagnose and repair the delivery rules",
+        "Verify all sample outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Observe silent discard and overlapping rules",
+          "why": "discard silently removes the default local copy. require \"reject\" enables reject \"reason\"; which instead records a refusal with your explanation. Choose a useful nonblank reason; the exact wording is not graded. No real reply is sent.",
+          "action": "Run the supplied example. Compare The old studio desk with Old desk with a notice subject.",
+          "commands": []
+        },
+        {
+          "title": "Run the worked priority repair",
+          "why": "In the studio example, the old-desk recipient must be refused even if Subject says Studio notice. A current desk notice goes to Notices; ordinary current mail remains in INBOX. An if/elsif chain chooses only the first matching branch. Equivalent explicit stop logic is also valid.",
+          "action": "Select Fill worked example and Run filter. Compare all four samples and the Expected/Actual effects.",
+          "commands": []
+        },
+        {
+          "title": "See why priority matters",
+          "why": "Reject cancels implicit keep but does not automatically stop later rules. This simulated site rejects a second refusal or a mixture of refusal and delivery for one sample. Separate branches or end processing at the correct point. A null return address does not remove the supplied delivery recipient; this exercise records the refusal decision without generating a bounce.",
+          "action": "In the worked repair, replace elsif with if and run. Select Old desk with a notice subject, read the conflict, then restore the worked repair.",
+          "commands": []
+        }
+      ],
+      "explanation": "The repaired filter uses actual delivery metadata, preserves unrelated messages, and chooses the required effect without contradictory extra actions. Compare each failed case rather than relying on one matching sample.",
+      "hints": [
+        "Look at Actual effects: a discard has no refusal reason, while a refusal is explicitly labeled.",
+        "Give the actual retired recipient priority over the subject-based filing rule.",
+        "Reject does not stop later rules by itself. Use exclusive branches or an appropriate stop so the same sample is not both refused and delivered."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc5228.html",
+        "https://www.rfc-editor.org/rfc/rfc5429.html"
+      ],
+      "simplifications": "Bounded plain-ASCII Sieve delivery subset. Only the supplied bare dot-atom envelope and one delivery recipient are represented. Forwarding is virtual single-hop to named targets with direct-loop detection and a four-action limit; no full SMTP graph, actual network, host files or subprocess. Refusal is a recorded decision, not generated SMTP/DSN/MDN messages. This site forbids mixed refusal/delivery effects. Vacation, MIME, procmail and other extensions remain unsupported. Resource/runtime errors retain the original in virtual INBOX and never earn credit. See SIEVE_DELIVERY_SUBSET.md.",
+      "initial": {
+        "kind": "SieveFiltering",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-rejection-priority",
+          "view": "introduction",
+          "assignment": {
+            "draft": "require [\"envelope\", \"fileinto\"];\n# Dropping mail silently does not refuse it with a reason.\nif envelope :is \"to\" \"retired@dispatch.test\" { discard; }\nif header :is \"Subject\" \"Dispatch update\" { fileinto \"Updates\"; }\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          },
+          "practice": {
+            "draft": "require [\"envelope\", \"fileinto\"];\nif envelope :is \"to\" \"old-desk@studio.guide.test\" {discard;}\nif header :is \"Subject\" \"Studio notice\" {fileinto \"Notices\";}\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SieveFiltering",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-rejection-priority",
+          "assignment": {
+            "address_tests": true,
+            "delivery_actions": true,
+            "starter": "require [\"envelope\", \"fileinto\"];\n# Dropping mail silently does not refuse it with a reason.\nif envelope :is \"to\" \"retired@dispatch.test\" { discard; }\nif header :is \"Subject\" \"Dispatch update\" { fileinto \"Updates\"; }\n",
+            "reference": "require [\"envelope\", \"reject\", \"fileinto\"];\nif envelope :is \"to\" \"retired@dispatch.test\" {\n    reject \"This mailbox is retired; contact the service desk.\";\n} elsif header :is \"Subject\" \"Dispatch update\" {\n    fileinto \"Updates\";\n}\n",
+            "cases": [
+              {
+                "id": "retired",
+                "label": "The retired recipient",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "retired@dispatch.test"
+                },
+                "expected_rejection": true
+              },
+              {
+                "id": "overlap",
+                "label": "Retired recipient with an update subject",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "Dispatch update"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "retired@dispatch.test"
+                },
+                "expected_rejection": true
+              },
+              {
+                "id": "hidden",
+                "label": "Retired recipient behind another header",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "all@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "retired@dispatch.test"
+                },
+                "expected_rejection": true
+              },
+              {
+                "id": "null",
+                "label": "A null-sender retired delivery",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [],
+                "envelope": {
+                  "from": "",
+                  "to": "retired@dispatch.test"
+                },
+                "expected_rejection": true
+              },
+              {
+                "id": "update",
+                "label": "An active recipient with an update",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "Dispatch update"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "Updates"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "active@dispatch.test"
+                }
+              },
+              {
+                "id": "ordinary",
+                "label": "An active ordinary delivery",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "active@dispatch.test"
+                }
+              },
+              {
+                "id": "header-decoy",
+                "label": "Retired address only in the visible header",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "retired@dispatch.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "active@dispatch.test"
+                }
+              },
+              {
+                "id": "other-domain",
+                "label": "The retired name at another domain",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "retired@elsewhere.test"
+                }
+              },
+              {
+                "id": "case",
+                "label": "The retired recipient in another case",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "RETIRED@DISPATCH.TEST"
+                },
+                "expected_rejection": true
+              },
+              {
+                "id": "near-subject",
+                "label": "A similar but different update subject",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "Dispatch update extra"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "active@dispatch.test"
+                }
+              },
+              {
+                "id": "subject-case",
+                "label": "An update subject in another case",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "DISPATCH UPDATE"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "Updates"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "active@dispatch.test"
+                }
+              }
+            ],
+            "mailboxes": [
+              "INBOX",
+              "Updates"
+            ]
+          },
+          "example": {
+            "address_tests": true,
+            "delivery_actions": true,
+            "starter": "require [\"envelope\", \"fileinto\"];\nif envelope :is \"to\" \"old-desk@studio.guide.test\" {discard;}\nif header :is \"Subject\" \"Studio notice\" {fileinto \"Notices\";}\n",
+            "reference": "require [\"envelope\", \"reject\", \"fileinto\"];\nif envelope :is \"to\" \"old-desk@studio.guide.test\" {\n    reject \"Please use the new studio desk.\";\n} elsif header :is \"Subject\" \"Studio notice\" {\n    fileinto \"Notices\";\n}\n",
+            "cases": [
+              {
+                "id": "old",
+                "label": "The old studio desk",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "old-desk@studio.guide.test"
+                },
+                "expected_rejection": true
+              },
+              {
+                "id": "overlap",
+                "label": "Old desk with a notice subject",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "Studio notice"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "old-desk@studio.guide.test"
+                },
+                "expected_rejection": true
+              },
+              {
+                "id": "notice",
+                "label": "A current desk notice",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "Studio notice"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "Notices"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "desk@studio.guide.test"
+                }
+              },
+              {
+                "id": "ordinary",
+                "label": "An ordinary current delivery",
+                "headers": [
+                  [
+                    "From",
+                    "Writer <writer@visible.test>"
+                  ],
+                  [
+                    "To",
+                    "other@visible.test"
+                  ],
+                  [
+                    "Subject",
+                    "An ordinary message"
+                  ]
+                ],
+                "body": "A simulated delivery sample.\n",
+                "expected": [
+                  "INBOX"
+                ],
+                "envelope": {
+                  "from": "writer@outside.test",
+                  "to": "desk@studio.guide.test"
+                }
+              }
+            ],
+            "mailboxes": [
+              "INBOX",
+              "Notices"
+            ]
+          }
+        }
+      },
+      "solution": [
+        "sieve-workspace {\"kind\":\"edit\",\"script\":\"require [\\\"envelope\\\", \\\"reject\\\", \\\"fileinto\\\"];\\nif envelope :is \\\"to\\\" \\\"retired@dispatch.test\\\" {\\n    reject \\\"This mailbox is retired; contact the service desk.\\\";\\n} elsif header :is \\\"Subject\\\" \\\"Dispatch update\\\" {\\n    fileinto \\\"Updates\\\";\\n}\\n\"}",
+        "sieve-workspace {\"kind\":\"run\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}"
+      ],
+      "prerequisites": []
+    }
+  ]
+}

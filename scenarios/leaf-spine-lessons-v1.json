@@ -1,0 +1,1107 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-leaf-spine-rack-expansion",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-leaf-spine-fabrics",
+      "topic": "Leaf/spine architecture",
+      "title": "Commission a rack without losing fabric alternatives",
+      "summary": "Connect a new rack to a leaf/spine fabric, then investigate independent spine paths during failures.",
+      "objective": "Commission Rack 4 by completing its three supplied cables. Connect every leaf to three different spines; use each port at most once and preserve all nine existing rack cables. Keep three distinct internal spine alternatives from each existing rack to Rack 4 with all devices available, and at least two after each stated single-spine loss. A parallel cable to one spine does not count as another spine.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand leaf/spine fan-out",
+        "Commission separate guide equipment",
+        "Add a rack and verify every stated failure"
+      ],
+      "hints": [
+        "Compare the new leaf’s three connections with the protected racks. Count different spine devices, not cables.",
+        "Each spine needs an unused port for the new rack. Inspect the fixed-cable list before choosing endpoints.",
+        "In the selected case, inspect each rack pair. A normal working path alone is insufficient; the number of remaining internal spines matters."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus3400s/sw/93x/fundamentals/configuration/guide/cisco-n3400s-nx-os-fundamentals-configuration-guide-933/cisco-n3400-nx-os-fundamentals-configuration-guide-9z_chapter_010.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/dcn/whitepapers/cisco-application-centric-infrastructure-design-guide.html"
+      ],
+      "simplifications": "Sources checked 2026-11-13: current CCNA v1.1 objective 1.2c; Cisco Nexus 3400 fundamentals 9.3(3), overview; Cisco ACI design guide (updated 2024-06-06), physical topology. This exercise is a conventional two-tier leaf/spine shape with already-configured routed adjacencies, one per device pair. No actual packets, routing protocols, ECMP hashing, EVPN/VXLAN, ACI controller, LAG, performance or convergence are modeled. Two cables is a structural hop count, not a latency guarantee. Modern designs can have other tiers and arrangements; this is not a universal prohibition.",
+      "explanation": "Each rack leaf joins every supplied spine. For any two rack leaves, each shared available spine gives a separate two-cable path. Three shared spines give three internal alternatives; removing one leaves two. The new rack must preserve the existing racks’ connections. The grade checks actual cable roles, distinct parents and every required pair under each stated outage, accepting equivalent unused ports.",
+      "initial": {
+        "kind": "CampusArchitecture",
+        "simulation": {
+          "schema_version": 1,
+          "version": 1,
+          "id": "ccna-leaf-spine-rack-expansion",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "connections": [
+                {
+                  "wire": "r1-s1",
+                  "a": {
+                    "node": "leaf-1",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "spine-1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r1-s2",
+                  "a": {
+                    "node": "leaf-1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "spine-2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r1-s3",
+                  "a": {
+                    "node": "leaf-1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "spine-3",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r2-s1",
+                  "a": {
+                    "node": "leaf-2",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "spine-1",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r2-s2",
+                  "a": {
+                    "node": "leaf-2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "spine-2",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r2-s3",
+                  "a": {
+                    "node": "leaf-2",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "spine-3",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r3-s1",
+                  "a": {
+                    "node": "leaf-3",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "spine-1",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "r3-s2",
+                  "a": {
+                    "node": "leaf-3",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "spine-2",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "r3-s3",
+                  "a": {
+                    "node": "leaf-3",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "spine-3",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "r4-s1",
+                  "a": {
+                    "node": "leaf-4",
+                    "port": "p1"
+                  },
+                  "b": null
+                },
+                {
+                  "wire": "r4-s2",
+                  "a": {
+                    "node": "leaf-4",
+                    "port": "p2"
+                  },
+                  "b": null
+                },
+                {
+                  "wire": "r4-s3",
+                  "a": {
+                    "node": "leaf-4",
+                    "port": "p3"
+                  },
+                  "b": null
+                }
+              ]
+            },
+            "checked": false
+          },
+          "practice": {
+            "draft": {
+              "connections": [
+                {
+                  "wire": "r1-s1",
+                  "a": {
+                    "node": "guide-leaf-1",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-spine-1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r1-s2",
+                  "a": {
+                    "node": "guide-leaf-1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-spine-2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r2-s1",
+                  "a": {
+                    "node": "guide-leaf-2",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-spine-1",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r2-s2",
+                  "a": {
+                    "node": "guide-leaf-2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-spine-2",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r3-s1",
+                  "a": {
+                    "node": "guide-leaf-3",
+                    "port": "p1"
+                  },
+                  "b": null
+                },
+                {
+                  "wire": "r3-s2",
+                  "a": {
+                    "node": "guide-leaf-3",
+                    "port": "p2"
+                  },
+                  "b": null
+                }
+              ]
+            },
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "CampusArchitecture",
+        "definition": {
+          "schema_version": 1,
+          "version": 1,
+          "id": "ccna-leaf-spine-rack-expansion",
+          "assignment": {
+            "id": "rack-expansion",
+            "facts": {
+              "schema_version": 1,
+              "design": "SpineLeaf",
+              "nodes": [
+                {
+                  "id": "leaf-1",
+                  "label": "Rack 1 leaf",
+                  "role": "Leaf",
+                  "block": "rack-1",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "leaf-2",
+                  "label": "Rack 2 leaf",
+                  "role": "Leaf",
+                  "block": "rack-2",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "leaf-3",
+                  "label": "Rack 3 leaf",
+                  "role": "Leaf",
+                  "block": "rack-3",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "leaf-4",
+                  "label": "Rack 4 leaf",
+                  "role": "Leaf",
+                  "block": "rack-4",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "spine-1",
+                  "label": "Spine 1",
+                  "role": "Spine",
+                  "block": null,
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    },
+                    {
+                      "id": "p4"
+                    }
+                  ]
+                },
+                {
+                  "id": "spine-2",
+                  "label": "Spine 2",
+                  "role": "Spine",
+                  "block": null,
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    },
+                    {
+                      "id": "p4"
+                    }
+                  ]
+                },
+                {
+                  "id": "spine-3",
+                  "label": "Spine 3",
+                  "role": "Spine",
+                  "block": null,
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    },
+                    {
+                      "id": "p4"
+                    }
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "id": "r1-s1",
+                  "label": "r1-s1"
+                },
+                {
+                  "id": "r1-s2",
+                  "label": "r1-s2"
+                },
+                {
+                  "id": "r1-s3",
+                  "label": "r1-s3"
+                },
+                {
+                  "id": "r2-s1",
+                  "label": "r2-s1"
+                },
+                {
+                  "id": "r2-s2",
+                  "label": "r2-s2"
+                },
+                {
+                  "id": "r2-s3",
+                  "label": "r2-s3"
+                },
+                {
+                  "id": "r3-s1",
+                  "label": "r3-s1"
+                },
+                {
+                  "id": "r3-s2",
+                  "label": "r3-s2"
+                },
+                {
+                  "id": "r3-s3",
+                  "label": "r3-s3"
+                },
+                {
+                  "id": "r4-s1",
+                  "label": "r4-s1"
+                },
+                {
+                  "id": "r4-s2",
+                  "label": "r4-s2"
+                },
+                {
+                  "id": "r4-s3",
+                  "label": "r4-s3"
+                }
+              ]
+            },
+            "initial": {
+              "connections": [
+                {
+                  "wire": "r1-s1",
+                  "a": {
+                    "node": "leaf-1",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "spine-1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r1-s2",
+                  "a": {
+                    "node": "leaf-1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "spine-2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r1-s3",
+                  "a": {
+                    "node": "leaf-1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "spine-3",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r2-s1",
+                  "a": {
+                    "node": "leaf-2",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "spine-1",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r2-s2",
+                  "a": {
+                    "node": "leaf-2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "spine-2",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r2-s3",
+                  "a": {
+                    "node": "leaf-2",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "spine-3",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r3-s1",
+                  "a": {
+                    "node": "leaf-3",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "spine-1",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "r3-s2",
+                  "a": {
+                    "node": "leaf-3",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "spine-2",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "r3-s3",
+                  "a": {
+                    "node": "leaf-3",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "spine-3",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "r4-s1",
+                  "a": {
+                    "node": "leaf-4",
+                    "port": "p1"
+                  },
+                  "b": null
+                },
+                {
+                  "wire": "r4-s2",
+                  "a": {
+                    "node": "leaf-4",
+                    "port": "p2"
+                  },
+                  "b": null
+                },
+                {
+                  "wire": "r4-s3",
+                  "a": {
+                    "node": "leaf-4",
+                    "port": "p3"
+                  },
+                  "b": null
+                }
+              ]
+            },
+            "reference": {
+              "connections": [
+                {
+                  "wire": "r1-s1",
+                  "a": {
+                    "node": "leaf-1",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "spine-1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r1-s2",
+                  "a": {
+                    "node": "leaf-1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "spine-2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r1-s3",
+                  "a": {
+                    "node": "leaf-1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "spine-3",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r2-s1",
+                  "a": {
+                    "node": "leaf-2",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "spine-1",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r2-s2",
+                  "a": {
+                    "node": "leaf-2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "spine-2",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r2-s3",
+                  "a": {
+                    "node": "leaf-2",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "spine-3",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r3-s1",
+                  "a": {
+                    "node": "leaf-3",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "spine-1",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "r3-s2",
+                  "a": {
+                    "node": "leaf-3",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "spine-2",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "r3-s3",
+                  "a": {
+                    "node": "leaf-3",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "spine-3",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "r4-s1",
+                  "a": {
+                    "node": "leaf-4",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "spine-1",
+                    "port": "p4"
+                  }
+                },
+                {
+                  "wire": "r4-s2",
+                  "a": {
+                    "node": "leaf-4",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "spine-2",
+                    "port": "p4"
+                  }
+                },
+                {
+                  "wire": "r4-s3",
+                  "a": {
+                    "node": "leaf-4",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "spine-3",
+                    "port": "p4"
+                  }
+                }
+              ]
+            },
+            "editable": [
+              {
+                "id": "r4-s1"
+              },
+              {
+                "id": "r4-s2"
+              },
+              {
+                "id": "r4-s3"
+              }
+            ],
+            "uplinks": [
+              {
+                "node": "leaf-1",
+                "minimum": 3
+              },
+              {
+                "node": "leaf-2",
+                "minimum": 3
+              },
+              {
+                "node": "leaf-3",
+                "minimum": 3
+              },
+              {
+                "node": "leaf-4",
+                "minimum": 3
+              }
+            ],
+            "pairs": [
+              {
+                "to": "leaf-4",
+                "from": "leaf-1"
+              },
+              {
+                "to": "leaf-4",
+                "from": "leaf-2"
+              },
+              {
+                "to": "leaf-4",
+                "from": "leaf-3"
+              }
+            ],
+            "cases": [
+              {
+                "id": "normal",
+                "label": "All spines available",
+                "experiment": {
+                  "unavailable": []
+                },
+                "minimum_paths": 3
+              },
+              {
+                "id": "spine-1-lost",
+                "label": "Spine 1 unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "spine-1"
+                    }
+                  ]
+                },
+                "minimum_paths": 2
+              },
+              {
+                "id": "spine-2-lost",
+                "label": "Spine 2 unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "spine-2"
+                    }
+                  ]
+                },
+                "minimum_paths": 2
+              },
+              {
+                "id": "spine-3-lost",
+                "label": "Spine 3 unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "spine-3"
+                    }
+                  ]
+                },
+                "minimum_paths": 2
+              }
+            ]
+          },
+          "example": {
+            "id": "guide-rack-expansion",
+            "facts": {
+              "schema_version": 1,
+              "design": "SpineLeaf",
+              "nodes": [
+                {
+                  "id": "guide-leaf-1",
+                  "label": "Guide Rack 1 leaf",
+                  "role": "Leaf",
+                  "block": "rack-1",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-leaf-2",
+                  "label": "Guide Rack 2 leaf",
+                  "role": "Leaf",
+                  "block": "rack-2",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-leaf-3",
+                  "label": "Guide Rack 3 leaf",
+                  "role": "Leaf",
+                  "block": "rack-3",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-spine-1",
+                  "label": "Guide Spine 1",
+                  "role": "Spine",
+                  "block": null,
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-spine-2",
+                  "label": "Guide Spine 2",
+                  "role": "Spine",
+                  "block": null,
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "id": "r1-s1",
+                  "label": "r1-s1"
+                },
+                {
+                  "id": "r1-s2",
+                  "label": "r1-s2"
+                },
+                {
+                  "id": "r2-s1",
+                  "label": "r2-s1"
+                },
+                {
+                  "id": "r2-s2",
+                  "label": "r2-s2"
+                },
+                {
+                  "id": "r3-s1",
+                  "label": "r3-s1"
+                },
+                {
+                  "id": "r3-s2",
+                  "label": "r3-s2"
+                }
+              ]
+            },
+            "initial": {
+              "connections": [
+                {
+                  "wire": "r1-s1",
+                  "a": {
+                    "node": "guide-leaf-1",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-spine-1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r1-s2",
+                  "a": {
+                    "node": "guide-leaf-1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-spine-2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r2-s1",
+                  "a": {
+                    "node": "guide-leaf-2",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-spine-1",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r2-s2",
+                  "a": {
+                    "node": "guide-leaf-2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-spine-2",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r3-s1",
+                  "a": {
+                    "node": "guide-leaf-3",
+                    "port": "p1"
+                  },
+                  "b": null
+                },
+                {
+                  "wire": "r3-s2",
+                  "a": {
+                    "node": "guide-leaf-3",
+                    "port": "p2"
+                  },
+                  "b": null
+                }
+              ]
+            },
+            "reference": {
+              "connections": [
+                {
+                  "wire": "r1-s1",
+                  "a": {
+                    "node": "guide-leaf-1",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-spine-1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r1-s2",
+                  "a": {
+                    "node": "guide-leaf-1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-spine-2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "r2-s1",
+                  "a": {
+                    "node": "guide-leaf-2",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-spine-1",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r2-s2",
+                  "a": {
+                    "node": "guide-leaf-2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-spine-2",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "r3-s1",
+                  "a": {
+                    "node": "guide-leaf-3",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-spine-1",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "r3-s2",
+                  "a": {
+                    "node": "guide-leaf-3",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-spine-2",
+                    "port": "p3"
+                  }
+                }
+              ]
+            },
+            "editable": [
+              {
+                "id": "r3-s1"
+              },
+              {
+                "id": "r3-s2"
+              }
+            ],
+            "uplinks": [
+              {
+                "node": "guide-leaf-1",
+                "minimum": 2
+              },
+              {
+                "node": "guide-leaf-2",
+                "minimum": 2
+              },
+              {
+                "node": "guide-leaf-3",
+                "minimum": 2
+              }
+            ],
+            "pairs": [
+              {
+                "to": "guide-leaf-3",
+                "from": "guide-leaf-1"
+              },
+              {
+                "to": "guide-leaf-3",
+                "from": "guide-leaf-2"
+              }
+            ],
+            "cases": [
+              {
+                "id": "normal",
+                "label": "All spines available",
+                "experiment": {
+                  "unavailable": []
+                },
+                "minimum_paths": 2
+              },
+              {
+                "id": "spine-1-lost",
+                "label": "Guide Spine 1 unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "guide-spine-1"
+                    }
+                  ]
+                },
+                "minimum_paths": 1
+              },
+              {
+                "id": "spine-2-lost",
+                "label": "Guide Spine 2 unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "guide-spine-2"
+                    }
+                  ]
+                },
+                "minimum_paths": 1
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "campus-layout {\"kind\":\"Edit\",\"draft\":{\"connections\":[{\"wire\":\"r1-s1\",\"a\":{\"node\":\"leaf-1\",\"port\":\"p1\"},\"b\":{\"node\":\"spine-1\",\"port\":\"p1\"}},{\"wire\":\"r1-s2\",\"a\":{\"node\":\"leaf-1\",\"port\":\"p2\"},\"b\":{\"node\":\"spine-2\",\"port\":\"p1\"}},{\"wire\":\"r1-s3\",\"a\":{\"node\":\"leaf-1\",\"port\":\"p3\"},\"b\":{\"node\":\"spine-3\",\"port\":\"p1\"}},{\"wire\":\"r2-s1\",\"a\":{\"node\":\"leaf-2\",\"port\":\"p1\"},\"b\":{\"node\":\"spine-1\",\"port\":\"p2\"}},{\"wire\":\"r2-s2\",\"a\":{\"node\":\"leaf-2\",\"port\":\"p2\"},\"b\":{\"node\":\"spine-2\",\"port\":\"p2\"}},{\"wire\":\"r2-s3\",\"a\":{\"node\":\"leaf-2\",\"port\":\"p3\"},\"b\":{\"node\":\"spine-3\",\"port\":\"p2\"}},{\"wire\":\"r3-s1\",\"a\":{\"node\":\"leaf-3\",\"port\":\"p1\"},\"b\":{\"node\":\"spine-1\",\"port\":\"p3\"}},{\"wire\":\"r3-s2\",\"a\":{\"node\":\"leaf-3\",\"port\":\"p2\"},\"b\":{\"node\":\"spine-2\",\"port\":\"p3\"}},{\"wire\":\"r3-s3\",\"a\":{\"node\":\"leaf-3\",\"port\":\"p3\"},\"b\":{\"node\":\"spine-3\",\"port\":\"p3\"}},{\"wire\":\"r4-s1\",\"a\":{\"node\":\"leaf-4\",\"port\":\"p1\"},\"b\":{\"node\":\"spine-1\",\"port\":\"p4\"}},{\"wire\":\"r4-s2\",\"a\":{\"node\":\"leaf-4\",\"port\":\"p2\"},\"b\":{\"node\":\"spine-2\",\"port\":\"p4\"}},{\"wire\":\"r4-s3\",\"a\":{\"node\":\"leaf-4\",\"port\":\"p3\"},\"b\":{\"node\":\"spine-3\",\"port\":\"p4\"}}]}}",
+        "campus-layout {\"kind\":\"Check\"}"
+      ]
+    }
+  ]
+}

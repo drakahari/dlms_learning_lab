@@ -709,13 +709,34 @@ fn introduction(
         return false;
     };
     let mut dirty = false;
-    label(ui, m, &s.title);
-    ui.strong("Introduction");
-    label(ui, m, &lesson.prerequisite_note);
-    for concept in &lesson.concepts {
-        ui.strong(&concept.title);
-        label(ui, m, &concept.text);
-    }
+    let intro = lesson_presentation::concepts(
+        ui,
+        s,
+        &lesson.prerequisite_note,
+        lesson
+            .concepts
+            .iter()
+            .map(|c| (c.title.clone(), c.text.clone())),
+    );
+    let entry = lesson_presentation::entry(s);
+    m.labels.push((
+        entry.map_or(s.summary.as_str(), |e| e.goal.as_str()).into(),
+        intro.objective.rect,
+    ));
+    m.labels.push((
+        entry
+            .filter(|e| !e.context.is_empty())
+            .map_or(lesson.prerequisite_note.as_str(), |e| e.context.as_str())
+            .into(),
+        intro.context.rect,
+    ));
+    lesson_presentation::worked(ui, &lesson.example_description);
+    lesson_presentation::worked_rows(ui, s);
+    controls::collapsing_header(ui, "Full worked action sequence").show(ui, |ui| {
+        for (n, step) in lesson.example_actions.iter().enumerate() {
+            lesson_presentation::section(ui, n + 1, &step.title, &step.explanation);
+        }
+    });
     ui.add_enabled_ui(active, |ui| {
         ui.horizontal_wrapped(|ui| {
             for (key, text, view, main) in [
@@ -777,14 +798,9 @@ fn page(
     let r = ui.add(egui::Label::new(RichText::new(&s.title).strong().size(22.)).wrap());
     m.cron.labels.push((s.title.clone(), r.rect));
     if practice {
-        ui.strong("Separate example · Ungraded");
-        label(
-            ui,
-            &mut m.cron,
-            &s.cron_teaching.as_ref().unwrap().example_description,
-        );
+        lesson_presentation::practice_step(ui, s, 0);
     } else {
-        label(ui, &mut m.cron, &s.objective);
+        lesson_presentation::assignment(ui, s);
     }
     // Capture pending input and focus separately before widgets. This observes
     // actual delivery, even when Paste replaces a selection with identical text.
@@ -858,6 +874,9 @@ fn page(
             edits.example_choice = Some(choice);
         }
     }
+    if practice {
+        lesson_presentation::practice_step(ui, s, 1);
+    }
     // Rendering reads actual current state only. No model/grade is installed by
     // this layout, and both modes retain the complete same practical assignment.
     let d = definition(s, practice).unwrap();
@@ -907,6 +926,9 @@ fn page(
             output(ui, d, Live { state, session }, p, &mut m.cron, scope);
         }
     });
+    if practice {
+        lesson_presentation::practice_step(ui, s, 2);
+    }
     ui.add_enabled_ui(active, |ui| {
         ui.horizontal_wrapped(|ui| {
             edits.queue(

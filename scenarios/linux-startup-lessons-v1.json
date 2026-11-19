@@ -1,0 +1,2170 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-startup-current-future",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-startup-policy",
+      "title": "Keep maintenance state separate from startup policy",
+      "objective": "Kiln is entering a maintenance window. Change current availability and future enrollment independently. Keep kiln-app.service stopped during maintenance, but enroll it in kiln.target for the next session. Run kiln-inspection.service at virtual port 9200 now, but remove its startup link so it stays stopped next session. Keep kiln-observer.service running at 9100 now and next session. Preserve all supplied files, other links and the default target.",
+      "minutes": 20,
+      "prerequisites": [
+        "lpic1-file-navigation"
+      ],
+      "initial": {
+        "kind": "UnitManager",
+        "simulation": {
+          "schema_version": 1,
+          "inventory": {
+            "schema_version": 1,
+            "fixture": "kiln-inventory",
+            "units": [
+              "kiln-app.service",
+              "kiln-inspection.service",
+              "kiln-maintenance.target",
+              "kiln-observer.service",
+              "kiln.target"
+            ],
+            "config_paths": [
+              "/etc/kiln/app.conf",
+              "/etc/kiln/inspection.conf",
+              "/etc/kiln/observer.conf"
+            ],
+            "artifact_ids": [],
+            "programs": {
+              "/sim/bin/kiln-app": {
+                "kind": "PortDaemon",
+                "config": "/etc/kiln/app.conf",
+                "key": "PORT",
+                "prerequisite": null
+              },
+              "/sim/bin/kiln-observer": {
+                "kind": "PortDaemon",
+                "config": "/etc/kiln/observer.conf",
+                "key": "PORT",
+                "prerequisite": null
+              },
+              "/sim/bin/kiln-inspection": {
+                "kind": "PortDaemon",
+                "config": "/etc/kiln/inspection.conf",
+                "key": "PORT",
+                "prerequisite": null
+              }
+            }
+          },
+          "documents": {
+            "kiln-app.service": "[Unit]\nDescription=kiln-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-app\n[Install]\nWantedBy=kiln.target\n",
+            "kiln-observer.service": "[Unit]\nDescription=kiln-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-observer\n[Install]\nWantedBy=kiln.target\n",
+            "kiln-inspection.service": "[Unit]\nDescription=kiln-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-inspection\n[Install]\nWantedBy=kiln.target\n",
+            "kiln.target": "[Unit]\nDescription=kiln.target\n",
+            "kiln-maintenance.target": "[Unit]\nDescription=kiln-maintenance.target\n"
+          },
+          "configuration": {
+            "/etc/kiln/app.conf": "PORT=8443\n",
+            "/etc/kiln/observer.conf": "PORT=9100\n",
+            "/etc/kiln/inspection.conf": "PORT=9200\n"
+          },
+          "loaded": {
+            "kiln-app.service": "[Unit]\nDescription=kiln-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-app\n[Install]\nWantedBy=kiln.target\n",
+            "kiln-observer.service": "[Unit]\nDescription=kiln-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-observer\n[Install]\nWantedBy=kiln.target\n",
+            "kiln-inspection.service": "[Unit]\nDescription=kiln-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-inspection\n[Install]\nWantedBy=kiln.target\n",
+            "kiln.target": "[Unit]\nDescription=kiln.target\n",
+            "kiln-maintenance.target": "[Unit]\nDescription=kiln-maintenance.target\n"
+          },
+          "runtime": {
+            "kiln-app.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=kiln-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-app\n[Install]\nWantedBy=kiln.target\n",
+                "configuration": "PORT=8443\n",
+                "artifact_input": null
+              }
+            },
+            "kiln-observer.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=kiln-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-observer\n[Install]\nWantedBy=kiln.target\n",
+                "configuration": "PORT=9100\n",
+                "artifact_input": null
+              }
+            }
+          },
+          "artifacts": {},
+          "boot_links": {
+            "kiln.target": [
+              "kiln-inspection.service",
+              "kiln-observer.service"
+            ]
+          },
+          "default_target": "kiln.target"
+        }
+      },
+      "goal": {
+        "kind": "UnitManager",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "kiln-inventory",
+              "units": [
+                "kiln-app.service",
+                "kiln-inspection.service",
+                "kiln-maintenance.target",
+                "kiln-observer.service",
+                "kiln.target"
+              ],
+              "config_paths": [
+                "/etc/kiln/app.conf",
+                "/etc/kiln/inspection.conf",
+                "/etc/kiln/observer.conf"
+              ],
+              "artifact_ids": [],
+              "programs": {
+                "/sim/bin/kiln-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/kiln/app.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/kiln-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/kiln/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/kiln-inspection": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/kiln/inspection.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "kiln-app.service": "[Unit]\nDescription=kiln-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-app\n[Install]\nWantedBy=kiln.target\n",
+              "kiln-observer.service": "[Unit]\nDescription=kiln-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-observer\n[Install]\nWantedBy=kiln.target\n",
+              "kiln-inspection.service": "[Unit]\nDescription=kiln-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-inspection\n[Install]\nWantedBy=kiln.target\n",
+              "kiln.target": "[Unit]\nDescription=kiln.target\n",
+              "kiln-maintenance.target": "[Unit]\nDescription=kiln-maintenance.target\n"
+            },
+            "configuration": {
+              "/etc/kiln/app.conf": "PORT=8443\n",
+              "/etc/kiln/observer.conf": "PORT=9100\n",
+              "/etc/kiln/inspection.conf": "PORT=9200\n"
+            },
+            "loaded": {
+              "kiln-app.service": "[Unit]\nDescription=kiln-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-app\n[Install]\nWantedBy=kiln.target\n",
+              "kiln-observer.service": "[Unit]\nDescription=kiln-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-observer\n[Install]\nWantedBy=kiln.target\n",
+              "kiln-inspection.service": "[Unit]\nDescription=kiln-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-inspection\n[Install]\nWantedBy=kiln.target\n",
+              "kiln.target": "[Unit]\nDescription=kiln.target\n",
+              "kiln-maintenance.target": "[Unit]\nDescription=kiln-maintenance.target\n"
+            },
+            "runtime": {
+              "kiln-app.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=kiln-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-app\n[Install]\nWantedBy=kiln.target\n",
+                  "configuration": "PORT=8443\n",
+                  "artifact_input": null
+                }
+              },
+              "kiln-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=kiln-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/kiln-observer\n[Install]\nWantedBy=kiln.target\n",
+                  "configuration": "PORT=9100\n",
+                  "artifact_input": null
+                }
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "kiln.target": [
+                "kiln-inspection.service",
+                "kiln-observer.service"
+              ]
+            },
+            "default_target": "kiln.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "kiln-observer.service",
+              "phase": "Running",
+              "port": 9100,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "kiln-observer.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "kiln-app.service",
+              "phase": "Inactive",
+              "port": null,
+              "value": null
+            },
+            {
+              "kind": "Runtime",
+              "unit": "kiln-inspection.service",
+              "phase": "Running",
+              "port": 9200,
+              "value": null
+            },
+            {
+              "kind": "InstallLink",
+              "target": "kiln.target",
+              "unit": "kiln-app.service",
+              "present": true
+            },
+            {
+              "kind": "InstallLink",
+              "target": "kiln.target",
+              "unit": "kiln-inspection.service",
+              "present": false
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "kiln-inspection.service"
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "kiln-observer.service",
+                "phase": "Running",
+                "port": 9100,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "kiln-observer.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "kiln-app.service",
+                "phase": "Running",
+                "port": 8443,
+                "value": null
+              },
+              {
+                "kind": "Runtime",
+                "unit": "kiln-inspection.service",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "kiln-app.service"
+              }
+            ],
+            "started": [
+              "kiln-app.service",
+              "kiln-observer.service",
+              "kiln.target"
+            ],
+            "ordering": []
+          },
+          "preservation": {
+            "unit_documents": [
+              "kiln-app.service",
+              "kiln-inspection.service",
+              "kiln-maintenance.target",
+              "kiln-observer.service",
+              "kiln.target"
+            ],
+            "configuration": [
+              "/etc/kiln/app.conf",
+              "/etc/kiln/inspection.conf",
+              "/etc/kiln/observer.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [
+              {
+                "target": "kiln.target",
+                "unit": "kiln-app.service"
+              },
+              {
+                "target": "kiln.target",
+                "unit": "kiln-inspection.service"
+              }
+            ],
+            "default_target": true
+          }
+        }
+      },
+      "unit_manager_teaching": {
+        "prerequisite_note": "Builds on opening and reading supplied files. The concepts below introduce service status, targets and startup enrollment before you use them. Every command stays inside the virtual manager.",
+        "concepts": [
+          {
+            "title": "Two independent questions",
+            "text": "A service is a program controlled by a service manager. Active asks whether a service is running now. Enabled asks whether startup links request it later. Starting does not enable; enabling does not start. A stopped service can be enabled, and a running one can be disabled."
+          },
+          {
+            "title": "Read evidence before applying policy",
+            "text": "In the worked sketchplan system, use systemctl status sketchplan-app.service and systemctl is-enabled sketchplan-app.service. Read the result, not just a success line from an earlier command. systemctl cat sketchplan-app.service shows the saved WantedBy target. Virtual ports are labels; nothing listens on this computer."
+          },
+          {
+            "title": "A maintenance plan",
+            "text": "The worked plan keeps sketchplan-app.service stopped now but enabled for next time, while sketchplan-inspection.service runs only now. Stop the app and enable it. Start inspection, then disable its startup enrollment. A Check also starts a separate copy from the saved default; it does not change the current practice system."
+          }
+        ],
+        "example_description": "Work in the separate sketchplan system. Keep the app stopped but enabled for later; run inspection only now and preserve the observer.",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "sketchplan-inventory",
+              "units": [
+                "sketchplan-app.service",
+                "sketchplan-inspection.service",
+                "sketchplan-maintenance.target",
+                "sketchplan-observer.service",
+                "sketchplan.target"
+              ],
+              "config_paths": [
+                "/etc/sketchplan/app.conf",
+                "/etc/sketchplan/inspection.conf",
+                "/etc/sketchplan/observer.conf"
+              ],
+              "artifact_ids": [],
+              "programs": {
+                "/sim/bin/sketchplan-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/sketchplan/app.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/sketchplan-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/sketchplan/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/sketchplan-inspection": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/sketchplan/inspection.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "sketchplan-app.service": "[Unit]\nDescription=sketchplan-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/sketchplan-app\n[Install]\nWantedBy=sketchplan.target\n",
+              "sketchplan-observer.service": "[Unit]\nDescription=sketchplan-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/sketchplan-observer\n[Install]\nWantedBy=sketchplan.target\n",
+              "sketchplan-inspection.service": "[Unit]\nDescription=sketchplan-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/sketchplan-inspection\n[Install]\nWantedBy=sketchplan.target\n",
+              "sketchplan.target": "[Unit]\nDescription=sketchplan.target\n",
+              "sketchplan-maintenance.target": "[Unit]\nDescription=sketchplan-maintenance.target\n"
+            },
+            "configuration": {
+              "/etc/sketchplan/app.conf": "PORT=8443\n",
+              "/etc/sketchplan/observer.conf": "PORT=9100\n",
+              "/etc/sketchplan/inspection.conf": "PORT=9200\n"
+            },
+            "loaded": {
+              "sketchplan-app.service": "[Unit]\nDescription=sketchplan-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/sketchplan-app\n[Install]\nWantedBy=sketchplan.target\n",
+              "sketchplan-observer.service": "[Unit]\nDescription=sketchplan-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/sketchplan-observer\n[Install]\nWantedBy=sketchplan.target\n",
+              "sketchplan-inspection.service": "[Unit]\nDescription=sketchplan-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/sketchplan-inspection\n[Install]\nWantedBy=sketchplan.target\n",
+              "sketchplan.target": "[Unit]\nDescription=sketchplan.target\n",
+              "sketchplan-maintenance.target": "[Unit]\nDescription=sketchplan-maintenance.target\n"
+            },
+            "runtime": {
+              "sketchplan-app.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=sketchplan-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/sketchplan-app\n[Install]\nWantedBy=sketchplan.target\n",
+                  "configuration": "PORT=8443\n",
+                  "artifact_input": null
+                }
+              },
+              "sketchplan-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=sketchplan-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/sketchplan-observer\n[Install]\nWantedBy=sketchplan.target\n",
+                  "configuration": "PORT=9100\n",
+                  "artifact_input": null
+                }
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "sketchplan.target": [
+                "sketchplan-inspection.service",
+                "sketchplan-observer.service"
+              ]
+            },
+            "default_target": "sketchplan.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "sketchplan-observer.service",
+              "phase": "Running",
+              "port": 9100,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "sketchplan-observer.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "sketchplan-app.service",
+              "phase": "Inactive",
+              "port": null,
+              "value": null
+            },
+            {
+              "kind": "Runtime",
+              "unit": "sketchplan-inspection.service",
+              "phase": "Running",
+              "port": 9200,
+              "value": null
+            },
+            {
+              "kind": "InstallLink",
+              "target": "sketchplan.target",
+              "unit": "sketchplan-app.service",
+              "present": true
+            },
+            {
+              "kind": "InstallLink",
+              "target": "sketchplan.target",
+              "unit": "sketchplan-inspection.service",
+              "present": false
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "sketchplan-inspection.service"
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "sketchplan-observer.service",
+                "phase": "Running",
+                "port": 9100,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "sketchplan-observer.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "sketchplan-app.service",
+                "phase": "Running",
+                "port": 8443,
+                "value": null
+              },
+              {
+                "kind": "Runtime",
+                "unit": "sketchplan-inspection.service",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "sketchplan-app.service"
+              }
+            ],
+            "started": [
+              "sketchplan-app.service",
+              "sketchplan-observer.service",
+              "sketchplan.target"
+            ],
+            "ordering": []
+          },
+          "preservation": {
+            "unit_documents": [
+              "sketchplan-app.service",
+              "sketchplan-inspection.service",
+              "sketchplan-maintenance.target",
+              "sketchplan-observer.service",
+              "sketchplan.target"
+            ],
+            "configuration": [
+              "/etc/sketchplan/app.conf",
+              "/etc/sketchplan/inspection.conf",
+              "/etc/sketchplan/observer.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [
+              {
+                "target": "sketchplan.target",
+                "unit": "sketchplan-app.service"
+              },
+              {
+                "target": "sketchplan.target",
+                "unit": "sketchplan-inspection.service"
+              }
+            ],
+            "default_target": true
+          }
+        },
+        "solution": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Stop",
+              "unit": "sketchplan-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Enable",
+              "unit": "sketchplan-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "sketchplan-inspection.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Disable",
+              "unit": "sketchplan-inspection.service"
+            }
+          }
+        ],
+        "example_actions": [
+          {
+            "title": "Stop sketchplan-app.service",
+            "explanation": "Stop the app for current maintenance; its startup links remain.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Stop",
+                "unit": "sketchplan-app.service"
+              }
+            }
+          },
+          {
+            "title": "Enable sketchplan-app.service",
+            "explanation": "Enroll the stopped app in its saved WantedBy target; it stays stopped now.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Enable",
+                "unit": "sketchplan-app.service"
+              }
+            }
+          },
+          {
+            "title": "Start sketchplan-inspection.service",
+            "explanation": "Start the inspection program now; inspect its actual status.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "sketchplan-inspection.service"
+              }
+            }
+          },
+          {
+            "title": "AdvancePrograms",
+            "explanation": "The simulator finishes bounded program initialization; the terminal start command does this automatically.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            }
+          },
+          {
+            "title": "Disable sketchplan-inspection.service",
+            "explanation": "Remove future inspection enrollment without stopping its current program.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Disable",
+                "unit": "sketchplan-inspection.service"
+              }
+            }
+          }
+        ],
+        "try_change": "After the example passes, run systemctl disable sketchplan-app.service. Its current status does not change, but next-session application coverage fails. Enable it again and recheck.",
+        "try_actions": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Disable",
+              "unit": "sketchplan-app.service"
+            }
+          }
+        ],
+        "try_outcomes": [
+          {
+            "kind": "InstallLink",
+            "target": "sketchplan.target",
+            "unit": "sketchplan-app.service",
+            "present": false
+          }
+        ],
+        "repair": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Enable",
+              "unit": "sketchplan-app.service"
+            }
+          }
+        ]
+      },
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.freedesktop.org/software/systemd/man/262/systemctl.html",
+        "https://www.freedesktop.org/software/systemd/man/262/systemd.unit.html"
+      ],
+      "hints": [
+        "Compare current service status with startup enrollment; changing one need not change the other.",
+        "Inspect the selected next target and the failed current/next-session rows. Preserve the named observer and files.",
+        "The worked plan keeps sketchplan-app.service stopped now but enabled for next time, while sketchplan-inspection.service runs only now. Stop the app and enable it. Start inspection, then disable its startup enrollment. A Check also starts a separate copy from the saved default; it does not change the current practice system."
+      ],
+      "topic": "Current services and startup policy",
+      "summary": "Keep kiln-app.service stopped during maintenance, but enroll it in kiln.target for the next session.",
+      "difficulty": "Beginner",
+      "steps": [
+        "Understand current and future service policy",
+        "Try a different maintenance plan",
+        "Apply the complete assignment"
+      ],
+      "guide": [],
+      "solution": [
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Stop\",\"unit\":\"kiln-app.service\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Enable\",\"unit\":\"kiln-app.service\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Start\",\"unit\":\"kiln-inspection.service\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"AdvancePrograms\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Disable\",\"unit\":\"kiln-inspection.service\"}}"
+      ],
+      "retry_guidance": "Read the failed current or next-session condition, inspect the relevant service and target, then change only that policy. Old journal messages do not prove current success.",
+      "explanation": "Start/Stop affect current programs. Enable/Disable affect installation links. Set-default chooses the next target; it does not switch the current session. The grader derives a separate next session from the saved policy and checks actual started units, current inputs and preservation. Equivalent supported action orders and harmless comments in editable text are accepted.",
+      "simplifications": "Sources checked 2026-11-02: LPI LPIC-1 v5.0, systemd262. Bounded supplied services/targets, fixed virtual programs and private simulated configuration only. No firmware, kernel, initramfs, GRUB, real boot, SysV, isolate, mask, reload/restart or host systemd. Next-session copy is a graph/program test, not a real reboot. No packets or listening ports."
+    },
+    {
+      "id": "lpic1-startup-default-target",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-startup-policy",
+      "title": "Choose the next target without switching the current session",
+      "objective": "The host is currently in a maintenance session, but the next start must use its normal service group. Select harbor.target for the next session; it must start only that target, harbor-app.service at 8443 and harbor-observer.service at 9100. Keep the current harbor-maintenance.target, harbor-app.service, harbor-inspection.service at 9200 and harbor-observer.service at 9100 active. Do not start harbor.target now. Remove harbor-inspection.service from harbor-maintenance.target startup enrollment. Preserve every file and every other install link.",
+      "minutes": 20,
+      "prerequisites": [
+        "lpic1-startup-current-future"
+      ],
+      "initial": {
+        "kind": "UnitManager",
+        "simulation": {
+          "schema_version": 1,
+          "inventory": {
+            "schema_version": 1,
+            "fixture": "harbor-inventory",
+            "units": [
+              "harbor-app.service",
+              "harbor-inspection.service",
+              "harbor-maintenance.target",
+              "harbor-observer.service",
+              "harbor.target"
+            ],
+            "config_paths": [
+              "/etc/harbor/app.conf",
+              "/etc/harbor/inspection.conf",
+              "/etc/harbor/observer.conf"
+            ],
+            "artifact_ids": [],
+            "programs": {
+              "/sim/bin/harbor-app": {
+                "kind": "PortDaemon",
+                "config": "/etc/harbor/app.conf",
+                "key": "PORT",
+                "prerequisite": null
+              },
+              "/sim/bin/harbor-observer": {
+                "kind": "PortDaemon",
+                "config": "/etc/harbor/observer.conf",
+                "key": "PORT",
+                "prerequisite": null
+              },
+              "/sim/bin/harbor-inspection": {
+                "kind": "PortDaemon",
+                "config": "/etc/harbor/inspection.conf",
+                "key": "PORT",
+                "prerequisite": null
+              }
+            }
+          },
+          "documents": {
+            "harbor-app.service": "[Unit]\nDescription=harbor-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-app\n[Install]\nWantedBy=harbor.target\n",
+            "harbor-observer.service": "[Unit]\nDescription=harbor-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-observer\n[Install]\nWantedBy=harbor.target\n",
+            "harbor-inspection.service": "[Unit]\nDescription=harbor-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-inspection\n[Install]\nWantedBy=harbor-maintenance.target\n",
+            "harbor.target": "[Unit]\nDescription=harbor.target\n",
+            "harbor-maintenance.target": "[Unit]\nDescription=harbor-maintenance.target\n"
+          },
+          "configuration": {
+            "/etc/harbor/app.conf": "PORT=8443\n",
+            "/etc/harbor/observer.conf": "PORT=9100\n",
+            "/etc/harbor/inspection.conf": "PORT=9200\n"
+          },
+          "loaded": {
+            "harbor-app.service": "[Unit]\nDescription=harbor-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-app\n[Install]\nWantedBy=harbor.target\n",
+            "harbor-observer.service": "[Unit]\nDescription=harbor-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-observer\n[Install]\nWantedBy=harbor.target\n",
+            "harbor-inspection.service": "[Unit]\nDescription=harbor-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-inspection\n[Install]\nWantedBy=harbor-maintenance.target\n",
+            "harbor.target": "[Unit]\nDescription=harbor.target\n",
+            "harbor-maintenance.target": "[Unit]\nDescription=harbor-maintenance.target\n"
+          },
+          "runtime": {
+            "harbor-app.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=harbor-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-app\n[Install]\nWantedBy=harbor.target\n",
+                "configuration": "PORT=8443\n",
+                "artifact_input": null
+              }
+            },
+            "harbor-observer.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=harbor-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-observer\n[Install]\nWantedBy=harbor.target\n",
+                "configuration": "PORT=9100\n",
+                "artifact_input": null
+              }
+            },
+            "harbor-inspection.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=harbor-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-inspection\n[Install]\nWantedBy=harbor-maintenance.target\n",
+                "configuration": "PORT=9200\n",
+                "artifact_input": null
+              }
+            },
+            "harbor-maintenance.target": {
+              "kind": "TargetActive"
+            }
+          },
+          "artifacts": {},
+          "boot_links": {
+            "harbor.target": [
+              "harbor-app.service",
+              "harbor-observer.service"
+            ],
+            "harbor-maintenance.target": [
+              "harbor-inspection.service"
+            ]
+          },
+          "default_target": "harbor-maintenance.target"
+        }
+      },
+      "goal": {
+        "kind": "UnitManager",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "harbor-inventory",
+              "units": [
+                "harbor-app.service",
+                "harbor-inspection.service",
+                "harbor-maintenance.target",
+                "harbor-observer.service",
+                "harbor.target"
+              ],
+              "config_paths": [
+                "/etc/harbor/app.conf",
+                "/etc/harbor/inspection.conf",
+                "/etc/harbor/observer.conf"
+              ],
+              "artifact_ids": [],
+              "programs": {
+                "/sim/bin/harbor-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/harbor/app.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/harbor-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/harbor/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/harbor-inspection": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/harbor/inspection.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "harbor-app.service": "[Unit]\nDescription=harbor-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-app\n[Install]\nWantedBy=harbor.target\n",
+              "harbor-observer.service": "[Unit]\nDescription=harbor-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-observer\n[Install]\nWantedBy=harbor.target\n",
+              "harbor-inspection.service": "[Unit]\nDescription=harbor-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-inspection\n[Install]\nWantedBy=harbor-maintenance.target\n",
+              "harbor.target": "[Unit]\nDescription=harbor.target\n",
+              "harbor-maintenance.target": "[Unit]\nDescription=harbor-maintenance.target\n"
+            },
+            "configuration": {
+              "/etc/harbor/app.conf": "PORT=8443\n",
+              "/etc/harbor/observer.conf": "PORT=9100\n",
+              "/etc/harbor/inspection.conf": "PORT=9200\n"
+            },
+            "loaded": {
+              "harbor-app.service": "[Unit]\nDescription=harbor-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-app\n[Install]\nWantedBy=harbor.target\n",
+              "harbor-observer.service": "[Unit]\nDescription=harbor-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-observer\n[Install]\nWantedBy=harbor.target\n",
+              "harbor-inspection.service": "[Unit]\nDescription=harbor-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-inspection\n[Install]\nWantedBy=harbor-maintenance.target\n",
+              "harbor.target": "[Unit]\nDescription=harbor.target\n",
+              "harbor-maintenance.target": "[Unit]\nDescription=harbor-maintenance.target\n"
+            },
+            "runtime": {
+              "harbor-app.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=harbor-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-app\n[Install]\nWantedBy=harbor.target\n",
+                  "configuration": "PORT=8443\n",
+                  "artifact_input": null
+                }
+              },
+              "harbor-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=harbor-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-observer\n[Install]\nWantedBy=harbor.target\n",
+                  "configuration": "PORT=9100\n",
+                  "artifact_input": null
+                }
+              },
+              "harbor-inspection.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=harbor-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/harbor-inspection\n[Install]\nWantedBy=harbor-maintenance.target\n",
+                  "configuration": "PORT=9200\n",
+                  "artifact_input": null
+                }
+              },
+              "harbor-maintenance.target": {
+                "kind": "TargetActive"
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "harbor.target": [
+                "harbor-app.service",
+                "harbor-observer.service"
+              ],
+              "harbor-maintenance.target": [
+                "harbor-inspection.service"
+              ]
+            },
+            "default_target": "harbor-maintenance.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "harbor-observer.service",
+              "phase": "Running",
+              "port": 9100,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "harbor-observer.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "harbor-app.service",
+              "phase": "Running",
+              "port": 8443,
+              "value": null
+            },
+            {
+              "kind": "Runtime",
+              "unit": "harbor-inspection.service",
+              "phase": "Running",
+              "port": 9200,
+              "value": null
+            },
+            {
+              "kind": "Runtime",
+              "unit": "harbor-maintenance.target",
+              "phase": "TargetActive",
+              "port": null,
+              "value": null
+            },
+            {
+              "kind": "Runtime",
+              "unit": "harbor.target",
+              "phase": "Inactive",
+              "port": null,
+              "value": null
+            },
+            {
+              "kind": "DefaultTarget",
+              "target": "harbor.target"
+            },
+            {
+              "kind": "InstallLink",
+              "target": "harbor-maintenance.target",
+              "unit": "harbor-inspection.service",
+              "present": false
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "harbor-app.service"
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "harbor-inspection.service"
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "harbor-observer.service",
+                "phase": "Running",
+                "port": 9100,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "harbor-observer.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "harbor-app.service",
+                "phase": "Running",
+                "port": 8443,
+                "value": null
+              },
+              {
+                "kind": "Runtime",
+                "unit": "harbor-inspection.service",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              },
+              {
+                "kind": "Runtime",
+                "unit": "harbor-maintenance.target",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "harbor-app.service"
+              }
+            ],
+            "started": [
+              "harbor-app.service",
+              "harbor-observer.service",
+              "harbor.target"
+            ],
+            "ordering": []
+          },
+          "preservation": {
+            "unit_documents": [
+              "harbor-app.service",
+              "harbor-inspection.service",
+              "harbor-maintenance.target",
+              "harbor-observer.service",
+              "harbor.target"
+            ],
+            "configuration": [
+              "/etc/harbor/app.conf",
+              "/etc/harbor/inspection.conf",
+              "/etc/harbor/observer.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [
+              {
+                "target": "harbor-maintenance.target",
+                "unit": "harbor-inspection.service"
+              }
+            ],
+            "default_target": false
+          }
+        }
+      },
+      "unit_manager_teaching": {
+        "prerequisite_note": "Builds on opening and reading supplied files. The concepts below introduce service status, targets and startup enrollment before you use them. Every command stays inside the virtual manager.",
+        "concepts": [
+          {
+            "title": "A target groups services",
+            "text": "A target is a named group requested by the manager. Enabling a service adds a link to the target named by WantedBy. A link in one target does not make a different default target request that service."
+          },
+          {
+            "title": "Next time is different from now",
+            "text": "Use systemctl get-default in the worked galleryplan system. systemctl set-default galleryplan.target changes the next-session choice; it does not stop galleryplan-maintenance.target, start the new target or change current services. This is not systemctl isolate, which is outside this simulator."
+          },
+          {
+            "title": "Observe both sessions",
+            "text": "The worked policy keeps current inspection running, removes its maintenance startup link and selects galleryplan.target for next time. Check inspects a separate next-session copy. Current maintenance remains active while the copy starts only the normal target, application and observer."
+          }
+        ],
+        "example_description": "Work in the separate galleryplan system. Select the normal target for later while preserving the current maintenance session.",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "galleryplan-inventory",
+              "units": [
+                "galleryplan-app.service",
+                "galleryplan-inspection.service",
+                "galleryplan-maintenance.target",
+                "galleryplan-observer.service",
+                "galleryplan.target"
+              ],
+              "config_paths": [
+                "/etc/galleryplan/app.conf",
+                "/etc/galleryplan/inspection.conf",
+                "/etc/galleryplan/observer.conf"
+              ],
+              "artifact_ids": [],
+              "programs": {
+                "/sim/bin/galleryplan-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/galleryplan/app.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/galleryplan-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/galleryplan/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/galleryplan-inspection": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/galleryplan/inspection.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "galleryplan-app.service": "[Unit]\nDescription=galleryplan-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/galleryplan-app\n[Install]\nWantedBy=galleryplan.target\n",
+              "galleryplan-observer.service": "[Unit]\nDescription=galleryplan-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/galleryplan-observer\n[Install]\nWantedBy=galleryplan.target\n",
+              "galleryplan-inspection.service": "[Unit]\nDescription=galleryplan-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/galleryplan-inspection\n[Install]\nWantedBy=galleryplan-maintenance.target\n",
+              "galleryplan.target": "[Unit]\nDescription=galleryplan.target\n",
+              "galleryplan-maintenance.target": "[Unit]\nDescription=galleryplan-maintenance.target\n"
+            },
+            "configuration": {
+              "/etc/galleryplan/app.conf": "PORT=8443\n",
+              "/etc/galleryplan/observer.conf": "PORT=9100\n",
+              "/etc/galleryplan/inspection.conf": "PORT=9200\n"
+            },
+            "loaded": {
+              "galleryplan-app.service": "[Unit]\nDescription=galleryplan-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/galleryplan-app\n[Install]\nWantedBy=galleryplan.target\n",
+              "galleryplan-observer.service": "[Unit]\nDescription=galleryplan-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/galleryplan-observer\n[Install]\nWantedBy=galleryplan.target\n",
+              "galleryplan-inspection.service": "[Unit]\nDescription=galleryplan-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/galleryplan-inspection\n[Install]\nWantedBy=galleryplan-maintenance.target\n",
+              "galleryplan.target": "[Unit]\nDescription=galleryplan.target\n",
+              "galleryplan-maintenance.target": "[Unit]\nDescription=galleryplan-maintenance.target\n"
+            },
+            "runtime": {
+              "galleryplan-app.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=galleryplan-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/galleryplan-app\n[Install]\nWantedBy=galleryplan.target\n",
+                  "configuration": "PORT=8443\n",
+                  "artifact_input": null
+                }
+              },
+              "galleryplan-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=galleryplan-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/galleryplan-observer\n[Install]\nWantedBy=galleryplan.target\n",
+                  "configuration": "PORT=9100\n",
+                  "artifact_input": null
+                }
+              },
+              "galleryplan-inspection.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=galleryplan-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/galleryplan-inspection\n[Install]\nWantedBy=galleryplan-maintenance.target\n",
+                  "configuration": "PORT=9200\n",
+                  "artifact_input": null
+                }
+              },
+              "galleryplan-maintenance.target": {
+                "kind": "TargetActive"
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "galleryplan.target": [
+                "galleryplan-app.service",
+                "galleryplan-observer.service"
+              ],
+              "galleryplan-maintenance.target": [
+                "galleryplan-inspection.service"
+              ]
+            },
+            "default_target": "galleryplan-maintenance.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "galleryplan-observer.service",
+              "phase": "Running",
+              "port": 9100,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "galleryplan-observer.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "galleryplan-app.service",
+              "phase": "Running",
+              "port": 8443,
+              "value": null
+            },
+            {
+              "kind": "Runtime",
+              "unit": "galleryplan-inspection.service",
+              "phase": "Running",
+              "port": 9200,
+              "value": null
+            },
+            {
+              "kind": "Runtime",
+              "unit": "galleryplan-maintenance.target",
+              "phase": "TargetActive",
+              "port": null,
+              "value": null
+            },
+            {
+              "kind": "Runtime",
+              "unit": "galleryplan.target",
+              "phase": "Inactive",
+              "port": null,
+              "value": null
+            },
+            {
+              "kind": "DefaultTarget",
+              "target": "galleryplan.target"
+            },
+            {
+              "kind": "InstallLink",
+              "target": "galleryplan-maintenance.target",
+              "unit": "galleryplan-inspection.service",
+              "present": false
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "galleryplan-app.service"
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "galleryplan-inspection.service"
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "galleryplan-observer.service",
+                "phase": "Running",
+                "port": 9100,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "galleryplan-observer.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "galleryplan-app.service",
+                "phase": "Running",
+                "port": 8443,
+                "value": null
+              },
+              {
+                "kind": "Runtime",
+                "unit": "galleryplan-inspection.service",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              },
+              {
+                "kind": "Runtime",
+                "unit": "galleryplan-maintenance.target",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "galleryplan-app.service"
+              }
+            ],
+            "started": [
+              "galleryplan-app.service",
+              "galleryplan-observer.service",
+              "galleryplan.target"
+            ],
+            "ordering": []
+          },
+          "preservation": {
+            "unit_documents": [
+              "galleryplan-app.service",
+              "galleryplan-inspection.service",
+              "galleryplan-maintenance.target",
+              "galleryplan-observer.service",
+              "galleryplan.target"
+            ],
+            "configuration": [
+              "/etc/galleryplan/app.conf",
+              "/etc/galleryplan/inspection.conf",
+              "/etc/galleryplan/observer.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [
+              {
+                "target": "galleryplan-maintenance.target",
+                "unit": "galleryplan-inspection.service"
+              }
+            ],
+            "default_target": false
+          }
+        },
+        "solution": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Disable",
+              "unit": "galleryplan-inspection.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "SetDefault",
+              "target": "galleryplan.target"
+            }
+          }
+        ],
+        "example_actions": [
+          {
+            "title": "Disable galleryplan-inspection.service",
+            "explanation": "Remove only future inspection enrollment; its current program must stay running.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Disable",
+                "unit": "galleryplan-inspection.service"
+              }
+            }
+          },
+          {
+            "title": "SetDefault galleryplan.target",
+            "explanation": "Choose the normal target for the next session without starting it now.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "SetDefault",
+                "target": "galleryplan.target"
+              }
+            }
+          }
+        ],
+        "try_change": "After the example passes, run systemctl set-default galleryplan-maintenance.target. Current services stay unchanged but next-session results fail. Restore galleryplan.target with set-default and check again.",
+        "try_actions": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "SetDefault",
+              "target": "galleryplan-maintenance.target"
+            }
+          }
+        ],
+        "try_outcomes": [
+          {
+            "kind": "DefaultTarget",
+            "target": "galleryplan-maintenance.target"
+          }
+        ],
+        "repair": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "SetDefault",
+              "target": "galleryplan.target"
+            }
+          }
+        ]
+      },
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.freedesktop.org/software/systemd/man/262/systemctl.html",
+        "https://www.freedesktop.org/software/systemd/man/262/systemd.unit.html"
+      ],
+      "hints": [
+        "Compare current service status with startup enrollment; changing one need not change the other.",
+        "Inspect the selected next target and the failed current/next-session rows. Preserve the named observer and files.",
+        "The worked policy keeps current inspection running, removes its maintenance startup link and selects galleryplan.target for next time. Check inspects a separate next-session copy. Current maintenance remains active while the copy starts only the normal target, application and observer."
+      ],
+      "topic": "Current services and startup policy",
+      "summary": "Select harbor.target for the next session; it must start only that target, harbor-app.service at 8443 and harbor-observer.service at 9100.",
+      "difficulty": "Beginner",
+      "steps": [
+        "Understand current and future service policy",
+        "Try a different maintenance plan",
+        "Apply the complete assignment"
+      ],
+      "guide": [],
+      "solution": [
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Disable\",\"unit\":\"harbor-inspection.service\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"SetDefault\",\"target\":\"harbor.target\"}}"
+      ],
+      "retry_guidance": "Read the failed current or next-session condition, inspect the relevant service and target, then change only that policy. Old journal messages do not prove current success.",
+      "explanation": "Start/Stop affect current programs. Enable/Disable affect installation links. Set-default chooses the next target; it does not switch the current session. The grader derives a separate next session from the saved policy and checks actual started units, current inputs and preservation. Equivalent supported action orders and harmless comments in editable text are accepted.",
+      "simplifications": "Sources checked 2026-11-02: LPI LPIC-1 v5.0, systemd262. Bounded supplied services/targets, fixed virtual programs and private simulated configuration only. No firmware, kernel, initramfs, GRUB, real boot, SysV, isolate, mask, reload/restart or host systemd. Next-session copy is a graph/program test, not a real reboot. No packets or listening ports."
+    },
+    {
+      "id": "lpic1-startup-install-links",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-startup-policy",
+      "title": "Move startup enrollment without leaving an old target link",
+      "objective": "The application is enrolled in the wrong service group. Repair its installation metadata and actual enrollment; editing WantedBy alone does not move existing links. Enroll press-app.service in press.target, remove its old press-maintenance.target link and select press.target for next time. Keep press-app.service running at 8443 using its current saved and loaded definition. Keep press-inspection.service running at 9200 now but absent next session. Keep press-observer.service running at 9100 now and next time. Preserve every application configuration, other unit documents and all other install links. The next session must start only press.target, press-app.service and press-observer.service.",
+      "minutes": 30,
+      "prerequisites": [
+        "lpic1-startup-default-target"
+      ],
+      "initial": {
+        "kind": "UnitManager",
+        "simulation": {
+          "schema_version": 1,
+          "inventory": {
+            "schema_version": 1,
+            "fixture": "press-inventory",
+            "units": [
+              "press-app.service",
+              "press-inspection.service",
+              "press-maintenance.target",
+              "press-observer.service",
+              "press.target"
+            ],
+            "config_paths": [
+              "/etc/press/app.conf",
+              "/etc/press/inspection.conf",
+              "/etc/press/observer.conf"
+            ],
+            "artifact_ids": [],
+            "programs": {
+              "/sim/bin/press-app": {
+                "kind": "PortDaemon",
+                "config": "/etc/press/app.conf",
+                "key": "PORT",
+                "prerequisite": null
+              },
+              "/sim/bin/press-observer": {
+                "kind": "PortDaemon",
+                "config": "/etc/press/observer.conf",
+                "key": "PORT",
+                "prerequisite": null
+              },
+              "/sim/bin/press-inspection": {
+                "kind": "PortDaemon",
+                "config": "/etc/press/inspection.conf",
+                "key": "PORT",
+                "prerequisite": null
+              }
+            }
+          },
+          "documents": {
+            "press-app.service": "[Unit]\nDescription=press-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-app\n[Install]\nWantedBy=press-maintenance.target\n",
+            "press-observer.service": "[Unit]\nDescription=press-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-observer\n[Install]\nWantedBy=press.target\n",
+            "press-inspection.service": "[Unit]\nDescription=press-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-inspection\n[Install]\nWantedBy=press.target\n",
+            "press.target": "[Unit]\nDescription=press.target\n",
+            "press-maintenance.target": "[Unit]\nDescription=press-maintenance.target\n"
+          },
+          "configuration": {
+            "/etc/press/app.conf": "PORT=8443\n",
+            "/etc/press/observer.conf": "PORT=9100\n",
+            "/etc/press/inspection.conf": "PORT=9200\n"
+          },
+          "loaded": {
+            "press-app.service": "[Unit]\nDescription=press-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-app\n[Install]\nWantedBy=press-maintenance.target\n",
+            "press-observer.service": "[Unit]\nDescription=press-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-observer\n[Install]\nWantedBy=press.target\n",
+            "press-inspection.service": "[Unit]\nDescription=press-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-inspection\n[Install]\nWantedBy=press.target\n",
+            "press.target": "[Unit]\nDescription=press.target\n",
+            "press-maintenance.target": "[Unit]\nDescription=press-maintenance.target\n"
+          },
+          "runtime": {
+            "press-app.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=press-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-app\n[Install]\nWantedBy=press-maintenance.target\n",
+                "configuration": "PORT=8443\n",
+                "artifact_input": null
+              }
+            },
+            "press-observer.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=press-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-observer\n[Install]\nWantedBy=press.target\n",
+                "configuration": "PORT=9100\n",
+                "artifact_input": null
+              }
+            },
+            "press-inspection.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=press-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-inspection\n[Install]\nWantedBy=press.target\n",
+                "configuration": "PORT=9200\n",
+                "artifact_input": null
+              }
+            }
+          },
+          "artifacts": {},
+          "boot_links": {
+            "press.target": [
+              "press-observer.service"
+            ],
+            "press-maintenance.target": [
+              "press-app.service"
+            ]
+          },
+          "default_target": "press-maintenance.target"
+        }
+      },
+      "goal": {
+        "kind": "UnitManager",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "press-inventory",
+              "units": [
+                "press-app.service",
+                "press-inspection.service",
+                "press-maintenance.target",
+                "press-observer.service",
+                "press.target"
+              ],
+              "config_paths": [
+                "/etc/press/app.conf",
+                "/etc/press/inspection.conf",
+                "/etc/press/observer.conf"
+              ],
+              "artifact_ids": [],
+              "programs": {
+                "/sim/bin/press-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/press/app.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/press-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/press/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/press-inspection": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/press/inspection.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "press-app.service": "[Unit]\nDescription=press-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-app\n[Install]\nWantedBy=press-maintenance.target\n",
+              "press-observer.service": "[Unit]\nDescription=press-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-observer\n[Install]\nWantedBy=press.target\n",
+              "press-inspection.service": "[Unit]\nDescription=press-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-inspection\n[Install]\nWantedBy=press.target\n",
+              "press.target": "[Unit]\nDescription=press.target\n",
+              "press-maintenance.target": "[Unit]\nDescription=press-maintenance.target\n"
+            },
+            "configuration": {
+              "/etc/press/app.conf": "PORT=8443\n",
+              "/etc/press/observer.conf": "PORT=9100\n",
+              "/etc/press/inspection.conf": "PORT=9200\n"
+            },
+            "loaded": {
+              "press-app.service": "[Unit]\nDescription=press-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-app\n[Install]\nWantedBy=press-maintenance.target\n",
+              "press-observer.service": "[Unit]\nDescription=press-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-observer\n[Install]\nWantedBy=press.target\n",
+              "press-inspection.service": "[Unit]\nDescription=press-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-inspection\n[Install]\nWantedBy=press.target\n",
+              "press.target": "[Unit]\nDescription=press.target\n",
+              "press-maintenance.target": "[Unit]\nDescription=press-maintenance.target\n"
+            },
+            "runtime": {
+              "press-app.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=press-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-app\n[Install]\nWantedBy=press-maintenance.target\n",
+                  "configuration": "PORT=8443\n",
+                  "artifact_input": null
+                }
+              },
+              "press-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=press-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-observer\n[Install]\nWantedBy=press.target\n",
+                  "configuration": "PORT=9100\n",
+                  "artifact_input": null
+                }
+              },
+              "press-inspection.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=press-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/press-inspection\n[Install]\nWantedBy=press.target\n",
+                  "configuration": "PORT=9200\n",
+                  "artifact_input": null
+                }
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "press.target": [
+                "press-observer.service"
+              ],
+              "press-maintenance.target": [
+                "press-app.service"
+              ]
+            },
+            "default_target": "press-maintenance.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "press-observer.service",
+              "phase": "Running",
+              "port": 9100,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "press-observer.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "press-app.service",
+              "phase": "Running",
+              "port": 8443,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "press-app.service"
+            },
+            {
+              "kind": "LoadedCurrent",
+              "unit": "press-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "press-inspection.service",
+              "phase": "Running",
+              "port": 9200,
+              "value": null
+            },
+            {
+              "kind": "InstallLink",
+              "target": "press.target",
+              "unit": "press-app.service",
+              "present": true
+            },
+            {
+              "kind": "InstallLink",
+              "target": "press-maintenance.target",
+              "unit": "press-app.service",
+              "present": false
+            },
+            {
+              "kind": "DefaultTarget",
+              "target": "press.target"
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "press-inspection.service"
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "press-observer.service",
+                "phase": "Running",
+                "port": 9100,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "press-observer.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "press-app.service",
+                "phase": "Running",
+                "port": 8443,
+                "value": null
+              },
+              {
+                "kind": "Runtime",
+                "unit": "press-inspection.service",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              },
+              {
+                "kind": "Runtime",
+                "unit": "press-maintenance.target",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "press-app.service"
+              }
+            ],
+            "started": [
+              "press-app.service",
+              "press-observer.service",
+              "press.target"
+            ],
+            "ordering": []
+          },
+          "preservation": {
+            "unit_documents": [
+              "press-inspection.service",
+              "press-maintenance.target",
+              "press-observer.service",
+              "press.target"
+            ],
+            "configuration": [
+              "/etc/press/app.conf",
+              "/etc/press/inspection.conf",
+              "/etc/press/observer.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [
+              {
+                "target": "press-maintenance.target",
+                "unit": "press-app.service"
+              },
+              {
+                "target": "press.target",
+                "unit": "press-app.service"
+              }
+            ],
+            "default_target": false
+          }
+        }
+      },
+      "unit_manager_teaching": {
+        "prerequisite_note": "Builds on opening and reading supplied files. The concepts below introduce service status, targets and startup enrollment before you use them. Every command stays inside the virtual manager.",
+        "concepts": [
+          {
+            "title": "Instructions and installed links differ",
+            "text": "WantedBy in [Install] tells Enable where to create a startup link. It is not itself an active dependency. Changing that text and reloading the manager do not remove links created earlier. Inspect the saved text and actual enrollment separately."
+          },
+          {
+            "title": "Move an enrollment deliberately",
+            "text": "In the different proofplan system, disable proofplan-app.service to remove its old enrollment. In the editor change its WantedBy to proofplan.target, Save, and run systemctl daemon-reload. Enable creates the new link. Select proofplan.target as the next default. Other service links must remain untouched."
+          },
+          {
+            "title": "Loaded and running versions",
+            "text": "This task also requires the app\u2019s current run to use the edited source. Reload reads saved definitions but does not replace a running program. Stop and start only proofplan-app.service, then inspect status and the loaded/current inputs. All configuration values stay unchanged. Check independently verifies current work and the next-session group."
+          }
+        ],
+        "example_description": "Work in the separate proofplan system. Move the app from its maintenance enrollment into the normal target and verify its current source.",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "proofplan-inventory",
+              "units": [
+                "proofplan-app.service",
+                "proofplan-inspection.service",
+                "proofplan-maintenance.target",
+                "proofplan-observer.service",
+                "proofplan.target"
+              ],
+              "config_paths": [
+                "/etc/proofplan/app.conf",
+                "/etc/proofplan/inspection.conf",
+                "/etc/proofplan/observer.conf"
+              ],
+              "artifact_ids": [],
+              "programs": {
+                "/sim/bin/proofplan-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/proofplan/app.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/proofplan-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/proofplan/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/proofplan-inspection": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/proofplan/inspection.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "proofplan-app.service": "[Unit]\nDescription=proofplan-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-app\n[Install]\nWantedBy=proofplan-maintenance.target\n",
+              "proofplan-observer.service": "[Unit]\nDescription=proofplan-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-observer\n[Install]\nWantedBy=proofplan.target\n",
+              "proofplan-inspection.service": "[Unit]\nDescription=proofplan-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-inspection\n[Install]\nWantedBy=proofplan.target\n",
+              "proofplan.target": "[Unit]\nDescription=proofplan.target\n",
+              "proofplan-maintenance.target": "[Unit]\nDescription=proofplan-maintenance.target\n"
+            },
+            "configuration": {
+              "/etc/proofplan/app.conf": "PORT=8443\n",
+              "/etc/proofplan/observer.conf": "PORT=9100\n",
+              "/etc/proofplan/inspection.conf": "PORT=9200\n"
+            },
+            "loaded": {
+              "proofplan-app.service": "[Unit]\nDescription=proofplan-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-app\n[Install]\nWantedBy=proofplan-maintenance.target\n",
+              "proofplan-observer.service": "[Unit]\nDescription=proofplan-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-observer\n[Install]\nWantedBy=proofplan.target\n",
+              "proofplan-inspection.service": "[Unit]\nDescription=proofplan-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-inspection\n[Install]\nWantedBy=proofplan.target\n",
+              "proofplan.target": "[Unit]\nDescription=proofplan.target\n",
+              "proofplan-maintenance.target": "[Unit]\nDescription=proofplan-maintenance.target\n"
+            },
+            "runtime": {
+              "proofplan-app.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=proofplan-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-app\n[Install]\nWantedBy=proofplan-maintenance.target\n",
+                  "configuration": "PORT=8443\n",
+                  "artifact_input": null
+                }
+              },
+              "proofplan-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=proofplan-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-observer\n[Install]\nWantedBy=proofplan.target\n",
+                  "configuration": "PORT=9100\n",
+                  "artifact_input": null
+                }
+              },
+              "proofplan-inspection.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=proofplan-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-inspection\n[Install]\nWantedBy=proofplan.target\n",
+                  "configuration": "PORT=9200\n",
+                  "artifact_input": null
+                }
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "proofplan.target": [
+                "proofplan-observer.service"
+              ],
+              "proofplan-maintenance.target": [
+                "proofplan-app.service"
+              ]
+            },
+            "default_target": "proofplan-maintenance.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "proofplan-observer.service",
+              "phase": "Running",
+              "port": 9100,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "proofplan-observer.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "proofplan-app.service",
+              "phase": "Running",
+              "port": 8443,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "proofplan-app.service"
+            },
+            {
+              "kind": "LoadedCurrent",
+              "unit": "proofplan-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "proofplan-inspection.service",
+              "phase": "Running",
+              "port": 9200,
+              "value": null
+            },
+            {
+              "kind": "InstallLink",
+              "target": "proofplan.target",
+              "unit": "proofplan-app.service",
+              "present": true
+            },
+            {
+              "kind": "InstallLink",
+              "target": "proofplan-maintenance.target",
+              "unit": "proofplan-app.service",
+              "present": false
+            },
+            {
+              "kind": "DefaultTarget",
+              "target": "proofplan.target"
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "proofplan-inspection.service"
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "proofplan-observer.service",
+                "phase": "Running",
+                "port": 9100,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "proofplan-observer.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "proofplan-app.service",
+                "phase": "Running",
+                "port": 8443,
+                "value": null
+              },
+              {
+                "kind": "Runtime",
+                "unit": "proofplan-inspection.service",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              },
+              {
+                "kind": "Runtime",
+                "unit": "proofplan-maintenance.target",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "proofplan-app.service"
+              }
+            ],
+            "started": [
+              "proofplan-app.service",
+              "proofplan-observer.service",
+              "proofplan.target"
+            ],
+            "ordering": []
+          },
+          "preservation": {
+            "unit_documents": [
+              "proofplan-inspection.service",
+              "proofplan-maintenance.target",
+              "proofplan-observer.service",
+              "proofplan.target"
+            ],
+            "configuration": [
+              "/etc/proofplan/app.conf",
+              "/etc/proofplan/inspection.conf",
+              "/etc/proofplan/observer.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [
+              {
+                "target": "proofplan-maintenance.target",
+                "unit": "proofplan-app.service"
+              },
+              {
+                "target": "proofplan.target",
+                "unit": "proofplan-app.service"
+              }
+            ],
+            "default_target": false
+          }
+        },
+        "solution": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Disable",
+              "unit": "proofplan-app.service"
+            }
+          },
+          {
+            "kind": "Save",
+            "draft": {
+              "version": 1,
+              "documents": {
+                "proofplan-app.service": "[Unit]\nDescription=proofplan-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-app\n[Install]\nWantedBy=proofplan.target\n",
+                "proofplan-observer.service": "[Unit]\nDescription=proofplan-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-observer\n[Install]\nWantedBy=proofplan.target\n",
+                "proofplan-inspection.service": "[Unit]\nDescription=proofplan-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-inspection\n[Install]\nWantedBy=proofplan.target\n",
+                "proofplan.target": "[Unit]\nDescription=proofplan.target\n",
+                "proofplan-maintenance.target": "[Unit]\nDescription=proofplan-maintenance.target\n"
+              },
+              "configuration": {
+                "/etc/proofplan/app.conf": "PORT=8443\n",
+                "/etc/proofplan/observer.conf": "PORT=9100\n",
+                "/etc/proofplan/inspection.conf": "PORT=9200\n"
+              },
+              "selected_unit": "proofplan-app.service",
+              "selected_config": "/etc/proofplan/app.conf"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "DaemonReload"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Enable",
+              "unit": "proofplan-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "SetDefault",
+              "target": "proofplan.target"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Stop",
+              "unit": "proofplan-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "proofplan-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ],
+        "example_actions": [
+          {
+            "title": "Disable proofplan-app.service",
+            "explanation": "Remove old enrollment before creating the replacement.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Disable",
+                "unit": "proofplan-app.service"
+              }
+            }
+          },
+          {
+            "title": "Save the app install target",
+            "explanation": "Change only the app\u2019s WantedBy target, preserving application configuration and other unit text.",
+            "action": {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "proofplan-app.service": "[Unit]\nDescription=proofplan-app.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-app\n[Install]\nWantedBy=proofplan.target\n",
+                  "proofplan-observer.service": "[Unit]\nDescription=proofplan-observer.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-observer\n[Install]\nWantedBy=proofplan.target\n",
+                  "proofplan-inspection.service": "[Unit]\nDescription=proofplan-inspection.service\n[Service]\nType=simple\nExecStart=/sim/bin/proofplan-inspection\n[Install]\nWantedBy=proofplan.target\n",
+                  "proofplan.target": "[Unit]\nDescription=proofplan.target\n",
+                  "proofplan-maintenance.target": "[Unit]\nDescription=proofplan-maintenance.target\n"
+                },
+                "configuration": {
+                  "/etc/proofplan/app.conf": "PORT=8443\n",
+                  "/etc/proofplan/observer.conf": "PORT=9100\n",
+                  "/etc/proofplan/inspection.conf": "PORT=9200\n"
+                },
+                "selected_unit": "proofplan-app.service",
+                "selected_config": "/etc/proofplan/app.conf"
+              }
+            }
+          },
+          {
+            "title": "DaemonReload",
+            "explanation": "Read saved definitions; this does not restart the current program.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            }
+          },
+          {
+            "title": "Enable proofplan-app.service",
+            "explanation": "Create the app\u2019s link in the new target.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Enable",
+                "unit": "proofplan-app.service"
+              }
+            }
+          },
+          {
+            "title": "SetDefault proofplan.target",
+            "explanation": "Select the new target for the separate next-session check.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "SetDefault",
+                "target": "proofplan.target"
+              }
+            }
+          },
+          {
+            "title": "Stop proofplan-app.service",
+            "explanation": "Stop the old app execution only.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Stop",
+                "unit": "proofplan-app.service"
+              }
+            }
+          },
+          {
+            "title": "Start proofplan-app.service",
+            "explanation": "Start the app with the loaded definition and its unchanged application inputs.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "proofplan-app.service"
+              }
+            }
+          },
+          {
+            "title": "AdvancePrograms",
+            "explanation": "The simulator completes initialization; terminal Start already includes this bounded step.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            }
+          }
+        ],
+        "try_change": "After the example passes, run systemctl disable proofplan-app.service. Its current status does not change, but next-session application coverage fails. Enable it again and recheck.",
+        "try_actions": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Disable",
+              "unit": "proofplan-app.service"
+            }
+          }
+        ],
+        "try_outcomes": [
+          {
+            "kind": "InstallLink",
+            "target": "proofplan.target",
+            "unit": "proofplan-app.service",
+            "present": false
+          }
+        ],
+        "repair": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Enable",
+              "unit": "proofplan-app.service"
+            }
+          }
+        ]
+      },
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.freedesktop.org/software/systemd/man/262/systemctl.html",
+        "https://www.freedesktop.org/software/systemd/man/262/systemd.unit.html"
+      ],
+      "hints": [
+        "Compare current service status with startup enrollment; changing one need not change the other.",
+        "Inspect the selected next target and the failed current/next-session rows. Preserve the named observer and files.",
+        "This task also requires the app\u2019s current run to use the edited source. Reload reads saved definitions but does not replace a running program. Stop and start only proofplan-app.service, then inspect status and the loaded/current inputs. All configuration values stay unchanged. Check independently verifies current work and the next-session group."
+      ],
+      "topic": "Current services and startup policy",
+      "summary": "Enroll press-app.service in press.target, remove its old press-maintenance.target link and select press.target for next time.",
+      "difficulty": "Intermediate",
+      "steps": [
+        "Understand current and future service policy",
+        "Try a different maintenance plan",
+        "Apply the complete assignment"
+      ],
+      "guide": [],
+      "solution": [
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Disable\",\"unit\":\"press-app.service\"}}",
+        "unit-manager {\"kind\":\"Save\",\"draft\":{\"version\":1,\"documents\":{\"press-app.service\":\"[Unit]\\nDescription=press-app.service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/press-app\\n[Install]\\nWantedBy=press.target\\n\",\"press-observer.service\":\"[Unit]\\nDescription=press-observer.service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/press-observer\\n[Install]\\nWantedBy=press.target\\n\",\"press-inspection.service\":\"[Unit]\\nDescription=press-inspection.service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/press-inspection\\n[Install]\\nWantedBy=press.target\\n\",\"press.target\":\"[Unit]\\nDescription=press.target\\n\",\"press-maintenance.target\":\"[Unit]\\nDescription=press-maintenance.target\\n\"},\"configuration\":{\"/etc/press/app.conf\":\"PORT=8443\\n\",\"/etc/press/observer.conf\":\"PORT=9100\\n\",\"/etc/press/inspection.conf\":\"PORT=9200\\n\"},\"selected_unit\":\"press-app.service\",\"selected_config\":\"/etc/press/app.conf\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"DaemonReload\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Enable\",\"unit\":\"press-app.service\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"SetDefault\",\"target\":\"press.target\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Stop\",\"unit\":\"press-app.service\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Start\",\"unit\":\"press-app.service\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"AdvancePrograms\"}}"
+      ],
+      "retry_guidance": "Read the failed current or next-session condition, inspect the relevant service and target, then change only that policy. Old journal messages do not prove current success.",
+      "explanation": "Start/Stop affect current programs. Enable/Disable affect installation links. Set-default chooses the next target; it does not switch the current session. The grader derives a separate next session from the saved policy and checks actual started units, current inputs and preservation. Equivalent supported action orders and harmless comments in editable text are accepted.",
+      "simplifications": "Sources checked 2026-11-02: LPI LPIC-1 v5.0, systemd262. Bounded supplied services/targets, fixed virtual programs and private simulated configuration only. No firmware, kernel, initramfs, GRUB, real boot, SysV, isolate, mask, reload/restart or host systemd. Next-session copy is a graph/program test, not a real reboot. No packets or listening ports."
+    }
+  ]
+}

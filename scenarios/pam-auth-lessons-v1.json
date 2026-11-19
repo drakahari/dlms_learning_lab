@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-pam-auth-bypass",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "PAM authentication",
+      "unit": "linux-authentication-stacks",
+      "title": "Repair an authentication bypass without locking everyone out",
+      "summary": "Diagnose an early authentication bypass, repair the rule controls, and verify acceptance as well as rejection using supplied module results.",
+      "objective": "Repair the virtual lab-login auth stack. Accept the supplied successful password check; reject an incorrect password, unknown user, unavailable password service and an ignored password check. Test every sample and inspect why each decision occurs. Do not solve the task by accepting everyone or rejecting everyone. Use only the supported auth rules; no real credentials or host configuration are involved.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "initial": {
+        "kind": "PamStack",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-pam-auth-bypass",
+          "view": "introduction",
+          "assignment": {
+            "draft": "# lab-login: virtual service\nauth sufficient pam_permit.so\nauth required pam_unix.so\nauth optional pam_deny.so\n",
+            "tested": null
+          },
+          "practice": {
+            "draft": "# example-login: virtual service\nauth optional pam_unix.so\nauth required pam_permit.so\n",
+            "tested": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "PamStack",
+        "definition": {
+          "initial": {
+            "id": "lpic2-pam-auth-bypass",
+            "instructions": "Repair the virtual lab-login auth stack. Accept the supplied successful password check; reject an incorrect password, unknown user, unavailable password service and an ignored password check. Test every sample and inspect why each decision occurs. Do not solve the task by accepting everyone or rejecting everyone. Use only the supported auth rules; no real credentials or host configuration are involved.",
+            "starter": "# lab-login: virtual service\nauth sufficient pam_permit.so\nauth required pam_unix.so\nauth optional pam_deny.so\n",
+            "cases": [
+              {
+                "id": "lpic2-pam-auth-bypass-0",
+                "label": "Lab-login: Password check succeeds",
+                "facts": {
+                  "unix_result": "Success"
+                },
+                "accepted": true
+              },
+              {
+                "id": "lpic2-pam-auth-bypass-1",
+                "label": "Lab-login: Password is incorrect",
+                "facts": {
+                  "unix_result": "AuthError"
+                },
+                "accepted": false
+              },
+              {
+                "id": "lpic2-pam-auth-bypass-2",
+                "label": "Lab-login: User is unknown",
+                "facts": {
+                  "unix_result": "UserUnknown"
+                },
+                "accepted": false
+              },
+              {
+                "id": "lpic2-pam-auth-bypass-3",
+                "label": "Lab-login: Password service is unavailable",
+                "facts": {
+                  "unix_result": "AuthInfoUnavailable"
+                },
+                "accepted": false
+              },
+              {
+                "id": "lpic2-pam-auth-bypass-4",
+                "label": "Lab-login: Password module supplies no decision",
+                "facts": {
+                  "unix_result": "Ignore"
+                },
+                "accepted": false
+              }
+            ]
+          },
+          "example": {
+            "id": "pam-auth-practice",
+            "instructions": "Repair the example-login stack so only a successful supplied password check is accepted. Compare expected and actual decisions, then explore how changing a control affects the visited rules.",
+            "starter": "# example-login: virtual service\nauth optional pam_unix.so\nauth required pam_permit.so\n",
+            "cases": [
+              {
+                "id": "pam-auth-practice-0",
+                "label": "Practice: Password check succeeds",
+                "facts": {
+                  "unix_result": "Success"
+                },
+                "accepted": true
+              },
+              {
+                "id": "pam-auth-practice-1",
+                "label": "Practice: Password is incorrect",
+                "facts": {
+                  "unix_result": "AuthError"
+                },
+                "accepted": false
+              },
+              {
+                "id": "pam-auth-practice-2",
+                "label": "Practice: User is unknown",
+                "facts": {
+                  "unix_result": "UserUnknown"
+                },
+                "accepted": false
+              },
+              {
+                "id": "pam-auth-practice-3",
+                "label": "Practice: Password service is unavailable",
+                "facts": {
+                  "unix_result": "AuthInfoUnavailable"
+                },
+                "accepted": false
+              },
+              {
+                "id": "pam-auth-practice-4",
+                "label": "Practice: Password module supplies no decision",
+                "facts": {
+                  "unix_result": "Ignore"
+                },
+                "accepted": false
+              }
+            ]
+          },
+          "example_worked": "# example-login: repaired\nauth required pam_unix.so\nauth optional pam_deny.so\n"
+        }
+      },
+      "steps": [
+        "Inspect the ordered auth rules, repair the decision controls and test all supplied acceptance/rejection cases."
+      ],
+      "guide": [],
+      "explanation": "The early sufficient pam_permit.so returns success before the password check runs. Remove that bypass or make it unable to short-circuit required credential checking. A required or requisite pam_unix.so can enforce failures; a sufficient pam_unix.so followed by required pam_deny.so is another supported solution. Optional failures are ignored. The trace shows actual visited rules and remembered failures; an ignored password result alone must not become success. This is control-flow practice over supplied synthetic outcomes, not an authentication service.",
+      "hints": [
+        "Compare the first visited rule in the incorrect-password sample with the password rule. A sufficient success can return before later rules run.",
+        "A required failure survives later successes; a requisite failure returns immediately. Optional failures contribute no failure. Check that valid users can still pass.",
+        "Test unavailable and ignored results too. A parser error is not a successful rejection, and pam_permit.so never verifies a supplied password result."
+      ],
+      "sources": [
+        "https://wiki.lpi.org/wiki/LPIC-2_Objectives_V4.5",
+        "https://github.com/linux-pam/linux-pam/blob/v1.7.1/doc/man/pam.conf-syntax.xml",
+        "https://github.com/linux-pam/linux-pam/blob/v1.7.1/libpam/pam_dispatch.c",
+        "https://github.com/linux-pam/linux-pam/blob/v1.7.1/modules/pam_unix/pam_unix_auth.c"
+      ],
+      "simplifications": "Checked2026-11-08, Linux-PAMv1.7.1 and LPIC-2v4.5/210.2. One bounded virtual pam.d auth stack with three known module names and four simple controls. Each sample supplies the Unix module result; no actual passwords, user records, conversation, PAM API, module loading, files or services are accessed. Permit assumes a valid supplied conversation; deny returns authentication error. No other management groups, arguments, includes/substacks, bracket controls, continuations, LDAP/NSS, distributions, password/session policy or complete PAM administration. Source-based semantic checks are not an actual libpam comparison.",
+      "prerequisites": [
+        "lpic1-account-team-handover"
+      ],
+      "solution": [
+        "PAM STACK\n\"# lab-login: repaired\\nauth requisite pam_unix.so\\nauth optional pam_deny.so\\n\""
+      ]
+    }
+  ]
+}

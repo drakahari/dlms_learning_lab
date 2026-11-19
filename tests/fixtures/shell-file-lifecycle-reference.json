@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "temporary-publish",
+      "source": "t=$(mktemp -- report.XXXXXX)\nprintf '%s\\n' 'north wing' > \"$t\"\nmv -- \"$t\" report.txt\nIFS= read -r line < report.txt\nprintf '%s\\n' \"$line\"",
+      "files": {
+        "keep.txt": "retain\n"
+      }
+    },
+    {
+      "id": "temporary-collision",
+      "source": "t=$(mktemp item.XXXXXX)\nprintf '%s\\n' ready > \"$t\"\nIFS= read -r line < \"$t\"\nrm -- \"$t\"\nprintf '%s\\n' \"$line\"",
+      "files": {
+        "item.000000": "retain first",
+        "item.000001": "retain second"
+      }
+    },
+    {
+      "id": "temporary-shared-captures",
+      "source": "a=$(mktemp first.XXXXXX)\nb=$(mktemp second.XXXXXX)\nprintf '%s\\n' one > \"$a\"\nmv \"$a\" final\nrm \"$b\"\nIFS= read -r line < final\nprintf '%s\\n' \"$line\"",
+      "files": {}
+    },
+    {
+      "id": "remove-existing",
+      "source": "rm -- input\nprintf '%s\\n' removed",
+      "files": {
+        "input": "discard",
+        "protected": "retain"
+      }
+    },
+    {
+      "id": "remove-missing",
+      "source": "rm missing",
+      "files": {
+        "protected": "retain"
+      }
+    },
+    {
+      "id": "remove-recovery",
+      "source": "rm missing || printf '%s\\n' recovered",
+      "files": {
+        "protected": "retain"
+      }
+    },
+    {
+      "id": "rename-replace",
+      "source": "mv source destination\nIFS= read -r line < destination\nprintf '%s\\n' \"$line\"",
+      "files": {
+        "source": "new\n",
+        "destination": "old\n",
+        "protected": "retain"
+      }
+    },
+    {
+      "id": "rename-missing",
+      "source": "mv missing destination",
+      "files": {
+        "destination": "retain"
+      }
+    },
+    {
+      "id": "rename-same",
+      "source": "mv item item",
+      "files": {
+        "item": "retain"
+      }
+    },
+    {
+      "id": "rename-recovery",
+      "source": "if mv missing report; then printf '%s\\n' wrong; else printf '%s\\n' retained; fi",
+      "files": {
+        "report": "retain"
+      }
+    },
+    {
+      "id": "terminator-and-spaces",
+      "source": "mv -- '-old' 'new name'\nrm -- --\nIFS= read -r line < 'new name'\nprintf '%s\\n' \"$line\"",
+      "files": {
+        "-old": "content\n",
+        "--": "remove"
+      }
+    },
+    {
+      "id": "space-template",
+      "source": "t=$(mktemp 'space name.XXXXXX')\nprintf '%s\\n' value > \"$t\"\nIFS= read -r line < \"$t\"\nrm \"$t\"\nprintf '%s\\n' \"$line\"",
+      "files": {}
+    },
+    {
+      "id": "literal-option-name",
+      "source": "t=$(mktemp dash.XXXXXX)\nmv -- \"$t\" --\nrm -- --\nprintf '%s\\n' done",
+      "files": {}
+    },
+    {
+      "id": "remove-then-normal-status",
+      "source": "rm item\nprintf '%s\\n' after",
+      "files": {
+        "item": "remove",
+        "protected": "retain"
+      }
+    }
+  ]
+}

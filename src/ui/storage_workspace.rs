@@ -59,18 +59,33 @@ impl LabApp {
             .expect("validated storage teaching");
         match view {
             teaching::View::Introduction => {
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for concept in &lesson.concepts {
-                    ui.label(RichText::new(&concept.title).strong());
-                    ui.label(&concept.text);
+                lesson_presentation::concepts(
+                    ui,
+                    &scenario,
+                    &lesson.prerequisite_note,
+                    lesson
+                        .concepts
+                        .iter()
+                        .map(|c| (c.title.clone(), c.text.clone())),
+                );
+                lesson_presentation::worked(ui, &lesson.example_description);
+                lesson_presentation::worked_rows(ui, &scenario);
+                if lesson.fixture.inventory().swap().is_some() {
+                    controls::collapsing_header(ui, "Command reference").show(ui, |ui| {
+                        for example in &lesson.example_commands {
+                            lesson_presentation::monospace(ui, &example.command, false);
+                            lesson_presentation::prose(ui, &example.explanation);
+                        }
+                    });
+                } else {
+                    for example in &lesson.example_commands {
+                        ui.label(RichText::new(&example.command).monospace());
+                        ui.label(&example.explanation);
+                    }
                 }
-                ui.label(RichText::new("A different example to try").strong());
-                ui.label(&lesson.example_description);
-                for example in &lesson.example_commands {
-                    ui.label(RichText::new(&example.command).monospace());
-                    ui.label(&example.explanation);
-                }
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                controls::collapsing_header(ui, "Explore after practice").show(ui, |ui| {
+                    lesson_presentation::practice_step(ui, &scenario, 2);
+                });
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -85,8 +100,7 @@ impl LabApp {
                 });
             }
             teaching::View::Example => {
-                ui.label("Practice example · Ungraded; your assignment remains saved separately.");
-                ui.label(&lesson.example_description);
+                lesson_presentation::practice_step(ui, &scenario, 0);
                 let mut l = self.progress.attempts[&scenario.id]
                     .workspace
                     .as_ref()
@@ -108,6 +122,7 @@ impl LabApp {
                         l.view = teaching::View::Example;
                     }
                 });
+                lesson_presentation::practice_step(ui, &scenario, 1);
                 ui.push_id(("storage-practice", &scenario.id), |ui| {
                     if configuration(
                         ui,
@@ -141,7 +156,7 @@ impl LabApp {
                         if l.checked {
                             let checks=l.checks(lesson);
                             if checks.iter().all(|c|c.0) {
-                                ui.colored_label(palette(ui).success,"Example checks pass · No assignment credit");
+                                ui.colored_label(palette(ui).success,"Example checks pass");
                             } else if !l.draft.matches(&l.state) {
                                 ui.colored_label(palette(ui).error,"The example editor has unsaved changes. Save the file before checking its results.");
                             } else {
@@ -151,7 +166,7 @@ impl LabApp {
                     });
                     self.metrics.feedback = Some(result.response.rect);
                 });
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                lesson_presentation::practice_step(ui, &scenario, 2);
                 let r = ui.add(button("Open full assignment"));
                 self.metrics.assignment_action = Some(r.rect);
                 if r.clicked() {
@@ -171,7 +186,7 @@ impl LabApp {
                     .storage_learning = Some(l);
             }
             teaching::View::Assignment => {
-                ui.label(&scenario.objective);
+                lesson_presentation::assignment(ui, &scenario);
                 let engine::State::PersistentMounts { mut storage } =
                     self.progress.attempts[&scenario.id].state.clone()
                 else {
@@ -236,7 +251,7 @@ impl LabApp {
                         let complete = progress::current_solved(a, &scenario);
                         self.metrics.completion = complete;
                         if complete {
-                            ui.colored_label(palette(ui).success,"Objective complete · Saved settings, live mounts and fresh-session checks pass.");
+                            ui.colored_label(palette(ui).success,if lesson.fixture.inventory().swap().is_some(){"Objective complete · Saved policy, active swap, protected mounts and independent policy tests pass."}else{"Objective complete · Saved settings, live mounts and fresh-session checks pass."});
                             if !a.challenge {
                                 ui.label(&scenario.explanation);
                             }
@@ -267,6 +282,65 @@ fn configuration(
     focus: &mut bool,
 ) -> bool {
     let before = (state.clone(), draft.text.clone());
+    if state.inventory().swap().is_some() {
+        swap_overview(ui, state);
+        controls::collapsing_header(ui, "Protected data mounts")
+            .show(ui, |ui| live_mounts(ui, state));
+    } else {
+        live_mounts(ui, state);
+    }
+    if ui.available_width() >= ui.text_style_height(&egui::TextStyle::Body) * 52. {
+        ui.columns(2, |columns| {
+            if state.inventory().swap().is_some() {
+                // egui columns justify ordinary labels by default. Keep the
+                // new teaching workspace left aligned; editor sizes still use
+                // the full available column width, without per-screen offsets.
+                columns[0].with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
+                    editor(ui, state, draft, requirements, metrics, focus);
+                });
+                columns[1].with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
+                    terminal(ui, state, draft, metrics);
+                });
+            } else {
+                editor(&mut columns[0], state, draft, requirements, metrics, focus);
+                terminal(&mut columns[1], state, draft, metrics);
+            }
+        });
+    } else {
+        editor(ui, state, draft, requirements, metrics, focus);
+        terminal(ui, state, draft, metrics);
+    }
+    before != (state.clone(), draft.text.clone())
+}
+fn swap_overview(ui: &mut egui::Ui, state: &Storage) {
+    let Some(facts) = state.inventory().swap() else {
+        return;
+    };
+    ui.label(RichText::new("Supplied swap areas · current state").strong());
+    for area in &facts.areas {
+        ui.horizontal_wrapped(|ui| {
+            ui.strong(&area.id);
+            ui.monospace(&area.device);
+            ui.label(if !area.available {
+                "Unavailable".into()
+            } else if !area.prepared {
+                "Not prepared".into()
+            } else {
+                match state.active_swap().get(&area.id) {
+                    Some(p) => format!("Active · priority {p}"),
+                    None => "Prepared · inactive".into(),
+                }
+            });
+        });
+        lesson_presentation::monospace(
+            ui,
+            &format!("UUID={} · {} usable bytes", area.uuid, area.size_bytes),
+            true,
+        );
+        ui.add_space(controls::GAP);
+    }
+}
+fn live_mounts(ui: &mut egui::Ui, state: &Storage) {
     ui.label(RichText::new("Current live mounts").strong());
     for target in state.inventory().mountpoints() {
         let text = match state.live().get(target) {
@@ -279,16 +353,6 @@ fn configuration(
         };
         ui.add(egui::Label::new(text).wrap());
     }
-    if ui.available_width() >= ui.text_style_height(&egui::TextStyle::Body) * 52. {
-        ui.columns(2, |columns| {
-            editor(&mut columns[0], state, draft, requirements, metrics, focus);
-            terminal(&mut columns[1], state, draft, metrics);
-        });
-    } else {
-        editor(ui, state, draft, requirements, metrics, focus);
-        terminal(ui, state, draft, metrics);
-    }
-    before != (state.clone(), draft.text.clone())
 }
 fn editor(
     ui: &mut egui::Ui,
@@ -298,11 +362,23 @@ fn editor(
     metrics: &mut Metrics,
     focus: &mut bool,
 ) {
-    let label = ui.label(RichText::new("Saved mount configuration · /etc/fstab").strong());
+    let swap = state.inventory().swap().is_some();
+    let label = ui.label(
+        RichText::new(if swap {
+            "Saved storage policy · /etc/fstab"
+        } else {
+            "Saved mount configuration · /etc/fstab"
+        })
+        .strong(),
+    );
     ui.label(
-        RichText::new("Source  mountpoint  type  options  dump  check")
-            .small()
-            .color(palette(ui).muted),
+        RichText::new(if swap {
+            "Swap row: source  none  swap  options  0  0 · retain supplied mount rows"
+        } else {
+            "Source  mountpoint  type  options  dump  check"
+        })
+        .small()
+        .color(palette(ui).muted),
     );
     let h = ui.text_style_height(&egui::TextStyle::Monospace) * 6. + 2. * controls::PAD_Y as f32;
     let width = (ui.available_width()
@@ -346,9 +422,9 @@ fn editor(
         let r=ui.add(button("Save configuration"));metrics.editor_save=Some(r.rect);if r.clicked(){draft.save(state);}
         let r=ui.add(button("Validate configuration"));metrics.storage_validate=Some(r.rect);if r.clicked(){
             let errors=state.validate_configuration();
-            draft.notice=Some(if !draft.matches(state){"Validation reads the saved file. The editor has unsaved changes; save them to validate the new text.".into()}else if errors.is_empty(){"Saved configuration is valid in this simulator. Validation does not change live mounts.".into()}else{errors.iter().map(ToString::to_string).collect::<Vec<_>>().join("\n")});
+            draft.notice=Some(if !draft.matches(state){"Validation reads the saved file. The editor has unsaved changes; save them to validate the new text.".into()}else if errors.is_empty(){if swap {"Saved policy is valid in this simulator. Validation does not change live mounts or active swap."}else{"Saved configuration is valid in this simulator. Validation does not change live mounts."}.into()}else{errors.iter().map(ToString::to_string).collect::<Vec<_>>().join("\n")});
         }
-        let r=ui.add(button("Test saved mounts"));metrics.storage_test=Some(r.rect);if r.clicked(){
+        let r=ui.add(button(if swap {"Test saved policy"} else {"Test saved mounts"}));metrics.storage_test=Some(r.rect);if r.clicked(){
             draft.append_output(&fresh_report(state,requirements));
             draft.notice=Some("Fresh-session results are in terminal output. The test uses independent copies; your current mounts and device names did not change.".into());
         }
@@ -375,7 +451,7 @@ fn terminal(ui: &mut egui::Ui, state: &mut Storage, draft: &mut Draft, metrics: 
                     ui.add(
                         egui::Label::new(
                             RichText::new(if draft.output.is_empty() {
-                                "Ready. Type blkid or mount."
+                                if state.inventory().swap().is_some() {"Ready. Run blkid or swapon --show --bytes to inspect the supplied simulated areas."}else{"Ready. Type blkid or mount."}
                             } else {
                                 &draft.output
                             })
@@ -475,6 +551,57 @@ pub(super) fn fresh_report(state: &Storage, requirements: &[Requirement]) -> Str
                 }
             }
             Err(e) => out.push_str(&format!("Cannot test this saved file: {e}\n")),
+        }
+    }
+    for (i, requirement) in
+        requirements
+            .iter()
+            .filter_map(|r| match r {
+                Requirement::Swap {
+                    requirement:
+                        dlms_learning_lab::storage_workspace::swap::Requirement::Fresh {
+                            devices,
+                            expected,
+                        },
+                } => Some((devices, expected)),
+                _ => None,
+            })
+            .enumerate()
+    {
+        let (devices, expected) = requirement;
+        out.push_str(&format!(
+            "Swap-policy test {} · independent alias permutation\n",
+            i + 1
+        ));
+        let expected_text = expected
+            .iter()
+            .map(|(id, priority)| {
+                format!(
+                    "{id}: {}",
+                    priority
+                        .map(|p| format!("active priority {p}"))
+                        .unwrap_or_else(|| "inactive".into())
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("; ");
+        out.push_str(&format!("Expected automatic areas: {expected_text}\n"));
+        match dlms_learning_lab::storage_workspace::swap::fresh(state, devices) {
+            Err(e) => out.push_str(&format!("Actual: failed · {e}\n")),
+            Ok(fresh) => {
+                out.push_str("Actual active areas:\n");
+                match dlms_learning_lab::storage::swap::listing(&fresh.inventory, &fresh.active) {
+                    Ok(text) => out.push_str(&text),
+                    Err(e) => out.push_str(&format!("{e}\n")),
+                }
+                for result in fresh.outcomes {
+                    if let dlms_learning_lab::storage::swap::Outcome::Failed { line, reason } =
+                        result
+                    {
+                        out.push_str(&format!("Failed saved line{line}: {reason}\n"));
+                    }
+                }
+            }
         }
     }
     out

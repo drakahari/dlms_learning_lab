@@ -1,4 +1,6 @@
 //! App admission, current outcomes and typed logical actions; no package CLI.
+mod conffiles;
+pub use conffiles::{ConfigurationTarget, ConfigurationUpgradeGoal, prepare_configuration, choose_configuration};
 use crate::debian_packages::{self as core, Action, Catalog, Constraint, State, Status, Version};
 use serde::{
     Deserialize, Deserializer, Serialize,
@@ -101,6 +103,7 @@ pub(crate) fn list<'de, D: Deserializer<'de>, V: Deserialize<'de>, const N: usiz
 }
 pub(crate) fn action_bounded(a: &Action) -> bool {
     match a {
+        Action::UpgradeConffiles{upgrade}=>upgrade.valid_shape() && within(a,MAX_ACTION_BYTES),
         Action::RefreshIndex {} => true,
         Action::Install { packages } => {
             !packages.is_empty()
@@ -131,6 +134,12 @@ pub fn admitted(s: &State) -> bool {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Requirement {
+    ConfigurationUpgrade { outcome:ConfigurationUpgradeGoal },
+    /// Positive behavior outcome: discover a package from its supplied file path.
+    InstalledFileProvider {
+        #[serde(deserialize_with = "string::<_,160>")]
+        path: String,
+    },
     Installed {
         #[serde(deserialize_with = "string::<_,64>")]
         package: String,
@@ -150,6 +159,7 @@ pub enum Requirement {
         package: String,
     },
     DependenciesSatisfied {},
+    ConflictsSatisfied {},
     FileMatches {
         #[serde(deserialize_with = "string::<_,160>")]
         path: String,
@@ -196,11 +206,19 @@ impl Requirement {
     fn valid(&self, i: &State) -> bool {
         let c = i.catalog();
         match self {
+            Self::ConfigurationUpgrade{outcome} => outcome.valid(i),
+            Self::InstalledFileProvider { path } => {
+                path.len() <= 160
+                    && c.archives
+                        .values()
+                        .any(|a| a.files.get(path).is_some_and(|file| !file.conffile))
+            }
             Self::Installed { package: n, .. }
             | Self::RetainedConfig { package: n, .. }
             | Self::NoRecord { package: n }
             | Self::PayloadIntact { package: n } => package(c, n),
             Self::DependenciesSatisfied {} => true,
+            Self::ConflictsSatisfied {} => true,
             Self::FileMatches { path: p, contents } => {
                 contents.len() <= 2048 && !contents.contains('\0') && file(c, p)
             }
@@ -220,6 +238,37 @@ impl Requirement {
         let r = s.runtime();
         let c = s.catalog();
         match self {
+            Self::ConfigurationUpgrade{outcome} => outcome.check(i,s),
+            Self::InstalledFileProvider { path } => {
+                let provider = r.records.iter().find(|(_, record)| {
+                    record.status == Status::Installed
+                        && c.archives[&record.archive]
+                            .files
+                            .get(path)
+                            .is_some_and(|file| !file.conffile)
+                });
+                match provider {
+                    None => (
+                        false,
+                        format!(
+                            "{path}: no installed package supplies this file. Search the complete path in repository Contents; a query or metadata refresh alone does not install it."
+                        ),
+                    ),
+                    Some((name, _)) => {
+                        let intact = s.payload_issues(name).is_ok_and(|issues| issues.is_empty());
+                        (
+                            intact,
+                            if intact {
+                                format!("{path}: an installed provider has intact ordinary files")
+                            } else {
+                                format!(
+                                    "{path}: its installed provider has missing or changed ordinary files. Inspect its files and use the taught repair workflow."
+                                )
+                            },
+                        )
+                    }
+                }
+            }
             Self::Installed {
                 package,
                 constraint,
@@ -289,6 +338,12 @@ impl Requirement {
                 ),
                 Err(_) => (false, "Installed dependency context is invalid".into()),
             },
+            Self::ConflictsSatisfied {} => match s.conflict_issues() {
+                Ok(v) => (v.is_empty(), v.first().map_or_else(
+                    || "No incompatible installed package pair remains.".into(),
+                    |r| format!("{} conflicts with installed {} version {}. Inspect both metadata and installed versions; a cache refresh alone does not change installed software.",r.package,r.conflict.name,r.installed.as_str()))),
+                Err(_) => (false,"Installed conflict context is invalid.".into()),
+            },
             Self::FileMatches { path, contents } => (
                 r.files.get(path) == Some(contents),
                 format!("{path}: current virtual text must match the explicitly requested content"),
@@ -351,6 +406,7 @@ impl Definition {
         {
             return Err("Package definition exceeds app state/requirement/JSON bounds".into());
         }
+        if self.requirements.iter().filter(|r|matches!(r,Requirement::ConfigurationUpgrade{..})).count()>1{return Err("This activity supports one configuration-upgrade package".into());}
         // Direct scalar/identity checks precede serialization and comparisons.
         if !self.requirements.iter().all(|r| r.valid(&self.initial)) {
             return Err("Package requirement field or known identity is invalid".into());
@@ -360,12 +416,14 @@ impl Definition {
             .iter()
             .enumerate()
             .any(|(n, r)| self.requirements[..n].contains(r))
-            || !self
-                .requirements
-                .iter()
-                .any(|r| matches!(r, Requirement::Installed { .. }))
+            || !self.requirements.iter().any(|r| {
+                matches!(
+                    r,
+                    Requirement::Installed { .. } | Requirement::InstalledFileProvider { .. } | Requirement::ConfigurationUpgrade{..}
+                )
+            })
         {
-            return Err("Package goals need known unique predicates and a positive installed-package outcome".into());
+            return Err("Package goals need known unique predicates and a positive installed-package or installed-file-provider outcome".into());
         }
         if !within(self, MAX_DEFINITION_BYTES) {
             return Err("Package definition exceeds compact JSON bounds".into());
@@ -398,8 +456,13 @@ pub fn apply(d: &Definition, s: &mut State, a: &Action) -> Result<core::Plan, St
     if !action_bounded(a) {
         return Err("Package action exceeds bounded fields/count; original retained".into());
     }
+    conffiles::admit(d,s,a)?;
     let mut candidate = s.clone();
-    let report = candidate.apply(a).map_err(|e| notice(e.message))?;
+    let report = candidate.apply(a).map_err(|e| {
+        if e.code==core::ErrorCode::Conffile && matches!(a,Action::Install{packages}if packages.iter().any(|p|conffiles::goal(d,&p.name).is_some())){
+            "Local settings and incoming defaults both changed. Use Review configuration upgrade, compare the texts, then apply an explicit choice.".into()
+        }else{notice(e.message)}
+    })?;
     if !admitted(&candidate) {
         return Err(
             "Logical operation exceeds this app's state admission; original retained".into(),
@@ -426,6 +489,7 @@ pub fn execute(d: &Definition, s: &mut State, input: &str) -> Result<String, Str
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Operation {
+    UpgradeConffiles,
     RefreshIndex,
     Install,
     Reinstall,
@@ -458,6 +522,8 @@ pub struct Draft {
     pub requests: Vec<RequestDraft>,
     pub query: QueryKind,
     pub query_argument: String,
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub conffile_upgrade: Option<core::ConffileUpgrade>,
 }
 impl<'de> Deserialize<'de> for Draft {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
@@ -474,6 +540,8 @@ impl<'de> Deserialize<'de> for Draft {
             query: QueryKind,
             #[serde(deserialize_with = "string::<_,160>")]
             query_argument: String,
+            #[serde(default)]
+            conffile_upgrade: Option<core::ConffileUpgrade>,
         }
         let r = R::deserialize(d)?;
         let v = Self {
@@ -484,6 +552,7 @@ impl<'de> Deserialize<'de> for Draft {
             requests: r.requests,
             query: r.query,
             query_argument: r.query_argument,
+            conffile_upgrade:r.conffile_upgrade,
         };
         if !v.valid() {
             return Err(D::Error::custom(
@@ -497,6 +566,13 @@ impl Draft {
     pub fn valid(&self) -> bool {
         self.version == 1
             && self.requests.len() <= 8
+            && (self.operation!=Operation::UpgradeConffiles||self.conffile_upgrade.is_some())
+            && self.conffile_upgrade.as_ref().is_none_or(|u|{
+                u.valid_shape()&&conffiles::action_size(u)
+                &&self.context.archives.get(&u.expected_archive).is_some_and(|a|a.name==u.package)
+                &&self.context.archives.get(&u.incoming_archive).is_some_and(|a|a.name==u.package)
+                &&u.files.iter().all(|r|self.context.archives[&u.expected_archive].files.get(&r.path).is_some_and(|p|p.conffile))
+            })
             && bounded_raw(&self.package, 64)
             && bounded_raw(&self.query_argument, 160)
             && self
@@ -533,17 +609,24 @@ impl Draft {
             }],
             query: QueryKind::Inventory,
             query_argument: String::new(),
+            conffile_upgrade:None,
         };
         if !d.valid_for(s) {
             return Err("Package draft aggregate bound".into());
         }
         Ok(d)
     }
+    pub fn review_configuration(&mut self,s:&State,package:&str)->Result<(),String>{
+        if !self.valid_for(s){return Err("This review uses different sample packages".into());}
+        let upgrade=s.review_conffiles(package).map_err(|e|notice(e.message))?;
+        self.fill(s,&Action::UpgradeConffiles{upgrade})
+    }
     pub fn action(&self) -> Result<Action, String> {
         if !self.valid() {
             return Err("Invalid package draft bounds; previous state retained".into());
         }
         let a = match self.operation {
+            Operation::UpgradeConffiles=>Action::UpgradeConffiles{upgrade:self.conffile_upgrade.clone().ok_or("Prepare a configuration review first")?},
             Operation::RefreshIndex => Action::RefreshIndex {},
             Operation::Install => Action::Install {
                 packages: self
@@ -585,6 +668,7 @@ impl Draft {
             .map_err(|e| notice(e.message))?;
         let mut next = self.clone();
         match a {
+            Action::UpgradeConffiles{upgrade}=>{next.operation=Operation::UpgradeConffiles;next.package=upgrade.package.clone();next.conffile_upgrade=Some(upgrade.clone());},
             Action::RefreshIndex {} => next.operation = Operation::RefreshIndex,
             Action::Install { packages } => {
                 next.operation = Operation::Install;
@@ -639,6 +723,8 @@ pub struct CandidateRow {
     pub version: Version,
     pub architecture: core::Architecture,
     pub dependencies: Vec<core::Dependency>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub conflicts: Vec<core::Dependency>,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(tag = "kind")]
@@ -693,6 +779,7 @@ pub fn query(s: &State, kind: QueryKind, arg: &str) -> Result<QueryResult, Strin
                     version: c.version.clone(),
                     architecture: c.architecture,
                     dependencies: c.depends.to_vec(),
+                    conflicts: c.conflicts.to_vec(),
                 }),
             }
         }

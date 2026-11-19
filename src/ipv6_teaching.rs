@@ -134,6 +134,7 @@ pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
             | crate::engine::State::Lvm { .. }
             | crate::engine::State::Ntp { .. }
             | crate::engine::State::Hsrp { .. }
+            | crate::engine::State::Syslog { .. }
     ) || crate::workspace::is_physical_workspace(attempt)
     {
         return;
@@ -170,6 +171,7 @@ pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
 pub fn preferred_device(requirements: &[Requirement]) -> Option<String> {
     requirements.first().map(|r| match r {
         Requirement::AddressIn { device, .. }
+        | Requirement::ModifiedEui64 { device, .. }
         | Requirement::KeepAddress { device, .. }
         | Requirement::Forwarding { device, .. } => device.clone(),
         Requirement::Reachable { from, .. } => from.clone(),

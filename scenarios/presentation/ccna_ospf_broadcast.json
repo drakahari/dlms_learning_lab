@@ -1,0 +1,67 @@
+[
+  {
+    "id": "ccna-ospf-broadcast-handover",
+    "context": "Builds on Router ID, configured OSPF neighbors and route observations. This exercise supplies one compatible two-way broadcast segment.",
+    "goal": "Prepare a shared OSPF segment for a later high-priority router and the loss of the first designated router.",
+    "concepts": [
+      {
+        "title": "Decide who can take a role",
+        "text": "On a shared broadcast segment, OSPF chooses a designated router (DR) and a backup (BDR). An interface priority of zero excludes that router from those roles. It can still be an OSPF neighbor. For a fresh election among these supplied routers, the larger priority wins. If priorities tie, compare numerical Router IDs."
+      },
+      {
+        "title": "Keep an established leader through a later arrival",
+        "text": "The priority determines eligibility and helps choose an open role. A router joining this established segment with a higher priority keeps the current DR and BDR in place. Compare a fresh election with a later arrival before planning any interruption."
+      },
+      {
+        "title": "Observe failover and neighbor choices",
+        "text": "If the DR goes down, the eligible BDR takes over and a new backup can be chosen. A pair of compatible routers involving a DR or BDR would attempt full adjacency. Two other routers can stay two-way neighbors. This exercise shows that decision from the settled roles."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Fresh segment",
+        "value": "Bridge DR · Depot BDR\nMeter stays a neighbor",
+        "explanation": "Bridge priority 90 beats Depot 70. Meter has priority 0 and can still be a neighbor."
+      },
+      {
+        "label": "Later arrival",
+        "value": "Workshop arrives at priority 160",
+        "explanation": "The earlier DR and BDR remain. A larger number on the newcomer does not move either incumbent."
+      },
+      {
+        "label": "Bridge outage",
+        "value": "Depot DR · Workshop BDR",
+        "explanation": "The original backup takes over. Meter can attempt adjacency with either elected router."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Set the training priorities",
+        "action": "Enter 110 for Library, 70 for Workshop, and 0 for Desk.",
+        "observe": "Library and Workshop win on the fresh segment. Desk stays a neighbor without a designated role."
+      },
+      {
+        "title": "Compare a later arrival",
+        "action": "Select New router joins.",
+        "observe": "Annex is present with a higher priority. Library still serves as DR and Workshop as BDR."
+      },
+      {
+        "title": "Check the named outage",
+        "action": "Select Library outage. Read the displayed roles and the Desk neighbor comparisons. Select Check workspace.",
+        "observe": "Workshop takes over. Annex can fill the open backup role, and Desk can attempt adjacency with it."
+      }
+    ],
+    "requirements": [
+      "On a fresh Research segment, make North the designated router and West the backup. Set their priorities below Relay’s supplied priority.",
+      "Keep Observer on the segment without allowing it to become a designated router or backup.",
+      "Check that Relay’s later arrival leaves the incumbent roles in place, then verify that West takes over when North goes down."
+    ],
+    "source": "scenarios/ccna-ospf-broadcast-lessons-v1.json",
+    "status": "updated",
+    "review": {
+      "introduction": "Explains eligibility, fresh election, non-preempting arrival and backup promotion with a worked segment.",
+      "example": "Learners change three interface priorities and inspect separate derived role and adjacency views.",
+      "assignment": "Independent configuration and useful feedback across fresh election, arrival and outage. The role choices are computed."
+    }
+  }
+]

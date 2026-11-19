@@ -4,6 +4,8 @@ use crate::switching::{Fabric, Jack, Mode};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
+pub mod access_outputs;
+
 pub const MAX_ENTRIES: usize = 256;
 pub const MAX_EVENTS: usize = 512;
 /// Compact serialized payload; pretty input has its own finite ceiling.
@@ -507,6 +509,73 @@ impl State {
         *self = trial;
         Ok(result)
     }
+    /// An explicit, caller-owned configured table. Old serialized state and the
+    /// ordinary dynamic-only send path are unchanged. Configuration is not a
+    /// source-security policy; future secure-port admission must run separately.
+    pub fn send_with_static(
+        &mut self,
+        source: &str,
+        destination: Mac,
+        configured: &crate::static_cam::Table,
+    ) -> Result<crate::static_cam::Frame, String> {
+        let source_mac = self
+            .address(source)
+            .ok_or("Choose a known source workstation")?;
+        self.send_frame_with_static(source, source_mac, destination, configured)
+    }
+    /// One explicit metadata source address on a supplied physical attachment.
+    /// This does not change workstation identity/NIC acceptance. Secure-port
+    /// admission, when used, must run before this forwarding-only entry point.
+    pub fn send_frame_with_static(
+        &mut self,
+        source: &str,
+        source_mac: Mac,
+        destination: Mac,
+        configured: &crate::static_cam::Table,
+    ) -> Result<crate::static_cam::Frame, String> {
+        self.validate()?;
+        configured.validate_for(&self.fabric)?;
+        if !source_mac.unicast() {
+            return Err(
+                "The metadata source must be a complete nonzero unicast MAC address".into(),
+            );
+        }
+        if configured.rows().is_empty() && self.address(source) == Some(source_mac) {
+            return self
+                .send(source, destination)
+                .map(|forwarding| crate::static_cam::Frame {
+                    forwarding,
+                    configured_sources: vec![],
+                });
+        }
+        if !self.host_addresses.contains_key(source) {
+            return Err("Choose a known source workstation".into());
+        }
+        if !destination.unicast() && destination != Mac::BROADCAST {
+            return Err(
+                "Unsupported multicast MAC: use an individual address or ff:ff:ff:ff:ff:ff".into(),
+            );
+        }
+        let mut trial = self.clone();
+        trial
+            .entries
+            .retain(|e| configured.lookup(&e.switch, e.vlan, e.address).is_none());
+        let mut configured_sources = Vec::new();
+        let forwarding = trial.propagate_with_static(
+            source,
+            destination,
+            Some(configured),
+            &mut configured_sources,
+            source_mac,
+            None,
+        )?;
+        trial.validate()?;
+        *self = trial;
+        Ok(crate::static_cam::Frame {
+            forwarding,
+            configured_sources,
+        })
+    }
     fn learn(
         &mut self,
         switch: &str,
@@ -537,12 +606,29 @@ impl State {
         Ok(None)
     }
     fn propagate(&mut self, source: &str, destination: Mac) -> Result<Observation, String> {
+        self.propagate_with_static(
+            source,
+            destination,
+            None,
+            &mut Vec::new(),
+            self.host_addresses[source],
+            None,
+        )
+    }
+    fn propagate_with_static(
+        &mut self,
+        source: &str,
+        destination: Mac,
+        configured: Option<&crate::static_cam::Table>,
+        configured_sources: &mut Vec<crate::static_cam::SourceObservation>,
+        source_mac: Mac,
+        outputs: Option<&access_outputs::AccessOutputs>,
+    ) -> Result<Observation, String> {
         let mut out = Observation::default();
         if !self.fabric.hosts[source].up {
             out.drop_at(source.into(), "The source workstation is stopped")?;
             return Ok(out);
         }
-        let source_mac = self.host_addresses[source];
         let mut peers = BTreeMap::new();
         for c in &self.fabric.cables {
             peers.insert(c.a.clone(), (c.b.clone(), c.up));
@@ -596,19 +682,35 @@ impl State {
                 ingress: ingress.clone(),
                 vlan,
             })?;
-            let previous_port = self.learn(&switch, vlan, source_mac, &ingress)?;
-            out.push(Event::Learn {
-                switch: switch.clone(),
-                vlan,
-                source: source_mac,
-                port: ingress.clone(),
-                previous_port,
-            })?;
-            let known = self
-                .entries
-                .iter()
-                .find(|e| e.switch == switch && e.vlan == vlan && e.address == destination)
-                .map(|e| e.port.clone());
+            if let Some(binding) = configured.and_then(|c| c.lookup(&switch, vlan, source_mac)) {
+                if configured_sources.len() >= crate::static_cam::MAX_BINDINGS {
+                    return Err(
+                        "Configured source observation limit reached; no state changed".into(),
+                    );
+                }
+                configured_sources.push(crate::static_cam::SourceObservation {
+                    binding: binding.clone(),
+                    ingress: ingress.clone(),
+                });
+            } else {
+                let previous_port = self.learn(&switch, vlan, source_mac, &ingress)?;
+                out.push(Event::Learn {
+                    switch: switch.clone(),
+                    vlan,
+                    source: source_mac,
+                    port: ingress.clone(),
+                    previous_port,
+                })?;
+            }
+            let known = configured
+                .and_then(|c| c.lookup(&switch, vlan, destination))
+                .map(|r| r.port.clone())
+                .or_else(|| {
+                    self.entries
+                        .iter()
+                        .find(|e| e.switch == switch && e.vlan == vlan && e.address == destination)
+                        .map(|e| e.port.clone())
+                });
             if known.as_deref() == Some(ingress.as_str()) {
                 out.push(Event::Filter {
                     switch,
@@ -650,6 +752,13 @@ impl State {
                     }
                     continue;
                 };
+                if outputs.is_some_and(|p| !p.permits(&switch, egress_port)) {
+                    out.drop_at(
+                        format!("{switch}/{egress_port}"),
+                        "This frame's output policy does not permit this outgoing port",
+                    )?;
+                    continue;
+                }
                 out.push(Event::Forward {
                     switch: switch.clone(),
                     ingress: ingress.clone(),

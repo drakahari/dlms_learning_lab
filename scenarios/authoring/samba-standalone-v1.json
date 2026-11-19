@@ -1,0 +1,5329 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-smb-identity-access",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "samba-standalone-shares",
+      "topic": "Samba identity and Unix access",
+      "title": "Repair an SMB login and its Unix access",
+      "summary": "Restore the supplied SMB accounts and the folder access needed by two team members.",
+      "objective": "Enable the supplied test SMB accounts for mira and noor; their Unix identities and groups already exist. Let both team members list /srv/team-reports and reach its existing files. The writer must read and replace draft.txt; the reviewer must read checklist.txt and be denied writes by share policy. Keep casey and anonymous clients out of the team share. Preserve every supplied regular-file mode, the configuration/payroll ownership, and the payroll and public-notice text. Keep the public share read-only and available.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the supplied sharing layers",
+        "Practice on the separate guide server",
+        "Repair and verify the full independent assignment"
+      ],
+      "hints": [
+        "Read the actual failure layer before changing file modes or account policy. A syntax pass is not an access pass.",
+        "Use the supplied client identities and id -Gn / ls -ld to distinguish share policy from Unix rights. The public and private resources have their own preservation requirements.",
+        "Compare saved versus applied settings and the actual resolved path. Save, apply, then open a new trial; avoid changing an archive to compensate for a wrong destination."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/#rdp-we-209.1_Samba_Server_Configuration_(weight:_5)",
+        "https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html",
+        "https://www.samba.org/samba/docs/current/man-html/testparm.1.html",
+        "https://www.samba.org/samba/docs/current/man-html/smbpasswd.8.html"
+      ],
+      "simplifications": "Sources checked 2026-11-13: LPIC-2 v4.5 objective209.1; official current Samba smb.conf/testparm manuals identify documentation4.25.0. No local testparm binary was available for a runtime comparison. Bounded standalone policy and existing regular-file text operations only: supplied abstract credential proofs, fixed local Unix identities/groups, enabled SMB records, supported INI directives, saved/applied snapshots and new client trials. Not an SMB/NTLM/Kerberos implementation, real server, AD member, CIFS mount, Windows ACL, printer, NIS, protocol pathname/case-folding, file-creation, locking or open-handle cache model. Paths use exact supplied Unix spelling. Account controls and Apply saved settings are marked simulator administration, not Linux commands. Filesystem terminal subset is listed in optional help. No host filesystem, process, network, service or account is changed.",
+      "explanation": "A named SMB login first needs its enabled supplied account. The mapped Unix user must then traverse the folder and satisfy the regular-file permission checks. The team folder needs group read/search for this task; the already-correct regular-file modes need no broadening. Writer and reviewer policy remains separate from Unix group rights.",
+      "initial": {
+        "kind": "SambaShare",
+        "simulation": {
+          "schema_version": 1,
+          "version": 1,
+          "id": "lpic2-smb-identity-access",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "schema_version": 1,
+              "server": "assignment-identity",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/team-reports": {
+                    "directory": true,
+                    "mode": 448,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/bulletin": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/bulletin/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/srv/team-reports/draft.txt": "draft=initial\n",
+                  "/srv/team-reports/checklist.txt": "checklist=initial\n",
+                  "/srv/team-reports/payroll.txt": "private=payroll-fixture\n",
+                  "/srv/bulletin/notice.txt": "notice=published\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team\nguest ok = no\nread only = yes\nread list = @reviewers\nwrite list = @writers\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = yes\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "team",
+                    "writers"
+                  ],
+                  "mira": [
+                    "team",
+                    "writers"
+                  ],
+                  "noor": [
+                    "team",
+                    "reviewers"
+                  ],
+                  "casey": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "casey",
+                  "enabled": true
+                },
+                {
+                  "user": "mira",
+                  "enabled": false
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team\nguest ok = no\nread only = yes\nread list = @reviewers\nwrite list = @writers\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = yes\n",
+              "generation": 1
+            },
+            "editor": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team\nguest ok = no\nread only = yes\nread list = @reviewers\nwrite list = @writers\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = yes\n",
+            "terminal": "",
+            "request": {
+              "client": "writer",
+              "share": "team",
+              "operation": {
+                "kind": "Read",
+                "path": "draft.txt"
+              }
+            },
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "schema_version": 1,
+              "server": "guide-identity",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/notes": {
+                    "directory": true,
+                    "mode": 448,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/practice/notes/draft.txt": "draft=initial\n",
+                  "/practice/notes/checklist.txt": "checklist=initial\n",
+                  "/practice/notes/payroll.txt": "private=payroll-fixture\n",
+                  "/practice/board/notice.txt": "notice=published\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project\nguest ok = no\nread only = yes\nread list = @readers\nwrite list = @authors\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = yes\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "project",
+                    "authors"
+                  ],
+                  "riley": [
+                    "project",
+                    "authors"
+                  ],
+                  "sam": [
+                    "project",
+                    "readers"
+                  ],
+                  "cameron": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "cameron",
+                  "enabled": true
+                },
+                {
+                  "user": "riley",
+                  "enabled": false
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project\nguest ok = no\nread only = yes\nread list = @readers\nwrite list = @authors\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = yes\n",
+              "generation": 1
+            },
+            "editor": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project\nguest ok = no\nread only = yes\nread list = @readers\nwrite list = @authors\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = yes\n",
+            "terminal": "",
+            "request": {
+              "client": "writer",
+              "share": "notes",
+              "operation": {
+                "kind": "Read",
+                "path": "draft.txt"
+              }
+            },
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SambaShare",
+        "definition": {
+          "schema_version": 1,
+          "version": 1,
+          "id": "lpic2-smb-identity-access",
+          "assignment": {
+            "id": "assignment-identity",
+            "initial": {
+              "schema_version": 1,
+              "server": "assignment-identity",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/team-reports": {
+                    "directory": true,
+                    "mode": 448,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/bulletin": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/bulletin/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/srv/team-reports/draft.txt": "draft=initial\n",
+                  "/srv/team-reports/checklist.txt": "checklist=initial\n",
+                  "/srv/team-reports/payroll.txt": "private=payroll-fixture\n",
+                  "/srv/bulletin/notice.txt": "notice=published\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team\nguest ok = no\nread only = yes\nread list = @reviewers\nwrite list = @writers\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = yes\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "team",
+                    "writers"
+                  ],
+                  "mira": [
+                    "team",
+                    "writers"
+                  ],
+                  "noor": [
+                    "team",
+                    "reviewers"
+                  ],
+                  "casey": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "casey",
+                  "enabled": true
+                },
+                {
+                  "user": "mira",
+                  "enabled": false
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team\nguest ok = no\nread only = yes\nread list = @reviewers\nwrite list = @writers\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = yes\n",
+              "generation": 1
+            },
+            "reference": {
+              "schema_version": 1,
+              "server": "assignment-identity",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/team-reports": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/bulletin": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/bulletin/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/srv/team-reports/draft.txt": "draft=initial\n",
+                  "/srv/team-reports/checklist.txt": "checklist=initial\n",
+                  "/srv/team-reports/payroll.txt": "private=payroll-fixture\n",
+                  "/srv/bulletin/notice.txt": "notice=published\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team\nguest ok = no\nread only = yes\nread list = @reviewers\nwrite list = @writers\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = yes\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "team",
+                    "writers"
+                  ],
+                  "mira": [
+                    "team",
+                    "writers"
+                  ],
+                  "noor": [
+                    "team",
+                    "reviewers"
+                  ],
+                  "casey": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "casey",
+                  "enabled": true
+                },
+                {
+                  "user": "mira",
+                  "enabled": true
+                },
+                {
+                  "user": "noor",
+                  "enabled": true
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team\nguest ok = no\nread only = yes\nread list = @reviewers\nwrite list = @writers\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = yes\n",
+              "generation": 2
+            },
+            "shares": [
+              {
+                "id": "team"
+              },
+              {
+                "id": "bulletin"
+              }
+            ],
+            "editable_accounts": [
+              {
+                "id": "mira"
+              },
+              {
+                "id": "noor"
+              }
+            ],
+            "accounts": [
+              {
+                "user": "mira",
+                "enabled": true
+              },
+              {
+                "user": "noor",
+                "enabled": true
+              }
+            ],
+            "policy": [
+              {
+                "kind": "ReadOnly",
+                "share": "bulletin"
+              }
+            ],
+            "clients": [
+              {
+                "id": "writer",
+                "label": "mira — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "mira"
+                }
+              },
+              {
+                "id": "reviewer",
+                "label": "noor — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "noor"
+                }
+              },
+              {
+                "id": "visitor",
+                "label": "casey — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "casey"
+                }
+              },
+              {
+                "id": "anonymous",
+                "label": "Anonymous client",
+                "credential": {
+                  "kind": "Anonymous"
+                }
+              },
+              {
+                "id": "wrong-writer",
+                "label": "mira — invalid test credential",
+                "credential": {
+                  "kind": "Invalid",
+                  "user": "mira"
+                }
+              }
+            ],
+            "filesystem": [
+              {
+                "kind": "Contents",
+                "path": "/srv/team-reports/payroll.txt",
+                "text": "private=payroll-fixture\n"
+              },
+              {
+                "kind": "Contents",
+                "path": "/srv/bulletin/notice.txt",
+                "text": "notice=published\n"
+              },
+              {
+                "kind": "Access",
+                "path": "/srv/team-reports",
+                "user": "mira",
+                "operation": "list_names",
+                "allowed": true
+              },
+              {
+                "kind": "Access",
+                "path": "/srv/team-reports",
+                "user": "noor",
+                "operation": "list_names",
+                "allowed": true
+              },
+              {
+                "kind": "Access",
+                "path": "/srv/team-reports",
+                "user": "casey",
+                "operation": "search_directory",
+                "allowed": false
+              },
+              {
+                "kind": "Access",
+                "path": "/srv/team-reports/draft.txt",
+                "user": "casey",
+                "operation": "read_file",
+                "allowed": false
+              },
+              {
+                "kind": "Mode",
+                "path": "/srv/team-reports/draft.txt",
+                "mode": 432
+              },
+              {
+                "kind": "Mode",
+                "path": "/srv/team-reports/checklist.txt",
+                "mode": 432
+              },
+              {
+                "kind": "Mode",
+                "path": "/srv/team-reports/payroll.txt",
+                "mode": 384
+              },
+              {
+                "kind": "Mode",
+                "path": "/srv/bulletin/notice.txt",
+                "mode": 420
+              },
+              {
+                "kind": "Mode",
+                "path": "/etc/samba/smb.conf",
+                "mode": 384
+              },
+              {
+                "kind": "Ownership",
+                "path": "/etc/samba/smb.conf",
+                "owner": "operator",
+                "group": "operators"
+              },
+              {
+                "kind": "Ownership",
+                "path": "/srv/team-reports/payroll.txt",
+                "owner": "operator",
+                "group": "operators"
+              }
+            ],
+            "cases": [
+              {
+                "id": "writer-read-first",
+                "label": "Writer reads the current report",
+                "inputs": [
+                  {
+                    "path": "/srv/team-reports/draft.txt",
+                    "text": "report=sample-one\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/team-reports/draft.txt",
+                  "text": "report=sample-one\n"
+                }
+              },
+              {
+                "id": "writer-read-second",
+                "label": "Writer reads a different report sample",
+                "inputs": [
+                  {
+                    "path": "/srv/team-reports/draft.txt",
+                    "text": "report=sample-two\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/team-reports/draft.txt",
+                  "text": "report=sample-two\n"
+                }
+              },
+              {
+                "id": "reviewer-read",
+                "label": "Reviewer reads the checklist",
+                "inputs": [
+                  {
+                    "path": "/srv/team-reports/checklist.txt",
+                    "text": "checklist=sample-three\n"
+                  }
+                ],
+                "request": {
+                  "client": "reviewer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "checklist.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/team-reports/checklist.txt",
+                  "text": "checklist=sample-three\n"
+                }
+              },
+              {
+                "id": "writer-update",
+                "label": "Writer updates the production draft",
+                "inputs": [
+                  {
+                    "path": "/srv/team-reports/draft.txt",
+                    "text": "before=writer-trial\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "draft.txt",
+                    "text": "after=writer-trial\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Replaced",
+                  "path": "/srv/team-reports/draft.txt",
+                  "text": "after=writer-trial\n"
+                }
+              },
+              {
+                "id": "reviewer-read-only",
+                "label": "Share policy keeps reviewer writes read-only",
+                "inputs": [],
+                "request": {
+                  "client": "reviewer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "draft.txt",
+                    "text": "must-not-write\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "ReadOnly"
+                  ]
+                }
+              },
+              {
+                "id": "visitor-policy",
+                "label": "Share policy rejects the non-team account",
+                "inputs": [],
+                "request": {
+                  "client": "visitor",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "SharePolicy"
+                  ]
+                }
+              },
+              {
+                "id": "anonymous-policy",
+                "label": "Reject anonymous team connections",
+                "inputs": [],
+                "request": {
+                  "client": "anonymous",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "Authentication",
+                    "SharePolicy"
+                  ]
+                }
+              },
+              {
+                "id": "invalid-proof",
+                "label": "A bad named credential does not become guest access",
+                "inputs": [],
+                "request": {
+                  "client": "wrong-writer",
+                  "share": "bulletin",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "Authentication"
+                  ]
+                }
+              },
+              {
+                "id": "private-file",
+                "label": "Team writer cannot read the private payroll file",
+                "inputs": [],
+                "request": {
+                  "client": "writer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "payroll.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "UnixAccess"
+                  ]
+                }
+              },
+              {
+                "id": "public-anonymous-read",
+                "label": "Anonymous clients can read the public notice",
+                "inputs": [
+                  {
+                    "path": "/srv/bulletin/notice.txt",
+                    "text": "notice=public-test-input\n"
+                  }
+                ],
+                "request": {
+                  "client": "anonymous",
+                  "share": "bulletin",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/bulletin/notice.txt",
+                  "text": "notice=public-test-input\n"
+                }
+              },
+              {
+                "id": "public-named-read",
+                "label": "The non-team account still reads the public notice",
+                "inputs": [
+                  {
+                    "path": "/srv/bulletin/notice.txt",
+                    "text": "notice=named-test-input\n"
+                  }
+                ],
+                "request": {
+                  "client": "visitor",
+                  "share": "bulletin",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/bulletin/notice.txt",
+                  "text": "notice=named-test-input\n"
+                }
+              },
+              {
+                "id": "public-read-only",
+                "label": "Public writes are denied by share policy",
+                "inputs": [],
+                "request": {
+                  "client": "anonymous",
+                  "share": "bulletin",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "notice.txt",
+                    "text": "must-not-publish\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "ReadOnly"
+                  ]
+                }
+              }
+            ],
+            "trial": {
+              "client": "writer",
+              "share": "team",
+              "operation": {
+                "kind": "Read",
+                "path": "draft.txt"
+              }
+            }
+          },
+          "example": {
+            "id": "guide-identity",
+            "initial": {
+              "schema_version": 1,
+              "server": "guide-identity",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/notes": {
+                    "directory": true,
+                    "mode": 448,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/practice/notes/draft.txt": "draft=initial\n",
+                  "/practice/notes/checklist.txt": "checklist=initial\n",
+                  "/practice/notes/payroll.txt": "private=payroll-fixture\n",
+                  "/practice/board/notice.txt": "notice=published\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project\nguest ok = no\nread only = yes\nread list = @readers\nwrite list = @authors\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = yes\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "project",
+                    "authors"
+                  ],
+                  "riley": [
+                    "project",
+                    "authors"
+                  ],
+                  "sam": [
+                    "project",
+                    "readers"
+                  ],
+                  "cameron": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "cameron",
+                  "enabled": true
+                },
+                {
+                  "user": "riley",
+                  "enabled": false
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project\nguest ok = no\nread only = yes\nread list = @readers\nwrite list = @authors\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = yes\n",
+              "generation": 1
+            },
+            "reference": {
+              "schema_version": 1,
+              "server": "guide-identity",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/notes": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/practice/notes/draft.txt": "draft=initial\n",
+                  "/practice/notes/checklist.txt": "checklist=initial\n",
+                  "/practice/notes/payroll.txt": "private=payroll-fixture\n",
+                  "/practice/board/notice.txt": "notice=published\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project\nguest ok = no\nread only = yes\nread list = @readers\nwrite list = @authors\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = yes\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "project",
+                    "authors"
+                  ],
+                  "riley": [
+                    "project",
+                    "authors"
+                  ],
+                  "sam": [
+                    "project",
+                    "readers"
+                  ],
+                  "cameron": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "cameron",
+                  "enabled": true
+                },
+                {
+                  "user": "riley",
+                  "enabled": true
+                },
+                {
+                  "user": "sam",
+                  "enabled": true
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project\nguest ok = no\nread only = yes\nread list = @readers\nwrite list = @authors\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = yes\n",
+              "generation": 2
+            },
+            "shares": [
+              {
+                "id": "notes"
+              },
+              {
+                "id": "board"
+              }
+            ],
+            "editable_accounts": [
+              {
+                "id": "riley"
+              },
+              {
+                "id": "sam"
+              }
+            ],
+            "accounts": [
+              {
+                "user": "riley",
+                "enabled": true
+              },
+              {
+                "user": "sam",
+                "enabled": true
+              }
+            ],
+            "policy": [
+              {
+                "kind": "ReadOnly",
+                "share": "board"
+              }
+            ],
+            "clients": [
+              {
+                "id": "writer",
+                "label": "riley — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "riley"
+                }
+              },
+              {
+                "id": "reviewer",
+                "label": "sam — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "sam"
+                }
+              },
+              {
+                "id": "visitor",
+                "label": "cameron — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "cameron"
+                }
+              },
+              {
+                "id": "anonymous",
+                "label": "Anonymous client",
+                "credential": {
+                  "kind": "Anonymous"
+                }
+              },
+              {
+                "id": "wrong-writer",
+                "label": "riley — invalid test credential",
+                "credential": {
+                  "kind": "Invalid",
+                  "user": "riley"
+                }
+              }
+            ],
+            "filesystem": [
+              {
+                "kind": "Contents",
+                "path": "/practice/notes/payroll.txt",
+                "text": "private=payroll-fixture\n"
+              },
+              {
+                "kind": "Contents",
+                "path": "/practice/board/notice.txt",
+                "text": "notice=published\n"
+              },
+              {
+                "kind": "Access",
+                "path": "/practice/notes",
+                "user": "riley",
+                "operation": "list_names",
+                "allowed": true
+              },
+              {
+                "kind": "Access",
+                "path": "/practice/notes",
+                "user": "sam",
+                "operation": "list_names",
+                "allowed": true
+              },
+              {
+                "kind": "Access",
+                "path": "/practice/notes",
+                "user": "cameron",
+                "operation": "search_directory",
+                "allowed": false
+              },
+              {
+                "kind": "Access",
+                "path": "/practice/notes/draft.txt",
+                "user": "cameron",
+                "operation": "read_file",
+                "allowed": false
+              },
+              {
+                "kind": "Mode",
+                "path": "/practice/notes/draft.txt",
+                "mode": 432
+              },
+              {
+                "kind": "Mode",
+                "path": "/practice/notes/checklist.txt",
+                "mode": 432
+              },
+              {
+                "kind": "Mode",
+                "path": "/practice/notes/payroll.txt",
+                "mode": 384
+              },
+              {
+                "kind": "Mode",
+                "path": "/practice/board/notice.txt",
+                "mode": 420
+              },
+              {
+                "kind": "Mode",
+                "path": "/etc/samba/smb.conf",
+                "mode": 384
+              },
+              {
+                "kind": "Ownership",
+                "path": "/etc/samba/smb.conf",
+                "owner": "operator",
+                "group": "operators"
+              },
+              {
+                "kind": "Ownership",
+                "path": "/practice/notes/payroll.txt",
+                "owner": "operator",
+                "group": "operators"
+              }
+            ],
+            "cases": [
+              {
+                "id": "writer-read-first",
+                "label": "Writer reads the current report",
+                "inputs": [
+                  {
+                    "path": "/practice/notes/draft.txt",
+                    "text": "report=sample-one\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/notes/draft.txt",
+                  "text": "report=sample-one\n"
+                }
+              },
+              {
+                "id": "writer-read-second",
+                "label": "Writer reads a different report sample",
+                "inputs": [
+                  {
+                    "path": "/practice/notes/draft.txt",
+                    "text": "report=sample-two\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/notes/draft.txt",
+                  "text": "report=sample-two\n"
+                }
+              },
+              {
+                "id": "reviewer-read",
+                "label": "Reviewer reads the checklist",
+                "inputs": [
+                  {
+                    "path": "/practice/notes/checklist.txt",
+                    "text": "checklist=sample-three\n"
+                  }
+                ],
+                "request": {
+                  "client": "reviewer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "checklist.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/notes/checklist.txt",
+                  "text": "checklist=sample-three\n"
+                }
+              },
+              {
+                "id": "writer-update",
+                "label": "Writer updates the production draft",
+                "inputs": [
+                  {
+                    "path": "/practice/notes/draft.txt",
+                    "text": "before=writer-trial\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "draft.txt",
+                    "text": "after=writer-trial\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Replaced",
+                  "path": "/practice/notes/draft.txt",
+                  "text": "after=writer-trial\n"
+                }
+              },
+              {
+                "id": "reviewer-read-only",
+                "label": "Share policy keeps reviewer writes read-only",
+                "inputs": [],
+                "request": {
+                  "client": "reviewer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "draft.txt",
+                    "text": "must-not-write\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "ReadOnly"
+                  ]
+                }
+              },
+              {
+                "id": "visitor-policy",
+                "label": "Share policy rejects the non-team account",
+                "inputs": [],
+                "request": {
+                  "client": "visitor",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "SharePolicy"
+                  ]
+                }
+              },
+              {
+                "id": "anonymous-policy",
+                "label": "Reject anonymous team connections",
+                "inputs": [],
+                "request": {
+                  "client": "anonymous",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "Authentication",
+                    "SharePolicy"
+                  ]
+                }
+              },
+              {
+                "id": "invalid-proof",
+                "label": "A bad named credential does not become guest access",
+                "inputs": [],
+                "request": {
+                  "client": "wrong-writer",
+                  "share": "board",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "Authentication"
+                  ]
+                }
+              },
+              {
+                "id": "private-file",
+                "label": "Team writer cannot read the private payroll file",
+                "inputs": [],
+                "request": {
+                  "client": "writer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "payroll.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "UnixAccess"
+                  ]
+                }
+              },
+              {
+                "id": "public-anonymous-read",
+                "label": "Anonymous clients can read the public notice",
+                "inputs": [
+                  {
+                    "path": "/practice/board/notice.txt",
+                    "text": "notice=public-test-input\n"
+                  }
+                ],
+                "request": {
+                  "client": "anonymous",
+                  "share": "board",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/board/notice.txt",
+                  "text": "notice=public-test-input\n"
+                }
+              },
+              {
+                "id": "public-named-read",
+                "label": "The non-team account still reads the public notice",
+                "inputs": [
+                  {
+                    "path": "/practice/board/notice.txt",
+                    "text": "notice=named-test-input\n"
+                  }
+                ],
+                "request": {
+                  "client": "visitor",
+                  "share": "board",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/board/notice.txt",
+                  "text": "notice=named-test-input\n"
+                }
+              },
+              {
+                "id": "public-read-only",
+                "label": "Public writes are denied by share policy",
+                "inputs": [],
+                "request": {
+                  "client": "anonymous",
+                  "share": "board",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "notice.txt",
+                    "text": "must-not-publish\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "ReadOnly"
+                  ]
+                }
+              }
+            ],
+            "trial": {
+              "client": "writer",
+              "share": "notes",
+              "operation": {
+                "kind": "Read",
+                "path": "draft.txt"
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "smb-share {\"kind\":\"Account\",\"user\":\"mira\",\"enabled\":true}",
+        "smb-share {\"kind\":\"Account\",\"user\":\"noor\",\"enabled\":true}",
+        "smb-share {\"kind\":\"Command\",\"command\":\"chmod g+rx /srv/team-reports\"}",
+        "smb-share {\"kind\":\"Check\"}"
+      ]
+    },
+    {
+      "id": "lpic2-smb-team-policy",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "samba-standalone-shares",
+      "topic": "Samba share policy",
+      "title": "Give writers and reviewers the right share access",
+      "summary": "Apply a share policy that permits team writing and review while preserving a read-only public share.",
+      "objective": "Publish team for mira to read/update the supplied draft and for noor to read while share policy rejects reviewer writes. Reject casey and anonymous connections to the team at authentication/share policy, rather than relying on an inaccessible file. A failed named login must not become guest access. Keep bulletin available for public reads, with a default read-only policy and no write-list exceptions. Preserve supplied regular-file modes, configuration/payroll ownership, and the private and notice contents. Save a supported configuration and apply its policy. The supplied Unix identities, SMB accounts and file inventory remain in place.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the supplied sharing layers",
+        "Practice on the separate guide server",
+        "Repair and verify the full independent assignment"
+      ],
+      "hints": [
+        "Read the actual failure layer before changing file modes or account policy. A syntax pass is not an access pass.",
+        "Use the supplied client identities and id -Gn / ls -ld to distinguish share policy from Unix rights. The public and private resources have their own preservation requirements.",
+        "Compare saved versus applied settings and the actual resolved path. Save, apply, then open a new trial; avoid changing an archive to compensate for a wrong destination."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/#rdp-we-209.1_Samba_Server_Configuration_(weight:_5)",
+        "https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html",
+        "https://www.samba.org/samba/docs/current/man-html/testparm.1.html",
+        "https://www.samba.org/samba/docs/current/man-html/smbpasswd.8.html"
+      ],
+      "simplifications": "Sources checked 2026-11-13: LPIC-2 v4.5 objective209.1; official current Samba smb.conf/testparm manuals identify documentation4.25.0. No local testparm binary was available for a runtime comparison. Bounded standalone policy and existing regular-file text operations only: supplied abstract credential proofs, fixed local Unix identities/groups, enabled SMB records, supported INI directives, saved/applied snapshots and new client trials. Not an SMB/NTLM/Kerberos implementation, real server, AD member, CIFS mount, Windows ACL, printer, NIS, protocol pathname/case-folding, file-creation, locking or open-handle cache model. Paths use exact supplied Unix spelling. Account controls and Apply saved settings are marked simulator administration, not Linux commands. Filesystem terminal subset is listed in optional help. No host filesystem, process, network, service or account is changed.",
+      "explanation": "The team policy must admit the right identities and distinguish write roles before the Unix filesystem is considered. A read-only default plus a writer exception is one supported solution; a writable default plus an explicit reviewer read-list can also meet the team outcomes. The public share still needs its stated read-only default without write exceptions. Guest access and failed named authentication are different cases.",
+      "initial": {
+        "kind": "SambaShare",
+        "simulation": {
+          "schema_version": 1,
+          "version": 1,
+          "id": "lpic2-smb-team-policy",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "schema_version": 1,
+              "server": "assignment-policy",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/team-reports": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/bulletin": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/bulletin/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/srv/team-reports/draft.txt": "draft=initial\n",
+                  "/srv/team-reports/checklist.txt": "checklist=initial\n",
+                  "/srv/team-reports/payroll.txt": "private=payroll-fixture\n",
+                  "/srv/bulletin/notice.txt": "notice=published\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team casey\nguest ok = yes\nread only = no\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = no\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "team",
+                    "writers"
+                  ],
+                  "mira": [
+                    "team",
+                    "writers"
+                  ],
+                  "noor": [
+                    "team",
+                    "reviewers"
+                  ],
+                  "casey": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "casey",
+                  "enabled": true
+                },
+                {
+                  "user": "mira",
+                  "enabled": true
+                },
+                {
+                  "user": "noor",
+                  "enabled": true
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team casey\nguest ok = yes\nread only = no\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = no\n",
+              "generation": 1
+            },
+            "editor": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team casey\nguest ok = yes\nread only = no\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = no\n",
+            "terminal": "",
+            "request": {
+              "client": "writer",
+              "share": "team",
+              "operation": {
+                "kind": "Read",
+                "path": "draft.txt"
+              }
+            },
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "schema_version": 1,
+              "server": "guide-policy",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/notes": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/practice/notes/draft.txt": "draft=initial\n",
+                  "/practice/notes/checklist.txt": "checklist=initial\n",
+                  "/practice/notes/payroll.txt": "private=payroll-fixture\n",
+                  "/practice/board/notice.txt": "notice=published\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project cameron\nguest ok = yes\nread only = no\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = no\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "project",
+                    "authors"
+                  ],
+                  "riley": [
+                    "project",
+                    "authors"
+                  ],
+                  "sam": [
+                    "project",
+                    "readers"
+                  ],
+                  "cameron": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "cameron",
+                  "enabled": true
+                },
+                {
+                  "user": "riley",
+                  "enabled": true
+                },
+                {
+                  "user": "sam",
+                  "enabled": true
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project cameron\nguest ok = yes\nread only = no\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = no\n",
+              "generation": 1
+            },
+            "editor": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project cameron\nguest ok = yes\nread only = no\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = no\n",
+            "terminal": "",
+            "request": {
+              "client": "writer",
+              "share": "notes",
+              "operation": {
+                "kind": "Read",
+                "path": "draft.txt"
+              }
+            },
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SambaShare",
+        "definition": {
+          "schema_version": 1,
+          "version": 1,
+          "id": "lpic2-smb-team-policy",
+          "assignment": {
+            "id": "assignment-policy",
+            "initial": {
+              "schema_version": 1,
+              "server": "assignment-policy",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/team-reports": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/bulletin": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/bulletin/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/srv/team-reports/draft.txt": "draft=initial\n",
+                  "/srv/team-reports/checklist.txt": "checklist=initial\n",
+                  "/srv/team-reports/payroll.txt": "private=payroll-fixture\n",
+                  "/srv/bulletin/notice.txt": "notice=published\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team casey\nguest ok = yes\nread only = no\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = no\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "team",
+                    "writers"
+                  ],
+                  "mira": [
+                    "team",
+                    "writers"
+                  ],
+                  "noor": [
+                    "team",
+                    "reviewers"
+                  ],
+                  "casey": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "casey",
+                  "enabled": true
+                },
+                {
+                  "user": "mira",
+                  "enabled": true
+                },
+                {
+                  "user": "noor",
+                  "enabled": true
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team casey\nguest ok = yes\nread only = no\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = no\n",
+              "generation": 1
+            },
+            "reference": {
+              "schema_version": 1,
+              "server": "assignment-policy",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/team-reports": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/team-reports/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/bulletin": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/bulletin/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/srv/team-reports/draft.txt": "draft=initial\n",
+                  "/srv/team-reports/checklist.txt": "checklist=initial\n",
+                  "/srv/team-reports/payroll.txt": "private=payroll-fixture\n",
+                  "/srv/bulletin/notice.txt": "notice=published\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team\nguest ok = no\nread only = yes\nread list = @reviewers\nwrite list = @writers\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = yes\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "team",
+                    "writers"
+                  ],
+                  "mira": [
+                    "team",
+                    "writers"
+                  ],
+                  "noor": [
+                    "team",
+                    "reviewers"
+                  ],
+                  "casey": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "casey",
+                  "enabled": true
+                },
+                {
+                  "user": "mira",
+                  "enabled": true
+                },
+                {
+                  "user": "noor",
+                  "enabled": true
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/team-reports\nvalid users = @team\nguest ok = no\nread only = yes\nread list = @reviewers\nwrite list = @writers\n\n[bulletin]\npath = /srv/bulletin\nguest ok = yes\nread only = yes\n",
+              "generation": 2
+            },
+            "shares": [
+              {
+                "id": "team"
+              },
+              {
+                "id": "bulletin"
+              }
+            ],
+            "editable_accounts": [],
+            "accounts": [
+              {
+                "user": "mira",
+                "enabled": true
+              },
+              {
+                "user": "noor",
+                "enabled": true
+              }
+            ],
+            "policy": [
+              {
+                "kind": "ReadOnly",
+                "share": "bulletin"
+              }
+            ],
+            "clients": [
+              {
+                "id": "writer",
+                "label": "mira — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "mira"
+                }
+              },
+              {
+                "id": "reviewer",
+                "label": "noor — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "noor"
+                }
+              },
+              {
+                "id": "visitor",
+                "label": "casey — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "casey"
+                }
+              },
+              {
+                "id": "anonymous",
+                "label": "Anonymous client",
+                "credential": {
+                  "kind": "Anonymous"
+                }
+              },
+              {
+                "id": "wrong-writer",
+                "label": "mira — invalid test credential",
+                "credential": {
+                  "kind": "Invalid",
+                  "user": "mira"
+                }
+              }
+            ],
+            "filesystem": [
+              {
+                "kind": "Contents",
+                "path": "/srv/team-reports/payroll.txt",
+                "text": "private=payroll-fixture\n"
+              },
+              {
+                "kind": "Contents",
+                "path": "/srv/bulletin/notice.txt",
+                "text": "notice=published\n"
+              },
+              {
+                "kind": "Access",
+                "path": "/srv/team-reports",
+                "user": "mira",
+                "operation": "list_names",
+                "allowed": true
+              },
+              {
+                "kind": "Access",
+                "path": "/srv/team-reports",
+                "user": "noor",
+                "operation": "list_names",
+                "allowed": true
+              },
+              {
+                "kind": "Access",
+                "path": "/srv/team-reports",
+                "user": "casey",
+                "operation": "search_directory",
+                "allowed": false
+              },
+              {
+                "kind": "Access",
+                "path": "/srv/team-reports/draft.txt",
+                "user": "casey",
+                "operation": "read_file",
+                "allowed": false
+              },
+              {
+                "kind": "Mode",
+                "path": "/srv/team-reports/draft.txt",
+                "mode": 432
+              },
+              {
+                "kind": "Mode",
+                "path": "/srv/team-reports/checklist.txt",
+                "mode": 432
+              },
+              {
+                "kind": "Mode",
+                "path": "/srv/team-reports/payroll.txt",
+                "mode": 384
+              },
+              {
+                "kind": "Mode",
+                "path": "/srv/bulletin/notice.txt",
+                "mode": 420
+              },
+              {
+                "kind": "Mode",
+                "path": "/etc/samba/smb.conf",
+                "mode": 384
+              },
+              {
+                "kind": "Ownership",
+                "path": "/etc/samba/smb.conf",
+                "owner": "operator",
+                "group": "operators"
+              },
+              {
+                "kind": "Ownership",
+                "path": "/srv/team-reports/payroll.txt",
+                "owner": "operator",
+                "group": "operators"
+              }
+            ],
+            "cases": [
+              {
+                "id": "writer-read-first",
+                "label": "Writer reads the current report",
+                "inputs": [
+                  {
+                    "path": "/srv/team-reports/draft.txt",
+                    "text": "report=sample-one\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/team-reports/draft.txt",
+                  "text": "report=sample-one\n"
+                }
+              },
+              {
+                "id": "writer-read-second",
+                "label": "Writer reads a different report sample",
+                "inputs": [
+                  {
+                    "path": "/srv/team-reports/draft.txt",
+                    "text": "report=sample-two\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/team-reports/draft.txt",
+                  "text": "report=sample-two\n"
+                }
+              },
+              {
+                "id": "reviewer-read",
+                "label": "Reviewer reads the checklist",
+                "inputs": [
+                  {
+                    "path": "/srv/team-reports/checklist.txt",
+                    "text": "checklist=sample-three\n"
+                  }
+                ],
+                "request": {
+                  "client": "reviewer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "checklist.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/team-reports/checklist.txt",
+                  "text": "checklist=sample-three\n"
+                }
+              },
+              {
+                "id": "writer-update",
+                "label": "Writer updates the production draft",
+                "inputs": [
+                  {
+                    "path": "/srv/team-reports/draft.txt",
+                    "text": "before=writer-trial\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "draft.txt",
+                    "text": "after=writer-trial\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Replaced",
+                  "path": "/srv/team-reports/draft.txt",
+                  "text": "after=writer-trial\n"
+                }
+              },
+              {
+                "id": "reviewer-read-only",
+                "label": "Share policy keeps reviewer writes read-only",
+                "inputs": [],
+                "request": {
+                  "client": "reviewer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "draft.txt",
+                    "text": "must-not-write\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "ReadOnly"
+                  ]
+                }
+              },
+              {
+                "id": "visitor-policy",
+                "label": "Share policy rejects the non-team account",
+                "inputs": [],
+                "request": {
+                  "client": "visitor",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "SharePolicy"
+                  ]
+                }
+              },
+              {
+                "id": "anonymous-policy",
+                "label": "Reject anonymous team connections",
+                "inputs": [],
+                "request": {
+                  "client": "anonymous",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "Authentication",
+                    "SharePolicy"
+                  ]
+                }
+              },
+              {
+                "id": "invalid-proof",
+                "label": "A bad named credential does not become guest access",
+                "inputs": [],
+                "request": {
+                  "client": "wrong-writer",
+                  "share": "bulletin",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "Authentication"
+                  ]
+                }
+              },
+              {
+                "id": "private-file",
+                "label": "Team writer cannot read the private payroll file",
+                "inputs": [],
+                "request": {
+                  "client": "writer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "payroll.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "UnixAccess"
+                  ]
+                }
+              },
+              {
+                "id": "public-anonymous-read",
+                "label": "Anonymous clients can read the public notice",
+                "inputs": [
+                  {
+                    "path": "/srv/bulletin/notice.txt",
+                    "text": "notice=public-test-input\n"
+                  }
+                ],
+                "request": {
+                  "client": "anonymous",
+                  "share": "bulletin",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/bulletin/notice.txt",
+                  "text": "notice=public-test-input\n"
+                }
+              },
+              {
+                "id": "public-named-read",
+                "label": "The non-team account still reads the public notice",
+                "inputs": [
+                  {
+                    "path": "/srv/bulletin/notice.txt",
+                    "text": "notice=named-test-input\n"
+                  }
+                ],
+                "request": {
+                  "client": "visitor",
+                  "share": "bulletin",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/bulletin/notice.txt",
+                  "text": "notice=named-test-input\n"
+                }
+              },
+              {
+                "id": "public-read-only",
+                "label": "Public writes are denied by share policy",
+                "inputs": [],
+                "request": {
+                  "client": "anonymous",
+                  "share": "bulletin",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "notice.txt",
+                    "text": "must-not-publish\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "ReadOnly"
+                  ]
+                }
+              }
+            ],
+            "trial": {
+              "client": "writer",
+              "share": "team",
+              "operation": {
+                "kind": "Read",
+                "path": "draft.txt"
+              }
+            }
+          },
+          "example": {
+            "id": "guide-policy",
+            "initial": {
+              "schema_version": 1,
+              "server": "guide-policy",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/notes": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/practice/notes/draft.txt": "draft=initial\n",
+                  "/practice/notes/checklist.txt": "checklist=initial\n",
+                  "/practice/notes/payroll.txt": "private=payroll-fixture\n",
+                  "/practice/board/notice.txt": "notice=published\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project cameron\nguest ok = yes\nread only = no\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = no\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "project",
+                    "authors"
+                  ],
+                  "riley": [
+                    "project",
+                    "authors"
+                  ],
+                  "sam": [
+                    "project",
+                    "readers"
+                  ],
+                  "cameron": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "cameron",
+                  "enabled": true
+                },
+                {
+                  "user": "riley",
+                  "enabled": true
+                },
+                {
+                  "user": "sam",
+                  "enabled": true
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project cameron\nguest ok = yes\nread only = no\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = no\n",
+              "generation": 1
+            },
+            "reference": {
+              "schema_version": 1,
+              "server": "guide-policy",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/notes": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/practice/notes/draft.txt": "draft=initial\n",
+                  "/practice/notes/checklist.txt": "checklist=initial\n",
+                  "/practice/notes/payroll.txt": "private=payroll-fixture\n",
+                  "/practice/board/notice.txt": "notice=published\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project\nguest ok = no\nread only = yes\nread list = @readers\nwrite list = @authors\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = yes\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "project",
+                    "authors"
+                  ],
+                  "riley": [
+                    "project",
+                    "authors"
+                  ],
+                  "sam": [
+                    "project",
+                    "readers"
+                  ],
+                  "cameron": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "cameron",
+                  "enabled": true
+                },
+                {
+                  "user": "riley",
+                  "enabled": true
+                },
+                {
+                  "user": "sam",
+                  "enabled": true
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project\nguest ok = no\nread only = yes\nread list = @readers\nwrite list = @authors\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = yes\n",
+              "generation": 2
+            },
+            "shares": [
+              {
+                "id": "notes"
+              },
+              {
+                "id": "board"
+              }
+            ],
+            "editable_accounts": [],
+            "accounts": [
+              {
+                "user": "riley",
+                "enabled": true
+              },
+              {
+                "user": "sam",
+                "enabled": true
+              }
+            ],
+            "policy": [
+              {
+                "kind": "ReadOnly",
+                "share": "board"
+              }
+            ],
+            "clients": [
+              {
+                "id": "writer",
+                "label": "riley — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "riley"
+                }
+              },
+              {
+                "id": "reviewer",
+                "label": "sam — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "sam"
+                }
+              },
+              {
+                "id": "visitor",
+                "label": "cameron — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "cameron"
+                }
+              },
+              {
+                "id": "anonymous",
+                "label": "Anonymous client",
+                "credential": {
+                  "kind": "Anonymous"
+                }
+              },
+              {
+                "id": "wrong-writer",
+                "label": "riley — invalid test credential",
+                "credential": {
+                  "kind": "Invalid",
+                  "user": "riley"
+                }
+              }
+            ],
+            "filesystem": [
+              {
+                "kind": "Contents",
+                "path": "/practice/notes/payroll.txt",
+                "text": "private=payroll-fixture\n"
+              },
+              {
+                "kind": "Contents",
+                "path": "/practice/board/notice.txt",
+                "text": "notice=published\n"
+              },
+              {
+                "kind": "Access",
+                "path": "/practice/notes",
+                "user": "riley",
+                "operation": "list_names",
+                "allowed": true
+              },
+              {
+                "kind": "Access",
+                "path": "/practice/notes",
+                "user": "sam",
+                "operation": "list_names",
+                "allowed": true
+              },
+              {
+                "kind": "Access",
+                "path": "/practice/notes",
+                "user": "cameron",
+                "operation": "search_directory",
+                "allowed": false
+              },
+              {
+                "kind": "Access",
+                "path": "/practice/notes/draft.txt",
+                "user": "cameron",
+                "operation": "read_file",
+                "allowed": false
+              },
+              {
+                "kind": "Mode",
+                "path": "/practice/notes/draft.txt",
+                "mode": 432
+              },
+              {
+                "kind": "Mode",
+                "path": "/practice/notes/checklist.txt",
+                "mode": 432
+              },
+              {
+                "kind": "Mode",
+                "path": "/practice/notes/payroll.txt",
+                "mode": 384
+              },
+              {
+                "kind": "Mode",
+                "path": "/practice/board/notice.txt",
+                "mode": 420
+              },
+              {
+                "kind": "Mode",
+                "path": "/etc/samba/smb.conf",
+                "mode": 384
+              },
+              {
+                "kind": "Ownership",
+                "path": "/etc/samba/smb.conf",
+                "owner": "operator",
+                "group": "operators"
+              },
+              {
+                "kind": "Ownership",
+                "path": "/practice/notes/payroll.txt",
+                "owner": "operator",
+                "group": "operators"
+              }
+            ],
+            "cases": [
+              {
+                "id": "writer-read-first",
+                "label": "Writer reads the current report",
+                "inputs": [
+                  {
+                    "path": "/practice/notes/draft.txt",
+                    "text": "report=sample-one\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/notes/draft.txt",
+                  "text": "report=sample-one\n"
+                }
+              },
+              {
+                "id": "writer-read-second",
+                "label": "Writer reads a different report sample",
+                "inputs": [
+                  {
+                    "path": "/practice/notes/draft.txt",
+                    "text": "report=sample-two\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/notes/draft.txt",
+                  "text": "report=sample-two\n"
+                }
+              },
+              {
+                "id": "reviewer-read",
+                "label": "Reviewer reads the checklist",
+                "inputs": [
+                  {
+                    "path": "/practice/notes/checklist.txt",
+                    "text": "checklist=sample-three\n"
+                  }
+                ],
+                "request": {
+                  "client": "reviewer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "checklist.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/notes/checklist.txt",
+                  "text": "checklist=sample-three\n"
+                }
+              },
+              {
+                "id": "writer-update",
+                "label": "Writer updates the production draft",
+                "inputs": [
+                  {
+                    "path": "/practice/notes/draft.txt",
+                    "text": "before=writer-trial\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "draft.txt",
+                    "text": "after=writer-trial\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Replaced",
+                  "path": "/practice/notes/draft.txt",
+                  "text": "after=writer-trial\n"
+                }
+              },
+              {
+                "id": "reviewer-read-only",
+                "label": "Share policy keeps reviewer writes read-only",
+                "inputs": [],
+                "request": {
+                  "client": "reviewer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "draft.txt",
+                    "text": "must-not-write\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "ReadOnly"
+                  ]
+                }
+              },
+              {
+                "id": "visitor-policy",
+                "label": "Share policy rejects the non-team account",
+                "inputs": [],
+                "request": {
+                  "client": "visitor",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "SharePolicy"
+                  ]
+                }
+              },
+              {
+                "id": "anonymous-policy",
+                "label": "Reject anonymous team connections",
+                "inputs": [],
+                "request": {
+                  "client": "anonymous",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "Authentication",
+                    "SharePolicy"
+                  ]
+                }
+              },
+              {
+                "id": "invalid-proof",
+                "label": "A bad named credential does not become guest access",
+                "inputs": [],
+                "request": {
+                  "client": "wrong-writer",
+                  "share": "board",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "Authentication"
+                  ]
+                }
+              },
+              {
+                "id": "private-file",
+                "label": "Team writer cannot read the private payroll file",
+                "inputs": [],
+                "request": {
+                  "client": "writer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "payroll.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "UnixAccess"
+                  ]
+                }
+              },
+              {
+                "id": "public-anonymous-read",
+                "label": "Anonymous clients can read the public notice",
+                "inputs": [
+                  {
+                    "path": "/practice/board/notice.txt",
+                    "text": "notice=public-test-input\n"
+                  }
+                ],
+                "request": {
+                  "client": "anonymous",
+                  "share": "board",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/board/notice.txt",
+                  "text": "notice=public-test-input\n"
+                }
+              },
+              {
+                "id": "public-named-read",
+                "label": "The non-team account still reads the public notice",
+                "inputs": [
+                  {
+                    "path": "/practice/board/notice.txt",
+                    "text": "notice=named-test-input\n"
+                  }
+                ],
+                "request": {
+                  "client": "visitor",
+                  "share": "board",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/board/notice.txt",
+                  "text": "notice=named-test-input\n"
+                }
+              },
+              {
+                "id": "public-read-only",
+                "label": "Public writes are denied by share policy",
+                "inputs": [],
+                "request": {
+                  "client": "anonymous",
+                  "share": "board",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "notice.txt",
+                    "text": "must-not-publish\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "ReadOnly"
+                  ]
+                }
+              }
+            ],
+            "trial": {
+              "client": "writer",
+              "share": "notes",
+              "operation": {
+                "kind": "Read",
+                "path": "draft.txt"
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "smb-share {\"kind\":\"Edit\",\"text\":\"[global]\\nsecurity = user\\nserver role = standalone server\\nmap to guest = Never\\n\\n[team]\\npath = /srv/team-reports\\nvalid users = @team\\nguest ok = no\\nread only = yes\\nread list = @reviewers\\nwrite list = @writers\\n\\n[bulletin]\\npath = /srv/bulletin\\nguest ok = yes\\nread only = yes\\n\"}",
+        "smb-share {\"kind\":\"Save\"}",
+        "smb-share {\"kind\":\"Publish\"}",
+        "smb-share {\"kind\":\"Check\"}"
+      ]
+    },
+    {
+      "id": "lpic2-smb-change-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "samba-standalone-shares",
+      "topic": "Samba configuration handover",
+      "title": "Handover the correct share without touching archived files",
+      "summary": "Repair a staged-to-production share handover and verify new clients use the intended files.",
+      "objective": "Make new team connections serve /srv/live-team, not /srv/old-team. The writer devon must read/update production files; reviewer imani must read and be denied writes by share policy. Enable the required supplied SMB accounts and restore team listing/search on /srv/live-team. Keep the non-team account and anonymous clients out at authentication/share policy. Keep bulletin available for public reads with its default read-only policy and no write exceptions. Preserve the archived draft, payroll and public-notice text, every supplied regular-file mode, and configuration/payroll ownership. Save and apply the corrected settings, then verify the resolved file paths and outcomes with new client trials. Do not erase archived files or broaden their permissions to make a wrong path work.",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "steps": [
+        "Understand the supplied sharing layers",
+        "Practice on the separate guide server",
+        "Repair and verify the full independent assignment"
+      ],
+      "hints": [
+        "Read the actual failure layer before changing file modes or account policy. A syntax pass is not an access pass.",
+        "Use the supplied client identities and id -Gn / ls -ld to distinguish share policy from Unix rights. The public and private resources have their own preservation requirements.",
+        "Compare saved versus applied settings and the actual resolved path. Save, apply, then open a new trial; avoid changing an archive to compensate for a wrong destination."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/#rdp-we-209.1_Samba_Server_Configuration_(weight:_5)",
+        "https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html",
+        "https://www.samba.org/samba/docs/current/man-html/testparm.1.html",
+        "https://www.samba.org/samba/docs/current/man-html/smbpasswd.8.html"
+      ],
+      "simplifications": "Sources checked 2026-11-13: LPIC-2 v4.5 objective209.1; official current Samba smb.conf/testparm manuals identify documentation4.25.0. No local testparm binary was available for a runtime comparison. Bounded standalone policy and existing regular-file text operations only: supplied abstract credential proofs, fixed local Unix identities/groups, enabled SMB records, supported INI directives, saved/applied snapshots and new client trials. Not an SMB/NTLM/Kerberos implementation, real server, AD member, CIFS mount, Windows ACL, printer, NIS, protocol pathname/case-folding, file-creation, locking or open-handle cache model. Paths use exact supplied Unix spelling. Account controls and Apply saved settings are marked simulator administration, not Linux commands. Filesystem terminal subset is listed in optional help. No host filesystem, process, network, service or account is changed.",
+      "explanation": "The handover is complete only when saved supported policy matches applied policy and new client operations reach the production files with the required access. Repointing a share can uncover previously hidden account and directory faults. Verification includes resolved paths, not just matching text or a successful write somewhere. The archive, payroll and public notice remain preserved; public and reviewer writes are denied by share policy.",
+      "initial": {
+        "kind": "SambaShare",
+        "simulation": {
+          "schema_version": 1,
+          "version": 1,
+          "id": "lpic2-smb-change-handover",
+          "view": "introduction",
+          "assignment": {
+            "world": {
+              "schema_version": 1,
+              "server": "assignment-handover",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/live-team": {
+                    "directory": true,
+                    "mode": 448,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/live-team/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/live-team/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/live-team/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/noticeboard": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/noticeboard/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/old-team": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/old-team/draft.txt": {
+                    "directory": false,
+                    "mode": 416,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/srv/live-team/draft.txt": "draft=initial\n",
+                  "/srv/live-team/checklist.txt": "checklist=initial\n",
+                  "/srv/live-team/payroll.txt": "private=payroll-fixture\n",
+                  "/srv/noticeboard/notice.txt": "notice=published\n",
+                  "/srv/old-team/draft.txt": "archive=previous-handover\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/live-team\nvalid users = @team taylor\nguest ok = yes\nread only = no\n\n[bulletin]\npath = /srv/noticeboard\nguest ok = yes\nread only = no\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "team",
+                    "writers"
+                  ],
+                  "devon": [
+                    "team",
+                    "writers"
+                  ],
+                  "imani": [
+                    "team",
+                    "reviewers"
+                  ],
+                  "taylor": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "devon",
+                  "enabled": true
+                },
+                {
+                  "user": "imani",
+                  "enabled": false
+                },
+                {
+                  "user": "taylor",
+                  "enabled": true
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/old-team\nvalid users = @team taylor\nguest ok = yes\nread only = no\n\n[bulletin]\npath = /srv/noticeboard\nguest ok = yes\nread only = no\n",
+              "generation": 1
+            },
+            "editor": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/live-team\nvalid users = @team taylor\nguest ok = yes\nread only = no\n\n[bulletin]\npath = /srv/noticeboard\nguest ok = yes\nread only = no\n",
+            "terminal": "",
+            "request": {
+              "client": "writer",
+              "share": "team",
+              "operation": {
+                "kind": "Read",
+                "path": "draft.txt"
+              }
+            },
+            "checked": false
+          },
+          "practice": {
+            "world": {
+              "schema_version": 1,
+              "server": "guide-handover",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/notes": {
+                    "directory": true,
+                    "mode": 448,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/old-notes": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/old-notes/draft.txt": {
+                    "directory": false,
+                    "mode": 416,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/practice/notes/draft.txt": "draft=initial\n",
+                  "/practice/notes/checklist.txt": "checklist=initial\n",
+                  "/practice/notes/payroll.txt": "private=payroll-fixture\n",
+                  "/practice/board/notice.txt": "notice=published\n",
+                  "/practice/old-notes/draft.txt": "archive=previous-handover\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project cameron\nguest ok = yes\nread only = no\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = no\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "project",
+                    "authors"
+                  ],
+                  "riley": [
+                    "project",
+                    "authors"
+                  ],
+                  "sam": [
+                    "project",
+                    "readers"
+                  ],
+                  "cameron": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "cameron",
+                  "enabled": true
+                },
+                {
+                  "user": "riley",
+                  "enabled": true
+                },
+                {
+                  "user": "sam",
+                  "enabled": false
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/old-notes\nvalid users = @project cameron\nguest ok = yes\nread only = no\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = no\n",
+              "generation": 1
+            },
+            "editor": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project cameron\nguest ok = yes\nread only = no\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = no\n",
+            "terminal": "",
+            "request": {
+              "client": "writer",
+              "share": "notes",
+              "operation": {
+                "kind": "Read",
+                "path": "draft.txt"
+              }
+            },
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SambaShare",
+        "definition": {
+          "schema_version": 1,
+          "version": 1,
+          "id": "lpic2-smb-change-handover",
+          "assignment": {
+            "id": "assignment-handover",
+            "initial": {
+              "schema_version": 1,
+              "server": "assignment-handover",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/live-team": {
+                    "directory": true,
+                    "mode": 448,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/live-team/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/live-team/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/live-team/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/noticeboard": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/noticeboard/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/old-team": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/old-team/draft.txt": {
+                    "directory": false,
+                    "mode": 416,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/srv/live-team/draft.txt": "draft=initial\n",
+                  "/srv/live-team/checklist.txt": "checklist=initial\n",
+                  "/srv/live-team/payroll.txt": "private=payroll-fixture\n",
+                  "/srv/noticeboard/notice.txt": "notice=published\n",
+                  "/srv/old-team/draft.txt": "archive=previous-handover\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/live-team\nvalid users = @team taylor\nguest ok = yes\nread only = no\n\n[bulletin]\npath = /srv/noticeboard\nguest ok = yes\nread only = no\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "team",
+                    "writers"
+                  ],
+                  "devon": [
+                    "team",
+                    "writers"
+                  ],
+                  "imani": [
+                    "team",
+                    "reviewers"
+                  ],
+                  "taylor": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "devon",
+                  "enabled": true
+                },
+                {
+                  "user": "imani",
+                  "enabled": false
+                },
+                {
+                  "user": "taylor",
+                  "enabled": true
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/old-team\nvalid users = @team taylor\nguest ok = yes\nread only = no\n\n[bulletin]\npath = /srv/noticeboard\nguest ok = yes\nread only = no\n",
+              "generation": 1
+            },
+            "reference": {
+              "schema_version": 1,
+              "server": "assignment-handover",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/live-team": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/live-team/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/live-team/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/live-team/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/noticeboard": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/noticeboard/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/srv/old-team": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/srv/old-team/draft.txt": {
+                    "directory": false,
+                    "mode": 416,
+                    "owner": "operator",
+                    "group": "team"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/srv/live-team/draft.txt": "draft=initial\n",
+                  "/srv/live-team/checklist.txt": "checklist=initial\n",
+                  "/srv/live-team/payroll.txt": "private=payroll-fixture\n",
+                  "/srv/noticeboard/notice.txt": "notice=published\n",
+                  "/srv/old-team/draft.txt": "archive=previous-handover\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/live-team\nvalid users = @team\nguest ok = no\nread only = yes\nread list = @reviewers\nwrite list = @writers\n\n[bulletin]\npath = /srv/noticeboard\nguest ok = yes\nread only = yes\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "team",
+                    "writers"
+                  ],
+                  "devon": [
+                    "team",
+                    "writers"
+                  ],
+                  "imani": [
+                    "team",
+                    "reviewers"
+                  ],
+                  "taylor": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "devon",
+                  "enabled": true
+                },
+                {
+                  "user": "imani",
+                  "enabled": true
+                },
+                {
+                  "user": "taylor",
+                  "enabled": true
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[team]\npath = /srv/live-team\nvalid users = @team\nguest ok = no\nread only = yes\nread list = @reviewers\nwrite list = @writers\n\n[bulletin]\npath = /srv/noticeboard\nguest ok = yes\nread only = yes\n",
+              "generation": 2
+            },
+            "shares": [
+              {
+                "id": "team"
+              },
+              {
+                "id": "bulletin"
+              }
+            ],
+            "editable_accounts": [
+              {
+                "id": "devon"
+              },
+              {
+                "id": "imani"
+              }
+            ],
+            "accounts": [
+              {
+                "user": "devon",
+                "enabled": true
+              },
+              {
+                "user": "imani",
+                "enabled": true
+              }
+            ],
+            "policy": [
+              {
+                "kind": "ReadOnly",
+                "share": "bulletin"
+              }
+            ],
+            "clients": [
+              {
+                "id": "writer",
+                "label": "devon — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "devon"
+                }
+              },
+              {
+                "id": "reviewer",
+                "label": "imani — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "imani"
+                }
+              },
+              {
+                "id": "visitor",
+                "label": "taylor — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "taylor"
+                }
+              },
+              {
+                "id": "anonymous",
+                "label": "Anonymous client",
+                "credential": {
+                  "kind": "Anonymous"
+                }
+              },
+              {
+                "id": "wrong-writer",
+                "label": "devon — invalid test credential",
+                "credential": {
+                  "kind": "Invalid",
+                  "user": "devon"
+                }
+              }
+            ],
+            "filesystem": [
+              {
+                "kind": "Contents",
+                "path": "/srv/live-team/payroll.txt",
+                "text": "private=payroll-fixture\n"
+              },
+              {
+                "kind": "Contents",
+                "path": "/srv/noticeboard/notice.txt",
+                "text": "notice=published\n"
+              },
+              {
+                "kind": "Access",
+                "path": "/srv/live-team",
+                "user": "devon",
+                "operation": "list_names",
+                "allowed": true
+              },
+              {
+                "kind": "Access",
+                "path": "/srv/live-team",
+                "user": "imani",
+                "operation": "list_names",
+                "allowed": true
+              },
+              {
+                "kind": "Access",
+                "path": "/srv/live-team",
+                "user": "taylor",
+                "operation": "search_directory",
+                "allowed": false
+              },
+              {
+                "kind": "Access",
+                "path": "/srv/live-team/draft.txt",
+                "user": "taylor",
+                "operation": "read_file",
+                "allowed": false
+              },
+              {
+                "kind": "Mode",
+                "path": "/srv/live-team/draft.txt",
+                "mode": 432
+              },
+              {
+                "kind": "Mode",
+                "path": "/srv/live-team/checklist.txt",
+                "mode": 432
+              },
+              {
+                "kind": "Mode",
+                "path": "/srv/live-team/payroll.txt",
+                "mode": 384
+              },
+              {
+                "kind": "Mode",
+                "path": "/srv/noticeboard/notice.txt",
+                "mode": 420
+              },
+              {
+                "kind": "Mode",
+                "path": "/srv/old-team/draft.txt",
+                "mode": 416
+              },
+              {
+                "kind": "Mode",
+                "path": "/etc/samba/smb.conf",
+                "mode": 384
+              },
+              {
+                "kind": "Ownership",
+                "path": "/etc/samba/smb.conf",
+                "owner": "operator",
+                "group": "operators"
+              },
+              {
+                "kind": "Ownership",
+                "path": "/srv/live-team/payroll.txt",
+                "owner": "operator",
+                "group": "operators"
+              },
+              {
+                "kind": "Contents",
+                "path": "/srv/old-team/draft.txt",
+                "text": "archive=previous-handover\n"
+              }
+            ],
+            "cases": [
+              {
+                "id": "writer-read-first",
+                "label": "Writer reads the current report",
+                "inputs": [
+                  {
+                    "path": "/srv/live-team/draft.txt",
+                    "text": "report=sample-one\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/live-team/draft.txt",
+                  "text": "report=sample-one\n"
+                }
+              },
+              {
+                "id": "writer-read-second",
+                "label": "Writer reads a different report sample",
+                "inputs": [
+                  {
+                    "path": "/srv/live-team/draft.txt",
+                    "text": "report=sample-two\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/live-team/draft.txt",
+                  "text": "report=sample-two\n"
+                }
+              },
+              {
+                "id": "reviewer-read",
+                "label": "Reviewer reads the checklist",
+                "inputs": [
+                  {
+                    "path": "/srv/live-team/checklist.txt",
+                    "text": "checklist=sample-three\n"
+                  }
+                ],
+                "request": {
+                  "client": "reviewer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "checklist.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/live-team/checklist.txt",
+                  "text": "checklist=sample-three\n"
+                }
+              },
+              {
+                "id": "writer-update",
+                "label": "Writer updates the production draft",
+                "inputs": [
+                  {
+                    "path": "/srv/live-team/draft.txt",
+                    "text": "before=writer-trial\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "draft.txt",
+                    "text": "after=writer-trial\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Replaced",
+                  "path": "/srv/live-team/draft.txt",
+                  "text": "after=writer-trial\n"
+                }
+              },
+              {
+                "id": "reviewer-read-only",
+                "label": "Share policy keeps reviewer writes read-only",
+                "inputs": [],
+                "request": {
+                  "client": "reviewer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "draft.txt",
+                    "text": "must-not-write\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "ReadOnly"
+                  ]
+                }
+              },
+              {
+                "id": "visitor-policy",
+                "label": "Share policy rejects the non-team account",
+                "inputs": [],
+                "request": {
+                  "client": "visitor",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "SharePolicy"
+                  ]
+                }
+              },
+              {
+                "id": "anonymous-policy",
+                "label": "Reject anonymous team connections",
+                "inputs": [],
+                "request": {
+                  "client": "anonymous",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "Authentication",
+                    "SharePolicy"
+                  ]
+                }
+              },
+              {
+                "id": "invalid-proof",
+                "label": "A bad named credential does not become guest access",
+                "inputs": [],
+                "request": {
+                  "client": "wrong-writer",
+                  "share": "bulletin",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "Authentication"
+                  ]
+                }
+              },
+              {
+                "id": "private-file",
+                "label": "Team writer cannot read the private payroll file",
+                "inputs": [],
+                "request": {
+                  "client": "writer",
+                  "share": "team",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "payroll.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "UnixAccess"
+                  ]
+                }
+              },
+              {
+                "id": "public-anonymous-read",
+                "label": "Anonymous clients can read the public notice",
+                "inputs": [
+                  {
+                    "path": "/srv/noticeboard/notice.txt",
+                    "text": "notice=public-test-input\n"
+                  }
+                ],
+                "request": {
+                  "client": "anonymous",
+                  "share": "bulletin",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/noticeboard/notice.txt",
+                  "text": "notice=public-test-input\n"
+                }
+              },
+              {
+                "id": "public-named-read",
+                "label": "The non-team account still reads the public notice",
+                "inputs": [
+                  {
+                    "path": "/srv/noticeboard/notice.txt",
+                    "text": "notice=named-test-input\n"
+                  }
+                ],
+                "request": {
+                  "client": "visitor",
+                  "share": "bulletin",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/srv/noticeboard/notice.txt",
+                  "text": "notice=named-test-input\n"
+                }
+              },
+              {
+                "id": "public-read-only",
+                "label": "Public writes are denied by share policy",
+                "inputs": [],
+                "request": {
+                  "client": "anonymous",
+                  "share": "bulletin",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "notice.txt",
+                    "text": "must-not-publish\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "ReadOnly"
+                  ]
+                }
+              }
+            ],
+            "trial": {
+              "client": "writer",
+              "share": "team",
+              "operation": {
+                "kind": "Read",
+                "path": "draft.txt"
+              }
+            }
+          },
+          "example": {
+            "id": "guide-handover",
+            "initial": {
+              "schema_version": 1,
+              "server": "guide-handover",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/notes": {
+                    "directory": true,
+                    "mode": 448,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/old-notes": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/old-notes/draft.txt": {
+                    "directory": false,
+                    "mode": 416,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/practice/notes/draft.txt": "draft=initial\n",
+                  "/practice/notes/checklist.txt": "checklist=initial\n",
+                  "/practice/notes/payroll.txt": "private=payroll-fixture\n",
+                  "/practice/board/notice.txt": "notice=published\n",
+                  "/practice/old-notes/draft.txt": "archive=previous-handover\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project cameron\nguest ok = yes\nread only = no\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = no\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "project",
+                    "authors"
+                  ],
+                  "riley": [
+                    "project",
+                    "authors"
+                  ],
+                  "sam": [
+                    "project",
+                    "readers"
+                  ],
+                  "cameron": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "cameron",
+                  "enabled": true
+                },
+                {
+                  "user": "riley",
+                  "enabled": true
+                },
+                {
+                  "user": "sam",
+                  "enabled": false
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/old-notes\nvalid users = @project cameron\nguest ok = yes\nread only = no\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = no\n",
+              "generation": 1
+            },
+            "reference": {
+              "schema_version": 1,
+              "server": "guide-handover",
+              "files": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/home/operator": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/notes": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/draft.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/checklist.txt": {
+                    "directory": false,
+                    "mode": 432,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/notes/payroll.txt": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/board/notice.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/practice/old-notes": {
+                    "directory": true,
+                    "mode": 488,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/practice/old-notes/draft.txt": {
+                    "directory": false,
+                    "mode": 416,
+                    "owner": "operator",
+                    "group": "project"
+                  },
+                  "/etc": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "operator",
+                    "group": "operators"
+                  },
+                  "/etc/samba/smb.conf": {
+                    "directory": false,
+                    "mode": 384,
+                    "owner": "operator",
+                    "group": "operators"
+                  }
+                },
+                "files": {
+                  "/practice/notes/draft.txt": "draft=initial\n",
+                  "/practice/notes/checklist.txt": "checklist=initial\n",
+                  "/practice/notes/payroll.txt": "private=payroll-fixture\n",
+                  "/practice/board/notice.txt": "notice=published\n",
+                  "/practice/old-notes/draft.txt": "archive=previous-handover\n",
+                  "/etc/samba/smb.conf": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project\nguest ok = no\nread only = yes\nread list = @readers\nwrite list = @authors\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = yes\n"
+                },
+                "users": {
+                  "operator": [
+                    "operators",
+                    "project",
+                    "authors"
+                  ],
+                  "riley": [
+                    "project",
+                    "authors"
+                  ],
+                  "sam": [
+                    "project",
+                    "readers"
+                  ],
+                  "cameron": [
+                    "visitors"
+                  ],
+                  "guest": [
+                    "visitors"
+                  ]
+                },
+                "user": "operator",
+                "home": "/home/operator",
+                "cwd": "/home/operator",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "accounts": [
+                {
+                  "user": "cameron",
+                  "enabled": true
+                },
+                {
+                  "user": "riley",
+                  "enabled": true
+                },
+                {
+                  "user": "sam",
+                  "enabled": true
+                }
+              ],
+              "guest": "guest",
+              "configuration_path": "/etc/samba/smb.conf",
+              "published": "[global]\nsecurity = user\nserver role = standalone server\nmap to guest = Never\n\n[notes]\npath = /practice/notes\nvalid users = @project\nguest ok = no\nread only = yes\nread list = @readers\nwrite list = @authors\n\n[board]\npath = /practice/board\nguest ok = yes\nread only = yes\n",
+              "generation": 2
+            },
+            "shares": [
+              {
+                "id": "notes"
+              },
+              {
+                "id": "board"
+              }
+            ],
+            "editable_accounts": [
+              {
+                "id": "riley"
+              },
+              {
+                "id": "sam"
+              }
+            ],
+            "accounts": [
+              {
+                "user": "riley",
+                "enabled": true
+              },
+              {
+                "user": "sam",
+                "enabled": true
+              }
+            ],
+            "policy": [
+              {
+                "kind": "ReadOnly",
+                "share": "board"
+              }
+            ],
+            "clients": [
+              {
+                "id": "writer",
+                "label": "riley — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "riley"
+                }
+              },
+              {
+                "id": "reviewer",
+                "label": "sam — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "sam"
+                }
+              },
+              {
+                "id": "visitor",
+                "label": "cameron — valid test credential",
+                "credential": {
+                  "kind": "Valid",
+                  "user": "cameron"
+                }
+              },
+              {
+                "id": "anonymous",
+                "label": "Anonymous client",
+                "credential": {
+                  "kind": "Anonymous"
+                }
+              },
+              {
+                "id": "wrong-writer",
+                "label": "riley — invalid test credential",
+                "credential": {
+                  "kind": "Invalid",
+                  "user": "riley"
+                }
+              }
+            ],
+            "filesystem": [
+              {
+                "kind": "Contents",
+                "path": "/practice/notes/payroll.txt",
+                "text": "private=payroll-fixture\n"
+              },
+              {
+                "kind": "Contents",
+                "path": "/practice/board/notice.txt",
+                "text": "notice=published\n"
+              },
+              {
+                "kind": "Access",
+                "path": "/practice/notes",
+                "user": "riley",
+                "operation": "list_names",
+                "allowed": true
+              },
+              {
+                "kind": "Access",
+                "path": "/practice/notes",
+                "user": "sam",
+                "operation": "list_names",
+                "allowed": true
+              },
+              {
+                "kind": "Access",
+                "path": "/practice/notes",
+                "user": "cameron",
+                "operation": "search_directory",
+                "allowed": false
+              },
+              {
+                "kind": "Access",
+                "path": "/practice/notes/draft.txt",
+                "user": "cameron",
+                "operation": "read_file",
+                "allowed": false
+              },
+              {
+                "kind": "Mode",
+                "path": "/practice/notes/draft.txt",
+                "mode": 432
+              },
+              {
+                "kind": "Mode",
+                "path": "/practice/notes/checklist.txt",
+                "mode": 432
+              },
+              {
+                "kind": "Mode",
+                "path": "/practice/notes/payroll.txt",
+                "mode": 384
+              },
+              {
+                "kind": "Mode",
+                "path": "/practice/board/notice.txt",
+                "mode": 420
+              },
+              {
+                "kind": "Mode",
+                "path": "/practice/old-notes/draft.txt",
+                "mode": 416
+              },
+              {
+                "kind": "Mode",
+                "path": "/etc/samba/smb.conf",
+                "mode": 384
+              },
+              {
+                "kind": "Ownership",
+                "path": "/etc/samba/smb.conf",
+                "owner": "operator",
+                "group": "operators"
+              },
+              {
+                "kind": "Ownership",
+                "path": "/practice/notes/payroll.txt",
+                "owner": "operator",
+                "group": "operators"
+              },
+              {
+                "kind": "Contents",
+                "path": "/practice/old-notes/draft.txt",
+                "text": "archive=previous-handover\n"
+              }
+            ],
+            "cases": [
+              {
+                "id": "writer-read-first",
+                "label": "Writer reads the current report",
+                "inputs": [
+                  {
+                    "path": "/practice/notes/draft.txt",
+                    "text": "report=sample-one\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/notes/draft.txt",
+                  "text": "report=sample-one\n"
+                }
+              },
+              {
+                "id": "writer-read-second",
+                "label": "Writer reads a different report sample",
+                "inputs": [
+                  {
+                    "path": "/practice/notes/draft.txt",
+                    "text": "report=sample-two\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/notes/draft.txt",
+                  "text": "report=sample-two\n"
+                }
+              },
+              {
+                "id": "reviewer-read",
+                "label": "Reviewer reads the checklist",
+                "inputs": [
+                  {
+                    "path": "/practice/notes/checklist.txt",
+                    "text": "checklist=sample-three\n"
+                  }
+                ],
+                "request": {
+                  "client": "reviewer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "checklist.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/notes/checklist.txt",
+                  "text": "checklist=sample-three\n"
+                }
+              },
+              {
+                "id": "writer-update",
+                "label": "Writer updates the production draft",
+                "inputs": [
+                  {
+                    "path": "/practice/notes/draft.txt",
+                    "text": "before=writer-trial\n"
+                  }
+                ],
+                "request": {
+                  "client": "writer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "draft.txt",
+                    "text": "after=writer-trial\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Replaced",
+                  "path": "/practice/notes/draft.txt",
+                  "text": "after=writer-trial\n"
+                }
+              },
+              {
+                "id": "reviewer-read-only",
+                "label": "Share policy keeps reviewer writes read-only",
+                "inputs": [],
+                "request": {
+                  "client": "reviewer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "draft.txt",
+                    "text": "must-not-write\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "ReadOnly"
+                  ]
+                }
+              },
+              {
+                "id": "visitor-policy",
+                "label": "Share policy rejects the non-team account",
+                "inputs": [],
+                "request": {
+                  "client": "visitor",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "SharePolicy"
+                  ]
+                }
+              },
+              {
+                "id": "anonymous-policy",
+                "label": "Reject anonymous team connections",
+                "inputs": [],
+                "request": {
+                  "client": "anonymous",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "draft.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "Authentication",
+                    "SharePolicy"
+                  ]
+                }
+              },
+              {
+                "id": "invalid-proof",
+                "label": "A bad named credential does not become guest access",
+                "inputs": [],
+                "request": {
+                  "client": "wrong-writer",
+                  "share": "board",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "Authentication"
+                  ]
+                }
+              },
+              {
+                "id": "private-file",
+                "label": "Team writer cannot read the private payroll file",
+                "inputs": [],
+                "request": {
+                  "client": "writer",
+                  "share": "notes",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "payroll.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "UnixAccess"
+                  ]
+                }
+              },
+              {
+                "id": "public-anonymous-read",
+                "label": "Anonymous clients can read the public notice",
+                "inputs": [
+                  {
+                    "path": "/practice/board/notice.txt",
+                    "text": "notice=public-test-input\n"
+                  }
+                ],
+                "request": {
+                  "client": "anonymous",
+                  "share": "board",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/board/notice.txt",
+                  "text": "notice=public-test-input\n"
+                }
+              },
+              {
+                "id": "public-named-read",
+                "label": "The non-team account still reads the public notice",
+                "inputs": [
+                  {
+                    "path": "/practice/board/notice.txt",
+                    "text": "notice=named-test-input\n"
+                  }
+                ],
+                "request": {
+                  "client": "visitor",
+                  "share": "board",
+                  "operation": {
+                    "kind": "Read",
+                    "path": "notice.txt"
+                  }
+                },
+                "expected": {
+                  "kind": "Read",
+                  "path": "/practice/board/notice.txt",
+                  "text": "notice=named-test-input\n"
+                }
+              },
+              {
+                "id": "public-read-only",
+                "label": "Public writes are denied by share policy",
+                "inputs": [],
+                "request": {
+                  "client": "anonymous",
+                  "share": "board",
+                  "operation": {
+                    "kind": "Replace",
+                    "path": "notice.txt",
+                    "text": "must-not-publish\n"
+                  }
+                },
+                "expected": {
+                  "kind": "Denied",
+                  "layers": [
+                    "ReadOnly"
+                  ]
+                }
+              }
+            ],
+            "trial": {
+              "client": "writer",
+              "share": "notes",
+              "operation": {
+                "kind": "Read",
+                "path": "draft.txt"
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "smb-share {\"kind\":\"Account\",\"user\":\"devon\",\"enabled\":true}",
+        "smb-share {\"kind\":\"Account\",\"user\":\"imani\",\"enabled\":true}",
+        "smb-share {\"kind\":\"Command\",\"command\":\"chmod g+rx /srv/live-team\"}",
+        "smb-share {\"kind\":\"Edit\",\"text\":\"[global]\\nsecurity = user\\nserver role = standalone server\\nmap to guest = Never\\n\\n[team]\\npath = /srv/live-team\\nvalid users = @team\\nguest ok = no\\nread only = yes\\nread list = @reviewers\\nwrite list = @writers\\n\\n[bulletin]\\npath = /srv/noticeboard\\nguest ok = yes\\nread only = yes\\n\"}",
+        "smb-share {\"kind\":\"Save\"}",
+        "smb-share {\"kind\":\"Publish\"}",
+        "smb-share {\"kind\":\"Check\"}"
+      ]
+    }
+  ]
+}

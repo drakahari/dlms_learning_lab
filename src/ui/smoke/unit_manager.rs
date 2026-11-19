@@ -8,6 +8,7 @@ pub(super) enum Control {
     Fill,
     Save,
     Check,
+    Startup(bool),
     Assignment,
     Example,
     Kind(bool),
@@ -394,6 +395,8 @@ impl LabApp {
             Control::Fill => self.metrics.insert,
             Control::Save => self.metrics.editor_save,
             Control::Check => self.metrics.check,
+            Control::Startup(false) => self.metrics.manager_start_default,
+            Control::Startup(true) => self.metrics.manager_start_recovery,
             Control::Assignment => self
                 .metrics
                 .assignment_action

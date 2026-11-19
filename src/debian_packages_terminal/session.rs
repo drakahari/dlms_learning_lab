@@ -53,7 +53,15 @@ impl Entry {
             && self.stderr.len() <= MAX_OUTPUT_BYTES
             && self.stdout.len() + self.stderr.len() <= MAX_OUTPUT_BYTES
             && match self.diagnostic {
-                None => matches!(self.status, 0 | 1),
+                None => {
+                    matches!(self.status, 0 | 1)
+                        || (self.status == 3
+                            && self.stdout.is_empty()
+                            && !self.stderr.is_empty()
+                            && self.stderr.len() <= 512
+                            && super::parse(&self.command)
+                                .is_ok_and(|c| matches!(c.kind, super::Kind::Contents(_))))
+                }
                 Some(_) => {
                     matches!(self.status, 2 | 100)
                         && self.stdout.is_empty()

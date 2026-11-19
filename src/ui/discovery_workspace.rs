@@ -83,14 +83,28 @@ impl LabApp {
         }
         match view {
             teaching::View::Introduction => {
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for c in &lesson.concepts {
-                    ui.label(RichText::new(&c.title).strong());
-                    ui.label(&c.text);
+                if ccna_presentation::enabled(&s) {
+                    ccna_presentation::concepts(
+                        ui,
+                        &s,
+                        &lesson.prerequisite_note,
+                        lesson
+                            .concepts
+                            .iter()
+                            .map(|c| (c.title.clone(), c.text.clone())),
+                    );
+                } else {
+                    ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
+                    for c in &lesson.concepts {
+                        ui.label(RichText::new(&c.title).strong());
+                        ui.label(&c.text);
+                    }
                 }
-                ui.label(RichText::new("A separate example to try").strong());
-                ui.label(&lesson.example_description);
-                ui.label(format!("Try a change: {}", lesson.try_change.description));
+                lesson_presentation::worked(ui, &lesson.example_description);
+                lesson_presentation::worked_rows(ui, &s);
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change.description));
+                }
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -105,8 +119,13 @@ impl LabApp {
                 });
             }
             teaching::View::Example => {
-                ui.label("Practice example · Not graded; your assignment stays separate.");
-                ui.label(&lesson.example_description);
+                ccna_presentation::example(ui, &s, true);
+                if !ccna_presentation::enabled(&s) {
+                    ui.label("Practice example · Not graded; your assignment stays separate.");
+                }
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(&lesson.example_description);
+                }
                 let mut l = self.progress.attempts[&s.id]
                     .workspace
                     .as_ref()
@@ -134,7 +153,7 @@ impl LabApp {
                     &mut l.notice,
                     &mut self.metrics,
                 );
-                let r = ui.add(primary(ui, "Check example · ungraded"));
+                let r = ui.add(primary(ui, "Check example"));
                 self.metrics.check = Some(r.rect);
                 if r.clicked() {
                     let _ = l.check(lesson);
@@ -149,7 +168,9 @@ impl LabApp {
                         message,
                     );
                 }
-                ui.label(format!("Try a change: {}", lesson.try_change.description));
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change.description));
+                }
                 let r = ui.add(button("Open full assignment"));
                 self.metrics.assignment_action = Some(r.rect);
                 let assignment = r.clicked();
@@ -169,7 +190,7 @@ impl LabApp {
                 }
             }
             teaching::View::Assignment => {
-                ui.label(&s.objective);
+                ccna_presentation::assignment(ui, &s);
                 let a = &self.progress.attempts[&s.id];
                 let engine::State::Discovery { simulation } = &a.state else {
                     unreachable!()

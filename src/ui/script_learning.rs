@@ -55,16 +55,27 @@ impl LabApp {
         };
         match view {
             teaching::View::Introduction => {
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for concept in &lesson.concepts {
-                    ui.label(RichText::new(&concept.title).strong());
-                    ui.label(&concept.text);
+                lesson_presentation::concepts(
+                    ui,
+                    &s,
+                    &lesson.prerequisite_note,
+                    lesson
+                        .concepts
+                        .iter()
+                        .map(|c| (c.title.clone(), c.text.clone())),
+                );
+                lesson_presentation::worked(ui, &lesson.inputs);
+                if ui.available_width() >= 760. {
+                    ui.columns(2, |columns| {
+                        worked_script(&mut columns[0], &s.id, &lesson.example);
+                        expected_preview(&mut columns[1], lesson);
+                    });
+                } else {
+                    worked_script(ui, &s.id, &lesson.example);
+                    expected_preview(ui, lesson);
                 }
-                ui.add_space(4.);
-                ui.label(RichText::new("A small example to try").strong());
-                ui.add(egui::Label::new(RichText::new(&lesson.example).monospace()).wrap());
-                ui.label(&lesson.inputs);
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                ui.add_space(8.);
+                lesson_presentation::worked_rows(ui, &s);
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -80,15 +91,14 @@ impl LabApp {
             }
             teaching::View::Example => self.script_example(ui, i, lesson),
             teaching::View::Assignment => {
-                self.metrics.script_goal = Some(ui.label(&s.objective).rect);
+                self.metrics.script_goal = Some(lesson_presentation::assignment(ui, &s).rect);
                 self.scripting(ui, i);
             }
         }
     }
     fn script_example(&mut self, ui: &mut egui::Ui, i: usize, lesson: &teaching::Lesson) {
-        ui.label("Practice example · Not graded; your assignment draft stays separate.");
-        ui.label(&lesson.inputs);
-        ui.label(format!("Try a change: {}", lesson.try_change));
+        let scenario = self.scenarios[i].clone();
+        lesson_presentation::prose(ui, &lesson.inputs);
         let id = self.scenarios[i].id.clone();
         let mut run_clicked = false;
         let mut stop_clicked = false;
@@ -102,7 +112,9 @@ impl LabApp {
                     egui::Layout::top_down(egui::Align::Min),
                     |ui| {
                         ui.set_width(left);
+                        lesson_presentation::practice_step(ui, &scenario, 0);
                         self.example_editor(ui, i);
+                        lesson_presentation::practice_step(ui, &scenario, 1);
                         (run_clicked, stop_clicked) = self.example_actions(ui);
                     },
                 );
@@ -115,9 +127,18 @@ impl LabApp {
                 );
             });
         } else {
+            lesson_presentation::practice_step(ui, &scenario, 0);
             self.example_editor(ui, i);
+            lesson_presentation::practice_step(ui, &scenario, 1);
             (run_clicked, stop_clicked) = self.example_actions(ui);
             self.example_output(ui, i);
+        }
+        // Keep authored follow-up investigations visible after the editor and result.
+        // Most lessons have two actions; repair projects also teach a retry step.
+        if let Some(entry) = lesson_presentation::entry(&scenario) {
+            for n in 2..entry.practice.len() {
+                lesson_presentation::practice_step(ui, &scenario, n);
+            }
         }
         if run_clicked {
             let l = self
@@ -159,7 +180,7 @@ impl LabApp {
         }
     }
     fn example_editor(&mut self, ui: &mut egui::Ui, i: usize) {
-        ui.label("Type in this example editor, then choose Run example.");
+        ui.strong("Example editor");
         let l = self
             .progress
             .attempts
@@ -236,7 +257,7 @@ impl LabApp {
         (run, stop)
     }
     fn example_output(&mut self, ui: &mut egui::Ui, i: usize) {
-        ui.label("Example output · No completion credit");
+        ui.strong("Actual result");
         let l = self.progress.attempts[&self.scenarios[i].id]
             .workspace
             .as_ref()
@@ -247,15 +268,100 @@ impl LabApp {
         if l.example_result.is_some() && l.example_revision != shell::EVALUATOR_REVISION {
             ui.label("Earlier saved example output · Run the example again to check it with this simulator.");
         }
-        let output = egui::Frame::new().fill(palette(ui).input).inner_margin(10.).show(ui, |ui| {
-            controls::nested_scroll(ui, egui::ScrollArea::both().id_salt(("example-output", i)).max_height(300.).min_scrolled_height(if l.example_result.is_some() { 180. } else { 60. }).auto_shrink([false, l.example_result.is_none()]), |ui| {
-                if let Some(r) = &l.example_result {
-                    let _ = scripting::outcome(ui, r);
-                    for (path, content) in &r.files { ui.label(RichText::new(format!("Virtual file {path}\n{content}")).monospace()); }
-                    if l.example_revision==shell::EVALUATOR_REVISION && r.error.is_none() { ui.label("Example finished. Change a value and run again to see what changes."); }
-                } else { ui.label("Run the example to see its printed text and any virtual file changes here."); }
+        let output = egui::Frame::new()
+            .fill(palette(ui).input)
+            .inner_margin(10.)
+            .show(ui, |ui| {
+                controls::nested_scroll(
+                    ui,
+                    egui::ScrollArea::both()
+                        .id_salt(("example-output", i))
+                        .max_height(300.)
+                        .min_scrolled_height(if l.example_result.is_some() {
+                            180.
+                        } else {
+                            60.
+                        })
+                        .auto_shrink([false, l.example_result.is_none()]),
+                    |ui| {
+                        if let Some(r) = &l.example_result {
+                            let _ = scripting::outcome(ui, r);
+                            for (path, content) in &r.files {
+                                ui.label(
+                                    RichText::new(format!("Virtual file {path}\n{content}"))
+                                        .monospace(),
+                                );
+                            }
+                            if l.example_revision == shell::EVALUATOR_REVISION && r.error.is_none()
+                            {
+                                ui.label("Run finished.");
+                            }
+                        } else {
+                            ui.label("Not run. Choose Run example.");
+                        }
+                    },
+                );
             });
-        });
         self.metrics.output = Some(output.response.rect);
+        let lesson = self.scenarios[i].teaching.as_ref().unwrap();
+        controls::collapsing_header(ui, "Expected preview · original example")
+            .id_salt(("example-expected-preview", i))
+            .show(ui, |ui| expected_preview(ui, lesson));
+    }
+}
+
+pub(super) fn worked_script(ui: &mut egui::Ui, id: &str, source: &str) -> egui::Rect {
+    ui.strong("Example script");
+    let font = egui::TextStyle::Monospace.resolve(ui.style());
+    let color = palette(ui).text;
+    let height = ui
+        .fonts_mut(|f| f.layout_no_wrap(source.into(), font, color).size().y)
+        .min(300.);
+    egui::Frame::new()
+        .fill(palette(ui).input)
+        .inner_margin(10.)
+        .show(ui, |ui| {
+            controls::nested_scroll(
+                ui,
+                egui::ScrollArea::both()
+                    .id_salt(("intro-script", id))
+                    .min_scrolled_height(height)
+                    .max_height(height),
+                |ui| {
+                    lesson_presentation::monospace(ui, source, false);
+                },
+            );
+        })
+        .response
+        .rect
+}
+fn expected_preview(ui: &mut egui::Ui, lesson: &teaching::Lesson) {
+    ui.strong("Expected preview · original example");
+    ui.label("These values describe the supplied script, before your edits.");
+    for (label, text) in [
+        ("Standard output", &lesson.fixture.stdout),
+        ("Standard error", &lesson.fixture.stderr),
+    ] {
+        ui.strong(label);
+        if text.is_empty() {
+            ui.label("(empty)");
+        } else {
+            lesson_presentation::monospace(ui, text, true);
+        }
+    }
+    ui.label(format!("Expected exit status: {}", lesson.fixture.status));
+    let changed: Vec<_> = lesson
+        .fixture
+        .after
+        .iter()
+        .filter(|(path, text)| lesson.fixture.files.get(*path) != Some(*text))
+        .collect();
+    if !changed.is_empty() {
+        controls::collapsing_header(ui, "Expected simulated file changes").show(ui, |ui| {
+            for (path, text) in changed {
+                ui.monospace(path);
+                lesson_presentation::monospace(ui, text, true);
+            }
+        });
     }
 }

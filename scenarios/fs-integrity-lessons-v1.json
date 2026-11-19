@@ -1,0 +1,3402 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-fs-offline-accounting",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Filesystem consistency and recovery",
+      "unit": "linux-filesystem-consistency",
+      "title": "Repair offline filesystem accounting without losing files",
+      "summary": "Investigate named files, allocation records and offline repair while protecting another volume.",
+      "objective": "Repair all supported consistency findings on /dev/vdb1 without changing report.txt or its original data blocks. Restore /dev/vdb1 mounted at /mnt/data. Leave /dev/vdc1 and its mount at /mnt/notes exactly unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Investigate the supplied virtual volume, repair only supported findings, verify retained contents and restore access."
+      ],
+      "guide": [],
+      "explanation": "The stored allocation maps and link counts must agree with actual file references. Unmounting alone changes no accounting. Offline preen corrects supported link, bitmap and summary disagreements while retaining the report and its blocks. A fresh read-only check reports no remaining findings; remounting restores access without touching the separate notes volume.",
+      "hints": [
+        "Inspect findmnt first: a mountpoint is where files are accessed; the device is what the checker examines.",
+        "A read-only check diagnoses; it does not repair. Unmount only the target and read the reported remaining finding.",
+        "Preen handles supported accounting errors. After repair, recheck offline and restore the mount. The protected notes volume must remain exactly unchanged."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man8/e2fsck.8.html"
+      ],
+      "simplifications": "Bounded original ext-family graph: fixed root/lost+found, retained file bytes and block ownership, names, link counts, allocation maps and free totals. No raw ext4/journal parser, disk I/O, missing-byte reconstruction, shared-block repair, arbitrary directories, kernel, real commands or mount effects. Mounted-check refusal is a stricter exercise policy. ls owner/mode/time are fixed modeled metadata. See FS_INTEGRITY_SUBSET.md.",
+      "initial": {
+        "kind": "FsIntegrity",
+        "simulation": {
+          "version": 1,
+          "definition": {
+            "assignment": {
+              "id": "lpic1-fs-offline-accounting",
+              "instructions": "Repair all supported consistency findings on /dev/vdb1 without changing report.txt or its original data blocks. Restore /dev/vdb1 mounted at /mnt/data. Leave /dev/vdc1 and its mount at /mnt/notes exactly unchanged.",
+              "cases": [
+                {
+                  "id": "lpic1-fs-offline-accounting-case-1",
+                  "label": "Bitmap disagreement",
+                  "initial": {
+                    "version": 1,
+                    "disks": [
+                      {
+                        "device": "/dev/vdb1",
+                        "mountpoint": "/mnt/data",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Independent report sample 1\nKeep this content.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      },
+                      {
+                        "device": "/dev/vdc1",
+                        "mountpoint": "/mnt/notes",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Protected notes: keep these bytes and this mount.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      }
+                    ]
+                  },
+                  "requirements": [
+                    {
+                      "kind": "Healthy",
+                      "device": "/dev/vdb1"
+                    },
+                    {
+                      "kind": "Mounted",
+                      "device": "/dev/vdb1"
+                    },
+                    {
+                      "kind": "Preserved",
+                      "device": "/dev/vdb1",
+                      "name": "report.txt"
+                    },
+                    {
+                      "kind": "Unchanged",
+                      "device": "/dev/vdc1"
+                    }
+                  ]
+                },
+                {
+                  "id": "lpic1-fs-offline-accounting-case-2",
+                  "label": "A second name and wrong totals",
+                  "initial": {
+                    "version": 1,
+                    "disks": [
+                      {
+                        "device": "/dev/vdb1",
+                        "mountpoint": "/mnt/data",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Independent report sample 2\nKeep this content.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12,
+                            "report-alias.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 39,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      },
+                      {
+                        "device": "/dev/vdc1",
+                        "mountpoint": "/mnt/notes",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Protected notes: keep these bytes and this mount.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      }
+                    ]
+                  },
+                  "requirements": [
+                    {
+                      "kind": "Healthy",
+                      "device": "/dev/vdb1"
+                    },
+                    {
+                      "kind": "Mounted",
+                      "device": "/dev/vdb1"
+                    },
+                    {
+                      "kind": "Preserved",
+                      "device": "/dev/vdb1",
+                      "name": "report.txt"
+                    },
+                    {
+                      "kind": "Unchanged",
+                      "device": "/dev/vdc1"
+                    }
+                  ]
+                },
+                {
+                  "id": "lpic1-fs-offline-accounting-case-3",
+                  "label": "Incorrect link and inode accounting",
+                  "initial": {
+                    "version": 1,
+                    "disks": [
+                      {
+                        "device": "/dev/vdb1",
+                        "mountpoint": "/mnt/data",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Independent report sample 3\nKeep this content.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 3
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            21
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 3,
+                          "mounted": true
+                        }
+                      },
+                      {
+                        "device": "/dev/vdc1",
+                        "mountpoint": "/mnt/notes",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Protected notes: keep these bytes and this mount.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      }
+                    ]
+                  },
+                  "requirements": [
+                    {
+                      "kind": "Healthy",
+                      "device": "/dev/vdb1"
+                    },
+                    {
+                      "kind": "Mounted",
+                      "device": "/dev/vdb1"
+                    },
+                    {
+                      "kind": "Preserved",
+                      "device": "/dev/vdb1",
+                      "name": "report.txt"
+                    },
+                    {
+                      "kind": "Unchanged",
+                      "device": "/dev/vdc1"
+                    }
+                  ]
+                }
+              ]
+            },
+            "example": {
+              "id": "lpic1-fs-offline-accounting-practice",
+              "instructions": "Repair all supported consistency findings on /dev/vdd1 without changing report.txt or its original data blocks. Restore /dev/vdd1 mounted at /mnt/workshop. Leave /dev/vde1 and its mount at /mnt/example-notes exactly unchanged.",
+              "cases": [
+                {
+                  "id": "lpic1-fs-offline-accounting-practice-case-1",
+                  "label": "Bitmap disagreement",
+                  "initial": {
+                    "version": 1,
+                    "disks": [
+                      {
+                        "device": "/dev/vdd1",
+                        "mountpoint": "/mnt/workshop",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Workshop report sample 1\nKeep this content.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      },
+                      {
+                        "device": "/dev/vde1",
+                        "mountpoint": "/mnt/example-notes",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Protected notes: keep these bytes and this mount.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      }
+                    ]
+                  },
+                  "requirements": [
+                    {
+                      "kind": "Healthy",
+                      "device": "/dev/vdd1"
+                    },
+                    {
+                      "kind": "Mounted",
+                      "device": "/dev/vdd1"
+                    },
+                    {
+                      "kind": "Preserved",
+                      "device": "/dev/vdd1",
+                      "name": "report.txt"
+                    },
+                    {
+                      "kind": "Unchanged",
+                      "device": "/dev/vde1"
+                    }
+                  ]
+                },
+                {
+                  "id": "lpic1-fs-offline-accounting-practice-case-2",
+                  "label": "A second name and wrong totals",
+                  "initial": {
+                    "version": 1,
+                    "disks": [
+                      {
+                        "device": "/dev/vdd1",
+                        "mountpoint": "/mnt/workshop",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Workshop report sample 2\nKeep this content.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12,
+                            "report-alias.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 39,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      },
+                      {
+                        "device": "/dev/vde1",
+                        "mountpoint": "/mnt/example-notes",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Protected notes: keep these bytes and this mount.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      }
+                    ]
+                  },
+                  "requirements": [
+                    {
+                      "kind": "Healthy",
+                      "device": "/dev/vdd1"
+                    },
+                    {
+                      "kind": "Mounted",
+                      "device": "/dev/vdd1"
+                    },
+                    {
+                      "kind": "Preserved",
+                      "device": "/dev/vdd1",
+                      "name": "report.txt"
+                    },
+                    {
+                      "kind": "Unchanged",
+                      "device": "/dev/vde1"
+                    }
+                  ]
+                },
+                {
+                  "id": "lpic1-fs-offline-accounting-practice-case-3",
+                  "label": "Incorrect link and inode accounting",
+                  "initial": {
+                    "version": 1,
+                    "disks": [
+                      {
+                        "device": "/dev/vdd1",
+                        "mountpoint": "/mnt/workshop",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Workshop report sample 3\nKeep this content.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 3
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            21
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 3,
+                          "mounted": true
+                        }
+                      },
+                      {
+                        "device": "/dev/vde1",
+                        "mountpoint": "/mnt/example-notes",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Protected notes: keep these bytes and this mount.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      }
+                    ]
+                  },
+                  "requirements": [
+                    {
+                      "kind": "Healthy",
+                      "device": "/dev/vdd1"
+                    },
+                    {
+                      "kind": "Mounted",
+                      "device": "/dev/vdd1"
+                    },
+                    {
+                      "kind": "Preserved",
+                      "device": "/dev/vdd1",
+                      "name": "report.txt"
+                    },
+                    {
+                      "kind": "Unchanged",
+                      "device": "/dev/vde1"
+                    }
+                  ]
+                }
+              ]
+            },
+            "example_commands": [
+              "findmnt",
+              "ls -li /mnt/workshop",
+              "umount /mnt/workshop",
+              "e2fsck -fn /dev/vdd1",
+              "e2fsck -fp /dev/vdd1",
+              "e2fsck -fn /dev/vdd1",
+              "mount /dev/vdd1 /mnt/workshop",
+              "cat /mnt/workshop/report.txt"
+            ]
+          },
+          "view": "introduction",
+          "assignment": {
+            "history": [],
+            "checked": null,
+            "command": "",
+            "transcript": []
+          },
+          "example": {
+            "history": [],
+            "checked": null,
+            "command": "",
+            "transcript": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "FsIntegrity",
+        "definition": {
+          "assignment": {
+            "id": "lpic1-fs-offline-accounting",
+            "instructions": "Repair all supported consistency findings on /dev/vdb1 without changing report.txt or its original data blocks. Restore /dev/vdb1 mounted at /mnt/data. Leave /dev/vdc1 and its mount at /mnt/notes exactly unchanged.",
+            "cases": [
+              {
+                "id": "lpic1-fs-offline-accounting-case-1",
+                "label": "Bitmap disagreement",
+                "initial": {
+                  "version": 1,
+                  "disks": [
+                    {
+                      "device": "/dev/vdb1",
+                      "mountpoint": "/mnt/data",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Independent report sample 1\nKeep this content.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    },
+                    {
+                      "device": "/dev/vdc1",
+                      "mountpoint": "/mnt/notes",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Protected notes: keep these bytes and this mount.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    }
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Healthy",
+                    "device": "/dev/vdb1"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "device": "/dev/vdb1"
+                  },
+                  {
+                    "kind": "Preserved",
+                    "device": "/dev/vdb1",
+                    "name": "report.txt"
+                  },
+                  {
+                    "kind": "Unchanged",
+                    "device": "/dev/vdc1"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-fs-offline-accounting-case-2",
+                "label": "A second name and wrong totals",
+                "initial": {
+                  "version": 1,
+                  "disks": [
+                    {
+                      "device": "/dev/vdb1",
+                      "mountpoint": "/mnt/data",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Independent report sample 2\nKeep this content.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12,
+                          "report-alias.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 39,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    },
+                    {
+                      "device": "/dev/vdc1",
+                      "mountpoint": "/mnt/notes",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Protected notes: keep these bytes and this mount.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    }
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Healthy",
+                    "device": "/dev/vdb1"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "device": "/dev/vdb1"
+                  },
+                  {
+                    "kind": "Preserved",
+                    "device": "/dev/vdb1",
+                    "name": "report.txt"
+                  },
+                  {
+                    "kind": "Unchanged",
+                    "device": "/dev/vdc1"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-fs-offline-accounting-case-3",
+                "label": "Incorrect link and inode accounting",
+                "initial": {
+                  "version": 1,
+                  "disks": [
+                    {
+                      "device": "/dev/vdb1",
+                      "mountpoint": "/mnt/data",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Independent report sample 3\nKeep this content.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 3
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12,
+                          21
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 3,
+                        "mounted": true
+                      }
+                    },
+                    {
+                      "device": "/dev/vdc1",
+                      "mountpoint": "/mnt/notes",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Protected notes: keep these bytes and this mount.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    }
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Healthy",
+                    "device": "/dev/vdb1"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "device": "/dev/vdb1"
+                  },
+                  {
+                    "kind": "Preserved",
+                    "device": "/dev/vdb1",
+                    "name": "report.txt"
+                  },
+                  {
+                    "kind": "Unchanged",
+                    "device": "/dev/vdc1"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic1-fs-offline-accounting-practice",
+            "instructions": "Repair all supported consistency findings on /dev/vdd1 without changing report.txt or its original data blocks. Restore /dev/vdd1 mounted at /mnt/workshop. Leave /dev/vde1 and its mount at /mnt/example-notes exactly unchanged.",
+            "cases": [
+              {
+                "id": "lpic1-fs-offline-accounting-practice-case-1",
+                "label": "Bitmap disagreement",
+                "initial": {
+                  "version": 1,
+                  "disks": [
+                    {
+                      "device": "/dev/vdd1",
+                      "mountpoint": "/mnt/workshop",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Workshop report sample 1\nKeep this content.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    },
+                    {
+                      "device": "/dev/vde1",
+                      "mountpoint": "/mnt/example-notes",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Protected notes: keep these bytes and this mount.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    }
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Healthy",
+                    "device": "/dev/vdd1"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "device": "/dev/vdd1"
+                  },
+                  {
+                    "kind": "Preserved",
+                    "device": "/dev/vdd1",
+                    "name": "report.txt"
+                  },
+                  {
+                    "kind": "Unchanged",
+                    "device": "/dev/vde1"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-fs-offline-accounting-practice-case-2",
+                "label": "A second name and wrong totals",
+                "initial": {
+                  "version": 1,
+                  "disks": [
+                    {
+                      "device": "/dev/vdd1",
+                      "mountpoint": "/mnt/workshop",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Workshop report sample 2\nKeep this content.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12,
+                          "report-alias.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 39,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    },
+                    {
+                      "device": "/dev/vde1",
+                      "mountpoint": "/mnt/example-notes",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Protected notes: keep these bytes and this mount.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    }
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Healthy",
+                    "device": "/dev/vdd1"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "device": "/dev/vdd1"
+                  },
+                  {
+                    "kind": "Preserved",
+                    "device": "/dev/vdd1",
+                    "name": "report.txt"
+                  },
+                  {
+                    "kind": "Unchanged",
+                    "device": "/dev/vde1"
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-fs-offline-accounting-practice-case-3",
+                "label": "Incorrect link and inode accounting",
+                "initial": {
+                  "version": 1,
+                  "disks": [
+                    {
+                      "device": "/dev/vdd1",
+                      "mountpoint": "/mnt/workshop",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Workshop report sample 3\nKeep this content.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 3
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12,
+                          21
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 3,
+                        "mounted": true
+                      }
+                    },
+                    {
+                      "device": "/dev/vde1",
+                      "mountpoint": "/mnt/example-notes",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Protected notes: keep these bytes and this mount.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    }
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Healthy",
+                    "device": "/dev/vdd1"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "device": "/dev/vdd1"
+                  },
+                  {
+                    "kind": "Preserved",
+                    "device": "/dev/vdd1",
+                    "name": "report.txt"
+                  },
+                  {
+                    "kind": "Unchanged",
+                    "device": "/dev/vde1"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_commands": [
+            "findmnt",
+            "ls -li /mnt/workshop",
+            "umount /mnt/workshop",
+            "e2fsck -fn /dev/vdd1",
+            "e2fsck -fp /dev/vdd1",
+            "e2fsck -fn /dev/vdd1",
+            "mount /dev/vdd1 /mnt/workshop",
+            "cat /mnt/workshop/report.txt"
+          ]
+        }
+      },
+      "solution": [
+        "FS INTEGRITY\n{\"kind\": \"Command\", \"input\": \"umount /mnt/data\"}",
+        "FS INTEGRITY\n{\"kind\": \"Command\", \"input\": \"e2fsck -fp /dev/vdb1\"}",
+        "FS INTEGRITY\n{\"kind\": \"Command\", \"input\": \"e2fsck -fn /dev/vdb1\"}",
+        "FS INTEGRITY\n{\"kind\": \"Command\", \"input\": \"mount /dev/vdb1 /mnt/data\"}",
+        "FS INTEGRITY\n{\"kind\": \"Check\"}"
+      ],
+      "prerequisites": [
+        "lpic1-links-handover",
+        "lpic1-removable-shared-handover"
+      ]
+    },
+    {
+      "id": "lpic1-fs-retained-recovery",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Filesystem consistency and recovery",
+      "unit": "linux-filesystem-consistency",
+      "title": "Recover retained unnamed data and restore access",
+      "summary": "Distinguish automatic correction from explicit recovery, inspect lost+found and preserve retained bytes.",
+      "objective": "Repair all supported consistency findings on /dev/vdb1 without changing report.txt or its original data blocks. Reconnect each supplied nonempty unnamed file in lost+found, preserving its original bytes and data blocks. A read-only check or automatic repair alone is insufficient. Restore /dev/vdb1 mounted at /mnt/data. Leave /dev/vdc1 and its mount at /mnt/notes exactly unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "steps": [
+        "Investigate the supplied virtual volume, repair only supported findings, verify retained contents and restore access."
+      ],
+      "guide": [],
+      "explanation": "The directory name, file inode and its retained data are different facts. Preen refuses the nonempty unnamed inode because reconnecting it needs an explicit decision. In this supplied exercise, explicit recovery attaches retained bytes under lost+found, choosing a different name if needed; it does not reconstruct overwritten data. Recheck, remount and read the recovered content. The separate notes volume remains unchanged.",
+      "hints": [
+        "Inspect findmnt first: a mountpoint is where files are accessed; the device is what the checker examines.",
+        "A read-only check diagnoses; it does not repair. Unmount only the target and read the reported remaining finding.",
+        "Preen handles supported accounting errors. A nonempty unnamed inode needs an explicit recovery decision in this exercise; inspect the name actually chosen under lost+found."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man8/e2fsck.8.html"
+      ],
+      "simplifications": "Bounded original ext-family graph: fixed root/lost+found, retained file bytes and block ownership, names, link counts, allocation maps and free totals. No raw ext4/journal parser, disk I/O, missing-byte reconstruction, shared-block repair, arbitrary directories, kernel, real commands or mount effects. Mounted-check refusal is a stricter exercise policy. ls owner/mode/time are fixed modeled metadata. See FS_INTEGRITY_SUBSET.md.",
+      "initial": {
+        "kind": "FsIntegrity",
+        "simulation": {
+          "version": 1,
+          "definition": {
+            "assignment": {
+              "id": "lpic1-fs-retained-recovery",
+              "instructions": "Repair all supported consistency findings on /dev/vdb1 without changing report.txt or its original data blocks. Reconnect each supplied nonempty unnamed file in lost+found, preserving its original bytes and data blocks. A read-only check or automatic repair alone is insufficient. Restore /dev/vdb1 mounted at /mnt/data. Leave /dev/vdc1 and its mount at /mnt/notes exactly unchanged.",
+              "cases": [
+                {
+                  "id": "lpic1-fs-retained-recovery-case-1",
+                  "label": "Retained unnamed note",
+                  "initial": {
+                    "version": 1,
+                    "disks": [
+                      {
+                        "device": "/dev/vdb1",
+                        "mountpoint": "/mnt/data",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Independent report sample 1\nKeep this content.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            },
+                            "14": {
+                              "content": "Retained assignment note 1\nDo not discard.\n",
+                              "blocks": [
+                                10
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      },
+                      {
+                        "device": "/dev/vdc1",
+                        "mountpoint": "/mnt/notes",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Protected notes: keep these bytes and this mount.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      }
+                    ]
+                  },
+                  "requirements": [
+                    {
+                      "kind": "Healthy",
+                      "device": "/dev/vdb1"
+                    },
+                    {
+                      "kind": "Mounted",
+                      "device": "/dev/vdb1"
+                    },
+                    {
+                      "kind": "Preserved",
+                      "device": "/dev/vdb1",
+                      "name": "report.txt"
+                    },
+                    {
+                      "kind": "Unchanged",
+                      "device": "/dev/vdc1"
+                    },
+                    {
+                      "kind": "Recovered",
+                      "device": "/dev/vdb1",
+                      "inode": 14
+                    }
+                  ]
+                },
+                {
+                  "id": "lpic1-fs-retained-recovery-case-2",
+                  "label": "An occupied recovery name",
+                  "initial": {
+                    "version": 1,
+                    "disks": [
+                      {
+                        "device": "/dev/vdb1",
+                        "mountpoint": "/mnt/data",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Independent report sample 2\nKeep this content.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            },
+                            "19": {
+                              "content": "Retained assignment note 2\nDo not discard.\n",
+                              "blocks": [
+                                11
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12,
+                            "report-alias.txt": 12,
+                            "lost+found/#19": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 39,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      },
+                      {
+                        "device": "/dev/vdc1",
+                        "mountpoint": "/mnt/notes",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Protected notes: keep these bytes and this mount.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      }
+                    ]
+                  },
+                  "requirements": [
+                    {
+                      "kind": "Healthy",
+                      "device": "/dev/vdb1"
+                    },
+                    {
+                      "kind": "Mounted",
+                      "device": "/dev/vdb1"
+                    },
+                    {
+                      "kind": "Preserved",
+                      "device": "/dev/vdb1",
+                      "name": "report.txt"
+                    },
+                    {
+                      "kind": "Unchanged",
+                      "device": "/dev/vdc1"
+                    },
+                    {
+                      "kind": "Recovered",
+                      "device": "/dev/vdb1",
+                      "inode": 19
+                    }
+                  ]
+                },
+                {
+                  "id": "lpic1-fs-retained-recovery-case-3",
+                  "label": "Another retained file and bad accounting",
+                  "initial": {
+                    "version": 1,
+                    "disks": [
+                      {
+                        "device": "/dev/vdb1",
+                        "mountpoint": "/mnt/data",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Independent report sample 3\nKeep this content.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 3
+                            },
+                            "24": {
+                              "content": "Retained assignment note 3\nDo not discard.\n",
+                              "blocks": [
+                                12
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            21
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 3,
+                          "mounted": true
+                        }
+                      },
+                      {
+                        "device": "/dev/vdc1",
+                        "mountpoint": "/mnt/notes",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Protected notes: keep these bytes and this mount.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      }
+                    ]
+                  },
+                  "requirements": [
+                    {
+                      "kind": "Healthy",
+                      "device": "/dev/vdb1"
+                    },
+                    {
+                      "kind": "Mounted",
+                      "device": "/dev/vdb1"
+                    },
+                    {
+                      "kind": "Preserved",
+                      "device": "/dev/vdb1",
+                      "name": "report.txt"
+                    },
+                    {
+                      "kind": "Unchanged",
+                      "device": "/dev/vdc1"
+                    },
+                    {
+                      "kind": "Recovered",
+                      "device": "/dev/vdb1",
+                      "inode": 24
+                    }
+                  ]
+                }
+              ]
+            },
+            "example": {
+              "id": "lpic1-fs-retained-recovery-practice",
+              "instructions": "Repair all supported consistency findings on /dev/vdd1 without changing report.txt or its original data blocks. Reconnect each supplied nonempty unnamed file in lost+found, preserving its original bytes and data blocks. A read-only check or automatic repair alone is insufficient. Restore /dev/vdd1 mounted at /mnt/workshop. Leave /dev/vde1 and its mount at /mnt/example-notes exactly unchanged.",
+              "cases": [
+                {
+                  "id": "lpic1-fs-retained-recovery-practice-case-1",
+                  "label": "Retained unnamed note",
+                  "initial": {
+                    "version": 1,
+                    "disks": [
+                      {
+                        "device": "/dev/vdd1",
+                        "mountpoint": "/mnt/workshop",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Workshop report sample 1\nKeep this content.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            },
+                            "14": {
+                              "content": "Retained workshop note 1\nDo not discard.\n",
+                              "blocks": [
+                                10
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      },
+                      {
+                        "device": "/dev/vde1",
+                        "mountpoint": "/mnt/example-notes",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Protected notes: keep these bytes and this mount.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      }
+                    ]
+                  },
+                  "requirements": [
+                    {
+                      "kind": "Healthy",
+                      "device": "/dev/vdd1"
+                    },
+                    {
+                      "kind": "Mounted",
+                      "device": "/dev/vdd1"
+                    },
+                    {
+                      "kind": "Preserved",
+                      "device": "/dev/vdd1",
+                      "name": "report.txt"
+                    },
+                    {
+                      "kind": "Unchanged",
+                      "device": "/dev/vde1"
+                    },
+                    {
+                      "kind": "Recovered",
+                      "device": "/dev/vdd1",
+                      "inode": 14
+                    }
+                  ]
+                },
+                {
+                  "id": "lpic1-fs-retained-recovery-practice-case-2",
+                  "label": "An occupied recovery name",
+                  "initial": {
+                    "version": 1,
+                    "disks": [
+                      {
+                        "device": "/dev/vdd1",
+                        "mountpoint": "/mnt/workshop",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Workshop report sample 2\nKeep this content.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            },
+                            "19": {
+                              "content": "Retained workshop note 2\nDo not discard.\n",
+                              "blocks": [
+                                11
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12,
+                            "report-alias.txt": 12,
+                            "lost+found/#19": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 39,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      },
+                      {
+                        "device": "/dev/vde1",
+                        "mountpoint": "/mnt/example-notes",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Protected notes: keep these bytes and this mount.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      }
+                    ]
+                  },
+                  "requirements": [
+                    {
+                      "kind": "Healthy",
+                      "device": "/dev/vdd1"
+                    },
+                    {
+                      "kind": "Mounted",
+                      "device": "/dev/vdd1"
+                    },
+                    {
+                      "kind": "Preserved",
+                      "device": "/dev/vdd1",
+                      "name": "report.txt"
+                    },
+                    {
+                      "kind": "Unchanged",
+                      "device": "/dev/vde1"
+                    },
+                    {
+                      "kind": "Recovered",
+                      "device": "/dev/vdd1",
+                      "inode": 19
+                    }
+                  ]
+                },
+                {
+                  "id": "lpic1-fs-retained-recovery-practice-case-3",
+                  "label": "Another retained file and bad accounting",
+                  "initial": {
+                    "version": 1,
+                    "disks": [
+                      {
+                        "device": "/dev/vdd1",
+                        "mountpoint": "/mnt/workshop",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Workshop report sample 3\nKeep this content.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 3
+                            },
+                            "24": {
+                              "content": "Retained workshop note 3\nDo not discard.\n",
+                              "blocks": [
+                                12
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            21
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 3,
+                          "mounted": true
+                        }
+                      },
+                      {
+                        "device": "/dev/vde1",
+                        "mountpoint": "/mnt/example-notes",
+                        "volume": {
+                          "version": 1,
+                          "block_count": 40,
+                          "inode_count": 40,
+                          "files": {
+                            "12": {
+                              "content": "Protected notes: keep these bytes and this mount.\n",
+                              "blocks": [
+                                8
+                              ],
+                              "links": 1
+                            }
+                          },
+                          "entries": {
+                            "report.txt": 12
+                          },
+                          "allocated_blocks": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                          ],
+                          "allocated_inodes": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12
+                          ],
+                          "free_blocks": 31,
+                          "free_inodes": 28,
+                          "mounted": true
+                        }
+                      }
+                    ]
+                  },
+                  "requirements": [
+                    {
+                      "kind": "Healthy",
+                      "device": "/dev/vdd1"
+                    },
+                    {
+                      "kind": "Mounted",
+                      "device": "/dev/vdd1"
+                    },
+                    {
+                      "kind": "Preserved",
+                      "device": "/dev/vdd1",
+                      "name": "report.txt"
+                    },
+                    {
+                      "kind": "Unchanged",
+                      "device": "/dev/vde1"
+                    },
+                    {
+                      "kind": "Recovered",
+                      "device": "/dev/vdd1",
+                      "inode": 24
+                    }
+                  ]
+                }
+              ]
+            },
+            "example_commands": [
+              "findmnt",
+              "ls -li /mnt/workshop",
+              "umount /mnt/workshop",
+              "e2fsck -fn /dev/vdd1",
+              "e2fsck -fp /dev/vdd1",
+              "e2fsck -fy /dev/vdd1",
+              "e2fsck -fn /dev/vdd1",
+              "mount /dev/vdd1 /mnt/workshop",
+              "ls -li /mnt/workshop/lost+found"
+            ]
+          },
+          "view": "introduction",
+          "assignment": {
+            "history": [],
+            "checked": null,
+            "command": "",
+            "transcript": []
+          },
+          "example": {
+            "history": [],
+            "checked": null,
+            "command": "",
+            "transcript": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "FsIntegrity",
+        "definition": {
+          "assignment": {
+            "id": "lpic1-fs-retained-recovery",
+            "instructions": "Repair all supported consistency findings on /dev/vdb1 without changing report.txt or its original data blocks. Reconnect each supplied nonempty unnamed file in lost+found, preserving its original bytes and data blocks. A read-only check or automatic repair alone is insufficient. Restore /dev/vdb1 mounted at /mnt/data. Leave /dev/vdc1 and its mount at /mnt/notes exactly unchanged.",
+            "cases": [
+              {
+                "id": "lpic1-fs-retained-recovery-case-1",
+                "label": "Retained unnamed note",
+                "initial": {
+                  "version": 1,
+                  "disks": [
+                    {
+                      "device": "/dev/vdb1",
+                      "mountpoint": "/mnt/data",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Independent report sample 1\nKeep this content.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          },
+                          "14": {
+                            "content": "Retained assignment note 1\nDo not discard.\n",
+                            "blocks": [
+                              10
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    },
+                    {
+                      "device": "/dev/vdc1",
+                      "mountpoint": "/mnt/notes",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Protected notes: keep these bytes and this mount.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    }
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Healthy",
+                    "device": "/dev/vdb1"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "device": "/dev/vdb1"
+                  },
+                  {
+                    "kind": "Preserved",
+                    "device": "/dev/vdb1",
+                    "name": "report.txt"
+                  },
+                  {
+                    "kind": "Unchanged",
+                    "device": "/dev/vdc1"
+                  },
+                  {
+                    "kind": "Recovered",
+                    "device": "/dev/vdb1",
+                    "inode": 14
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-fs-retained-recovery-case-2",
+                "label": "An occupied recovery name",
+                "initial": {
+                  "version": 1,
+                  "disks": [
+                    {
+                      "device": "/dev/vdb1",
+                      "mountpoint": "/mnt/data",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Independent report sample 2\nKeep this content.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          },
+                          "19": {
+                            "content": "Retained assignment note 2\nDo not discard.\n",
+                            "blocks": [
+                              11
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12,
+                          "report-alias.txt": 12,
+                          "lost+found/#19": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 39,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    },
+                    {
+                      "device": "/dev/vdc1",
+                      "mountpoint": "/mnt/notes",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Protected notes: keep these bytes and this mount.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    }
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Healthy",
+                    "device": "/dev/vdb1"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "device": "/dev/vdb1"
+                  },
+                  {
+                    "kind": "Preserved",
+                    "device": "/dev/vdb1",
+                    "name": "report.txt"
+                  },
+                  {
+                    "kind": "Unchanged",
+                    "device": "/dev/vdc1"
+                  },
+                  {
+                    "kind": "Recovered",
+                    "device": "/dev/vdb1",
+                    "inode": 19
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-fs-retained-recovery-case-3",
+                "label": "Another retained file and bad accounting",
+                "initial": {
+                  "version": 1,
+                  "disks": [
+                    {
+                      "device": "/dev/vdb1",
+                      "mountpoint": "/mnt/data",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Independent report sample 3\nKeep this content.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 3
+                          },
+                          "24": {
+                            "content": "Retained assignment note 3\nDo not discard.\n",
+                            "blocks": [
+                              12
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12,
+                          21
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 3,
+                        "mounted": true
+                      }
+                    },
+                    {
+                      "device": "/dev/vdc1",
+                      "mountpoint": "/mnt/notes",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Protected notes: keep these bytes and this mount.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    }
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Healthy",
+                    "device": "/dev/vdb1"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "device": "/dev/vdb1"
+                  },
+                  {
+                    "kind": "Preserved",
+                    "device": "/dev/vdb1",
+                    "name": "report.txt"
+                  },
+                  {
+                    "kind": "Unchanged",
+                    "device": "/dev/vdc1"
+                  },
+                  {
+                    "kind": "Recovered",
+                    "device": "/dev/vdb1",
+                    "inode": 24
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic1-fs-retained-recovery-practice",
+            "instructions": "Repair all supported consistency findings on /dev/vdd1 without changing report.txt or its original data blocks. Reconnect each supplied nonempty unnamed file in lost+found, preserving its original bytes and data blocks. A read-only check or automatic repair alone is insufficient. Restore /dev/vdd1 mounted at /mnt/workshop. Leave /dev/vde1 and its mount at /mnt/example-notes exactly unchanged.",
+            "cases": [
+              {
+                "id": "lpic1-fs-retained-recovery-practice-case-1",
+                "label": "Retained unnamed note",
+                "initial": {
+                  "version": 1,
+                  "disks": [
+                    {
+                      "device": "/dev/vdd1",
+                      "mountpoint": "/mnt/workshop",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Workshop report sample 1\nKeep this content.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          },
+                          "14": {
+                            "content": "Retained workshop note 1\nDo not discard.\n",
+                            "blocks": [
+                              10
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    },
+                    {
+                      "device": "/dev/vde1",
+                      "mountpoint": "/mnt/example-notes",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Protected notes: keep these bytes and this mount.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    }
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Healthy",
+                    "device": "/dev/vdd1"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "device": "/dev/vdd1"
+                  },
+                  {
+                    "kind": "Preserved",
+                    "device": "/dev/vdd1",
+                    "name": "report.txt"
+                  },
+                  {
+                    "kind": "Unchanged",
+                    "device": "/dev/vde1"
+                  },
+                  {
+                    "kind": "Recovered",
+                    "device": "/dev/vdd1",
+                    "inode": 14
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-fs-retained-recovery-practice-case-2",
+                "label": "An occupied recovery name",
+                "initial": {
+                  "version": 1,
+                  "disks": [
+                    {
+                      "device": "/dev/vdd1",
+                      "mountpoint": "/mnt/workshop",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Workshop report sample 2\nKeep this content.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          },
+                          "19": {
+                            "content": "Retained workshop note 2\nDo not discard.\n",
+                            "blocks": [
+                              11
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12,
+                          "report-alias.txt": 12,
+                          "lost+found/#19": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 39,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    },
+                    {
+                      "device": "/dev/vde1",
+                      "mountpoint": "/mnt/example-notes",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Protected notes: keep these bytes and this mount.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    }
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Healthy",
+                    "device": "/dev/vdd1"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "device": "/dev/vdd1"
+                  },
+                  {
+                    "kind": "Preserved",
+                    "device": "/dev/vdd1",
+                    "name": "report.txt"
+                  },
+                  {
+                    "kind": "Unchanged",
+                    "device": "/dev/vde1"
+                  },
+                  {
+                    "kind": "Recovered",
+                    "device": "/dev/vdd1",
+                    "inode": 19
+                  }
+                ]
+              },
+              {
+                "id": "lpic1-fs-retained-recovery-practice-case-3",
+                "label": "Another retained file and bad accounting",
+                "initial": {
+                  "version": 1,
+                  "disks": [
+                    {
+                      "device": "/dev/vdd1",
+                      "mountpoint": "/mnt/workshop",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Workshop report sample 3\nKeep this content.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 3
+                          },
+                          "24": {
+                            "content": "Retained workshop note 3\nDo not discard.\n",
+                            "blocks": [
+                              12
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12,
+                          21
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 3,
+                        "mounted": true
+                      }
+                    },
+                    {
+                      "device": "/dev/vde1",
+                      "mountpoint": "/mnt/example-notes",
+                      "volume": {
+                        "version": 1,
+                        "block_count": 40,
+                        "inode_count": 40,
+                        "files": {
+                          "12": {
+                            "content": "Protected notes: keep these bytes and this mount.\n",
+                            "blocks": [
+                              8
+                            ],
+                            "links": 1
+                          }
+                        },
+                        "entries": {
+                          "report.txt": 12
+                        },
+                        "allocated_blocks": [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8
+                        ],
+                        "allocated_inodes": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12
+                        ],
+                        "free_blocks": 31,
+                        "free_inodes": 28,
+                        "mounted": true
+                      }
+                    }
+                  ]
+                },
+                "requirements": [
+                  {
+                    "kind": "Healthy",
+                    "device": "/dev/vdd1"
+                  },
+                  {
+                    "kind": "Mounted",
+                    "device": "/dev/vdd1"
+                  },
+                  {
+                    "kind": "Preserved",
+                    "device": "/dev/vdd1",
+                    "name": "report.txt"
+                  },
+                  {
+                    "kind": "Unchanged",
+                    "device": "/dev/vde1"
+                  },
+                  {
+                    "kind": "Recovered",
+                    "device": "/dev/vdd1",
+                    "inode": 24
+                  }
+                ]
+              }
+            ]
+          },
+          "example_commands": [
+            "findmnt",
+            "ls -li /mnt/workshop",
+            "umount /mnt/workshop",
+            "e2fsck -fn /dev/vdd1",
+            "e2fsck -fp /dev/vdd1",
+            "e2fsck -fy /dev/vdd1",
+            "e2fsck -fn /dev/vdd1",
+            "mount /dev/vdd1 /mnt/workshop",
+            "ls -li /mnt/workshop/lost+found"
+          ]
+        }
+      },
+      "solution": [
+        "FS INTEGRITY\n{\"kind\": \"Command\", \"input\": \"umount /mnt/data\"}",
+        "FS INTEGRITY\n{\"kind\": \"Command\", \"input\": \"e2fsck -fy /dev/vdb1\"}",
+        "FS INTEGRITY\n{\"kind\": \"Command\", \"input\": \"e2fsck -fn /dev/vdb1\"}",
+        "FS INTEGRITY\n{\"kind\": \"Command\", \"input\": \"mount /dev/vdb1 /mnt/data\"}",
+        "FS INTEGRITY\n{\"kind\": \"Check\"}"
+      ],
+      "prerequisites": [
+        "lpic1-fs-offline-accounting"
+      ]
+    }
+  ]
+}

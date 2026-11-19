@@ -1,0 +1,1936 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-rpm-metadata-preserve",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "RPM metadata and scoped payload recovery",
+      "unit": "rpm-payload-recovery",
+      "title": "Repair attributes without erasing site settings",
+      "summary": "Restore recorded file attributes while retaining intentional configuration text and neighboring packages.",
+      "objective": "Keep queue-agent, report-pages and desk-notes installed at their original 1.0-1 versions. Restore the installed queue-agent record’s mode, owner, group and modified time for /srv/teaching/queue-agent.conf and /srv/teaching/queue-agent/help.txt. Keep the current contents of both queue-agent files, including the intentional local configuration text. Keep report-pages and every one of its current supplied files unchanged. Keep desk-notes and all its supplied files unchanged. Retain healthy declared package requirements. Use only the supplied virtual packages and file data. The configuration’s intentional text difference is not a request to replace it; no upgrade, host command, real archive, signature or full rpm -V is required.",
+      "retry_guidance": "Read the named outcome row. If attributes still differ, inspect the installed record and actual file. If text remains damaged, metadata-only repair cannot replace it. If versions or neighbors changed, restore the stated package set or reset only this attempt and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Repair only the stated differences",
+        "Check current outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Read the installed header and actual file differences before choosing a repair. Package-record health and current file contents are distinct observations.",
+          "action": "Open Inspect package data · Read-only and use Installed records, Package header and Payload path to inspect the supplied target.",
+          "commands": [
+            {
+              "command": "rpm -q queue-agent",
+              "explanation": "Read the actual installed version, without changing it.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Repair only the stated differences",
+          "why": "Metadata-only repair preserves current text; exact reinstall repairs the separate plain payload where required. Keep versions and neighbors as stated.",
+          "action": "Enter the appropriate closed simulated RPM operation, select Run command and inspect its result.",
+          "commands": [
+            {
+              "command": "rpm --restore queue-agent",
+              "explanation": "One supported metadata-only repair, not a host operation.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Check current outcomes",
+          "why": "Correct attributes do not excuse changed site text, an upgraded version or a missing neighbor.",
+          "action": "Choose Check work and read the specific failing row. Inspect that file or record, repair it and retry.",
+          "commands": [
+            {
+              "command": "rpm -q desk-notes",
+              "explanation": "Confirm the retained neighbor record; this query itself earns no credit.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "initial": {
+        "kind": "RpmPackages",
+        "simulation": {
+          "schema_version": 1,
+          "catalog": {
+            "fixture": "metadata-site-recovery",
+            "target": "x86_64",
+            "published": "current",
+            "archives": {
+              "queue-agent-v1": {
+                "identity": {
+                  "name": "queue-agent",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/teaching/queue-agent.conf": {
+                    "file": {
+                      "contents": "style=default\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "config_noreplace"
+                  },
+                  "/srv/teaching/queue-agent/help.txt": {
+                    "file": {
+                      "contents": "Supported local workflow.\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "queue-agent-v2": {
+                "identity": {
+                  "name": "queue-agent",
+                  "arch": "noarch"
+                },
+                "evr": "2.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/teaching/queue-agent.conf": {
+                    "file": {
+                      "contents": "style=new-default\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "config_noreplace"
+                  },
+                  "/srv/teaching/queue-agent/help.txt": {
+                    "file": {
+                      "contents": "Newer workflow, outside this repair.\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "report-pages-v1": {
+                "identity": {
+                  "name": "report-pages",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/teaching/report-pages/template.txt": {
+                    "file": {
+                      "contents": "Curated template, version one.\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "report-pages-v2": {
+                "identity": {
+                  "name": "report-pages",
+                  "arch": "noarch"
+                },
+                "evr": "2.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/teaching/report-pages/template.txt": {
+                    "file": {
+                      "contents": "New template, version two.\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "desk-notes-v1": {
+                "identity": {
+                  "name": "desk-notes",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/teaching/desk-notes/notice.txt": {
+                    "file": {
+                      "contents": "Retain this unrelated working note.\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              }
+            },
+            "snapshots": {
+              "current": {
+                "archives": [
+                  "queue-agent-v2",
+                  "report-pages-v2",
+                  "desk-notes-v1"
+                ]
+              }
+            },
+            "allowed_paths": [
+              "/srv/teaching/desk-notes/notice.txt",
+              "/srv/teaching/queue-agent.conf",
+              "/srv/teaching/queue-agent/help.txt",
+              "/srv/teaching/report-pages/template.txt"
+            ]
+          },
+          "runtime": {
+            "installed": [
+              {
+                "identity": {
+                  "name": "queue-agent",
+                  "arch": "noarch"
+                },
+                "archive": "queue-agent-v1"
+              },
+              {
+                "identity": {
+                  "name": "report-pages",
+                  "arch": "noarch"
+                },
+                "archive": "report-pages-v1"
+              },
+              {
+                "identity": {
+                  "name": "desk-notes",
+                  "arch": "noarch"
+                },
+                "archive": "desk-notes-v1"
+              }
+            ],
+            "available": [
+              "queue-agent-v1",
+              "queue-agent-v2",
+              "report-pages-v1",
+              "report-pages-v2",
+              "desk-notes-v1"
+            ],
+            "cached": "current",
+            "files": {
+              "/srv/teaching/queue-agent.conf": {
+                "contents": "style=site\n",
+                "mode": 416,
+                "owner": "alex",
+                "group": "ops",
+                "mtime": 1700000099
+              },
+              "/srv/teaching/queue-agent/help.txt": {
+                "contents": "Supported local workflow.\n",
+                "mode": 384,
+                "owner": "alex",
+                "group": "ops",
+                "mtime": 1700000088
+              },
+              "/srv/teaching/report-pages/template.txt": {
+                "contents": "Curated template, version one.\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 1700000000
+              },
+              "/srv/teaching/desk-notes/notice.txt": {
+                "contents": "Retain this unrelated working note.\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 1700000000
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "RpmPackages",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "metadata-site-recovery",
+              "target": "x86_64",
+              "published": "current",
+              "archives": {
+                "queue-agent-v1": {
+                  "identity": {
+                    "name": "queue-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/teaching/queue-agent.conf": {
+                      "file": {
+                        "contents": "style=default\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/teaching/queue-agent/help.txt": {
+                      "file": {
+                        "contents": "Supported local workflow.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "queue-agent-v2": {
+                  "identity": {
+                    "name": "queue-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/teaching/queue-agent.conf": {
+                      "file": {
+                        "contents": "style=new-default\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/teaching/queue-agent/help.txt": {
+                      "file": {
+                        "contents": "Newer workflow, outside this repair.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "report-pages-v1": {
+                  "identity": {
+                    "name": "report-pages",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/teaching/report-pages/template.txt": {
+                      "file": {
+                        "contents": "Curated template, version one.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "report-pages-v2": {
+                  "identity": {
+                    "name": "report-pages",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/teaching/report-pages/template.txt": {
+                      "file": {
+                        "contents": "New template, version two.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "desk-notes-v1": {
+                  "identity": {
+                    "name": "desk-notes",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/teaching/desk-notes/notice.txt": {
+                      "file": {
+                        "contents": "Retain this unrelated working note.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "current": {
+                  "archives": [
+                    "queue-agent-v2",
+                    "report-pages-v2",
+                    "desk-notes-v1"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/srv/teaching/desk-notes/notice.txt",
+                "/srv/teaching/queue-agent.conf",
+                "/srv/teaching/queue-agent/help.txt",
+                "/srv/teaching/report-pages/template.txt"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "queue-agent",
+                    "arch": "noarch"
+                  },
+                  "archive": "queue-agent-v1"
+                },
+                {
+                  "identity": {
+                    "name": "report-pages",
+                    "arch": "noarch"
+                  },
+                  "archive": "report-pages-v1"
+                },
+                {
+                  "identity": {
+                    "name": "desk-notes",
+                    "arch": "noarch"
+                  },
+                  "archive": "desk-notes-v1"
+                }
+              ],
+              "available": [
+                "queue-agent-v1",
+                "queue-agent-v2",
+                "report-pages-v1",
+                "report-pages-v2",
+                "desk-notes-v1"
+              ],
+              "cached": "current",
+              "files": {
+                "/srv/teaching/queue-agent.conf": {
+                  "contents": "style=site\n",
+                  "mode": 416,
+                  "owner": "alex",
+                  "group": "ops",
+                  "mtime": 1700000099
+                },
+                "/srv/teaching/queue-agent/help.txt": {
+                  "contents": "Supported local workflow.\n",
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "ops",
+                  "mtime": 1700000088
+                },
+                "/srv/teaching/report-pages/template.txt": {
+                  "contents": "Curated template, version one.\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                },
+                "/srv/teaching/desk-notes/notice.txt": {
+                  "contents": "Retain this unrelated working note.\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/rpms/queue-agent-v1.rpm": "queue-agent-v1",
+            "/rpms/queue-agent-v2.rpm": "queue-agent-v2",
+            "/rpms/report-pages-v1.rpm": "report-pages-v1",
+            "/rpms/report-pages-v2.rpm": "report-pages-v2",
+            "/rpms/desk-notes-v1.rpm": "desk-notes-v1"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "queue-agent",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "report-pages",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "desk-notes",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "OwnedMetadataMatches",
+              "package": {
+                "name": "queue-agent",
+                "arch": "noarch"
+              },
+              "path": "/srv/teaching/queue-agent.conf"
+            },
+            {
+              "kind": "OwnedMetadataMatches",
+              "package": {
+                "name": "queue-agent",
+                "arch": "noarch"
+              },
+              "path": "/srv/teaching/queue-agent/help.txt"
+            },
+            {
+              "kind": "PreserveInitialContents",
+              "path": "/srv/teaching/queue-agent.conf"
+            },
+            {
+              "kind": "PreserveInitialContents",
+              "path": "/srv/teaching/queue-agent/help.txt"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "report-pages",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "desk-notes",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            }
+          ],
+          "allow_metadata_restore": true
+        }
+      },
+      "solution": [
+        "rpm --restore queue-agent"
+      ],
+      "prerequisites": [
+        "lpic1-rpm-payload",
+        "lpic1-permissions"
+      ],
+      "explanation": "Use installed records to choose the smallest appropriate repair. Preserve deliberate configuration contents and unrequested data. Matching file attributes does not prove the payload contents are correct; a different installed version can also have a matching payload. The grade checks the full stated resulting state, not command history.",
+      "hints": [
+        "Compare recorded metadata and current contents separately in the read-only inspector. A configured local value may deliberately differ from its package default.",
+        "The metadata-only operation reads the installed package record; a newer available header is not the requested version.",
+        "For the mixed incident, apply the two kinds of repair to their respective packages. Recheck exact versions and the unrelated note afterward."
+      ],
+      "sources": [
+        "https://rpm.org/docs/6.0.x/man/rpm.8",
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/"
+      ],
+      "simplifications": "Closed, in-process noarch/script-free RPM data and ordinary virtual text files. Metadata restore models only mode/owner/group/mtime, for one exact installed package with all payload paths present. No capabilities, special bits/files, xattrs/SELinux, real account resolution, archives/signatures, rpm -V, resolver or host operations. Modified RPM configuration replacement/sidecars and missing-file partial restore are explicitly unsupported. Source-informed model, no real RPM conformance or complete exam claim. References checked2026-11-06; all learner activity is offline and simulated.",
+      "rpm_packages_teaching": {
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "example-attributes-gallery",
+              "target": "x86_64",
+              "published": "current",
+              "archives": {
+                "gallery-panel-v1": {
+                  "identity": {
+                    "name": "gallery-panel",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/museum/gallery-panel.conf": {
+                      "file": {
+                        "contents": "style=default\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/museum/gallery-panel/help.txt": {
+                      "file": {
+                        "contents": "Supported local workflow.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-panel-v2": {
+                  "identity": {
+                    "name": "gallery-panel",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/museum/gallery-panel.conf": {
+                      "file": {
+                        "contents": "style=new-default\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/museum/gallery-panel/help.txt": {
+                      "file": {
+                        "contents": "Newer workflow, outside this repair.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-cards-v1": {
+                  "identity": {
+                    "name": "gallery-cards",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/museum/gallery-cards/template.txt": {
+                      "file": {
+                        "contents": "Curated template, version one.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-cards-v2": {
+                  "identity": {
+                    "name": "gallery-cards",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/museum/gallery-cards/template.txt": {
+                      "file": {
+                        "contents": "New template, version two.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-notes-v1": {
+                  "identity": {
+                    "name": "gallery-notes",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/museum/gallery-notes/notice.txt": {
+                      "file": {
+                        "contents": "Retain this unrelated working note.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "current": {
+                  "archives": [
+                    "gallery-panel-v2",
+                    "gallery-cards-v2",
+                    "gallery-notes-v1"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/museum/gallery-cards/template.txt",
+                "/museum/gallery-notes/notice.txt",
+                "/museum/gallery-panel.conf",
+                "/museum/gallery-panel/help.txt"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "gallery-panel",
+                    "arch": "noarch"
+                  },
+                  "archive": "gallery-panel-v1"
+                },
+                {
+                  "identity": {
+                    "name": "gallery-cards",
+                    "arch": "noarch"
+                  },
+                  "archive": "gallery-cards-v1"
+                },
+                {
+                  "identity": {
+                    "name": "gallery-notes",
+                    "arch": "noarch"
+                  },
+                  "archive": "gallery-notes-v1"
+                }
+              ],
+              "available": [
+                "gallery-panel-v1",
+                "gallery-panel-v2",
+                "gallery-cards-v1",
+                "gallery-cards-v2",
+                "gallery-notes-v1"
+              ],
+              "cached": "current",
+              "files": {
+                "/museum/gallery-panel.conf": {
+                  "contents": "style=gallery\n",
+                  "mode": 416,
+                  "owner": "alex",
+                  "group": "ops",
+                  "mtime": 1700000099
+                },
+                "/museum/gallery-panel/help.txt": {
+                  "contents": "Supported local workflow.\n",
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "ops",
+                  "mtime": 1700000088
+                },
+                "/museum/gallery-cards/template.txt": {
+                  "contents": "Curated template, version one.\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                },
+                "/museum/gallery-notes/notice.txt": {
+                  "contents": "Retain this unrelated working note.\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/museum/rpms/gallery-panel-v1.rpm": "gallery-panel-v1",
+            "/museum/rpms/gallery-panel-v2.rpm": "gallery-panel-v2",
+            "/museum/rpms/gallery-cards-v1.rpm": "gallery-cards-v1",
+            "/museum/rpms/gallery-cards-v2.rpm": "gallery-cards-v2",
+            "/museum/rpms/gallery-notes-v1.rpm": "gallery-notes-v1"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "gallery-panel",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "gallery-cards",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "gallery-notes",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "OwnedMetadataMatches",
+              "package": {
+                "name": "gallery-panel",
+                "arch": "noarch"
+              },
+              "path": "/museum/gallery-panel.conf"
+            },
+            {
+              "kind": "OwnedMetadataMatches",
+              "package": {
+                "name": "gallery-panel",
+                "arch": "noarch"
+              },
+              "path": "/museum/gallery-panel/help.txt"
+            },
+            {
+              "kind": "PreserveInitialContents",
+              "path": "/museum/gallery-panel.conf"
+            },
+            {
+              "kind": "PreserveInitialContents",
+              "path": "/museum/gallery-panel/help.txt"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "gallery-cards",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "gallery-notes",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            }
+          ],
+          "allow_metadata_restore": true
+        },
+        "prerequisite_note": "Builds on installed-versus-local RPM records, exact reinstall and ordinary Linux permissions. This introduction separates intentional configuration text, attribute drift and payload damage before the independent assignment.",
+        "concepts": [
+          {
+            "title": "File text and file attributes are different",
+            "text": "The saved package record contains default text and attributes such as mode, owner, group and modified time. Your site deliberately changed its configuration text. A difference from the recorded default is not automatically damage. Inspect each changed field and the stated task before choosing a repair."
+          },
+          {
+            "title": "Read the installed record, not a newer offer",
+            "text": "Open Inspect package data · Read-only. Keep Installed records selected, choose the Package header and then its Payload path. Compare the simulated recorded file with the current file. Available local archives may contain a newer version; that is not the specification for repairing the version already installed. This inspector is a simulated comparison, not rpm -V."
+          },
+          {
+            "title": "Restore attributes without replacing text",
+            "text": "rpm --restore NAME restores the installed package’s declared regular-file mode, owner, group and modified time in this activity. It preserves all file contents and installed versions. It does not recreate missing files, restore capabilities or repair damaged text. A locally customized configuration can therefore retain a content difference after the attribute repair is correct."
+          },
+          {
+            "title": "Choose the repair that fits the damage",
+            "text": "For a plain content-damaged package, rpm --reinstall with its supplied exact archive restores the declared payload. It is different from metadata-only repair. Modified RPM configuration sidecars are outside this simulator: replacement of the customized configuration package is refused, rather than pretending to reproduce a real .rpmnew/.rpmsave decision."
+          },
+          {
+            "title": "Check the whole requested state",
+            "text": "A quiet successful command is not completion. Check example or Check work inspects current metadata, retained text, package versions and neighbors. Preserve the unrelated note package. If you upgrade or remove it outside the task, the relevant preservation/version check fails even when your original repair remains correct."
+          }
+        ],
+        "example_description": "The separate gallery world has customized gallery-panel configuration. Its configuration and help-file attributes drifted; keep their current text and gallery-notes while restoring recorded attributes.",
+        "example_commands": [
+          {
+            "command": "rpm -q gallery-panel",
+            "explanation": "Confirm the installed target version."
+          },
+          {
+            "command": "rpm -ql gallery-panel",
+            "explanation": "Locate its supplied configuration and help file."
+          },
+          {
+            "command": "rpm --restore gallery-panel",
+            "explanation": "Restore attributes from the installed record while retaining gallery configuration text."
+          }
+        ],
+        "try_change": {
+          "description": "After a passing check, remove only gallery-notes in this separate practice, then Check example. The attribute repair remains correct but the unrelated-package requirement fails. Insert and run its exact install command to retry.",
+          "commands": [
+            {
+              "command": "rpm -e gallery-notes",
+              "explanation": "Deliberately break only the stated version or preservation requirement in this separate practice."
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "command": "rpm -i /museum/rpms/gallery-notes-v1.rpm",
+            "explanation": "Restore the unrelated note package and its exact original file."
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-rpm-mixed-recovery",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "RPM metadata and scoped payload recovery",
+      "unit": "rpm-payload-recovery",
+      "title": "Recover attributes and damaged content with the right repairs",
+      "summary": "Diagnose two kinds of drift, combine metadata repair with exact payload replacement and preserve installed versions.",
+      "objective": "Keep queue-agent, report-pages and desk-notes installed at their original 1.0-1 versions. Restore the installed queue-agent record’s mode, owner, group and modified time for /srv/teaching/queue-agent.conf and /srv/teaching/queue-agent/help.txt. Keep the current contents of both queue-agent files, including the intentional local configuration text. Restore the exact recorded payload of /srv/teaching/report-pages/template.txt from the supplied version-one report-pages archive; metadata-only repair is insufficient. Keep desk-notes and all its supplied files unchanged. Retain healthy declared package requirements. Use only the supplied virtual packages and file data. The configuration’s intentional text difference is not a request to replace it; no upgrade, host command, real archive, signature or full rpm -V is required.",
+      "retry_guidance": "Read the named outcome row. If attributes still differ, inspect the installed record and actual file. If text remains damaged, metadata-only repair cannot replace it. If versions or neighbors changed, restore the stated package set or reset only this attempt and retry.",
+      "difficulty": "Advanced",
+      "minutes": 24,
+      "steps": [
+        "Understand the task",
+        "Repair only the stated differences",
+        "Check current outcomes"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Read the installed header and actual file differences before choosing a repair. Package-record health and current file contents are distinct observations.",
+          "action": "Open Inspect package data · Read-only and use Installed records, Package header and Payload path to inspect the supplied target.",
+          "commands": [
+            {
+              "command": "rpm -q queue-agent",
+              "explanation": "Read the actual installed version, without changing it.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Repair only the stated differences",
+          "why": "Metadata-only repair preserves current text; exact reinstall repairs the separate plain payload where required. Keep versions and neighbors as stated.",
+          "action": "Enter the appropriate closed simulated RPM operation, select Run command and inspect its result.",
+          "commands": [
+            {
+              "command": "rpm --restore queue-agent",
+              "explanation": "One supported metadata-only repair, not a host operation.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Check current outcomes",
+          "why": "Correct attributes do not excuse changed site text, an upgraded version or a missing neighbor.",
+          "action": "Choose Check work and read the specific failing row. Inspect that file or record, repair it and retry.",
+          "commands": [
+            {
+              "command": "rpm -q desk-notes",
+              "explanation": "Confirm the retained neighbor record; this query itself earns no credit.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "initial": {
+        "kind": "RpmPackages",
+        "simulation": {
+          "schema_version": 1,
+          "catalog": {
+            "fixture": "mixed-package-recovery",
+            "target": "x86_64",
+            "published": "current",
+            "archives": {
+              "queue-agent-v1": {
+                "identity": {
+                  "name": "queue-agent",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/teaching/queue-agent.conf": {
+                    "file": {
+                      "contents": "style=default\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "config_noreplace"
+                  },
+                  "/srv/teaching/queue-agent/help.txt": {
+                    "file": {
+                      "contents": "Supported local workflow.\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "queue-agent-v2": {
+                "identity": {
+                  "name": "queue-agent",
+                  "arch": "noarch"
+                },
+                "evr": "2.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/teaching/queue-agent.conf": {
+                    "file": {
+                      "contents": "style=new-default\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "config_noreplace"
+                  },
+                  "/srv/teaching/queue-agent/help.txt": {
+                    "file": {
+                      "contents": "Newer workflow, outside this repair.\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "report-pages-v1": {
+                "identity": {
+                  "name": "report-pages",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/teaching/report-pages/template.txt": {
+                    "file": {
+                      "contents": "Curated template, version one.\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "report-pages-v2": {
+                "identity": {
+                  "name": "report-pages",
+                  "arch": "noarch"
+                },
+                "evr": "2.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/teaching/report-pages/template.txt": {
+                    "file": {
+                      "contents": "New template, version two.\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "desk-notes-v1": {
+                "identity": {
+                  "name": "desk-notes",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/srv/teaching/desk-notes/notice.txt": {
+                    "file": {
+                      "contents": "Retain this unrelated working note.\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 1700000000
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              }
+            },
+            "snapshots": {
+              "current": {
+                "archives": [
+                  "queue-agent-v2",
+                  "report-pages-v2",
+                  "desk-notes-v1"
+                ]
+              }
+            },
+            "allowed_paths": [
+              "/srv/teaching/desk-notes/notice.txt",
+              "/srv/teaching/queue-agent.conf",
+              "/srv/teaching/queue-agent/help.txt",
+              "/srv/teaching/report-pages/template.txt"
+            ]
+          },
+          "runtime": {
+            "installed": [
+              {
+                "identity": {
+                  "name": "queue-agent",
+                  "arch": "noarch"
+                },
+                "archive": "queue-agent-v1"
+              },
+              {
+                "identity": {
+                  "name": "report-pages",
+                  "arch": "noarch"
+                },
+                "archive": "report-pages-v1"
+              },
+              {
+                "identity": {
+                  "name": "desk-notes",
+                  "arch": "noarch"
+                },
+                "archive": "desk-notes-v1"
+              }
+            ],
+            "available": [
+              "queue-agent-v1",
+              "queue-agent-v2",
+              "report-pages-v1",
+              "report-pages-v2",
+              "desk-notes-v1"
+            ],
+            "cached": "current",
+            "files": {
+              "/srv/teaching/queue-agent.conf": {
+                "contents": "style=site\n",
+                "mode": 416,
+                "owner": "alex",
+                "group": "ops",
+                "mtime": 1700000099
+              },
+              "/srv/teaching/queue-agent/help.txt": {
+                "contents": "Supported local workflow.\n",
+                "mode": 384,
+                "owner": "alex",
+                "group": "ops",
+                "mtime": 1700000088
+              },
+              "/srv/teaching/report-pages/template.txt": {
+                "contents": "Unreviewed damaged template.\n",
+                "mode": 384,
+                "owner": "alex",
+                "group": "ops",
+                "mtime": 1700000077
+              },
+              "/srv/teaching/desk-notes/notice.txt": {
+                "contents": "Retain this unrelated working note.\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 1700000000
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "RpmPackages",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "mixed-package-recovery",
+              "target": "x86_64",
+              "published": "current",
+              "archives": {
+                "queue-agent-v1": {
+                  "identity": {
+                    "name": "queue-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/teaching/queue-agent.conf": {
+                      "file": {
+                        "contents": "style=default\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/teaching/queue-agent/help.txt": {
+                      "file": {
+                        "contents": "Supported local workflow.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "queue-agent-v2": {
+                  "identity": {
+                    "name": "queue-agent",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/teaching/queue-agent.conf": {
+                      "file": {
+                        "contents": "style=new-default\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/srv/teaching/queue-agent/help.txt": {
+                      "file": {
+                        "contents": "Newer workflow, outside this repair.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "report-pages-v1": {
+                  "identity": {
+                    "name": "report-pages",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/teaching/report-pages/template.txt": {
+                      "file": {
+                        "contents": "Curated template, version one.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "report-pages-v2": {
+                  "identity": {
+                    "name": "report-pages",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/teaching/report-pages/template.txt": {
+                      "file": {
+                        "contents": "New template, version two.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "desk-notes-v1": {
+                  "identity": {
+                    "name": "desk-notes",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/srv/teaching/desk-notes/notice.txt": {
+                      "file": {
+                        "contents": "Retain this unrelated working note.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "current": {
+                  "archives": [
+                    "queue-agent-v2",
+                    "report-pages-v2",
+                    "desk-notes-v1"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/srv/teaching/desk-notes/notice.txt",
+                "/srv/teaching/queue-agent.conf",
+                "/srv/teaching/queue-agent/help.txt",
+                "/srv/teaching/report-pages/template.txt"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "queue-agent",
+                    "arch": "noarch"
+                  },
+                  "archive": "queue-agent-v1"
+                },
+                {
+                  "identity": {
+                    "name": "report-pages",
+                    "arch": "noarch"
+                  },
+                  "archive": "report-pages-v1"
+                },
+                {
+                  "identity": {
+                    "name": "desk-notes",
+                    "arch": "noarch"
+                  },
+                  "archive": "desk-notes-v1"
+                }
+              ],
+              "available": [
+                "queue-agent-v1",
+                "queue-agent-v2",
+                "report-pages-v1",
+                "report-pages-v2",
+                "desk-notes-v1"
+              ],
+              "cached": "current",
+              "files": {
+                "/srv/teaching/queue-agent.conf": {
+                  "contents": "style=site\n",
+                  "mode": 416,
+                  "owner": "alex",
+                  "group": "ops",
+                  "mtime": 1700000099
+                },
+                "/srv/teaching/queue-agent/help.txt": {
+                  "contents": "Supported local workflow.\n",
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "ops",
+                  "mtime": 1700000088
+                },
+                "/srv/teaching/report-pages/template.txt": {
+                  "contents": "Unreviewed damaged template.\n",
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "ops",
+                  "mtime": 1700000077
+                },
+                "/srv/teaching/desk-notes/notice.txt": {
+                  "contents": "Retain this unrelated working note.\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/rpms/queue-agent-v1.rpm": "queue-agent-v1",
+            "/rpms/queue-agent-v2.rpm": "queue-agent-v2",
+            "/rpms/report-pages-v1.rpm": "report-pages-v1",
+            "/rpms/report-pages-v2.rpm": "report-pages-v2",
+            "/rpms/desk-notes-v1.rpm": "desk-notes-v1"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "queue-agent",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "report-pages",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "desk-notes",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "OwnedMetadataMatches",
+              "package": {
+                "name": "queue-agent",
+                "arch": "noarch"
+              },
+              "path": "/srv/teaching/queue-agent.conf"
+            },
+            {
+              "kind": "OwnedMetadataMatches",
+              "package": {
+                "name": "queue-agent",
+                "arch": "noarch"
+              },
+              "path": "/srv/teaching/queue-agent/help.txt"
+            },
+            {
+              "kind": "PreserveInitialContents",
+              "path": "/srv/teaching/queue-agent.conf"
+            },
+            {
+              "kind": "PreserveInitialContents",
+              "path": "/srv/teaching/queue-agent/help.txt"
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "report-pages",
+                "arch": "noarch"
+              },
+              "path": "/srv/teaching/report-pages/template.txt"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "desk-notes",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            }
+          ],
+          "allow_metadata_restore": true
+        }
+      },
+      "solution": [
+        "rpm --restore queue-agent",
+        "rpm --reinstall /rpms/report-pages-v1.rpm"
+      ],
+      "prerequisites": [
+        "lpic1-rpm-metadata-preserve",
+        "lpic1-rpm-handover"
+      ],
+      "explanation": "Use installed records to choose the smallest appropriate repair. Preserve deliberate configuration contents and unrequested data. Matching file attributes does not prove the payload contents are correct; a different installed version can also have a matching payload. The grade checks the full stated resulting state, not command history.",
+      "hints": [
+        "Compare recorded metadata and current contents separately in the read-only inspector. A configured local value may deliberately differ from its package default.",
+        "The metadata-only operation reads the installed package record; a newer available header is not the requested version.",
+        "For the mixed incident, apply the two kinds of repair to their respective packages. Recheck exact versions and the unrelated note afterward."
+      ],
+      "sources": [
+        "https://rpm.org/docs/6.0.x/man/rpm.8",
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/"
+      ],
+      "simplifications": "Closed, in-process noarch/script-free RPM data and ordinary virtual text files. Metadata restore models only mode/owner/group/mtime, for one exact installed package with all payload paths present. No capabilities, special bits/files, xattrs/SELinux, real account resolution, archives/signatures, rpm -V, resolver or host operations. Modified RPM configuration replacement/sidecars and missing-file partial restore are explicitly unsupported. Source-informed model, no real RPM conformance or complete exam claim. References checked2026-11-06; all learner activity is offline and simulated.",
+      "rpm_packages_teaching": {
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "example-mixed-gallery",
+              "target": "x86_64",
+              "published": "current",
+              "archives": {
+                "gallery-panel-v1": {
+                  "identity": {
+                    "name": "gallery-panel",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/museum/gallery-panel.conf": {
+                      "file": {
+                        "contents": "style=default\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/museum/gallery-panel/help.txt": {
+                      "file": {
+                        "contents": "Supported local workflow.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-panel-v2": {
+                  "identity": {
+                    "name": "gallery-panel",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/museum/gallery-panel.conf": {
+                      "file": {
+                        "contents": "style=new-default\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "config_noreplace"
+                    },
+                    "/museum/gallery-panel/help.txt": {
+                      "file": {
+                        "contents": "Newer workflow, outside this repair.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-cards-v1": {
+                  "identity": {
+                    "name": "gallery-cards",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/museum/gallery-cards/template.txt": {
+                      "file": {
+                        "contents": "Curated template, version one.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-cards-v2": {
+                  "identity": {
+                    "name": "gallery-cards",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/museum/gallery-cards/template.txt": {
+                      "file": {
+                        "contents": "New template, version two.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "gallery-notes-v1": {
+                  "identity": {
+                    "name": "gallery-notes",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/museum/gallery-notes/notice.txt": {
+                      "file": {
+                        "contents": "Retain this unrelated working note.\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 1700000000
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "current": {
+                  "archives": [
+                    "gallery-panel-v2",
+                    "gallery-cards-v2",
+                    "gallery-notes-v1"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/museum/gallery-cards/template.txt",
+                "/museum/gallery-notes/notice.txt",
+                "/museum/gallery-panel.conf",
+                "/museum/gallery-panel/help.txt"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "gallery-panel",
+                    "arch": "noarch"
+                  },
+                  "archive": "gallery-panel-v1"
+                },
+                {
+                  "identity": {
+                    "name": "gallery-cards",
+                    "arch": "noarch"
+                  },
+                  "archive": "gallery-cards-v1"
+                },
+                {
+                  "identity": {
+                    "name": "gallery-notes",
+                    "arch": "noarch"
+                  },
+                  "archive": "gallery-notes-v1"
+                }
+              ],
+              "available": [
+                "gallery-panel-v1",
+                "gallery-panel-v2",
+                "gallery-cards-v1",
+                "gallery-cards-v2",
+                "gallery-notes-v1"
+              ],
+              "cached": "current",
+              "files": {
+                "/museum/gallery-panel.conf": {
+                  "contents": "style=gallery\n",
+                  "mode": 416,
+                  "owner": "alex",
+                  "group": "ops",
+                  "mtime": 1700000099
+                },
+                "/museum/gallery-panel/help.txt": {
+                  "contents": "Supported local workflow.\n",
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "ops",
+                  "mtime": 1700000088
+                },
+                "/museum/gallery-cards/template.txt": {
+                  "contents": "Unreviewed damaged template.\n",
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "ops",
+                  "mtime": 1700000077
+                },
+                "/museum/gallery-notes/notice.txt": {
+                  "contents": "Retain this unrelated working note.\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 1700000000
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/museum/rpms/gallery-panel-v1.rpm": "gallery-panel-v1",
+            "/museum/rpms/gallery-panel-v2.rpm": "gallery-panel-v2",
+            "/museum/rpms/gallery-cards-v1.rpm": "gallery-cards-v1",
+            "/museum/rpms/gallery-cards-v2.rpm": "gallery-cards-v2",
+            "/museum/rpms/gallery-notes-v1.rpm": "gallery-notes-v1"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "gallery-panel",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "gallery-cards",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "gallery-notes",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "OwnedMetadataMatches",
+              "package": {
+                "name": "gallery-panel",
+                "arch": "noarch"
+              },
+              "path": "/museum/gallery-panel.conf"
+            },
+            {
+              "kind": "OwnedMetadataMatches",
+              "package": {
+                "name": "gallery-panel",
+                "arch": "noarch"
+              },
+              "path": "/museum/gallery-panel/help.txt"
+            },
+            {
+              "kind": "PreserveInitialContents",
+              "path": "/museum/gallery-panel.conf"
+            },
+            {
+              "kind": "PreserveInitialContents",
+              "path": "/museum/gallery-panel/help.txt"
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "gallery-cards",
+                "arch": "noarch"
+              },
+              "path": "/museum/gallery-cards/template.txt"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "gallery-notes",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            }
+          ],
+          "allow_metadata_restore": true
+        },
+        "prerequisite_note": "Builds on installed-versus-local RPM records, exact reinstall and ordinary Linux permissions. This introduction separates intentional configuration text, attribute drift and payload damage before the independent assignment.",
+        "concepts": [
+          {
+            "title": "File text and file attributes are different",
+            "text": "The saved package record contains default text and attributes such as mode, owner, group and modified time. Your site deliberately changed its configuration text. A difference from the recorded default is not automatically damage. Inspect each changed field and the stated task before choosing a repair."
+          },
+          {
+            "title": "Read the installed record, not a newer offer",
+            "text": "Open Inspect package data · Read-only. Keep Installed records selected, choose the Package header and then its Payload path. Compare the simulated recorded file with the current file. Available local archives may contain a newer version; that is not the specification for repairing the version already installed. This inspector is a simulated comparison, not rpm -V."
+          },
+          {
+            "title": "Restore attributes without replacing text",
+            "text": "rpm --restore NAME restores the installed package’s declared regular-file mode, owner, group and modified time in this activity. It preserves all file contents and installed versions. It does not recreate missing files, restore capabilities or repair damaged text. A locally customized configuration can therefore retain a content difference after the attribute repair is correct."
+          },
+          {
+            "title": "One incident can need two different repairs",
+            "text": "The gallery configuration needs its attributes restored while keeping local text. The separate cards package has damaged template contents. First try metadata-only repair on the cards package and inspect it: changed text remains. Reinstall its supplied exact version-one archive to restore the contents. These independent packages can be repaired in either order; upgrading is not the requested repair."
+          },
+          {
+            "title": "Check the whole requested state",
+            "text": "A quiet successful command is not completion. Check example or Check work inspects current metadata, retained text, package versions and neighbors. Preserve the unrelated note package. If you upgrade or remove it outside the task, the relevant preservation/version check fails even when your original repair remains correct."
+          }
+        ],
+        "example_description": "The separate gallery world has customized gallery-panel configuration and damaged gallery-cards template contents. Repair both while retaining version one and gallery-notes.",
+        "example_commands": [
+          {
+            "command": "rpm -q gallery-panel",
+            "explanation": "Confirm the installed target version."
+          },
+          {
+            "command": "rpm -ql gallery-panel",
+            "explanation": "Locate its supplied configuration and help file."
+          },
+          {
+            "command": "rpm --restore gallery-panel",
+            "explanation": "Restore attributes from the installed record while retaining gallery configuration text."
+          },
+          {
+            "command": "rpm --restore gallery-cards",
+            "explanation": "Expected partial repair: file attributes are repaired but damaged template text remains."
+          },
+          {
+            "command": "rpm --reinstall /museum/rpms/gallery-cards-v1.rpm",
+            "explanation": "Reinstall only the plain content-damaged package at its exact installed version."
+          }
+        ],
+        "try_change": {
+          "description": "After a passing check, upgrade only gallery-cards to the offered version two, then Check example. Its payload can match its new record while the required original version is wrong. Use the two repair commands to return to version one.",
+          "commands": [
+            {
+              "command": "rpm -U /museum/rpms/gallery-cards-v2.rpm",
+              "explanation": "Deliberately break only the stated version or preservation requirement in this separate practice."
+            }
+          ],
+          "expected": [
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "command": "rpm -e gallery-cards",
+            "explanation": "Remove the unrequested newer plain-data version."
+          },
+          {
+            "command": "rpm -i /museum/rpms/gallery-cards-v1.rpm",
+            "explanation": "Put back the supplied exact version-one plain payload."
+          }
+        ]
+      }
+    }
+  ]
+}

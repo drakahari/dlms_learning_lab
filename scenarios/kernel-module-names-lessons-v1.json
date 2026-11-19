@@ -1,0 +1,431 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-module-name-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-module-names",
+      "topic": "Saved driver names and future requests",
+      "title": "Repair the names used to request a driver",
+      "summary": "Repair two saved request names while preserving the audit provider and physical settings.",
+      "objective": "Bring the supplied teaching sensor controller online with its existing physical-module settings. Make both saved requests, modprobe capture_current and modprobe capture_legacy, activate that controller’s driver when it is not already loaded. A successful command selecting another provider is insufficient. Preserve the audit provider, all supplied physical-module options and the unrelated audit_query binding. Leave no additional unrequested aliases. Save or revert the editor draft before checking; verify current state and both future requests.",
+      "retry_guidance": "Read which current-state or named-request check failed. A request may return success for the wrong provider; inspect its saved binding and actual driver, repair that state and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair the name bindings",
+        "Verify current and future requests"
+      ],
+      "guide": [
+        {
+          "title": "Separate a request name from a loaded module",
+          "why": "An application can request a convenient name instead of a module’s physical name. In the supplied modprobe.d file, alias demo_capture example_reader maps that request to the example_reader module. The alias is a saved lookup rule, not another loaded module: lsmod still shows example_reader. This exercise supports exact names only, not wildcard patterns or alias chains.",
+          "action": "Insert lspci -k, modprobe demo_capture and lspci -k in that order, then Run each.",
+          "commands": [
+            {
+              "command": "lspci -k",
+              "explanation": "A possible driver is not necessarily active.",
+              "simulator_only": false
+            },
+            {
+              "command": "modprobe demo_capture",
+              "explanation": "Expected command success: this wrong binding selects the already loaded audit provider.",
+              "simulator_only": false
+            },
+            {
+              "command": "lspci -k",
+              "explanation": "The reader is still unavailable despite status0.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Do not confuse a successful command with the right driver",
+          "why": "The starting demo_capture name points at example_audit, which is already loaded. modprobe demo_capture can therefore succeed without activating the reader. Use lspci -k to inspect the actual driver. In the editor, keep options and the unrelated demo_audit binding, and repair the two requested names. Alias lines are file contents, not terminal commands; Fill practice editor does not save or run them.",
+          "action": "Select Edit and save the practice name bindings, choose Fill practice editor, read the four lines and click Save configuration. Run modprobe demo_capture and lsmod.",
+          "commands": [
+            {
+              "command": "options example_reader queues=1\nalias demo_capture example_reader\nalias demo_compat example_reader\nalias demo_audit example_audit",
+              "explanation": "File contents for the native editor; choose Save configuration afterward.",
+              "simulator_only": false
+            },
+            {
+              "command": "modprobe demo_capture",
+              "explanation": "Resolve the saved alias and load the physical driver with its dependencies.",
+              "simulator_only": false
+            },
+            {
+              "command": "lsmod",
+              "explanation": "The listing contains example_reader, not the alias name.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify both callers from a clean insertion",
+          "why": "Save configuration, then request demo_capture and inspect lsmod. Remove only example_reader before requesting demo_compat; modprobe -r preserves dependencies used by the audit provider. Check example tests each declared name with the target unloaded in its own simulated copy. Your live modules do not change during a check. Both future requests and the current controller must work.",
+          "action": "Run modprobe -r example_reader, then modprobe demo_compat and lspci -k. Choose Check example. Change only demo_capture back to example_audit in the editor, save and check again; restore its worked binding to retry.",
+          "commands": [
+            {
+              "command": "modprobe -r example_reader",
+              "explanation": "Keep example_audit and any prerequisites it still uses.",
+              "simulator_only": false
+            },
+            {
+              "command": "modprobe demo_compat",
+              "explanation": "Resolve this second saved name from an unloaded reader.",
+              "simulator_only": false
+            },
+            {
+              "command": "lspci -k",
+              "explanation": "The controller now has its expected driver in use.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "An application can request a convenient name instead of a module’s physical name. In the supplied modprobe.d file, alias demo_capture example_reader maps that request to the example_reader module. The alias is a saved lookup rule, not another loaded module: lsmod still shows example_reader. This exercise supports exact names only, not wildcard patterns or alias chains. The starting demo_capture name points at example_audit, which is already loaded. modprobe demo_capture can therefore succeed without activating the reader. Use lspci -k to inspect the actual driver. In the editor, keep options and the unrelated demo_audit binding, and repair the two requested names. Alias lines are file contents, not terminal commands; Fill practice editor does not save or run them. Save configuration, then request demo_capture and inspect lsmod. Remove only example_reader before requesting demo_compat; modprobe -r preserves dependencies used by the audit provider. Check example tests each declared name with the target unloaded in its own simulated copy. Your live modules do not change during a check. Both future requests and the current controller must work.",
+      "hints": [
+        "Inspect lspci -k and the saved file. A request name and a physical module name have different roles; lsmod shows physical names.",
+        "A load request can succeed for an already loaded audit provider. Each requested name must select the controller driver when that driver starts unloaded.",
+        "Edit the alias lines for the two requested names. Preserve the physical options and unrelated audit binding; save, activate the controller and check the two future cases."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://github.com/kmod-project/kmod/blob/v34/man/modprobe.8.scd",
+        "https://github.com/kmod-project/kmod/blob/v34/man/insmod.8.scd",
+        "https://github.com/kmod-project/kmod/blob/v34/man/modprobe.d.5.scd"
+      ],
+      "simplifications": "Opt-in exact aliases in one virtual modprobe.d file only. No globs, alias chains, ambiguous duplicates, physical-name collisions, alias-specific options, removal by alias, blacklist, script directives, real hardware/kernel/ELF or host execution. Names normalize hyphen and underscore. Each future request is evaluated on a separate bounded in-process copy; grading does not change live modules. This is narrow partial LPIC-2 practice, not full kmod or exam coverage.",
+      "initial": {
+        "kind": "KernelModules",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-module-name-handover",
+          "view": "introduction",
+          "example_step": 0,
+          "assignment": {
+            "role": "assignment",
+            "runtime": {
+              "index": [
+                "audit_link",
+                "bus_core",
+                "lab_sensor",
+                "sensor_bus"
+              ],
+              "loaded": {
+                "bus_core": {
+                  "parameters": {}
+                },
+                "audit_link": {
+                  "parameters": {}
+                }
+              },
+              "config": "# Names requested by applications\noptions lab_sensor queues=1\nalias capture_current audit_link\nalias audit_query audit_link\n",
+              "diagnostics": []
+            },
+            "config_draft": "# Names requested by applications\noptions lab_sensor queues=1\nalias capture_current audit_link\nalias audit_query audit_link\n",
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "practice": {
+            "role": "practice",
+            "runtime": {
+              "index": [
+                "example_audit",
+                "example_reader",
+                "reader_bus",
+                "reader_core"
+              ],
+              "loaded": {
+                "reader_core": {
+                  "parameters": {}
+                },
+                "example_audit": {
+                  "parameters": {}
+                }
+              },
+              "config": "# Names requested by applications\noptions example_reader queues=1\nalias demo_capture example_audit\nalias demo_audit example_audit\n",
+              "diagnostics": []
+            },
+            "config_draft": "# Names requested by applications\noptions example_reader queues=1\nalias demo_capture example_audit\nalias demo_audit example_audit\n",
+            "command": "",
+            "transcript": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "KernelModules",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-module-name-handover",
+          "assignment": {
+            "catalogue": {
+              "kernel_release": "6.8.0-lab",
+              "modules": {
+                "bus_core": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/bus_core.ko",
+                  "description": "Supplied bus_core teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "sensor_bus": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/sensor_bus.ko",
+                  "description": "Supplied sensor_bus teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [
+                    "bus_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "lab_sensor": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/lab_sensor.ko",
+                  "description": "Supplied lab_sensor teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [
+                    "sensor_bus"
+                  ],
+                  "parameters": {
+                    "queues": {
+                      "description": "Number of supplied queues",
+                      "minimum": 1,
+                      "maximum": 8,
+                      "default": 1
+                    }
+                  },
+                  "external_users": 0
+                },
+                "audit_link": {
+                  "path": "/lib/modules/6.8.0-lab/kernel/drivers/audit_link.ko",
+                  "description": "Supplied audit_link teaching module",
+                  "kernel_release": "6.8.0-lab",
+                  "size": 16384,
+                  "dependencies": [
+                    "bus_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "old_sensor": {
+                  "path": "/lib/modules/6.7.0-lab/kernel/drivers/old_sensor.ko",
+                  "description": "Supplied old_sensor teaching module",
+                  "kernel_release": "6.7.0-lab",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                }
+              },
+              "devices": [
+                {
+                  "slot": "00:05.0",
+                  "description": "Teaching sensor controller",
+                  "driver": "lab_sensor"
+                }
+              ]
+            },
+            "initial": {
+              "index": [
+                "audit_link",
+                "bus_core",
+                "lab_sensor",
+                "sensor_bus"
+              ],
+              "loaded": {
+                "bus_core": {
+                  "parameters": {}
+                },
+                "audit_link": {
+                  "parameters": {}
+                }
+              },
+              "config": "# Names requested by applications\noptions lab_sensor queues=1\nalias capture_current audit_link\nalias audit_query audit_link\n",
+              "diagnostics": []
+            },
+            "target": {
+              "module": "lab_sensor",
+              "parameters": {
+                "queues": 1
+              },
+              "saved_options": false,
+              "current_index": false,
+              "request_names": [
+                "capture_current",
+                "capture_legacy"
+              ]
+            }
+          },
+          "example": {
+            "catalogue": {
+              "kernel_release": "6.9.0-example",
+              "modules": {
+                "reader_core": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/reader_core.ko",
+                  "description": "Supplied reader_core teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "reader_bus": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/reader_bus.ko",
+                  "description": "Supplied reader_bus teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [
+                    "reader_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "example_reader": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/example_reader.ko",
+                  "description": "Supplied example_reader teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [
+                    "reader_bus"
+                  ],
+                  "parameters": {
+                    "queues": {
+                      "description": "Number of supplied queues",
+                      "minimum": 1,
+                      "maximum": 8,
+                      "default": 1
+                    }
+                  },
+                  "external_users": 0
+                },
+                "example_audit": {
+                  "path": "/lib/modules/6.9.0-example/kernel/drivers/example_audit.ko",
+                  "description": "Supplied example_audit teaching module",
+                  "kernel_release": "6.9.0-example",
+                  "size": 16384,
+                  "dependencies": [
+                    "reader_core"
+                  ],
+                  "parameters": {},
+                  "external_users": 0
+                },
+                "old_reader": {
+                  "path": "/lib/modules/6.8.0-example/kernel/drivers/old_reader.ko",
+                  "description": "Supplied old_reader teaching module",
+                  "kernel_release": "6.8.0-example",
+                  "size": 16384,
+                  "dependencies": [],
+                  "parameters": {},
+                  "external_users": 0
+                }
+              },
+              "devices": [
+                {
+                  "slot": "00:05.0",
+                  "description": "Teaching sensor controller",
+                  "driver": "example_reader"
+                }
+              ]
+            },
+            "initial": {
+              "index": [
+                "example_audit",
+                "example_reader",
+                "reader_bus",
+                "reader_core"
+              ],
+              "loaded": {
+                "reader_core": {
+                  "parameters": {}
+                },
+                "example_audit": {
+                  "parameters": {}
+                }
+              },
+              "config": "# Names requested by applications\noptions example_reader queues=1\nalias demo_capture example_audit\nalias demo_audit example_audit\n",
+              "diagnostics": []
+            },
+            "target": {
+              "module": "example_reader",
+              "parameters": {
+                "queues": 1
+              },
+              "saved_options": false,
+              "current_index": false,
+              "request_names": [
+                "demo_capture",
+                "demo_compat"
+              ]
+            }
+          },
+          "reference": [
+            {
+              "kind": "save_config",
+              "text": "options lab_sensor queues=1\nalias capture_current lab_sensor\nalias capture_legacy lab_sensor\nalias audit_query audit_link\n"
+            },
+            {
+              "kind": "command",
+              "text": "modprobe capture_current"
+            }
+          ],
+          "example_steps": [
+            {
+              "kind": "command",
+              "text": "lspci -k"
+            },
+            {
+              "kind": "command",
+              "text": "modprobe demo_capture"
+            },
+            {
+              "kind": "command",
+              "text": "lspci -k"
+            },
+            {
+              "kind": "save_config",
+              "text": "options example_reader queues=1\nalias demo_capture example_reader\nalias demo_compat example_reader\nalias demo_audit example_audit\n"
+            },
+            {
+              "kind": "command",
+              "text": "modprobe demo_capture"
+            },
+            {
+              "kind": "command",
+              "text": "lsmod"
+            },
+            {
+              "kind": "command",
+              "text": "modprobe -r example_reader"
+            },
+            {
+              "kind": "command",
+              "text": "modprobe demo_compat"
+            },
+            {
+              "kind": "command",
+              "text": "lspci -k"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "@module-save \"options lab_sensor queues=1\\nalias capture_current lab_sensor\\nalias capture_legacy lab_sensor\\nalias audit_query audit_link\\n\"",
+        "modprobe capture_current",
+        "@module-check"
+      ],
+      "prerequisites": [
+        "lpic2-module-options-reload"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,605 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-package-file-provider",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Debian package administration",
+      "unit": "debian-package-file-search",
+      "title": "Find and install the package behind a missing command",
+      "summary": "Use repository file listings to distinguish a missing executable from similarly named documentation and private helpers.",
+      "objective": "Refresh the supplied package and Contents metadata. Install the package that provides /usr/bin/ledger-check, with intact files and satisfied dependencies. Do not install packages that only supply documentation or a private-path lookalike. Preserve the installed records-viewer and records-lib packages, their files and /work/records-notes.txt.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "retry_guidance": "Read the unmet result and correct the relevant package. A query is evidence, not a repair. Destructive changes such as purging required settings can need Reset to restore this lab\u2019s supplied package state; other labs and favorites stay saved.",
+      "steps": [
+        "Compare installed ownership with available file providers.",
+        "Refresh the supplied metadata and investigate exact paths.",
+        "Install the required provider and verify preserved software."
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A command file can have a different name from its package. dpkg-query -S checks installed records; apt-file searches the repository Contents index, including packages not installed here.",
+          "action": "Start with installed ownership, then search for the missing file.",
+          "commands": [
+            {
+              "command": "dpkg-query -S /usr/bin/ledger-check",
+              "explanation": "An absent recorded owner is expected before the provider is installed; it does not prove that no repository package contains the file.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Locate the complete path",
+          "why": "A name-only match can be documentation or a private helper. Refresh first, then compare complete paths. -F requires the literal complete path in this supported subset; paths are printed without an initial slash.",
+          "action": "Use search to gather matches, then inspect the exact executable path and list the identified package.",
+          "commands": [
+            {
+              "command": "apt-get --error-on=any update",
+              "explanation": "Refresh this sample\u2019s coherent package and Contents snapshot without installing software.",
+              "simulator_only": false
+            },
+            {
+              "command": "apt-file search ledger-check",
+              "explanation": "Look for literal substring matches in repository file names, including uninstalled packages.",
+              "simulator_only": false
+            },
+            {
+              "command": "apt-file -F search usr/bin/ledger-check",
+              "explanation": "Narrow to the complete path; usr/libexec and documentation do not match.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Install and verify",
+          "why": "Search results describe available files; they do not create those files or install a package.",
+          "action": "Install the provider you identified, inspect its record and use Check work.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "If the old index shows only documentation and a private helper, refresh metadata before concluding the executable is unavailable.",
+        "Compare complete paths: usr/bin/ledger-check is different from usr/libexec/ledger-check and usr/share/doc/ledger-check.",
+        "The text before the colon in an apt-file result is the package name. Use that name in apt-get -y install; a query alone leaves the task unfinished."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://manpages.debian.org/trixie/apt/apt-get.8.en.html",
+        "https://manpages.debian.org/trixie/dpkg/dpkg-query.1.en.html",
+        "https://manpages.debian.org/trixie/dpkg/dpkg.1.en.html",
+        "https://manpages.debian.org/trixie/apt-file/apt-file.1.en.html",
+        "https://sources.debian.org/src/apt-file/3.3/apt-file/"
+      ],
+      "simplifications": "Offline script-free Debian package model, not the Fedora host. Only disclosed literal commands and supplied regular text files, packages and publications are supported. No real downloads, archives, maintainer scripts, root permissions, signature checks, rollback guarantee, full dependency resolver, package-manager concurrency, RPM or host execution. Configuration retention follows the declared simplified policy. Sources checked 2026-10-25; LPIC-1 v5.0 102.4 is only partially addressed. Contents queries are a bounded original implementation of the literal apt-file 3.3 search/list subset. Each supplied publication includes coherent Packages/Contents data, derived from its regular-file manifests; independent/missing Contents targets, architecture selectors, regex/glob options, source-list editing and multiple sources are not modeled. Sources rechecked 2026-11-02; no host apt-file comparison is claimed.",
+      "initial": {
+        "kind": "DebianPackages",
+        "simulation": {
+          "catalog": {
+            "architecture": "amd64",
+            "repository_reachable": true,
+            "published": "records-current",
+            "archives": {
+              "records-lib": {
+                "name": "records-lib",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/lib/records/base.txt": {
+                    "contents": "base\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "records-viewer": {
+                "name": "records-viewer",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/bin/records-viewer": {
+                    "contents": "viewer\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "records-tool": {
+                "name": "records-tools",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "records-lib",
+                    "constraint": null
+                  }
+                ],
+                "files": {
+                  "/usr/bin/ledger-check": {
+                    "contents": "tool\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "records-docs": {
+                "name": "records-docs",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/share/doc/ledger-check": {
+                    "contents": "documentation, not executable\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "records-private": {
+                "name": "records-private",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/libexec/ledger-check": {
+                    "contents": "private helper\n",
+                    "conffile": false
+                  }
+                }
+              }
+            },
+            "publications": {
+              "records-old": {
+                "candidates": {
+                  "records-lib": "records-lib",
+                  "records-viewer": "records-viewer",
+                  "records-docs": "records-docs",
+                  "records-private": "records-private"
+                }
+              },
+              "records-current": {
+                "candidates": {
+                  "records-lib": "records-lib",
+                  "records-viewer": "records-viewer",
+                  "records-tools": "records-tool",
+                  "records-docs": "records-docs",
+                  "records-private": "records-private"
+                }
+              }
+            },
+            "extra_paths": [
+              "/work/records-notes.txt"
+            ]
+          },
+          "runtime": {
+            "cached": "records-old",
+            "local_archives": [
+              "records-lib",
+              "records-viewer"
+            ],
+            "records": {
+              "records-lib": {
+                "archive": "records-lib",
+                "status": "Installed"
+              },
+              "records-viewer": {
+                "archive": "records-viewer",
+                "status": "Installed"
+              }
+            },
+            "files": {
+              "/usr/lib/records/base.txt": "base\n",
+              "/usr/bin/records-viewer": "viewer\n",
+              "/work/records-notes.txt": "keep these local notes\n"
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "DebianPackages",
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "records-current",
+              "archives": {
+                "records-lib": {
+                  "name": "records-lib",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/records/base.txt": {
+                      "contents": "base\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "records-viewer": {
+                  "name": "records-viewer",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/bin/records-viewer": {
+                      "contents": "viewer\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "records-tool": {
+                  "name": "records-tools",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "records-lib",
+                      "constraint": null
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/ledger-check": {
+                      "contents": "tool\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "records-docs": {
+                  "name": "records-docs",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/share/doc/ledger-check": {
+                      "contents": "documentation, not executable\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "records-private": {
+                  "name": "records-private",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/libexec/ledger-check": {
+                      "contents": "private helper\n",
+                      "conffile": false
+                    }
+                  }
+                }
+              },
+              "publications": {
+                "records-old": {
+                  "candidates": {
+                    "records-lib": "records-lib",
+                    "records-viewer": "records-viewer",
+                    "records-docs": "records-docs",
+                    "records-private": "records-private"
+                  }
+                },
+                "records-current": {
+                  "candidates": {
+                    "records-lib": "records-lib",
+                    "records-viewer": "records-viewer",
+                    "records-tools": "records-tool",
+                    "records-docs": "records-docs",
+                    "records-private": "records-private"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/work/records-notes.txt"
+              ]
+            },
+            "runtime": {
+              "cached": "records-old",
+              "local_archives": [
+                "records-lib",
+                "records-viewer"
+              ],
+              "records": {
+                "records-lib": {
+                  "archive": "records-lib",
+                  "status": "Installed"
+                },
+                "records-viewer": {
+                  "archive": "records-viewer",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/usr/lib/records/base.txt": "base\n",
+                "/usr/bin/records-viewer": "viewer\n",
+                "/work/records-notes.txt": "keep these local notes\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "InstalledFileProvider",
+              "path": "/usr/bin/ledger-check"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "records-viewer"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/records-viewer"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "records-lib"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/lib/records/base.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/work/records-notes.txt"
+            },
+            {
+              "kind": "NoRecord",
+              "package": "records-docs"
+            },
+            {
+              "kind": "NoRecord",
+              "package": "records-private"
+            },
+            {
+              "kind": "Cached",
+              "snapshot": "records-current"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "apt-get --error-on=any update",
+        "apt-get -y install records-tools"
+      ],
+      "prerequisites": [
+        "lpic1-package-handover"
+      ],
+      "debian_packages_teaching": {
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "gallery-current",
+              "archives": {
+                "gallery-lib": {
+                  "name": "gallery-lib",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/gallery/base.txt": {
+                      "contents": "base\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "gallery-viewer": {
+                  "name": "gallery-viewer",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/bin/gallery-viewer": {
+                      "contents": "viewer\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "gallery-tool": {
+                  "name": "gallery-tools",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "gallery-lib",
+                      "constraint": null
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/exhibit-audit": {
+                      "contents": "tool\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "gallery-docs": {
+                  "name": "gallery-docs",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/share/doc/exhibit-audit": {
+                      "contents": "documentation, not executable\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "gallery-private": {
+                  "name": "gallery-private",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/libexec/exhibit-audit": {
+                      "contents": "private helper\n",
+                      "conffile": false
+                    }
+                  }
+                }
+              },
+              "publications": {
+                "gallery-old": {
+                  "candidates": {
+                    "gallery-lib": "gallery-lib",
+                    "gallery-viewer": "gallery-viewer",
+                    "gallery-docs": "gallery-docs",
+                    "gallery-private": "gallery-private"
+                  }
+                },
+                "gallery-current": {
+                  "candidates": {
+                    "gallery-lib": "gallery-lib",
+                    "gallery-viewer": "gallery-viewer",
+                    "gallery-tools": "gallery-tool",
+                    "gallery-docs": "gallery-docs",
+                    "gallery-private": "gallery-private"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/work/gallery-notes.txt"
+              ]
+            },
+            "runtime": {
+              "cached": "gallery-old",
+              "local_archives": [
+                "gallery-lib",
+                "gallery-viewer"
+              ],
+              "records": {
+                "gallery-lib": {
+                  "archive": "gallery-lib",
+                  "status": "Installed"
+                },
+                "gallery-viewer": {
+                  "archive": "gallery-viewer",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/usr/lib/gallery/base.txt": "base\n",
+                "/usr/bin/gallery-viewer": "viewer\n",
+                "/work/gallery-notes.txt": "keep these local notes\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "InstalledFileProvider",
+              "path": "/usr/bin/exhibit-audit"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "gallery-viewer"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/gallery-viewer"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "gallery-lib"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/lib/gallery/base.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/work/gallery-notes.txt"
+            },
+            {
+              "kind": "NoRecord",
+              "package": "gallery-docs"
+            },
+            {
+              "kind": "NoRecord",
+              "package": "gallery-private"
+            },
+            {
+              "kind": "Cached",
+              "snapshot": "gallery-current"
+            }
+          ]
+        },
+        "prerequisite_note": "Complete the earlier Debian package unit first: installed records, refreshing lists, dependencies and safe removal are reused. This lesson adds repository file lookup; it does not run a command from the files it finds.",
+        "concepts": [
+          {
+            "title": "File names and package names differ",
+            "text": "A package bundles files under a package name. A missing /usr/bin/exhibit-audit might come from a differently named package. dpkg-query -S only searches installed records. An unknown owner is useful evidence, not a repair."
+          },
+          {
+            "title": "Search available files",
+            "text": "apt-file reads repository Contents metadata, including uninstalled packages. apt-file search exhibit-audit matches a literal part of a file name. apt-file -F search usr/bin/exhibit-audit matches the complete path. Printed paths omit the first slash; usr/bin and usr/libexec are different locations."
+          },
+          {
+            "title": "Inspect, then install",
+            "text": "The result format is package-name: path. apt-file list PACKAGE lists that package\u2019s available file paths without installing it. In this sample, apt-get --error-on=any update refreshes both metadata lists. Search does not depend on the package already being installed, and it never changes software."
+          }
+        ],
+        "example_description": "Workshop: the missing /usr/bin/exhibit-audit must be installed while keeping gallery-viewer, gallery-lib and /work/gallery-notes.txt. The old index has lookalikes but lacks the needed executable. Refresh, search and inspect the complete path before installing. This example uses separate workshop packages.",
+        "example_actions": [
+          {
+            "action": {
+              "kind": "RefreshIndex"
+            },
+            "command": "apt-get --error-on=any update",
+            "explanation": "Refresh metadata, then type apt-file search exhibit-audit. Compare the printed paths. Narrow with apt-file -F search usr/bin/exhibit-audit and inspect apt-file list gallery-tools; these queries do not install anything."
+          },
+          {
+            "action": {
+              "kind": "Install",
+              "packages": [
+                {
+                  "name": "gallery-tools",
+                  "version": null
+                }
+              ]
+            },
+            "command": "apt-get -y install gallery-tools",
+            "explanation": "The complete executable path belongs to gallery-tools. Install it, then use Check work; the library and viewer stay unchanged."
+          }
+        ],
+        "try_change": {
+          "description": "After the workshop passes, install gallery-private. It adds a similar-name file under usr/libexec, so the required executable still works but the no-lookalike requirement fails. Compare both complete paths with apt-file search exhibit-audit. Remove gallery-private to repair the task.",
+          "actions": [
+            {
+              "kind": "Install",
+              "packages": [
+                {
+                  "name": "gallery-private",
+                  "version": null
+                }
+              ]
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Remove",
+            "name": "gallery-private"
+          }
+        ]
+      },
+      "explanation": "The installed ownership database cannot identify software that has not been installed. The refreshed Contents index maps the exact usr/bin/ledger-check path to records-tools; the documentation and usr/libexec matches are different files. Installing that package satisfies its declared library dependency without adding either lookalike or disturbing the viewer and notes."
+    }
+  ]
+}

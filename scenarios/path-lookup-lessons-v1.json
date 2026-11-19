@@ -1,0 +1,1982 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-env-tool-path",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-command-search",
+      "topic": "Inherited PATH and command search",
+      "title": "Repair a worker’s tool search",
+      "summary": "Find why a worker selects an old tool, then repair inherited search without changing unrelated settings.",
+      "objective": "Repair the setup so the simulated worker finds reportgen inside this sample’s TOOL_DIR and auditprobe inside BASE_PATH. Give the worker a defined, exported PATH made only from the supplied readonly directories. Different valid search orders are accepted when both tools resolve as required. Preserve every other supplied setting and its export attribute. Pass no additional names to the worker; private temporary variables are allowed. Print nothing from setup, finish with status 0, and leave every simulated file unchanged. The separate supplied child report must retain its Worker token output for all six samples.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Inspect and repair lookup",
+        "Verify every worker sample"
+      ],
+      "guide": [
+        {
+          "title": "Read the supplied locations",
+          "why": "TOOL_DIR varies between samples; a hard-coded location is not a repair.",
+          "action": "Read Inspect sample inputs and the supplied lookup inventory. Compare the intended current provider with the older eligible copy.",
+          "commands": []
+        },
+        {
+          "title": "Repair the setup",
+          "why": "The worker uses the actual exported value, not a value printed by the setup.",
+          "action": "Edit Setup script, then choose Run setup + lookup. Inspect Worker lookup and the separate Child report.",
+          "commands": []
+        },
+        {
+          "title": "Verify every sample",
+          "why": "An already exported PATH and a newly created PATH start differently. Other inherited values must still survive.",
+          "action": "Inspect failing samples, retry, and verify all six pass. Stop cancels unfinished work without awarding credit.",
+          "commands": []
+        }
+      ],
+      "initial": {
+        "kind": "Environment",
+        "simulation": {
+          "definition": {
+            "id": "lpic1-env-tool-path",
+            "assignment": {
+              "id": "lpic1-env-tool-path",
+              "instructions": "Repair the setup so the simulated worker finds reportgen inside this sample’s TOOL_DIR and auditprobe inside BASE_PATH. Give the worker a defined, exported PATH made only from the supplied readonly directories. Different valid search orders are accepted when both tools resolve as required. Preserve every other supplied setting and its export attribute. Pass no additional names to the worker; private temporary variables are allowed. Print nothing from setup, finish with status 0, and leave every simulated file unchanged. The separate supplied child report must retain its Worker token output for all six samples.",
+              "starter": "# Repair search for the worker; leave the other supplied values alone.\nPATH=\"$LEGACY_DIR:$BASE_PATH\"\nexport PATH\n",
+              "child_source": "printf 'Worker token: %s\\n' \"$TOKEN\"\n",
+              "cases": [
+                {
+                  "input": {
+                    "name": "Current release",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/opt/reports/current/bin",
+                      "BASE_PATH": "/usr/bin",
+                      "LEGACY_DIR": "/opt/reports/retired/bin",
+                      "TOKEN": "dispatch east"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: dispatch east\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: dispatch east\n"
+                    }
+                  },
+                  "parent": {
+                    "PATH": {
+                      "value": "/opt/reports/current/bin:/usr/bin",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Current release",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/opt/reports/current/bin",
+                      "BASE_PATH": "/usr/bin",
+                      "LEGACY_DIR": "/opt/reports/retired/bin",
+                      "TOKEN": "dispatch east",
+                      "PATH": "/opt/reports/current/bin:/usr/bin"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: dispatch east\n"
+                    },
+                    "stdout": "Worker token: dispatch east\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: dispatch east\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Blue rollout",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/opt/reports/blue/bin",
+                      "BASE_PATH": "/usr/bin",
+                      "LEGACY_DIR": "/opt/reports/retired/bin",
+                      "TOKEN": "night  crew",
+                      "PATH": "/opt/reports/retired/bin:/usr/bin"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: night  crew\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: night  crew\n"
+                    }
+                  },
+                  "parent": {
+                    "PATH": {
+                      "value": "/opt/reports/blue/bin:/usr/bin",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Blue rollout",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/opt/reports/blue/bin",
+                      "BASE_PATH": "/usr/bin",
+                      "LEGACY_DIR": "/opt/reports/retired/bin",
+                      "TOKEN": "night  crew",
+                      "PATH": "/opt/reports/blue/bin:/usr/bin"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: night  crew\n"
+                    },
+                    "stdout": "Worker token: night  crew\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: night  crew\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Green rollout",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/opt/reports/green/bin",
+                      "BASE_PATH": "/usr/bin",
+                      "LEGACY_DIR": "/opt/reports/retired/bin",
+                      "TOKEN": "literal * token"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: literal * token\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: literal * token\n"
+                    }
+                  },
+                  "parent": {
+                    "PATH": {
+                      "value": "/opt/reports/green/bin:/usr/bin",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Green rollout",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/opt/reports/green/bin",
+                      "BASE_PATH": "/usr/bin",
+                      "LEGACY_DIR": "/opt/reports/retired/bin",
+                      "TOKEN": "literal * token",
+                      "PATH": "/opt/reports/green/bin:/usr/bin"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: literal * token\n"
+                    },
+                    "stdout": "Worker token: literal * token\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: literal * token\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Fallback location",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/srv/reports/bin",
+                      "BASE_PATH": "/usr/bin",
+                      "LEGACY_DIR": "/opt/reports/retired/bin",
+                      "TOKEN": "",
+                      "PATH": "/opt/reports/retired/bin:/usr/bin"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: \n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: \n"
+                    }
+                  },
+                  "parent": {
+                    "PATH": {
+                      "value": "/srv/reports/bin:/usr/bin",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Fallback location",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/srv/reports/bin",
+                      "BASE_PATH": "/usr/bin",
+                      "LEGACY_DIR": "/opt/reports/retired/bin",
+                      "TOKEN": "",
+                      "PATH": "/srv/reports/bin:/usr/bin"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: \n"
+                    },
+                    "stdout": "Worker token: \n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: \n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Research tools",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/opt/research/bin",
+                      "BASE_PATH": "/usr/bin",
+                      "LEGACY_DIR": "/opt/reports/retired/bin",
+                      "TOKEN": "tag %s stays data"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: tag %s stays data\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: tag %s stays data\n"
+                    }
+                  },
+                  "parent": {
+                    "PATH": {
+                      "value": "/opt/research/bin:/usr/bin",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Research tools",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/opt/research/bin",
+                      "BASE_PATH": "/usr/bin",
+                      "LEGACY_DIR": "/opt/reports/retired/bin",
+                      "TOKEN": "tag %s stays data",
+                      "PATH": "/opt/research/bin:/usr/bin"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: tag %s stays data\n"
+                    },
+                    "stdout": "Worker token: tag %s stays data\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: tag %s stays data\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Temporary release",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/srv/release/bin",
+                      "BASE_PATH": "/usr/bin",
+                      "LEGACY_DIR": "/opt/reports/retired/bin",
+                      "TOKEN": "final marker",
+                      "PATH": "/opt/reports/retired/bin:/usr/bin"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: final marker\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: final marker\n"
+                    }
+                  },
+                  "parent": {
+                    "PATH": {
+                      "value": "/srv/release/bin:/usr/bin",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Temporary release",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/srv/release/bin",
+                      "BASE_PATH": "/usr/bin",
+                      "LEGACY_DIR": "/opt/reports/retired/bin",
+                      "TOKEN": "final marker",
+                      "PATH": "/srv/release/bin:/usr/bin"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: final marker\n"
+                    },
+                    "stdout": "Worker token: final marker\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: final marker\n"
+                    }
+                  }
+                }
+              ],
+              "path_lookup": {
+                "profile": {
+                  "version": 1,
+                  "tree": {
+                    "nodes": {
+                      "/": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/home": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/home/alex": {
+                        "mode": 493,
+                        "owner": "alex",
+                        "group": "staff",
+                        "directory": true
+                      },
+                      "/work": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/reports": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/reports/current": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/reports/current/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/reports/blue": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/reports/blue/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/reports/green": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/reports/green/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/srv": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/srv/reports": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/srv/reports/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/research": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/research/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/srv/release": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/srv/release/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/usr": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/usr/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/reports/retired": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/reports/retired/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/home/alex/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/reports/current/bin/reportgen": {
+                        "mode": 73,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      },
+                      "/opt/reports/blue/bin/reportgen": {
+                        "mode": 73,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      },
+                      "/opt/reports/green/bin/reportgen": {
+                        "mode": 73,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      },
+                      "/srv/reports/bin/reportgen": {
+                        "mode": 73,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      },
+                      "/opt/research/bin/reportgen": {
+                        "mode": 73,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      },
+                      "/srv/release/bin/reportgen": {
+                        "mode": 73,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      },
+                      "/opt/reports/retired/bin/reportgen": {
+                        "mode": 73,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      },
+                      "/usr/bin/reportgen": {
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      },
+                      "/usr/bin/auditprobe": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      }
+                    },
+                    "files": {
+                      "/opt/reports/current/bin/reportgen": "",
+                      "/opt/reports/blue/bin/reportgen": "",
+                      "/opt/reports/green/bin/reportgen": "",
+                      "/srv/reports/bin/reportgen": "",
+                      "/opt/research/bin/reportgen": "",
+                      "/srv/release/bin/reportgen": "",
+                      "/opt/reports/retired/bin/reportgen": "",
+                      "/usr/bin/reportgen": "",
+                      "/usr/bin/auditprobe": ""
+                    },
+                    "users": {
+                      "root": [
+                        "root"
+                      ],
+                      "alex": [
+                        "staff"
+                      ]
+                    },
+                    "user": "alex",
+                    "home": "/home/alex",
+                    "cwd": "/work",
+                    "previous": null,
+                    "umask": 18,
+                    "clock": 0,
+                    "modified": {}
+                  },
+                  "trusted_directories": [
+                    "/opt/reports/current/bin",
+                    "/opt/reports/blue/bin",
+                    "/opt/reports/green/bin",
+                    "/srv/reports/bin",
+                    "/opt/research/bin",
+                    "/srv/release/bin",
+                    "/usr/bin",
+                    "/opt/reports/retired/bin"
+                  ],
+                  "names": [
+                    "reportgen",
+                    "auditprobe"
+                  ]
+                },
+                "cases": [
+                  {
+                    "case_name": "Current release",
+                    "selected": {
+                      "reportgen": [
+                        "/opt/reports/current/bin/reportgen"
+                      ],
+                      "auditprobe": [
+                        "/usr/bin/auditprobe"
+                      ]
+                    }
+                  },
+                  {
+                    "case_name": "Blue rollout",
+                    "selected": {
+                      "reportgen": [
+                        "/opt/reports/blue/bin/reportgen"
+                      ],
+                      "auditprobe": [
+                        "/usr/bin/auditprobe"
+                      ]
+                    }
+                  },
+                  {
+                    "case_name": "Green rollout",
+                    "selected": {
+                      "reportgen": [
+                        "/opt/reports/green/bin/reportgen"
+                      ],
+                      "auditprobe": [
+                        "/usr/bin/auditprobe"
+                      ]
+                    }
+                  },
+                  {
+                    "case_name": "Fallback location",
+                    "selected": {
+                      "reportgen": [
+                        "/srv/reports/bin/reportgen"
+                      ],
+                      "auditprobe": [
+                        "/usr/bin/auditprobe"
+                      ]
+                    }
+                  },
+                  {
+                    "case_name": "Research tools",
+                    "selected": {
+                      "reportgen": [
+                        "/opt/research/bin/reportgen"
+                      ],
+                      "auditprobe": [
+                        "/usr/bin/auditprobe"
+                      ]
+                    }
+                  },
+                  {
+                    "case_name": "Temporary release",
+                    "selected": {
+                      "reportgen": [
+                        "/srv/release/bin/reportgen"
+                      ],
+                      "auditprobe": [
+                        "/usr/bin/auditprobe"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "example": {
+              "id": "worked-gallery-tool-path",
+              "instructions": "Set an exported search path so the gallery worker finds labeltool in TOOL_DIR and auditview in BASE_PATH. Use only the supplied readonly directories, preserve every other inherited setting and all simulated files, print nothing from setup and finish with status 0. Keep the separate Worker token report unchanged.",
+              "starter": "export PATH=\"$TOOL_DIR:$BASE_PATH\"\n",
+              "child_source": "printf 'Worker token: %s\\n' \"$TOKEN\"\n",
+              "cases": [
+                {
+                  "input": {
+                    "name": "Gallery preview",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/opt/gallery/new/bin",
+                      "BASE_PATH": "/usr/local/bin",
+                      "LEGACY_DIR": "/opt/gallery/old/bin",
+                      "TOKEN": "gallery tag"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: gallery tag\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: gallery tag\n"
+                    }
+                  },
+                  "parent": {
+                    "PATH": {
+                      "value": "/opt/gallery/new/bin:/usr/local/bin",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Gallery preview",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/opt/gallery/new/bin",
+                      "BASE_PATH": "/usr/local/bin",
+                      "LEGACY_DIR": "/opt/gallery/old/bin",
+                      "TOKEN": "gallery tag",
+                      "PATH": "/opt/gallery/new/bin:/usr/local/bin"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: gallery tag\n"
+                    },
+                    "stdout": "Worker token: gallery tag\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: gallery tag\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Touring gallery",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/srv/gallery/bin",
+                      "BASE_PATH": "/usr/local/bin",
+                      "LEGACY_DIR": "/opt/gallery/old/bin",
+                      "TOKEN": "tour tag",
+                      "PATH": "/opt/gallery/old/bin:/usr/local/bin"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: tour tag\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: tour tag\n"
+                    }
+                  },
+                  "parent": {
+                    "PATH": {
+                      "value": "/srv/gallery/bin:/usr/local/bin",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Touring gallery",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TOOL_DIR": "/srv/gallery/bin",
+                      "BASE_PATH": "/usr/local/bin",
+                      "LEGACY_DIR": "/opt/gallery/old/bin",
+                      "TOKEN": "tour tag",
+                      "PATH": "/srv/gallery/bin:/usr/local/bin"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Retain this sample note: tour tag\n"
+                    },
+                    "stdout": "Worker token: tour tag\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Retain this sample note: tour tag\n"
+                    }
+                  }
+                }
+              ],
+              "path_lookup": {
+                "profile": {
+                  "version": 1,
+                  "tree": {
+                    "nodes": {
+                      "/": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/home": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/home/alex": {
+                        "mode": 493,
+                        "owner": "alex",
+                        "group": "staff",
+                        "directory": true
+                      },
+                      "/work": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/gallery": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/gallery/new": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/gallery/new/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/srv": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/srv/gallery": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/srv/gallery/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/usr": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/usr/local": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/usr/local/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/gallery/old": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/gallery/old/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/home/alex/bin": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": true
+                      },
+                      "/opt/gallery/new/bin/labeltool": {
+                        "mode": 73,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      },
+                      "/srv/gallery/bin/labeltool": {
+                        "mode": 73,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      },
+                      "/opt/gallery/old/bin/labeltool": {
+                        "mode": 73,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      },
+                      "/usr/local/bin/labeltool": {
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      },
+                      "/usr/local/bin/auditview": {
+                        "mode": 365,
+                        "owner": "root",
+                        "group": "root",
+                        "directory": false
+                      }
+                    },
+                    "files": {
+                      "/opt/gallery/new/bin/labeltool": "",
+                      "/srv/gallery/bin/labeltool": "",
+                      "/opt/gallery/old/bin/labeltool": "",
+                      "/usr/local/bin/labeltool": "",
+                      "/usr/local/bin/auditview": ""
+                    },
+                    "users": {
+                      "root": [
+                        "root"
+                      ],
+                      "alex": [
+                        "staff"
+                      ]
+                    },
+                    "user": "alex",
+                    "home": "/home/alex",
+                    "cwd": "/work",
+                    "previous": null,
+                    "umask": 18,
+                    "clock": 0,
+                    "modified": {}
+                  },
+                  "trusted_directories": [
+                    "/opt/gallery/new/bin",
+                    "/srv/gallery/bin",
+                    "/usr/local/bin",
+                    "/opt/gallery/old/bin"
+                  ],
+                  "names": [
+                    "labeltool",
+                    "auditview"
+                  ]
+                },
+                "cases": [
+                  {
+                    "case_name": "Gallery preview",
+                    "selected": {
+                      "labeltool": [
+                        "/opt/gallery/new/bin/labeltool"
+                      ],
+                      "auditview": [
+                        "/usr/local/bin/auditview"
+                      ]
+                    }
+                  },
+                  {
+                    "case_name": "Touring gallery",
+                    "selected": {
+                      "labeltool": [
+                        "/srv/gallery/bin/labeltool"
+                      ],
+                      "auditview": [
+                        "/usr/local/bin/auditview"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "view": "introduction",
+          "assignment": {
+            "source": "# Repair search for the worker; leave the other supplied values alone.\nPATH=\"$LEGACY_DIR:$BASE_PATH\"\nexport PATH\n",
+            "result": null
+          },
+          "example": {
+            "source": "export PATH=\"$TOOL_DIR:$BASE_PATH\"\n",
+            "result": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "Environment",
+        "definition": {
+          "id": "lpic1-env-tool-path",
+          "assignment": {
+            "id": "lpic1-env-tool-path",
+            "instructions": "Repair the setup so the simulated worker finds reportgen inside this sample’s TOOL_DIR and auditprobe inside BASE_PATH. Give the worker a defined, exported PATH made only from the supplied readonly directories. Different valid search orders are accepted when both tools resolve as required. Preserve every other supplied setting and its export attribute. Pass no additional names to the worker; private temporary variables are allowed. Print nothing from setup, finish with status 0, and leave every simulated file unchanged. The separate supplied child report must retain its Worker token output for all six samples.",
+            "starter": "# Repair search for the worker; leave the other supplied values alone.\nPATH=\"$LEGACY_DIR:$BASE_PATH\"\nexport PATH\n",
+            "child_source": "printf 'Worker token: %s\\n' \"$TOKEN\"\n",
+            "cases": [
+              {
+                "input": {
+                  "name": "Current release",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/opt/reports/current/bin",
+                    "BASE_PATH": "/usr/bin",
+                    "LEGACY_DIR": "/opt/reports/retired/bin",
+                    "TOKEN": "dispatch east"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: dispatch east\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: dispatch east\n"
+                  }
+                },
+                "parent": {
+                  "PATH": {
+                    "value": "/opt/reports/current/bin:/usr/bin",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Current release",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/opt/reports/current/bin",
+                    "BASE_PATH": "/usr/bin",
+                    "LEGACY_DIR": "/opt/reports/retired/bin",
+                    "TOKEN": "dispatch east",
+                    "PATH": "/opt/reports/current/bin:/usr/bin"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: dispatch east\n"
+                  },
+                  "stdout": "Worker token: dispatch east\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: dispatch east\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Blue rollout",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/opt/reports/blue/bin",
+                    "BASE_PATH": "/usr/bin",
+                    "LEGACY_DIR": "/opt/reports/retired/bin",
+                    "TOKEN": "night  crew",
+                    "PATH": "/opt/reports/retired/bin:/usr/bin"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: night  crew\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: night  crew\n"
+                  }
+                },
+                "parent": {
+                  "PATH": {
+                    "value": "/opt/reports/blue/bin:/usr/bin",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Blue rollout",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/opt/reports/blue/bin",
+                    "BASE_PATH": "/usr/bin",
+                    "LEGACY_DIR": "/opt/reports/retired/bin",
+                    "TOKEN": "night  crew",
+                    "PATH": "/opt/reports/blue/bin:/usr/bin"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: night  crew\n"
+                  },
+                  "stdout": "Worker token: night  crew\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: night  crew\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Green rollout",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/opt/reports/green/bin",
+                    "BASE_PATH": "/usr/bin",
+                    "LEGACY_DIR": "/opt/reports/retired/bin",
+                    "TOKEN": "literal * token"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: literal * token\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: literal * token\n"
+                  }
+                },
+                "parent": {
+                  "PATH": {
+                    "value": "/opt/reports/green/bin:/usr/bin",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Green rollout",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/opt/reports/green/bin",
+                    "BASE_PATH": "/usr/bin",
+                    "LEGACY_DIR": "/opt/reports/retired/bin",
+                    "TOKEN": "literal * token",
+                    "PATH": "/opt/reports/green/bin:/usr/bin"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: literal * token\n"
+                  },
+                  "stdout": "Worker token: literal * token\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: literal * token\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Fallback location",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/srv/reports/bin",
+                    "BASE_PATH": "/usr/bin",
+                    "LEGACY_DIR": "/opt/reports/retired/bin",
+                    "TOKEN": "",
+                    "PATH": "/opt/reports/retired/bin:/usr/bin"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: \n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: \n"
+                  }
+                },
+                "parent": {
+                  "PATH": {
+                    "value": "/srv/reports/bin:/usr/bin",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Fallback location",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/srv/reports/bin",
+                    "BASE_PATH": "/usr/bin",
+                    "LEGACY_DIR": "/opt/reports/retired/bin",
+                    "TOKEN": "",
+                    "PATH": "/srv/reports/bin:/usr/bin"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: \n"
+                  },
+                  "stdout": "Worker token: \n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: \n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Research tools",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/opt/research/bin",
+                    "BASE_PATH": "/usr/bin",
+                    "LEGACY_DIR": "/opt/reports/retired/bin",
+                    "TOKEN": "tag %s stays data"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: tag %s stays data\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: tag %s stays data\n"
+                  }
+                },
+                "parent": {
+                  "PATH": {
+                    "value": "/opt/research/bin:/usr/bin",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Research tools",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/opt/research/bin",
+                    "BASE_PATH": "/usr/bin",
+                    "LEGACY_DIR": "/opt/reports/retired/bin",
+                    "TOKEN": "tag %s stays data",
+                    "PATH": "/opt/research/bin:/usr/bin"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: tag %s stays data\n"
+                  },
+                  "stdout": "Worker token: tag %s stays data\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: tag %s stays data\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Temporary release",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/srv/release/bin",
+                    "BASE_PATH": "/usr/bin",
+                    "LEGACY_DIR": "/opt/reports/retired/bin",
+                    "TOKEN": "final marker",
+                    "PATH": "/opt/reports/retired/bin:/usr/bin"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: final marker\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: final marker\n"
+                  }
+                },
+                "parent": {
+                  "PATH": {
+                    "value": "/srv/release/bin:/usr/bin",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Temporary release",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/srv/release/bin",
+                    "BASE_PATH": "/usr/bin",
+                    "LEGACY_DIR": "/opt/reports/retired/bin",
+                    "TOKEN": "final marker",
+                    "PATH": "/srv/release/bin:/usr/bin"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: final marker\n"
+                  },
+                  "stdout": "Worker token: final marker\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: final marker\n"
+                  }
+                }
+              }
+            ],
+            "path_lookup": {
+              "profile": {
+                "version": 1,
+                "tree": {
+                  "nodes": {
+                    "/": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/home": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/home/alex": {
+                      "mode": 493,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "/work": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/reports": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/reports/current": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/reports/current/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/reports/blue": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/reports/blue/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/reports/green": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/reports/green/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/srv": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/srv/reports": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/srv/reports/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/research": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/research/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/srv/release": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/srv/release/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/usr": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/usr/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/reports/retired": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/reports/retired/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/home/alex/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/reports/current/bin/reportgen": {
+                      "mode": 73,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    },
+                    "/opt/reports/blue/bin/reportgen": {
+                      "mode": 73,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    },
+                    "/opt/reports/green/bin/reportgen": {
+                      "mode": 73,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    },
+                    "/srv/reports/bin/reportgen": {
+                      "mode": 73,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    },
+                    "/opt/research/bin/reportgen": {
+                      "mode": 73,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    },
+                    "/srv/release/bin/reportgen": {
+                      "mode": 73,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    },
+                    "/opt/reports/retired/bin/reportgen": {
+                      "mode": 73,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    },
+                    "/usr/bin/reportgen": {
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    },
+                    "/usr/bin/auditprobe": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    }
+                  },
+                  "files": {
+                    "/opt/reports/current/bin/reportgen": "",
+                    "/opt/reports/blue/bin/reportgen": "",
+                    "/opt/reports/green/bin/reportgen": "",
+                    "/srv/reports/bin/reportgen": "",
+                    "/opt/research/bin/reportgen": "",
+                    "/srv/release/bin/reportgen": "",
+                    "/opt/reports/retired/bin/reportgen": "",
+                    "/usr/bin/reportgen": "",
+                    "/usr/bin/auditprobe": ""
+                  },
+                  "users": {
+                    "root": [
+                      "root"
+                    ],
+                    "alex": [
+                      "staff"
+                    ]
+                  },
+                  "user": "alex",
+                  "home": "/home/alex",
+                  "cwd": "/work",
+                  "previous": null,
+                  "umask": 18,
+                  "clock": 0,
+                  "modified": {}
+                },
+                "trusted_directories": [
+                  "/opt/reports/current/bin",
+                  "/opt/reports/blue/bin",
+                  "/opt/reports/green/bin",
+                  "/srv/reports/bin",
+                  "/opt/research/bin",
+                  "/srv/release/bin",
+                  "/usr/bin",
+                  "/opt/reports/retired/bin"
+                ],
+                "names": [
+                  "reportgen",
+                  "auditprobe"
+                ]
+              },
+              "cases": [
+                {
+                  "case_name": "Current release",
+                  "selected": {
+                    "reportgen": [
+                      "/opt/reports/current/bin/reportgen"
+                    ],
+                    "auditprobe": [
+                      "/usr/bin/auditprobe"
+                    ]
+                  }
+                },
+                {
+                  "case_name": "Blue rollout",
+                  "selected": {
+                    "reportgen": [
+                      "/opt/reports/blue/bin/reportgen"
+                    ],
+                    "auditprobe": [
+                      "/usr/bin/auditprobe"
+                    ]
+                  }
+                },
+                {
+                  "case_name": "Green rollout",
+                  "selected": {
+                    "reportgen": [
+                      "/opt/reports/green/bin/reportgen"
+                    ],
+                    "auditprobe": [
+                      "/usr/bin/auditprobe"
+                    ]
+                  }
+                },
+                {
+                  "case_name": "Fallback location",
+                  "selected": {
+                    "reportgen": [
+                      "/srv/reports/bin/reportgen"
+                    ],
+                    "auditprobe": [
+                      "/usr/bin/auditprobe"
+                    ]
+                  }
+                },
+                {
+                  "case_name": "Research tools",
+                  "selected": {
+                    "reportgen": [
+                      "/opt/research/bin/reportgen"
+                    ],
+                    "auditprobe": [
+                      "/usr/bin/auditprobe"
+                    ]
+                  }
+                },
+                {
+                  "case_name": "Temporary release",
+                  "selected": {
+                    "reportgen": [
+                      "/srv/release/bin/reportgen"
+                    ],
+                    "auditprobe": [
+                      "/usr/bin/auditprobe"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "example": {
+            "id": "worked-gallery-tool-path",
+            "instructions": "Set an exported search path so the gallery worker finds labeltool in TOOL_DIR and auditview in BASE_PATH. Use only the supplied readonly directories, preserve every other inherited setting and all simulated files, print nothing from setup and finish with status 0. Keep the separate Worker token report unchanged.",
+            "starter": "export PATH=\"$TOOL_DIR:$BASE_PATH\"\n",
+            "child_source": "printf 'Worker token: %s\\n' \"$TOKEN\"\n",
+            "cases": [
+              {
+                "input": {
+                  "name": "Gallery preview",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/opt/gallery/new/bin",
+                    "BASE_PATH": "/usr/local/bin",
+                    "LEGACY_DIR": "/opt/gallery/old/bin",
+                    "TOKEN": "gallery tag"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: gallery tag\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: gallery tag\n"
+                  }
+                },
+                "parent": {
+                  "PATH": {
+                    "value": "/opt/gallery/new/bin:/usr/local/bin",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Gallery preview",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/opt/gallery/new/bin",
+                    "BASE_PATH": "/usr/local/bin",
+                    "LEGACY_DIR": "/opt/gallery/old/bin",
+                    "TOKEN": "gallery tag",
+                    "PATH": "/opt/gallery/new/bin:/usr/local/bin"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: gallery tag\n"
+                  },
+                  "stdout": "Worker token: gallery tag\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: gallery tag\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Touring gallery",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/srv/gallery/bin",
+                    "BASE_PATH": "/usr/local/bin",
+                    "LEGACY_DIR": "/opt/gallery/old/bin",
+                    "TOKEN": "tour tag",
+                    "PATH": "/opt/gallery/old/bin:/usr/local/bin"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: tour tag\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: tour tag\n"
+                  }
+                },
+                "parent": {
+                  "PATH": {
+                    "value": "/srv/gallery/bin:/usr/local/bin",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Touring gallery",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TOOL_DIR": "/srv/gallery/bin",
+                    "BASE_PATH": "/usr/local/bin",
+                    "LEGACY_DIR": "/opt/gallery/old/bin",
+                    "TOKEN": "tour tag",
+                    "PATH": "/srv/gallery/bin:/usr/local/bin"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Retain this sample note: tour tag\n"
+                  },
+                  "stdout": "Worker token: tour tag\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Retain this sample note: tour tag\n"
+                  }
+                }
+              }
+            ],
+            "path_lookup": {
+              "profile": {
+                "version": 1,
+                "tree": {
+                  "nodes": {
+                    "/": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/home": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/home/alex": {
+                      "mode": 493,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "/work": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/gallery": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/gallery/new": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/gallery/new/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/srv": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/srv/gallery": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/srv/gallery/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/usr": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/usr/local": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/usr/local/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/gallery/old": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/gallery/old/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/home/alex/bin": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": true
+                    },
+                    "/opt/gallery/new/bin/labeltool": {
+                      "mode": 73,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    },
+                    "/srv/gallery/bin/labeltool": {
+                      "mode": 73,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    },
+                    "/opt/gallery/old/bin/labeltool": {
+                      "mode": 73,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    },
+                    "/usr/local/bin/labeltool": {
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    },
+                    "/usr/local/bin/auditview": {
+                      "mode": 365,
+                      "owner": "root",
+                      "group": "root",
+                      "directory": false
+                    }
+                  },
+                  "files": {
+                    "/opt/gallery/new/bin/labeltool": "",
+                    "/srv/gallery/bin/labeltool": "",
+                    "/opt/gallery/old/bin/labeltool": "",
+                    "/usr/local/bin/labeltool": "",
+                    "/usr/local/bin/auditview": ""
+                  },
+                  "users": {
+                    "root": [
+                      "root"
+                    ],
+                    "alex": [
+                      "staff"
+                    ]
+                  },
+                  "user": "alex",
+                  "home": "/home/alex",
+                  "cwd": "/work",
+                  "previous": null,
+                  "umask": 18,
+                  "clock": 0,
+                  "modified": {}
+                },
+                "trusted_directories": [
+                  "/opt/gallery/new/bin",
+                  "/srv/gallery/bin",
+                  "/usr/local/bin",
+                  "/opt/gallery/old/bin"
+                ],
+                "names": [
+                  "labeltool",
+                  "auditview"
+                ]
+              },
+              "cases": [
+                {
+                  "case_name": "Gallery preview",
+                  "selected": {
+                    "labeltool": [
+                      "/opt/gallery/new/bin/labeltool"
+                    ],
+                    "auditview": [
+                      "/usr/local/bin/auditview"
+                    ]
+                  }
+                },
+                {
+                  "case_name": "Touring gallery",
+                  "selected": {
+                    "labeltool": [
+                      "/srv/gallery/bin/labeltool"
+                    ],
+                    "auditview": [
+                      "/usr/local/bin/auditview"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "solution": [
+        "export PATH=\"$TOOL_DIR:$BASE_PATH\"\n"
+      ],
+      "explanation": "The setup uses each sample’s directory containing the current tool, keeps the base helper reachable and exports the resulting PATH. Ordered lookup selects eligible artifacts in those readonly folders. Reversing these two folders also works here because the base reportgen lacks execute permission. Other valid readonly entries and duplicates may remain if the required providers still win. No selected tool is executed; the fixed token report is a different simulated script.",
+      "hints": [
+        "Inspect the actual selected reportgen path. An earlier eligible copy wins even when a current copy appears later.",
+        "Use TOOL_DIR and BASE_PATH from each sample; one fixed folder cannot work for all six. Keep the base helper reachable.",
+        "A new private PATH is not inherited. export PATH marks its current value without exporting your other private variables."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Search-and-Execution.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Environment.html",
+        "https://man7.org/linux/man-pages/man7/path_resolution.7.html"
+      ],
+      "simplifications": "Sources checked 2026-11-05: LPIC-1 v5.0 objective105.1, narrow exported search customization, plus supporting104.7 file-location reasoning. Evaluator19 setup and fixed child report stay in-process. A separate typed lookup checks supplied ordinary-file execute and ancestor search bits; no resolved utility is loaded or run. Only nonempty canonical absolute PATH components are supported (up to16,16KiB total); unset/default, empty/current-directory and relative search forms report their limitation. No aliases/functions/hash lookup, which/type/whereis, ELF/shebang loading, root/ACL/mount semantics or host access. Readonly policy concerns only this supplied caller and directory list, not global security. This is not full105.1 or104.7 coverage.",
+      "retry_guidance": "Read the named failing sample and actual lookup. Distinguish a missing exported value, wrong first provider, permission skip and disallowed directory. Repair only setup, run again and check the separate report and protected files.",
+      "teaching": {
+        "prerequisite_note": "Complete Keep a planning note in the parent and Locate the active application files first. You will reuse quoted assignments, export, absolute paths and file/directory permission bits; no host commands are needed.",
+        "concepts": [
+          {
+            "title": "A name needs somewhere to look",
+            "text": "A command name such as labeltool does not identify its folder. PATH is a colon-separated list of directories. The worker tries them from left to right and selects the first eligible file with that name. Here the folders and files are supplied metadata in memory; selecting a file does not run it."
+          },
+          {
+            "title": "Make the current copy reachable first",
+            "text": "In the gallery example, TOOL_DIR holds the current labeltool; LEGACY_DIR holds an older copy. BASE_PATH holds auditview and a labeltool file without execute permission. The worked setup puts TOOL_DIR before BASE_PATH. A disabled candidate is skipped; an earlier eligible old copy would win. The assignment uses reportgen and auditprobe in different folders."
+          },
+          {
+            "title": "Pass the search value to the worker",
+            "text": "The worker gets the setup’s exported values. In export PATH=\"$TOOL_DIR:$BASE_PATH\", the colon separates directories and the quotes keep the supplied text together. export marks the new value for inheritance. A newly assigned PATH is private unless exported; assigning to an already exported PATH keeps that attribute. A parent shell can use its own private PATH, but this task inspects a separate worker’s inherited value."
+          },
+          {
+            "title": "Permission to search is different from permission to list",
+            "text": "A known path needs search permission (x) on every parent directory and execute permission (x) on the selected ordinary file. Read permission is not required for this metadata lookup. The supplied inventory is readonly; you repair the search value, not permissions. The allowed directory list means readonly for this modeled caller; it is not a general security guarantee."
+          },
+          {
+            "title": "Check the whole path and keep the report separate",
+            "text": "Even an unused trailing directory must belong to the supplied readonly list. The lookup table shows which files the worker actually finds; it does not show utility output or prove the programs could start. A separate fixed child script reports TOKEN. Keep that report and every other supplied value unchanged while repairing PATH. Each run uses fresh sample inputs and reset simulated files."
+          }
+        ],
+        "example": "export PATH=\"$TOOL_DIR:$BASE_PATH\"\n",
+        "inputs": "Gallery example: TOOL_DIR is /opt/gallery/new/bin and BASE_PATH is /usr/local/bin in the first sample. Expected lookup selects labeltool from TOOL_DIR and auditview from BASE_PATH; the separate report prints Worker token: gallery tag. A second gallery sample changes TOOL_DIR and starts with an already exported PATH.",
+        "try_change": "Run the gallery example, try the old provider first, then restore the current directory. Compare the actual worker lookup with the expected providers.",
+        "fixture": {
+          "name": "Gallery preview",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "TOOL_DIR": "/opt/gallery/new/bin",
+            "BASE_PATH": "/usr/local/bin",
+            "LEGACY_DIR": "/opt/gallery/old/bin",
+            "TOKEN": "gallery tag"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this sample note: gallery tag\n"
+          },
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Retain this sample note: gallery tag\n"
+          }
+        }
+      },
+      "prerequisites": [
+        "lpic1-env-parent-note",
+        "lpic1-fhs-locate-active-files"
+      ]
+    }
+  ]
+}

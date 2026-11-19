@@ -1,0 +1,1447 @@
+{
+  "schema_version": 1,
+  "lessons": [
+    {
+      "scenario": {
+        "id": "lpic1-modal-setting-repair",
+        "version": 1,
+        "track": "LPIC-1",
+        "unit": "modal-file-editing",
+        "topic": "Text editing with vi-style modes",
+        "title": "Repair a file using vi-style modes",
+        "summary": "Move, edit, correct a typo and write the virtual file without changing unrelated settings.",
+        "objective": "Edit /lab/worker.conf so port is 8080 and workers is 4. Preserve name=edge-a and the supplied operator note. Save the changes and check the saved files.",
+        "difficulty": "Beginner",
+        "minutes": 15,
+        "steps": [
+          "Understand the task, work in the simulated editor, save or discard drafts, then Check saved files."
+        ],
+        "guide": [],
+        "explanation": "The repair changes two values in the saved file while preserving the name and operator note. Movement keys act in NORMAL, typing acts in INSERT, and :w writes the virtual file; a correct unsaved buffer alone is not a finished repair.",
+        "hints": [
+          "Check the mode label before typing: Escape returns to NORMAL; i inserts before the cursor and a inserts after it.",
+          "Use j and $ to reach a value at the end of the next line. Count the digits you actually need to replace, rather than reusing the example blindly.",
+          "Write with :w and Enter, then Check saved files. A remaining unsaved draft is reported separately from a wrong saved value."
+        ],
+        "sources": [
+          "https://www.lpi.org/our-certifications/exam-101-102-objectives/#rdp-we-103.8_Basic_file_editing",
+          "https://vimhelp.org/usr_02.txt.html",
+          "https://vimhelp.org/motion.txt.html",
+          "https://vimhelp.org/change.txt.html",
+          "https://vimhelp.org/editing.txt.html",
+          "https://vimhelp.org/pattern.txt.html"
+        ],
+        "simplifications": "Bounded in-process vi/Vim-style subset, printable ASCII and line breaks only. Supplied files only; no host vi, shell escapes, files, plugins or external commands. Plain case-sensitive search, not regular expressions; no counts, visual mode, named registers, redo, options or general Ex. Vim-style grouped undo, not complete classic-vi undo behavior. This is text editing, not execution of the sample configuration or job records. Other editors and EDITOR are supporting explanation only.",
+        "prerequisites": []
+      },
+      "definition": {
+        "version": 1,
+        "id": "lpic1-modal-setting-repair",
+        "initial": {
+          "files": {
+            "/lab/worker.conf": {
+              "text": "name=edge-a\nport=80\nworkers=2\n",
+              "writable": true,
+              "draft": null
+            },
+            "/lab/operator-notes.txt": {
+              "text": "Keep the original operator note.\n",
+              "writable": false,
+              "draft": null
+            }
+          },
+          "start": "/lab/worker.conf",
+          "requirements": [
+            {
+              "kind": "Settings",
+              "path": "/lab/worker.conf",
+              "values": {
+                "port": "8080",
+                "workers": "4"
+              }
+            },
+            {
+              "kind": "Unchanged",
+              "path": "/lab/operator-notes.txt"
+            }
+          ]
+        },
+        "example": {
+          "files": {
+            "/lab/worker.conf": {
+              "text": "name=demo-b\nport=90\nworkers=1\n",
+              "writable": true,
+              "draft": null
+            },
+            "/lab/operator-notes.txt": {
+              "text": "Keep the original example note.\n",
+              "writable": false,
+              "draft": null
+            }
+          },
+          "start": "/lab/worker.conf",
+          "requirements": [
+            {
+              "kind": "Settings",
+              "path": "/lab/worker.conf",
+              "values": {
+                "port": "9090",
+                "workers": "3"
+              }
+            },
+            {
+              "kind": "Unchanged",
+              "path": "/lab/operator-notes.txt"
+            }
+          ]
+        },
+        "example_solution": [
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "j"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "$"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "x"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "x"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "a"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "9"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "0"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "9"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "0"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Escape"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "j"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "$"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "x"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "a"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "3"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Escape"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": ":"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "w"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Enter"
+            }
+          }
+        ]
+      },
+      "solution": [
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "j"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "$"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "x"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "x"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "a"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "8"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "0"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "8"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "0"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Escape"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "j"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "$"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "x"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "a"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "4"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Escape"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": ":"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "w"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Enter"
+          }
+        },
+        {
+          "kind": "Check"
+        }
+      ],
+      "presentation": {
+        "id": "lpic1-modal-setting-repair",
+        "goal": "Edit /lab/worker.conf so port is 8080 and workers is 4. Preserve name=edge-a and the supplied operator note. Save the changes and check the saved files.",
+        "context": "You already know that a file stores text. This lesson introduces an editor that uses different modes for movement and typing. No terminal or shell knowledge is needed.",
+        "concepts": [
+          {
+            "title": "Open file, buffer and mode",
+            "text": "The supplied file is already open. The editor shows a working copy, called a buffer; changing it does not change the saved file yet. NORMAL means keys are editing commands. Click inside the editor to focus it. Tab moves to the next app control; it does not insert a tab."
+          },
+          {
+            "title": "Move first, then type",
+            "text": "In NORMAL, h moves left, j down, k up and l right. Arrow keys also move in NORMAL. 0 means the start of the line; $ means its last character. Press i to type before the cursor or a to type after it. INSERT means letters become text. Backspace erases the preceding character, including a line break. Escape returns to NORMAL and keeps the editor focused."
+          },
+          {
+            "title": "Correct and save",
+            "text": "In NORMAL, x deletes the character under the cursor. At the end of a line it moves back to the remaining last character. u undoes the most recent change; a whole INSERT session is one change. Type :w and press Enter to write the saved virtual file. Check saved files grades those saved contents and refuses unfinished drafts."
+          },
+          {
+            "title": "Read the small configuration",
+            "text": "These sample records use key=value. The words on the left name settings; the text on the right is their value. Lines starting with # are comments. This exercise edits text only; it does not start a service or run the file."
+          }
+        ],
+        "worked": [
+          {
+            "label": "Example input",
+            "value": "port=90; workers=1; name=demo-b",
+            "explanation": "Change only the two requested values."
+          },
+          {
+            "label": "Reach port",
+            "value": "j then $",
+            "explanation": "Down one line, then to its final digit."
+          },
+          {
+            "label": "Replace port",
+            "value": "x x; a; type 9090; Escape",
+            "explanation": "Delete both old digits, then insert after =."
+          },
+          {
+            "label": "Replace workers",
+            "value": "j $ x; a; type 3; Escape",
+            "explanation": "Replace the next line’s single digit."
+          },
+          {
+            "label": "Write and check",
+            "value": ":w then Enter; Check example",
+            "explanation": "Expected saved values: port=9090, workers=3; preserve name=demo-b."
+          }
+        ],
+        "practice": [
+          {
+            "title": "Locate the example value",
+            "action": "Click the editor. In NORMAL press j, then $. The cursor should be on the final digit of port=90.",
+            "observe": "The mode stays NORMAL and the saved file has not changed."
+          },
+          {
+            "title": "Replace and save",
+            "action": "Press x twice to remove 90. Press a, type 9090, then Escape. Move down with j, press $, x, a, type 3, then Escape. Type :w and press Enter.",
+            "observe": "The example should have port=9090 and workers=3, with name=demo-b preserved. Check example inspects the saved file."
+          },
+          {
+            "title": "Make and recover a mistake",
+            "action": "Enter INSERT with i and type a short extra word. Escape, then u. Check example again.",
+            "observe": "Undo restores the previous buffer; the actual saved-file view lets you see what was written. Your separate assignment is not edited."
+          }
+        ],
+        "requirements": [
+          "Edit /lab/worker.conf so port is 8080 and workers is 4.",
+          "Preserve name=edge-a and the supplied operator note.",
+          "Save the changes and check the saved files."
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "introduction": "",
+        "practice": "",
+        "assignment": ""
+      }
+    },
+    {
+      "scenario": {
+        "id": "lpic1-modal-record-maintenance",
+        "version": 1,
+        "track": "LPIC-1",
+        "unit": "modal-file-editing",
+        "topic": "Text editing with vi-style modes",
+        "title": "Find, copy and retire complete records",
+        "summary": "Use search and a linewise register to maintain a small virtual work list.",
+        "objective": "In /lab/jobs.txt keep exactly two RUN disk-check records and no REMOVE old-job record. Preserve every other complete line and the operator note, then save and check.",
+        "difficulty": "Intermediate",
+        "minutes": 20,
+        "steps": [
+          "Understand the task, work in the simulated editor, save or discard drafts, then Check saved files."
+        ],
+        "guide": [],
+        "explanation": "The saved record counts matter, not one prescribed key sequence or line order. yy/p copies a complete line; dd retires a complete line. A wrong duplicate or accidental deletion changes the outcome even if the desired words still appear somewhere.",
+        "hints": [
+          "Search in NORMAL with /RUN then Enter. Check the whole current line before copying it.",
+          "yy copies a complete line; p puts it below. Typing p twice produces an extra record and will not meet an exactly-two requirement.",
+          "Find the retired line with /REMOVE and Enter, then delete it with dd. Preserve the KEEP lines and write with :w."
+        ],
+        "sources": [
+          "https://www.lpi.org/our-certifications/exam-101-102-objectives/#rdp-we-103.8_Basic_file_editing",
+          "https://vimhelp.org/usr_02.txt.html",
+          "https://vimhelp.org/motion.txt.html",
+          "https://vimhelp.org/change.txt.html",
+          "https://vimhelp.org/editing.txt.html",
+          "https://vimhelp.org/pattern.txt.html"
+        ],
+        "simplifications": "Bounded in-process vi/Vim-style subset, printable ASCII and line breaks only. Supplied files only; no host vi, shell escapes, files, plugins or external commands. Plain case-sensitive search, not regular expressions; no counts, visual mode, named registers, redo, options or general Ex. Vim-style grouped undo, not complete classic-vi undo behavior. This is text editing, not execution of the sample configuration or job records. Other editors and EDITOR are supporting explanation only.",
+        "prerequisites": [
+          "lpic1-modal-setting-repair"
+        ]
+      },
+      "definition": {
+        "version": 1,
+        "id": "lpic1-modal-record-maintenance",
+        "initial": {
+          "files": {
+            "/lab/jobs.txt": {
+              "text": "KEEP daily-archive\nRUN disk-check\nREMOVE old-job\nKEEP weekly-summary\n",
+              "writable": true,
+              "draft": null
+            },
+            "/lab/operator-notes.txt": {
+              "text": "Do not rewrite the operator note.\n",
+              "writable": false,
+              "draft": null
+            }
+          },
+          "start": "/lab/jobs.txt",
+          "requirements": [
+            {
+              "kind": "Records",
+              "path": "/lab/jobs.txt",
+              "counts": {
+                "RUN disk-check": 2,
+                "REMOVE old-job": 0
+              }
+            },
+            {
+              "kind": "Unchanged",
+              "path": "/lab/operator-notes.txt"
+            }
+          ]
+        },
+        "example": {
+          "files": {
+            "/lab/jobs.txt": {
+              "text": "KEEP metrics\nRUN smoke-check\nREMOVE legacy-check\nKEEP handover\n",
+              "writable": true,
+              "draft": null
+            },
+            "/lab/operator-notes.txt": {
+              "text": "Keep the example note.\n",
+              "writable": false,
+              "draft": null
+            }
+          },
+          "start": "/lab/jobs.txt",
+          "requirements": [
+            {
+              "kind": "Records",
+              "path": "/lab/jobs.txt",
+              "counts": {
+                "RUN smoke-check": 2,
+                "REMOVE legacy-check": 0
+              }
+            },
+            {
+              "kind": "Unchanged",
+              "path": "/lab/operator-notes.txt"
+            }
+          ]
+        },
+        "example_solution": [
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "/"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "R"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "U"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "N"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Enter"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "y"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "y"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "p"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "/"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "R"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "E"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "M"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "O"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "V"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "E"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Enter"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "d"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "d"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": ":"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "w"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Enter"
+            }
+          }
+        ]
+      },
+      "solution": [
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "/"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "R"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "U"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "N"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Enter"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "y"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "y"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "p"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "/"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "R"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "E"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "M"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "O"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "V"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "E"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Enter"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "d"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "d"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": ":"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "w"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Enter"
+          }
+        },
+        {
+          "kind": "Check"
+        }
+      ],
+      "presentation": {
+        "id": "lpic1-modal-record-maintenance",
+        "goal": "In /lab/jobs.txt keep exactly two RUN disk-check records and no REMOVE old-job record. Preserve every other complete line and the operator note, then save and check.",
+        "context": "Builds on Repair a file using vi-style modes: movement, INSERT, Escape, undo and :w. The lines are practice records, not executable jobs.",
+        "concepts": [
+          {
+            "title": "Find text without counting lines",
+            "text": "In NORMAL type /, then a word and Enter to search forward. ? searches backward; n repeats the last search in the same direction. Search is case-sensitive, begins after the cursor, and wraps at the file boundary. This subset accepts plain letters, digits, spaces and _-=:,@%; it diagnoses regular expressions rather than pretending to support them."
+          },
+          {
+            "title": "Copy a whole line",
+            "text": "In NORMAL yy copies the current complete line into the editor’s unnamed register, an internal holding place. p puts a linewise copy below the current line; P puts it above. This register is separate from the desktop clipboard. It stays available when you move or undo."
+          },
+          {
+            "title": "Remove only the retired record",
+            "text": "dd deletes the complete current line and replaces the unnamed register with that line. x instead deletes one character and stores a characterwise value; p then puts characters after the cursor. Search for the record you intend to remove before using dd. Undo with u if you remove the wrong line."
+          }
+        ],
+        "worked": [
+          {
+            "label": "RUN record count",
+            "value": "RUN smoke-check ×2",
+            "explanation": "Keep KEEP metrics and KEEP handover."
+          },
+          {
+            "label": "Retired record",
+            "value": "REMOVE legacy-check ×0",
+            "explanation": "Remove the complete legacy record."
+          },
+          {
+            "label": "Find",
+            "value": "/RUN then Enter",
+            "explanation": "The cursor moves to the supplied RUN record."
+          },
+          {
+            "label": "Copy",
+            "value": "yy then p",
+            "explanation": "The line is copied below itself; this is still an unsaved buffer."
+          },
+          {
+            "label": "Retire",
+            "value": "/REMOVE then Enter; dd",
+            "explanation": "Delete just the complete legacy record."
+          },
+          {
+            "label": "Write and check",
+            "value": ":w then Enter; Check example",
+            "explanation": "Inspect actual saved lines separately from the expected counts."
+          }
+        ],
+        "practice": [
+          {
+            "title": "Find and copy",
+            "action": "Click the editor, Escape for NORMAL, type /RUN and Enter, then yy and p.",
+            "observe": "The example RUN smoke-check line appears twice. Copying with yy alone changes no file."
+          },
+          {
+            "title": "Retire the old record",
+            "action": "Type /REMOVE and Enter, then dd. Type :w and Enter; choose Check example.",
+            "observe": "There should be two RUN smoke-check records, no REMOVE legacy-check record, and both KEEP records unchanged."
+          },
+          {
+            "title": "Diagnose a wrong copy",
+            "action": "Reset example only, then copy a KEEP line instead. Save and check; read the record feedback before repairing.",
+            "observe": "Copying the wrong record, keeping the retired one or deleting another line fails. All complete lines matter, not just a keyword."
+          }
+        ],
+        "requirements": [
+          "In /lab/jobs.txt keep exactly two RUN disk-check records and no REMOVE old-job record.",
+          "Preserve every other complete line and the operator note, then save and check."
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "introduction": "",
+        "practice": "",
+        "assignment": ""
+      }
+    },
+    {
+      "scenario": {
+        "id": "lpic1-modal-recovery",
+        "version": 1,
+        "track": "LPIC-1",
+        "unit": "modal-file-editing",
+        "topic": "Text editing with vi-style modes",
+        "title": "Recover an unsaved draft and finish a file handover",
+        "summary": "Separate buffer recovery, file selection and saved repairs across two virtual files.",
+        "objective": "Discard or undo the accidental unsaved handover draft, preserving /lab/handover.txt. In /lab/worker.conf set port=8443 and workers=6 while preserving name=edge-c. Leave no unsaved drafts and check the saved files.",
+        "difficulty": "Intermediate",
+        "minutes": 20,
+        "steps": [
+          "Understand the task, work in the simulated editor, save or discard drafts, then Check saved files."
+        ],
+        "guide": [],
+        "explanation": "The accidental draft and saved handover are different data. Discarding with :q! or undoing the unsaved change preserves the file; writing the bad draft would not. The separate worker repair must be written. Checking validates all saved requirements and every unsaved buffer, not just the file currently on screen.",
+        "hints": [
+          "The handover already has the right saved contents. Writing the accidental draft is not the repair.",
+          ":q! and Enter discards the draft. Undo u can also restore this supplied draft because its earlier buffer is retained.",
+          "Open the worker file only after resolving the handover draft. Repair and save both requested settings, preserving its name."
+        ],
+        "sources": [
+          "https://www.lpi.org/our-certifications/exam-101-102-objectives/#rdp-we-103.8_Basic_file_editing",
+          "https://vimhelp.org/usr_02.txt.html",
+          "https://vimhelp.org/motion.txt.html",
+          "https://vimhelp.org/change.txt.html",
+          "https://vimhelp.org/editing.txt.html",
+          "https://vimhelp.org/pattern.txt.html"
+        ],
+        "simplifications": "Bounded in-process vi/Vim-style subset, printable ASCII and line breaks only. Supplied files only; no host vi, shell escapes, files, plugins or external commands. Plain case-sensitive search, not regular expressions; no counts, visual mode, named registers, redo, options or general Ex. Vim-style grouped undo, not complete classic-vi undo behavior. This is text editing, not execution of the sample configuration or job records. Other editors and EDITOR are supporting explanation only.",
+        "prerequisites": [
+          "lpic1-modal-setting-repair",
+          "lpic1-modal-record-maintenance"
+        ]
+      },
+      "definition": {
+        "version": 1,
+        "id": "lpic1-modal-recovery",
+        "initial": {
+          "files": {
+            "/lab/worker.conf": {
+              "text": "name=edge-c\nport=9000\nworkers=2\n",
+              "writable": true,
+              "draft": null
+            },
+            "/lab/handover.txt": {
+              "text": "Preserve the signed-off handover.\n",
+              "writable": false,
+              "draft": "Accidental unsaved replacement.\n"
+            }
+          },
+          "start": "/lab/handover.txt",
+          "requirements": [
+            {
+              "kind": "Settings",
+              "path": "/lab/worker.conf",
+              "values": {
+                "port": "8443",
+                "workers": "6"
+              }
+            },
+            {
+              "kind": "Unchanged",
+              "path": "/lab/handover.txt"
+            }
+          ]
+        },
+        "example": {
+          "files": {
+            "/lab/worker.conf": {
+              "text": "name=demo-c\nport=5000\nworkers=1\n",
+              "writable": true,
+              "draft": null
+            },
+            "/lab/handover.txt": {
+              "text": "Preserve this original example handover.\n",
+              "writable": false,
+              "draft": "This unsaved example draft should be discarded.\n"
+            }
+          },
+          "start": "/lab/handover.txt",
+          "requirements": [
+            {
+              "kind": "Settings",
+              "path": "/lab/worker.conf",
+              "values": {
+                "port": "5050",
+                "workers": "5"
+              }
+            },
+            {
+              "kind": "Unchanged",
+              "path": "/lab/handover.txt"
+            }
+          ]
+        },
+        "example_solution": [
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": ":"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "q"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "!"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Enter"
+            }
+          },
+          {
+            "kind": "Open",
+            "path": "/lab/worker.conf"
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "j"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "$"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "x"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "x"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "x"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "x"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "a"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "5"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "0"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "5"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "0"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Escape"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "j"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "$"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "x"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "a"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "5"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Escape"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": ":"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Character",
+              "value": "w"
+            }
+          },
+          {
+            "kind": "Key",
+            "key": {
+              "kind": "Enter"
+            }
+          }
+        ]
+      },
+      "solution": [
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": ":"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "q"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "!"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Enter"
+          }
+        },
+        {
+          "kind": "Open",
+          "path": "/lab/worker.conf"
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "j"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "$"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "x"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "x"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "x"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "x"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "a"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "8"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "4"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "4"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "3"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Escape"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "j"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "$"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "x"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "a"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "6"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Escape"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": ":"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Character",
+            "value": "w"
+          }
+        },
+        {
+          "kind": "Key",
+          "key": {
+            "kind": "Enter"
+          }
+        },
+        {
+          "kind": "Check"
+        }
+      ],
+      "presentation": {
+        "id": "lpic1-modal-recovery",
+        "goal": "Discard or undo the accidental unsaved handover draft, preserving /lab/handover.txt. In /lab/worker.conf set port=8443 and workers=6 while preserving name=edge-c. Leave no unsaved drafts and check the saved files.",
+        "context": "Combines both earlier editing lessons. The supplied handover file has a correct saved version and a deliberately incorrect unsaved buffer. The other file needs a real saved repair.",
+        "concepts": [
+          {
+            "title": "A buffer can be wrong while its file is safe",
+            "text": "The editor opens on an accidental unsaved handover draft. The saved virtual file is still the original. Inspect Actual saved file if you need to compare them. Do not save the mistake: a correct saved file with an incorrect unsaved buffer is still unfinished."
+          },
+          {
+            "title": "Save, quit and abandon have different effects",
+            "text": ":w writes the current buffer to its virtual file. :q closes only when there are no unsaved edits. :q! closes and discards the unsaved buffer; it does not erase the file. :wq writes and closes. u can also recover the previous buffer; it never silently rewrites saved bytes. Enter finishes each colon command."
+          },
+          {
+            "title": "Change files deliberately",
+            "text": "Choose a supplied virtual file in Virtual file, then Open selected file. The workspace refuses to switch away from unsaved edits until you save or discard them. Read-only files can be inspected and have a draft, but writing them is refused. Once a file is closed, Open selected file reopens its saved contents."
+          }
+        ],
+        "worked": [
+          {
+            "label": "Starting example",
+            "value": "Incorrect unsaved handover; correct saved handover",
+            "explanation": "The deliberate error is in the buffer, not the saved file."
+          },
+          {
+            "label": "Discard",
+            "value": ":q! then Enter",
+            "explanation": "Keep the saved handover and close this buffer."
+          },
+          {
+            "label": "Select worker",
+            "value": "Virtual file → /lab/worker.conf; Open selected file",
+            "explanation": "Only supplied virtual paths are available."
+          },
+          {
+            "label": "Example repairs",
+            "value": "port=5050; workers=5; preserve name=demo-c",
+            "explanation": "Use the earlier movement/editing skills, then :w and Enter."
+          },
+          {
+            "label": "Verify",
+            "value": "Check example",
+            "explanation": "Check the saved worker settings, original handover and all drafts."
+          }
+        ],
+        "practice": [
+          {
+            "title": "Recover the supplied mistake",
+            "action": "Inspect the example’s current draft and Actual saved file. Escape for NORMAL, then type :q! and Enter.",
+            "observe": "The accidental example draft is discarded; the original saved handover is preserved. The editor status becomes Closed."
+          },
+          {
+            "title": "Repair the other file",
+            "action": "Choose /lab/worker.conf in Virtual file and select Open selected file. Change port from 5000 to 5050 and workers from 1 to 5; keep name=demo-c. Write with :w and Enter.",
+            "observe": "Actual saved file should reflect only the two requested repairs. Check example also verifies the handover and absence of unsaved drafts."
+          },
+          {
+            "title": "Compare refusal and recovery",
+            "action": "Reset example only. Try :q and Enter on the supplied unsaved draft, then read the refusal. Escape cancels the colon entry. Try u as a different recovery.",
+            "observe": "The refused quit preserves the draft. Undo can restore the original buffer without writing a new handover file."
+          }
+        ],
+        "requirements": [
+          "Discard or undo the accidental unsaved handover draft, preserving /lab/handover.txt.",
+          "In /lab/worker.conf set port=8443 and workers=6 while preserving name=edge-c.",
+          "Leave no unsaved drafts and check the saved files."
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "introduction": "",
+        "practice": "",
+        "assignment": ""
+      }
+    }
+  ]
+}

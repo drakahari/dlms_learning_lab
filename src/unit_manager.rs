@@ -1709,15 +1709,32 @@ impl State {
     /// Same fresh session as `fresh_session`, plus the exact induced graph used
     /// for its jobs. The caller still initializes simple programs explicitly.
     pub fn fresh_session_inspected(&self) -> Result<(Self, Report, StartOrdering)> {
+        self.start_fresh_session(None)
+    }
+
+    /// Start one simulated session with an explicitly supplied target.
+    /// The saved default remains unchanged and later sessions still use it.
+    pub fn fresh_session_at(&self, target: &str) -> Result<(Self, Report, StartOrdering)> {
+        self.start_fresh_session(Some(target))
+    }
+
+    fn start_fresh_session(&self, override_target: Option<&str>) -> Result<(Self, Report, StartOrdering)> {
         self.validate()?;
-        self.parse_sources(&self.documents)?;
+        let definitions = self.parse_sources(&self.documents)?;
+        let target = if let Some(target) = override_target {
+            if !definitions.get(target).is_some_and(|definition| matches!(definition.kind, UnitType::Target)) {
+                return Err(error(ErrorKind::Missing, "Choose a supplied, saved target for this startup."));
+            }
+            target
+        } else {
+            self.default_target.as_str()
+        };
         let mut next = self.clone();
         next.runtime.clear();
         next.artifacts.clear();
         next.journal = None;
         next.loaded = next.documents.clone();
-        let target = next.default_target.clone();
-        let (report, ordering) = next.start_inspected(&target)?;
+        let (report, ordering) = next.start_inspected(target)?;
         journal::record(&BTreeMap::new(), &mut next, &report)?;
         next.validate()?;
         Ok((next, report, ordering))

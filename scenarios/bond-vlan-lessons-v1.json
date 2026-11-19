@@ -1,0 +1,1872 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-bonded-vlan-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Bonded VLAN handover",
+      "unit": "linux-bonded-vlan",
+      "title": "Prepare a bonded VLAN uplink for a NIC failure",
+      "summary": "One active-backup bond carries two VLANs. Repair its saved controller/member dependencies and prove that either NIC can carry both networks after startup.",
+      "objective": "Prepare bond0 and its member profiles for the next simulated startup so Reports and Audit can reach their supplied peers when both NICs are available, when enp1s0 is unavailable, and when enp2s0 is unavailable. Preserve the current bond configuration, attached membership and current Reports/Audit settings while re-reading the saved files; future success is not a current reconfiguration. Keep audit.nmconnection unchanged and keep audit0 without a default route. Retain all five supplied filenames and UUIDs. Choose Test startup profiles and inspect the results of all three cases.",
+      "difficulty": "Advanced",
+      "minutes": 35,
+      "initial": {
+        "kind": "NmProfiles",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-bonded-vlan-handover",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "bond.nmconnection": "[connection]\nid=Data bond\nuuid=10000180-0000-4000-8000-000000000001\ntype=bond\ninterface-name=bond0\nautoconnect=true\nautoconnect-ports=0\n[bond]\nmode=active-backup\nmiimon=100\nprimary=enp1s0\nprimary_reselect=always\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 member\nuuid=10000180-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 member\nuuid=10000180-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000180\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=bond0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.180.0.20/24\ngateway=10.180.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000181\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=bond0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.181.0.20/24\ngateway=10.181.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "bond.nmconnection"
+          },
+          "practice": {
+            "draft": {
+              "bond.nmconnection": "[connection]\nid=Data bond\nuuid=10000190-0000-4000-8000-000000000001\ntype=bond\ninterface-name=bond0\nautoconnect=true\nautoconnect-ports=0\n[bond]\nmode=active-backup\nmiimon=100\nprimary=enp1s0\nprimary_reselect=always\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 member\nuuid=10000190-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 member\nuuid=10000190-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000190\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=bond0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.190.0.20/24\ngateway=10.190.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000191\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=bond0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.191.0.20/24\ngateway=10.191.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "tested": null,
+            "selected": "bond.nmconnection"
+          }
+        }
+      },
+      "goal": {
+        "kind": "NmProfiles",
+        "definition": {
+          "initial": {
+            "id": "lpic2-bonded-vlan-handover",
+            "instructions": "Prepare bond0 and its member profiles for the next simulated startup so Reports and Audit can reach their supplied peers when both NICs are available, when enp1s0 is unavailable, and when enp2s0 is unavailable. Preserve the current bond configuration, attached membership and current Reports/Audit settings while re-reading the saved files; future success is not a current reconfiguration. Keep audit.nmconnection unchanged and keep audit0 without a default route. Retain all five supplied filenames and UUIDs. Choose Test startup profiles and inspect the results of all three cases.",
+            "starter": {
+              "bond.nmconnection": "[connection]\nid=Data bond\nuuid=10000180-0000-4000-8000-000000000001\ntype=bond\ninterface-name=bond0\nautoconnect=true\nautoconnect-ports=0\n[bond]\nmode=active-backup\nmiimon=100\nprimary=enp1s0\nprimary_reselect=always\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 member\nuuid=10000180-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 member\nuuid=10000180-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000180\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=bond0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.180.0.20/24\ngateway=10.180.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000181\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=bond0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.181.0.20/24\ngateway=10.181.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "protected_profiles": [
+              "audit.nmconnection"
+            ],
+            "cases": [
+              {
+                "id": "both-up",
+                "label": "Both member NICs have carrier",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-bonded-vlan-handover",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.180.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.181.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.180.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.181.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.180.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.181.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        },
+                        "nic-a": {
+                          "label": "NIC A",
+                          "up": true
+                        },
+                        "nic-b": {
+                          "label": "NIC B",
+                          "up": true
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            },
+                            "nic-a": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "nic-b": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-nic-a",
+                          "a": {
+                            "kind": "host",
+                            "host": "nic-a"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "nic-a"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-nic-b",
+                          "a": {
+                            "kind": "host",
+                            "host": "nic-b"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "nic-b"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "nic-a"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "nic-b"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.180.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.180.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.181.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.181.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  },
+                  "bond": {
+                    "version": 1,
+                    "profiles": {
+                      "version": 1,
+                      "controller": {
+                        "file": "bond.nmconnection",
+                        "uuid": "10000180-0000-4000-8000-000000000001",
+                        "interface": "bond0"
+                      },
+                      "members": [
+                        {
+                          "file": "port-enp1s0.nmconnection",
+                          "uuid": "10000180-0000-4000-8000-000000000002",
+                          "interface": "enp1s0"
+                        },
+                        {
+                          "file": "port-enp2s0.nmconnection",
+                          "uuid": "10000180-0000-4000-8000-000000000003",
+                          "interface": "enp2s0"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "current_controls": {
+                  "controller": true,
+                  "members": [
+                    "enp1s0",
+                    "enp2s0"
+                  ]
+                },
+                "current_files": {
+                  "bond.nmconnection": "[connection]\nid=Data bond\nuuid=10000180-0000-4000-8000-000000000001\ntype=bond\ninterface-name=bond0\nautoconnect=true\nautoconnect-ports=1\n[bond]\nmode=active-backup\nmiimon=100\nprimary=enp1s0\nprimary_reselect=always\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 member\nuuid=10000180-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 member\nuuid=10000180-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000180\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=bond0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.180.0.20/24\ngateway=10.180.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000181\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=bond0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.181.0.20/24\ngateway=10.181.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000180",
+                  "00000000-0000-4000-8000-000000000181"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.180.0.50",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.181.0.50",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              },
+              {
+                "id": "nic-a-down",
+                "label": "enp1s0 has no carrier",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-bonded-vlan-handover",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.180.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.181.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.180.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.181.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.180.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.181.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        },
+                        "nic-a": {
+                          "label": "NIC A",
+                          "up": false
+                        },
+                        "nic-b": {
+                          "label": "NIC B",
+                          "up": true
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            },
+                            "nic-a": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "nic-b": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-nic-a",
+                          "a": {
+                            "kind": "host",
+                            "host": "nic-a"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "nic-a"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-nic-b",
+                          "a": {
+                            "kind": "host",
+                            "host": "nic-b"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "nic-b"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "nic-a"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "nic-b"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.180.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.180.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.181.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.181.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  },
+                  "bond": {
+                    "version": 1,
+                    "profiles": {
+                      "version": 1,
+                      "controller": {
+                        "file": "bond.nmconnection",
+                        "uuid": "10000180-0000-4000-8000-000000000001",
+                        "interface": "bond0"
+                      },
+                      "members": [
+                        {
+                          "file": "port-enp1s0.nmconnection",
+                          "uuid": "10000180-0000-4000-8000-000000000002",
+                          "interface": "enp1s0"
+                        },
+                        {
+                          "file": "port-enp2s0.nmconnection",
+                          "uuid": "10000180-0000-4000-8000-000000000003",
+                          "interface": "enp2s0"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "current_controls": {
+                  "controller": true,
+                  "members": [
+                    "enp1s0",
+                    "enp2s0"
+                  ]
+                },
+                "current_files": {
+                  "bond.nmconnection": "[connection]\nid=Data bond\nuuid=10000180-0000-4000-8000-000000000001\ntype=bond\ninterface-name=bond0\nautoconnect=true\nautoconnect-ports=1\n[bond]\nmode=active-backup\nmiimon=100\nprimary=enp1s0\nprimary_reselect=always\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 member\nuuid=10000180-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 member\nuuid=10000180-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000180\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=bond0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.180.0.20/24\ngateway=10.180.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000181\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=bond0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.181.0.20/24\ngateway=10.181.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000180",
+                  "00000000-0000-4000-8000-000000000181"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.180.0.50",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.181.0.50",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              },
+              {
+                "id": "nic-b-down",
+                "label": "enp2s0 has no carrier",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-bonded-vlan-handover",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.180.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.181.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.180.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.181.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.180.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.181.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        },
+                        "nic-a": {
+                          "label": "NIC A",
+                          "up": true
+                        },
+                        "nic-b": {
+                          "label": "NIC B",
+                          "up": false
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            },
+                            "nic-a": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "nic-b": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-nic-a",
+                          "a": {
+                            "kind": "host",
+                            "host": "nic-a"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "nic-a"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-nic-b",
+                          "a": {
+                            "kind": "host",
+                            "host": "nic-b"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "nic-b"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "nic-a"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "nic-b"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.180.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.180.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.181.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.181.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  },
+                  "bond": {
+                    "version": 1,
+                    "profiles": {
+                      "version": 1,
+                      "controller": {
+                        "file": "bond.nmconnection",
+                        "uuid": "10000180-0000-4000-8000-000000000001",
+                        "interface": "bond0"
+                      },
+                      "members": [
+                        {
+                          "file": "port-enp1s0.nmconnection",
+                          "uuid": "10000180-0000-4000-8000-000000000002",
+                          "interface": "enp1s0"
+                        },
+                        {
+                          "file": "port-enp2s0.nmconnection",
+                          "uuid": "10000180-0000-4000-8000-000000000003",
+                          "interface": "enp2s0"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "current_controls": {
+                  "controller": true,
+                  "members": [
+                    "enp1s0",
+                    "enp2s0"
+                  ]
+                },
+                "current_files": {
+                  "bond.nmconnection": "[connection]\nid=Data bond\nuuid=10000180-0000-4000-8000-000000000001\ntype=bond\ninterface-name=bond0\nautoconnect=true\nautoconnect-ports=1\n[bond]\nmode=active-backup\nmiimon=100\nprimary=enp1s0\nprimary_reselect=always\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 member\nuuid=10000180-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 member\nuuid=10000180-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000180\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=bond0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.180.0.20/24\ngateway=10.180.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000181\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=bond0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.181.0.20/24\ngateway=10.181.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000180",
+                  "00000000-0000-4000-8000-000000000181"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.180.0.50",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.181.0.50",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-bonded-vlan-handover-practice",
+            "instructions": "In the separate practice network, prepare Reports and Audit for next startup with either NIC unavailable. First start matching ports from bond0, then bind the missing second NIC. Compare the 0/3, partial and complete results without changing the actual current selections.",
+            "starter": {
+              "bond.nmconnection": "[connection]\nid=Data bond\nuuid=10000190-0000-4000-8000-000000000001\ntype=bond\ninterface-name=bond0\nautoconnect=true\nautoconnect-ports=0\n[bond]\nmode=active-backup\nmiimon=100\nprimary=enp1s0\nprimary_reselect=always\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 member\nuuid=10000190-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 member\nuuid=10000190-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+              "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000190\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=bond0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.190.0.20/24\ngateway=10.190.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+              "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000191\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=bond0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.191.0.20/24\ngateway=10.191.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+            },
+            "protected_profiles": [
+              "audit.nmconnection"
+            ],
+            "cases": [
+              {
+                "id": "both-up",
+                "label": "Both member NICs have carrier",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-bonded-vlan-handover",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.190.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.191.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.190.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.191.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.190.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.191.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        },
+                        "nic-a": {
+                          "label": "NIC A",
+                          "up": true
+                        },
+                        "nic-b": {
+                          "label": "NIC B",
+                          "up": true
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            },
+                            "nic-a": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "nic-b": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-nic-a",
+                          "a": {
+                            "kind": "host",
+                            "host": "nic-a"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "nic-a"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-nic-b",
+                          "a": {
+                            "kind": "host",
+                            "host": "nic-b"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "nic-b"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "nic-a"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "nic-b"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.190.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.190.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.191.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.191.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  },
+                  "bond": {
+                    "version": 1,
+                    "profiles": {
+                      "version": 1,
+                      "controller": {
+                        "file": "bond.nmconnection",
+                        "uuid": "10000190-0000-4000-8000-000000000001",
+                        "interface": "bond0"
+                      },
+                      "members": [
+                        {
+                          "file": "port-enp1s0.nmconnection",
+                          "uuid": "10000190-0000-4000-8000-000000000002",
+                          "interface": "enp1s0"
+                        },
+                        {
+                          "file": "port-enp2s0.nmconnection",
+                          "uuid": "10000190-0000-4000-8000-000000000003",
+                          "interface": "enp2s0"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "current_controls": {
+                  "controller": true,
+                  "members": [
+                    "enp1s0",
+                    "enp2s0"
+                  ]
+                },
+                "current_files": {
+                  "bond.nmconnection": "[connection]\nid=Data bond\nuuid=10000190-0000-4000-8000-000000000001\ntype=bond\ninterface-name=bond0\nautoconnect=true\nautoconnect-ports=1\n[bond]\nmode=active-backup\nmiimon=100\nprimary=enp1s0\nprimary_reselect=always\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 member\nuuid=10000190-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 member\nuuid=10000190-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000190\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=bond0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.190.0.20/24\ngateway=10.190.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000191\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=bond0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.191.0.20/24\ngateway=10.191.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000190",
+                  "00000000-0000-4000-8000-000000000191"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.190.0.50",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.191.0.50",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              },
+              {
+                "id": "nic-a-down",
+                "label": "enp1s0 has no carrier",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-bonded-vlan-handover",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.190.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.191.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.190.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.191.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.190.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.191.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        },
+                        "nic-a": {
+                          "label": "NIC A",
+                          "up": false
+                        },
+                        "nic-b": {
+                          "label": "NIC B",
+                          "up": true
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            },
+                            "nic-a": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "nic-b": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-nic-a",
+                          "a": {
+                            "kind": "host",
+                            "host": "nic-a"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "nic-a"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-nic-b",
+                          "a": {
+                            "kind": "host",
+                            "host": "nic-b"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "nic-b"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "nic-a"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "nic-b"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.190.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.190.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.191.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.191.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  },
+                  "bond": {
+                    "version": 1,
+                    "profiles": {
+                      "version": 1,
+                      "controller": {
+                        "file": "bond.nmconnection",
+                        "uuid": "10000190-0000-4000-8000-000000000001",
+                        "interface": "bond0"
+                      },
+                      "members": [
+                        {
+                          "file": "port-enp1s0.nmconnection",
+                          "uuid": "10000190-0000-4000-8000-000000000002",
+                          "interface": "enp1s0"
+                        },
+                        {
+                          "file": "port-enp2s0.nmconnection",
+                          "uuid": "10000190-0000-4000-8000-000000000003",
+                          "interface": "enp2s0"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "current_controls": {
+                  "controller": true,
+                  "members": [
+                    "enp1s0",
+                    "enp2s0"
+                  ]
+                },
+                "current_files": {
+                  "bond.nmconnection": "[connection]\nid=Data bond\nuuid=10000190-0000-4000-8000-000000000001\ntype=bond\ninterface-name=bond0\nautoconnect=true\nautoconnect-ports=1\n[bond]\nmode=active-backup\nmiimon=100\nprimary=enp1s0\nprimary_reselect=always\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 member\nuuid=10000190-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 member\nuuid=10000190-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000190\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=bond0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.190.0.20/24\ngateway=10.190.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000191\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=bond0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.191.0.20/24\ngateway=10.191.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000190",
+                  "00000000-0000-4000-8000-000000000191"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.190.0.50",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.191.0.50",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              },
+              {
+                "id": "nic-b-down",
+                "label": "enp2s0 has no carrier",
+                "environment": {
+                  "physical": {
+                    "id": "lpic2-bonded-vlan-handover",
+                    "links": [
+                      {
+                        "name": "reports0",
+                        "network": {
+                          "address": "10.190.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      },
+                      {
+                        "name": "audit0",
+                        "network": {
+                          "address": "10.191.0.0",
+                          "length": 24
+                        },
+                        "carrier": true
+                      }
+                    ],
+                    "gateways": [
+                      {
+                        "address": "10.190.0.1",
+                        "device": "reports0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      },
+                      {
+                        "address": "10.191.0.1",
+                        "device": "audit0",
+                        "available": true,
+                        "exports": [
+                          {
+                            "address": "172.16.0.0",
+                            "length": 16
+                          }
+                        ]
+                      }
+                    ],
+                    "nodes": [
+                      {
+                        "address": "10.190.0.50",
+                        "available": true
+                      },
+                      {
+                        "address": "10.191.0.50",
+                        "available": true
+                      }
+                    ],
+                    "resolvers": []
+                  },
+                  "default_metrics": {
+                    "reports0": 100,
+                    "audit0": 200
+                  },
+                  "vlan": {
+                    "version": 1,
+                    "fabric": {
+                      "hosts": {
+                        "reports": {
+                          "label": "Reports",
+                          "up": true
+                        },
+                        "audit": {
+                          "label": "Audit",
+                          "up": true
+                        },
+                        "nic-a": {
+                          "label": "NIC A",
+                          "up": true
+                        },
+                        "nic-b": {
+                          "label": "NIC B",
+                          "up": false
+                        }
+                      },
+                      "switches": {
+                        "sw": {
+                          "label": "Supplied VLAN switch",
+                          "vlans": [
+                            30,
+                            40,
+                            88,
+                            99
+                          ],
+                          "ports": {
+                            "reports": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 30
+                              }
+                            },
+                            "audit": {
+                              "up": true,
+                              "mode": {
+                                "kind": "access",
+                                "vlan": 40
+                              }
+                            },
+                            "nic-a": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            },
+                            "nic-b": {
+                              "up": true,
+                              "mode": {
+                                "kind": "trunk",
+                                "native": 99,
+                                "allowed": [
+                                  30,
+                                  40,
+                                  88,
+                                  99
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "cables": [
+                        {
+                          "id": "link-nic-a",
+                          "a": {
+                            "kind": "host",
+                            "host": "nic-a"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "nic-a"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-nic-b",
+                          "a": {
+                            "kind": "host",
+                            "host": "nic-b"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "nic-b"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-reports",
+                          "a": {
+                            "kind": "host",
+                            "host": "reports"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "reports"
+                          },
+                          "up": true
+                        },
+                        {
+                          "id": "link-audit",
+                          "a": {
+                            "kind": "host",
+                            "host": "audit"
+                          },
+                          "b": {
+                            "kind": "switch",
+                            "switch": "sw",
+                            "port": "audit"
+                          },
+                          "up": true
+                        }
+                      ]
+                    },
+                    "parents": [
+                      {
+                        "device": "enp1s0",
+                        "endpoint": "nic-a"
+                      },
+                      {
+                        "device": "enp2s0",
+                        "endpoint": "nic-b"
+                      }
+                    ],
+                    "interfaces": [
+                      "reports0",
+                      "audit0"
+                    ],
+                    "peers": [
+                      {
+                        "address": "10.190.0.1",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.190.0.50",
+                        "endpoint": "reports"
+                      },
+                      {
+                        "address": "10.191.0.1",
+                        "endpoint": "audit"
+                      },
+                      {
+                        "address": "10.191.0.50",
+                        "endpoint": "audit"
+                      }
+                    ]
+                  },
+                  "bond": {
+                    "version": 1,
+                    "profiles": {
+                      "version": 1,
+                      "controller": {
+                        "file": "bond.nmconnection",
+                        "uuid": "10000190-0000-4000-8000-000000000001",
+                        "interface": "bond0"
+                      },
+                      "members": [
+                        {
+                          "file": "port-enp1s0.nmconnection",
+                          "uuid": "10000190-0000-4000-8000-000000000002",
+                          "interface": "enp1s0"
+                        },
+                        {
+                          "file": "port-enp2s0.nmconnection",
+                          "uuid": "10000190-0000-4000-8000-000000000003",
+                          "interface": "enp2s0"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "current_controls": {
+                  "controller": true,
+                  "members": [
+                    "enp1s0",
+                    "enp2s0"
+                  ]
+                },
+                "current_files": {
+                  "bond.nmconnection": "[connection]\nid=Data bond\nuuid=10000190-0000-4000-8000-000000000001\ntype=bond\ninterface-name=bond0\nautoconnect=true\nautoconnect-ports=1\n[bond]\nmode=active-backup\nmiimon=100\nprimary=enp1s0\nprimary_reselect=always\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 member\nuuid=10000190-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 member\nuuid=10000190-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+                  "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000190\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=bond0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.190.0.20/24\ngateway=10.190.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+                  "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000191\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=bond0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.191.0.20/24\ngateway=10.191.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+                },
+                "initially_selected": [
+                  "00000000-0000-4000-8000-000000000190",
+                  "00000000-0000-4000-8000-000000000191"
+                ],
+                "requirements": [
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "CurrentUnchanged",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.190.0.50",
+                    "interface": "reports0"
+                  },
+                  {
+                    "kind": "FuturePath",
+                    "target": "10.191.0.50",
+                    "interface": "audit0"
+                  },
+                  {
+                    "kind": "FutureNoDefault",
+                    "interface": "audit0"
+                  }
+                ]
+              }
+            ]
+          },
+          "example_worked": {
+            "bond.nmconnection": "[connection]\nid=Data bond\nuuid=10000190-0000-4000-8000-000000000001\ntype=bond\ninterface-name=bond0\nautoconnect=true\nautoconnect-ports=1\n[bond]\nmode=active-backup\nmiimon=100\nprimary=enp1s0\nprimary_reselect=always\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+            "port-enp1s0.nmconnection": "[connection]\nid=enp1s0 member\nuuid=10000190-0000-4000-8000-000000000002\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+            "port-enp2s0.nmconnection": "[connection]\nid=enp2s0 member\nuuid=10000190-0000-4000-8000-000000000003\ntype=ethernet\ninterface-name=enp2s0\nautoconnect=false\ncontroller=bond0\nport-type=bond\n[ipv4]\nmethod=disabled\n[ipv6]\nmethod=disabled\n",
+            "reports.nmconnection": "[connection]\nid=Reports\nuuid=00000000-0000-4000-8000-000000000190\ntype=vlan\ninterface-name=reports0\nautoconnect=true\n[vlan]\nparent=bond0\nid=30\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.190.0.20/24\ngateway=10.190.0.1\nnever-default=false\n[ipv6]\nmethod=disabled\n",
+            "audit.nmconnection": "[connection]\nid=Audit\nuuid=00000000-0000-4000-8000-000000000191\ntype=vlan\ninterface-name=audit0\nautoconnect=true\n[vlan]\nparent=bond0\nid=40\nflags=1\nprotocol=802.1Q\n[ipv4]\nmethod=manual\naddress1=10.191.0.20/24\ngateway=10.191.0.1\nnever-default=true\n[ipv6]\nmethod=disabled\n"
+          }
+        }
+      },
+      "steps": [
+        "Inspect the saved controller, port and VLAN profiles, make the dependency repair, then check all three startup cases while preserving current settings."
+      ],
+      "guide": [],
+      "explanation": "The controller must start matching bound ports. autoconnect-ports=1 starts those ports even when their own autoconnect is false; an unbound Ethernet profile does not join the bond. With both NIC profiles bound, active-backup uses the configured primary when available and the other member when the primary lacks carrier. Each selected member must carry the actual VLAN tag both ways. Saved-file changes and current selections are checked separately.",
+      "hints": [
+        "Inspect autoconnect-ports in bond.nmconnection and compare controller/port-type in the two port files. Their own autoconnect=false does not prevent the controller from starting a matching port.",
+        "A profile without controller and port-type is an unbound Ethernet candidate. It cannot act as this bond\u2019s backup merely because its cable has carrier."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://docs.kernel.org/networking/bonding.html",
+        "https://networkmanager.dev/docs/api/latest/settings-bond.html",
+        "https://networkmanager.dev/docs/api/latest/settings-connection.html",
+        "https://networkmanager.dev/docs/api/latest/nm-settings-keyfile.html"
+      ],
+      "simplifications": "Source-enabled bounded NetworkManager keyfile and settled active-backup projection, not a daemon/kernel or boot experiment. One supplied controller, two candidate NIC profiles, two manual IPv4 VLAN profiles and three fixed physical cases. Explicit miimon=100, primary_reselect=always/0, literal controller/parent names, 802.1Q and supplied VLAN flags1. No real timers, activation ordering, link negotiation, gratuitous ARP/MAC updates, packet timing, other bond modes, general nmcli/ip, independent port-driven startup/discovery, bridge, DHCP/IPv6 bond, nested controllers, host profiles/services/interfaces or network operations. Bound port IP groups may be omitted; unbound/controller methods are disabled. Current source-held snapshots stay distinct from edited future policy. Correct IP routes and both-direction tags are required; carrier alone is insufficient.",
+      "solution": [
+        "NM PROFILES\n{\"bond.nmconnection\": \"[connection]\\nid=Data bond\\nuuid=10000180-0000-4000-8000-000000000001\\ntype=bond\\ninterface-name=bond0\\nautoconnect=true\\nautoconnect-ports=1\\n[bond]\\nmode=active-backup\\nmiimon=100\\nprimary=enp1s0\\nprimary_reselect=always\\n[ipv4]\\nmethod=disabled\\n[ipv6]\\nmethod=disabled\\n\", \"port-enp1s0.nmconnection\": \"[connection]\\nid=enp1s0 member\\nuuid=10000180-0000-4000-8000-000000000002\\ntype=ethernet\\ninterface-name=enp1s0\\nautoconnect=false\\ncontroller=bond0\\nport-type=bond\\n[ipv4]\\nmethod=disabled\\n[ipv6]\\nmethod=disabled\\n\", \"port-enp2s0.nmconnection\": \"[connection]\\nid=enp2s0 member\\nuuid=10000180-0000-4000-8000-000000000003\\ntype=ethernet\\ninterface-name=enp2s0\\nautoconnect=false\\ncontroller=bond0\\nport-type=bond\\n[ipv4]\\nmethod=disabled\\n[ipv6]\\nmethod=disabled\\n\", \"reports.nmconnection\": \"[connection]\\nid=Reports\\nuuid=00000000-0000-4000-8000-000000000180\\ntype=vlan\\ninterface-name=reports0\\nautoconnect=true\\n[vlan]\\nparent=bond0\\nid=30\\nflags=1\\nprotocol=802.1Q\\n[ipv4]\\nmethod=manual\\naddress1=10.180.0.20/24\\ngateway=10.180.0.1\\nnever-default=false\\n[ipv6]\\nmethod=disabled\\n\", \"audit.nmconnection\": \"[connection]\\nid=Audit\\nuuid=00000000-0000-4000-8000-000000000181\\ntype=vlan\\ninterface-name=audit0\\nautoconnect=true\\n[vlan]\\nparent=bond0\\nid=40\\nflags=1\\nprotocol=802.1Q\\n[ipv4]\\nmethod=manual\\naddress1=10.181.0.20/24\\ngateway=10.181.0.1\\nnever-default=true\\n[ipv6]\\nmethod=disabled\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic2-vlan-return-handover"
+      ]
+    }
+  ]
+}

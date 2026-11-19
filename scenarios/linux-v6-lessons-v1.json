@@ -1,0 +1,2372 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-ipv6-control-header-policy",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-ipv6-router-policy",
+      "topic": "IPv6 router filtering and scope",
+      "title": "Keep selected IPv6 control traffic without a blanket permit",
+      "summary": "Match IPv6 control headers by direction, LAN prefix, type and code.",
+      "objective": "Permit incoming ICMPv6 type 2, code 0 through wan0 to lan0, destination LAN fd20:30:40::/64. Permit outgoing echo requests (type 128, code 0) from that LAN through lan0 to wan0. Permit incoming echo replies (type 129, code 0) toward that LAN through wan0 to lan0. These are stateless header matches. Drop other ICMPv6 headers, including wrong codes/directions, and all TCP/UDP for this control-only task. Keep supplied INPUT/OUTPUT, forwarding, interfaces and routes unchanged. A filter cannot route link-local addresses to another link.",
+      "retry_guidance": "Read the first failed policy or traffic event. Compare the expected condition with the actual gate, state and first matching rule; adjust that cause and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair the IPv6 rules",
+        "Verify policy ranges and sample traffic"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the actual IPv6 rules",
+          "why": "A packet header contains addresses and protocol information. ip6tables handles the supplied IPv6 headers; an IPv4 iptables permit does not apply to them. Read the rules from top to bottom: the first match decides, then the chain policy applies if none matched.",
+          "action": "Choose ip6tables -S in Example command, Insert command, then Run command. Run Selected control headers and inspect its two events.",
+          "commands": [
+            {
+              "command": "ip6tables -S",
+              "explanation": "Read the actual example IPv6 rules, their order and default policies; IPv4 iptables rules are a separate table.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip -6 route show",
+              "explanation": "Read the fixed routes; the link-local next hop fe80::fe is scoped by its named outgoing interface.",
+              "simulator_only": false
+            },
+            {
+              "command": "sysctl net.ipv6.conf.all.forwarding",
+              "explanation": "Read the supplied forwarding flag; this read changes no simulated or real setting.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Repair the separate example",
+          "why": "FORWARD handles traffic crossing the router. lan0 to wan0 leaves the LAN; wan0 to lan0 enters it. INPUT is for this router itself and stays supplied here. In the worked example, fd42:11:22::/64 is the LAN range. A /128 is one address, not the whole LAN.",
+          "action": "Use the worked commands if needed. Run Selected control headers, Echo header directions and Other protocols stay blocked.",
+          "commands": [
+            {
+              "command": "ip6tables -F FORWARD",
+              "explanation": "Remove the obsolete FORWARD entries, retaining the policy and the supplied INPUT/OUTPUT chains.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip6tables -P FORWARD DROP",
+              "explanation": "Drop headers that match no specific permit; a successful sample is not permission for other traffic.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip6tables -A FORWARD -i wan0 -o lan0 -d fd42:11:22::/64 -p ipv6-icmp --icmpv6-type 2/0 -j ACCEPT",
+              "explanation": "Permit exactly the example LAN’s incoming Packet Too Big type 2, code 0 headers. This is a header predicate, not validation of an actual error message or working PMTU discovery.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip6tables -A FORWARD -i lan0 -o wan0 -s fd42:11:22::/64 -p ipv6-icmp --icmpv6-type 128/0 -j ACCEPT",
+              "explanation": "Permit the example LAN’s outgoing echo-request headers; type 128 and code 0 are separate numbers.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip6tables -A FORWARD -i wan0 -o lan0 -d fd42:11:22::/64 -p ipv6-icmp --icmpv6-type 129/0 -j ACCEPT",
+              "explanation": "Permit echo-reply headers toward the example LAN. This stateless match does not establish whether a request was sent.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Test a missing code",
+          "why": "ICMPv6 uses a type and a code instead of TCP/UDP ports. Type 2/code 0 is Packet Too Big, type 128/code 0 an echo request, and type 129/code 0 an echo reply. --icmpv6-type 2/0 checks both numbers; --icmpv6-type 2 alone accepts every numeric code for that type.",
+          "action": "Choose Check example. Insert and run the type-2-only experiment; rerun Selected control headers. Delete the inserted first rule and retry.",
+          "commands": [
+            {
+              "command": "ip6tables -I FORWARD -i wan0 -o lan0 -d fd42:11:22::/64 -p ipv6-icmp --icmpv6-type 2 -j ACCEPT",
+              "explanation": "This deliberate mistake matches every numeric code for type 2. The requirement is code 0; run Selected control headers and inspect the wrong-code event.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip6tables -D FORWARD 1",
+              "explanation": "After the experiment, remove the first inserted rule and retry. Inspect -S before deleting a row.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The three separate permits describe different headers: incoming type 2/code 0, outgoing type 128/code 0, and incoming type 129/code 0. Each includes the required LAN prefix and interface direction. DROP handles all other modeled headers. Replacing a type/code pair with a type-only match admits other codes; a single displayed host also fails a /64 requirement.",
+      "hints": [
+        "Read ip6tables -S and compare FORWARD order with the required interfaces and prefix ranges.",
+        "A type-only ICMPv6 match includes all numeric codes; TCP reply source port and connection state are separate restrictions.",
+        "Each full check compares the entire stated ranges. Run the named traffic tests to see a concrete header and running rule before changing a permit."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/iptables.8.html",
+        "https://man7.org/linux/man-pages/man8/iptables-extensions.8.html",
+        "https://www.rfc-editor.org/rfc/rfc4291.html#section-2.5.6",
+        "https://www.rfc-editor.org/rfc/rfc4890.html",
+        "https://www.rfc-editor.org/rfc/rfc4193.html"
+      ],
+      "simplifications": "In-process numeric IPv6 header simulator with fixed routes/interfaces/forwarding, at most 96 filter rules and 64 TCP/UDP conversations. NEW/ESTABLISHED describe observed directions, not a TCP stack. ICMPv6 is stateless; no NDP, real PMTU discovery, RA, RELATED errors, fragments, NAT, timers, kernel counters or real packets. A permitted header is not a working neighbor, session or application. These selected requirements are not a complete production firewall policy. Local-origin link-local output and scoped link-local TCP/UDP tracking are excluded.",
+      "initial": {
+        "kind": "LinuxV6",
+        "simulation": {
+          "source_id": "lpic2-ipv6-control-header-policy",
+          "view": "introduction",
+          "assignment": {
+            "state": {
+              "filter": {
+                "base": {
+                  "input": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": "lan0",
+                        "egress": null,
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "forward": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": null,
+                        "egress": null,
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      },
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": null,
+                        "egress": null,
+                        "protocol": "Tcp",
+                        "source_port": null,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "output": {
+                    "policy": "Accept",
+                    "rules": []
+                  }
+                },
+                "input": [
+                  null
+                ],
+                "forward": [
+                  null,
+                  null
+                ],
+                "output": []
+              },
+              "connections": {
+                "next_id": 1,
+                "entries": []
+              }
+            },
+            "input": "",
+            "output": "",
+            "selected_case": 0,
+            "last_trial": null,
+            "checked": false
+          },
+          "practice": {
+            "state": {
+              "filter": {
+                "base": {
+                  "input": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": "lan0",
+                        "egress": null,
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "forward": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": null,
+                        "egress": null,
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      },
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": null,
+                        "egress": null,
+                        "protocol": "Tcp",
+                        "source_port": null,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "output": {
+                    "policy": "Accept",
+                    "rules": []
+                  }
+                },
+                "input": [
+                  null
+                ],
+                "forward": [
+                  null,
+                  null
+                ],
+                "output": []
+              },
+              "connections": {
+                "next_id": 1,
+                "entries": []
+              }
+            },
+            "input": "",
+            "output": "",
+            "selected_case": 0,
+            "last_trial": null,
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "LinuxV6",
+        "definition": {
+          "source_id": "lpic2-ipv6-control-header-policy",
+          "assignment": {
+            "id": "lpic2-ipv6-control-header-policy-assignment",
+            "facts": {
+              "links": [
+                {
+                  "name": "lan0",
+                  "address": "fd20:30:40::1",
+                  "link_local": "fe80::1",
+                  "prefix": 64,
+                  "up": true
+                },
+                {
+                  "name": "wan0",
+                  "address": "2001:db8:50::1",
+                  "link_local": "fe80::2",
+                  "prefix": 64,
+                  "up": true
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "network": "::",
+                    "prefix": 0
+                  },
+                  "device": "wan0",
+                  "via": "fe80::fe",
+                  "metric": 10
+                }
+              ]
+            },
+            "forwarding": true,
+            "initial": {
+              "filter": {
+                "base": {
+                  "input": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": "lan0",
+                        "egress": null,
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "forward": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": null,
+                        "egress": null,
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      },
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": null,
+                        "egress": null,
+                        "protocol": "Tcp",
+                        "source_port": null,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "output": {
+                    "policy": "Accept",
+                    "rules": []
+                  }
+                },
+                "input": [
+                  null
+                ],
+                "forward": [
+                  null,
+                  null
+                ],
+                "output": []
+              },
+              "connections": {
+                "next_id": 1,
+                "entries": []
+              }
+            },
+            "policies": [
+              {
+                "class": null,
+                "domains": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Icmp6",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": null,
+                    "destination": {
+                      "network": "fd20:30:40::",
+                      "prefix": 64
+                    },
+                    "ingress": "wan0",
+                    "egress": "lan0",
+                    "protocol": "Icmp6",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": 2,
+                    "icmp_code": 0,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "fd20:30:40::",
+                      "prefix": 64
+                    },
+                    "destination": null,
+                    "ingress": "lan0",
+                    "egress": "wan0",
+                    "protocol": "Icmp6",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": 128,
+                    "icmp_code": 0,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": {
+                      "network": "fd20:30:40::",
+                      "prefix": 64
+                    },
+                    "ingress": "wan0",
+                    "egress": "lan0",
+                    "protocol": "Icmp6",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": 129,
+                    "icmp_code": 0,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              {
+                "class": "New",
+                "domains": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Udp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": []
+              },
+              {
+                "class": "Established",
+                "domains": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Udp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": []
+              }
+            ],
+            "cases": [
+              {
+                "id": "selected-control-headers",
+                "label": "Selected control headers",
+                "events": [
+                  {
+                    "label": "Packet Too Big, code 0",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:60::42",
+                        "destination": "fd20:30:40::55",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 2,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Wrong code does not match",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:60::42",
+                        "destination": "fd20:30:40::55",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 2,
+                        "icmp_code": 1
+                      }
+                    },
+                    "expected": "filtered"
+                  }
+                ]
+              },
+              {
+                "id": "echo-header-policy",
+                "label": "Echo header directions",
+                "events": [
+                  {
+                    "label": "Outbound request header",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd20:30:40::55",
+                        "destination": "2001:db8:60::42",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Inbound reply header",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:60::42",
+                        "destination": "fd20:30:40::55",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 129,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Unsolicited inbound request header",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:60::42",
+                        "destination": "fd20:30:40::55",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "filtered"
+                  }
+                ]
+              },
+              {
+                "id": "other-protocols",
+                "label": "Other protocols stay blocked",
+                "events": [
+                  {
+                    "label": "TCP is outside this control policy",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd20:30:40::55",
+                        "destination": "2001:db8:60::42",
+                        "protocol": "Tcp",
+                        "source_port": 40000,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "filtered"
+                  },
+                  {
+                    "label": "UDP is outside this control policy",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:60::42",
+                        "destination": "fd20:30:40::55",
+                        "protocol": "Udp",
+                        "source_port": 53,
+                        "destination_port": 40000,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "filtered"
+                  }
+                ]
+              },
+              {
+                "id": "link-local-scope",
+                "label": "Link-local is not a routed destination",
+                "events": [
+                  {
+                    "label": "A remote-link address cannot be reached by broadening a filter",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd20:30:40::55",
+                        "destination": "fe80::fe",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "scope_bound"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-ipv6-control-header-policy-example",
+            "facts": {
+              "links": [
+                {
+                  "name": "lan0",
+                  "address": "fd42:11:22::1",
+                  "link_local": "fe80::1",
+                  "prefix": 64,
+                  "up": true
+                },
+                {
+                  "name": "wan0",
+                  "address": "2001:db8:80::1",
+                  "link_local": "fe80::2",
+                  "prefix": 64,
+                  "up": true
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "network": "::",
+                    "prefix": 0
+                  },
+                  "device": "wan0",
+                  "via": "fe80::fe",
+                  "metric": 10
+                }
+              ]
+            },
+            "forwarding": true,
+            "initial": {
+              "filter": {
+                "base": {
+                  "input": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": "lan0",
+                        "egress": null,
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "forward": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": null,
+                        "egress": null,
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      },
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": null,
+                        "egress": null,
+                        "protocol": "Tcp",
+                        "source_port": null,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "output": {
+                    "policy": "Accept",
+                    "rules": []
+                  }
+                },
+                "input": [
+                  null
+                ],
+                "forward": [
+                  null,
+                  null
+                ],
+                "output": []
+              },
+              "connections": {
+                "next_id": 1,
+                "entries": []
+              }
+            },
+            "policies": [
+              {
+                "class": null,
+                "domains": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Icmp6",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": null,
+                    "destination": {
+                      "network": "fd42:11:22::",
+                      "prefix": 64
+                    },
+                    "ingress": "wan0",
+                    "egress": "lan0",
+                    "protocol": "Icmp6",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": 2,
+                    "icmp_code": 0,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "fd42:11:22::",
+                      "prefix": 64
+                    },
+                    "destination": null,
+                    "ingress": "lan0",
+                    "egress": "wan0",
+                    "protocol": "Icmp6",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": 128,
+                    "icmp_code": 0,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": {
+                      "network": "fd42:11:22::",
+                      "prefix": 64
+                    },
+                    "ingress": "wan0",
+                    "egress": "lan0",
+                    "protocol": "Icmp6",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": 129,
+                    "icmp_code": 0,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              {
+                "class": "New",
+                "domains": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Udp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": []
+              },
+              {
+                "class": "Established",
+                "domains": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Udp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": []
+              }
+            ],
+            "cases": [
+              {
+                "id": "selected-control-headers",
+                "label": "Selected control headers",
+                "events": [
+                  {
+                    "label": "Packet Too Big, code 0",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:90::42",
+                        "destination": "fd42:11:22::55",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 2,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Wrong code does not match",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:90::42",
+                        "destination": "fd42:11:22::55",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 2,
+                        "icmp_code": 1
+                      }
+                    },
+                    "expected": "filtered"
+                  }
+                ]
+              },
+              {
+                "id": "echo-header-policy",
+                "label": "Echo header directions",
+                "events": [
+                  {
+                    "label": "Outbound request header",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd42:11:22::55",
+                        "destination": "2001:db8:90::42",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Inbound reply header",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:90::42",
+                        "destination": "fd42:11:22::55",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 129,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Unsolicited inbound request header",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:90::42",
+                        "destination": "fd42:11:22::55",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "filtered"
+                  }
+                ]
+              },
+              {
+                "id": "other-protocols",
+                "label": "Other protocols stay blocked",
+                "events": [
+                  {
+                    "label": "TCP is outside this control policy",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd42:11:22::55",
+                        "destination": "2001:db8:90::42",
+                        "protocol": "Tcp",
+                        "source_port": 40000,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "filtered"
+                  },
+                  {
+                    "label": "UDP is outside this control policy",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:90::42",
+                        "destination": "fd42:11:22::55",
+                        "protocol": "Udp",
+                        "source_port": 53,
+                        "destination_port": 40000,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "filtered"
+                  }
+                ]
+              },
+              {
+                "id": "link-local-scope",
+                "label": "Link-local is not a routed destination",
+                "events": [
+                  {
+                    "label": "A remote-link address cannot be reached by broadening a filter",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd42:11:22::55",
+                        "destination": "fe80::fe",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "scope_bound"
+                  }
+                ]
+              }
+            ]
+          },
+          "worked": [
+            {
+              "kind": "command",
+              "line": "ip6tables -F FORWARD"
+            },
+            {
+              "kind": "command",
+              "line": "ip6tables -P FORWARD DROP"
+            },
+            {
+              "kind": "command",
+              "line": "ip6tables -A FORWARD -i wan0 -o lan0 -d fd42:11:22::/64 -p ipv6-icmp --icmpv6-type 2/0 -j ACCEPT"
+            },
+            {
+              "kind": "command",
+              "line": "ip6tables -A FORWARD -i lan0 -o wan0 -s fd42:11:22::/64 -p ipv6-icmp --icmpv6-type 128/0 -j ACCEPT"
+            },
+            {
+              "kind": "command",
+              "line": "ip6tables -A FORWARD -i wan0 -o lan0 -d fd42:11:22::/64 -p ipv6-icmp --icmpv6-type 129/0 -j ACCEPT"
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "v6-workspace {\"kind\":\"command\",\"line\":\"ip6tables -F FORWARD\"}",
+        "v6-workspace {\"kind\":\"command\",\"line\":\"ip6tables -P FORWARD DROP\"}",
+        "v6-workspace {\"kind\":\"command\",\"line\":\"ip6tables -A FORWARD -i wan0 -o lan0 -d fd20:30:40::/64 -p ipv6-icmp --icmpv6-type 2/0 -j ACCEPT\"}",
+        "v6-workspace {\"kind\":\"command\",\"line\":\"ip6tables -A FORWARD -i lan0 -o wan0 -s fd20:30:40::/64 -p ipv6-icmp --icmpv6-type 128/0 -j ACCEPT\"}",
+        "v6-workspace {\"kind\":\"command\",\"line\":\"ip6tables -A FORWARD -i wan0 -o lan0 -d fd20:30:40::/64 -p ipv6-icmp --icmpv6-type 129/0 -j ACCEPT\"}",
+        "v6-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-host-dual-stack-handover",
+        "lpic2-nat-published-service-policy"
+      ]
+    },
+    {
+      "id": "lpic2-ipv6-tracked-service-policy",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-ipv6-router-policy",
+      "topic": "IPv6 router filtering and scope",
+      "title": "Permit tracked IPv6 replies without opening inbound access",
+      "summary": "Restore precise outgoing web requests, tracked replies and the selected control header.",
+      "objective": "Permit only TCP from LAN fd20:30:40::/64 on lan0 toward 2001:db8:60::/64 through wan0, destination port 443, in NEW and ESTABLISHED contexts. Permit reverse TCP from that remote /64 to the LAN through wan0 to lan0, source port 443, only in ESTABLISHED context. Retain incoming ICMPv6 type 2, code 0 from wan0 to the LAN through lan0. Other ICMPv6 headers are outside this task’s permit. Drop other TCP/UDP, including unsolicited inbound headers, UDP impostors, wrong prefixes and wrong service ports. Keep the supplied INPUT/OUTPUT, forwarding, interfaces and routes unchanged. No source or destination translation is needed.",
+      "retry_guidance": "Read the first failed policy or traffic event. Compare the expected condition with the actual gate, state and first matching rule; adjust that cause and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair the IPv6 rules",
+        "Verify policy ranges and sample traffic"
+      ],
+      "guide": [
+        {
+          "title": "Read the broken direction rules",
+          "why": "IPv6 prefixes still describe ranges. In the worked example, fd42:11:22::/64 identifies the LAN and 2001:db8:90::/64 the remote service range. A /128 rule for the displayed client would omit other required clients. ULA fd00::/8 is locally assigned private addressing; the documentation addresses here stand in for a remote role, not real Internet targets.",
+          "action": "Choose ip6tables -S, Insert command, then Run command. Run Request, reply and follow-up and inspect each event.",
+          "commands": [
+            {
+              "command": "ip6tables -S",
+              "explanation": "Read the actual example IPv6 rules, their order and default policies; IPv4 iptables rules are a separate table.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip -6 route show",
+              "explanation": "Read the fixed routes; the link-local next hop fe80::fe is scoped by its named outgoing interface.",
+              "simulator_only": false
+            },
+            {
+              "command": "sysctl net.ipv6.conf.all.forwarding",
+              "explanation": "Read the supplied forwarding flag; this read changes no simulated or real setting.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Repair the separate example",
+          "why": "A TCP conversation uses both addresses and both ports. The original request goes to destination port 443. Its reverse has source port 443. NEW means the simulator has not observed both directions; the first observed reverse is ESTABLISHED. Both directions stay ESTABLISHED afterward. This is not a completed TCP handshake.",
+          "action": "Use the worked example commands if needed. Run Request, reply and follow-up, Another client and server in the ranges, and Keep the selected ICMPv6 header.",
+          "commands": [
+            {
+              "command": "ip6tables -F FORWARD",
+              "explanation": "Remove the obsolete FORWARD entries, retaining the policy and the supplied INPUT/OUTPUT chains.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip6tables -P FORWARD DROP",
+              "explanation": "Drop headers that match no specific permit; a successful sample is not permission for other traffic.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip6tables -A FORWARD -i lan0 -o wan0 -s fd42:11:22::/64 -d 2001:db8:90::/64 -p tcp --dport 443 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT",
+              "explanation": "Keep the example’s TCP web request permitted both before and after its reply is observed. Both address prefixes, direction and destination port still restrict the permit.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip6tables -A FORWARD -i wan0 -o lan0 -s 2001:db8:90::/64 -d fd42:11:22::/64 -p tcp --sport 443 -m conntrack --ctstate ESTABLISHED -j ACCEPT",
+              "explanation": "Permit the reverse example TCP tuple only after a reply direction is observed. Its source port is 443; an unrelated NEW inbound header must still be dropped.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip6tables -A FORWARD -i wan0 -o lan0 -d fd42:11:22::/64 -p ipv6-icmp --icmpv6-type 2/0 -j ACCEPT",
+              "explanation": "Permit exactly the example LAN’s incoming Packet Too Big type 2, code 0 headers. This is a header predicate, not validation of an actual error message or working PMTU discovery.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Try an overbroad reply permit",
+          "why": "The worked outbound rule allows NEW,ESTABLISHED but still restricts interfaces, both prefixes and destination port. The inbound rule allows only ESTABLISHED with the reverse prefixes and source port. Putting NEW in that inbound list would admit an unrelated arrival.",
+          "action": "Choose Check example. Insert and run the NEW,ESTABLISHED experiment for the inbound permit; run Unsolicited traffic stays blocked. Delete its inserted first rule and retry.",
+          "commands": [
+            {
+              "command": "ip6tables -I FORWARD -i wan0 -o lan0 -d fd42:11:22::/64 -p tcp --sport 443 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT",
+              "explanation": "This deliberately broadens the reply permit to NEW too. Run Unsolicited traffic stays blocked to observe the leak. It is an experiment, not the worked repair.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip6tables -D FORWARD 1",
+              "explanation": "After the experiment, remove the first inserted rule and retry. Inspect -S before deleting a row.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The outgoing web rule must remain valid after a reply has been observed, so it permits both supported states while keeping its direction, prefixes and port restrictions. The inbound reverse permits only ESTABLISHED TCP with source port 443. Unsolicited NEW arrivals remain blocked. The separate numeric ICMPv6 type 2/code 0 permit restores the stated header requirement; no NAT or ICMP connection state is invented.",
+      "hints": [
+        "Read ip6tables -S and compare FORWARD order with the required interfaces and prefix ranges.",
+        "A type-only ICMPv6 match includes all numeric codes; TCP reply source port and connection state are separate restrictions.",
+        "Each full check compares the entire stated ranges. Run the named traffic tests to see a concrete header and running rule before changing a permit."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/iptables.8.html",
+        "https://man7.org/linux/man-pages/man8/iptables-extensions.8.html",
+        "https://www.rfc-editor.org/rfc/rfc4291.html#section-2.5.6",
+        "https://www.rfc-editor.org/rfc/rfc4890.html",
+        "https://www.rfc-editor.org/rfc/rfc4193.html"
+      ],
+      "simplifications": "In-process numeric IPv6 header simulator with fixed routes/interfaces/forwarding, at most 96 filter rules and 64 TCP/UDP conversations. NEW/ESTABLISHED describe observed directions, not a TCP stack. ICMPv6 is stateless; no NDP, real PMTU discovery, RA, RELATED errors, fragments, NAT, timers, kernel counters or real packets. A permitted header is not a working neighbor, session or application. These selected requirements are not a complete production firewall policy. Local-origin link-local output and scoped link-local TCP/UDP tracking are excluded.",
+      "initial": {
+        "kind": "LinuxV6",
+        "simulation": {
+          "source_id": "lpic2-ipv6-tracked-service-policy",
+          "view": "introduction",
+          "assignment": {
+            "state": {
+              "filter": {
+                "base": {
+                  "input": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": "lan0",
+                        "egress": null,
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "forward": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": {
+                          "network": "fd20:30:40::",
+                          "prefix": 64
+                        },
+                        "destination": {
+                          "network": "2001:db8:60::",
+                          "prefix": 64
+                        },
+                        "ingress": "lan0",
+                        "egress": "wan0",
+                        "protocol": "Tcp",
+                        "source_port": null,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      },
+                      {
+                        "source": {
+                          "network": "2001:db8:60::",
+                          "prefix": 64
+                        },
+                        "destination": {
+                          "network": "fd20:30:40::",
+                          "prefix": 64
+                        },
+                        "ingress": "wan0",
+                        "egress": "lan0",
+                        "protocol": "Tcp",
+                        "source_port": 443,
+                        "destination_port": null,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "output": {
+                    "policy": "Accept",
+                    "rules": []
+                  }
+                },
+                "input": [
+                  null
+                ],
+                "forward": [
+                  "New",
+                  "New"
+                ],
+                "output": []
+              },
+              "connections": {
+                "next_id": 1,
+                "entries": []
+              }
+            },
+            "input": "",
+            "output": "",
+            "selected_case": 0,
+            "last_trial": null,
+            "checked": false
+          },
+          "practice": {
+            "state": {
+              "filter": {
+                "base": {
+                  "input": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": "lan0",
+                        "egress": null,
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "forward": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": {
+                          "network": "fd42:11:22::",
+                          "prefix": 64
+                        },
+                        "destination": {
+                          "network": "2001:db8:90::",
+                          "prefix": 64
+                        },
+                        "ingress": "lan0",
+                        "egress": "wan0",
+                        "protocol": "Tcp",
+                        "source_port": null,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      },
+                      {
+                        "source": {
+                          "network": "2001:db8:90::",
+                          "prefix": 64
+                        },
+                        "destination": {
+                          "network": "fd42:11:22::",
+                          "prefix": 64
+                        },
+                        "ingress": "wan0",
+                        "egress": "lan0",
+                        "protocol": "Tcp",
+                        "source_port": 443,
+                        "destination_port": null,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "output": {
+                    "policy": "Accept",
+                    "rules": []
+                  }
+                },
+                "input": [
+                  null
+                ],
+                "forward": [
+                  "New",
+                  "New"
+                ],
+                "output": []
+              },
+              "connections": {
+                "next_id": 1,
+                "entries": []
+              }
+            },
+            "input": "",
+            "output": "",
+            "selected_case": 0,
+            "last_trial": null,
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "LinuxV6",
+        "definition": {
+          "source_id": "lpic2-ipv6-tracked-service-policy",
+          "assignment": {
+            "id": "lpic2-ipv6-tracked-service-policy-assignment",
+            "facts": {
+              "links": [
+                {
+                  "name": "lan0",
+                  "address": "fd20:30:40::1",
+                  "link_local": "fe80::1",
+                  "prefix": 64,
+                  "up": true
+                },
+                {
+                  "name": "wan0",
+                  "address": "2001:db8:50::1",
+                  "link_local": "fe80::2",
+                  "prefix": 64,
+                  "up": true
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "network": "::",
+                    "prefix": 0
+                  },
+                  "device": "wan0",
+                  "via": "fe80::fe",
+                  "metric": 10
+                }
+              ]
+            },
+            "forwarding": true,
+            "initial": {
+              "filter": {
+                "base": {
+                  "input": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": "lan0",
+                        "egress": null,
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "forward": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": {
+                          "network": "fd20:30:40::",
+                          "prefix": 64
+                        },
+                        "destination": {
+                          "network": "2001:db8:60::",
+                          "prefix": 64
+                        },
+                        "ingress": "lan0",
+                        "egress": "wan0",
+                        "protocol": "Tcp",
+                        "source_port": null,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      },
+                      {
+                        "source": {
+                          "network": "2001:db8:60::",
+                          "prefix": 64
+                        },
+                        "destination": {
+                          "network": "fd20:30:40::",
+                          "prefix": 64
+                        },
+                        "ingress": "wan0",
+                        "egress": "lan0",
+                        "protocol": "Tcp",
+                        "source_port": 443,
+                        "destination_port": null,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "output": {
+                    "policy": "Accept",
+                    "rules": []
+                  }
+                },
+                "input": [
+                  null
+                ],
+                "forward": [
+                  "New",
+                  "New"
+                ],
+                "output": []
+              },
+              "connections": {
+                "next_id": 1,
+                "entries": []
+              }
+            },
+            "policies": [
+              {
+                "class": null,
+                "domains": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Icmp6",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": null,
+                    "destination": {
+                      "network": "fd20:30:40::",
+                      "prefix": 64
+                    },
+                    "ingress": "wan0",
+                    "egress": "lan0",
+                    "protocol": "Icmp6",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": 2,
+                    "icmp_code": 0,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              {
+                "class": "New",
+                "domains": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Udp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": {
+                      "network": "fd20:30:40::",
+                      "prefix": 64
+                    },
+                    "destination": {
+                      "network": "2001:db8:60::",
+                      "prefix": 64
+                    },
+                    "ingress": "lan0",
+                    "egress": "wan0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              {
+                "class": "Established",
+                "domains": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Udp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": {
+                      "network": "fd20:30:40::",
+                      "prefix": 64
+                    },
+                    "destination": {
+                      "network": "2001:db8:60::",
+                      "prefix": 64
+                    },
+                    "ingress": "lan0",
+                    "egress": "wan0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "2001:db8:60::",
+                      "prefix": 64
+                    },
+                    "destination": {
+                      "network": "fd20:30:40::",
+                      "prefix": 64
+                    },
+                    "ingress": "wan0",
+                    "egress": "lan0",
+                    "protocol": "Tcp",
+                    "source_port": 443,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ]
+              }
+            ],
+            "cases": [
+              {
+                "id": "request-reply-and-followup",
+                "label": "Request, reply and follow-up",
+                "events": [
+                  {
+                    "label": "Original web request",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd20:30:40::55",
+                        "destination": "2001:db8:60::42",
+                        "protocol": "Tcp",
+                        "source_port": 40000,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Actual reversed reply",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "reply",
+                      "event": 0
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Original after reply",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "original",
+                      "event": 0
+                    },
+                    "expected": "allowed"
+                  }
+                ]
+              },
+              {
+                "id": "second-conversation",
+                "label": "Another client and server in the ranges",
+                "events": [
+                  {
+                    "label": "Different endpoint and source port",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd20:30:40::99",
+                        "destination": "2001:db8:60::ffff",
+                        "protocol": "Tcp",
+                        "source_port": 41000,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Reply to the second client",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "reply",
+                      "event": 0
+                    },
+                    "expected": "allowed"
+                  }
+                ]
+              },
+              {
+                "id": "new-inbound-restrictions",
+                "label": "Unsolicited traffic stays blocked",
+                "events": [
+                  {
+                    "label": "No earlier request for this apparent reply",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:60::42",
+                        "destination": "fd20:30:40::55",
+                        "protocol": "Tcp",
+                        "source_port": 443,
+                        "destination_port": 40000,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "filtered"
+                  },
+                  {
+                    "label": "Wrong remote prefix",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd20:30:40::55",
+                        "destination": "2001:db8:50::42",
+                        "protocol": "Tcp",
+                        "source_port": 40000,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "filtered"
+                  },
+                  {
+                    "label": "UDP is a different conversation",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd20:30:40::55",
+                        "destination": "2001:db8:60::42",
+                        "protocol": "Udp",
+                        "source_port": 40000,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "filtered"
+                  },
+                  {
+                    "label": "Wrong server port",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd20:30:40::55",
+                        "destination": "2001:db8:60::42",
+                        "protocol": "Tcp",
+                        "source_port": 40000,
+                        "destination_port": 8443,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "filtered"
+                  }
+                ]
+              },
+              {
+                "id": "selected-control",
+                "label": "Keep the selected ICMPv6 header",
+                "events": [
+                  {
+                    "label": "Packet Too Big, code 0",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:60::42",
+                        "destination": "fd20:30:40::55",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 2,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Another ICMPv6 type is not this permit",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:60::42",
+                        "destination": "fd20:30:40::55",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "filtered"
+                  }
+                ]
+              },
+              {
+                "id": "link-local-scope",
+                "label": "Link-local is not a routed destination",
+                "events": [
+                  {
+                    "label": "A remote-link address cannot be reached by broadening a filter",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd20:30:40::55",
+                        "destination": "fe80::fe",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "scope_bound"
+                  }
+                ]
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic2-ipv6-tracked-service-policy-example",
+            "facts": {
+              "links": [
+                {
+                  "name": "lan0",
+                  "address": "fd42:11:22::1",
+                  "link_local": "fe80::1",
+                  "prefix": 64,
+                  "up": true
+                },
+                {
+                  "name": "wan0",
+                  "address": "2001:db8:80::1",
+                  "link_local": "fe80::2",
+                  "prefix": 64,
+                  "up": true
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "network": "::",
+                    "prefix": 0
+                  },
+                  "device": "wan0",
+                  "via": "fe80::fe",
+                  "metric": 10
+                }
+              ]
+            },
+            "forwarding": true,
+            "initial": {
+              "filter": {
+                "base": {
+                  "input": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": null,
+                        "destination": null,
+                        "ingress": "lan0",
+                        "egress": null,
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "forward": {
+                    "policy": "Drop",
+                    "rules": [
+                      {
+                        "source": {
+                          "network": "fd42:11:22::",
+                          "prefix": 64
+                        },
+                        "destination": {
+                          "network": "2001:db8:90::",
+                          "prefix": 64
+                        },
+                        "ingress": "lan0",
+                        "egress": "wan0",
+                        "protocol": "Tcp",
+                        "source_port": null,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      },
+                      {
+                        "source": {
+                          "network": "2001:db8:90::",
+                          "prefix": 64
+                        },
+                        "destination": {
+                          "network": "fd42:11:22::",
+                          "prefix": 64
+                        },
+                        "ingress": "wan0",
+                        "egress": "lan0",
+                        "protocol": "Tcp",
+                        "source_port": 443,
+                        "destination_port": null,
+                        "icmp_type": null,
+                        "icmp_code": null,
+                        "target": "Accept"
+                      }
+                    ]
+                  },
+                  "output": {
+                    "policy": "Accept",
+                    "rules": []
+                  }
+                },
+                "input": [
+                  null
+                ],
+                "forward": [
+                  "New",
+                  "New"
+                ],
+                "output": []
+              },
+              "connections": {
+                "next_id": 1,
+                "entries": []
+              }
+            },
+            "policies": [
+              {
+                "class": null,
+                "domains": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Icmp6",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": null,
+                    "destination": {
+                      "network": "fd42:11:22::",
+                      "prefix": 64
+                    },
+                    "ingress": "wan0",
+                    "egress": "lan0",
+                    "protocol": "Icmp6",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": 2,
+                    "icmp_code": 0,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              {
+                "class": "New",
+                "domains": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Udp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": {
+                      "network": "fd42:11:22::",
+                      "prefix": 64
+                    },
+                    "destination": {
+                      "network": "2001:db8:90::",
+                      "prefix": 64
+                    },
+                    "ingress": "lan0",
+                    "egress": "wan0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ]
+              },
+              {
+                "class": "Established",
+                "domains": [
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": null,
+                    "destination": null,
+                    "ingress": null,
+                    "egress": null,
+                    "protocol": "Udp",
+                    "source_port": null,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ],
+                "allowed": [
+                  {
+                    "source": {
+                      "network": "fd42:11:22::",
+                      "prefix": 64
+                    },
+                    "destination": {
+                      "network": "2001:db8:90::",
+                      "prefix": 64
+                    },
+                    "ingress": "lan0",
+                    "egress": "wan0",
+                    "protocol": "Tcp",
+                    "source_port": null,
+                    "destination_port": 443,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  },
+                  {
+                    "source": {
+                      "network": "2001:db8:90::",
+                      "prefix": 64
+                    },
+                    "destination": {
+                      "network": "fd42:11:22::",
+                      "prefix": 64
+                    },
+                    "ingress": "wan0",
+                    "egress": "lan0",
+                    "protocol": "Tcp",
+                    "source_port": 443,
+                    "destination_port": null,
+                    "icmp_type": null,
+                    "icmp_code": null,
+                    "target": "Accept"
+                  }
+                ]
+              }
+            ],
+            "cases": [
+              {
+                "id": "request-reply-and-followup",
+                "label": "Request, reply and follow-up",
+                "events": [
+                  {
+                    "label": "Original web request",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd42:11:22::55",
+                        "destination": "2001:db8:90::42",
+                        "protocol": "Tcp",
+                        "source_port": 40000,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Actual reversed reply",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "reply",
+                      "event": 0
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Original after reply",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "original",
+                      "event": 0
+                    },
+                    "expected": "allowed"
+                  }
+                ]
+              },
+              {
+                "id": "second-conversation",
+                "label": "Another client and server in the ranges",
+                "events": [
+                  {
+                    "label": "Different endpoint and source port",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd42:11:22::99",
+                        "destination": "2001:db8:90::ffff",
+                        "protocol": "Tcp",
+                        "source_port": 41000,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Reply to the second client",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "reply",
+                      "event": 0
+                    },
+                    "expected": "allowed"
+                  }
+                ]
+              },
+              {
+                "id": "new-inbound-restrictions",
+                "label": "Unsolicited traffic stays blocked",
+                "events": [
+                  {
+                    "label": "No earlier request for this apparent reply",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:90::42",
+                        "destination": "fd42:11:22::55",
+                        "protocol": "Tcp",
+                        "source_port": 443,
+                        "destination_port": 40000,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "filtered"
+                  },
+                  {
+                    "label": "Wrong remote prefix",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd42:11:22::55",
+                        "destination": "2001:db8:80::42",
+                        "protocol": "Tcp",
+                        "source_port": 40000,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "filtered"
+                  },
+                  {
+                    "label": "UDP is a different conversation",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd42:11:22::55",
+                        "destination": "2001:db8:90::42",
+                        "protocol": "Udp",
+                        "source_port": 40000,
+                        "destination_port": 443,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "filtered"
+                  },
+                  {
+                    "label": "Wrong server port",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd42:11:22::55",
+                        "destination": "2001:db8:90::42",
+                        "protocol": "Tcp",
+                        "source_port": 40000,
+                        "destination_port": 8443,
+                        "icmp_type": null,
+                        "icmp_code": null
+                      }
+                    },
+                    "expected": "filtered"
+                  }
+                ]
+              },
+              {
+                "id": "selected-control",
+                "label": "Keep the selected ICMPv6 header",
+                "events": [
+                  {
+                    "label": "Packet Too Big, code 0",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:90::42",
+                        "destination": "fd42:11:22::55",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 2,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "allowed"
+                  },
+                  {
+                    "label": "Another ICMPv6 type is not this permit",
+                    "ingress": "wan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "2001:db8:90::42",
+                        "destination": "fd42:11:22::55",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "filtered"
+                  }
+                ]
+              },
+              {
+                "id": "link-local-scope",
+                "label": "Link-local is not a routed destination",
+                "events": [
+                  {
+                    "label": "A remote-link address cannot be reached by broadening a filter",
+                    "ingress": "lan0",
+                    "packet": {
+                      "kind": "literal",
+                      "header": {
+                        "source": "fd42:11:22::55",
+                        "destination": "fe80::fe",
+                        "protocol": "Icmp6",
+                        "source_port": null,
+                        "destination_port": null,
+                        "icmp_type": 128,
+                        "icmp_code": 0
+                      }
+                    },
+                    "expected": "scope_bound"
+                  }
+                ]
+              }
+            ]
+          },
+          "worked": [
+            {
+              "kind": "command",
+              "line": "ip6tables -F FORWARD"
+            },
+            {
+              "kind": "command",
+              "line": "ip6tables -P FORWARD DROP"
+            },
+            {
+              "kind": "command",
+              "line": "ip6tables -A FORWARD -i lan0 -o wan0 -s fd42:11:22::/64 -d 2001:db8:90::/64 -p tcp --dport 443 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT"
+            },
+            {
+              "kind": "command",
+              "line": "ip6tables -A FORWARD -i wan0 -o lan0 -s 2001:db8:90::/64 -d fd42:11:22::/64 -p tcp --sport 443 -m conntrack --ctstate ESTABLISHED -j ACCEPT"
+            },
+            {
+              "kind": "command",
+              "line": "ip6tables -A FORWARD -i wan0 -o lan0 -d fd42:11:22::/64 -p ipv6-icmp --icmpv6-type 2/0 -j ACCEPT"
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "v6-workspace {\"kind\":\"command\",\"line\":\"ip6tables -F FORWARD\"}",
+        "v6-workspace {\"kind\":\"command\",\"line\":\"ip6tables -P FORWARD DROP\"}",
+        "v6-workspace {\"kind\":\"command\",\"line\":\"ip6tables -A FORWARD -i lan0 -o wan0 -s fd20:30:40::/64 -d 2001:db8:60::/64 -p tcp --dport 443 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT\"}",
+        "v6-workspace {\"kind\":\"command\",\"line\":\"ip6tables -A FORWARD -i wan0 -o lan0 -s 2001:db8:60::/64 -d fd20:30:40::/64 -p tcp --sport 443 -m conntrack --ctstate ESTABLISHED -j ACCEPT\"}",
+        "v6-workspace {\"kind\":\"command\",\"line\":\"ip6tables -A FORWARD -i wan0 -o lan0 -d fd20:30:40::/64 -p ipv6-icmp --icmpv6-type 2/0 -j ACCEPT\"}",
+        "v6-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-ipv6-control-header-policy"
+      ]
+    }
+  ]
+}

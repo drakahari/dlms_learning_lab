@@ -14,7 +14,19 @@ impl LabApp {
                 .workspace_header_controls
                 .push(("back".into(), r.rect, r.id));
             if r.clicked() {
+                if let Some(a) = self.progress.attempts.get_mut(&id)
+                    && let State::SieveFiltering { simulation } = &mut a.state
+                    && (simulation.assignment.running || simulation.practice.running)
+                {
+                    simulation.assignment.stop();
+                    simulation.practice.stop();
+                    self.dirty = true;
+                }
                 self.script_job = None;
+                self.environment_run = None;
+                self.user_mounts_run = None;
+                self.fs_integrity_run = None;
+                self.startup_files_run = None;
                 self.selected = None;
                 self.invalidate_apache_presentation();
                 self.nat_presentation.clear();
@@ -65,6 +77,15 @@ impl LabApp {
                         self.notice = Some(e);
                         challenge = before;
                     }
+                } else if matches!(self.scenarios[i].initial, State::Syslog { .. }) {
+                    if let Err(error) = dlms_learning_lab::syslog_workspace::binding::set_challenge(
+                        self.progress.attempts.get_mut(&id).unwrap(),
+                        &self.scenarios[i],
+                        challenge,
+                    ) {
+                        self.notice = Some(error);
+                        challenge = before;
+                    }
                 } else if matches!(self.scenarios[i].initial, State::PhysicalLink { .. }) {
                     if let Err(error) = dlms_learning_lab::physical_link_workspace::record_mode(
                         self.progress.attempts.get_mut(&id).unwrap(),
@@ -113,6 +134,10 @@ impl LabApp {
                 }
                 self.help_open = false;
                 self.script_job = None;
+                self.environment_run = None;
+                self.user_mounts_run = None;
+                self.fs_integrity_run = None;
+                self.startup_files_run = None;
                 if let Some(view) = &mut self.ipv4_view {
                     view.hide_guidance();
                 }
@@ -152,6 +177,52 @@ impl LabApp {
                 self.metrics.confirm_reset = Some(r.rect);
                 if r.clicked() {
                     self.reset_attempt(i);
+                    if !self.reset_pending
+                        && self.scenarios[i]
+                            .accounts_teaching
+                            .as_ref()
+                            .is_some_and(|l| l.template_teaching.is_some())
+                    {
+                        for scope in ["assignment", "example"] {
+                            accounts_template_page::clear_save_status(
+                                ui.ctx(),
+                                &self.scenarios[i].id,
+                                scope,
+                            );
+                        }
+                    }
+                    // Only clear this source's ephemeral native UI state after a successful explicit reset.
+                    if !self.reset_pending
+                        && let engine::Goal::SharedLibraries { definition } =
+                            &self.scenarios[i].goal
+                    {
+                        let source = &self.scenarios[i];
+                        let visit = self.progress.attempts[&source.id].visited;
+                        for (scope, initial) in [
+                            (
+                                dlms_learning_lab::shared_libraries_workspace::Scope::Assignment,
+                                &definition.initial,
+                            ),
+                            (
+                                dlms_learning_lab::shared_libraries_workspace::Scope::Example,
+                                &definition.lesson.initial,
+                            ),
+                        ] {
+                            let programs = initial
+                                .catalog
+                                .programs
+                                .iter()
+                                .map(|p| p.path.clone())
+                                .collect::<Vec<_>>();
+                            shared_libraries_page::clear_scope_ui(
+                                ui.ctx(),
+                                source,
+                                visit,
+                                scope,
+                                &programs,
+                            );
+                        }
+                    }
                 }
                 let cancel = ui.add(button("Cancel"));
                 self.metrics.reset_cancel = Some(cancel.rect);
@@ -163,6 +234,221 @@ impl LabApp {
         challenge
     }
     pub(super) fn workspace(&mut self, ui: &mut egui::Ui, i: usize) {
+        if matches!(self.scenarios[i].initial, State::RaidAssembly { .. }) {
+            self.raid_assembly_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::Autofs { .. }) {
+            self.autofs_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::Transport { .. }) {
+            self.transport_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::StartupFiles { .. }) {
+            self.startup_files_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::FileIndex { .. }) {
+            self.file_index_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::SharedLibraries { .. }) {
+            self.shared_libraries_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::Raid1 { .. }) {
+            self.raid1_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::FsIntegrity { .. }) {
+            self.fs_integrity_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::UserMounts { .. }) {
+            self.user_mounts_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::Environment { .. }) {
+            self.environment_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::DebianSources { .. }) {
+            self.debian_sources_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::ClientNames { .. }) {
+            self.client_names_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::RemovableMounts { .. }) {
+            self.optional_mount_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::NmProfiles { .. }) {
+            self.nm_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::PamStack { .. }) {
+            self.pam_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::Aging { .. }) {
+            self.aging_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::PortSecurity { .. }) {
+            self.port_security_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::DhcpSnooping { .. }) {
+            self.dhcp_snooping_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::ArpInspection { .. }) {
+            self.arp_inspection_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::ManagementPolicy { .. }) {
+            self.management_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::LocalAccess { .. }) {
+            self.local_access_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::AaaAccess { .. }) {
+            self.aaa_access_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::LdapClient { .. }) {
+            self.ldap_client_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::LdapAccess { .. }) {
+            self.ldap_access_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::LdapSchema { .. }) {
+            self.ldap_schema_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::CopiedJournal { .. }) { self.copied_journal_page(ui,i); return; }
+        if matches!(self.scenarios[i].initial, State::JsonInventory { .. }) { self.json_inventory_page(ui,i); return; }
+        if matches!(self.scenarios[i].initial, State::RestController { .. }) { self.rest_controller_page(ui,i); return; }
+        if matches!(self.scenarios[i].initial, State::DevicePath { .. }) { self.device_path_page(ui,i); return; }
+        if matches!(self.scenarios[i].initial, State::LocalMail { .. }) { self.local_mail_page(ui,i); return; }
+        if matches!(self.scenarios[i].initial, State::Chrony { .. }) { self.chrony_page(ui,i); return; }
+        if matches!(self.scenarios[i].initial, State::GrubOnce { .. }) { self.grub_once_page(ui,i); return; }
+        if matches!(self.scenarios[i].initial, State::EfiLoader { .. }) { self.efi_loader_page(ui,i); return; }
+        if matches!(self.scenarios[i].initial, State::BiosLoader { .. }) { self.bios_loader_page(ui,i); return; }
+        if matches!(self.scenarios[i].initial, State::BootEntry { .. }) { self.boot_entry_page(ui,i); return; }
+        if matches!(self.scenarios[i].initial, State::LdapSchemaQuery { .. }) {
+            self.ldap_schema_query_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::LdapPassword { .. }) {
+            self.ldap_password_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::LdapChanges { .. }) {
+            self.ldap_changes_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::DhcpConfig { .. }) {
+            self.dhcp_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::Qos { .. }) {
+            self.qos_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::LinuxLogging { .. }) {
+            self.linux_logging_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial,State::VirtualIsolation{..}){self.virtual_isolation_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::SieveFiltering{..}){self.sieve_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::LinuxRouter{..}){self.router_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::LinuxFlow{..}){self.flow_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::LinuxV6{..}){self.v6_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::LinuxServiceRouter{..}){self.services_router_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::LinuxV6Administration{..}){self.v6_admin_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::LinuxV6Startup{..}){self.v6_startup_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::Poe{..}){self.poe_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::Dkms{..}){self.dkms_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::Initramfs{..}){self.initramfs_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::Pxe{..}){self.pxe_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::Iscsi{..}){self.iscsi_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::AtaSmart{..}){self.ata_smart_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::ApacheHttps{..}){self.apache_https_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::Desktop{..}){self.desktop_profile_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::SecurityInvestigation{..}){self.security_investigation_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::AutomationWorkshop{..}){self.automation_workshop_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::KernelBuild{..}){self.kernel_build_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::ServiceExposure{..}){self.service_exposure_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::IdsRule{..}){self.ids_rule_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::AuthFilter{..}){self.auth_filter_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::VpnPoint{..}){self.vpn_point_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::FtpIdentity{..}){self.ftp_identity_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::MailboxAccess{..}|State::MailboxAdministration{..}){self.mailbox_lesson(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::SmtpRouting{..}){self.smtp_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::GuestDrivers{..}){self.guest_driver_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::SambaShare{..}){self.samba_share_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::CampusArchitecture{..}){self.network_architecture_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::NetworkTransfer{..}){self.network_transfer_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::EditorHandover{..}){self.editor_handover_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::ModalEditing{..}){self.modal_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial,State::SshAccess{..}){self.ssh_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::HostNetwork { .. }) {
+            self.host_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::Repositories { .. }) {
+            self.repository_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::ResourceObservations { .. }) {self.resource_observation_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::MaintenanceNotice { .. }) {self.maintenance_notice_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::DnsAccess { .. }) {self.dns_access_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::Localization { .. }) {self.localization_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::WirelessChannels { .. }) {self.wireless_channel_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::WlanProfiles { .. }) {self.wlan_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::HttpCache { .. }) {self.http_cache_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::ServiceClients { .. }) {self.service_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::ReverseProxy { .. }) {self.reverse_proxy_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::ProxyPolicy { .. }) {self.proxy_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::SnmpMonitor { .. }) {self.snmp_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::WlanPaths { .. }) {self.wlan_paths_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::Timezone { .. }) {self.timezone_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::PrintQueues { .. }) {self.print_queue_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::SourceInstall { .. }) {self.source_install_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::CapacityPlanning { .. }) {self.capacity_planning_page(ui,i);return;}
+        if matches!(self.scenarios[i].initial, State::Capacity { .. }) {
+            self.capacity_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::KernelModules { .. }) {
+            self.kernel_module_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::RecursiveTree { .. }) {
+            self.recursive_tree_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::DirectoryPolicy { .. }) {
+            self.directory_policy_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::Links { .. }) {
+            self.links_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::MagicSubnet { .. }) {
+            self.magic_subnet_page(ui, i);
+            return;
+        }
         if matches!(self.scenarios[i].initial, State::PartitionFs { .. }) {
             self.partition_fs_page(ui, i);
             return;
@@ -171,6 +457,11 @@ impl LabApp {
             self.hsrp_page(ui, i);
             return;
         }
+        if matches!(self.scenarios[i].initial, State::Syslog { .. }) {
+            self.syslog_page(ui, i);
+            return;
+        }
+
         if matches!(self.scenarios[i].initial, State::Ntp { .. }) {
             self.ntp_page(ui, i);
             return;
@@ -417,7 +708,7 @@ impl LabApp {
         });
         Self::workspace_footer(ui);
     }
-    fn workspace_footer(ui: &mut egui::Ui) {
+    pub(super) fn workspace_footer(ui: &mut egui::Ui) {
         ui.label(
             RichText::new(
                 "Simulation only · Leaving keeps your work and editor drafts saved locally.",
@@ -1005,7 +1296,8 @@ impl LabApp {
                 ui.label(&s.explanation);
             });
         egui::CollapsingHeader::new("Supported commands, limits & sources").id_salt(("references",i)).show(ui,|ui|{
-            ui.add(egui::Label::new(engine::help(&a.state)).wrap());ui.label(&s.simplifications);
+            let help=if let engine::Goal::RpmPackages{definition}=&s.goal {definition.command_help()}else{engine::help(&a.state)};
+            ui.add(egui::Label::new(help).wrap());ui.label(&s.simplifications);
             if matches!(a.state,State::Discovery{..}) {ui.label("Native controls act only on the virtual LLDP topology. Manual advertisements and the simulated clock are teaching controls; no IOS/Linux CLI, CDP or real network is modeled.");} else if matches!(a.state,State::Processes{..}) {ui.label("Only this activity’s virtual process table exists. No host processes are inspected or changed. show is a simulator-only snapshot; shell syntax and job control are not supported.");} else if matches!(a.state,State::Accounts{..}) {ui.label("Virtual administration uses only this activity’s account/group records and virtual files. Expiry is metadata only; no host accounts, credentials, authentication, PAM, login or sessions are modeled.");} else if !matches!(a.state,State::Filesystem{..}) { ui.label("All commands act only on this simulation. test-access, config set, dns set, dns serial, named-checkzone’s teaching form, and ip addr set are simulator helpers, not complete real Linux commands."); }
             for source in &s.sources{ui.add(egui::Label::new(source).wrap());}
         });

@@ -9,7 +9,7 @@ pub use session::Session;
 use std::cmp::Ordering;
 pub const MAX_COMMAND_BYTES: usize = 2048;
 pub const MAX_OUTPUT_BYTES: usize = 32768;
-pub const HELP: &str = "Virtual Debian package console: dpkg-query -W [-f='FORMAT'] [NAME]; dpkg-query -S ABS_PATH (installed recorded owner); apt-cache --important depends NAME; apt-get --error-on=any update; apt-get -y install NAME[=VERSION]...; apt-get -y --reinstall install NAME=VERSION (same installed/cached artifact; all installed Depends healthy); dpkg -r|--remove NAME; dpkg -P|--purge NAME; dpkg --compare-versions V1 lt|le|eq|ne|ge|gt V2. Literal arguments only. Formatter fields: Package, binary:Package, Version, Architecture, db:Status-Status. Script-free final-state simulation, not dpkg/APT transaction or rollback execution, archives, downloads, privilege or security checks. No dpkg -i/unpack/configure/verify/audit, APT removal/resolver/pinning or RPM aliases. Mutation output is explicitly a model-derived simulation summary. help/show are simulator helpers; reading help or inspecting data does not complete the assignment.";
+pub const HELP: &str = "Virtual Debian package console: apt-cache show NAME (one cached candidate: identity and Depends/Conflicts fields only); apt-file search PATTERN (literal substring); apt-file -F search PATH (literal complete path); apt-file list PACKAGE (exact package), with find/show and --fixed-string aliases; dpkg-query -W [-f='FORMAT'] [NAME]; dpkg-query -S ABS_PATH (installed recorded owner); apt-cache --important depends NAME; apt-get --error-on=any update; apt-get -y install NAME[=VERSION]...; apt-get -y --reinstall install NAME=VERSION (same installed/cached artifact; all installed Depends healthy); dpkg -r|--remove NAME; dpkg -P|--purge NAME; dpkg --compare-versions V1 lt|le|eq|ne|ge|gt V2. Literal arguments only. Formatter fields: Package, binary:Package, Version, Architecture, db:Status-Status. Each supplied package snapshot includes matching Contents data over its regular-file manifests; no independent/missing Contents targets, source filters, globs/regex or apt-file update wrapper. Search status 0=matches, 1=no matches, 3=empty cache; queries never install. Script-free final-state simulation, not dpkg/APT transaction or rollback execution, archives, downloads, privilege or security checks. No dpkg -i/unpack/configure/verify/audit, APT removal/resolver/pinning or RPM aliases. Mutation output is explicitly a model-derived simulation summary. help/show are simulator helpers; reading help or inspecting data does not complete the assignment.";
 #[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum DiagnosticKind {
     Syntax,
@@ -34,6 +34,7 @@ fn error(kind: DiagnosticKind, status: u8, text: impl AsRef<str>) -> Diagnostic 
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Family {
+    Contents,
     Dpkg,
     Query,
     Apt,
@@ -66,12 +67,14 @@ enum Relation {
 }
 #[derive(Clone, Debug)]
 enum Kind {
+    Contents(crate::debian_contents::Query),
     Show {
         package: Option<String>,
         format: Vec<Piece>,
     },
     Owner(String),
     Depends(String),
+    Metadata(String),
     Update,
     Install(Vec<core::Request>),
     Reinstall {
@@ -344,6 +347,7 @@ pub fn parse(input: &str) -> Result<Command> {
     }
     let family = match words[0].as_str() {
         "apt-get" | "apt-cache" => Family::Apt,
+        "apt-file" => Family::Contents,
         "dpkg-query" => Family::Query,
         _ => Family::Dpkg,
     };
@@ -351,6 +355,10 @@ pub fn parse(input: &str) -> Result<Command> {
     let kind = match words[0].as_str() {
         "help" if rest.is_empty() => Kind::Help,
         "dpkg-query" => query(rest, false)?,
+        "apt-file" => Kind::Contents(
+            crate::debian_contents::parse(rest)
+                .map_err(|e| error(DiagnosticKind::Unsupported, 2, e.message))?,
+        ),
         "dpkg" => match rest {
             [action, name] if matches!(action.as_str(), "-r" | "--remove" | "-P" | "--purge") => {
                 Kind::Remove {
@@ -380,6 +388,9 @@ pub fn parse(input: &str) -> Result<Command> {
             _ => query(rest, true)?,
         },
         "apt-cache" => {
+            if rest.len()==2 && rest[0]=="show" {
+                Kind::Metadata(exact_name(&rest[1],Family::Apt)?)
+            } else {
             let names: Vec<_> = rest
                 .iter()
                 .filter(|s| s.as_str() != "--important")
@@ -391,10 +402,11 @@ pub fn parse(input: &str) -> Result<Command> {
                 return Err(error(
                     DiagnosticKind::Unsupported,
                     100,
-                    "Only apt-cache --important depends NAME is modeled; policy/source/priority tables are not",
+                    "Use apt-cache show NAME or apt-cache --important depends NAME in this subset; policy/source/priority tables are not modeled",
                 ));
             }
             Kind::Depends(exact_name(names[1], Family::Apt)?)
+            }
         }
         "apt-get" => {
             let (mut yes, mut reinstall, mut strict) = (false, false, false);
@@ -625,6 +637,25 @@ pub fn execute(definition: &Definition, state: &mut State, input: &str) -> Resul
     let family = command.family;
     match command.kind {
         Kind::Help => done(HELP.into(), String::new(), 0, false, family),
+        Kind::Contents(query) => {
+            let out = crate::debian_contents::query(state, &query).map_err(|e| {
+                error(
+                    match e.code {
+                        crate::debian_contents::Code::Limit => DiagnosticKind::Limit,
+                        crate::debian_contents::Code::Context => DiagnosticKind::Context,
+                        crate::debian_contents::Code::Unsupported => DiagnosticKind::Unsupported,
+                    },
+                    2,
+                    e.message,
+                )
+            })?;
+            let stderr = if out.status == 3 {
+                "apt-file: cache is empty in this sample; run apt-get --error-on=any update before searching.\n".into()
+            } else {
+                String::new()
+            };
+            done(out.text, stderr, out.status, false, family)
+        }
         Kind::Show { package, format } => {
             let mut out = Text::default();
             let mut found = false;
@@ -685,6 +716,25 @@ pub fn execute(definition: &Definition, state: &mut State, input: &str) -> Resul
                     family,
                 ),
             }
+        }
+        Kind::Metadata(package) => {
+            let c=state.cached_candidate(&package).map_err(|e|model(e,family))?.ok_or_else(||error(DiagnosticKind::Model,100,"Package is absent from the current cached metadata"))?;
+            if c.architecture!=core::Architecture::All && c.architecture!=state.catalog().architecture {
+                return Err(error(DiagnosticKind::Unsupported,100,"Foreign-architecture metadata is outside this single-architecture display subset"));
+            }
+            let mut out=Text::default();
+            out.push(&format!("Package: {}\nVersion: {}\nArchitecture: {}\n",c.name,c.version.as_str(),arch(c.architecture)),family)?;
+            for (label,relations) in [("Depends",c.depends),("Conflicts",c.conflicts)] {
+                if !relations.is_empty(){
+                    let fields=relations.iter().map(|d|match &d.constraint{
+                        None=>d.name.clone(),
+                        Some(c)=>format!("{} ({} {})",d.name,match c.relation{core::Relation::Lt=>"<<",core::Relation::Le=>"<=",core::Relation::Eq=>"=",core::Relation::Ge=>">=",core::Relation::Gt=>">>"},c.version.as_str()),
+                    }).collect::<Vec<_>>();
+                    out.push(&format!("{label}: {}\n",fields.join(", ")),family)?;
+                }
+            }
+            out.push("\n",family)?;
+            done(out.value,String::new(),0,false,family)
         }
         Kind::Depends(package) => {
             compatible(state, &package)?;

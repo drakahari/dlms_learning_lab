@@ -64,6 +64,15 @@ pub enum Requirement {
         files: Vec<String>,
         incremental: bool,
     },
+    /// Exact delivered filenames only; contents/recoverability need other rows.
+    ArtifactSet {
+        #[serde(deserialize_with = "text::<_,120>")]
+        name: String,
+        #[serde(deserialize_with = "strings::<_,8>")]
+        archives: Vec<String>,
+        #[serde(deserialize_with = "strings::<_,8>")]
+        snapshots: Vec<String>,
+    },
     PreserveArtifacts {
         #[serde(deserialize_with = "text::<_,120>")]
         name: String,
@@ -191,7 +200,8 @@ impl Definition {
                 | Requirement::Recovery { name, .. }
                 | Requirement::Payloads { name, .. }
                 | Requirement::Snapshot { name, .. }
-                | Requirement::PreserveArtifacts { name, .. } => name,
+                | Requirement::PreserveArtifacts { name, .. }
+                | Requirement::ArtifactSet { name, .. } => name,
             };
             if !names.insert(name) {
                 return Err("Duplicate backup objective name".into());
@@ -241,6 +251,22 @@ impl Definition {
                         && !root.contains('/')
                         && files.iter().all(|p| relative_file(p))
                         && files.iter().collect::<BTreeSet<_>>().len() == files.len()
+                }
+                Requirement::ArtifactSet {
+                    name,
+                    archives,
+                    snapshots,
+                } => {
+                    short(name, 120)
+                        && archives.len() <= 8
+                        && snapshots.len() <= 8
+                        && archives
+                            .iter()
+                            .chain(snapshots)
+                            .all(|p| artifact(&self.initial, p))
+                        && archives.iter().collect::<BTreeSet<_>>().len() == archives.len()
+                        && snapshots.iter().collect::<BTreeSet<_>>().len() == snapshots.len()
+                        && archives.iter().all(|p| !snapshots.contains(p))
                 }
                 Requirement::PreserveArtifacts {
                     name,
@@ -320,6 +346,43 @@ fn immediate_check(initial: &Store, state: &Store, requirement: &Requirement) ->
                 } else {
                     format!(
                         "{name}: stored file names, top-level folder or backup type differ. List the archive and check which snapshot you used; names alone do not verify file contents."
+                    )
+                },
+            )
+        }
+        Requirement::ArtifactSet {
+            name,
+            archives,
+            snapshots,
+        } => {
+            let missing_archives = archives
+                .iter()
+                .filter(|p| !state.archives.contains_key(*p))
+                .count();
+            let extra_archives = state
+                .archives
+                .keys()
+                .filter(|p| !archives.contains(p))
+                .count();
+            let missing_snapshots = snapshots
+                .iter()
+                .filter(|p| !state.snapshots.contains_key(*p))
+                .count();
+            let extra_snapshots = state
+                .snapshots
+                .keys()
+                .filter(|p| !snapshots.contains(p))
+                .count();
+            let pass = missing_archives + extra_archives + missing_snapshots + extra_snapshots == 0;
+            (
+                pass,
+                if pass {
+                    format!(
+                        "{name}: the requested archive and snapshot files are present, with no extra backup files. This filename check does not verify contents or recovery."
+                    )
+                } else {
+                    format!(
+                        "{name}: {missing_archives} missing and {extra_archives} extra archives; {missing_snapshots} missing and {extra_snapshots} extra snapshots. Inspect the backup folder and keep only the requested delivery. Filenames alone do not verify its contents."
                     )
                 },
             )
@@ -631,6 +694,7 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         terminal_learning,
         process_learning,
         accounts_learning,
+        accounts_template_drafts,
         discovery_draft,
         discovery_learning,
         storage_draft,
@@ -700,6 +764,7 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         || terminal_learning.is_some()
         || process_learning.is_some()
         || accounts_learning.is_some()
+        || accounts_template_drafts.is_some()
         || discovery_draft.is_some()
         || discovery_learning.is_some()
         || storage_draft.is_some()

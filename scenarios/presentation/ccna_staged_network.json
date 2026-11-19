@@ -1,0 +1,132 @@
+[
+  {
+    "id": "ccna-controller-pilot-rollout",
+    "goal": "Restore approved desk access in stages and keep a shared reserve port outside the rollout.",
+    "context": "Builds on Ethernet access VLANs and the earlier controller profile lesson. The supplied switches and VLANs are already configured.",
+    "concepts": [
+      {
+        "title": "Choose where to change the setting",
+        "text": "A direct device edit changes one port immediately. The controller keeps its desired profile. A later reconciliation in this network restores the settings from that profile."
+      },
+      {
+        "title": "Check the impact of a shared profile",
+        "text": "Every port bound to a changed profile can inherit that change. A preview shows the ports affected, so you can compare them with the approved work order before applying anything."
+      },
+      {
+        "title": "Start with a pilot",
+        "text": "A pilot is one approved device you change and test first. Confirm it reaches the service and that the reserve port remains unchanged. Then roll out the approved profile to the other device and reconcile again."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Preview a local edit",
+        "value": "Supply desk A · Down → Up\nReserve scanner · no change",
+        "explanation": "The single-port change has a narrow immediate impact. The controller still holds its earlier settings."
+      },
+      {
+        "label": "Preview a shared profile edit",
+        "value": "Supply desk A · new settings\nSupply desk B · new settings\nReserve scanner · new settings",
+        "explanation": "The reserve scanner shares the profile. Identify the extra affected port before applying."
+      },
+      {
+        "label": "Apply to the pilot and verify",
+        "value": "Bind desk A to the dedicated service profile\nPilot reaches supply service · reserve stays down",
+        "explanation": "Test both outcomes before changing desk B. Reconcile the completed rollout to confirm the desired settings persist."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Compare local and controller scope",
+        "action": "Preview a Device port edit for bench-a, Up in VLAN 130. Apply it and observe reachability. Reconcile the controller, then preview a Shared profile change to intake.",
+        "observe": "The direct edit is temporary here. The intake profile would extend the change to reserve-scanner as well."
+      },
+      {
+        "title": "Verify one approved pilot",
+        "action": "Select Bind to profile, bench-a and approved-service. Preview and apply. Select Verify pilot on that bench while bench-b remains unchanged.",
+        "observe": "The pilot still works after reconciliation. The reserve scanner remains outside the stores network."
+      },
+      {
+        "title": "Complete the authorized rollout",
+        "action": "Bind bench-b to approved-service. Preview and apply, then select Reconcile, preview and apply again. Select Check workspace.",
+        "observe": "Both benches now reach stores. Neither reaches office-lab, and the reserve scanner stays in its original state."
+      }
+    ],
+    "requirements": [
+      "Authorize access between both signed-off dispatch desks and the supplied dispatch service.",
+      "Verify a controller-managed pilot before changing the other desk. Reconcile and check the completed rollout.",
+      "Preserve the intake scanner’s original settings and its separation from dispatch. Keep the visitor network separate."
+    ],
+    "source": "scenarios/staged-network-lessons-v1.json",
+    "status": "updated",
+    "review": {
+      "introduction": "Connects each controller or device action to a worked observation.",
+      "example": "Uses independent source values and actionable guidance next to the actual controls.",
+      "assignment": "Uses the virtual live result, preserves the control cases and grades the repair."
+    }
+  },
+  {
+    "id": "ccna-controller-intent-path",
+    "goal": "Restore an approved fabric exchange by correcting controller intent, installing it and repairing the transport path.",
+    "context": "Builds on inspecting a controller resource and verifying a routed IPv4 path. The supplied examples distinguish decisions about traffic from the network that carries it.",
+    "concepts": [
+      {
+        "title": "Identify what the network carries",
+        "text": "The underlay is the routed network between the supplied edges. The overlay is a logical relationship between edge applications. Two edges need working underlay transport before an allowed overlay exchange can reach its destination."
+      },
+      {
+        "title": "Follow intent in two directions",
+        "text": "An application sends a northbound request to the controller. The controller stores its desired policy. A southbound update sends the resulting rule to the devices. An accepted request and an installed rule describe different points in this sequence."
+      },
+      {
+        "title": "Verify the forwarding result",
+        "text": "The control plane decides which traffic can pass and the data plane applies the installed rules when moving traffic. Check desired intent, installed rule and underlay result separately. Check the needed return direction and leave other exchanges unchanged."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Inspect an accepted request",
+        "value": "Requested · Allow\nInstalled · Exclude",
+        "explanation": "The controller knows the desired result. The edge still applies its earlier rule. Publish the policy before retrying."
+      },
+      {
+        "label": "Find the actual transport failure",
+        "value": "Installed · Allow\nUnderlay · no usable path",
+        "explanation": "The required rule is already installed. Check the physical-side virtual uplink instead of changing the policy again."
+      },
+      {
+        "label": "Verify both outcomes",
+        "value": "Approved direction · forwarded\nUnapproved direction · excluded",
+        "explanation": "Test the actual exchange. A working underlay can carry valid traffic and still leave an unrelated overlay exchange excluded."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Read the three observations",
+        "action": "For lab-client to sample-service, compare the Desired column, the Installed column and the Underlay result.",
+        "observe": "The desired rule allows the exchange. The installed rule and transport still prevent it."
+      },
+      {
+        "title": "Submit the missing direction",
+        "action": "Select sample-service as From and lab-client as To. Set Allow and select Submit intent. Select Publish rules.",
+        "observe": "The reply is now present in the desired and installed policy. The transport problem stays visible independently."
+      },
+      {
+        "title": "Repair the underlay path",
+        "action": "Enable the supplied service uplink and select Check workspace. Compare the permitted client/service exchanges and the separate lab-admin trials.",
+        "observe": "The required exchanges pass. The unrelated excluded exchange stays excluded."
+      }
+    ],
+    "requirements": [
+      "Allow branch-to-office and office-to-branch traffic in the desired and installed policy.",
+      "Restore the supplied service uplink and verify actual transport in both required directions.",
+      "Keep the monitor-to-branch exchange working and the monitor-to-office exchange excluded."
+    ],
+    "source": "scenarios/staged-network-lessons-v1.json",
+    "status": "updated",
+    "review": {
+      "introduction": "Connects each controller or device action to a worked observation.",
+      "example": "Uses independent source values and actionable guidance next to the actual controls.",
+      "assignment": "Uses the virtual live result, preserves the control cases and grades the repair."
+    }
+  }
+]

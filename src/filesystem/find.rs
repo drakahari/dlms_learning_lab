@@ -198,6 +198,7 @@ fn spend(work: &mut usize) -> Result<(), ()> {
 enum Test {
     Name(Pattern),
     Directory(bool),
+    Size(super::size_predicate::Criterion),
 }
 struct Query<'a> {
     start: &'a str,
@@ -205,7 +206,7 @@ struct Query<'a> {
     tests: Vec<Test>,
 }
 impl<'a> Query<'a> {
-    fn parse(args: &'a [String]) -> Result<Self, String> {
+    fn parse(args: &'a [String], sized:bool) -> Result<Self, String> {
         // Validate direct callers before cloning/parsing their data.
         if args.len() > 38
             || args
@@ -247,7 +248,7 @@ impl<'a> Query<'a> {
                 break;
             }
             if tests.len() == 16 {
-                return Err("find supports at most16 name/type predicates.".into());
+                return Err(if sized { "find supports at most16 name/type/size predicates." } else { "find supports at most16 name/type predicates." }.into());
             }
             let arg = args
                 .get(i + 1)
@@ -255,10 +256,12 @@ impl<'a> Query<'a> {
             tests.push(match args[i].as_str() {
                 "-name" => Test::Name(Pattern::parse(arg)?),
                 "-type" if arg == "f" || arg == "d" => Test::Directory(arg == "d"),
-                _ => return Err("Unsupported find syntax. Use one start, optional leading -maxdepth, implicit-AND -name/-type f|d tests, and optional final -print.".into()),
+                "-size" if sized => Test::Size(super::size_predicate::Criterion::parse(arg)?),
+                _ => return Err(if sized { "Unsupported find syntax. Use one start, optional leading -maxdepth, implicit-AND -name/-type/-size tests, and optional final -print. Size queries require -type f." } else { "Unsupported find syntax. Use one start, optional leading -maxdepth, implicit-AND -name/-type f|d tests, and optional final -print." }.into()),
             });
             i += 2;
         }
+        if tests.iter().any(|t|matches!(t,Test::Size(_))) && !tests.iter().any(|t|matches!(t,Test::Directory(false))) {return Err("File-size queries in this subset need an explicit -type f; directory metadata sizes are not modeled.".into());}
         debug_assert_eq!(i, args.len());
         Ok(Self {
             start,
@@ -270,11 +273,14 @@ impl<'a> Query<'a> {
 
 impl Tree {
     /// A bounded read-only query. Arguments omit the command name itself.
-    pub fn find(&self, arguments: &[String]) -> Result<FindReport, String> {
+    pub fn find(&self, arguments: &[String]) -> Result<FindReport, String> {self.find_internal(arguments,false)}
+    /// Opt-in extension for source-held size-search activities; original find is unchanged.
+    pub fn find_sized(&self,arguments:&[String])->Result<FindReport,String>{self.find_internal(arguments,true)}
+    fn find_internal(&self, arguments: &[String], sized:bool) -> Result<FindReport,String> {
         if !self.valid() {
             return Err("Invalid virtual filesystem state; search was not run.".into());
         }
-        let query = Query::parse(arguments)?;
+        let query = Query::parse(arguments,sized)?;
         let start = self
             .resolve(query.start, false)
             .map_err(|error| small(&String::from(error), DIAGNOSTIC_BYTES))?;
@@ -309,6 +315,7 @@ impl Tree {
             for test in &query.tests {
                 let matches = match test {
                     Test::Directory(directory) => node.directory == *directory,
+                    Test::Size(criterion) => !node.directory && self.files.get(key).is_some_and(|body|criterion.matches(body.len())),
                     Test::Name(pattern) => match pattern.matches(basename.as_bytes(), &mut work) {
                         Ok(matches) => matches,
                         Err(()) => {

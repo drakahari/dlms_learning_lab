@@ -1,0 +1,1123 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-links-identity",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Hard and symbolic links",
+      "unit": "linux-link-handover",
+      "title": "Choose a shared name and an independent snapshot",
+      "summary": "Distinguish a shared file from a copy by inspecting identity and future edits.",
+      "objective": "Use /delivery/live as a hard-link name for /work/report. Create an independent copy at /archive/snapshot. Retain Release notes v1 plus a newline in both files and preserve /work/keep. Future edits through either live name must affect both; the snapshot must remain independent.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Investigate the supplied files and links, make the required changes, then check the whole result."
+      ],
+      "guide": [],
+      "explanation": "Inspect inode IDs and symbolic-link text first. Use the supported link/copy/move operations for the required relationship, verify contents, and retain protected data. See the worked practice files for a different example.",
+      "hints": [
+        "Use stat to compare regular-file inode IDs; a symbolic link has a different inode from its target.",
+        "A relative symbolic target starts in the directory containing the link. Use stat -L to follow it.",
+        "Retained shared names need the original inode; an independent snapshot needs another regular inode."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man7/symlink.7.html"
+      ],
+      "simplifications": "One bounded virtual device with fixed directories and cwd. No permissions, mount boundaries, open descriptors, directory mutation, overwriting destinations or full GNU utilities. Native file editor changes simulated existing files only. Commands never reach a host shell.",
+      "initial": {
+        "kind": "Links",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_command": 0,
+          "assignment": {
+            "world": {
+              "version": 1,
+              "cwd": "/work",
+              "entries": {
+                "/": 1,
+                "/work": 2,
+                "/delivery": 3,
+                "/archive": 4,
+                "/practice": 5,
+                "/practice/in": 6,
+                "/practice/out": 7,
+                "/practice/archive": 8,
+                "/work/report": 9,
+                "/delivery/live": 10,
+                "/work/keep": 11
+              },
+              "inodes": {
+                "1": "Directory",
+                "2": "Directory",
+                "3": "Directory",
+                "4": "Directory",
+                "5": "Directory",
+                "6": "Directory",
+                "7": "Directory",
+                "8": "Directory",
+                "9": {
+                  "Regular": {
+                    "data": "Release notes v1\n"
+                  }
+                },
+                "10": {
+                  "Regular": {
+                    "data": "Release notes v1\n"
+                  }
+                },
+                "11": {
+                  "Regular": {
+                    "data": "Retain this note\n"
+                  }
+                }
+              },
+              "next_inode": 12,
+              "revision": 0
+            },
+            "history": [],
+            "command": "",
+            "transcript": [],
+            "checked": false,
+            "editor_path": "",
+            "editor_text": "",
+            "editor_open_path": "",
+            "editor_loaded": false
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "cwd": "/work",
+              "entries": {
+                "/": 1,
+                "/work": 2,
+                "/delivery": 3,
+                "/archive": 4,
+                "/practice": 5,
+                "/practice/in": 6,
+                "/practice/out": 7,
+                "/practice/archive": 8,
+                "/practice/in/brief": 9
+              },
+              "inodes": {
+                "1": "Directory",
+                "2": "Directory",
+                "3": "Directory",
+                "4": "Directory",
+                "5": "Directory",
+                "6": "Directory",
+                "7": "Directory",
+                "8": "Directory",
+                "9": {
+                  "Regular": {
+                    "data": "Practice brief\n"
+                  }
+                }
+              },
+              "next_inode": 10,
+              "revision": 0
+            },
+            "history": [],
+            "command": "",
+            "transcript": [],
+            "checked": false,
+            "editor_path": "",
+            "editor_text": "",
+            "editor_open_path": "",
+            "editor_loaded": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "Links",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "cwd": "/work",
+            "entries": {
+              "/": 1,
+              "/work": 2,
+              "/delivery": 3,
+              "/archive": 4,
+              "/practice": 5,
+              "/practice/in": 6,
+              "/practice/out": 7,
+              "/practice/archive": 8,
+              "/work/report": 9,
+              "/delivery/live": 10,
+              "/work/keep": 11
+            },
+            "inodes": {
+              "1": "Directory",
+              "2": "Directory",
+              "3": "Directory",
+              "4": "Directory",
+              "5": "Directory",
+              "6": "Directory",
+              "7": "Directory",
+              "8": "Directory",
+              "9": {
+                "Regular": {
+                  "data": "Release notes v1\n"
+                }
+              },
+              "10": {
+                "Regular": {
+                  "data": "Release notes v1\n"
+                }
+              },
+              "11": {
+                "Regular": {
+                  "data": "Retain this note\n"
+                }
+              }
+            },
+            "next_inode": 12,
+            "revision": 0
+          },
+          "example": {
+            "version": 1,
+            "cwd": "/work",
+            "entries": {
+              "/": 1,
+              "/work": 2,
+              "/delivery": 3,
+              "/archive": 4,
+              "/practice": 5,
+              "/practice/in": 6,
+              "/practice/out": 7,
+              "/practice/archive": 8,
+              "/practice/in/brief": 9
+            },
+            "inodes": {
+              "1": "Directory",
+              "2": "Directory",
+              "3": "Directory",
+              "4": "Directory",
+              "5": "Directory",
+              "6": "Directory",
+              "7": "Directory",
+              "8": "Directory",
+              "9": {
+                "Regular": {
+                  "data": "Practice brief\n"
+                }
+              }
+            },
+            "next_inode": 10,
+            "revision": 0
+          },
+          "requirements": [
+            {
+              "kind": "Shared",
+              "left": "/work/report",
+              "right": "/delivery/live"
+            },
+            {
+              "kind": "Independent",
+              "left": "/work/report",
+              "right": "/archive/snapshot"
+            },
+            {
+              "kind": "Content",
+              "path": "/work/report",
+              "text": "Release notes v1\n"
+            },
+            {
+              "kind": "Content",
+              "path": "/archive/snapshot",
+              "text": "Release notes v1\n"
+            },
+            {
+              "kind": "Preserved",
+              "path": "/work/keep"
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "Shared",
+              "left": "/practice/in/brief",
+              "right": "/practice/out/live"
+            },
+            {
+              "kind": "Independent",
+              "left": "/practice/in/brief",
+              "right": "/practice/archive/copy"
+            }
+          ],
+          "example_commands": [
+            "ln /practice/in/brief /practice/out/live",
+            "cp /practice/in/brief /practice/archive/copy",
+            "stat /practice/in/brief",
+            "stat /practice/out/live",
+            "stat /practice/archive/copy"
+          ]
+        }
+      },
+      "solution": [
+        "rm /delivery/live",
+        "ln /work/report /delivery/live",
+        "cp /work/report /archive/snapshot"
+      ],
+      "prerequisites": [
+        "lpic1-file-handover"
+      ]
+    },
+    {
+      "id": "lpic1-links-relative",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Hard and symbolic links",
+      "unit": "linux-link-handover",
+      "title": "Repair a shortcut from the right directory",
+      "summary": "Make a symbolic link resolve from its containing directory.",
+      "objective": "Repair /delivery/latest as a symbolic link to /work/current. Relative and absolute targets are accepted when they resolve correctly. Preserve the original current file, its identity and /work/keep.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Investigate the supplied files and links, make the required changes, then check the whole result."
+      ],
+      "guide": [],
+      "explanation": "Inspect inode IDs and symbolic-link text first. Use the supported link/copy/move operations for the required relationship, verify contents, and retain protected data. See the worked practice files for a different example.",
+      "hints": [
+        "Use stat to compare regular-file inode IDs; a symbolic link has a different inode from its target.",
+        "A relative symbolic target starts in the directory containing the link. Use stat -L to follow it.",
+        "Retained shared names need the original inode; an independent snapshot needs another regular inode."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man7/symlink.7.html"
+      ],
+      "simplifications": "One bounded virtual device with fixed directories and cwd. No permissions, mount boundaries, open descriptors, directory mutation, overwriting destinations or full GNU utilities. Native file editor changes simulated existing files only. Commands never reach a host shell.",
+      "initial": {
+        "kind": "Links",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_command": 0,
+          "assignment": {
+            "world": {
+              "version": 1,
+              "cwd": "/work",
+              "entries": {
+                "/": 1,
+                "/work": 2,
+                "/delivery": 3,
+                "/archive": 4,
+                "/practice": 5,
+                "/practice/in": 6,
+                "/practice/out": 7,
+                "/practice/archive": 8,
+                "/work/current": 9,
+                "/work/keep": 10,
+                "/delivery/latest": 11
+              },
+              "inodes": {
+                "1": "Directory",
+                "2": "Directory",
+                "3": "Directory",
+                "4": "Directory",
+                "5": "Directory",
+                "6": "Directory",
+                "7": "Directory",
+                "8": "Directory",
+                "9": {
+                  "Regular": {
+                    "data": "Schedule approved\n"
+                  }
+                },
+                "10": {
+                  "Regular": {
+                    "data": "Retain this note\n"
+                  }
+                },
+                "11": {
+                  "SymbolicLink": {
+                    "target": "work/current"
+                  }
+                }
+              },
+              "next_inode": 12,
+              "revision": 0
+            },
+            "history": [],
+            "command": "",
+            "transcript": [],
+            "checked": false,
+            "editor_path": "",
+            "editor_text": "",
+            "editor_open_path": "",
+            "editor_loaded": false
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "cwd": "/work",
+              "entries": {
+                "/": 1,
+                "/work": 2,
+                "/delivery": 3,
+                "/archive": 4,
+                "/practice": 5,
+                "/practice/in": 6,
+                "/practice/out": 7,
+                "/practice/archive": 8,
+                "/practice/in/today": 9,
+                "/practice/out/latest": 10
+              },
+              "inodes": {
+                "1": "Directory",
+                "2": "Directory",
+                "3": "Directory",
+                "4": "Directory",
+                "5": "Directory",
+                "6": "Directory",
+                "7": "Directory",
+                "8": "Directory",
+                "9": {
+                  "Regular": {
+                    "data": "Practice timetable\n"
+                  }
+                },
+                "10": {
+                  "SymbolicLink": {
+                    "target": "in/today"
+                  }
+                }
+              },
+              "next_inode": 11,
+              "revision": 0
+            },
+            "history": [],
+            "command": "",
+            "transcript": [],
+            "checked": false,
+            "editor_path": "",
+            "editor_text": "",
+            "editor_open_path": "",
+            "editor_loaded": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "Links",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "cwd": "/work",
+            "entries": {
+              "/": 1,
+              "/work": 2,
+              "/delivery": 3,
+              "/archive": 4,
+              "/practice": 5,
+              "/practice/in": 6,
+              "/practice/out": 7,
+              "/practice/archive": 8,
+              "/work/current": 9,
+              "/work/keep": 10,
+              "/delivery/latest": 11
+            },
+            "inodes": {
+              "1": "Directory",
+              "2": "Directory",
+              "3": "Directory",
+              "4": "Directory",
+              "5": "Directory",
+              "6": "Directory",
+              "7": "Directory",
+              "8": "Directory",
+              "9": {
+                "Regular": {
+                  "data": "Schedule approved\n"
+                }
+              },
+              "10": {
+                "Regular": {
+                  "data": "Retain this note\n"
+                }
+              },
+              "11": {
+                "SymbolicLink": {
+                  "target": "work/current"
+                }
+              }
+            },
+            "next_inode": 12,
+            "revision": 0
+          },
+          "example": {
+            "version": 1,
+            "cwd": "/work",
+            "entries": {
+              "/": 1,
+              "/work": 2,
+              "/delivery": 3,
+              "/archive": 4,
+              "/practice": 5,
+              "/practice/in": 6,
+              "/practice/out": 7,
+              "/practice/archive": 8,
+              "/practice/in/today": 9,
+              "/practice/out/latest": 10
+            },
+            "inodes": {
+              "1": "Directory",
+              "2": "Directory",
+              "3": "Directory",
+              "4": "Directory",
+              "5": "Directory",
+              "6": "Directory",
+              "7": "Directory",
+              "8": "Directory",
+              "9": {
+                "Regular": {
+                  "data": "Practice timetable\n"
+                }
+              },
+              "10": {
+                "SymbolicLink": {
+                  "target": "in/today"
+                }
+              }
+            },
+            "next_inode": 11,
+            "revision": 0
+          },
+          "requirements": [
+            {
+              "kind": "SymlinkTo",
+              "path": "/delivery/latest",
+              "target": "/work/current"
+            },
+            {
+              "kind": "Preserved",
+              "path": "/work/current"
+            },
+            {
+              "kind": "Preserved",
+              "path": "/work/keep"
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "SymlinkTo",
+              "path": "/practice/out/latest",
+              "target": "/practice/in/today"
+            }
+          ],
+          "example_commands": [
+            "readlink /practice/out/latest",
+            "rm /practice/out/latest",
+            "ln -s ../in/today /practice/out/latest",
+            "stat -L /practice/out/latest",
+            "cat /practice/out/latest"
+          ]
+        }
+      },
+      "solution": [
+        "rm /delivery/latest",
+        "ln -s ../work/current /delivery/latest"
+      ],
+      "prerequisites": [
+        "lpic1-file-handover",
+        "lpic1-links-identity"
+      ]
+    },
+    {
+      "id": "lpic1-links-move",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Hard and symbolic links",
+      "unit": "linux-link-handover",
+      "title": "Move a receipt without losing its identity",
+      "summary": "Preserve a moved file and repair the name pointing to its former location.",
+      "objective": "Move /work/closed to /archive/closed while keeping its original inode and receipt contents. Repair /delivery/receipt as a symbolic link to the archived receipt. Retire the old /work/closed name and preserve /work/keep.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "steps": [
+        "Investigate the supplied files and links, make the required changes, then check the whole result."
+      ],
+      "guide": [],
+      "explanation": "Inspect inode IDs and symbolic-link text first. Use the supported link/copy/move operations for the required relationship, verify contents, and retain protected data. See the worked practice files for a different example.",
+      "hints": [
+        "Use stat to compare regular-file inode IDs; a symbolic link has a different inode from its target.",
+        "A relative symbolic target starts in the directory containing the link. Use stat -L to follow it.",
+        "Retained shared names need the original inode; an independent snapshot needs another regular inode."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man7/symlink.7.html"
+      ],
+      "simplifications": "One bounded virtual device with fixed directories and cwd. No permissions, mount boundaries, open descriptors, directory mutation, overwriting destinations or full GNU utilities. Native file editor changes simulated existing files only. Commands never reach a host shell.",
+      "initial": {
+        "kind": "Links",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_command": 0,
+          "assignment": {
+            "world": {
+              "version": 1,
+              "cwd": "/work",
+              "entries": {
+                "/": 1,
+                "/work": 2,
+                "/delivery": 3,
+                "/archive": 4,
+                "/practice": 5,
+                "/practice/in": 6,
+                "/practice/out": 7,
+                "/practice/archive": 8,
+                "/work/closed": 9,
+                "/work/keep": 10,
+                "/delivery/receipt": 11
+              },
+              "inodes": {
+                "1": "Directory",
+                "2": "Directory",
+                "3": "Directory",
+                "4": "Directory",
+                "5": "Directory",
+                "6": "Directory",
+                "7": "Directory",
+                "8": "Directory",
+                "9": {
+                  "Regular": {
+                    "data": "Receipt 471 closed\n"
+                  }
+                },
+                "10": {
+                  "Regular": {
+                    "data": "Retain this note\n"
+                  }
+                },
+                "11": {
+                  "SymbolicLink": {
+                    "target": "../work/closed"
+                  }
+                }
+              },
+              "next_inode": 12,
+              "revision": 0
+            },
+            "history": [],
+            "command": "",
+            "transcript": [],
+            "checked": false,
+            "editor_path": "",
+            "editor_text": "",
+            "editor_open_path": "",
+            "editor_loaded": false
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "cwd": "/work",
+              "entries": {
+                "/": 1,
+                "/work": 2,
+                "/delivery": 3,
+                "/archive": 4,
+                "/practice": 5,
+                "/practice/in": 6,
+                "/practice/out": 7,
+                "/practice/archive": 8,
+                "/practice/in/receipt": 9,
+                "/practice/out/receipt": 10
+              },
+              "inodes": {
+                "1": "Directory",
+                "2": "Directory",
+                "3": "Directory",
+                "4": "Directory",
+                "5": "Directory",
+                "6": "Directory",
+                "7": "Directory",
+                "8": "Directory",
+                "9": {
+                  "Regular": {
+                    "data": "Practice receipt\n"
+                  }
+                },
+                "10": {
+                  "SymbolicLink": {
+                    "target": "../in/receipt"
+                  }
+                }
+              },
+              "next_inode": 11,
+              "revision": 0
+            },
+            "history": [],
+            "command": "",
+            "transcript": [],
+            "checked": false,
+            "editor_path": "",
+            "editor_text": "",
+            "editor_open_path": "",
+            "editor_loaded": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "Links",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "cwd": "/work",
+            "entries": {
+              "/": 1,
+              "/work": 2,
+              "/delivery": 3,
+              "/archive": 4,
+              "/practice": 5,
+              "/practice/in": 6,
+              "/practice/out": 7,
+              "/practice/archive": 8,
+              "/work/closed": 9,
+              "/work/keep": 10,
+              "/delivery/receipt": 11
+            },
+            "inodes": {
+              "1": "Directory",
+              "2": "Directory",
+              "3": "Directory",
+              "4": "Directory",
+              "5": "Directory",
+              "6": "Directory",
+              "7": "Directory",
+              "8": "Directory",
+              "9": {
+                "Regular": {
+                  "data": "Receipt 471 closed\n"
+                }
+              },
+              "10": {
+                "Regular": {
+                  "data": "Retain this note\n"
+                }
+              },
+              "11": {
+                "SymbolicLink": {
+                  "target": "../work/closed"
+                }
+              }
+            },
+            "next_inode": 12,
+            "revision": 0
+          },
+          "example": {
+            "version": 1,
+            "cwd": "/work",
+            "entries": {
+              "/": 1,
+              "/work": 2,
+              "/delivery": 3,
+              "/archive": 4,
+              "/practice": 5,
+              "/practice/in": 6,
+              "/practice/out": 7,
+              "/practice/archive": 8,
+              "/practice/in/receipt": 9,
+              "/practice/out/receipt": 10
+            },
+            "inodes": {
+              "1": "Directory",
+              "2": "Directory",
+              "3": "Directory",
+              "4": "Directory",
+              "5": "Directory",
+              "6": "Directory",
+              "7": "Directory",
+              "8": "Directory",
+              "9": {
+                "Regular": {
+                  "data": "Practice receipt\n"
+                }
+              },
+              "10": {
+                "SymbolicLink": {
+                  "target": "../in/receipt"
+                }
+              }
+            },
+            "next_inode": 11,
+            "revision": 0
+          },
+          "requirements": [
+            {
+              "kind": "Moved",
+              "source": "/work/closed",
+              "destination": "/archive/closed"
+            },
+            {
+              "kind": "SymlinkTo",
+              "path": "/delivery/receipt",
+              "target": "/archive/closed"
+            },
+            {
+              "kind": "Content",
+              "path": "/archive/closed",
+              "text": "Receipt 471 closed\n"
+            },
+            {
+              "kind": "Preserved",
+              "path": "/work/keep"
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "Moved",
+              "source": "/practice/in/receipt",
+              "destination": "/practice/archive/receipt"
+            },
+            {
+              "kind": "SymlinkTo",
+              "path": "/practice/out/receipt",
+              "target": "/practice/archive/receipt"
+            }
+          ],
+          "example_commands": [
+            "mv /practice/in/receipt /practice/archive/receipt",
+            "readlink /practice/out/receipt",
+            "rm /practice/out/receipt",
+            "ln -s ../archive/receipt /practice/out/receipt",
+            "cat /practice/out/receipt"
+          ]
+        }
+      },
+      "solution": [
+        "mv /work/closed /archive/closed",
+        "rm /delivery/receipt",
+        "ln -s ../archive/closed /delivery/receipt"
+      ],
+      "prerequisites": [
+        "lpic1-file-handover",
+        "lpic1-links-relative"
+      ]
+    },
+    {
+      "id": "lpic1-links-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Hard and symbolic links",
+      "unit": "linux-link-handover",
+      "title": "Publish a new release while retaining the old one",
+      "summary": "Combine hard links, independent copies and a symbolic publication link safely.",
+      "objective": "Retain the original /work/release-old inode at /archive/pin and retire its old name. Keep its contents as an independent /archive/snapshot copy. Point /delivery/current to /work/release-new using a symbolic link. Preserve the new release and /work/keep; future edits to the pinned file must not change the snapshot.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Investigate the supplied files and links, make the required changes, then check the whole result."
+      ],
+      "guide": [],
+      "explanation": "Inspect inode IDs and symbolic-link text first. Use the supported link/copy/move operations for the required relationship, verify contents, and retain protected data. See the worked practice files for a different example.",
+      "hints": [
+        "Use stat to compare regular-file inode IDs; a symbolic link has a different inode from its target.",
+        "A relative symbolic target starts in the directory containing the link. Use stat -L to follow it.",
+        "Retained shared names need the original inode; an independent snapshot needs another regular inode."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man7/symlink.7.html"
+      ],
+      "simplifications": "One bounded virtual device with fixed directories and cwd. No permissions, mount boundaries, open descriptors, directory mutation, overwriting destinations or full GNU utilities. Native file editor changes simulated existing files only. Commands never reach a host shell.",
+      "initial": {
+        "kind": "Links",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_command": 0,
+          "assignment": {
+            "world": {
+              "version": 1,
+              "cwd": "/work",
+              "entries": {
+                "/": 1,
+                "/work": 2,
+                "/delivery": 3,
+                "/archive": 4,
+                "/practice": 5,
+                "/practice/in": 6,
+                "/practice/out": 7,
+                "/practice/archive": 8,
+                "/work/release-old": 9,
+                "/work/release-new": 10,
+                "/work/keep": 11,
+                "/delivery/current": 12
+              },
+              "inodes": {
+                "1": "Directory",
+                "2": "Directory",
+                "3": "Directory",
+                "4": "Directory",
+                "5": "Directory",
+                "6": "Directory",
+                "7": "Directory",
+                "8": "Directory",
+                "9": {
+                  "Regular": {
+                    "data": "Version one retained\n"
+                  }
+                },
+                "10": {
+                  "Regular": {
+                    "data": "Version two approved\n"
+                  }
+                },
+                "11": {
+                  "Regular": {
+                    "data": "Retain this note\n"
+                  }
+                },
+                "12": {
+                  "SymbolicLink": {
+                    "target": "../work/release-old"
+                  }
+                }
+              },
+              "next_inode": 13,
+              "revision": 0
+            },
+            "history": [],
+            "command": "",
+            "transcript": [],
+            "checked": false,
+            "editor_path": "",
+            "editor_text": "",
+            "editor_open_path": "",
+            "editor_loaded": false
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "cwd": "/work",
+              "entries": {
+                "/": 1,
+                "/work": 2,
+                "/delivery": 3,
+                "/archive": 4,
+                "/practice": 5,
+                "/practice/in": 6,
+                "/practice/out": 7,
+                "/practice/archive": 8,
+                "/practice/in/old": 9,
+                "/practice/in/new": 10,
+                "/practice/out/current": 11
+              },
+              "inodes": {
+                "1": "Directory",
+                "2": "Directory",
+                "3": "Directory",
+                "4": "Directory",
+                "5": "Directory",
+                "6": "Directory",
+                "7": "Directory",
+                "8": "Directory",
+                "9": {
+                  "Regular": {
+                    "data": "Old practice revision\n"
+                  }
+                },
+                "10": {
+                  "Regular": {
+                    "data": "New practice revision\n"
+                  }
+                },
+                "11": {
+                  "SymbolicLink": {
+                    "target": "../in/old"
+                  }
+                }
+              },
+              "next_inode": 12,
+              "revision": 0
+            },
+            "history": [],
+            "command": "",
+            "transcript": [],
+            "checked": false,
+            "editor_path": "",
+            "editor_text": "",
+            "editor_open_path": "",
+            "editor_loaded": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "Links",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "cwd": "/work",
+            "entries": {
+              "/": 1,
+              "/work": 2,
+              "/delivery": 3,
+              "/archive": 4,
+              "/practice": 5,
+              "/practice/in": 6,
+              "/practice/out": 7,
+              "/practice/archive": 8,
+              "/work/release-old": 9,
+              "/work/release-new": 10,
+              "/work/keep": 11,
+              "/delivery/current": 12
+            },
+            "inodes": {
+              "1": "Directory",
+              "2": "Directory",
+              "3": "Directory",
+              "4": "Directory",
+              "5": "Directory",
+              "6": "Directory",
+              "7": "Directory",
+              "8": "Directory",
+              "9": {
+                "Regular": {
+                  "data": "Version one retained\n"
+                }
+              },
+              "10": {
+                "Regular": {
+                  "data": "Version two approved\n"
+                }
+              },
+              "11": {
+                "Regular": {
+                  "data": "Retain this note\n"
+                }
+              },
+              "12": {
+                "SymbolicLink": {
+                  "target": "../work/release-old"
+                }
+              }
+            },
+            "next_inode": 13,
+            "revision": 0
+          },
+          "example": {
+            "version": 1,
+            "cwd": "/work",
+            "entries": {
+              "/": 1,
+              "/work": 2,
+              "/delivery": 3,
+              "/archive": 4,
+              "/practice": 5,
+              "/practice/in": 6,
+              "/practice/out": 7,
+              "/practice/archive": 8,
+              "/practice/in/old": 9,
+              "/practice/in/new": 10,
+              "/practice/out/current": 11
+            },
+            "inodes": {
+              "1": "Directory",
+              "2": "Directory",
+              "3": "Directory",
+              "4": "Directory",
+              "5": "Directory",
+              "6": "Directory",
+              "7": "Directory",
+              "8": "Directory",
+              "9": {
+                "Regular": {
+                  "data": "Old practice revision\n"
+                }
+              },
+              "10": {
+                "Regular": {
+                  "data": "New practice revision\n"
+                }
+              },
+              "11": {
+                "SymbolicLink": {
+                  "target": "../in/old"
+                }
+              }
+            },
+            "next_inode": 12,
+            "revision": 0
+          },
+          "requirements": [
+            {
+              "kind": "Moved",
+              "source": "/work/release-old",
+              "destination": "/archive/pin"
+            },
+            {
+              "kind": "Content",
+              "path": "/archive/pin",
+              "text": "Version one retained\n"
+            },
+            {
+              "kind": "Independent",
+              "left": "/archive/pin",
+              "right": "/archive/snapshot"
+            },
+            {
+              "kind": "Content",
+              "path": "/archive/snapshot",
+              "text": "Version one retained\n"
+            },
+            {
+              "kind": "SymlinkTo",
+              "path": "/delivery/current",
+              "target": "/work/release-new"
+            },
+            {
+              "kind": "Preserved",
+              "path": "/work/release-new"
+            },
+            {
+              "kind": "Preserved",
+              "path": "/work/keep"
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "Moved",
+              "source": "/practice/in/old",
+              "destination": "/practice/archive/pin"
+            },
+            {
+              "kind": "Independent",
+              "left": "/practice/archive/pin",
+              "right": "/practice/archive/snapshot"
+            },
+            {
+              "kind": "SymlinkTo",
+              "path": "/practice/out/current",
+              "target": "/practice/in/new"
+            }
+          ],
+          "example_commands": [
+            "ln /practice/in/old /practice/archive/pin",
+            "cp /practice/in/old /practice/archive/snapshot",
+            "rm /practice/in/old",
+            "rm /practice/out/current",
+            "ln -s ../in/new /practice/out/current",
+            "cat /practice/out/current"
+          ]
+        }
+      },
+      "solution": [
+        "ln /work/release-old /archive/pin",
+        "cp /work/release-old /archive/snapshot",
+        "rm /work/release-old",
+        "rm /delivery/current",
+        "ln -s ../work/release-new /delivery/current"
+      ],
+      "prerequisites": [
+        "lpic1-file-handover",
+        "lpic1-links-move"
+      ]
+    }
+  ]
+}

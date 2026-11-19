@@ -1,8 +1,10 @@
 //! Bounded virtual Linux process metadata. No OS/process/filesystem APIs.
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
+mod listeners;
+pub use listeners::{Listener, Protocol};
 
-pub const HELP: &str = "Process simulator subset: ps -eo pid,ppid,user,stat,ni,comm; ps -p PID[,PID...] -o COLUMNS; pgrep -x NAME [-u USER]; kill [-s SIGNAL|-SIGNAL] [--] PID...; renice [--priority] VALUE [-p] PID.... Signals: 0, INT, TERM, KILL, STOP, CONT (Linux x86_64 numbers). No host processes, regex, groups, jobs, spawning or real scheduler. show is a simulator-only snapshot helper.";
+pub const HELP: &str = "Process simulator subset: ps -eo pid,ppid,user,stat,ni,comm; ps -p PID[,PID...] -o COLUMNS; pgrep -x NAME [-u USER]; kill [-s SIGNAL|-SIGNAL] [--] PID...; renice [--priority] VALUE [-p] PID.... Signals: 0, INT, TERM, KILL, STOP, CONT (Linux x86_64 numbers). ss -lntup/-lntp/-lnup (separated/reordered l,n,t,u,p flags supported; -p optional): supplied IPv4 TCP LISTEN/UDP UNCONN metadata only. Recv-Q is fixed empty, TCP Send-Q is supplied backlog and UDP Send-Q is0; no connections, shared sockets or network reachability. All endpoints are visible; -p process details require root or the owner. Pausing an owner does not close its sockets. No host processes, sockets, regex, groups, jobs, spawning or real scheduler. show is a simulator-only snapshot helper.";
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
@@ -44,6 +46,8 @@ pub struct Table {
     pub session: u32,
     #[serde(deserialize_with = "process_map")]
     pub processes: BTreeMap<u32, Process>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty", deserialize_with = "listeners::deserialize")]
+    pub listeners: Vec<Listener>,
 }
 fn process_map<'de, D: serde::Deserializer<'de>>(
     deserializer: D,
@@ -207,7 +211,7 @@ impl Table {
                 at = parent;
             }
         }
-        true
+        listeners::valid(self)
     }
     /// Immutable identities/shape stay pinned when saving or restoring an attempt.
     pub fn same_problem(&self, initial: &Self) -> bool {
@@ -215,6 +219,7 @@ impl Table {
             && initial.valid()
             && self.user == initial.user
             && self.session == initial.session
+            && self.listeners == initial.listeners
             && self.processes.len() == initial.processes.len()
             && self.processes.iter().all(|(id, p)| {
                 initial.processes.get(id).is_some_and(|old| {
@@ -521,6 +526,7 @@ impl Table {
                     .collect::<Result<BTreeSet<_>, _>>()?;
                 self.ps(Some(&ids), columns)
             }
+            ["ss", args @ ..] => self.ss(args),
             ["pgrep", args @ ..] => self.pgrep(args),
             ["kill", args @ ..] => self.kill(args),
             ["renice", args @ ..] => self.renice(args),
@@ -538,6 +544,7 @@ pub enum ExpectedPhase {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Requirement {
+    Listener { endpoint: Listener, present: bool },
     NoPendingTermination { pid: u32 },
     Phase { pid: u32, expected: ExpectedPhase },
     Niceness { pid: u32, value: i8 },
@@ -546,6 +553,7 @@ pub enum Requirement {
 impl Requirement {
     pub fn valid(&self, initial: &Table) -> bool {
         match self {
+            Self::Listener { endpoint, .. } => initial.valid() && initial.listeners.contains(endpoint),
             Self::NoPendingTermination { pid } => initial.processes.contains_key(pid),
             Self::Phase { pid, .. } => initial.processes.contains_key(pid),
             Self::Niceness { pid, value } => {
@@ -561,6 +569,7 @@ impl Requirement {
             return (false, "The process table is invalid".into());
         }
         match self {
+            Self::Listener { endpoint, present } => listeners::check(table, endpoint, *present),
             Self::NoPendingTermination { pid } => {
                 let pass = table.processes.get(pid).is_some_and(|p| {
                     matches!(
@@ -639,10 +648,14 @@ impl Requirement {
                 };
                 (pass, message)
             }
-            Self::Unchanged { pid, expected } => (
-                table.observed_process(*pid).as_ref() == Some(expected),
-                format!("Preserve process {pid} and its settings"),
-            ),
+            Self::Unchanged { pid, expected } => {
+                let pass = table.observed_process(*pid).as_ref() == Some(expected);
+                let mut message = format!("Preserve process {pid} and its settings");
+                if !pass && table.listeners.iter().any(|row| row.pid == *pid) {
+                    message.push_str(&listeners::preservation_feedback(table, *pid, expected));
+                }
+                (pass, message)
+            }
         }
     }
 }

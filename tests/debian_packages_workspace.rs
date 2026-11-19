@@ -218,6 +218,7 @@ fn each_explicit_integrity_record_file_cache_and_availability_predicate_has_its_
                     rt.records.remove(package);
                 })
             }
+            Requirement::ConflictsSatisfied {} => panic!("The legacy-only negative matrix does not author conflict requirements"),
             Requirement::DependenciesSatisfied {} => replace(&mut st, |_, rt| {
                 rt.records.remove("museum-lib");
             }),
@@ -765,6 +766,7 @@ fn legal_pure_model_maxima_can_exceed_app_admission_without_raising_pack_or_prof
                 version: core::Version::parse("1").unwrap(),
                 architecture: core::Architecture::All,
                 depends: vec![],
+                conflicts: vec![],
                 files: files.clone(),
             },
         )]),

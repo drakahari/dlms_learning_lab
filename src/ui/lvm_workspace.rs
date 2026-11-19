@@ -1,4 +1,8 @@
 //! Native widgets for the bounded LVM session; never a host terminal.
+mod config_scan;
+mod device_reference;
+mod mounts;
+mod snapshot;
 use super::*;
 use dlms_learning_lab::{engine::State, lvm_workspace as model, script_teaching::View};
 #[derive(Default)]
@@ -6,17 +10,24 @@ pub(super) struct Metrics {
     pub controls: Vec<(String, egui::Rect, egui::Rect)>,
     pub fields: Vec<(String, egui::Rect, egui::Id, egui::Rect)>,
     pub rows: Vec<(bool, egui::Rect)>,
+    /// Complete task extent, including all requirements.
     pub goal: Option<egui::Rect>,
+    /// Actual lead Label response; scroll anchor, not whole-task coverage.
+    pub goal_anchor: Option<egui::Rect>,
     pub run_id: Option<egui::Id>,
     pub notice: Option<egui::Rect>,
     pub example_choices: Vec<(usize, egui::Rect, egui::Rect)>,
     #[cfg(test)]
     pub capacity_texts: Vec<String>,
     #[cfg(test)]
+    pub physical_facts: Vec<String>,
+    #[cfg(test)]
     pub feedback_texts: Vec<String>,
     #[cfg(test)]
     pub inspected_files: Vec<(String, String)>,
     pub files_viewport: Option<egui::Rect>,
+    pub reader_records: Vec<(String, bool)>,
+    pub reader_rows: Vec<(String, egui::Rect, egui::Rect)>,
     #[cfg(test)]
     pub requested_hints: Vec<String>,
     #[cfg(test)]
@@ -49,6 +60,7 @@ struct NativeEditBuffer<'a> {
     value: &'a mut String,
     rejected: bool,
     received: bool,
+    limit: usize,
 }
 impl egui::TextBuffer for NativeEditBuffer<'_> {
     fn type_id(&self) -> std::any::TypeId {
@@ -70,7 +82,7 @@ impl egui::TextBuffer for NativeEditBuffer<'_> {
                 .value
                 .len()
                 .checked_add(text.len())
-                .is_none_or(|n| n > 2048)
+                .is_none_or(|n| n > self.limit)
         {
             self.rejected = true;
             return 0;
@@ -103,6 +115,11 @@ impl LabApp {
         let engine::Goal::Lvm { definition } = &source.goal else {
             return;
         };
+        if definition.config_scan_task.is_some() {
+            self.lvm_config_scan_page(ui, i);
+            return;
+        }
+        let example_steps = definition.example_steps();
         let root = ui.ctx().cumulative_frame_nr_for(egui::ViewportId::ROOT);
         let packet = ui.input(|i| {
             i.events
@@ -183,25 +200,77 @@ impl LabApp {
         }
         ui.heading(&source.title);
         if view == View::Introduction {
-            ui.label(&definition.lesson.prerequisite_note);
-            for c in &definition.lesson.concepts {
-                ui.strong(&c.title);
-                ui.label(&c.text);
+            lesson_presentation::concepts(
+                ui,
+                &source,
+                &definition.lesson.prerequisite_note,
+                definition
+                    .lesson
+                    .concepts
+                    .iter()
+                    .map(|c| (c.title.clone(), c.text.clone())),
+            );
+            lesson_presentation::worked(ui, &definition.lesson.description);
+            if let Some(p) = &definition.lesson.mount_practice {
+                for step in &p.worked {
+                    mounts::worked(ui, &step.operation, &step.explanation);
+                }
+            } else if definition.initial.pv_capacity.is_some()
+                || definition.snapshot_task.is_some()
+                || definition.device_reference_task.is_some()
+            {
+                for command in &example_steps {
+                    lesson_presentation::command(ui, &command.text, &command.explanation);
+                }
+            } else {
+                lesson_presentation::worked_rows(ui, &source);
             }
-            ui.strong("A different runnable example");
-            ui.label(&definition.lesson.description);
-            for c in &definition.lesson.worked {
-                ui.monospace(&c.text);
-                ui.label(&c.explanation);
+            controls::collapsing_header(ui, "Explore after the worked example").show(ui, |ui| {
+                lesson_presentation::prose(ui, &definition.lesson.try_change);
+            });
+            if definition.mount_task.is_some()
+                || definition.device_reference_task.is_some()
+                || definition.snapshot_task.is_some()
+                || definition.plan.is_some()
+                || definition.retirement.is_some()
+                || definition.availability.is_some()
+                || definition.renaming.is_some()
+                || definition.targets.iter().any(|t| !t.pv_sizes.is_empty())
+            {
+                let mut next = None;
+                ui.horizontal_wrapped(|ui| {
+                    let r = ui.add_enabled(!packet && !blocked, primary(ui, "Try this example"));
+                    self.metrics.lvm.controls.push((
+                        "practice-start".into(),
+                        r.rect,
+                        ui.clip_rect(),
+                    ));
+                    if r.clicked() {
+                        next = Some(View::Example);
+                    }
+                    if ui
+                        .add_enabled(!packet && !blocked, button("Go straight to assignment"))
+                        .clicked()
+                    {
+                        next = Some(View::Assignment);
+                    }
+                });
+                if let Some(next) = next {
+                    match session.set_view(definition, next) {
+                        Ok(()) => {
+                            self.dirty = true;
+                            self.lesson_scroll_reset = true;
+                            self.focus_input = true;
+                        }
+                        Err(e) => self.notice = Some(e),
+                    }
+                }
             }
-            ui.label(&definition.lesson.try_change);
-            ui.label("Open Separate example to insert and run one command at a time. You may go straight to Assignment. No example work is installed in the assignment.");
             return;
         }
         let practice = view == View::Example;
         if practice {
-            ui.strong("Separate example · No assignment credit");
-            ui.label(&definition.lesson.description);
+            lesson_presentation::practice_step(ui, &source, 0);
             let mut selected = session.selected_example;
             let r = ui
                 .add_enabled_ui(!packet && !blocked, |ui| {
@@ -210,10 +279,10 @@ impl LabApp {
                         ("lvm-example", &source.id, attempt.visited),
                         ui.available_width(),
                     )
-                    .selected_text(&definition.lesson.worked[selected].text)
+                    .selected_text(&example_steps[selected].text)
                     .show_ui(ui, |ui| {
                         controls::fit_popup_contents(ui);
-                        for (n, c) in definition.lesson.worked.iter().enumerate() {
+                        for (n, c) in example_steps.iter().enumerate() {
                             let r = ui.selectable_value(&mut selected, n, &c.text);
                             self.metrics
                                 .lvm
@@ -234,15 +303,61 @@ impl LabApp {
                     Err(e) => self.notice = Some(e),
                 }
             }
+            let simulator_step = definition
+                .lesson
+                .snapshot_practice
+                .as_ref()
+                .and_then(|p| p.worked.get(selected))
+                .filter(|s| {
+                    !matches!(s.operation, model::snapshot_flow::Operation::Command { .. })
+                });
+            let reference_step = definition
+                .lesson
+                .device_reference_practice
+                .as_ref()
+                .and_then(|p| p.worked.get(selected))
+                .filter(|_| definition.reference_helper(selected));
+            let mount_step = definition
+                .lesson
+                .mount_practice
+                .as_ref()
+                .and_then(|p| p.worked.get(selected))
+                .filter(|_| definition.mount_helper(selected));
             ui.horizontal_wrapped(|ui| {
-                let r = ui.add_enabled(!packet && !blocked, button("Insert selected command"));
+                let r = ui.add_enabled(
+                    !packet && !blocked,
+                    button(if mount_step.is_some() {
+                        "Fill selected example"
+                    } else if simulator_step.is_some() || reference_step.is_some() {
+                        "Apply selected simulator action"
+                    } else {
+                        "Insert selected command"
+                    }),
+                );
                 self.metrics.insert = Some(r.rect);
                 self.metrics
                     .lvm
                     .controls
                     .push(("insert".into(), r.rect, ui.clip_rect()));
                 if r.clicked() {
-                    match session.insert(definition, selected) {
+                    let result = if let Some(step) = mount_step {
+                        let model::mount_flow::Operation::SavePolicy { text } = &step.operation
+                        else {
+                            unreachable!()
+                        };
+                        session.edit_mount(definition, text.clone(), true)
+                    } else if let Some(step) = reference_step {
+                        session
+                            .apply_reference(definition, &step.operation, true)
+                            .map(|_| ())
+                    } else if let Some(step) = simulator_step {
+                        session
+                            .apply_snapshot(definition, &step.operation, true)
+                            .map(|_| ())
+                    } else {
+                        session.insert(definition, selected)
+                    };
+                    match result {
                         Ok(()) => {
                             navigated = true;
                             self.dirty = true;
@@ -271,15 +386,183 @@ impl LabApp {
             if navigated {
                 return;
             }
-            ui.label(&definition.lesson.worked[selected].explanation);
-            ui.label(format!("Try a change: {}", definition.lesson.try_change));
-            ui.monospace(&definition.lesson.experiment);
-            ui.monospace(&definition.lesson.repair);
+            if let Some(step) = mount_step {
+                mounts::worked(ui, &step.operation, &example_steps[selected].explanation);
+                ui.label("Fill copies this example into its editor only. Choose Save configuration before using mount.");
+            } else {
+                ui.label(&example_steps[selected].explanation);
+            }
+            controls::collapsing_header(ui, if definition.lesson.mount_practice.is_some() || definition.lesson.snapshot_practice.is_some() || definition.lesson.device_reference_practice.is_some(){"Optional exploration · after the worked example"}else{"Experiment commands · after the worked example"}).show(
+                ui,
+                |ui| {
+                    if let Some(p)=&definition.lesson.mount_practice {
+                        lesson_presentation::prose(ui,&definition.lesson.try_change);
+                        mounts::worked(ui,&p.experiment,"Make this deliberate change in the separate example; check which actual requirement now fails.");
+                        for op in &p.repair {mounts::worked(ui,op,"Repair this practice change, inspect the mounted data and check again.");}
+                        return;
+                    }
+                    if let Some(p)=&definition.lesson.device_reference_practice {
+                        lesson_presentation::prose(ui,&definition.lesson.try_change);
+                        lesson_presentation::command(ui,&p.experiment.description(&p.context),"Save this deliberate practice mistake, inspect the actual reader, then check again.");
+                        for op in &p.repair { lesson_presentation::command(ui,&op.description(&p.context),"Repair the separate example, then check again."); }
+                        return;
+                    }
+                    if let Some(p)=&definition.lesson.snapshot_practice {
+                        lesson_presentation::prose(ui,&definition.lesson.try_change);
+                        lesson_presentation::command(ui,&p.experiment.description(&p.context),"Make this deliberate change, inspect the records, then check the example again.");
+                        for operation in &p.repair {
+                            lesson_presentation::command(ui,&operation.description(&p.context),"Repair this practice change, then check again.");
+                        }
+                        if p.repair.is_empty(){ui.label("An exhausted saved view cannot be revived. Reset the example to try again with sufficient COW space before the writes.");}
+                        return;
+                    }
+                    lesson_presentation::command(
+                        ui,
+                        &definition.lesson.experiment,
+                        "Create the described incomplete change.",
+                    );
+                    lesson_presentation::command(
+                        ui,
+                        &definition.lesson.repair,
+                        if !definition.lesson.targets.iter().all(|t| t.pv_sizes.is_empty()) {
+                            "Restore the requested recognized PV end; retain the existing data and other capacity layers."
+                        } else if definition.renaming.is_some() {
+                            "Restore the requested name of the same original object."
+                        } else if definition.availability.is_some() {
+                            "Restore only the requested availability state."
+                        } else if definition.retirement.is_some() {
+                            "Retire only the reintroduced raw allocation or PV label."
+                        } else if definition.plan.is_some() {
+                            "Recreate the requested new raw allocation."
+                        } else {
+                            "Restore filesystem-to-LV agreement."
+                        },
+                    );
+                },
+            );
         } else {
-            let r = ui.label(&source.objective);
-            self.metrics.lvm.goal = Some(r.rect);
+            let r = lesson_presentation::assignment_responses(ui, &source);
+            self.metrics.lvm.goal = Some(r.whole.rect);
+            self.metrics.lvm.goal_anchor = Some(r.goal.rect);
         }
-        ui.label("Simulated storage terminal · pvs, vgs and lvs report current state. No host command runs.");
+        if practice {
+            lesson_presentation::practice_step(ui, &source, 1);
+        }
+        if definition.snapshot_task.is_some() {
+            let result = snapshot::tools(
+                ui,
+                definition,
+                session,
+                practice,
+                !packet
+                    && !blocked
+                    && !self.reset_pending
+                    && !self.settings_open
+                    && !self.theme_preview
+                    && !self.data_tools.modal_open(),
+                &mut self.metrics.lvm,
+            );
+            if result.changed {
+                self.dirty = true;
+                self.notice = None;
+            }
+            if let Some(error) = result.error {
+                self.notice = Some(error);
+            }
+        }
+        let reference_edit = device_reference::tools(
+            ui,
+            definition,
+            session,
+            practice,
+            (
+                !blocked
+                    && !self.reset_pending
+                    && !self.settings_open
+                    && !self.theme_preview
+                    && !self.data_tools.modal_open(),
+                packet,
+            ),
+            (
+                &source.id,
+                source.version,
+                attempt.visited,
+                self.lvm_presentation.generation[usize::from(practice)],
+            ),
+            &mut self.metrics.lvm,
+        );
+        if reference_edit.changed {
+            self.dirty = true;
+            self.notice = None;
+        }
+        if let Some(error) = reference_edit.error {
+            self.notice = Some(error);
+        }
+        let mount_edit = mounts::tools(
+            ui,
+            definition,
+            session,
+            practice,
+            (
+                !blocked
+                    && !self.reset_pending
+                    && !self.settings_open
+                    && !self.theme_preview
+                    && !self.data_tools.modal_open(),
+                packet,
+            ),
+            (
+                &source.id,
+                source.version,
+                attempt.visited,
+                self.lvm_presentation.generation[usize::from(practice)],
+            ),
+            &mut self.metrics.lvm,
+        );
+        if mount_edit.changed {
+            self.dirty = true;
+            self.notice = None;
+        }
+        if let Some(error) = mount_edit.error {
+            self.notice = Some(error);
+        }
+        let supplied = if practice {
+            &session.example
+        } else {
+            &session.current
+        };
+        if supplied.provisioning.is_some() || supplied.pv_capacity.is_some() {
+            controls::collapsing_header(ui, "Supplied device facts").default_open(definition.device_reference_task.is_none()&&definition.mount_task.is_none()).show(ui, |ui| {
+                lesson_presentation::prose(ui, if supplied.pv_capacity.is_some(){"Device and recognized PV sizes are separate. This exercise reserves 1 MiB before data; each group allocates whole physical extents (PEs). Placement facts below are derived simulator facts, not extra pvs columns."}else{"pvs lists initialized physical volumes. This supplied inventory also shows blank devices and data you must preserve."});
+                let rows=supplied.devices.iter().map(|(path,d)| {
+                    let role=match d.role {
+                        dlms_learning_lab::lvm::DeviceRole::Blank=>if supplied.provisioning == Some(dlms_learning_lab::lvm::provision::Profile::Lifecycle) {"No modeled PV label · not secure erasure".to_owned()}else{"Blank · available for initialization".to_owned()},
+                        dlms_learning_lab::lvm::DeviceRole::Foreign=>"Contains other data · leave unchanged".to_owned(),
+                        dlms_learning_lab::lvm::DeviceRole::PhysicalVolume=>if d.group.is_empty(){"Physical volume · not in a group".to_owned()}else{format!("Physical volume · {}",d.group)},
+                    };
+                    let mut text=format!("{} · {role}",capacity(d.bytes));
+                    if let Some(recognized)=d.pv_bytes {
+                        text=format!("Device {} · recognized PV {} · {role}",capacity(d.bytes),capacity(recognized));
+                        if let Some(g)=supplied.groups.get(&d.group){
+                            let count=(recognized-dlms_learning_lab::lvm::DATA_START)/g.extent_bytes;
+                            let high=dlms_learning_lab::lvm::pv_capacity::highest_allocated(supplied,path).ok().flatten().map_or_else(||"none".to_owned(),|v|v.to_string());
+                            text.push_str(&format!(" · {count} PEs of {} · highest allocated PE {high} (numbering starts at 0)",capacity(g.extent_bytes)));
+                        }
+                        #[cfg(test)] self.metrics.lvm.physical_facts.push(format!("{path}: {text}"));
+                    }
+                    (path,text)
+                }).collect::<Vec<_>>();
+                if ui.available_width()<ui.text_style_height(&egui::TextStyle::Body)*40. {
+                    for (path,text) in rows { ui.monospace(path);ui.label(text);ui.add_space(ui.spacing().item_spacing.y); }
+                } else {
+                    let width=ui.available_width()*0.65;
+                    egui::Grid::new(("raw-supplied-devices", &source.id, practice)).num_columns(2).max_col_width(width).spacing([16.,8.]).show(ui, |ui| {
+                        for (path,text) in rows { ui.monospace(path);ui.label(text);ui.end_row(); }
+                    });
+                }
+            });
+        }
+        ui.label(if definition.mount_task.is_some(){"Simulated terminal · inspect with blkid, findmnt and cat; apply saved policy with mount/umount."}else{"Simulated storage terminal · pvs, vgs and lvs report current state."});
         let mut command = if practice {
             session.example_command.clone()
         } else {
@@ -310,14 +593,15 @@ impl LabApp {
             && !self.data_tools.modal_open();
         // Inspect every text event before egui can stop reading at Enter or
         // ignore a paste delivered to an unfocused field. No payload is copied.
-        let invalid_packet = ui.input(|i| {
-            i.events.iter().any(|e| match e {
-                egui::Event::Text(t) | egui::Event::Paste(t) => {
-                    t.len() > 2048 || t.contains(['\0', '\n', '\r'])
-                }
-                _ => false,
-            })
-        });
+        let invalid_packet = !mount_edit.received
+            && ui.input(|i| {
+                i.events.iter().any(|e| match e {
+                    egui::Event::Text(t) | egui::Event::Paste(t) => {
+                        t.len() > 2048 || t.contains(['\0', '\n', '\r'])
+                    }
+                    _ => false,
+                })
+            });
         let after_return = ui.input(|i| {
             let mut returned = false;
             i.events.iter().any(|e| {
@@ -334,16 +618,23 @@ impl LabApp {
             value: &mut command,
             rejected: invalid_packet,
             received: false,
+            limit: 2048,
         };
         let edit = ui.add_enabled(
             active,
             controls::singleline(ui, &mut buffer)
-                .hint_text("e.g. lvs")
+                .hint_text(if definition.mount_task.is_some() {
+                    "e.g. findmnt"
+                } else {
+                    "e.g. lvs"
+                })
                 .id(id)
                 .desired_width(ui.available_width()),
         );
         let mut rejected = buffer.rejected;
-        let ignored = packet && (!buffer.received || after_return);
+        let ignored = packet
+            && ((!buffer.received && !reference_edit.received && !mount_edit.received)
+                || after_return);
         self.metrics
             .lvm
             .fields
@@ -361,19 +652,27 @@ impl LabApp {
                 }
             }
         }
-        if rejected || ignored {
+        if rejected || ignored || reference_edit.rejected || mount_edit.rejected {
             self.lvm_presentation.veto_root = Some(root);
             self.lvm_presentation.held_veto |= ui.input(|i| i.pointer.primary_down());
             if let Some(state) = old_native {
                 state.restore(ui.ctx(), id);
             }
-            self.notice = Some(if rejected {
+            if !reference_edit.rejected && !mount_edit.rejected {
+                self.notice = Some(if rejected {
                 "That edit exceeds the command limit or contains a line break. The previous draft and selection are retained; nothing ran."
             } else {
                 "That text was not applied. Click the command field, retry the edit, then choose the action again."
             }.into());
+            }
         }
-        let allowed = active && !rejected && !ignored;
+        let allowed = active
+            && !rejected
+            && !ignored
+            && !reference_edit.rejected
+            && !reference_edit.received
+            && !mount_edit.rejected
+            && !mount_edit.received;
         let enter = (edit.has_focus() || edit.lost_focus())
             && ui.input(|i| {
                 i.key_pressed(egui::Key::Enter)
@@ -461,7 +760,19 @@ impl LabApp {
             .map(|t| 3 + usize::from(t.fill_lv))
             .sum::<usize>()
             + 1;
-        let capacity_rows = rows.as_ref().is_some_and(|r| r.len() == expected_rows);
+        let initial = if practice {
+            &definition.lesson.fixture
+        } else {
+            &definition.initial
+        };
+        let extra = if storage.pv_capacity.is_some() {
+            storage.devices.len() + targets.iter().filter(|t| t.preserve_volume).count()
+        } else {
+            0
+        };
+        let capacity_rows = rows
+            .as_ref()
+            .is_some_and(|r| r.len() == expected_rows + extra);
         if let Some(text) = &self.notice {
             let r = ui.colored_label(palette(ui).error, format!("Needs attention · {text}"));
             self.metrics.lvm.notice = Some(r.rect);
@@ -476,16 +787,23 @@ impl LabApp {
             let failures = rows.iter().filter(|r| !r.0).count();
             if let Some((index, (_, text))) = rows.iter().enumerate().find(|(_, r)| !r.0) {
                 let first = if capacity_rows {
-                    capacity_check_text(index, text.clone(), storage, targets)
+                    storage_check_text(index, text.clone(), storage, initial, targets)
                 } else {
                     text.clone()
                 };
                 ui.colored_label(
                     palette(ui).error,
-                    format!(
-                        "Needs attention · {failures} of {} checks. First issue: {first}",
-                        rows.len()
-                    ),
+                    if definition.mount_task.is_some() {
+                        format!(
+                            "Needs attention · {failures} of {} checks. Details below.",
+                            rows.len()
+                        )
+                    } else {
+                        format!(
+                            "Needs attention · {failures} of {} checks. First issue: {first}",
+                            rows.len()
+                        )
+                    },
                 );
             } else {
                 ui.colored_label(
@@ -513,7 +831,23 @@ impl LabApp {
                 .stick_to_bottom(true)
                 .show(ui, |ui| {
                     for row in output {
-                        ui.monospace(format!("virtual $ {}", row.input));
+                        if definition.mount_task.is_some() {
+                            ui.monospace(mounts::history(&row.input));
+                        } else if let Some(label) =
+                            device_reference::action_label(definition, &row.input, practice, true)
+                        {
+                            ui.monospace(label);
+                        } else if let Some(context) = definition.snapshot_context(practice) {
+                            let label = model::snapshot_flow::decode(&row.input)
+                                .map_or_else(|_| row.input.clone(), |op| op.description(context));
+                            ui.monospace(if row.input.starts_with(model::snapshot_flow::PREFIX) {
+                                label
+                            } else {
+                                format!("virtual $ {label}")
+                            });
+                        } else {
+                            ui.monospace(format!("virtual $ {}", row.input));
+                        }
                         ui.add(
                             egui::Label::new(RichText::new(&row.output).monospace())
                                 .wrap()
@@ -523,22 +857,78 @@ impl LabApp {
                 })
                 .inner_rect
         });
-        ui.strong("Modeled LV and filesystem capacity");
-        for (vg, g) in &storage.groups {
-            for (lv, v) in &g.volumes {
-                if let Some(fs) = &v.filesystem {
-                    let text = format!(
-                        "{vg}/{lv}: LV {} · filesystem {}",
-                        capacity(v.extents.len() as u64 * g.extent_bytes),
-                        capacity(fs.blocks * dlms_learning_lab::lvm::BLOCK_BYTES)
-                    );
-                    #[cfg(test)]
-                    self.metrics.lvm.capacity_texts.push(text.clone());
-                    ui.label(text);
+        if practice {
+            lesson_presentation::practice_step(ui, &source, 2);
+        }
+        if definition.mount_task.is_none() {
+            ui.strong(
+                if storage.provisioning.is_some()
+                    || storage.pv_capacity.is_some()
+                    || storage.snapshots.is_some()
+                {
+                    "Current allocations and remaining space"
+                } else {
+                    "Modeled LV and filesystem capacity"
+                },
+            );
+            for (vg, g) in &storage.groups {
+                if storage.provisioning.is_some()
+                    || storage.pv_capacity.is_some()
+                    || storage.snapshots.is_some()
+                {
+                    let free = storage.free_extents(vg).unwrap_or(0);
+                    ui.label(format!(
+                        "{vg}: {free} free extents · {} each",
+                        capacity(g.extent_bytes)
+                    ));
+                }
+                for (lv, v) in &g.volumes {
+                    if v.filesystem.is_none()
+                        && (storage.provisioning.is_some() || storage.snapshots.is_some())
+                    {
+                        let mut text = format!(
+                            "{vg}/{lv}: {} · Raw storage · no filesystem or mount",
+                            capacity(v.extents.len() as u64 * g.extent_bytes)
+                        );
+                        if let Some(availability) = &storage.activation {
+                            let id = format!("{vg}/{lv}");
+                            text.push_str(if availability.active[&id] {
+                                " · Active"
+                            } else {
+                                " · Inactive"
+                            });
+                            if availability.open.contains(&id) {
+                                text.push_str(" · Marked open in this exercise");
+                            }
+                        }
+                        #[cfg(test)]
+                        self.metrics.lvm.capacity_texts.push(text.clone());
+                        ui.label(text);
+                    }
+                    if let Some(fs) = &v.filesystem {
+                        let mut text = format!(
+                            "{vg}/{lv}: LV {} · filesystem {}",
+                            capacity(v.extents.len() as u64 * g.extent_bytes),
+                            capacity(fs.blocks * dlms_learning_lab::lvm::BLOCK_BYTES)
+                        );
+                        if let Some(availability) = &storage.activation {
+                            let id = format!("{vg}/{lv}");
+                            text.push_str(if availability.active[&id] {
+                                " · Active"
+                            } else {
+                                " · Inactive"
+                            });
+                            if availability.open.contains(&id) {
+                                text.push_str(" · Marked open in this exercise");
+                            }
+                        }
+                        #[cfg(test)]
+                        self.metrics.lvm.capacity_texts.push(text.clone());
+                        ui.label(text);
+                    }
                 }
             }
-        }
-        let details = ui
+            let details = ui
             .push_id(
                 (
                     "lvm-retained-files",
@@ -553,6 +943,7 @@ impl LabApp {
                         "Inspect retained files and exact byte capacities",
                     )
                     .show(ui, |ui| {
+                        if storage.activation.is_some(){lesson_presentation::prose(ui,"Simulated application reader · availability is required. This is not a Linux mount or a command reading a raw device.");}else if storage.pv_capacity.is_some(){lesson_presentation::prose(ui,"Simulated application reader over supplied data; this is not a Linux mount or a command reading a raw device. Mount/kernel availability is not modeled here.");}
                         let files = egui::ScrollArea::vertical()
                             .id_salt(("lvm-files", &source.id, practice))
                             .max_height(h)
@@ -572,19 +963,18 @@ impl LabApp {
                                                 ui.label("No retained files in this filesystem.");
                                             }
                                             for (path, file) in &fs.files {
-                                                #[cfg(test)]
-                                                self.metrics
-                                                    .lvm
-                                                    .inspected_files
-                                                    .push((path.clone(), file.contents.clone()));
                                                 ui.strong(path);
-                                                ui.add(
-                                                    egui::Label::new(
-                                                        RichText::new(&file.contents).monospace(),
-                                                    )
-                                                    .wrap()
-                                                    .selectable(true),
-                                                );
+                                                let result=if storage.activation.is_some() || storage.pv_capacity.is_some(){storage.read_file(&format!("{vg}/{lv}"),path)}else{Ok(file.contents.as_str())};
+                                                if storage.activation.is_some() || storage.pv_capacity.is_some(){self.metrics.lvm.reader_records.push((format!("{vg}/{lv}:{path}"),result.is_ok()));}
+                                                let response=match result {
+                                                    Ok(contents)=>{
+                                                        #[cfg(test)]
+                                                        self.metrics.lvm.inspected_files.push((path.clone(),contents.to_owned()));
+                                                        ui.add(egui::Label::new(RichText::new(contents).monospace()).wrap().selectable(true))
+                                                    }
+                                                    Err(e)=>ui.label(format!("Reader unavailable: {e}")),
+                                                };
+                                                if storage.activation.is_some() || storage.pv_capacity.is_some(){self.metrics.lvm.reader_rows.push((format!("{vg}/{lv}:{path}"),response.rect,ui.clip_rect()));}
                                             }
                                         }
                                     }
@@ -595,29 +985,34 @@ impl LabApp {
                 },
             )
             .inner;
-        self.metrics.lvm.controls.push((
-            "inspect-files".into(),
-            details.header_response.rect,
-            ui.clip_rect(),
-        ));
+            self.metrics.lvm.controls.push((
+                "inspect-files".into(),
+                details.header_response.rect,
+                ui.clip_rect(),
+            ));
+        }
         if let Some(rows) = rows {
-            for (index, (ok, text)) in rows.into_iter().enumerate() {
-                let text = if capacity_rows {
-                    capacity_check_text(index, text, storage, targets)
-                } else {
-                    text
-                };
-                #[cfg(test)]
-                self.metrics.lvm.feedback_texts.push(text.clone());
-                let r = ui.colored_label(
-                    if ok {
-                        palette(ui).success
+            if definition.mount_task.is_some() {
+                mounts::feedback(ui, &rows, &mut self.metrics.lvm);
+            } else {
+                for (index, (ok, text)) in rows.into_iter().enumerate() {
+                    let text = if capacity_rows {
+                        storage_check_text(index, text, storage, initial, targets)
                     } else {
-                        palette(ui).error
-                    },
-                    format!("{} · {text}", if ok { "Passed" } else { "Needs attention" }),
-                );
-                self.metrics.lvm.rows.push((ok, r.rect));
+                        text
+                    };
+                    #[cfg(test)]
+                    self.metrics.lvm.feedback_texts.push(text.clone());
+                    let r = ui.colored_label(
+                        if ok {
+                            palette(ui).success
+                        } else {
+                            palette(ui).error
+                        },
+                        format!("{} · {text}", if ok { "Passed" } else { "Needs attention" }),
+                    );
+                    self.metrics.lvm.rows.push((ok, r.rect));
+                }
             }
         }
         if !practice {
@@ -662,10 +1057,24 @@ impl LabApp {
                             )
                             .show(ui, |ui| {
                                 ui.label(&source.explanation);
-                                for command in &source.solution {
+                                if let Some(task)=&definition.mount_task {for operation in &task.reference {mounts::worked(ui,operation,"Apply this approach to the supplied assignment, then verify the current mounted data.");}}else{
+                                for (command_index, command) in source.solution.iter().enumerate() {
                                     #[cfg(test)]
                                     self.metrics.lvm.worked_commands.push(command.clone());
-                                    ui.monospace(command);
+                                    if let Some(label) = device_reference::action_label(definition, command, false, false) {
+                                        let r=ui.monospace(label);
+                                        self.metrics.lvm.controls.push((format!("reference-worked-line-{command_index}"),r.rect,ui.clip_rect()));
+                                    } else if let Some(context) = definition.snapshot_context(false) {
+                                        ui.monospace(
+                                            model::snapshot_flow::decode(command).map_or_else(
+                                                |_| command.clone(),
+                                                |op| op.description(context),
+                                            ),
+                                        );
+                                    } else {
+                                        ui.monospace(command);
+                                    }
+                                }
                                 }
                             });
                             self.metrics.lvm.controls.push((
@@ -768,4 +1177,58 @@ fn capacity_check_text(
         first += 3 + usize::from(target.fill_lv);
     }
     fallback
+}
+
+// Only the explicit PV extension prepends metadata/protection rows. Keep the
+// legacy formatter and row ordering unchanged for all earlier source profiles.
+fn storage_check_text(
+    index: usize,
+    fallback: String,
+    storage: &dlms_learning_lab::lvm::State,
+    initial: &dlms_learning_lab::lvm::State,
+    targets: &[model::Target],
+) -> String {
+    if storage.pv_capacity.is_none() {
+        return capacity_check_text(index, fallback, storage, targets);
+    }
+    let mut at = 0;
+    let mut requested = std::collections::BTreeSet::new();
+    for t in targets {
+        for p in &t.pv_sizes {
+            requested.insert(p.device.as_str());
+            if index == at {
+                return format!(
+                    "{}: recognized PV {}; required {}. Device {}. LV and filesystem are separate layers.",
+                    p.device,
+                    capacity(storage.devices[&p.device].pv_bytes.unwrap()),
+                    capacity(p.bytes),
+                    capacity(storage.devices[&p.device].bytes)
+                );
+            }
+            at += 1;
+        }
+        if t.preserve_volume {
+            if index == at {
+                return fallback;
+            }
+            at += 1;
+        }
+    }
+    for (path, d) in &initial.devices {
+        if !requested.contains(path.as_str()) {
+            if index == at {
+                return if let Some(before) = d.pv_bytes {
+                    format!(
+                        "Unrelated {path}: recognized PV {}; keep the supplied {}, signature, group and device size",
+                        capacity(storage.devices[path].pv_bytes.unwrap()),
+                        capacity(before)
+                    )
+                } else {
+                    fallback
+                };
+            }
+            at += 1;
+        }
+    }
+    capacity_check_text(index - at, fallback, storage, targets)
 }

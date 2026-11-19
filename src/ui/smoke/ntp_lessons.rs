@@ -31,6 +31,7 @@ enum Target {
     Scale,
     HeaderChoice(String),
     Goal,
+    GoalAnchor,
     Feedback,
     Notice,
     Text(String),
@@ -739,6 +740,7 @@ impl LabApp {
                 (r.1, r.2.intersect(ctx.content_rect()))
             }
             Target::Goal => (m.ntp.goal.unwrap(), root),
+            Target::GoalAnchor => (m.ntp.goal_anchor.expect("Actual lead Label response"), root),
             Target::Notice => (m.ntp.notice.expect("Actual command-error notice"), root),
             Target::Feedback => {
                 let r = m
@@ -1195,7 +1197,7 @@ impl LabApp {
             }
             Step::Geometry => {
                 let targets = [
-                    Target::Goal,
+                    Target::GoalAnchor,
                     Target::Control("device"),
                     Target::Field,
                     Target::Control("run"),

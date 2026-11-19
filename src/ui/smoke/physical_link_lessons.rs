@@ -1146,7 +1146,7 @@ impl LabApp {
                     46,
                     "Exact normal unit source boundary"
                 );
-                assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 15);
+                assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 19);
                 assert_eq!(
                     self.scenarios
                         .iter()
@@ -1848,7 +1848,12 @@ impl LabApp {
                         return (false, None);
                     }
                 }
-                let r = self.physical_anchor(anchor).expect("Actual capture anchor");
+                let r = self.physical_anchor(anchor).unwrap_or_else(|| {
+                    panic!(
+                        "Actual capture anchor {anchor:?} for {tag} at stage{}",
+                        self.smoke_stage
+                    )
+                });
                 if !self.reveal_smoke_control(ctx, r) {
                     return (false, None);
                 }

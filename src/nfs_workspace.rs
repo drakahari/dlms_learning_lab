@@ -962,6 +962,7 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         terminal_learning,
         process_learning,
         accounts_learning,
+        accounts_template_drafts,
         discovery_draft,
         discovery_learning,
         storage_draft,
@@ -1029,6 +1030,7 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         || terminal_learning.is_some()
         || process_learning.is_some()
         || accounts_learning.is_some()
+        || accounts_template_drafts.is_some()
         || discovery_draft.is_some()
         || discovery_learning.is_some()
         || storage_draft.is_some()

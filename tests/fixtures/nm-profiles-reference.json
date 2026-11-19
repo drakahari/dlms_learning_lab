@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "reference_version": "nmcli tool, version 1.56.1-2.fc44",
+  "reference_binary_sha256": "5fd7577a716dadfd50b34bcd492ff14fd4ea08f09cdab63fd3be5cba666039f9",
+  "original_capture_script_sha256": "5b67786d348a733775c3c65eee29a44adb8b6296b274a58afb91b5186f9e0ff7",
+  "argv": [
+    "nmcli",
+    "--offline",
+    "connection",
+    "modify",
+    "connection.id",
+    "offline-reference-fixture"
+  ],
+  "scope": "Fixed synthetic stdin/stdout normalization; no daemon or host profile access; empty-gateway rejection is a genuine observation, not a successful fixture",
+  "cases": [
+    {
+      "id": "basic",
+      "input": "[connection]\nid=Example profile\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n[ipv4]\nmethod=manual\naddress1=10.20.0.20/24\ngateway=10.20.0.1\nroute-metric=100\n[ipv6]\nmethod=disabled\n",
+      "reference_status": 0,
+      "normalized": "[connection]\nid=offline-reference-fixture\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n\n[ethernet]\n\n[ipv4]\naddress1=10.20.0.20/24\ngateway=10.20.0.1\nmethod=manual\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n\n[proxy]\n",
+      "diagnostic": ""
+    },
+    {
+      "id": "inline-override",
+      "input": "[connection]\nid=Example profile\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n[ipv4]\nmethod=manual\naddress1=10.20.0.20/24,10.20.0.254\ngateway=10.20.0.1\nroute-metric=100\n[ipv6]\nmethod=disabled\n",
+      "reference_status": 0,
+      "normalized": "[connection]\nid=offline-reference-fixture\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n\n[ethernet]\n\n[ipv4]\naddress1=10.20.0.20/24\ngateway=10.20.0.1\nmethod=manual\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n\n[proxy]\n",
+      "diagnostic": ""
+    },
+    {
+      "id": "empty-override",
+      "input": "[connection]\nid=Example profile\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n[ipv4]\nmethod=manual\naddress1=10.20.0.20/24,10.20.0.254\ngateway=\nroute-metric=100\n[ipv6]\nmethod=disabled\n",
+      "reference_status": 1,
+      "normalized": "",
+      "diagnostic": "Error: Error writing connection: ipv4.gateway: gateway is invalid\n"
+    },
+    {
+      "id": "zero-gateway",
+      "input": "[connection]\nid=Example profile\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n[ipv4]\nmethod=manual\naddress1=10.20.0.20/24\ngateway=0.0.0.0\nroute-metric=100\n[ipv6]\nmethod=disabled\n",
+      "reference_status": 0,
+      "normalized": "[connection]\nid=offline-reference-fixture\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n\n[ethernet]\n\n[ipv4]\naddress1=10.20.0.20/24\nmethod=manual\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n\n[proxy]\n",
+      "diagnostic": ""
+    },
+    {
+      "id": "never-default",
+      "input": "[connection]\nid=Example profile\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n[ipv4]\nnever-default=true\nmethod=manual\naddress1=10.20.0.20/24\ngateway=10.20.0.1\nroute-metric=100\n[ipv6]\nmethod=disabled\n",
+      "reference_status": 0,
+      "normalized": "[connection]\nid=offline-reference-fixture\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n\n[ethernet]\n\n[ipv4]\naddress1=10.20.0.20/24\nmethod=manual\nnever-default=true\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n\n[proxy]\n",
+      "diagnostic": ""
+    },
+    {
+      "id": "duplicate-value",
+      "input": "[connection]\nid=Example profile\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=old0\ninterface-name=enp1s0\n[ipv4]\nmethod=manual\naddress1=10.20.0.20/24\ngateway=10.20.0.1\nroute-metric=100\n[ipv6]\nmethod=disabled\n",
+      "reference_status": 0,
+      "normalized": "[connection]\nid=offline-reference-fixture\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n\n[ethernet]\n\n[ipv4]\naddress1=10.20.0.20/24\ngateway=10.20.0.1\nmethod=manual\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n\n[proxy]\n",
+      "diagnostic": ""
+    },
+    {
+      "id": "route-zero",
+      "input": "[connection]\nid=Example profile\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n[ipv4]\nmethod=manual\naddress1=10.20.0.20/24\ngateway=10.20.0.1\nroute-metric=100\nroute1=172.22.0.0/16,10.20.0.1,0\n[ipv6]\nmethod=disabled\n",
+      "reference_status": 0,
+      "normalized": "[connection]\nid=offline-reference-fixture\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n\n[ethernet]\n\n[ipv4]\naddress1=10.20.0.20/24\ngateway=10.20.0.1\nmethod=manual\nroute-metric=100\nroute1=172.22.0.0/16,10.20.0.1,0\n\n[ipv6]\nmethod=disabled\n\n[proxy]\n",
+      "diagnostic": ""
+    },
+    {
+      "id": "legacy-semicolon",
+      "input": "[connection]\nid=Example profile\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n[ipv4]\nmethod=manual\naddress1=10.20.0.20/24;10.20.0.254\nroute-metric=100\n[ipv6]\nmethod=disabled\n",
+      "reference_status": 0,
+      "normalized": "[connection]\nid=offline-reference-fixture\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\n\n[ethernet]\n\n[ipv4]\naddress1=10.20.0.20/24\ngateway=10.20.0.254\nmethod=manual\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n\n[proxy]\n",
+      "diagnostic": ""
+    },
+    {
+      "id": "autoconnect-false",
+      "input": "[connection]\nid=Example profile\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\ninterface-name=enp1s0\nautoconnect=false\nautoconnect-priority=-9\n[ipv4]\nmethod=manual\naddress1=10.20.0.20/24\ngateway=10.20.0.1\nroute-metric=100\n[ipv6]\nmethod=disabled\n",
+      "reference_status": 0,
+      "normalized": "[connection]\nid=offline-reference-fixture\nuuid=00000000-0000-4000-8000-000000000001\ntype=ethernet\nautoconnect=false\nautoconnect-priority=-9\ninterface-name=enp1s0\n\n[ethernet]\n\n[ipv4]\naddress1=10.20.0.20/24\ngateway=10.20.0.1\nmethod=manual\nroute-metric=100\n\n[ipv6]\nmethod=disabled\n\n[proxy]\n",
+      "diagnostic": ""
+    }
+  ]
+}

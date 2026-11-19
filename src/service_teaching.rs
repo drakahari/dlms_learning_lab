@@ -201,6 +201,7 @@ pub fn prepare(a: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
             | crate::engine::State::Lvm { .. }
             | crate::engine::State::Ntp { .. }
             | crate::engine::State::Hsrp { .. }
+            | crate::engine::State::Syslog { .. }
     ) || crate::workspace::is_physical_workspace(a)
     {
         return;

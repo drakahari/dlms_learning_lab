@@ -1,0 +1,286 @@
+[
+  {
+    "name": "Missing registry precedes missing events",
+    "args": [
+      "owners.txt",
+      "events.log"
+    ],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n"
+    },
+    "stdout": "",
+    "stderr": "Owner file is missing.\n",
+    "status": 2,
+    "after": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n"
+    }
+  },
+  {
+    "name": "Invalid owner identifiers and empty owner",
+    "args": [
+      "owners.txt",
+      "events.log"
+    ],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "9edge|North\n",
+      "/work/events.log": "WARN|edge|no\n"
+    },
+    "stdout": "",
+    "stderr": "Invalid owner row: 1\n",
+    "status": 2,
+    "after": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "9edge|North\n",
+      "/work/events.log": "WARN|edge|no\n"
+    }
+  },
+  {
+    "name": "Owner separator count is exact",
+    "args": [
+      "owners.txt",
+      "events.log"
+    ],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "edge|North|Extra\n",
+      "/work/events.log": "WARN|edge|no\n"
+    },
+    "stdout": "",
+    "stderr": "Invalid owner row: 1\n",
+    "status": 2,
+    "after": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "edge|North|Extra\n",
+      "/work/events.log": "WARN|edge|no\n"
+    }
+  },
+  {
+    "name": "Empty owner is rejected",
+    "args": [
+      "owners.txt",
+      "events.log"
+    ],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "edge|\n",
+      "/work/events.log": "WARN|edge|no\n"
+    },
+    "stdout": "",
+    "stderr": "Invalid owner row: 1\n",
+    "status": 2,
+    "after": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "edge|\n",
+      "/work/events.log": "WARN|edge|no\n"
+    }
+  },
+  {
+    "name": "Whitespace-only nonempty owner is literal",
+    "args": [
+      "owners.txt",
+      "events.log"
+    ],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "edge|   \n",
+      "/work/events.log": "WARN|edge|trim nothing\n"
+    },
+    "stdout": "WARN|edge|   |trim nothing\nReported: 1\nSkipped: 0\n",
+    "stderr": "",
+    "status": 0,
+    "after": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "edge|   \n",
+      "/work/events.log": "WARN|edge|trim nothing\n"
+    }
+  },
+  {
+    "name": "Device prefix is not a duplicate key",
+    "args": [
+      "owners.txt",
+      "events.log"
+    ],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "edge|A\nedge-x|B\n",
+      "/work/events.log": "WARN|edge-x|right\nWARN|edge|left\n"
+    },
+    "stdout": "WARN|edge-x|B|right\nWARN|edge|A|left\nReported: 2\nSkipped: 0\n",
+    "stderr": "",
+    "status": 0,
+    "after": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "edge|A\nedge-x|B\n",
+      "/work/events.log": "WARN|edge-x|right\nWARN|edge|left\n"
+    }
+  },
+  {
+    "name": "Info-only stream succeeds with no owner matches",
+    "args": [
+      "owners.txt",
+      "events.log"
+    ],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "",
+      "/work/events.log": "INFO|new|nothing actionable"
+    },
+    "stdout": "Reported: 0\nSkipped: 0\n",
+    "stderr": "",
+    "status": 0,
+    "after": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "",
+      "/work/events.log": "INFO|new|nothing actionable"
+    }
+  },
+  {
+    "name": "Entire8-by8domain with32-byte device and both missing final newlines",
+    "args": [
+      "owners.txt",
+      "events.log"
+    ],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "n0|Team 0\nn1|Team 1\nn2|Team 2\nn3|Team 3\nn4|Team 4\nn5|Team 5\nn6|Team 6\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|Last",
+      "/work/events.log": "WARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 0\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 1\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 2\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 3\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 4\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 5\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 6\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 7"
+    },
+    "stdout": "WARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|Last|event 0\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|Last|event 1\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|Last|event 2\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|Last|event 3\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|Last|event 4\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|Last|event 5\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|Last|event 6\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|Last|event 7\nReported: 8\nSkipped: 0\n",
+    "stderr": "",
+    "status": 0,
+    "after": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "n0|Team 0\nn1|Team 1\nn2|Team 2\nn3|Team 3\nn4|Team 4\nn5|Team 5\nn6|Team 6\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|Last",
+      "/work/events.log": "WARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 0\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 1\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 2\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 3\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 4\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 5\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 6\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 7"
+    }
+  },
+  {
+    "name": "Invalid33-byte registry device",
+    "args": [
+      "owners.txt",
+      "events.log"
+    ],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|Owner\n",
+      "/work/events.log": "WARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 0\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 1\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 2\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 3\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 4\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 5\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 6\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 7"
+    },
+    "stdout": "",
+    "stderr": "Invalid owner row: 1\n",
+    "status": 2,
+    "after": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|Owner\n",
+      "/work/events.log": "WARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 0\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 1\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 2\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 3\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 4\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 5\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 6\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 7"
+    }
+  },
+  {
+    "name": "Invalid Unicode registry device",
+    "args": [
+      "owners.txt",
+      "events.log"
+    ],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "é|Owner\n",
+      "/work/events.log": "WARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 0\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 1\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 2\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 3\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 4\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 5\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 6\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 7"
+    },
+    "stdout": "",
+    "stderr": "Invalid owner row: 1\n",
+    "status": 2,
+    "after": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners.txt": "é|Owner\n",
+      "/work/events.log": "WARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 0\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 1\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 2\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 3\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 4\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 5\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 6\nWARN|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|event 7"
+    }
+  },
+  {
+    "name": "Eight rows, maximum128-byte fields,32-byte devices and80-byte literal filenames",
+    "args": [
+      "owners rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.txt",
+      "events eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.log"
+    ],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.txt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa0|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa2|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa3|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa5|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa6|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+      "/work/events eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.log": "WARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    "stdout": "WARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nReported: 8\nSkipped: 0\n",
+    "stderr": "",
+    "status": 0,
+    "after": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owners rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.txt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa0|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa2|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa3|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa5|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa6|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+      "/work/events eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.log": "WARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nWARN|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa7|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+  },
+  {
+    "name": "Two literal file names with spaces and wildcard",
+    "args": [
+      "owner map *.txt",
+      "events - today.log"
+    ],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owner map *.txt": "edge|North\n",
+      "/work/events - today.log": "ERROR|edge|preserve filenames\n"
+    },
+    "stdout": "ERROR|edge|North|preserve filenames\nReported: 1\nSkipped: 0\n",
+    "stderr": "",
+    "status": 0,
+    "after": {
+      "/work/keep.txt": "Keep this unrelated note.\n",
+      "/work/match.log": "Literal * is message text.\n",
+      "/work/owner map *.txt": "edge|North\n",
+      "/work/events - today.log": "ERROR|edge|preserve filenames\n"
+    }
+  }
+]

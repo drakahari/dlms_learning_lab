@@ -1,6 +1,13 @@
 //! Bounded Unix file model. All paths name in-memory entries, never host files.
+pub mod recursive;
+pub mod size_predicate;
 mod find;
 mod permissions;
+pub mod directory_policy;
+pub mod path_lookup;
+pub mod command_location_policy;
+pub mod whereis_deployment;
+pub mod discovery_policy;
 use crate::engine::{self, Node};
 pub use find::{FindDiagnostic, FindDiagnosticKind, FindReport};
 use serde::{Deserialize, Serialize};
@@ -24,10 +31,14 @@ pub struct Tree {
     pub clock: u64,
     #[serde(default)]
     pub modified: BTreeMap<String, u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub command_location: Option<crate::command_location::Context>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Requirement {
+    CommandLocation { definition: Box<command_location_policy::Definition> },
+    WhereisDeployment { definition: Box<whereis_deployment::Definition> },
     Entry {
         path: String,
         directory: bool,
@@ -69,6 +80,7 @@ pub enum Requirement {
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum Access {
+    ExecuteFile,
     ReadFile,
     WriteFile,
     ListNames,
@@ -77,18 +89,19 @@ pub enum Access {
 }
 impl Access {
     pub(crate) fn directory(self) -> bool {
-        !matches!(self, Self::ReadFile | Self::WriteFile)
+        !matches!(self, Self::ReadFile | Self::WriteFile | Self::ExecuteFile)
     }
     fn mask(self) -> u16 {
         match self {
             Self::ReadFile | Self::ListNames => 4,
             Self::WriteFile => 2,
-            Self::SearchDirectory => 1,
+            Self::SearchDirectory | Self::ExecuteFile => 1,
             Self::CreateEntry => 3,
         }
     }
     pub fn description(self) -> &'static str {
         match self {
+            Self::ExecuteFile => "execute the supplied file (permission query only)",
             Self::ReadFile => "read the file",
             Self::WriteFile => "write the file",
             Self::ListNames => "list names in the directory",
@@ -229,6 +242,8 @@ impl From<PathError> for String {
 }
 impl Requirement {
     pub fn valid(&self) -> bool {
+        if let Self::WhereisDeployment { definition } = self { return definition.validate().is_ok(); }
+        if let Self::CommandLocation { definition } = self { return definition.validate().is_ok(); }
         if let Self::Mask { mask } = self {
             return *mask <= 0o777;
         }
@@ -241,7 +256,7 @@ impl Requirement {
             | Self::Mode { path, .. }
             | Self::Access { path, .. }
             | Self::Ownership { path, .. } => path,
-            Self::Mask { .. } => unreachable!(),
+            Self::Mask { .. } | Self::CommandLocation { .. } | Self::WhereisDeployment { .. } => unreachable!(),
         };
         canonical(path)
             && match self {
@@ -266,6 +281,8 @@ impl Requirement {
             }
     }
     pub fn valid_for(&self, tree: &Tree) -> bool {
+        if let Self::WhereisDeployment { definition } = self { return definition.valid_for(tree); }
+        if let Self::CommandLocation { definition } = self { return definition.valid_for(tree); }
         self.valid()
             && match self {
                 Self::Access { user, .. } => tree.users.contains_key(user),
@@ -277,6 +294,8 @@ impl Requirement {
     }
     pub fn check(&self, tree: &Tree) -> (bool, String) {
         match self {
+            Self::CommandLocation { definition } => definition.check(tree),
+            Self::WhereisDeployment { definition } => definition.check(tree),
             Self::Ownership { path, owner, group } => (
                 self.valid_for(tree)
                     && tree
@@ -392,7 +411,8 @@ impl Requirement {
 }
 impl Tree {
     pub fn valid(&self) -> bool {
-        self.user != "root"
+        self.command_location.as_ref().is_none_or(|c| c.shape().is_ok())
+            && self.user != "root"
             && self.users.contains_key(&self.user)
             && !self.users.is_empty()
             && self.users.len() <= 16
@@ -577,6 +597,7 @@ impl Tree {
     }
     /// Transactional bounded commands: no host I/O, no executable script dispatch.
     pub fn execute(&mut self, input: &str) -> Result<String, String> {
+        if self.command_location.is_some() { return Err("This command-location activity needs its held source; no command ran".into()); }
         if !self.valid() {
             return Err("Invalid virtual filesystem state; no command executed.".into());
         }
@@ -600,6 +621,28 @@ impl Tree {
         }
         *self = candidate;
         Ok(output)
+    }
+    /// Opted filesystem commands always use held original context, never imported rights.
+    pub fn execute_in_context(&mut self, initial:&Self, input:&str)->Result<String,String>{
+        if initial.command_location.is_none(){
+            if self.command_location.is_some(){return Err("Operational context is not present in the held original source".into());}
+            return self.execute(input);
+        }
+        command_location_policy::bound(initial,self)?;
+        if input.len()>4096{return Err("Command exceeds4,096bytes".into());}
+        let words=crate::shell::literal_command(input)?;
+        if words.first().is_some_and(|cmd|cmd=="which"||cmd=="type"){
+            let context=initial.command_location.as_ref().expect("bound source");
+            let output=crate::command_location::execute_bound(context,self.command_location.as_ref(),initial,self,input).map_err(|e|e.to_string())?;
+            return if output.success(){Ok(output.stdout)}else{Err(output.diagnostic)};
+        }
+        if words.as_slice()==["help"]{return Ok(format!("{HELP}\nThis activity additionally supports which NAME and type -a -p NAME for supplied external names. Only permitted caller-owned command-file modes may change."));}
+        if words.as_slice()==["show"]{return Ok(format!("Simulator state · User: {} · Working directory: {} · {} entries\nSupplied PATH: {}",self.user,self.cwd,self.nodes.len(),initial.command_location.as_ref().unwrap().path));}
+        if words.first().is_some_and(|cmd|cmd=="find"){return self.find(&words[1..])?.terminal();}
+        let mut candidate=self.clone();let output=candidate.command(&words)?;
+        command_location_policy::bound(initial,&candidate)?;
+        if output.len()>MAX_OUTPUT{return Err("Output limit reached(32KiB); no command applied".into());}
+        *self=candidate;Ok(output)
     }
     fn command(&mut self, words: &[String]) -> Result<String, String> {
         let Some(cmd) = words.first().map(String::as_str) else {

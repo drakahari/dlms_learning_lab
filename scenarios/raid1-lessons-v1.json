@@ -1,0 +1,2828 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-raid1-replace",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "RAID1 recovery",
+      "unit": "linux-raid1-recovery",
+      "title": "Restore a degraded mirror after a member failure",
+      "summary": "Distinguish readable data from full redundancy, replace a listed failed member and finish copying.",
+      "objective": "Restore /dev/md10 to two synchronized members with matching complete data. Detach the originally listed failed member; retain its old metadata and data rather than erasing it. Retain every supplied ledger segment; partial copying is not completion.",
+      "difficulty": "Intermediate",
+      "minutes": 14,
+      "steps": [
+        "Inspect array state and candidate media.",
+        "Restore the intended member and finish simulated copying.",
+        "Verify actual copies, retained data and protected devices."
+      ],
+      "guide": [],
+      "explanation": "A degraded mirror can still serve its surviving complete copy. Restore redundancy by admitting suitable fresh media and finishing the copy; read actual synchronized membership and retained data afterward. A detached failed member keeps stale metadata. Command exit status alone does not establish healthy storage, and RAID is not a backup.",
+      "hints": [
+        "Use mdadm --detail on the supplied target and compare member roles. Missing is different from a listed faulty device.",
+        "Compare usable MD capacity against the array component requirement; a large raw size does not override too little usable space.",
+        "Adding is only the start. Use the explicitly simulated recovery control, then check actual synchronized copies and protected data."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://github.com/md-raid-utilities/mdadm/blob/8b414a0d4753693d67b9a5822994e5f0c91b0b0a/mdadm.8.in",
+        "https://github.com/torvalds/linux/blob/v6.18/Documentation/admin-guide/md.rst"
+      ],
+      "simplifications": "Supplied active writable two-slot RAID1 only. Fixed textual sample segments are not physical sectors or RAID1 stripe/chunk geometry. Native advance explicitly models copying, not real time. Fresh media only; no re-add, --test, --replace, force, erase, creation, boot/assembly, write activity, last-source failure, real disks or host commands. Protected-media refusal is a simulator safeguard, not a real mdadm promise.",
+      "initial": {
+        "kind": "Raid1",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/vda1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md10"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "Restore a degraded mirror after a member failure: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "Restore a degraded mirror after a member failure: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "Restore a degraded mirror after a member failure: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "Restore a degraded mirror after a member failure: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "Restore a degraded mirror after a member failure: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "Restore a degraded mirror after a member failure: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "Restore a degraded mirror after a member failure: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "Restore a degraded mirror after a member failure: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/vdb1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": false,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md10"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/vdc1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/vdd1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 32768,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              }
+            },
+            "arrays": {
+              "/dev/md10": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/vda1",
+                    "slot": 0,
+                    "role": "synced"
+                  },
+                  {
+                    "device": "/dev/vdb1",
+                    "slot": 1,
+                    "role": "faulty"
+                  }
+                ]
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "devices": {
+              "/dev/vda1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md10"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "Restore a degraded mirror after a member failure: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "Restore a degraded mirror after a member failure: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "Restore a degraded mirror after a member failure: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "Restore a degraded mirror after a member failure: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "Restore a degraded mirror after a member failure: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "Restore a degraded mirror after a member failure: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "Restore a degraded mirror after a member failure: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "Restore a degraded mirror after a member failure: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/vdb1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": false,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md10"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/vdc1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/vdd1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 32768,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              }
+            },
+            "arrays": {
+              "/dev/md10": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/vda1",
+                    "slot": 0,
+                    "role": "synced"
+                  },
+                  {
+                    "device": "/dev/vdb1",
+                    "slot": 1,
+                    "role": "faulty"
+                  }
+                ]
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "devices": {
+              "/dev/vdi1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md30"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "Workshop archive: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "Workshop archive: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "Workshop archive: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "Workshop archive: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "Workshop archive: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "Workshop archive: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "Workshop archive: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "Workshop archive: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/vdj1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": false,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md30"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "obsolete Workshop archive: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "obsolete Workshop archive: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "obsolete Workshop archive: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "obsolete Workshop archive: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "obsolete Workshop archive: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "obsolete Workshop archive: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "obsolete Workshop archive: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "obsolete Workshop archive: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/vdk1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/vdl1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 32768,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              }
+            },
+            "arrays": {
+              "/dev/md30": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/vdi1",
+                    "slot": 0,
+                    "role": "synced"
+                  },
+                  {
+                    "device": "/dev/vdj1",
+                    "slot": 1,
+                    "role": "faulty"
+                  }
+                ]
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "devices": {
+              "/dev/vdi1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md30"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "Workshop archive: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "Workshop archive: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "Workshop archive: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "Workshop archive: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "Workshop archive: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "Workshop archive: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "Workshop archive: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "Workshop archive: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/vdj1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": false,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md30"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "obsolete Workshop archive: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "obsolete Workshop archive: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "obsolete Workshop archive: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "obsolete Workshop archive: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "obsolete Workshop archive: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "obsolete Workshop archive: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "obsolete Workshop archive: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "obsolete Workshop archive: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/vdk1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/vdl1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 32768,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              }
+            },
+            "arrays": {
+              "/dev/md30": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/vdi1",
+                    "slot": 0,
+                    "role": "synced"
+                  },
+                  {
+                    "device": "/dev/vdj1",
+                    "slot": 1,
+                    "role": "faulty"
+                  }
+                ]
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Raid1",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/vda1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md10"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "Restore a degraded mirror after a member failure: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "Restore a degraded mirror after a member failure: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "Restore a degraded mirror after a member failure: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "Restore a degraded mirror after a member failure: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "Restore a degraded mirror after a member failure: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "Restore a degraded mirror after a member failure: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "Restore a degraded mirror after a member failure: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "Restore a degraded mirror after a member failure: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/vdb1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": false,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md10"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "obsolete Restore a degraded mirror after a member failure: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/vdc1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/vdd1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 32768,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              }
+            },
+            "arrays": {
+              "/dev/md10": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/vda1",
+                    "slot": 0,
+                    "role": "synced"
+                  },
+                  {
+                    "device": "/dev/vdb1",
+                    "slot": 1,
+                    "role": "faulty"
+                  }
+                ]
+              }
+            }
+          },
+          "plan": {
+            "array": "/dev/md10"
+          },
+          "lesson": {
+            "prerequisite_note": "Builds on device identity, suitable blank media and protected data in disk preparation and persistent mounts. The MD commands and recovery states are introduced here; all supplied paths are simulated.",
+            "concepts": [
+              {
+                "title": "One readable copy is not restored redundancy",
+                "text": "A two-member RAID1 mirror normally keeps the same data on two members. Degraded means one complete copy is missing, even if files can still be read. A mirror does not replace a backup: it can copy an unwanted change too."
+              },
+              {
+                "title": "Read membership before changing it",
+                "text": "mdadm --detail ARRAY lists the supplied array and its members. A failed member is still listed until it is removed; a missing slot has no attached device to remove. A successful detail command only means the inspection worked, not that the array is healthy."
+              },
+              {
+                "title": "Choose writable blank media with enough usable space",
+                "text": "Compare the required component capacity with the candidate\u2019s usable MD capacity, not just its raw size. Existing data, protected media and unavailable devices are not disposable spares. Adding fresh media to this degraded mirror starts copying; it does not immediately make a complete second copy."
+              },
+              {
+                "title": "Finish copying, then verify the outcome",
+                "text": "Advance simulated recovery copies four small sample segments per click inside this app. Read the progress and inspect the array again. Verify retained files and any protected sibling array. On real Linux the kernel performs recovery; this button is a teaching control, not a Linux command or timing estimate."
+              }
+            ],
+            "description": "The separate example uses /dev/md30. Its component requires32MiB of usable MD capacity. Inspect membership, choose eligible media, copy the eight supplied data segments and verify the retained ledger.",
+            "initial": {
+              "version": 1,
+              "devices": {
+                "/dev/vdi1": {
+                  "raw_sectors": 131072,
+                  "usable_sectors": 98304,
+                  "available": true,
+                  "read_only": false,
+                  "protected": false,
+                  "media": {
+                    "md": {
+                      "array": "/dev/md30"
+                    }
+                  },
+                  "content": [
+                    {
+                      "file": "/ledger.txt",
+                      "index": 0,
+                      "text": "Workshop archive: retained row 1\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 1,
+                      "text": "Workshop archive: retained row 2\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 2,
+                      "text": "Workshop archive: retained row 3\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 3,
+                      "text": "Workshop archive: retained row 4\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 4,
+                      "text": "Workshop archive: retained row 5\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 5,
+                      "text": "Workshop archive: retained row 6\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 6,
+                      "text": "Workshop archive: retained row 7\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 7,
+                      "text": "Workshop archive: retained row 8\n"
+                    }
+                  ]
+                },
+                "/dev/vdj1": {
+                  "raw_sectors": 131072,
+                  "usable_sectors": 98304,
+                  "available": false,
+                  "read_only": false,
+                  "protected": false,
+                  "media": {
+                    "md": {
+                      "array": "/dev/md30"
+                    }
+                  },
+                  "content": [
+                    {
+                      "file": "/ledger.txt",
+                      "index": 0,
+                      "text": "obsolete Workshop archive: retained row 1\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 1,
+                      "text": "obsolete Workshop archive: retained row 2\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 2,
+                      "text": "obsolete Workshop archive: retained row 3\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 3,
+                      "text": "obsolete Workshop archive: retained row 4\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 4,
+                      "text": "obsolete Workshop archive: retained row 5\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 5,
+                      "text": "obsolete Workshop archive: retained row 6\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 6,
+                      "text": "obsolete Workshop archive: retained row 7\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 7,
+                      "text": "obsolete Workshop archive: retained row 8\n"
+                    }
+                  ]
+                },
+                "/dev/vdk1": {
+                  "raw_sectors": 131072,
+                  "usable_sectors": 98304,
+                  "available": true,
+                  "read_only": false,
+                  "protected": false,
+                  "media": "blank",
+                  "content": []
+                },
+                "/dev/vdl1": {
+                  "raw_sectors": 131072,
+                  "usable_sectors": 32768,
+                  "available": true,
+                  "read_only": false,
+                  "protected": false,
+                  "media": "blank",
+                  "content": []
+                }
+              },
+              "arrays": {
+                "/dev/md30": {
+                  "component_sectors": 65536,
+                  "members": [
+                    {
+                      "device": "/dev/vdi1",
+                      "slot": 0,
+                      "role": "synced"
+                    },
+                    {
+                      "device": "/dev/vdj1",
+                      "slot": 1,
+                      "role": "faulty"
+                    }
+                  ]
+                }
+              }
+            },
+            "plan": {
+              "array": "/dev/md30"
+            },
+            "worked": [
+              {
+                "title": "Inspect the example mirror",
+                "explanation": "Run this inspection first. Read the array State and member roles; exit status0 is not a claim of healthy redundancy.",
+                "command": "mdadm --detail /dev/md30",
+                "action": null
+              },
+              {
+                "title": "Detach the listed failed member",
+                "explanation": "The example lists this member as faulty. Remove only that failed member; its old bytes and metadata remain on the detached simulated device.",
+                "command": "mdadm /dev/md30 --remove /dev/vdj1",
+                "action": null
+              },
+              {
+                "title": "Add eligible fresh media",
+                "explanation": "This example candidate is blank, available and large enough in usable MD capacity. After Run command, observe Rebuilding rather than Healthy.",
+                "command": "mdadm /dev/md30 --add /dev/vdk1",
+                "action": null
+              },
+              {
+                "title": "Observe an incomplete copy",
+                "explanation": "Use Advance simulated recovery once. Four of eight actual sample segments are copied; Check example must still report incomplete redundancy.",
+                "command": null,
+                "action": {
+                  "kind": "advance",
+                  "array": "/dev/md30",
+                  "units": 4
+                }
+              },
+              {
+                "title": "Finish copying and inspect",
+                "explanation": "Use Advance simulated recovery once more, then inspect the array and Check example. Read retained data in the read-only view.",
+                "command": null,
+                "action": {
+                  "kind": "advance",
+                  "array": "/dev/md30",
+                  "units": 4
+                }
+              },
+              {
+                "title": "Inspect the completed example",
+                "explanation": "Read the synchronized member roles and Healthy state after both copies agree. The inspection itself does not perform recovery.",
+                "command": "mdadm --detail /dev/md30",
+                "action": null
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "mdadm --detail /dev/md10",
+        "mdadm /dev/md10 --remove /dev/vdb1",
+        "mdadm /dev/md10 --add /dev/vdc1",
+        "raid1 {\"kind\":\"advance\",\"array\":\"/dev/md10\",\"units\":128}"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "lpic2-raid1-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "RAID1 recovery",
+      "unit": "linux-raid1-recovery",
+      "title": "Restore a missing mirror member without damaging a neighbor",
+      "summary": "Choose safe replacement media for an absent slot while retaining an unrelated healthy mirror.",
+      "objective": "Restore /dev/md12 to two synchronized members with matching complete data. Choose any eligible fresh replacement; do not attempt to remove a nonexistent member from the missing slot. Retain every supplied ledger segment; partial copying is not completion. Keep all protected media and the unrelated array, if supplied, unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Inspect array state and candidate media.",
+        "Restore the intended member and finish simulated copying.",
+        "Verify actual copies, retained data and protected devices."
+      ],
+      "guide": [],
+      "explanation": "A degraded mirror can still serve its surviving complete copy. Restore redundancy by admitting suitable fresh media and finishing the copy; read actual synchronized membership and retained data afterward. A detached failed member keeps stale metadata. Command exit status alone does not establish healthy storage, and RAID is not a backup.",
+      "hints": [
+        "Use mdadm --detail on the supplied target and compare member roles. Missing is different from a listed faulty device.",
+        "Compare usable MD capacity against the array component requirement; a large raw size does not override too little usable space.",
+        "Adding is only the start. Use the explicitly simulated recovery control, then check actual synchronized copies and protected data."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://github.com/md-raid-utilities/mdadm/blob/8b414a0d4753693d67b9a5822994e5f0c91b0b0a/mdadm.8.in",
+        "https://github.com/torvalds/linux/blob/v6.18/Documentation/admin-guide/md.rst"
+      ],
+      "simplifications": "Supplied active writable two-slot RAID1 only. Fixed textual sample segments are not physical sectors or RAID1 stripe/chunk geometry. Native advance explicitly models copying, not real time. Fresh media only; no re-add, --test, --replace, force, erase, creation, boot/assembly, write activity, last-source failure, real disks or host commands. Protected-media refusal is a simulator safeguard, not a real mdadm promise.",
+      "initial": {
+        "kind": "Raid1",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/sda1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md12"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdb1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": false,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdc1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdd1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 32768,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sde1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "foreign",
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "another project: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "another project: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "another project: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "another project: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "another project: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "another project: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "another project: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "another project: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdf1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdg1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": true,
+                "media": {
+                  "md": {
+                    "array": "/dev/md13"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdh1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": true,
+                "media": {
+                  "md": {
+                    "array": "/dev/md13"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 8\n"
+                  }
+                ]
+              }
+            },
+            "arrays": {
+              "/dev/md12": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/sda1",
+                    "slot": 0,
+                    "role": "synced"
+                  }
+                ]
+              },
+              "/dev/md13": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/sdg1",
+                    "slot": 0,
+                    "role": "synced"
+                  },
+                  {
+                    "device": "/dev/sdh1",
+                    "slot": 1,
+                    "role": "synced"
+                  }
+                ]
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "devices": {
+              "/dev/sda1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md12"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdb1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": false,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdc1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdd1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 32768,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sde1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "foreign",
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "another project: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "another project: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "another project: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "another project: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "another project: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "another project: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "another project: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "another project: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdf1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdg1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": true,
+                "media": {
+                  "md": {
+                    "array": "/dev/md13"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdh1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": true,
+                "media": {
+                  "md": {
+                    "array": "/dev/md13"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 8\n"
+                  }
+                ]
+              }
+            },
+            "arrays": {
+              "/dev/md12": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/sda1",
+                    "slot": 0,
+                    "role": "synced"
+                  }
+                ]
+              },
+              "/dev/md13": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/sdg1",
+                    "slot": 0,
+                    "role": "synced"
+                  },
+                  {
+                    "device": "/dev/sdh1",
+                    "slot": 1,
+                    "role": "synced"
+                  }
+                ]
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "devices": {
+              "/dev/sdi1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md32"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "Gallery handover: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "Gallery handover: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "Gallery handover: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "Gallery handover: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "Gallery handover: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "Gallery handover: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "Gallery handover: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "Gallery handover: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdj1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": false,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdk1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdl1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 32768,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdm1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "foreign",
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "another project: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "another project: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "another project: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "another project: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "another project: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "another project: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "another project: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "another project: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdn1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdo1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": true,
+                "media": {
+                  "md": {
+                    "array": "/dev/md33"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "protected Gallery handover: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "protected Gallery handover: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "protected Gallery handover: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "protected Gallery handover: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "protected Gallery handover: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "protected Gallery handover: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "protected Gallery handover: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "protected Gallery handover: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdp1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": true,
+                "media": {
+                  "md": {
+                    "array": "/dev/md33"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "protected Gallery handover: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "protected Gallery handover: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "protected Gallery handover: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "protected Gallery handover: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "protected Gallery handover: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "protected Gallery handover: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "protected Gallery handover: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "protected Gallery handover: retained row 8\n"
+                  }
+                ]
+              }
+            },
+            "arrays": {
+              "/dev/md32": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/sdi1",
+                    "slot": 0,
+                    "role": "synced"
+                  }
+                ]
+              },
+              "/dev/md33": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/sdo1",
+                    "slot": 0,
+                    "role": "synced"
+                  },
+                  {
+                    "device": "/dev/sdp1",
+                    "slot": 1,
+                    "role": "synced"
+                  }
+                ]
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "devices": {
+              "/dev/sdi1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md32"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "Gallery handover: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "Gallery handover: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "Gallery handover: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "Gallery handover: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "Gallery handover: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "Gallery handover: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "Gallery handover: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "Gallery handover: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdj1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": false,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdk1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdl1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 32768,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdm1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "foreign",
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "another project: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "another project: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "another project: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "another project: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "another project: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "another project: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "another project: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "another project: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdn1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdo1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": true,
+                "media": {
+                  "md": {
+                    "array": "/dev/md33"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "protected Gallery handover: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "protected Gallery handover: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "protected Gallery handover: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "protected Gallery handover: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "protected Gallery handover: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "protected Gallery handover: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "protected Gallery handover: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "protected Gallery handover: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdp1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": true,
+                "media": {
+                  "md": {
+                    "array": "/dev/md33"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "protected Gallery handover: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "protected Gallery handover: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "protected Gallery handover: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "protected Gallery handover: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "protected Gallery handover: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "protected Gallery handover: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "protected Gallery handover: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "protected Gallery handover: retained row 8\n"
+                  }
+                ]
+              }
+            },
+            "arrays": {
+              "/dev/md32": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/sdi1",
+                    "slot": 0,
+                    "role": "synced"
+                  }
+                ]
+              },
+              "/dev/md33": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/sdo1",
+                    "slot": 0,
+                    "role": "synced"
+                  },
+                  {
+                    "device": "/dev/sdp1",
+                    "slot": 1,
+                    "role": "synced"
+                  }
+                ]
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Raid1",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/sda1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": {
+                  "md": {
+                    "array": "/dev/md12"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "Restore a missing mirror member without damaging a neighbor: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdb1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": false,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdc1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdd1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 32768,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sde1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "foreign",
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "another project: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "another project: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "another project: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "another project: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "another project: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "another project: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "another project: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "another project: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdf1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": false,
+                "media": "blank",
+                "content": []
+              },
+              "/dev/sdg1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": true,
+                "media": {
+                  "md": {
+                    "array": "/dev/md13"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 8\n"
+                  }
+                ]
+              },
+              "/dev/sdh1": {
+                "raw_sectors": 131072,
+                "usable_sectors": 98304,
+                "available": true,
+                "read_only": false,
+                "protected": true,
+                "media": {
+                  "md": {
+                    "array": "/dev/md13"
+                  }
+                },
+                "content": [
+                  {
+                    "file": "/ledger.txt",
+                    "index": 0,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 1\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 1,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 2\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 2,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 3\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 3,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 4\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 4,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 5\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 5,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 6\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 6,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 7\n"
+                  },
+                  {
+                    "file": "/ledger.txt",
+                    "index": 7,
+                    "text": "protected Restore a missing mirror member without damaging a neighbor: retained row 8\n"
+                  }
+                ]
+              }
+            },
+            "arrays": {
+              "/dev/md12": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/sda1",
+                    "slot": 0,
+                    "role": "synced"
+                  }
+                ]
+              },
+              "/dev/md13": {
+                "component_sectors": 65536,
+                "members": [
+                  {
+                    "device": "/dev/sdg1",
+                    "slot": 0,
+                    "role": "synced"
+                  },
+                  {
+                    "device": "/dev/sdh1",
+                    "slot": 1,
+                    "role": "synced"
+                  }
+                ]
+              }
+            }
+          },
+          "plan": {
+            "array": "/dev/md12"
+          },
+          "lesson": {
+            "prerequisite_note": "Builds on device identity, suitable blank media and protected data in disk preparation and persistent mounts. The MD commands and recovery states are introduced here; all supplied paths are simulated.",
+            "concepts": [
+              {
+                "title": "One readable copy is not restored redundancy",
+                "text": "A two-member RAID1 mirror normally keeps the same data on two members. Degraded means one complete copy is missing, even if files can still be read. A mirror does not replace a backup: it can copy an unwanted change too."
+              },
+              {
+                "title": "Read membership before changing it",
+                "text": "mdadm --detail ARRAY lists the supplied array and its members. A failed member is still listed until it is removed; a missing slot has no attached device to remove. A successful detail command only means the inspection worked, not that the array is healthy."
+              },
+              {
+                "title": "Choose writable blank media with enough usable space",
+                "text": "Compare the required component capacity with the candidate\u2019s usable MD capacity, not just its raw size. Existing data, protected media and unavailable devices are not disposable spares. Adding fresh media to this degraded mirror starts copying; it does not immediately make a complete second copy."
+              },
+              {
+                "title": "Finish copying, then verify the outcome",
+                "text": "Advance simulated recovery copies four small sample segments per click inside this app. Read the progress and inspect the array again. Verify retained files and any protected sibling array. On real Linux the kernel performs recovery; this button is a teaching control, not a Linux command or timing estimate."
+              }
+            ],
+            "description": "The separate example uses /dev/md32. Its component requires32MiB of usable MD capacity. Inspect membership, choose eligible media, copy the eight supplied data segments and verify the retained ledger.",
+            "initial": {
+              "version": 1,
+              "devices": {
+                "/dev/sdi1": {
+                  "raw_sectors": 131072,
+                  "usable_sectors": 98304,
+                  "available": true,
+                  "read_only": false,
+                  "protected": false,
+                  "media": {
+                    "md": {
+                      "array": "/dev/md32"
+                    }
+                  },
+                  "content": [
+                    {
+                      "file": "/ledger.txt",
+                      "index": 0,
+                      "text": "Gallery handover: retained row 1\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 1,
+                      "text": "Gallery handover: retained row 2\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 2,
+                      "text": "Gallery handover: retained row 3\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 3,
+                      "text": "Gallery handover: retained row 4\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 4,
+                      "text": "Gallery handover: retained row 5\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 5,
+                      "text": "Gallery handover: retained row 6\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 6,
+                      "text": "Gallery handover: retained row 7\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 7,
+                      "text": "Gallery handover: retained row 8\n"
+                    }
+                  ]
+                },
+                "/dev/sdj1": {
+                  "raw_sectors": 131072,
+                  "usable_sectors": 98304,
+                  "available": false,
+                  "read_only": false,
+                  "protected": false,
+                  "media": "blank",
+                  "content": []
+                },
+                "/dev/sdk1": {
+                  "raw_sectors": 131072,
+                  "usable_sectors": 98304,
+                  "available": true,
+                  "read_only": false,
+                  "protected": false,
+                  "media": "blank",
+                  "content": []
+                },
+                "/dev/sdl1": {
+                  "raw_sectors": 131072,
+                  "usable_sectors": 32768,
+                  "available": true,
+                  "read_only": false,
+                  "protected": false,
+                  "media": "blank",
+                  "content": []
+                },
+                "/dev/sdm1": {
+                  "raw_sectors": 131072,
+                  "usable_sectors": 98304,
+                  "available": true,
+                  "read_only": false,
+                  "protected": false,
+                  "media": "foreign",
+                  "content": [
+                    {
+                      "file": "/ledger.txt",
+                      "index": 0,
+                      "text": "another project: retained row 1\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 1,
+                      "text": "another project: retained row 2\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 2,
+                      "text": "another project: retained row 3\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 3,
+                      "text": "another project: retained row 4\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 4,
+                      "text": "another project: retained row 5\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 5,
+                      "text": "another project: retained row 6\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 6,
+                      "text": "another project: retained row 7\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 7,
+                      "text": "another project: retained row 8\n"
+                    }
+                  ]
+                },
+                "/dev/sdn1": {
+                  "raw_sectors": 131072,
+                  "usable_sectors": 98304,
+                  "available": true,
+                  "read_only": false,
+                  "protected": false,
+                  "media": "blank",
+                  "content": []
+                },
+                "/dev/sdo1": {
+                  "raw_sectors": 131072,
+                  "usable_sectors": 98304,
+                  "available": true,
+                  "read_only": false,
+                  "protected": true,
+                  "media": {
+                    "md": {
+                      "array": "/dev/md33"
+                    }
+                  },
+                  "content": [
+                    {
+                      "file": "/ledger.txt",
+                      "index": 0,
+                      "text": "protected Gallery handover: retained row 1\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 1,
+                      "text": "protected Gallery handover: retained row 2\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 2,
+                      "text": "protected Gallery handover: retained row 3\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 3,
+                      "text": "protected Gallery handover: retained row 4\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 4,
+                      "text": "protected Gallery handover: retained row 5\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 5,
+                      "text": "protected Gallery handover: retained row 6\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 6,
+                      "text": "protected Gallery handover: retained row 7\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 7,
+                      "text": "protected Gallery handover: retained row 8\n"
+                    }
+                  ]
+                },
+                "/dev/sdp1": {
+                  "raw_sectors": 131072,
+                  "usable_sectors": 98304,
+                  "available": true,
+                  "read_only": false,
+                  "protected": true,
+                  "media": {
+                    "md": {
+                      "array": "/dev/md33"
+                    }
+                  },
+                  "content": [
+                    {
+                      "file": "/ledger.txt",
+                      "index": 0,
+                      "text": "protected Gallery handover: retained row 1\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 1,
+                      "text": "protected Gallery handover: retained row 2\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 2,
+                      "text": "protected Gallery handover: retained row 3\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 3,
+                      "text": "protected Gallery handover: retained row 4\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 4,
+                      "text": "protected Gallery handover: retained row 5\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 5,
+                      "text": "protected Gallery handover: retained row 6\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 6,
+                      "text": "protected Gallery handover: retained row 7\n"
+                    },
+                    {
+                      "file": "/ledger.txt",
+                      "index": 7,
+                      "text": "protected Gallery handover: retained row 8\n"
+                    }
+                  ]
+                }
+              },
+              "arrays": {
+                "/dev/md32": {
+                  "component_sectors": 65536,
+                  "members": [
+                    {
+                      "device": "/dev/sdi1",
+                      "slot": 0,
+                      "role": "synced"
+                    }
+                  ]
+                },
+                "/dev/md33": {
+                  "component_sectors": 65536,
+                  "members": [
+                    {
+                      "device": "/dev/sdo1",
+                      "slot": 0,
+                      "role": "synced"
+                    },
+                    {
+                      "device": "/dev/sdp1",
+                      "slot": 1,
+                      "role": "synced"
+                    }
+                  ]
+                }
+              }
+            },
+            "plan": {
+              "array": "/dev/md32"
+            },
+            "worked": [
+              {
+                "title": "Inspect the example mirror",
+                "explanation": "Run this inspection first. Read the array State and member roles; exit status0 is not a claim of healthy redundancy.",
+                "command": "mdadm --detail /dev/md32",
+                "action": null
+              },
+              {
+                "title": "Add eligible fresh media",
+                "explanation": "This example candidate is blank, available and large enough in usable MD capacity. After Run command, observe Rebuilding rather than Healthy.",
+                "command": "mdadm /dev/md32 --add /dev/sdk1",
+                "action": null
+              },
+              {
+                "title": "Observe an incomplete copy",
+                "explanation": "Use Advance simulated recovery once. Four of eight actual sample segments are copied; Check example must still report incomplete redundancy.",
+                "command": null,
+                "action": {
+                  "kind": "advance",
+                  "array": "/dev/md32",
+                  "units": 4
+                }
+              },
+              {
+                "title": "Finish copying and inspect",
+                "explanation": "Use Advance simulated recovery once more, then inspect the array and Check example. Read retained data in the read-only view.",
+                "command": null,
+                "action": {
+                  "kind": "advance",
+                  "array": "/dev/md32",
+                  "units": 4
+                }
+              },
+              {
+                "title": "Inspect the completed example",
+                "explanation": "Read the synchronized member roles and Healthy state after both copies agree. The inspection itself does not perform recovery.",
+                "command": "mdadm --detail /dev/md32",
+                "action": null
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "mdadm --detail /dev/md12",
+        "mdadm /dev/md12 --add /dev/sdc1",
+        "raid1 {\"kind\":\"advance\",\"array\":\"/dev/md12\",\"units\":128}"
+      ],
+      "prerequisites": [
+        "lpic2-raid1-replace"
+      ]
+    }
+  ]
+}

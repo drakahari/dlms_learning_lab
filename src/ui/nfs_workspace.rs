@@ -1071,7 +1071,6 @@ fn page(
                 }))
     });
     m.nfs.heading = Some(ui.heading(&s.title).rect);
-    ui.label(RichText::new(&s.objective).strong());
     ui.label(RichText::new("Supplied virtual NFS · Existing files and numeric identities only; nothing runs on the host").small());
     let old = view(a);
     let mut current = old;
@@ -1107,13 +1106,19 @@ fn page(
     }
     if current == teaching::View::Introduction {
         if let Some(l) = &s.nfs_teaching {
-            ui.label(&l.prerequisite_note);
-            for c in &l.concepts {
-                ui.strong(&c.title);
-                ui.label(&c.text);
-            }
-            ui.strong("A separate example to investigate");
-            ui.label(&l.example_description);
+            lesson_presentation::concepts(
+                ui,
+                s,
+                &l.prerequisite_note,
+                l.concepts.iter().map(|c| (c.title.clone(), c.text.clone())),
+            );
+            lesson_presentation::worked(ui, &l.example_description);
+            lesson_presentation::worked_rows(ui, s);
+            controls::collapsing_header(ui, "Full worked sequence").show(ui, |ui| {
+                for (n, step) in l.example_actions.iter().enumerate() {
+                    lesson_presentation::section(ui, n + 1, &step.title, &step.explanation);
+                }
+            });
             ui.add_enabled_ui(active && !rejected, |ui| {
                 if button_action(ui, &mut m.nfs, "try-example", "Try this example", true) {
                     match work::set_practice_presentation(a, s, Some(teaching::View::Example), None)
@@ -1133,6 +1138,9 @@ fn page(
         return dirty;
     }
     let practice = current == teaching::View::Example;
+    if !practice {
+        lesson_presentation::assignment(ui, s);
+    }
     let scope = egui::Id::new(("nfs", &s.id, s.version, a.visited, practice, p.epoch));
     // Prepass admission is fresh or an exact complete-key hit, not a persisted checked flag.
     if !p.memo.admitted(&s.id) {
@@ -1150,12 +1158,12 @@ fn page(
         ..Default::default()
     };
     if practice && let Some(l) = &s.nfs_teaching {
-        ui.strong("Separate example · Ungraded");
-        ui.label(&l.example_description);
+        lesson_presentation::practice_step(ui, s, 0);
         ui.add_enabled_ui(active,|ui|{let selected=a.workspace.as_ref().unwrap().nfs_learning.as_ref().unwrap().selected_example;let mut choice=selected;controls::form_row(ui,"Example action",|ui,width|{let combo=controls::dropdown(ui,scope.with("example-action"),width).selected_text(&l.example_actions[selected].title).show_ui(ui,|ui|{controls::fit_popup_contents(ui);for(n,step)in l.example_actions.iter().enumerate(){let r=ui.selectable_value(&mut choice,n,&step.title);m.nfs.choices.push((format!("example-action:{n}"),r.rect));}m.nfs.popup=Some(("example-action".into(),controls::popup_content_clip(ui)));});m.nfs.controls.push(("example-action".into(),combo.response.rect,combo.response.enabled(),ui.clip_rect()));});if choice!=selected{match work::set_practice_presentation(a,s,None,Some(choice)){Ok(())=>dirty=true,Err(e)=>{edits.rejected=true;p.notice=Some(work::notice(e));}}}
    let chosen=a.workspace.as_ref().unwrap().nfs_learning.as_ref().unwrap().selected_example;ui.label(&l.example_actions[chosen].explanation);ui.horizontal_wrapped(|ui|{queue(&mut edits.q,button_action(ui,&mut m.nfs,"fill","Fill example fields only",false),Submit::Fill);queue(&mut edits.q,button_action(ui,&mut m.nfs,"reset-example","Reset example",false),Submit::ResetExample);});
    egui::CollapsingHeader::new("Experiment and repair · Optional").id_salt(scope.with("experiment")).show(ui,|ui|{ui.label(&l.try_change.description);ui.label("Try the described change with the actual editor/actions, Check, then repair it.");});
   });
+        lesson_presentation::practice_step(ui, s, 1);
     } else if !a.challenge {
         egui::CollapsingHeader::new("Task stages and help · Optional")
             .id_salt(scope.with("help"))
@@ -1196,6 +1204,9 @@ fn page(
         requests(ui, a, practice, p, &mut m.nfs, scope, &mut edits);
         write_editor(ui, p, &mut m.nfs, scope, &mut edits, required_write);
     });
+    if practice {
+        lesson_presentation::practice_step(ui, s, 2);
+    }
     ui.add_enabled_ui(active, |ui| {
         queue(
             &mut edits.q,

@@ -1,0 +1,4067 @@
+[
+  {
+    "definition": {
+      "source_id": "lpic2-router-local-transit-policy",
+      "assignment": {
+        "initial": {
+          "host": {
+            "version": 1,
+            "profile": {
+              "id": "assignment-router-0",
+              "links": [
+                {
+                  "name": "lan0",
+                  "network": {
+                    "address": "10.20.30.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "wan0",
+                  "network": {
+                    "address": "198.51.100.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "198.51.100.254",
+                  "device": "wan0",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "203.0.113.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "203.0.113.9",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.53",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.10",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.54",
+                  "available": true
+                },
+                {
+                  "address": "10.20.30.55",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.75",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "lan0",
+                  "up": true,
+                  "address": {
+                    "address": "10.20.30.1",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "wan0",
+                  "up": true,
+                  "address": {
+                    "address": "198.51.100.1",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "198.51.100.254",
+                  "device": "wan0",
+                  "metric": 10
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "filter": {
+            "input": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": null,
+                  "destination": null,
+                  "ingress": null,
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 22,
+                  "target": "Accept"
+                },
+                {
+                  "source": null,
+                  "destination": null,
+                  "ingress": null,
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 443,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "forward": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": null,
+                  "destination": null,
+                  "ingress": null,
+                  "egress": null,
+                  "protocol": "Udp",
+                  "source_port": null,
+                  "destination_port": 53,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "output": {
+              "policy": "Accept",
+              "rules": []
+            }
+          },
+          "forwarding": true,
+          "filter_file": "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT DROP [0:0]\nCOMMIT\n",
+          "forward_file": "net.ipv4.ip_forward = 0\n"
+        },
+        "files": false,
+        "persistence": false,
+        "forwarding": true,
+        "policies": [
+          {
+            "chain": "Input",
+            "domains": [
+              {
+                "source": null,
+                "destination": {
+                  "network": "10.20.30.1",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": {
+                  "network": "198.51.100.1",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "10.20.30.1",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 22,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "chain": "Forward",
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              },
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.53",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": 53,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "chain": "Output",
+            "domains": [
+              {
+                "source": {
+                  "network": "10.20.30.1",
+                  "prefix": 32
+                },
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": {
+                  "network": "198.51.100.1",
+                  "prefix": 32
+                },
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ]
+          }
+        ],
+        "cases": [
+          {
+            "id": "admin-lan",
+            "label": "LAN SSH to the router",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "10.20.30.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 22
+            },
+            "allow": true
+          },
+          {
+            "id": "admin-wan",
+            "label": "WAN SSH stays blocked",
+            "origin": {
+              "incoming": "wan0"
+            },
+            "header": {
+              "source": "203.0.113.75",
+              "destination": "10.20.30.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 22
+            },
+            "allow": false
+          },
+          {
+            "id": "router-web",
+            "label": "The router is not a web server",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "10.20.30.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "lan-web",
+            "label": "LAN web transit",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": true
+          },
+          {
+            "id": "web-port",
+            "label": "Other web port stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 80
+            },
+            "allow": false
+          },
+          {
+            "id": "web-target",
+            "label": "Other web destination stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.10",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "dns",
+            "label": "LAN DNS transit",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.53",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": true
+          },
+          {
+            "id": "dns-target",
+            "label": "Other DNS destination stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.54",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": false
+          },
+          {
+            "id": "wan-transit",
+            "label": "New WAN transit stays blocked",
+            "origin": {
+              "incoming": "wan0"
+            },
+            "header": {
+              "source": "203.0.113.75",
+              "destination": "203.0.113.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "router-output",
+            "label": "Router-originated DNS stays allowed",
+            "origin": "local",
+            "header": {
+              "source": "198.51.100.1",
+              "destination": "203.0.113.53",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": true
+          }
+        ]
+      },
+      "example": {
+        "initial": {
+          "host": {
+            "version": 1,
+            "profile": {
+              "id": "guided-router-0",
+              "links": [
+                {
+                  "name": "lan0",
+                  "network": {
+                    "address": "172.20.4.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "wan0",
+                  "network": {
+                    "address": "192.0.2.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "192.0.2.254",
+                  "device": "wan0",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "198.51.100.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "198.51.100.9",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.53",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.10",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.54",
+                  "available": true
+                },
+                {
+                  "address": "172.20.4.55",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.75",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "lan0",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.4.1",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "wan0",
+                  "up": true,
+                  "address": {
+                    "address": "192.0.2.1",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "192.0.2.254",
+                  "device": "wan0",
+                  "metric": 10
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "filter": {
+            "input": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": null,
+                  "destination": null,
+                  "ingress": null,
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 22,
+                  "target": "Accept"
+                },
+                {
+                  "source": null,
+                  "destination": null,
+                  "ingress": null,
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 443,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "forward": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": null,
+                  "destination": null,
+                  "ingress": null,
+                  "egress": null,
+                  "protocol": "Udp",
+                  "source_port": null,
+                  "destination_port": 53,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "output": {
+              "policy": "Accept",
+              "rules": []
+            }
+          },
+          "forwarding": true,
+          "filter_file": "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT DROP [0:0]\nCOMMIT\n",
+          "forward_file": "net.ipv4.ip_forward = 0\n"
+        },
+        "files": false,
+        "persistence": false,
+        "forwarding": true,
+        "policies": [
+          {
+            "chain": "Input",
+            "domains": [
+              {
+                "source": null,
+                "destination": {
+                  "network": "172.20.4.1",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": {
+                  "network": "192.0.2.1",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "172.20.4.1",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 22,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "chain": "Forward",
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              },
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.53",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": 53,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "chain": "Output",
+            "domains": [
+              {
+                "source": {
+                  "network": "172.20.4.1",
+                  "prefix": 32
+                },
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": {
+                  "network": "192.0.2.1",
+                  "prefix": 32
+                },
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ]
+          }
+        ],
+        "cases": [
+          {
+            "id": "admin-lan",
+            "label": "LAN SSH to the router",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "172.20.4.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 22
+            },
+            "allow": true
+          },
+          {
+            "id": "admin-wan",
+            "label": "WAN SSH stays blocked",
+            "origin": {
+              "incoming": "wan0"
+            },
+            "header": {
+              "source": "198.51.100.75",
+              "destination": "172.20.4.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 22
+            },
+            "allow": false
+          },
+          {
+            "id": "router-web",
+            "label": "The router is not a web server",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "172.20.4.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "lan-web",
+            "label": "LAN web transit",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": true
+          },
+          {
+            "id": "web-port",
+            "label": "Other web port stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 80
+            },
+            "allow": false
+          },
+          {
+            "id": "web-target",
+            "label": "Other web destination stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.10",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "dns",
+            "label": "LAN DNS transit",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.53",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": true
+          },
+          {
+            "id": "dns-target",
+            "label": "Other DNS destination stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.54",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": false
+          },
+          {
+            "id": "wan-transit",
+            "label": "New WAN transit stays blocked",
+            "origin": {
+              "incoming": "wan0"
+            },
+            "header": {
+              "source": "198.51.100.75",
+              "destination": "198.51.100.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "router-output",
+            "label": "Router-originated DNS stays allowed",
+            "origin": "local",
+            "header": {
+              "source": "192.0.2.1",
+              "destination": "198.51.100.53",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": true
+          }
+        ]
+      },
+      "worked": [
+        {
+          "kind": "command",
+          "line": "iptables -F INPUT"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -F FORWARD"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -P INPUT DROP"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -P FORWARD DROP"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -P OUTPUT ACCEPT"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -A INPUT -i lan0 -s 172.20.4.0/24 -d 172.20.4.1 -p tcp --dport 22 -j ACCEPT"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -A FORWARD -i lan0 -o wan0 -s 172.20.4.0/24 -d 198.51.100.9 -p tcp --dport 443 -j ACCEPT"
+        },
+        {
+          "kind": "command",
+          "line": "iptables -A FORWARD -i lan0 -o wan0 -s 172.20.4.0/24 -d 198.51.100.53 -p udp --dport 53 -j ACCEPT"
+        },
+        {
+          "kind": "check"
+        }
+      ]
+    },
+    "initial": {
+      "source_id": "lpic2-router-local-transit-policy",
+      "view": "introduction",
+      "assignment": {
+        "state": {
+          "host": {
+            "version": 1,
+            "profile": {
+              "id": "assignment-router-0",
+              "links": [
+                {
+                  "name": "lan0",
+                  "network": {
+                    "address": "10.20.30.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "wan0",
+                  "network": {
+                    "address": "198.51.100.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "198.51.100.254",
+                  "device": "wan0",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "203.0.113.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "203.0.113.9",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.53",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.10",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.54",
+                  "available": true
+                },
+                {
+                  "address": "10.20.30.55",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.75",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "lan0",
+                  "up": true,
+                  "address": {
+                    "address": "10.20.30.1",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "wan0",
+                  "up": true,
+                  "address": {
+                    "address": "198.51.100.1",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "198.51.100.254",
+                  "device": "wan0",
+                  "metric": 10
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "filter": {
+            "input": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": null,
+                  "destination": null,
+                  "ingress": null,
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 22,
+                  "target": "Accept"
+                },
+                {
+                  "source": null,
+                  "destination": null,
+                  "ingress": null,
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 443,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "forward": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": null,
+                  "destination": null,
+                  "ingress": null,
+                  "egress": null,
+                  "protocol": "Udp",
+                  "source_port": null,
+                  "destination_port": 53,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "output": {
+              "policy": "Accept",
+              "rules": []
+            }
+          },
+          "forwarding": true,
+          "filter_file": "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT DROP [0:0]\nCOMMIT\n",
+          "forward_file": "net.ipv4.ip_forward = 0\n"
+        },
+        "input": "",
+        "output": "",
+        "filter_draft": "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT DROP [0:0]\nCOMMIT\n",
+        "forward_draft": "net.ipv4.ip_forward = 0\n",
+        "file": "filter",
+        "selected_case": 0,
+        "checked": false
+      },
+      "practice": {
+        "state": {
+          "host": {
+            "version": 1,
+            "profile": {
+              "id": "guided-router-0",
+              "links": [
+                {
+                  "name": "lan0",
+                  "network": {
+                    "address": "172.20.4.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "wan0",
+                  "network": {
+                    "address": "192.0.2.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "192.0.2.254",
+                  "device": "wan0",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "198.51.100.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "198.51.100.9",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.53",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.10",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.54",
+                  "available": true
+                },
+                {
+                  "address": "172.20.4.55",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.75",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "lan0",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.4.1",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "wan0",
+                  "up": true,
+                  "address": {
+                    "address": "192.0.2.1",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "192.0.2.254",
+                  "device": "wan0",
+                  "metric": 10
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "filter": {
+            "input": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": null,
+                  "destination": null,
+                  "ingress": null,
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 22,
+                  "target": "Accept"
+                },
+                {
+                  "source": null,
+                  "destination": null,
+                  "ingress": null,
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 443,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "forward": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": null,
+                  "destination": null,
+                  "ingress": null,
+                  "egress": null,
+                  "protocol": "Udp",
+                  "source_port": null,
+                  "destination_port": 53,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "output": {
+              "policy": "Accept",
+              "rules": []
+            }
+          },
+          "forwarding": true,
+          "filter_file": "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT DROP [0:0]\nCOMMIT\n",
+          "forward_file": "net.ipv4.ip_forward = 0\n"
+        },
+        "input": "",
+        "output": "",
+        "filter_draft": "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT DROP [0:0]\nCOMMIT\n",
+        "forward_draft": "net.ipv4.ip_forward = 0\n",
+        "file": "filter",
+        "selected_case": 0,
+        "checked": false
+      }
+    },
+    "solution": [
+      {
+        "kind": "command",
+        "line": "iptables -F INPUT"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -F FORWARD"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -P INPUT DROP"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -P FORWARD DROP"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -P OUTPUT ACCEPT"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -A INPUT -i lan0 -s 10.20.30.0/24 -d 10.20.30.1 -p tcp --dport 22 -j ACCEPT"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -A FORWARD -i lan0 -o wan0 -s 10.20.30.0/24 -d 203.0.113.9 -p tcp --dport 443 -j ACCEPT"
+      },
+      {
+        "kind": "command",
+        "line": "iptables -A FORWARD -i lan0 -o wan0 -s 10.20.30.0/24 -d 203.0.113.53 -p udp --dport 53 -j ACCEPT"
+      },
+      {
+        "kind": "check"
+      }
+    ]
+  },
+  {
+    "definition": {
+      "source_id": "lpic2-router-forwarding-recovery",
+      "assignment": {
+        "initial": {
+          "host": {
+            "version": 1,
+            "profile": {
+              "id": "assignment-router-1",
+              "links": [
+                {
+                  "name": "lan0",
+                  "network": {
+                    "address": "10.20.30.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "wan0",
+                  "network": {
+                    "address": "198.51.100.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "198.51.100.254",
+                  "device": "wan0",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "203.0.113.0",
+                      "length": 24
+                    }
+                  ]
+                },
+                {
+                  "address": "198.51.100.253",
+                  "device": "wan0",
+                  "available": false,
+                  "exports": [
+                    {
+                      "address": "203.0.113.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "203.0.113.9",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.53",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.10",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.54",
+                  "available": true
+                },
+                {
+                  "address": "10.20.30.55",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.75",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "lan0",
+                  "up": true,
+                  "address": {
+                    "address": "10.20.30.1",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "wan0",
+                  "up": true,
+                  "address": {
+                    "address": "198.51.100.1",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "198.51.100.254",
+                  "device": "wan0",
+                  "metric": 10
+                },
+                {
+                  "destination": {
+                    "address": "203.0.113.0",
+                    "length": 24
+                  },
+                  "via": "198.51.100.253",
+                  "device": "wan0",
+                  "metric": 5
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "filter": {
+            "input": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "10.20.30.1",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 22,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "forward": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "203.0.113.9",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 443,
+                  "target": "Accept"
+                },
+                {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "203.0.113.53",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Udp",
+                  "source_port": null,
+                  "destination_port": 53,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "output": {
+              "policy": "Accept",
+              "rules": []
+            }
+          },
+          "forwarding": false,
+          "filter_file": "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT DROP [0:0]\nCOMMIT\n",
+          "forward_file": "net.ipv4.ip_forward = 0\n"
+        },
+        "files": false,
+        "persistence": false,
+        "forwarding": true,
+        "policies": [
+          {
+            "chain": "Input",
+            "domains": [
+              {
+                "source": null,
+                "destination": {
+                  "network": "10.20.30.1",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": {
+                  "network": "198.51.100.1",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "10.20.30.1",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 22,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "chain": "Forward",
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              },
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.53",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": 53,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "chain": "Output",
+            "domains": [
+              {
+                "source": {
+                  "network": "10.20.30.1",
+                  "prefix": 32
+                },
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": {
+                  "network": "198.51.100.1",
+                  "prefix": 32
+                },
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ]
+          }
+        ],
+        "cases": [
+          {
+            "id": "admin-lan",
+            "label": "LAN SSH to the router",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "10.20.30.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 22
+            },
+            "allow": true
+          },
+          {
+            "id": "admin-wan",
+            "label": "WAN SSH stays blocked",
+            "origin": {
+              "incoming": "wan0"
+            },
+            "header": {
+              "source": "203.0.113.75",
+              "destination": "10.20.30.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 22
+            },
+            "allow": false
+          },
+          {
+            "id": "router-web",
+            "label": "The router is not a web server",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "10.20.30.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "lan-web",
+            "label": "LAN web transit",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": true
+          },
+          {
+            "id": "web-port",
+            "label": "Other web port stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 80
+            },
+            "allow": false
+          },
+          {
+            "id": "web-target",
+            "label": "Other web destination stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.10",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "dns",
+            "label": "LAN DNS transit",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.53",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": true
+          },
+          {
+            "id": "dns-target",
+            "label": "Other DNS destination stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.54",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": false
+          },
+          {
+            "id": "wan-transit",
+            "label": "New WAN transit stays blocked",
+            "origin": {
+              "incoming": "wan0"
+            },
+            "header": {
+              "source": "203.0.113.75",
+              "destination": "203.0.113.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "router-output",
+            "label": "Router-originated DNS stays allowed",
+            "origin": "local",
+            "header": {
+              "source": "198.51.100.1",
+              "destination": "203.0.113.53",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": true
+          }
+        ]
+      },
+      "example": {
+        "initial": {
+          "host": {
+            "version": 1,
+            "profile": {
+              "id": "guided-router-1",
+              "links": [
+                {
+                  "name": "lan0",
+                  "network": {
+                    "address": "172.20.4.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "wan0",
+                  "network": {
+                    "address": "192.0.2.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "192.0.2.254",
+                  "device": "wan0",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "198.51.100.0",
+                      "length": 24
+                    }
+                  ]
+                },
+                {
+                  "address": "192.0.2.253",
+                  "device": "wan0",
+                  "available": false,
+                  "exports": [
+                    {
+                      "address": "198.51.100.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "198.51.100.9",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.53",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.10",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.54",
+                  "available": true
+                },
+                {
+                  "address": "172.20.4.55",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.75",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "lan0",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.4.1",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "wan0",
+                  "up": true,
+                  "address": {
+                    "address": "192.0.2.1",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "192.0.2.254",
+                  "device": "wan0",
+                  "metric": 10
+                },
+                {
+                  "destination": {
+                    "address": "198.51.100.0",
+                    "length": 24
+                  },
+                  "via": "192.0.2.253",
+                  "device": "wan0",
+                  "metric": 5
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "filter": {
+            "input": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "172.20.4.1",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 22,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "forward": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "198.51.100.9",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 443,
+                  "target": "Accept"
+                },
+                {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "198.51.100.53",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Udp",
+                  "source_port": null,
+                  "destination_port": 53,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "output": {
+              "policy": "Accept",
+              "rules": []
+            }
+          },
+          "forwarding": false,
+          "filter_file": "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT DROP [0:0]\nCOMMIT\n",
+          "forward_file": "net.ipv4.ip_forward = 0\n"
+        },
+        "files": false,
+        "persistence": false,
+        "forwarding": true,
+        "policies": [
+          {
+            "chain": "Input",
+            "domains": [
+              {
+                "source": null,
+                "destination": {
+                  "network": "172.20.4.1",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": {
+                  "network": "192.0.2.1",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "172.20.4.1",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 22,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "chain": "Forward",
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              },
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.53",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": 53,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "chain": "Output",
+            "domains": [
+              {
+                "source": {
+                  "network": "172.20.4.1",
+                  "prefix": 32
+                },
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": {
+                  "network": "192.0.2.1",
+                  "prefix": 32
+                },
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ]
+          }
+        ],
+        "cases": [
+          {
+            "id": "admin-lan",
+            "label": "LAN SSH to the router",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "172.20.4.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 22
+            },
+            "allow": true
+          },
+          {
+            "id": "admin-wan",
+            "label": "WAN SSH stays blocked",
+            "origin": {
+              "incoming": "wan0"
+            },
+            "header": {
+              "source": "198.51.100.75",
+              "destination": "172.20.4.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 22
+            },
+            "allow": false
+          },
+          {
+            "id": "router-web",
+            "label": "The router is not a web server",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "172.20.4.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "lan-web",
+            "label": "LAN web transit",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": true
+          },
+          {
+            "id": "web-port",
+            "label": "Other web port stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 80
+            },
+            "allow": false
+          },
+          {
+            "id": "web-target",
+            "label": "Other web destination stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.10",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "dns",
+            "label": "LAN DNS transit",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.53",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": true
+          },
+          {
+            "id": "dns-target",
+            "label": "Other DNS destination stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.54",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": false
+          },
+          {
+            "id": "wan-transit",
+            "label": "New WAN transit stays blocked",
+            "origin": {
+              "incoming": "wan0"
+            },
+            "header": {
+              "source": "198.51.100.75",
+              "destination": "198.51.100.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "router-output",
+            "label": "Router-originated DNS stays allowed",
+            "origin": "local",
+            "header": {
+              "source": "192.0.2.1",
+              "destination": "198.51.100.53",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": true
+          }
+        ]
+      },
+      "worked": [
+        {
+          "kind": "command",
+          "line": "ip -4 route show"
+        },
+        {
+          "kind": "command",
+          "line": "sysctl net.ipv4.ip_forward"
+        },
+        {
+          "kind": "command",
+          "line": "sysctl -w net.ipv4.ip_forward=1"
+        },
+        {
+          "kind": "command",
+          "line": "ip -4 route replace 198.51.100.0/24 via 192.0.2.254 dev wan0 metric 5"
+        },
+        {
+          "kind": "check"
+        }
+      ]
+    },
+    "initial": {
+      "source_id": "lpic2-router-forwarding-recovery",
+      "view": "introduction",
+      "assignment": {
+        "state": {
+          "host": {
+            "version": 1,
+            "profile": {
+              "id": "assignment-router-1",
+              "links": [
+                {
+                  "name": "lan0",
+                  "network": {
+                    "address": "10.20.30.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "wan0",
+                  "network": {
+                    "address": "198.51.100.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "198.51.100.254",
+                  "device": "wan0",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "203.0.113.0",
+                      "length": 24
+                    }
+                  ]
+                },
+                {
+                  "address": "198.51.100.253",
+                  "device": "wan0",
+                  "available": false,
+                  "exports": [
+                    {
+                      "address": "203.0.113.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "203.0.113.9",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.53",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.10",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.54",
+                  "available": true
+                },
+                {
+                  "address": "10.20.30.55",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.75",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "lan0",
+                  "up": true,
+                  "address": {
+                    "address": "10.20.30.1",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "wan0",
+                  "up": true,
+                  "address": {
+                    "address": "198.51.100.1",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "198.51.100.254",
+                  "device": "wan0",
+                  "metric": 10
+                },
+                {
+                  "destination": {
+                    "address": "203.0.113.0",
+                    "length": 24
+                  },
+                  "via": "198.51.100.253",
+                  "device": "wan0",
+                  "metric": 5
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "filter": {
+            "input": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "10.20.30.1",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 22,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "forward": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "203.0.113.9",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 443,
+                  "target": "Accept"
+                },
+                {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "203.0.113.53",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Udp",
+                  "source_port": null,
+                  "destination_port": 53,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "output": {
+              "policy": "Accept",
+              "rules": []
+            }
+          },
+          "forwarding": false,
+          "filter_file": "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT DROP [0:0]\nCOMMIT\n",
+          "forward_file": "net.ipv4.ip_forward = 0\n"
+        },
+        "input": "",
+        "output": "",
+        "filter_draft": "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT DROP [0:0]\nCOMMIT\n",
+        "forward_draft": "net.ipv4.ip_forward = 0\n",
+        "file": "filter",
+        "selected_case": 0,
+        "checked": false
+      },
+      "practice": {
+        "state": {
+          "host": {
+            "version": 1,
+            "profile": {
+              "id": "guided-router-1",
+              "links": [
+                {
+                  "name": "lan0",
+                  "network": {
+                    "address": "172.20.4.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "wan0",
+                  "network": {
+                    "address": "192.0.2.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "192.0.2.254",
+                  "device": "wan0",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "198.51.100.0",
+                      "length": 24
+                    }
+                  ]
+                },
+                {
+                  "address": "192.0.2.253",
+                  "device": "wan0",
+                  "available": false,
+                  "exports": [
+                    {
+                      "address": "198.51.100.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "198.51.100.9",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.53",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.10",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.54",
+                  "available": true
+                },
+                {
+                  "address": "172.20.4.55",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.75",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "lan0",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.4.1",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "wan0",
+                  "up": true,
+                  "address": {
+                    "address": "192.0.2.1",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "192.0.2.254",
+                  "device": "wan0",
+                  "metric": 10
+                },
+                {
+                  "destination": {
+                    "address": "198.51.100.0",
+                    "length": 24
+                  },
+                  "via": "192.0.2.253",
+                  "device": "wan0",
+                  "metric": 5
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "filter": {
+            "input": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "172.20.4.1",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 22,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "forward": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "198.51.100.9",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 443,
+                  "target": "Accept"
+                },
+                {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "198.51.100.53",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Udp",
+                  "source_port": null,
+                  "destination_port": 53,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "output": {
+              "policy": "Accept",
+              "rules": []
+            }
+          },
+          "forwarding": false,
+          "filter_file": "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT DROP [0:0]\nCOMMIT\n",
+          "forward_file": "net.ipv4.ip_forward = 0\n"
+        },
+        "input": "",
+        "output": "",
+        "filter_draft": "*filter\n:INPUT DROP [0:0]\n:FORWARD DROP [0:0]\n:OUTPUT DROP [0:0]\nCOMMIT\n",
+        "forward_draft": "net.ipv4.ip_forward = 0\n",
+        "file": "filter",
+        "selected_case": 0,
+        "checked": false
+      }
+    },
+    "solution": [
+      {
+        "kind": "command",
+        "line": "ip -4 route show"
+      },
+      {
+        "kind": "command",
+        "line": "sysctl net.ipv4.ip_forward"
+      },
+      {
+        "kind": "command",
+        "line": "sysctl -w net.ipv4.ip_forward=1"
+      },
+      {
+        "kind": "command",
+        "line": "ip -4 route replace 203.0.113.0/24 via 198.51.100.254 dev wan0 metric 5"
+      },
+      {
+        "kind": "check"
+      }
+    ]
+  },
+  {
+    "definition": {
+      "source_id": "lpic2-router-saved-policy-recovery",
+      "assignment": {
+        "initial": {
+          "host": {
+            "version": 1,
+            "profile": {
+              "id": "assignment-router-2",
+              "links": [
+                {
+                  "name": "lan0",
+                  "network": {
+                    "address": "10.20.30.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "wan0",
+                  "network": {
+                    "address": "198.51.100.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "198.51.100.254",
+                  "device": "wan0",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "203.0.113.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "203.0.113.9",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.53",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.10",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.54",
+                  "available": true
+                },
+                {
+                  "address": "10.20.30.55",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.75",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "lan0",
+                  "up": true,
+                  "address": {
+                    "address": "10.20.30.1",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "wan0",
+                  "up": true,
+                  "address": {
+                    "address": "198.51.100.1",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "198.51.100.254",
+                  "device": "wan0",
+                  "metric": 10
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "filter": {
+            "input": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "10.20.30.1",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 22,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "forward": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "203.0.113.9",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 443,
+                  "target": "Accept"
+                },
+                {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "203.0.113.53",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Udp",
+                  "source_port": null,
+                  "destination_port": 53,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "output": {
+              "policy": "Accept",
+              "rules": []
+            }
+          },
+          "forwarding": true,
+          "filter_file": "*filter\n:INPUT ACCEPT [0:0]\n:FORWARD ACCEPT [0:0]\n:OUTPUT ACCEPT [0:0]\nCOMMIT\n",
+          "forward_file": "net.ipv4.ip_forward = 0\n"
+        },
+        "files": true,
+        "persistence": true,
+        "forwarding": true,
+        "policies": [
+          {
+            "chain": "Input",
+            "domains": [
+              {
+                "source": null,
+                "destination": {
+                  "network": "10.20.30.1",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": {
+                  "network": "198.51.100.1",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "10.20.30.1",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 22,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "chain": "Forward",
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              },
+              {
+                "source": {
+                  "network": "10.20.30.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "203.0.113.53",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": 53,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "chain": "Output",
+            "domains": [
+              {
+                "source": {
+                  "network": "10.20.30.1",
+                  "prefix": 32
+                },
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": {
+                  "network": "198.51.100.1",
+                  "prefix": 32
+                },
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ]
+          }
+        ],
+        "cases": [
+          {
+            "id": "admin-lan",
+            "label": "LAN SSH to the router",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "10.20.30.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 22
+            },
+            "allow": true
+          },
+          {
+            "id": "admin-wan",
+            "label": "WAN SSH stays blocked",
+            "origin": {
+              "incoming": "wan0"
+            },
+            "header": {
+              "source": "203.0.113.75",
+              "destination": "10.20.30.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 22
+            },
+            "allow": false
+          },
+          {
+            "id": "router-web",
+            "label": "The router is not a web server",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "10.20.30.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "lan-web",
+            "label": "LAN web transit",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": true
+          },
+          {
+            "id": "web-port",
+            "label": "Other web port stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 80
+            },
+            "allow": false
+          },
+          {
+            "id": "web-target",
+            "label": "Other web destination stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.10",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "dns",
+            "label": "LAN DNS transit",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.53",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": true
+          },
+          {
+            "id": "dns-target",
+            "label": "Other DNS destination stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "10.20.30.55",
+              "destination": "203.0.113.54",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": false
+          },
+          {
+            "id": "wan-transit",
+            "label": "New WAN transit stays blocked",
+            "origin": {
+              "incoming": "wan0"
+            },
+            "header": {
+              "source": "203.0.113.75",
+              "destination": "203.0.113.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "router-output",
+            "label": "Router-originated DNS stays allowed",
+            "origin": "local",
+            "header": {
+              "source": "198.51.100.1",
+              "destination": "203.0.113.53",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": true
+          }
+        ]
+      },
+      "example": {
+        "initial": {
+          "host": {
+            "version": 1,
+            "profile": {
+              "id": "guided-router-2",
+              "links": [
+                {
+                  "name": "lan0",
+                  "network": {
+                    "address": "172.20.4.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "wan0",
+                  "network": {
+                    "address": "192.0.2.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "192.0.2.254",
+                  "device": "wan0",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "198.51.100.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "198.51.100.9",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.53",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.10",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.54",
+                  "available": true
+                },
+                {
+                  "address": "172.20.4.55",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.75",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "lan0",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.4.1",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "wan0",
+                  "up": true,
+                  "address": {
+                    "address": "192.0.2.1",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "192.0.2.254",
+                  "device": "wan0",
+                  "metric": 10
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "filter": {
+            "input": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "172.20.4.1",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 22,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "forward": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "198.51.100.9",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 443,
+                  "target": "Accept"
+                },
+                {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "198.51.100.53",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Udp",
+                  "source_port": null,
+                  "destination_port": 53,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "output": {
+              "policy": "Accept",
+              "rules": []
+            }
+          },
+          "forwarding": true,
+          "filter_file": "*filter\n:INPUT ACCEPT [0:0]\n:FORWARD ACCEPT [0:0]\n:OUTPUT ACCEPT [0:0]\nCOMMIT\n",
+          "forward_file": "net.ipv4.ip_forward = 0\n"
+        },
+        "files": true,
+        "persistence": true,
+        "forwarding": true,
+        "policies": [
+          {
+            "chain": "Input",
+            "domains": [
+              {
+                "source": null,
+                "destination": {
+                  "network": "172.20.4.1",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": null,
+                "destination": {
+                  "network": "192.0.2.1",
+                  "prefix": 32
+                },
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "172.20.4.1",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": null,
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 22,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "chain": "Forward",
+            "domains": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.9",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Tcp",
+                "source_port": null,
+                "destination_port": 443,
+                "target": "Accept"
+              },
+              {
+                "source": {
+                  "network": "172.20.4.0",
+                  "prefix": 24
+                },
+                "destination": {
+                  "network": "198.51.100.53",
+                  "prefix": 32
+                },
+                "ingress": "lan0",
+                "egress": "wan0",
+                "protocol": "Udp",
+                "source_port": null,
+                "destination_port": 53,
+                "target": "Accept"
+              }
+            ]
+          },
+          {
+            "chain": "Output",
+            "domains": [
+              {
+                "source": {
+                  "network": "172.20.4.1",
+                  "prefix": 32
+                },
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              },
+              {
+                "source": {
+                  "network": "192.0.2.1",
+                  "prefix": 32
+                },
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ],
+            "allowed": [
+              {
+                "source": null,
+                "destination": null,
+                "ingress": null,
+                "egress": null,
+                "protocol": null,
+                "source_port": null,
+                "destination_port": null,
+                "target": "Accept"
+              }
+            ]
+          }
+        ],
+        "cases": [
+          {
+            "id": "admin-lan",
+            "label": "LAN SSH to the router",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "172.20.4.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 22
+            },
+            "allow": true
+          },
+          {
+            "id": "admin-wan",
+            "label": "WAN SSH stays blocked",
+            "origin": {
+              "incoming": "wan0"
+            },
+            "header": {
+              "source": "198.51.100.75",
+              "destination": "172.20.4.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 22
+            },
+            "allow": false
+          },
+          {
+            "id": "router-web",
+            "label": "The router is not a web server",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "172.20.4.1",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "lan-web",
+            "label": "LAN web transit",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": true
+          },
+          {
+            "id": "web-port",
+            "label": "Other web port stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 80
+            },
+            "allow": false
+          },
+          {
+            "id": "web-target",
+            "label": "Other web destination stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.10",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "dns",
+            "label": "LAN DNS transit",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.53",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": true
+          },
+          {
+            "id": "dns-target",
+            "label": "Other DNS destination stays blocked",
+            "origin": {
+              "incoming": "lan0"
+            },
+            "header": {
+              "source": "172.20.4.55",
+              "destination": "198.51.100.54",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": false
+          },
+          {
+            "id": "wan-transit",
+            "label": "New WAN transit stays blocked",
+            "origin": {
+              "incoming": "wan0"
+            },
+            "header": {
+              "source": "198.51.100.75",
+              "destination": "198.51.100.9",
+              "protocol": "Tcp",
+              "source_port": 49152,
+              "destination_port": 443
+            },
+            "allow": false
+          },
+          {
+            "id": "router-output",
+            "label": "Router-originated DNS stays allowed",
+            "origin": "local",
+            "header": {
+              "source": "192.0.2.1",
+              "destination": "198.51.100.53",
+              "protocol": "Udp",
+              "source_port": 49152,
+              "destination_port": 53
+            },
+            "allow": true
+          }
+        ]
+      },
+      "worked": [
+        {
+          "kind": "command",
+          "line": "iptables -S"
+        },
+        {
+          "kind": "command",
+          "line": "cat /etc/lab-filter.rules"
+        },
+        {
+          "kind": "command",
+          "line": "iptables-save -t filter -f /etc/lab-filter.rules"
+        },
+        {
+          "kind": "file",
+          "file": "forwarding"
+        },
+        {
+          "kind": "edit",
+          "text": "# Allow supplied transit\nnet.ipv4.ip_forward = 1\n"
+        },
+        {
+          "kind": "save"
+        },
+        {
+          "kind": "command",
+          "line": "iptables-restore --test /etc/lab-filter.rules"
+        },
+        {
+          "kind": "command",
+          "line": "sysctl -p /etc/sysctl.d/lab-forwarding.conf"
+        },
+        {
+          "kind": "command",
+          "line": "iptables-restore /etc/lab-filter.rules"
+        },
+        {
+          "kind": "check"
+        }
+      ]
+    },
+    "initial": {
+      "source_id": "lpic2-router-saved-policy-recovery",
+      "view": "introduction",
+      "assignment": {
+        "state": {
+          "host": {
+            "version": 1,
+            "profile": {
+              "id": "assignment-router-2",
+              "links": [
+                {
+                  "name": "lan0",
+                  "network": {
+                    "address": "10.20.30.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "wan0",
+                  "network": {
+                    "address": "198.51.100.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "198.51.100.254",
+                  "device": "wan0",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "203.0.113.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "203.0.113.9",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.53",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.10",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.54",
+                  "available": true
+                },
+                {
+                  "address": "10.20.30.55",
+                  "available": true
+                },
+                {
+                  "address": "203.0.113.75",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "lan0",
+                  "up": true,
+                  "address": {
+                    "address": "10.20.30.1",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "wan0",
+                  "up": true,
+                  "address": {
+                    "address": "198.51.100.1",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "198.51.100.254",
+                  "device": "wan0",
+                  "metric": 10
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "filter": {
+            "input": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "10.20.30.1",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 22,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "forward": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "203.0.113.9",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 443,
+                  "target": "Accept"
+                },
+                {
+                  "source": {
+                    "network": "10.20.30.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "203.0.113.53",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Udp",
+                  "source_port": null,
+                  "destination_port": 53,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "output": {
+              "policy": "Accept",
+              "rules": []
+            }
+          },
+          "forwarding": true,
+          "filter_file": "*filter\n:INPUT ACCEPT [0:0]\n:FORWARD ACCEPT [0:0]\n:OUTPUT ACCEPT [0:0]\nCOMMIT\n",
+          "forward_file": "net.ipv4.ip_forward = 0\n"
+        },
+        "input": "",
+        "output": "",
+        "filter_draft": "*filter\n:INPUT ACCEPT [0:0]\n:FORWARD ACCEPT [0:0]\n:OUTPUT ACCEPT [0:0]\nCOMMIT\n",
+        "forward_draft": "net.ipv4.ip_forward = 0\n",
+        "file": "filter",
+        "selected_case": 0,
+        "checked": false
+      },
+      "practice": {
+        "state": {
+          "host": {
+            "version": 1,
+            "profile": {
+              "id": "guided-router-2",
+              "links": [
+                {
+                  "name": "lan0",
+                  "network": {
+                    "address": "172.20.4.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                },
+                {
+                  "name": "wan0",
+                  "network": {
+                    "address": "192.0.2.0",
+                    "length": 24
+                  },
+                  "carrier": true
+                }
+              ],
+              "gateways": [
+                {
+                  "address": "192.0.2.254",
+                  "device": "wan0",
+                  "available": true,
+                  "exports": [
+                    {
+                      "address": "198.51.100.0",
+                      "length": 24
+                    }
+                  ]
+                }
+              ],
+              "nodes": [
+                {
+                  "address": "198.51.100.9",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.53",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.10",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.54",
+                  "available": true
+                },
+                {
+                  "address": "172.20.4.55",
+                  "available": true
+                },
+                {
+                  "address": "198.51.100.75",
+                  "available": true
+                }
+              ],
+              "resolvers": []
+            },
+            "configuration": {
+              "interfaces": [
+                {
+                  "name": "lan0",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.4.1",
+                    "prefix": 24
+                  }
+                },
+                {
+                  "name": "wan0",
+                  "up": true,
+                  "address": {
+                    "address": "192.0.2.1",
+                    "prefix": 24
+                  }
+                }
+              ],
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "via": "192.0.2.254",
+                  "device": "wan0",
+                  "metric": 10
+                }
+              ],
+              "nameservers": []
+            },
+            "generation": 0
+          },
+          "filter": {
+            "input": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "172.20.4.1",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": null,
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 22,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "forward": {
+              "policy": "Drop",
+              "rules": [
+                {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "198.51.100.9",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Tcp",
+                  "source_port": null,
+                  "destination_port": 443,
+                  "target": "Accept"
+                },
+                {
+                  "source": {
+                    "network": "172.20.4.0",
+                    "prefix": 24
+                  },
+                  "destination": {
+                    "network": "198.51.100.53",
+                    "prefix": 32
+                  },
+                  "ingress": "lan0",
+                  "egress": "wan0",
+                  "protocol": "Udp",
+                  "source_port": null,
+                  "destination_port": 53,
+                  "target": "Accept"
+                }
+              ]
+            },
+            "output": {
+              "policy": "Accept",
+              "rules": []
+            }
+          },
+          "forwarding": true,
+          "filter_file": "*filter\n:INPUT ACCEPT [0:0]\n:FORWARD ACCEPT [0:0]\n:OUTPUT ACCEPT [0:0]\nCOMMIT\n",
+          "forward_file": "net.ipv4.ip_forward = 0\n"
+        },
+        "input": "",
+        "output": "",
+        "filter_draft": "*filter\n:INPUT ACCEPT [0:0]\n:FORWARD ACCEPT [0:0]\n:OUTPUT ACCEPT [0:0]\nCOMMIT\n",
+        "forward_draft": "net.ipv4.ip_forward = 0\n",
+        "file": "filter",
+        "selected_case": 0,
+        "checked": false
+      }
+    },
+    "solution": [
+      {
+        "kind": "command",
+        "line": "iptables -S"
+      },
+      {
+        "kind": "command",
+        "line": "cat /etc/lab-filter.rules"
+      },
+      {
+        "kind": "command",
+        "line": "iptables-save -t filter -f /etc/lab-filter.rules"
+      },
+      {
+        "kind": "file",
+        "file": "forwarding"
+      },
+      {
+        "kind": "edit",
+        "text": "# Allow supplied transit\nnet.ipv4.ip_forward = 1\n"
+      },
+      {
+        "kind": "save"
+      },
+      {
+        "kind": "command",
+        "line": "iptables-restore --test /etc/lab-filter.rules"
+      },
+      {
+        "kind": "command",
+        "line": "sysctl -p /etc/sysctl.d/lab-forwarding.conf"
+      },
+      {
+        "kind": "command",
+        "line": "iptables-restore /etc/lab-filter.rules"
+      },
+      {
+        "kind": "check"
+      }
+    ]
+  }
+]

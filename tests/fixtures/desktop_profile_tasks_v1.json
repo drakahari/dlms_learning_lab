@@ -1,0 +1,188 @@
+{
+  "lpic1-xorg-keyboard-scope": {
+    "definition": {
+      "version": 1,
+      "source_id": "lpic1-xorg-keyboard-scope",
+      "assignment": {
+        "activity": "keyboard",
+        "starter": "# Supplied keyboard rules\nSection \"InputClass\"\n    Identifier \"Keyboard defaults\"\n    MatchIsKeyboard \"on\"\n    Option \"XkbLayout\" \"us\"\nEndSection\n\nSection \"InputClass\"\n    Identifier \"Language desk\"\n    MatchIsKeyboard \"on\"\n    MatchProduct \"Operator keyboard\"\n    Option \"XkbLayout\" \"fr\"\nEndSection\n",
+        "devices": [
+          {
+            "device": {
+              "product": "Workshop Language-desk keyboard FR",
+              "default": "us"
+            },
+            "expected": "fr"
+          },
+          {
+            "device": {
+              "product": "Workshop Operator keyboard",
+              "default": "us"
+            },
+            "expected": "us"
+          },
+          {
+            "device": {
+              "product": "Workshop Spare keyboard",
+              "default": "us"
+            },
+            "expected": "us"
+          }
+        ]
+      },
+      "example": {
+        "activity": "keyboard",
+        "starter": "# Supplied keyboard rules\nSection \"InputClass\"\n    Identifier \"Keyboard defaults\"\n    MatchIsKeyboard \"on\"\n    Option \"XkbLayout\" \"us\"\nEndSection\n\nSection \"InputClass\"\n    Identifier \"Language desk\"\n    MatchIsKeyboard \"on\"\n    MatchProduct \"Instructor keyboard\"\n    Option \"XkbLayout\" \"de\"\nEndSection\n",
+        "devices": [
+          {
+            "device": {
+              "product": "Workshop Training desk DE",
+              "default": "us"
+            },
+            "expected": "de"
+          },
+          {
+            "device": {
+              "product": "Workshop Instructor keyboard",
+              "default": "us"
+            },
+            "expected": "us"
+          },
+          {
+            "device": {
+              "product": "Workshop Spare keyboard",
+              "default": "us"
+            },
+            "expected": "us"
+          }
+        ]
+      }
+    },
+    "answers": {
+      "assignment": "# Supplied keyboard rules\nSection \"InputClass\"\n    Identifier \"Keyboard defaults\"\n    MatchIsKeyboard \"on\"\n    Option \"XkbLayout\" \"us\"\nEndSection\n\nSection \"InputClass\"\n    Identifier \"Language desk\"\n    MatchIsKeyboard \"on\"\n    MatchProduct \"Language-desk keyboard FR\"\n    Option \"XkbLayout\" \"fr\"\nEndSection\n",
+      "example": "# Supplied keyboard rules\nSection \"InputClass\"\n    Identifier \"Keyboard defaults\"\n    MatchIsKeyboard \"on\"\n    Option \"XkbLayout\" \"us\"\nEndSection\n\nSection \"InputClass\"\n    Identifier \"Language desk\"\n    MatchIsKeyboard \"on\"\n    MatchProduct \"Training desk DE\"\n    Option \"XkbLayout\" \"de\"\nEndSection\n"
+    }
+  },
+  "lpic1-remote-desktop-arrangement": {
+    "definition": {
+      "version": 1,
+      "source_id": "lpic1-remote-desktop-arrangement",
+      "assignment": {
+        "activity": "remote",
+        "starter": {
+          "services": {
+            "sharing": "allow_control",
+            "remote_login": true
+          },
+          "observer": {
+            "port": "standard",
+            "client": "rdp_ready"
+          },
+          "employee": {
+            "port": "standard",
+            "client": "other_protocol_only"
+          }
+        },
+        "require_observer": true,
+        "require_login": true
+      },
+      "example": {
+        "activity": "remote",
+        "starter": {
+          "services": {
+            "sharing": "off",
+            "remote_login": true
+          },
+          "observer": {
+            "port": "secondary",
+            "client": "rdp_ready"
+          },
+          "employee": {
+            "port": "standard",
+            "client": "rdp_ready"
+          }
+        },
+        "require_observer": true,
+        "require_login": false
+      }
+    },
+    "answers": {
+      "assignment": {
+        "services": {
+          "sharing": "view_only",
+          "remote_login": true
+        },
+        "observer": {
+          "port": "secondary",
+          "client": "rdp_ready"
+        },
+        "employee": {
+          "port": "standard",
+          "client": "rdp_ready"
+        }
+      },
+      "example": {
+        "services": {
+          "sharing": "view_only",
+          "remote_login": false
+        },
+        "observer": {
+          "port": "standard",
+          "client": "rdp_ready"
+        },
+        "employee": {
+          "port": "standard",
+          "client": "rdp_ready"
+        }
+      }
+    }
+  },
+  "lpic1-accessible-input-profile": {
+    "definition": {
+      "version": 1,
+      "source_id": "lpic1-accessible-input-profile",
+      "assignment": {
+        "activity": "typing",
+        "starter": {
+          "text": "standard",
+          "high_contrast": false,
+          "sticky_keys": false,
+          "typing_filter": "none"
+        },
+        "visual_target": "large",
+        "requires_high_contrast": true,
+        "expected_case_phrase": "Ab",
+        "expected_filter_phrase": "ab",
+        "filter": "quick_repeated_key"
+      },
+      "example": {
+        "activity": "typing",
+        "starter": {
+          "text": "standard",
+          "high_contrast": false,
+          "sticky_keys": false,
+          "typing_filter": "none"
+        },
+        "visual_target": "large",
+        "requires_high_contrast": false,
+        "expected_case_phrase": "Ab",
+        "expected_filter_phrase": "ba",
+        "filter": "accidental_brief_key"
+      }
+    },
+    "answers": {
+      "assignment": {
+        "text": "large",
+        "high_contrast": true,
+        "sticky_keys": true,
+        "typing_filter": "bounce_keys300_ms"
+      },
+      "example": {
+        "text": "large",
+        "high_contrast": false,
+        "sticky_keys": true,
+        "typing_filter": "slow_keys300_ms"
+      }
+    }
+  }
+}

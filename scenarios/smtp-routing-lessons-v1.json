@@ -1,0 +1,2029 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-smtp-destination-role",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-smtp-routing",
+      "topic": "SMTP local and relay destinations",
+      "title": "Deliver domain mail on the right server",
+      "summary": "Correct the boundary between local mailbox delivery and forwarding.",
+      "objective": "Deliver outside mail for mila@team.dispatch.test and tariq@team.dispatch.test on mailbox; retain operator@edge.dispatch.test local delivery. Keep outgoing mail from 10.44.8.0/24 and 192.0.2.0/24 working. Reject outside clients relaying to partner.dispatch.test; local and permitted team destinations must remain reachable. Repair only mydestination on edge; preserve the behavior of all other supplied settings. Equivalent supported configurations are accepted. Save and reload the repair, then deliver both original queued samples to their intended servers. An empty queue, printed success or an old receipt alone is insufficient.",
+      "retry_guidance": "Read the named failed outcome. Distinguish unsaved edits, running settings, routing, access policy and recorded delivery; repair the relevant layer, then retry and check again.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Understand the task",
+        "Repair and apply settings",
+        "Verify delivery and relay boundaries"
+      ],
+      "guide": [
+        {
+          "title": "Inspect and repair the guide server",
+          "why": "In mila@team.dispatch.test, mila is the recipient and team.dispatch.test is the destination domain. A mail transfer agent (MTA), such as Postfix, decides whether to deliver locally or forward the message. It is different from a mail-reading program.",
+          "action": "Select guide-edge in Mail server. Read the mydestination line in the editor and run postconf -n. In this separate worked problem, change that line to mydestination = guide-edge.guide.test, localhost. Select Save configuration.",
+          "commands": [
+            {
+              "command": "postconf -n",
+              "explanation": "Read the selected server\u2019s saved explicit settings; this does not apply or repair them.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Apply the saved repair and retry its queue",
+          "why": "mydestination lists domains this server delivers locally. Adding a domain here does not tell Postfix where another server lives. If a forwarding server mistakenly treats a team domain as local, it can look for a nonexistent local user instead of reaching the mailbox server.",
+          "action": "Keep guide-edge selected and run postfix reload (or select Reload saved settings). Then select guide-edge, run postqueue -p followed by postqueue -f.",
+          "commands": [
+            {
+              "command": "postfix reload",
+              "explanation": "Apply the selected server\u2019s saved supported settings without retrying sample mail.",
+              "simulator_only": false
+            },
+            {
+              "command": "postqueue -p",
+              "explanation": "Read only pending mail owned by the selected server; an empty queue is not proof of delivery.",
+              "simulator_only": false
+            },
+            {
+              "command": "postqueue -f",
+              "explanation": "Request retry; this model advances one finite attempt and labels its observations separately.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify delivery and the trust boundary together",
+          "why": "relay_domains permits incoming mail for named onward destinations; relayhost selects the next hop for nonlocal mail. This unit supplies exact literal endpoints, not DNS/MX discovery. Save changes to the selected virtual main.cf, then reload to change its running settings.",
+          "action": "Select Check configuration. To explore, select guide-edge, undo the repaired mydestination line, Save and Reload, then check again. Restore the worked line and repeat the check. If a prior attempt permanently failed a sample, expand Replay sample mail and select Reset sample mail only before retrying.",
+          "commands": []
+        }
+      ],
+      "explanation": "The team domain belongs to the mailbox server, not the forwarding edge. Keeping the edge\u2019s own hostname local while forwarding the team domain preserves both operator delivery and the team path. A next hop is distinct from authorization to relay.",
+      "hints": [
+        "Compare the mydestination concept in the Introduction with the supplied role of edge.",
+        "Inspect saved and running settings separately. A reload changes only the selected server; retry pending mail on its original queue owner.",
+        "Check passing refusal cases as well as failing delivery cases. Never solve a routing fault by broadening trust or replacing sample messages."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.postfix.org/BASIC_CONFIGURATION_README.html",
+        "https://www.postfix.org/SMTPD_ACCESS_README.html",
+        "https://www.postfix.org/postconf.5.html",
+        "https://www.postfix.org/postconf.1.html",
+        "https://www.postfix.org/postqueue.1.html",
+        "https://www.postfix.org/postfix.1.html"
+      ],
+      "simplifications": "Finite literal Postfix-like configuration and sample delivery only. Exact supplied IPv4 endpoints and domains; no real SMTP session, daemon, host files, network, DNS/MX, TLS/SASL, maps, virtual mailboxes, bounce creation or retry timers. Only seven explicit settings and four console commands are modeled. Flush advances one bounded attempt immediately. Sizes are represented subject/body bytes, not full RFC message sizes. Real postfix check ownership/directory behavior is not simulated. Reset sample mail only is a labeled simulator helper, not a Linux command.",
+      "initial": {
+        "kind": "SmtpRouting",
+        "simulation": {
+          "version": 1,
+          "source_id": "lpic2-smtp-destination-role",
+          "view": "introduction",
+          "assignment": {
+            "runtime": {
+              "version": 1,
+              "files": {
+                "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost, team.dispatch.test\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [mailbox.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "active": {
+                "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost, team.dispatch.test\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [mailbox.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "messages": {
+                "partner-receipt": {
+                  "queue_id": "A0000000",
+                  "status": {
+                    "kind": "Queued"
+                  }
+                },
+                "team-notice": {
+                  "queue_id": "A0000001",
+                  "status": {
+                    "kind": "Queued"
+                  }
+                }
+              }
+            },
+            "drafts": {
+              "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost, team.dispatch.test\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [mailbox.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+            },
+            "selected": "edge",
+            "input": "",
+            "output": "",
+            "checked": false
+          },
+          "practice": {
+            "runtime": {
+              "version": 1,
+              "files": {
+                "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost, team.guide.test\nmynetworks = 198.51.100.0/24, 10.44.8.0/24\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-mailbox.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "active": {
+                "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost, team.guide.test\nmynetworks = 198.51.100.0/24, 10.44.8.0/24\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-mailbox.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "messages": {
+                "partner-receipt": {
+                  "queue_id": "A0000000",
+                  "status": {
+                    "kind": "Queued"
+                  }
+                },
+                "team-notice": {
+                  "queue_id": "A0000001",
+                  "status": {
+                    "kind": "Queued"
+                  }
+                }
+              }
+            },
+            "drafts": {
+              "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost, team.guide.test\nmynetworks = 198.51.100.0/24, 10.44.8.0/24\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-mailbox.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+            },
+            "selected": "guide-edge",
+            "input": "",
+            "output": "",
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SmtpRouting",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-smtp-destination-role",
+          "assignment": {
+            "facts": {
+              "world": {
+                "nodes": {
+                  "edge": {
+                    "hostname": "edge.dispatch.test",
+                    "address": "192.0.2.10",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "operator"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "transit": {
+                    "hostname": "transit.dispatch.test",
+                    "address": "192.0.2.20",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "postmaster"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "mailbox": {
+                    "hostname": "mailbox.dispatch.test",
+                    "address": "192.0.2.30",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "mila",
+                      "tariq"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "partner": {
+                    "hostname": "partner.dispatch.test",
+                    "address": "192.0.2.40",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "visitor"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  }
+                },
+                "routes": {
+                  "partner.dispatch.test": "[partner.dispatch.test]"
+                }
+              },
+              "initial_files": {
+                "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost, team.dispatch.test\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [mailbox.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "initial_active": {
+                "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost, team.dispatch.test\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [mailbox.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "samples": {
+                "team-notice": {
+                  "entry": "edge",
+                  "sender": "operator@edge.dispatch.test",
+                  "recipient": "mila@team.dispatch.test",
+                  "subject": "Team notice",
+                  "body": "Keep this original sample and its intended recipient."
+                },
+                "partner-receipt": {
+                  "entry": "edge",
+                  "sender": null,
+                  "recipient": "visitor@partner.dispatch.test",
+                  "subject": "Partner receipt",
+                  "body": "Independent sample with a different destination."
+                }
+              }
+            },
+            "editable": {
+              "edge": [
+                "mydestination"
+              ]
+            },
+            "probes": [
+              {
+                "id": "incoming-0",
+                "label": "Outside mail reaches mila on the mailbox server",
+                "entry": "edge",
+                "client": "203.0.113.9",
+                "recipient": "mila@team.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "mailbox",
+                  "mailboxes": [
+                    "mila"
+                  ]
+                }
+              },
+              {
+                "id": "incoming-1",
+                "label": "Outside mail reaches tariq on the mailbox server",
+                "entry": "edge",
+                "client": "203.0.113.9",
+                "recipient": "tariq@team.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "mailbox",
+                  "mailboxes": [
+                    "tariq"
+                  ]
+                }
+              },
+              {
+                "id": "local-operator",
+                "label": "Retain local operator delivery",
+                "entry": "edge",
+                "client": "203.0.113.9",
+                "recipient": "operator@edge.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "edge",
+                  "mailboxes": [
+                    "operator"
+                  ]
+                }
+              },
+              {
+                "id": "outside-0",
+                "label": "Reject external relay from 203.0.113.9",
+                "entry": "edge",
+                "client": "203.0.113.9",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "edge"
+                }
+              },
+              {
+                "id": "outside-1",
+                "label": "Reject external relay from 10.44.9.50",
+                "entry": "edge",
+                "client": "10.44.9.50",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "edge"
+                }
+              },
+              {
+                "id": "outside-2",
+                "label": "Reject external relay from 192.0.9.50",
+                "entry": "edge",
+                "client": "192.0.9.50",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "edge"
+                }
+              },
+              {
+                "id": "trusted-0",
+                "label": "Retain outgoing mail from 10.44.8.25",
+                "entry": "edge",
+                "client": "10.44.8.25",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              },
+              {
+                "id": "trusted-1",
+                "label": "Retain outgoing mail from 10.44.8.200",
+                "entry": "edge",
+                "client": "10.44.8.200",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              },
+              {
+                "id": "trusted-2",
+                "label": "Retain outgoing mail from 192.0.2.20",
+                "entry": "edge",
+                "client": "192.0.2.20",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              }
+            ],
+            "queued": {
+              "team-notice": {
+                "kind": "Delivery",
+                "node": "mailbox",
+                "mailboxes": [
+                  "mila"
+                ]
+              },
+              "partner-receipt": {
+                "kind": "Delivery",
+                "node": "partner",
+                "mailboxes": [
+                  "visitor"
+                ]
+              }
+            }
+          },
+          "example": {
+            "facts": {
+              "world": {
+                "nodes": {
+                  "guide-edge": {
+                    "hostname": "guide-edge.guide.test",
+                    "address": "198.51.100.10",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "operator"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "guide-transit": {
+                    "hostname": "guide-transit.guide.test",
+                    "address": "198.51.100.20",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "postmaster"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "guide-mailbox": {
+                    "hostname": "guide-mailbox.guide.test",
+                    "address": "198.51.100.30",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "riley",
+                      "sam"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "guide-partner": {
+                    "hostname": "guide-partner.guide.test",
+                    "address": "198.51.100.40",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "visitor"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  }
+                },
+                "routes": {
+                  "partner.guide.test": "[guide-partner.guide.test]"
+                }
+              },
+              "initial_files": {
+                "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost, team.guide.test\nmynetworks = 198.51.100.0/24, 10.44.8.0/24\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-mailbox.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "initial_active": {
+                "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost, team.guide.test\nmynetworks = 198.51.100.0/24, 10.44.8.0/24\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-mailbox.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "samples": {
+                "team-notice": {
+                  "entry": "guide-edge",
+                  "sender": "operator@guide-edge.guide.test",
+                  "recipient": "riley@team.guide.test",
+                  "subject": "Team notice",
+                  "body": "Keep this original sample and its intended recipient."
+                },
+                "partner-receipt": {
+                  "entry": "guide-edge",
+                  "sender": null,
+                  "recipient": "visitor@partner.guide.test",
+                  "subject": "Partner receipt",
+                  "body": "Independent sample with a different destination."
+                }
+              }
+            },
+            "editable": {
+              "guide-edge": [
+                "mydestination"
+              ]
+            },
+            "probes": [
+              {
+                "id": "incoming-0",
+                "label": "Outside mail reaches riley on the mailbox server",
+                "entry": "guide-edge",
+                "client": "203.0.113.9",
+                "recipient": "riley@team.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-mailbox",
+                  "mailboxes": [
+                    "riley"
+                  ]
+                }
+              },
+              {
+                "id": "incoming-1",
+                "label": "Outside mail reaches sam on the mailbox server",
+                "entry": "guide-edge",
+                "client": "203.0.113.9",
+                "recipient": "sam@team.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-mailbox",
+                  "mailboxes": [
+                    "sam"
+                  ]
+                }
+              },
+              {
+                "id": "local-operator",
+                "label": "Retain local operator delivery",
+                "entry": "guide-edge",
+                "client": "203.0.113.9",
+                "recipient": "operator@guide-edge.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-edge",
+                  "mailboxes": [
+                    "operator"
+                  ]
+                }
+              },
+              {
+                "id": "outside-0",
+                "label": "Reject external relay from 203.0.113.9",
+                "entry": "guide-edge",
+                "client": "203.0.113.9",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "guide-edge"
+                }
+              },
+              {
+                "id": "outside-1",
+                "label": "Reject external relay from 10.44.9.50",
+                "entry": "guide-edge",
+                "client": "10.44.9.50",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "guide-edge"
+                }
+              },
+              {
+                "id": "outside-2",
+                "label": "Reject external relay from 198.51.109.50",
+                "entry": "guide-edge",
+                "client": "198.51.109.50",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "guide-edge"
+                }
+              },
+              {
+                "id": "trusted-0",
+                "label": "Retain outgoing mail from 10.44.8.25",
+                "entry": "guide-edge",
+                "client": "10.44.8.25",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              },
+              {
+                "id": "trusted-1",
+                "label": "Retain outgoing mail from 10.44.8.200",
+                "entry": "guide-edge",
+                "client": "10.44.8.200",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              },
+              {
+                "id": "trusted-2",
+                "label": "Retain outgoing mail from 198.51.100.20",
+                "entry": "guide-edge",
+                "client": "198.51.100.20",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              }
+            ],
+            "queued": {
+              "team-notice": {
+                "kind": "Delivery",
+                "node": "guide-mailbox",
+                "mailboxes": [
+                  "riley"
+                ]
+              },
+              "partner-receipt": {
+                "kind": "Delivery",
+                "node": "guide-partner",
+                "mailboxes": [
+                  "visitor"
+                ]
+              }
+            }
+          },
+          "reference": [
+            {
+              "kind": "edit",
+              "node": "edge",
+              "text": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+            },
+            {
+              "kind": "save",
+              "node": "edge"
+            },
+            {
+              "kind": "reload",
+              "node": "edge"
+            },
+            {
+              "kind": "flush",
+              "node": "edge"
+            },
+            {
+              "kind": "check"
+            }
+          ],
+          "example_steps": [
+            {
+              "kind": "edit",
+              "node": "guide-edge",
+              "text": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost\nmynetworks = 198.51.100.0/24, 10.44.8.0/24\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+            },
+            {
+              "kind": "save",
+              "node": "guide-edge"
+            },
+            {
+              "kind": "reload",
+              "node": "guide-edge"
+            },
+            {
+              "kind": "flush",
+              "node": "guide-edge"
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "smtp-workspace {\"kind\":\"edit\",\"node\":\"edge\",\"text\":\"myhostname = edge.dispatch.test\\nmydestination = edge.dispatch.test, localhost\\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\\nrelay_domains = team.dispatch.test\\nrelayhost = [transit.dispatch.test]\\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\\nparent_domain_matches_subdomains =\\n\"}",
+        "smtp-workspace {\"kind\":\"save\",\"node\":\"edge\"}",
+        "smtp-workspace {\"kind\":\"reload\",\"node\":\"edge\"}",
+        "smtp-workspace {\"kind\":\"flush\",\"node\":\"edge\"}",
+        "smtp-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "lpic2-smtp-relay-boundary",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-smtp-routing",
+      "topic": "SMTP relay access policy",
+      "title": "Close an open relay without blocking legitimate mail",
+      "summary": "Restrict client trust while preserving incoming, local and trusted outgoing mail.",
+      "objective": "Deliver outside mail for mila@team.dispatch.test and tariq@team.dispatch.test on mailbox; retain operator@edge.dispatch.test local delivery. Keep outgoing mail from 10.44.8.0/24 and 192.0.2.0/24 working. Reject outside clients relaying to partner.dispatch.test; local and permitted team destinations must remain reachable. Repair only mynetworks on edge; preserve the behavior of all other supplied settings. Equivalent supported configurations are accepted. Save and reload the repair, then deliver both original queued samples to their intended servers. An empty queue, printed success or an old receipt alone is insufficient.",
+      "retry_guidance": "Read the named failed outcome. Distinguish unsaved edits, running settings, routing, access policy and recorded delivery; repair the relevant layer, then retry and check again.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Understand the task",
+        "Repair and apply settings",
+        "Verify delivery and relay boundaries"
+      ],
+      "guide": [
+        {
+          "title": "Inspect and repair the guide server",
+          "why": "mynetworks identifies clients allowed to send onward mail. A /0 matches every IPv4 client, including outsiders. The recipient domain alone cannot prove the sender is trusted. This task supplies the intended client networks explicitly.",
+          "action": "Select guide-edge in Mail server. Read the mynetworks line in the editor and run postconf -n. In this separate worked problem, change that line to mynetworks = 198.51.100.0/24, 10.44.8.0/24. Select Save configuration.",
+          "commands": [
+            {
+              "command": "postconf -n",
+              "explanation": "Read the selected server\u2019s saved explicit settings; this does not apply or repair them.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Apply the saved repair and retry its queue",
+          "why": "permit_mynetworks permits a matching client immediately. Otherwise reject_unauth_destination denies onward delivery to an unauthorized domain, while allowing checks to continue for local domains and supplied relay_domains. Keep this destination guard; removing it is not a repair.",
+          "action": "Keep guide-edge selected and run postfix reload (or select Reload saved settings). Then select guide-edge, run postqueue -p followed by postqueue -f.",
+          "commands": [
+            {
+              "command": "postfix reload",
+              "explanation": "Apply the selected server\u2019s saved supported settings without retrying sample mail.",
+              "simulator_only": false
+            },
+            {
+              "command": "postqueue -p",
+              "explanation": "Read only pending mail owned by the selected server; an empty queue is not proof of delivery.",
+              "simulator_only": false
+            },
+            {
+              "command": "postqueue -f",
+              "explanation": "Request retry; this model advances one finite attempt and labels its observations separately.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify delivery and the trust boundary together",
+          "why": "A closed relay must still deliver outside mail to the team, accept trusted outgoing mail, and reject untrusted outgoing mail. A refusal is a passing test when refusal is required. A missing route or unavailable endpoint is not proof of correct access policy.",
+          "action": "Select Check configuration. To explore, select guide-edge, undo the repaired mynetworks line, Save and Reload, then check again. Restore the worked line and repeat the check. If a prior attempt permanently failed a sample, expand Replay sample mail and select Reset sample mail only before retrying.",
+          "commands": []
+        }
+      ],
+      "explanation": "Replacing all-client trust with the two supplied client networks closes onward relay for outsiders without rejecting incoming team mail. Preserve the destination guard and verify multiple clients on each side of the boundary; blocking all mail is not a secure, working repair.",
+      "hints": [
+        "Compare the mynetworks concept in the Introduction with the supplied role of edge.",
+        "Inspect saved and running settings separately. A reload changes only the selected server; retry pending mail on its original queue owner.",
+        "Check passing refusal cases as well as failing delivery cases. Never solve a routing fault by broadening trust or replacing sample messages."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.postfix.org/BASIC_CONFIGURATION_README.html",
+        "https://www.postfix.org/SMTPD_ACCESS_README.html",
+        "https://www.postfix.org/postconf.5.html",
+        "https://www.postfix.org/postconf.1.html",
+        "https://www.postfix.org/postqueue.1.html",
+        "https://www.postfix.org/postfix.1.html"
+      ],
+      "simplifications": "Finite literal Postfix-like configuration and sample delivery only. Exact supplied IPv4 endpoints and domains; no real SMTP session, daemon, host files, network, DNS/MX, TLS/SASL, maps, virtual mailboxes, bounce creation or retry timers. Only seven explicit settings and four console commands are modeled. Flush advances one bounded attempt immediately. Sizes are represented subject/body bytes, not full RFC message sizes. Real postfix check ownership/directory behavior is not simulated. Reset sample mail only is a labeled simulator helper, not a Linux command.",
+      "initial": {
+        "kind": "SmtpRouting",
+        "simulation": {
+          "version": 1,
+          "source_id": "lpic2-smtp-relay-boundary",
+          "view": "introduction",
+          "assignment": {
+            "runtime": {
+              "version": 1,
+              "files": {
+                "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost\nmynetworks = 0.0.0.0/0\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [mailbox.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "active": {
+                "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost\nmynetworks = 0.0.0.0/0\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [mailbox.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "messages": {
+                "partner-receipt": {
+                  "queue_id": "A0000000",
+                  "status": {
+                    "kind": "Queued"
+                  }
+                },
+                "team-notice": {
+                  "queue_id": "A0000001",
+                  "status": {
+                    "kind": "Queued"
+                  }
+                }
+              }
+            },
+            "drafts": {
+              "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost\nmynetworks = 0.0.0.0/0\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [mailbox.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+            },
+            "selected": "edge",
+            "input": "",
+            "output": "",
+            "checked": false
+          },
+          "practice": {
+            "runtime": {
+              "version": 1,
+              "files": {
+                "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost\nmynetworks = 0.0.0.0/0\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-mailbox.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "active": {
+                "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost\nmynetworks = 0.0.0.0/0\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-mailbox.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "messages": {
+                "partner-receipt": {
+                  "queue_id": "A0000000",
+                  "status": {
+                    "kind": "Queued"
+                  }
+                },
+                "team-notice": {
+                  "queue_id": "A0000001",
+                  "status": {
+                    "kind": "Queued"
+                  }
+                }
+              }
+            },
+            "drafts": {
+              "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost\nmynetworks = 0.0.0.0/0\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-mailbox.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+            },
+            "selected": "guide-edge",
+            "input": "",
+            "output": "",
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SmtpRouting",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-smtp-relay-boundary",
+          "assignment": {
+            "facts": {
+              "world": {
+                "nodes": {
+                  "edge": {
+                    "hostname": "edge.dispatch.test",
+                    "address": "192.0.2.10",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "operator"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "transit": {
+                    "hostname": "transit.dispatch.test",
+                    "address": "192.0.2.20",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "postmaster"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "mailbox": {
+                    "hostname": "mailbox.dispatch.test",
+                    "address": "192.0.2.30",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "mila",
+                      "tariq"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "partner": {
+                    "hostname": "partner.dispatch.test",
+                    "address": "192.0.2.40",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "visitor"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  }
+                },
+                "routes": {
+                  "partner.dispatch.test": "[partner.dispatch.test]"
+                }
+              },
+              "initial_files": {
+                "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost\nmynetworks = 0.0.0.0/0\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [mailbox.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "initial_active": {
+                "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost\nmynetworks = 0.0.0.0/0\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [mailbox.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "samples": {
+                "team-notice": {
+                  "entry": "edge",
+                  "sender": "operator@edge.dispatch.test",
+                  "recipient": "mila@team.dispatch.test",
+                  "subject": "Team notice",
+                  "body": "Keep this original sample and its intended recipient."
+                },
+                "partner-receipt": {
+                  "entry": "edge",
+                  "sender": null,
+                  "recipient": "visitor@partner.dispatch.test",
+                  "subject": "Partner receipt",
+                  "body": "Independent sample with a different destination."
+                }
+              }
+            },
+            "editable": {
+              "edge": [
+                "mynetworks"
+              ]
+            },
+            "probes": [
+              {
+                "id": "incoming-0",
+                "label": "Outside mail reaches mila on the mailbox server",
+                "entry": "edge",
+                "client": "203.0.113.9",
+                "recipient": "mila@team.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "mailbox",
+                  "mailboxes": [
+                    "mila"
+                  ]
+                }
+              },
+              {
+                "id": "incoming-1",
+                "label": "Outside mail reaches tariq on the mailbox server",
+                "entry": "edge",
+                "client": "203.0.113.9",
+                "recipient": "tariq@team.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "mailbox",
+                  "mailboxes": [
+                    "tariq"
+                  ]
+                }
+              },
+              {
+                "id": "local-operator",
+                "label": "Retain local operator delivery",
+                "entry": "edge",
+                "client": "203.0.113.9",
+                "recipient": "operator@edge.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "edge",
+                  "mailboxes": [
+                    "operator"
+                  ]
+                }
+              },
+              {
+                "id": "outside-0",
+                "label": "Reject external relay from 203.0.113.9",
+                "entry": "edge",
+                "client": "203.0.113.9",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "edge"
+                }
+              },
+              {
+                "id": "outside-1",
+                "label": "Reject external relay from 10.44.9.50",
+                "entry": "edge",
+                "client": "10.44.9.50",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "edge"
+                }
+              },
+              {
+                "id": "outside-2",
+                "label": "Reject external relay from 192.0.9.50",
+                "entry": "edge",
+                "client": "192.0.9.50",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "edge"
+                }
+              },
+              {
+                "id": "trusted-0",
+                "label": "Retain outgoing mail from 10.44.8.25",
+                "entry": "edge",
+                "client": "10.44.8.25",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              },
+              {
+                "id": "trusted-1",
+                "label": "Retain outgoing mail from 10.44.8.200",
+                "entry": "edge",
+                "client": "10.44.8.200",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              },
+              {
+                "id": "trusted-2",
+                "label": "Retain outgoing mail from 192.0.2.20",
+                "entry": "edge",
+                "client": "192.0.2.20",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              }
+            ],
+            "queued": {
+              "team-notice": {
+                "kind": "Delivery",
+                "node": "mailbox",
+                "mailboxes": [
+                  "mila"
+                ]
+              },
+              "partner-receipt": {
+                "kind": "Delivery",
+                "node": "partner",
+                "mailboxes": [
+                  "visitor"
+                ]
+              }
+            }
+          },
+          "example": {
+            "facts": {
+              "world": {
+                "nodes": {
+                  "guide-edge": {
+                    "hostname": "guide-edge.guide.test",
+                    "address": "198.51.100.10",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "operator"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "guide-transit": {
+                    "hostname": "guide-transit.guide.test",
+                    "address": "198.51.100.20",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "postmaster"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "guide-mailbox": {
+                    "hostname": "guide-mailbox.guide.test",
+                    "address": "198.51.100.30",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "riley",
+                      "sam"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "guide-partner": {
+                    "hostname": "guide-partner.guide.test",
+                    "address": "198.51.100.40",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "visitor"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  }
+                },
+                "routes": {
+                  "partner.guide.test": "[guide-partner.guide.test]"
+                }
+              },
+              "initial_files": {
+                "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost\nmynetworks = 0.0.0.0/0\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-mailbox.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "initial_active": {
+                "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost\nmynetworks = 0.0.0.0/0\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-mailbox.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "samples": {
+                "team-notice": {
+                  "entry": "guide-edge",
+                  "sender": "operator@guide-edge.guide.test",
+                  "recipient": "riley@team.guide.test",
+                  "subject": "Team notice",
+                  "body": "Keep this original sample and its intended recipient."
+                },
+                "partner-receipt": {
+                  "entry": "guide-edge",
+                  "sender": null,
+                  "recipient": "visitor@partner.guide.test",
+                  "subject": "Partner receipt",
+                  "body": "Independent sample with a different destination."
+                }
+              }
+            },
+            "editable": {
+              "guide-edge": [
+                "mynetworks"
+              ]
+            },
+            "probes": [
+              {
+                "id": "incoming-0",
+                "label": "Outside mail reaches riley on the mailbox server",
+                "entry": "guide-edge",
+                "client": "203.0.113.9",
+                "recipient": "riley@team.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-mailbox",
+                  "mailboxes": [
+                    "riley"
+                  ]
+                }
+              },
+              {
+                "id": "incoming-1",
+                "label": "Outside mail reaches sam on the mailbox server",
+                "entry": "guide-edge",
+                "client": "203.0.113.9",
+                "recipient": "sam@team.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-mailbox",
+                  "mailboxes": [
+                    "sam"
+                  ]
+                }
+              },
+              {
+                "id": "local-operator",
+                "label": "Retain local operator delivery",
+                "entry": "guide-edge",
+                "client": "203.0.113.9",
+                "recipient": "operator@guide-edge.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-edge",
+                  "mailboxes": [
+                    "operator"
+                  ]
+                }
+              },
+              {
+                "id": "outside-0",
+                "label": "Reject external relay from 203.0.113.9",
+                "entry": "guide-edge",
+                "client": "203.0.113.9",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "guide-edge"
+                }
+              },
+              {
+                "id": "outside-1",
+                "label": "Reject external relay from 10.44.9.50",
+                "entry": "guide-edge",
+                "client": "10.44.9.50",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "guide-edge"
+                }
+              },
+              {
+                "id": "outside-2",
+                "label": "Reject external relay from 198.51.109.50",
+                "entry": "guide-edge",
+                "client": "198.51.109.50",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "guide-edge"
+                }
+              },
+              {
+                "id": "trusted-0",
+                "label": "Retain outgoing mail from 10.44.8.25",
+                "entry": "guide-edge",
+                "client": "10.44.8.25",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              },
+              {
+                "id": "trusted-1",
+                "label": "Retain outgoing mail from 10.44.8.200",
+                "entry": "guide-edge",
+                "client": "10.44.8.200",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              },
+              {
+                "id": "trusted-2",
+                "label": "Retain outgoing mail from 198.51.100.20",
+                "entry": "guide-edge",
+                "client": "198.51.100.20",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              }
+            ],
+            "queued": {
+              "team-notice": {
+                "kind": "Delivery",
+                "node": "guide-mailbox",
+                "mailboxes": [
+                  "riley"
+                ]
+              },
+              "partner-receipt": {
+                "kind": "Delivery",
+                "node": "guide-partner",
+                "mailboxes": [
+                  "visitor"
+                ]
+              }
+            }
+          },
+          "reference": [
+            {
+              "kind": "edit",
+              "node": "edge",
+              "text": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+            },
+            {
+              "kind": "save",
+              "node": "edge"
+            },
+            {
+              "kind": "reload",
+              "node": "edge"
+            },
+            {
+              "kind": "flush",
+              "node": "edge"
+            },
+            {
+              "kind": "check"
+            }
+          ],
+          "example_steps": [
+            {
+              "kind": "edit",
+              "node": "guide-edge",
+              "text": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost\nmynetworks = 198.51.100.0/24, 10.44.8.0/24\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+            },
+            {
+              "kind": "save",
+              "node": "guide-edge"
+            },
+            {
+              "kind": "reload",
+              "node": "guide-edge"
+            },
+            {
+              "kind": "flush",
+              "node": "guide-edge"
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "smtp-workspace {\"kind\":\"edit\",\"node\":\"edge\",\"text\":\"myhostname = edge.dispatch.test\\nmydestination = edge.dispatch.test, localhost\\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\\nrelay_domains = team.dispatch.test\\nrelayhost = [transit.dispatch.test]\\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\\nparent_domain_matches_subdomains =\\n\"}",
+        "smtp-workspace {\"kind\":\"save\",\"node\":\"edge\"}",
+        "smtp-workspace {\"kind\":\"reload\",\"node\":\"edge\"}",
+        "smtp-workspace {\"kind\":\"flush\",\"node\":\"edge\"}",
+        "smtp-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-smtp-destination-role"
+      ]
+    },
+    {
+      "id": "lpic2-smtp-queue-recovery",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-smtp-routing",
+      "topic": "SMTP queues and routing loops",
+      "title": "Recover a relay loop without losing queued mail",
+      "summary": "Diagnose a repeated next-hop path, apply the repair and recover the original queued messages.",
+      "objective": "Deliver outside mail for mila@team.dispatch.test and tariq@team.dispatch.test on mailbox; retain operator@edge.dispatch.test local delivery. Keep outgoing mail from 10.44.8.0/24 and 192.0.2.0/24 working. Reject outside clients relaying to partner.dispatch.test; local and permitted team destinations must remain reachable. Repair only relayhost on transit; preserve the behavior of all other supplied settings. Equivalent supported configurations are accepted. Save and reload the repair, then deliver both original queued samples to their intended servers. An empty queue, printed success or an old receipt alone is insufficient.",
+      "retry_guidance": "Read the named failed outcome. Distinguish unsaved edits, running settings, routing, access policy and recorded delivery; repair the relevant layer, then retry and check again.",
+      "difficulty": "Intermediate",
+      "minutes": 26,
+      "steps": [
+        "Understand the task",
+        "Repair and apply settings",
+        "Verify delivery and relay boundaries"
+      ],
+      "guide": [
+        {
+          "title": "Inspect and repair the guide server",
+          "why": "A queue holds mail waiting for delivery. postqueue -p lists pending samples and their last failure. An empty queue alone cannot prove delivery: a permanently failed sample is also absent. Inspect the retained sample states and intended mailbox results.",
+          "action": "Select guide-transit in Mail server. Read the relayhost line in the editor and run postconf -n. In this separate worked problem, change that line to relayhost = [guide-mailbox.guide.test]. Select Save configuration.",
+          "commands": [
+            {
+              "command": "postconf -n",
+              "explanation": "Read the selected server\u2019s saved explicit settings; this does not apply or repair them.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Apply the saved repair and retry its queue",
+          "why": "A relay evaluates the address of the server currently connecting to it, not the original distant sender. A next hop pointing back toward an earlier relay can cycle. This simulator reports the finite repeated path; it does not fabricate real SMTP hop headers, bounce timing or retry schedules.",
+          "action": "Keep guide-transit selected and run postfix reload (or select Reload saved settings). Then select guide-edge, run postqueue -p followed by postqueue -f.",
+          "commands": [
+            {
+              "command": "postfix reload",
+              "explanation": "Apply the selected server\u2019s saved supported settings without retrying sample mail.",
+              "simulator_only": false
+            },
+            {
+              "command": "postqueue -p",
+              "explanation": "Read only pending mail owned by the selected server; an empty queue is not proof of delivery.",
+              "simulator_only": false
+            },
+            {
+              "command": "postqueue -f",
+              "explanation": "Request retry; this model advances one finite attempt and labels its observations separately.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify delivery and the trust boundary together",
+          "why": "Saving a correct file does not update the running route. postfix reload applies this server\u2019s supported saved settings. postqueue -f requests a retry of its queued mail; the simulator advances one bounded attempt immediately. A successful command exit is not evidence that recipients received mail. Recheck delivery and relay boundaries together.",
+          "action": "Select Check configuration. To explore, select guide-transit, undo the repaired relayhost line, Save and Reload, then check again. Restore the worked line and repeat the check. If a prior attempt permanently failed a sample, expand Replay sample mail and select Reset sample mail only before retrying.",
+          "commands": []
+        }
+      ],
+      "explanation": "The transit next hop must lead onward to the mailbox endpoint, not back to the edge. Saving, reloading and retrying are separate operations. Delivery records must identify the intended recipient server, and current saved/running paths must still work.",
+      "hints": [
+        "Compare the relayhost concept in the Introduction with the supplied role of transit.",
+        "Inspect saved and running settings separately. A reload changes only the selected server; retry pending mail on its original queue owner.",
+        "Check passing refusal cases as well as failing delivery cases. Never solve a routing fault by broadening trust or replacing sample messages."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.postfix.org/BASIC_CONFIGURATION_README.html",
+        "https://www.postfix.org/SMTPD_ACCESS_README.html",
+        "https://www.postfix.org/postconf.5.html",
+        "https://www.postfix.org/postconf.1.html",
+        "https://www.postfix.org/postqueue.1.html",
+        "https://www.postfix.org/postfix.1.html"
+      ],
+      "simplifications": "Finite literal Postfix-like configuration and sample delivery only. Exact supplied IPv4 endpoints and domains; no real SMTP session, daemon, host files, network, DNS/MX, TLS/SASL, maps, virtual mailboxes, bounce creation or retry timers. Only seven explicit settings and four console commands are modeled. Flush advances one bounded attempt immediately. Sizes are represented subject/body bytes, not full RFC message sizes. Real postfix check ownership/directory behavior is not simulated. Reset sample mail only is a labeled simulator helper, not a Linux command.",
+      "initial": {
+        "kind": "SmtpRouting",
+        "simulation": {
+          "version": 1,
+          "source_id": "lpic2-smtp-queue-recovery",
+          "view": "introduction",
+          "assignment": {
+            "runtime": {
+              "version": 1,
+              "files": {
+                "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [edge.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "active": {
+                "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [edge.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "messages": {
+                "partner-receipt": {
+                  "queue_id": "A0000000",
+                  "status": {
+                    "kind": "Queued"
+                  }
+                },
+                "team-notice": {
+                  "queue_id": "A0000001",
+                  "status": {
+                    "kind": "Queued"
+                  }
+                }
+              }
+            },
+            "drafts": {
+              "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [edge.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+            },
+            "selected": "transit",
+            "input": "",
+            "output": "",
+            "checked": false
+          },
+          "practice": {
+            "runtime": {
+              "version": 1,
+              "files": {
+                "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost\nmynetworks = 198.51.100.0/24, 10.44.8.0/24\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-edge.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "active": {
+                "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost\nmynetworks = 198.51.100.0/24, 10.44.8.0/24\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-edge.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "messages": {
+                "partner-receipt": {
+                  "queue_id": "A0000000",
+                  "status": {
+                    "kind": "Queued"
+                  }
+                },
+                "team-notice": {
+                  "queue_id": "A0000001",
+                  "status": {
+                    "kind": "Queued"
+                  }
+                }
+              }
+            },
+            "drafts": {
+              "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost\nmynetworks = 198.51.100.0/24, 10.44.8.0/24\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-edge.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+              "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+            },
+            "selected": "guide-transit",
+            "input": "",
+            "output": "",
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SmtpRouting",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-smtp-queue-recovery",
+          "assignment": {
+            "facts": {
+              "world": {
+                "nodes": {
+                  "edge": {
+                    "hostname": "edge.dispatch.test",
+                    "address": "192.0.2.10",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "operator"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "transit": {
+                    "hostname": "transit.dispatch.test",
+                    "address": "192.0.2.20",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "postmaster"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "mailbox": {
+                    "hostname": "mailbox.dispatch.test",
+                    "address": "192.0.2.30",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "mila",
+                      "tariq"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "partner": {
+                    "hostname": "partner.dispatch.test",
+                    "address": "192.0.2.40",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "visitor"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  }
+                },
+                "routes": {
+                  "partner.dispatch.test": "[partner.dispatch.test]"
+                }
+              },
+              "initial_files": {
+                "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [edge.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "initial_active": {
+                "edge": "myhostname = edge.dispatch.test\nmydestination = edge.dispatch.test, localhost\nmynetworks = 192.0.2.0/24, 10.44.8.0/24\nrelay_domains = team.dispatch.test\nrelayhost = [transit.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "transit": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [edge.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "mailbox": "myhostname = mailbox.dispatch.test\nmydestination = team.dispatch.test, mailbox.dispatch.test, localhost\nmynetworks = 192.0.2.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "partner": "myhostname = partner.dispatch.test\nmydestination = partner.dispatch.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "samples": {
+                "team-notice": {
+                  "entry": "edge",
+                  "sender": "operator@edge.dispatch.test",
+                  "recipient": "mila@team.dispatch.test",
+                  "subject": "Team notice",
+                  "body": "Keep this original sample and its intended recipient."
+                },
+                "partner-receipt": {
+                  "entry": "edge",
+                  "sender": null,
+                  "recipient": "visitor@partner.dispatch.test",
+                  "subject": "Partner receipt",
+                  "body": "Independent sample with a different destination."
+                }
+              }
+            },
+            "editable": {
+              "transit": [
+                "relayhost"
+              ]
+            },
+            "probes": [
+              {
+                "id": "incoming-0",
+                "label": "Outside mail reaches mila on the mailbox server",
+                "entry": "edge",
+                "client": "203.0.113.9",
+                "recipient": "mila@team.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "mailbox",
+                  "mailboxes": [
+                    "mila"
+                  ]
+                }
+              },
+              {
+                "id": "incoming-1",
+                "label": "Outside mail reaches tariq on the mailbox server",
+                "entry": "edge",
+                "client": "203.0.113.9",
+                "recipient": "tariq@team.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "mailbox",
+                  "mailboxes": [
+                    "tariq"
+                  ]
+                }
+              },
+              {
+                "id": "local-operator",
+                "label": "Retain local operator delivery",
+                "entry": "edge",
+                "client": "203.0.113.9",
+                "recipient": "operator@edge.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "edge",
+                  "mailboxes": [
+                    "operator"
+                  ]
+                }
+              },
+              {
+                "id": "outside-0",
+                "label": "Reject external relay from 203.0.113.9",
+                "entry": "edge",
+                "client": "203.0.113.9",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "edge"
+                }
+              },
+              {
+                "id": "outside-1",
+                "label": "Reject external relay from 10.44.9.50",
+                "entry": "edge",
+                "client": "10.44.9.50",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "edge"
+                }
+              },
+              {
+                "id": "outside-2",
+                "label": "Reject external relay from 192.0.9.50",
+                "entry": "edge",
+                "client": "192.0.9.50",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "edge"
+                }
+              },
+              {
+                "id": "trusted-0",
+                "label": "Retain outgoing mail from 10.44.8.25",
+                "entry": "edge",
+                "client": "10.44.8.25",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              },
+              {
+                "id": "trusted-1",
+                "label": "Retain outgoing mail from 10.44.8.200",
+                "entry": "edge",
+                "client": "10.44.8.200",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              },
+              {
+                "id": "trusted-2",
+                "label": "Retain outgoing mail from 192.0.2.20",
+                "entry": "edge",
+                "client": "192.0.2.20",
+                "recipient": "visitor@partner.dispatch.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              }
+            ],
+            "queued": {
+              "team-notice": {
+                "kind": "Delivery",
+                "node": "mailbox",
+                "mailboxes": [
+                  "mila"
+                ]
+              },
+              "partner-receipt": {
+                "kind": "Delivery",
+                "node": "partner",
+                "mailboxes": [
+                  "visitor"
+                ]
+              }
+            }
+          },
+          "example": {
+            "facts": {
+              "world": {
+                "nodes": {
+                  "guide-edge": {
+                    "hostname": "guide-edge.guide.test",
+                    "address": "198.51.100.10",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "operator"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "guide-transit": {
+                    "hostname": "guide-transit.guide.test",
+                    "address": "198.51.100.20",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "postmaster"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "guide-mailbox": {
+                    "hostname": "guide-mailbox.guide.test",
+                    "address": "198.51.100.30",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "riley",
+                      "sam"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  },
+                  "guide-partner": {
+                    "hostname": "guide-partner.guide.test",
+                    "address": "198.51.100.40",
+                    "port": 25,
+                    "available": true,
+                    "users": [
+                      "visitor"
+                    ],
+                    "aliases": "",
+                    "forwards": {}
+                  }
+                },
+                "routes": {
+                  "partner.guide.test": "[guide-partner.guide.test]"
+                }
+              },
+              "initial_files": {
+                "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost\nmynetworks = 198.51.100.0/24, 10.44.8.0/24\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-edge.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "initial_active": {
+                "guide-edge": "myhostname = guide-edge.guide.test\nmydestination = guide-edge.guide.test, localhost\nmynetworks = 198.51.100.0/24, 10.44.8.0/24\nrelay_domains = team.guide.test\nrelayhost = [guide-transit.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-transit": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-edge.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-mailbox": "myhostname = guide-mailbox.guide.test\nmydestination = team.guide.test, guide-mailbox.guide.test, localhost\nmynetworks = 198.51.100.20/32\nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n",
+                "guide-partner": "myhostname = guide-partner.guide.test\nmydestination = partner.guide.test, localhost\nmynetworks = \nrelay_domains = \nrelayhost = \nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+              },
+              "samples": {
+                "team-notice": {
+                  "entry": "guide-edge",
+                  "sender": "operator@guide-edge.guide.test",
+                  "recipient": "riley@team.guide.test",
+                  "subject": "Team notice",
+                  "body": "Keep this original sample and its intended recipient."
+                },
+                "partner-receipt": {
+                  "entry": "guide-edge",
+                  "sender": null,
+                  "recipient": "visitor@partner.guide.test",
+                  "subject": "Partner receipt",
+                  "body": "Independent sample with a different destination."
+                }
+              }
+            },
+            "editable": {
+              "guide-transit": [
+                "relayhost"
+              ]
+            },
+            "probes": [
+              {
+                "id": "incoming-0",
+                "label": "Outside mail reaches riley on the mailbox server",
+                "entry": "guide-edge",
+                "client": "203.0.113.9",
+                "recipient": "riley@team.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-mailbox",
+                  "mailboxes": [
+                    "riley"
+                  ]
+                }
+              },
+              {
+                "id": "incoming-1",
+                "label": "Outside mail reaches sam on the mailbox server",
+                "entry": "guide-edge",
+                "client": "203.0.113.9",
+                "recipient": "sam@team.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-mailbox",
+                  "mailboxes": [
+                    "sam"
+                  ]
+                }
+              },
+              {
+                "id": "local-operator",
+                "label": "Retain local operator delivery",
+                "entry": "guide-edge",
+                "client": "203.0.113.9",
+                "recipient": "operator@guide-edge.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-edge",
+                  "mailboxes": [
+                    "operator"
+                  ]
+                }
+              },
+              {
+                "id": "outside-0",
+                "label": "Reject external relay from 203.0.113.9",
+                "entry": "guide-edge",
+                "client": "203.0.113.9",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "guide-edge"
+                }
+              },
+              {
+                "id": "outside-1",
+                "label": "Reject external relay from 10.44.9.50",
+                "entry": "guide-edge",
+                "client": "10.44.9.50",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "guide-edge"
+                }
+              },
+              {
+                "id": "outside-2",
+                "label": "Reject external relay from 198.51.109.50",
+                "entry": "guide-edge",
+                "client": "198.51.109.50",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Reject",
+                  "node": "guide-edge"
+                }
+              },
+              {
+                "id": "trusted-0",
+                "label": "Retain outgoing mail from 10.44.8.25",
+                "entry": "guide-edge",
+                "client": "10.44.8.25",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              },
+              {
+                "id": "trusted-1",
+                "label": "Retain outgoing mail from 10.44.8.200",
+                "entry": "guide-edge",
+                "client": "10.44.8.200",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              },
+              {
+                "id": "trusted-2",
+                "label": "Retain outgoing mail from 198.51.100.20",
+                "entry": "guide-edge",
+                "client": "198.51.100.20",
+                "recipient": "visitor@partner.guide.test",
+                "expected": {
+                  "kind": "Delivery",
+                  "node": "guide-partner",
+                  "mailboxes": [
+                    "visitor"
+                  ]
+                }
+              }
+            ],
+            "queued": {
+              "team-notice": {
+                "kind": "Delivery",
+                "node": "guide-mailbox",
+                "mailboxes": [
+                  "riley"
+                ]
+              },
+              "partner-receipt": {
+                "kind": "Delivery",
+                "node": "guide-partner",
+                "mailboxes": [
+                  "visitor"
+                ]
+              }
+            }
+          },
+          "reference": [
+            {
+              "kind": "edit",
+              "node": "transit",
+              "text": "myhostname = transit.dispatch.test\nmydestination = transit.dispatch.test, localhost\nmynetworks = 192.0.2.10/32\nrelay_domains = \nrelayhost = [mailbox.dispatch.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+            },
+            {
+              "kind": "save",
+              "node": "transit"
+            },
+            {
+              "kind": "reload",
+              "node": "transit"
+            },
+            {
+              "kind": "flush",
+              "node": "edge"
+            },
+            {
+              "kind": "check"
+            }
+          ],
+          "example_steps": [
+            {
+              "kind": "edit",
+              "node": "guide-transit",
+              "text": "myhostname = guide-transit.guide.test\nmydestination = guide-transit.guide.test, localhost\nmynetworks = 198.51.100.10/32\nrelay_domains = \nrelayhost = [guide-mailbox.guide.test]\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\nparent_domain_matches_subdomains =\n"
+            },
+            {
+              "kind": "save",
+              "node": "guide-transit"
+            },
+            {
+              "kind": "reload",
+              "node": "guide-transit"
+            },
+            {
+              "kind": "flush",
+              "node": "guide-edge"
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "smtp-workspace {\"kind\":\"edit\",\"node\":\"transit\",\"text\":\"myhostname = transit.dispatch.test\\nmydestination = transit.dispatch.test, localhost\\nmynetworks = 192.0.2.10/32\\nrelay_domains = \\nrelayhost = [mailbox.dispatch.test]\\nsmtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination\\nparent_domain_matches_subdomains =\\n\"}",
+        "smtp-workspace {\"kind\":\"save\",\"node\":\"transit\"}",
+        "smtp-workspace {\"kind\":\"reload\",\"node\":\"transit\"}",
+        "smtp-workspace {\"kind\":\"flush\",\"node\":\"edge\"}",
+        "smtp-workspace {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-smtp-destination-role",
+        "lpic2-smtp-relay-boundary"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,172 @@
+[
+  {
+    "id": "ccna-poe-compatible-ports",
+    "goal": "Distinguish data-only, PoE and PoE+ ports, then connect every supplied device within the switch budget.",
+    "context": "Builds on wired devices and interface/cable inspection. The equipment and budgets are supplied; no electrical measurements or real hardware are needed.",
+    "concepts": [
+      {
+        "title": "A data connection is not a power supply",
+        "text": "An Ethernet cable can carry data and, with compatible equipment, electrical power. PoE means Power over Ethernet. The switch is the power source; the phone, access point or camera is the powered device. A data-only port cannot power these supplied devices."
+      },
+      {
+        "title": "Match the device to the source port",
+        "text": "Each supplied device has a power class. In this activity, class 4 needs a 30 W source reservation and a PoE+ port. Ordinary PoE ports provide up to 15.4 W; PoE+ provides up to 30 W. A different port may solve a source mismatch. Changing a checkbox cannot add hardware to a data-only port."
+      },
+      {
+        "title": "A reservation is not measured consumption",
+        "text": "The supplied classes reserve 4 W (class 1), 7 W (class 2), 15.4 W (class 0 or 3) or 30 W (class 4) from the source. A 30 W-capable port does not always reserve 30 W: its connected device’s class decides the allocation. These are source reservations, not delivered power after cable losses or real-time consumption."
+      },
+      {
+        "title": "Several ports share one power budget",
+        "text": "Add the reservations for powered devices and compare that total with the switch budget. An enabled, unused port reserves nothing in this model. Ports reserve in their listed order here; that is a teaching rule, not a claim about every switch. A capable port can still be denied when earlier reservations leave too little."
+      },
+      {
+        "title": "Use the controls to inspect a cause",
+        "text": "Connect to chooses a supplied port for each device. A port accepts one cable, so choose Disconnected before reusing an occupied port. PoE enabled controls power on each capable port. Current power shows what the model actually allocates; Check power plan evaluates the full requirements after your final edit."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Training AP · class 4",
+        "value": "30 W source reservation · PoE+ required",
+        "explanation": "A 15.4 W PoE source is too small, even if the whole switch has spare power."
+      },
+      {
+        "label": "Helpdesk phone · class 1",
+        "value": "4 W source reservation",
+        "explanation": "Any supplied compatible source can power the phone. A larger per-port maximum does not change its declared reservation."
+      },
+      {
+        "label": "Entry camera · class 2",
+        "value": "7 W source reservation",
+        "explanation": "The first example powers all three devices."
+      },
+      {
+        "label": "Expected source total",
+        "value": "30 + 4 + 7 = 41 W of 41 W",
+        "explanation": "Count device allocations, not the sum of every port’s maximum. This example uses different equipment and values from your assignment."
+      },
+      {
+        "label": "What a repair changes",
+        "value": "Compatible source → power allocation",
+        "explanation": "Choose a compatible unused port, inspect Current power and then Check example."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Match each device to a port",
+        "action": "In Connect to, inspect the AP’s selected source. Choose Disconnected for a device before reusing its occupied port; connect the AP to a supplied PoE+ port. Inspect PoE enabled for that port.",
+        "observe": "Current power distinguishes an incompatible source, power disabled and an actual powered allocation. The port list describes hardware capacity; the power controls do not change that capacity."
+      },
+      {
+        "title": "Inspect the reservations",
+        "action": "Compare the declared class reservations with the shared budget. Give the phone and camera their own compatible ports.",
+        "observe": "The source total changes when a powered device connects or loses power. The three expected reservations total 41 W."
+      },
+      {
+        "title": "Check, break and retry",
+        "action": "Select Check example. Turn PoE enabled off for a required device, inspect its cause and check again. Restore a compatible powered connection and recheck.",
+        "observe": "Each result names the device and explains its cause. An edit clears the previous check, so a successful configuration cannot keep stale success after you break it."
+      }
+    ],
+    "requirements": [
+      "Give Staff AP, Support phone and Camera powered connections using compatible supplied ports.",
+      "Connect each device to one distinct port and keep all supplied equipment.",
+      "Keep source reservations within the displayed shared switch budget."
+    ],
+    "status": "updated",
+    "source": "scenarios/poe-lessons-v1.json",
+    "review": {
+      "introduction": "Reviewed each source class, source-versus-device distinction, compatible-port limit and budget calculation against the bounded model and different-value worked plan. Model/source/task checks pass; actual native rendering pending.",
+      "example": "Reviewed Connect to, Disconnected, PoE enabled, Current power and Check example instructions against the source model. Practice uses separate equipment/budgets and accepts alternate valid plans; native keyboard/layout/cold verification pending.",
+      "assignment": "Reviewed every supplied device target and the source-bound independent requirements. No reference port plan appears in the task or starter; intentional source/power/budget faults remain. Authored engine paths and alternatives pass; native/progress acceptance pending."
+    }
+  },
+  {
+    "id": "ccna-poe-budget-recovery",
+    "goal": "Diagnose a per-port limit and a shared-budget shortage while preserving voice and deliberately retiring an unused power attachment.",
+    "context": "Builds on wired devices and interface/cable inspection. The equipment and budgets are supplied; no electrical measurements or real hardware are needed.",
+    "concepts": [
+      {
+        "title": "A data connection is not a power supply",
+        "text": "An Ethernet cable can carry data and, with compatible equipment, electrical power. PoE means Power over Ethernet. The switch is the power source; the phone, access point or camera is the powered device. A data-only port cannot power these supplied devices."
+      },
+      {
+        "title": "Match the device to the source port",
+        "text": "Each supplied device has a power class. In this activity, class 4 needs a 30 W source reservation and a PoE+ port. Ordinary PoE ports provide up to 15.4 W; PoE+ provides up to 30 W. A different port may solve a source mismatch. Changing a checkbox cannot add hardware to a data-only port."
+      },
+      {
+        "title": "A reservation is not measured consumption",
+        "text": "The supplied classes reserve 4 W (class 1), 7 W (class 2), 15.4 W (class 0 or 3) or 30 W (class 4) from the source. A 30 W-capable port does not always reserve 30 W: its connected device’s class decides the allocation. These are source reservations, not delivered power after cable losses or real-time consumption."
+      },
+      {
+        "title": "Several ports share one power budget",
+        "text": "Add the reservations for powered devices and compare that total with the switch budget. An enabled, unused port reserves nothing in this model. Ports reserve in their listed order here; that is a teaching rule, not a claim about every switch. A capable port can still be denied when earlier reservations leave too little."
+      },
+      {
+        "title": "Use the controls to inspect a cause",
+        "text": "Connect to chooses a supplied port for each device. A port accepts one cable, so choose Disconnected before reusing an occupied port. PoE enabled controls power on each capable port. Current power shows what the model actually allocates; Check power plan evaluates the full requirements after your final edit."
+      },
+      {
+        "title": "Retire an attachment deliberately",
+        "text": "When a device is out of service, disconnect it or turn off PoE on its port. Leaving it denied by an exhausted budget is a fault, not retirement. Preserve power to the required phone and access point; a power result alone does not test IP connectivity."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Training AP · class 4",
+        "value": "30 W source reservation · PoE+ required",
+        "explanation": "A 15.4 W PoE source is too small, even if the whole switch has spare power."
+      },
+      {
+        "label": "Helpdesk phone · class 1",
+        "value": "4 W source reservation",
+        "explanation": "Any supplied compatible source can power the phone. A larger per-port maximum does not change its declared reservation."
+      },
+      {
+        "label": "Entry camera · class 2",
+        "value": "Disconnected · 0 W reserved",
+        "explanation": "This camera is out of service in the budget example. It is deliberately disconnected, not merely starved."
+      },
+      {
+        "label": "Expected source total",
+        "value": "30 + 4 = 34 W of 34 W",
+        "explanation": "Count device allocations, not the sum of every port’s maximum. This example uses different equipment and values from your assignment."
+      },
+      {
+        "label": "What a repair changes",
+        "value": "Compatible source +available budget → power allocation",
+        "explanation": "Moving the AP to a PoE+ source exposes any remaining budget shortage. Retire the unused attachment so both essential devices receive power."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Match each device to a port",
+        "action": "In Connect to, inspect the AP’s selected source. Choose Disconnected for a device before reusing its occupied port; connect the AP to a supplied PoE+ port. Inspect PoE enabled for that port.",
+        "observe": "Current power distinguishes an incompatible source, power disabled and an actual powered allocation. The port list describes hardware capacity; the power controls do not change that capacity."
+      },
+      {
+        "title": "Inspect the reservations",
+        "action": "Compare the declared class reservations with the shared budget. The camera is out of service. Disconnect it or clear PoE enabled on its port while preserving the phone and AP.",
+        "observe": "The source total changes when a powered device connects or loses power. A 30 W AP and 4 W phone fit the 34 W example budget; adding the 7 W camera does not."
+      },
+      {
+        "title": "Check, break and retry",
+        "action": "Select Check example. Turn PoE enabled off for a required device, inspect its cause and check again. Restore a compatible powered connection and recheck.",
+        "observe": "Each result names the device and explains its cause. An edit clears the previous check, so a successful configuration cannot keep stale success after you break it."
+      }
+    ],
+    "requirements": [
+      "Restore power to Staff AP and Support phone using compatible supplied ports.",
+      "Display is out of service: deliberately disconnect it or disable power on its port. Budget denial is not deliberate retirement.",
+      "Keep all supplied equipment, use distinct ports and stay within the shared source budget."
+    ],
+    "status": "updated",
+    "source": "scenarios/poe-lessons-v1.json",
+    "review": {
+      "introduction": "Reviewed each source class, source-versus-device distinction, compatible-port limit and budget calculation against the bounded model and different-value worked plan. Model/source/task checks pass; actual native rendering pending.",
+      "example": "Reviewed Connect to, Disconnected, PoE enabled, Current power and Check example instructions against the source model. Practice uses separate equipment/budgets and accepts alternate valid plans; native keyboard/layout/cold verification pending.",
+      "assignment": "Reviewed every supplied device target and the source-bound independent requirements. No reference port plan appears in the task or starter; intentional source/power/budget faults remain. Authored engine paths and alternatives pass; native/progress acceptance pending."
+    }
+  }
+]

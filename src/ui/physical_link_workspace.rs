@@ -1129,10 +1129,11 @@ fn body(
             })
         });
     m.title = Some(ui.heading(&s.title).rect);
-    m.goal = Some(
-        ui.add(egui::Label::new(RichText::new(&s.objective).strong()).wrap())
-            .rect,
-    );
+    m.goal = if current == View::Assignment {
+        Some(ccna_presentation::assignment(ui, s).rect)
+    } else {
+        None
+    };
     ui.label(
         RichText::new("In-process simulated links · No host interfaces or IOS commands").small(),
     );
@@ -1153,13 +1154,34 @@ fn body(
             });
         }
     });
+    if current == View::Example {
+        m.goal = Some(ccna_presentation::example(ui, s, true).rect);
+    }
     if current == View::Introduction {
         let lesson = s.physical_link_teaching.as_ref().unwrap();
-        ui.add(egui::Label::new(&lesson.introduction).wrap());
-        for concept in &lesson.concepts {
-            ui.strong(&concept.title);
-            ui.add(egui::Label::new(&concept.text).wrap());
+        if ccna_presentation::enabled(s) {
+            let intro = lesson_presentation::concepts(
+                ui,
+                s,
+                &lesson.introduction,
+                lesson
+                    .concepts
+                    .iter()
+                    .map(|c| (c.title.clone(), c.text.clone())),
+            );
+            m.goal = Some(intro.objective.rect);
+        } else {
+            ui.add(egui::Label::new(&lesson.introduction).wrap());
+            for concept in &lesson.concepts {
+                ui.strong(&concept.title);
+                ui.add(egui::Label::new(&concept.text).wrap());
+            }
         }
+        lesson_presentation::worked(
+            ui,
+            "Compare these practice-link changes with the explanation, then inspect and sample the separate link yourself.",
+        );
+        lesson_presentation::worked_rows(ui, s);
         ui.add_enabled_ui(active && !pending_on_entry && !blocked, |ui| {
             ui.horizontal_wrapped(|ui| {
                 if action(ui, m, "try-example", "Try the separate example", true) {
@@ -1210,7 +1232,7 @@ fn body(
     let mut changed = false;
     let mut rejected = false;
     ui.add_enabled_ui(active,|ui|{
-  if practice{let lesson=s.physical_link_teaching.as_ref().unwrap();ui.strong("Separate example · No assignment credit");ui.add(egui::Label::new(lesson.practice.requirements.iter().map(|r|r.label.as_str()).collect::<Vec<_>>().join("; ")).wrap());ui.label("Fill worked example changes only this example's draft. Inspect it, Apply configuration, then Check configuration.");ui.horizontal_wrapped(|ui|{intent.fill=action(ui,m,"fill-example","Fill worked example",false);intent.reset=action(ui,m,"reset-example","Reset example",false);});controls::collapsing_header(ui,"Try a change · Optional").show(ui,|ui|{ui.add(egui::Label::new(&lesson.experiment_description).wrap());});}
+  if practice{let lesson=s.physical_link_teaching.as_ref().unwrap();ui.add(egui::Label::new(lesson.practice.requirements.iter().map(|r|r.label.as_str()).collect::<Vec<_>>().join("; ")).wrap());ui.label("Fill worked example changes only this example's draft. Inspect it, Apply configuration, then Check configuration.");ui.horizontal_wrapped(|ui|{intent.fill=action(ui,m,"fill-example","Fill worked example",false);intent.reset=action(ui,m,"reset-example","Reset example",false);});controls::collapsing_header(ui,"Try a change · Optional").show(ui,|ui|{ui.add(egui::Label::new(&lesson.experiment_description).wrap());});}
   let wide=ui.available_width()>ui.text_style_height(&egui::TextStyle::Body)*78.;
   if wide{ui.columns(2,|columns|{changed|=editor(&mut columns[0],s,a,p,m,practice);rejected|=investigation(&mut columns[1],s,a,p,m,(practice,entry_focus),&mut intent);});}else{changed|=editor(ui,s,a,p,m,practice);ui.add_space(controls::GAP);rejected|=investigation(ui,s,a,p,m,(practice,entry_focus),&mut intent);}
   let unapplied=&p.draft.as_ref().unwrap().configuration!=scope_state(a,practice).configuration();

@@ -1,0 +1,830 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-capacity-inodes",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Filesystem capacity",
+      "unit": "linux-capacity-handover",
+      "title": "Find why an empty file cannot be created",
+      "summary": "Diagnose inode exhaustion, then free names without damaging retained data.",
+      "objective": "Create /result with 4096 logical bytes. Leave at least 2 free inodes and 1 ordinary-available block. The five /spool-* files are expendable. Keep /audit unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 14,
+      "steps": [
+        "Inspect the supplied virtual filesystem, repair capacity and required files, then check the complete handover."
+      ],
+      "guide": [],
+      "explanation": "One valid approach: preview and remove /spool-1, /spool-2, /spool-3; set /result to 4096 logical bytes. Check both the required file lengths and remaining ordinary-available blocks/free inodes. Other safe selections meeting these outcomes are valid.",
+      "hints": [
+        "Compare ordinary-available blocks and free inodes before choosing cleanup.",
+        "Preview removals and retain the protected files. Count rounded blocks for each required file, plus one inode per new file.",
+        "Shrinking releases blocks; removing a file also releases an inode. Check remaining headroom after all required writes."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.kernel.org/doc/html/latest/filesystems/ext4/super.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/df-invocation.html"
+      ],
+      "simplifications": "Supplied logical capacity facts only. Flat virtual names; no file contents, real device, filesystem repair, sparse allocation, quota, links, real df or host I/O. Fixed overhead and reserve are explicit inputs, not an ext4 overhead calculation. Only a narrow capacity slice of LPIC-2 filesystem maintenance.",
+      "initial": {
+        "kind": "Capacity",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_action": 0,
+          "assignment": {
+            "world": {
+              "version": 1,
+              "profile": {
+                "id": "inode-intake",
+                "block_bytes": 4096,
+                "total_blocks": 100,
+                "fixed_used_blocks": 10,
+                "root_reserved_blocks": 5,
+                "total_inodes": 10,
+                "fixed_used_inodes": 4,
+                "retained": {
+                  "/audit": 4096
+                }
+              },
+              "generation": 0,
+              "files": {
+                "/audit": 4096,
+                "/spool-1": 0,
+                "/spool-2": 0,
+                "/spool-3": 0,
+                "/spool-4": 0,
+                "/spool-5": 0
+              }
+            },
+            "selected": [],
+            "preview": null,
+            "path": "",
+            "bytes": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "profile": {
+                "id": "sample-inodes",
+                "block_bytes": 2048,
+                "total_blocks": 60,
+                "fixed_used_blocks": 5,
+                "root_reserved_blocks": 3,
+                "total_inodes": 7,
+                "fixed_used_inodes": 2,
+                "retained": {
+                  "/sample-audit": 2048
+                }
+              },
+              "generation": 0,
+              "files": {
+                "/sample-audit": 2048,
+                "/sample-q1": 0,
+                "/sample-q2": 0,
+                "/sample-q3": 0,
+                "/sample-q4": 0
+              }
+            },
+            "selected": [],
+            "preview": null,
+            "path": "",
+            "bytes": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          }
+        }
+      },
+      "goal": {
+        "kind": "Capacity",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "profile": {
+              "id": "inode-intake",
+              "block_bytes": 4096,
+              "total_blocks": 100,
+              "fixed_used_blocks": 10,
+              "root_reserved_blocks": 5,
+              "total_inodes": 10,
+              "fixed_used_inodes": 4,
+              "retained": {
+                "/audit": 4096
+              }
+            },
+            "generation": 0,
+            "files": {
+              "/audit": 4096,
+              "/spool-1": 0,
+              "/spool-2": 0,
+              "/spool-3": 0,
+              "/spool-4": 0,
+              "/spool-5": 0
+            }
+          },
+          "example": {
+            "version": 1,
+            "profile": {
+              "id": "sample-inodes",
+              "block_bytes": 2048,
+              "total_blocks": 60,
+              "fixed_used_blocks": 5,
+              "root_reserved_blocks": 3,
+              "total_inodes": 7,
+              "fixed_used_inodes": 2,
+              "retained": {
+                "/sample-audit": 2048
+              }
+            },
+            "generation": 0,
+            "files": {
+              "/sample-audit": 2048,
+              "/sample-q1": 0,
+              "/sample-q2": 0,
+              "/sample-q3": 0,
+              "/sample-q4": 0
+            }
+          },
+          "requirements": [
+            {
+              "kind": "File",
+              "path": "/result",
+              "bytes": 4096
+            },
+            {
+              "kind": "Headroom",
+              "blocks": 1,
+              "inodes": 2
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "File",
+              "path": "/sample-result",
+              "bytes": 2048
+            },
+            {
+              "kind": "Headroom",
+              "blocks": 1,
+              "inodes": 1
+            }
+          ],
+          "example_actions": [
+            {
+              "kind": "Remove",
+              "names": [
+                "/sample-q1",
+                "/sample-q2"
+              ]
+            },
+            {
+              "kind": "Put",
+              "path": "/sample-result",
+              "bytes": 2048
+            }
+          ]
+        }
+      },
+      "solution": [
+        "capacity-action {\"kind\":\"Remove\",\"names\":[\"/spool-1\",\"/spool-2\",\"/spool-3\"]}",
+        "capacity-action {\"kind\":\"Put\",\"path\":\"/result\",\"bytes\":4096}"
+      ]
+    },
+    {
+      "id": "lpic2-capacity-blocks",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Filesystem capacity",
+      "unit": "linux-capacity-handover",
+      "title": "Leave usable space without spending the reserve",
+      "summary": "Apply per-file rounding and ordinary availability when planning a report.",
+      "objective": "Create /report with 32769 logical bytes and leave at least 10 ordinary-available blocks and 1 free inode. Keep /site at 4097 bytes and /audit unchanged. Only /cache-large and /cache-old are expendable; remove or resize them as needed.",
+      "difficulty": "Intermediate",
+      "minutes": 14,
+      "steps": [
+        "Inspect the supplied virtual filesystem, repair capacity and required files, then check the complete handover."
+      ],
+      "guide": [],
+      "explanation": "One valid approach: preview and remove /cache-old; set /report to 32769 logical bytes. Check both the required file lengths and remaining ordinary-available blocks/free inodes. Other safe selections meeting these outcomes are valid.",
+      "hints": [
+        "Compare ordinary-available blocks and free inodes before choosing cleanup.",
+        "Preview removals and retain the protected files. Count rounded blocks for each required file, plus one inode per new file.",
+        "Shrinking releases blocks; removing a file also releases an inode. Check remaining headroom after all required writes."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.kernel.org/doc/html/latest/filesystems/ext4/super.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/df-invocation.html"
+      ],
+      "simplifications": "Supplied logical capacity facts only. Flat virtual names; no file contents, real device, filesystem repair, sparse allocation, quota, links, real df or host I/O. Fixed overhead and reserve are explicit inputs, not an ext4 overhead calculation. Only a narrow capacity slice of LPIC-2 filesystem maintenance.",
+      "initial": {
+        "kind": "Capacity",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_action": 0,
+          "assignment": {
+            "world": {
+              "version": 1,
+              "profile": {
+                "id": "ordinary-blocks",
+                "block_bytes": 4096,
+                "total_blocks": 100,
+                "fixed_used_blocks": 10,
+                "root_reserved_blocks": 12,
+                "total_inodes": 30,
+                "fixed_used_inodes": 4,
+                "retained": {
+                  "/audit": 4096
+                }
+              },
+              "generation": 0,
+              "files": {
+                "/audit": 4096,
+                "/site": 4097,
+                "/cache-large": 204800,
+                "/cache-old": 81920
+              }
+            },
+            "selected": [],
+            "preview": null,
+            "path": "",
+            "bytes": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "profile": {
+                "id": "sample-blocks",
+                "block_bytes": 1024,
+                "total_blocks": 64,
+                "fixed_used_blocks": 8,
+                "root_reserved_blocks": 8,
+                "total_inodes": 24,
+                "fixed_used_inodes": 3,
+                "retained": {
+                  "/sample-audit": 1024
+                }
+              },
+              "generation": 0,
+              "files": {
+                "/sample-audit": 1024,
+                "/sample-current": 1025,
+                "/sample-cache": 30720,
+                "/sample-old": 10240
+              }
+            },
+            "selected": [],
+            "preview": null,
+            "path": "",
+            "bytes": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          }
+        }
+      },
+      "goal": {
+        "kind": "Capacity",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "profile": {
+              "id": "ordinary-blocks",
+              "block_bytes": 4096,
+              "total_blocks": 100,
+              "fixed_used_blocks": 10,
+              "root_reserved_blocks": 12,
+              "total_inodes": 30,
+              "fixed_used_inodes": 4,
+              "retained": {
+                "/audit": 4096
+              }
+            },
+            "generation": 0,
+            "files": {
+              "/audit": 4096,
+              "/site": 4097,
+              "/cache-large": 204800,
+              "/cache-old": 81920
+            }
+          },
+          "example": {
+            "version": 1,
+            "profile": {
+              "id": "sample-blocks",
+              "block_bytes": 1024,
+              "total_blocks": 64,
+              "fixed_used_blocks": 8,
+              "root_reserved_blocks": 8,
+              "total_inodes": 24,
+              "fixed_used_inodes": 3,
+              "retained": {
+                "/sample-audit": 1024
+              }
+            },
+            "generation": 0,
+            "files": {
+              "/sample-audit": 1024,
+              "/sample-current": 1025,
+              "/sample-cache": 30720,
+              "/sample-old": 10240
+            }
+          },
+          "requirements": [
+            {
+              "kind": "File",
+              "path": "/report",
+              "bytes": 32769
+            },
+            {
+              "kind": "File",
+              "path": "/site",
+              "bytes": 4097
+            },
+            {
+              "kind": "Headroom",
+              "blocks": 10,
+              "inodes": 1
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "File",
+              "path": "/sample-export",
+              "bytes": 8193
+            },
+            {
+              "kind": "File",
+              "path": "/sample-current",
+              "bytes": 1025
+            },
+            {
+              "kind": "Headroom",
+              "blocks": 6,
+              "inodes": 1
+            }
+          ],
+          "example_actions": [
+            {
+              "kind": "Remove",
+              "names": [
+                "/sample-old"
+              ]
+            },
+            {
+              "kind": "Put",
+              "path": "/sample-export",
+              "bytes": 8193
+            }
+          ]
+        }
+      },
+      "solution": [
+        "capacity-action {\"kind\":\"Remove\",\"names\":[\"/cache-old\"]}",
+        "capacity-action {\"kind\":\"Put\",\"path\":\"/report\",\"bytes\":32769}"
+      ]
+    },
+    {
+      "id": "lpic2-capacity-snapshot",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Filesystem capacity",
+      "unit": "linux-capacity-handover",
+      "title": "Repair a cleanup plan after files change",
+      "summary": "Review a removal preview against an active file that grows.",
+      "objective": "Set /active to 24576 logical bytes and create /manifest with 4096 bytes. Leave at least 20 ordinary-available blocks and 1 free inode. /cache and /cache-old are expendable. Retain /audit. A preview does not apply changes. Review a fresh preview if a file changes before removal.",
+      "difficulty": "Intermediate",
+      "minutes": 14,
+      "steps": [
+        "Inspect the supplied virtual filesystem, repair capacity and required files, then check the complete handover."
+      ],
+      "guide": [],
+      "explanation": "One valid approach: set /active to 24576 logical bytes; preview and remove /cache; set /manifest to 4096 logical bytes. Check both the required file lengths and remaining ordinary-available blocks/free inodes. Other safe selections meeting these outcomes are valid.",
+      "hints": [
+        "Compare ordinary-available blocks and free inodes before choosing cleanup.",
+        "Preview removals and retain the protected files. Count rounded blocks for each required file, plus one inode per new file.",
+        "Shrinking releases blocks; removing a file also releases an inode. Check remaining headroom after all required writes."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.kernel.org/doc/html/latest/filesystems/ext4/super.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/df-invocation.html"
+      ],
+      "simplifications": "Supplied logical capacity facts only. Flat virtual names; no file contents, real device, filesystem repair, sparse allocation, quota, links, real df or host I/O. Fixed overhead and reserve are explicit inputs, not an ext4 overhead calculation. Only a narrow capacity slice of LPIC-2 filesystem maintenance.",
+      "initial": {
+        "kind": "Capacity",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_action": 0,
+          "assignment": {
+            "world": {
+              "version": 1,
+              "profile": {
+                "id": "moving-snapshot",
+                "block_bytes": 4096,
+                "total_blocks": 80,
+                "fixed_used_blocks": 10,
+                "root_reserved_blocks": 8,
+                "total_inodes": 30,
+                "fixed_used_inodes": 4,
+                "retained": {
+                  "/audit": 4096
+                }
+              },
+              "generation": 0,
+              "files": {
+                "/audit": 4096,
+                "/active": 8192,
+                "/cache": 163840,
+                "/cache-old": 32768
+              }
+            },
+            "selected": [],
+            "preview": null,
+            "path": "",
+            "bytes": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "profile": {
+                "id": "sample-snapshot",
+                "block_bytes": 2048,
+                "total_blocks": 70,
+                "fixed_used_blocks": 8,
+                "root_reserved_blocks": 6,
+                "total_inodes": 25,
+                "fixed_used_inodes": 3,
+                "retained": {
+                  "/sample-audit": 2048
+                }
+              },
+              "generation": 0,
+              "files": {
+                "/sample-audit": 2048,
+                "/sample-active": 4096,
+                "/sample-cache": 81920,
+                "/sample-old": 12288
+              }
+            },
+            "selected": [],
+            "preview": null,
+            "path": "",
+            "bytes": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          }
+        }
+      },
+      "goal": {
+        "kind": "Capacity",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "profile": {
+              "id": "moving-snapshot",
+              "block_bytes": 4096,
+              "total_blocks": 80,
+              "fixed_used_blocks": 10,
+              "root_reserved_blocks": 8,
+              "total_inodes": 30,
+              "fixed_used_inodes": 4,
+              "retained": {
+                "/audit": 4096
+              }
+            },
+            "generation": 0,
+            "files": {
+              "/audit": 4096,
+              "/active": 8192,
+              "/cache": 163840,
+              "/cache-old": 32768
+            }
+          },
+          "example": {
+            "version": 1,
+            "profile": {
+              "id": "sample-snapshot",
+              "block_bytes": 2048,
+              "total_blocks": 70,
+              "fixed_used_blocks": 8,
+              "root_reserved_blocks": 6,
+              "total_inodes": 25,
+              "fixed_used_inodes": 3,
+              "retained": {
+                "/sample-audit": 2048
+              }
+            },
+            "generation": 0,
+            "files": {
+              "/sample-audit": 2048,
+              "/sample-active": 4096,
+              "/sample-cache": 81920,
+              "/sample-old": 12288
+            }
+          },
+          "requirements": [
+            {
+              "kind": "File",
+              "path": "/active",
+              "bytes": 24576
+            },
+            {
+              "kind": "File",
+              "path": "/manifest",
+              "bytes": 4096
+            },
+            {
+              "kind": "Headroom",
+              "blocks": 20,
+              "inodes": 1
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "File",
+              "path": "/sample-active",
+              "bytes": 12288
+            },
+            {
+              "kind": "File",
+              "path": "/sample-manifest",
+              "bytes": 2048
+            },
+            {
+              "kind": "Headroom",
+              "blocks": 12,
+              "inodes": 1
+            }
+          ],
+          "example_actions": [
+            {
+              "kind": "Put",
+              "path": "/sample-active",
+              "bytes": 12288
+            },
+            {
+              "kind": "Remove",
+              "names": [
+                "/sample-cache"
+              ]
+            },
+            {
+              "kind": "Put",
+              "path": "/sample-manifest",
+              "bytes": 2048
+            }
+          ]
+        }
+      },
+      "solution": [
+        "capacity-action {\"kind\":\"Put\",\"path\":\"/active\",\"bytes\":24576}",
+        "capacity-action {\"kind\":\"Remove\",\"names\":[\"/cache\"]}",
+        "capacity-action {\"kind\":\"Put\",\"path\":\"/manifest\",\"bytes\":4096}"
+      ]
+    },
+    {
+      "id": "lpic2-capacity-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Filesystem capacity",
+      "unit": "linux-capacity-handover",
+      "title": "Hand over a filesystem with room for two outputs",
+      "summary": "Combine block budgeting, inode budgeting and protected files in a practical cleanup.",
+      "objective": "Create /bundle at 20480 bytes and an empty /receipt file. Keep /source at 8193 bytes and retain /audit unchanged. After both outputs exist, leave at least 20 ordinary-available blocks and 3 free inodes. The caches and /empty-* files are expendable. Choose a cleanup that releases both resources.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Inspect the supplied virtual filesystem, repair capacity and required files, then check the complete handover."
+      ],
+      "guide": [],
+      "explanation": "One valid approach: preview and remove /cache-big, /empty-a, /empty-b, /empty-c; set /bundle to 20480 logical bytes; set /receipt to 0 logical bytes. Check both the required file lengths and remaining ordinary-available blocks/free inodes. Other safe selections meeting these outcomes are valid.",
+      "hints": [
+        "Compare ordinary-available blocks and free inodes before choosing cleanup.",
+        "Preview removals and retain the protected files. Count rounded blocks for each required file, plus one inode per new file.",
+        "Shrinking releases blocks; removing a file also releases an inode. Check remaining headroom after all required writes."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.kernel.org/doc/html/latest/filesystems/ext4/super.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/df-invocation.html"
+      ],
+      "simplifications": "Supplied logical capacity facts only. Flat virtual names; no file contents, real device, filesystem repair, sparse allocation, quota, links, real df or host I/O. Fixed overhead and reserve are explicit inputs, not an ext4 overhead calculation. Only a narrow capacity slice of LPIC-2 filesystem maintenance.",
+      "initial": {
+        "kind": "Capacity",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_action": 0,
+          "assignment": {
+            "world": {
+              "version": 1,
+              "profile": {
+                "id": "capacity-handover",
+                "block_bytes": 4096,
+                "total_blocks": 96,
+                "fixed_used_blocks": 12,
+                "root_reserved_blocks": 8,
+                "total_inodes": 12,
+                "fixed_used_inodes": 4,
+                "retained": {
+                  "/audit": 8192
+                }
+              },
+              "generation": 0,
+              "files": {
+                "/audit": 8192,
+                "/source": 8193,
+                "/cache-big": 131072,
+                "/cache-old": 65536,
+                "/empty-a": 0,
+                "/empty-b": 0,
+                "/empty-c": 0
+              }
+            },
+            "selected": [],
+            "preview": null,
+            "path": "",
+            "bytes": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          },
+          "practice": {
+            "world": {
+              "version": 1,
+              "profile": {
+                "id": "sample-handover",
+                "block_bytes": 1024,
+                "total_blocks": 80,
+                "fixed_used_blocks": 10,
+                "root_reserved_blocks": 6,
+                "total_inodes": 11,
+                "fixed_used_inodes": 3,
+                "retained": {
+                  "/sample-audit": 2048
+                }
+              },
+              "generation": 0,
+              "files": {
+                "/sample-audit": 2048,
+                "/sample-source": 1025,
+                "/sample-cache": 30720,
+                "/sample-old": 10240,
+                "/sample-empty-a": 0,
+                "/sample-empty-b": 0,
+                "/sample-empty-c": 0
+              }
+            },
+            "selected": [],
+            "preview": null,
+            "path": "",
+            "bytes": "",
+            "dirty": false,
+            "checked": false,
+            "message": ""
+          }
+        }
+      },
+      "goal": {
+        "kind": "Capacity",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "profile": {
+              "id": "capacity-handover",
+              "block_bytes": 4096,
+              "total_blocks": 96,
+              "fixed_used_blocks": 12,
+              "root_reserved_blocks": 8,
+              "total_inodes": 12,
+              "fixed_used_inodes": 4,
+              "retained": {
+                "/audit": 8192
+              }
+            },
+            "generation": 0,
+            "files": {
+              "/audit": 8192,
+              "/source": 8193,
+              "/cache-big": 131072,
+              "/cache-old": 65536,
+              "/empty-a": 0,
+              "/empty-b": 0,
+              "/empty-c": 0
+            }
+          },
+          "example": {
+            "version": 1,
+            "profile": {
+              "id": "sample-handover",
+              "block_bytes": 1024,
+              "total_blocks": 80,
+              "fixed_used_blocks": 10,
+              "root_reserved_blocks": 6,
+              "total_inodes": 11,
+              "fixed_used_inodes": 3,
+              "retained": {
+                "/sample-audit": 2048
+              }
+            },
+            "generation": 0,
+            "files": {
+              "/sample-audit": 2048,
+              "/sample-source": 1025,
+              "/sample-cache": 30720,
+              "/sample-old": 10240,
+              "/sample-empty-a": 0,
+              "/sample-empty-b": 0,
+              "/sample-empty-c": 0
+            }
+          },
+          "requirements": [
+            {
+              "kind": "File",
+              "path": "/source",
+              "bytes": 8193
+            },
+            {
+              "kind": "File",
+              "path": "/bundle",
+              "bytes": 20480
+            },
+            {
+              "kind": "File",
+              "path": "/receipt",
+              "bytes": 0
+            },
+            {
+              "kind": "Headroom",
+              "blocks": 20,
+              "inodes": 3
+            }
+          ],
+          "example_requirements": [
+            {
+              "kind": "File",
+              "path": "/sample-source",
+              "bytes": 1025
+            },
+            {
+              "kind": "File",
+              "path": "/sample-bundle",
+              "bytes": 8192
+            },
+            {
+              "kind": "File",
+              "path": "/sample-receipt",
+              "bytes": 0
+            },
+            {
+              "kind": "Headroom",
+              "blocks": 15,
+              "inodes": 2
+            }
+          ],
+          "example_actions": [
+            {
+              "kind": "Remove",
+              "names": [
+                "/sample-cache",
+                "/sample-empty-a",
+                "/sample-empty-b"
+              ]
+            },
+            {
+              "kind": "Put",
+              "path": "/sample-bundle",
+              "bytes": 8192
+            },
+            {
+              "kind": "Put",
+              "path": "/sample-receipt",
+              "bytes": 0
+            }
+          ]
+        }
+      },
+      "solution": [
+        "capacity-action {\"kind\":\"Remove\",\"names\":[\"/cache-big\",\"/empty-a\",\"/empty-b\",\"/empty-c\"]}",
+        "capacity-action {\"kind\":\"Put\",\"path\":\"/bundle\",\"bytes\":20480}",
+        "capacity-action {\"kind\":\"Put\",\"path\":\"/receipt\",\"bytes\":0}"
+      ]
+    }
+  ]
+}

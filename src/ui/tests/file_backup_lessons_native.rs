@@ -44,13 +44,12 @@ fn text(shape: &egui::epaint::Shape, wanted: &str) -> bool {
         _ => false,
     }
 }
-fn goal_text<'a>(
-    shape: &'a egui::epaint::Shape,
-    wanted: &str,
-) -> Option<&'a egui::epaint::TextShape> {
+fn success_text(shape: &egui::Shape) -> Option<&egui::epaint::TextShape> {
     match shape {
-        egui::epaint::Shape::Text(t) if t.galley.job.text == wanted => Some(t),
-        egui::epaint::Shape::Vec(v) => v.iter().find_map(|s| goal_text(s, wanted)),
+        egui::Shape::Text(text) if text.galley.text().starts_with("Pass · Assignment complete") => {
+            Some(text)
+        }
+        egui::Shape::Vec(items) => items.iter().find_map(success_text),
         _ => None,
     }
 }
@@ -93,11 +92,23 @@ fn frame(ctx: &egui::Context, a: &mut LabApp, w: &mut Witness, drive: bool) -> e
     viewport.fullscreen = Some(w.fullscreen);
     let mut passes = 0;
     let discard_once = w.discard_once;
+    let goal_phase = crate::ui::smoke::file_backup_lessons::goal_stage(a.smoke_stage);
+    let mut assignment_layout = None;
     let out = ctx.run(input, |ctx| {
         passes += 1;
         a.render(ctx);
         if discard_once && passes == 1 {
             ctx.request_discard("Bounded backup checker per-frame diagnostic");
+        }
+        if goal_phase
+            && let Some(i) = a.selected
+            && let Some(viewport) = a.metrics.main_viewport
+        {
+            assignment_layout = lesson_presentation::paint::collect(
+                ctx,
+                &a.scenarios[i],
+                viewport.intersect(ctx.content_rect()),
+            );
         }
         a.save();
         a.started = Instant::now() - std::time::Duration::from_secs(1);
@@ -106,6 +117,15 @@ fn frame(ctx: &egui::Context, a: &mut LabApp, w: &mut Witness, drive: bool) -> e
         }
     });
     w.observed_passes = passes;
+    if goal_phase && let Some(layout) = assignment_layout.as_ref() {
+        let source = &a.scenarios[a.selected.unwrap()];
+        let actual = lesson_presentation::paint::output_evidence(ctx, source, layout, &out);
+        lesson_presentation::paint::observe(
+            ctx,
+            lesson_presentation::paint::output_proof_key(ctx, source),
+            &actual,
+        );
+    }
     for viewport in out.viewport_output.values() {
         for command in &viewport.commands {
             match command {
@@ -139,50 +159,22 @@ fn frame(ctx: &egui::Context, a: &mut LabApp, w: &mut Witness, drive: bool) -> e
                     }
                     if name.contains("backup-capstone-narrow") {
                         let source = &a.scenarios[a.selected.unwrap()];
-                        let root = a
-                            .metrics
-                            .main_viewport
-                            .unwrap()
-                            .intersect(ctx.content_rect());
-                        let (paint, clip) = out
-                            .shapes
-                            .iter()
-                            .find_map(|s| {
-                                goal_text(&s.shape, &source.objective)
-                                    .map(|t| (t, s.clip_rect.intersect(root)))
-                            })
-                            .expect(
-                                "Capture must paint the real complete current objective galley",
-                            );
-                        assert_eq!(paint.angle, 0.);
-                        let body = egui::TextStyle::Body.resolve(&ctx.style());
-                        assert!(!paint.galley.job.sections.is_empty());
-                        for section in &paint.galley.job.sections {
-                            assert_eq!(
-                                section.format.font_id, body,
-                                "Essential goal text stays in normal body font, never shrunk"
-                            );
-                        }
-                        let tolerance = 1. / ctx.pixels_per_point();
-                        assert!(!paint.galley.rows.is_empty());
-                        for row in &paint.galley.rows {
-                            let rect = row.rect().translate(paint.pos.to_vec2());
-                            assert!(
-                                rect.left() >= clip.left() - tolerance
-                                    && rect.right() <= clip.right() + tolerance,
-                                "Every actual goal galley row stays inside its horizontal clip: {name}/{rect:?}/{clip:?}"
-                            );
-                        }
-                        let row = if name.contains("goal-end") {
-                            paint.galley.rows.last().unwrap()
-                        } else {
-                            paint.galley.rows.first().unwrap()
-                        };
-                        let edge = row.rect().translate(paint.pos.to_vec2());
-                        assert!(
-                            smoke::smoke_control_visible(edge, clip, ctx.pixels_per_point()),
-                            "The actual requested first/last goal row must be fully visible, not just a title: {name}/{edge:?}/{clip:?}"
+                        let layout=assignment_layout.as_ref().expect("Actual backup goal capture retains current-pass complete label layouts");
+                        let last = name.contains("goal-end");
+                        let actual = lesson_presentation::paint::assert_output_edge(
+                            ctx, source, layout, &out, last, false,
                         );
+                        let proof = lesson_presentation::paint::observe(
+                            ctx,
+                            lesson_presentation::paint::output_proof_key(ctx, source),
+                            &actual,
+                        );
+                        if last {
+                            assert!(
+                                proof.complete(),
+                                "Every backup goal/requirement row was independently witnessed in final FullOutput through existing bounded real wheel frames"
+                            );
+                        }
                     }
                     if name.contains("backup-alignment") || name.contains("backup-capstone-narrow")
                     {
@@ -218,7 +210,11 @@ fn frame(ctx: &egui::Context, a: &mut LabApp, w: &mut Witness, drive: bool) -> e
                                 && run.right() <= clip.right() + tolerance
                         );
                     }
-                    if name.contains("wrong-feedback") {
+                    if name.contains("wrong-feedback") || name.contains("success-invalidated") {
+                        assert!(
+                            !a.metrics.backup.complete && a.metrics.backup.success.is_none(),
+                            "Wrong/broken current work cannot expose an old success-summary target"
+                        );
                         assert!(
                             out.shapes.iter().any(|s| text(&s.shape, "Needs work ·")),
                             "The real rendered failing outcome must identify failure in words"
@@ -226,8 +222,54 @@ fn frame(ctx: &egui::Context, a: &mut LabApp, w: &mut Witness, drive: bool) -> e
                     }
                     if name.contains("objectives-complete") {
                         assert!(
+                            a.metrics.backup.complete,
+                            "Completion capture requires actual current passing grading"
+                        );
+                        let response = a
+                            .metrics
+                            .backup
+                            .success
+                            .expect("Actual assignment-success summary response");
+                        let (summary,clip)=out.shapes.iter().find_map(|shape|success_text(&shape.shape).map(|text|(text,shape.clip_rect)))
+                            .expect("The actual success summary, rather than an unrelated green row, paints in the captured frame");
+                        let bounds = summary.visual_bounding_rect();
+                        let tolerance = 1. / out.pixels_per_point;
+                        let main = a
+                            .metrics
+                            .main_viewport
+                            .unwrap()
+                            .intersect(ctx.content_rect());
+                        assert!(
+                            summary.opacity_factor > 0.
+                                && !summary.galley.elided
+                                && bounds.is_positive()
+                        );
+                        assert!(response.expand(tolerance).contains_rect(bounds));
+                        assert!(clip.intersect(main).expand(tolerance).contains_rect(bounds));
+                        assert!(summary.galley.rows.iter().any(|row| {
+                            !row.visuals.mesh.vertices[row.visuals.glyph_vertex_range.clone()]
+                                .is_empty()
+                        }));
+                        for row in &summary.galley.rows {
+                            for vertex in
+                                &row.visuals.mesh.vertices[row.visuals.glyph_vertex_range.clone()]
+                            {
+                                let color = summary.override_text_color.unwrap_or_else(|| {
+                                    if vertex.color == egui::Color32::PLACEHOLDER {
+                                        summary.fallback_color
+                                    } else {
+                                        vertex.color
+                                    }
+                                });
+                                assert!(
+                                    color.a() > 0,
+                                    "Actual success-summary glyphs stay nontransparent"
+                                );
+                            }
+                        }
+                        assert!(
                             out.shapes.iter().any(|s| text(&s.shape, "Pass ·")),
-                            "The real rendered passing outcome must identify success in words"
+                            "The real rendered passing outcome identifies success in words"
                         );
                     }
                     if name.contains("-command") {

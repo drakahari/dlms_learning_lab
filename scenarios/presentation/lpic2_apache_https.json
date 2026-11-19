@@ -1,0 +1,132 @@
+[
+  {
+    "id": "lpic2-apache-https-chain",
+    "goal": "Use the supplied Apache configuration to restore trusted HTTPS for the reports site while keeping the archive site working.",
+    "context": "Builds on the Apache virtual-host lesson. HTTPS clients use a server certificate to check the site name and verify who vouched for that identity.",
+    "concepts": [
+      {
+        "title": "Read the server identity",
+        "text": "The first certificate in the configured file identifies the site and is called the leaf. Its listed DNS name must match the name the client intended to contact. The configured key must match the leaf’s public key."
+      },
+      {
+        "title": "Follow the issuers to a trusted root",
+        "text": "The server can supply intermediate certificates after the leaf. A client uses those issuer links to reach an anchor it already trusts. Including a root in the server file cannot make the client trust that root."
+      },
+      {
+        "title": "Save, apply and inspect the client",
+        "text": "Save configuration checks the file’s structure. Apply saved configuration checks the supplied file and key pair and updates the active listener. A successful apply can still leave a client unable to verify the name or build the issuer path."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Read the failing client result",
+        "value": "Leaf: museum-gallery\nMissing issuer: museum-issuing\nClient anchor: museum-root",
+        "explanation": "The leaf matches gallery.museum.example, but the client cannot find the intermediate between that leaf and its trusted root."
+      },
+      {
+        "label": "Keep the matching key and supply the intermediate",
+        "value": "SSLCertificateFile /etc/ssl/museum/gallery-full.pem\nSSLCertificateKeyFile /etc/ssl/museum/gallery.key",
+        "explanation": "The supplied full file begins with museum-gallery, followed by museum-issuing. The key matches that first certificate."
+      },
+      {
+        "label": "Apply and verify both sites",
+        "value": "museum-gallery → museum-issuing → museum-root",
+        "explanation": "The client builds a path to its own root. The other site still needs its original working identity."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Inspect the starting material",
+        "action": "Open Supplied certificate and matching key records. Compare the portal’s leaf-only and full files. The primary client trial below the editor shows the active failure.",
+        "observe": "The full file contains the same leaf followed by its issuing certificate. The leaf-only file can pass the key check but leaves the client missing its issuer."
+      },
+      {
+        "title": "Repair the practice site",
+        "action": "In the portal block, change SSLCertificateFile to /etc/ssl/training/portal-full.pem. Leave the key and photos block in place. Select Save configuration, then Apply saved configuration.",
+        "observe": "The applied configuration now supplies the portal leaf and its issuing certificate."
+      },
+      {
+        "title": "Check both client trials",
+        "action": "Select the primary trial and read its name match and trusted path. Select the auxiliary trial and check that it still verifies. Select Check configuration. Try the leaf-only file again, save and apply, then restore the fixed file.",
+        "observe": "With the leaf-only file, the client reports a missing issuer again even though the saved file applies."
+      }
+    ],
+    "requirements": [
+      "Restore the reports site’s matching certificate name and trusted issuer path for the supplied client.",
+      "Keep the archive client verifying its original site.",
+      "Save and apply your configuration, then check both results."
+    ],
+    "status": "updated",
+    "source": "scenarios/apache-https-lessons-v1.json",
+    "review": {
+      "introduction": "Introduces certificate, issuer and virtual host semantics with different names from either workspace.",
+      "example": "A separate configuration, with steps next to the supplied inventory, editor and virtual client trials.",
+      "assignment": "Uses a real starter mismatch in the model with precise per-client feedback and no repair values supplied by default."
+    }
+  },
+  {
+    "id": "lpic2-apache-https-sni",
+    "goal": "Restore the correct certificate for each named HTTPS site and preserve the intended default.",
+    "context": "Builds on checking a certificate name and issuer chain. Both sites here use one supplied IP and port.",
+    "concepts": [
+      {
+        "title": "Choose a site before checking its certificate",
+        "text": "Server Name Indication (SNI) is a name the client sends early in the TLS exchange. The listener matches it against ServerName on this shared address and port, then presents the certificate configured in the selected block."
+      },
+      {
+        "title": "Read selection and verification separately",
+        "text": "A site can be selected by SNI and still present a certificate for the wrong name. Read Selected host and Certificate served, then compare the DNS match and the trust path."
+      },
+      {
+        "title": "Keep the intended first site",
+        "text": "In this profile, an unknown or absent SNI uses the first block. That lets the listener present a certificate. It does not make that certificate valid for the unknown name."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Inspect a request before the repair",
+        "value": "SNI: events.museum.example\nSelected host: events.museum.example\nCertificate: museum-gallery",
+        "explanation": "The listener found a matching block, but that block serves a certificate for gallery.museum.example. Its trusted issuer path cannot fix the name mismatch."
+      },
+      {
+        "label": "Pair each ServerName with its own leaf",
+        "value": "ServerName events.museum.example\nSSLCertificateFile /etc/ssl/museum/events-full.pem",
+        "explanation": "The named block should serve the events certificate and its matching key. Both named clients need correct pairings."
+      },
+      {
+        "label": "Test an unfamiliar name",
+        "value": "SNI: unknown.museum.example\nSelected host: gallery.museum.example\nDNS name does not match",
+        "explanation": "The first block is intentionally the gallery site. Its certificate should still fail verification for the unfamiliar name."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Compare the two supplied hosts",
+        "action": "Expand the supplied records if needed. The editor labels the first block status and the second web. Compare those names with the leaf DNS names. Use the primary and auxiliary client trials below the editor.",
+        "observe": "Each named client selects a block. The certificate from that block belongs to the other site."
+      },
+      {
+        "title": "Restore the names and default",
+        "action": "Set the first block’s ServerName to web.practice.example and the second to status.practice.example. Keep each certificate and key with its block. Save and apply the changes.",
+        "observe": "The first block now serves the web site by name and remains the default. The second selects the status certificate."
+      },
+      {
+        "title": "Check named and default connections",
+        "action": "Try the primary and auxiliary trials again, then select the unknown-SNI and no-SNI trials. Select Check configuration. Read the intended default result and its separate DNS name outcome.",
+        "observe": "The named trials verify successfully. The other trials still get a name mismatch, even though the default certificate has a trusted path."
+      }
+    ],
+    "requirements": [
+      "Make the catalog and docs clients select their matching sites and verify the served certificates.",
+      "Keep the catalog site as the default for unknown or absent SNI.",
+      "Save and apply the configuration. The default must still fail the DNS check for an unrelated name."
+    ],
+    "status": "updated",
+    "source": "scenarios/apache-https-lessons-v1.json",
+    "review": {
+      "introduction": "Introduces certificate, issuer and virtual host semantics with different names from either workspace.",
+      "example": "A separate configuration, with steps next to the supplied inventory, editor and virtual client trials.",
+      "assignment": "Uses a real starter mismatch in the model with precise per-client feedback and no repair values supplied by default."
+    }
+  }
+]

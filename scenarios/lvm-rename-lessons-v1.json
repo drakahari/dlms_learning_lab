@@ -1,0 +1,1436 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-lvm-rename-volume",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM names and data identity",
+      "unit": "lvm-storage-names",
+      "title": "Rename a data volume without replacing its contents",
+      "summary": "Rename the original team/draft LV to team/reports while preserving its data, neighbor and availability.",
+      "objective": "Rename the existing team/draft LV to team/reports. Keep every original allocation, filesystem, file and PV membership unchanged. Keep team/reference active and marked open, team/draft\u2019s original object active at its new name, and reserve/spare inactive. Do not create, delete, grow, format or mount storage. Verify current names and retained data.",
+      "retry_guidance": "Read which original object has the wrong current name. A destination collision does not remove the neighbor. Rename the original LV at its current path; do not create a replacement with the required spelling.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/teama": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "team"
+              },
+              "/dev/reservea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "team": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "draft": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "team/draft: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "team/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "team/draft": true,
+                "team/reference": true,
+                "reserve/spare": false
+              },
+              "open": [
+                "team/reference"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "reserve": 1,
+                "team": 2
+              },
+              "volumes": {
+                "reserve/spare": 3,
+                "team/draft": 4,
+                "team/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "current": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/teama": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "team"
+              },
+              "/dev/reservea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "team": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "draft": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "team/draft: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "team/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "team/draft": true,
+                "team/reference": true,
+                "reserve/spare": false
+              },
+              "open": [
+                "team/reference"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "reserve": 1,
+                "team": 2
+              },
+              "volumes": {
+                "reserve/spare": 3,
+                "team/draft": 4,
+                "team/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/studioa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "studio"
+              },
+              "/dev/bencha": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "bench"
+              }
+            },
+            "groups": {
+              "studio": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "notes": {
+                    "extents": [
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "studio/notes: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "studio/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "bench": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bencha",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "studio/notes": true,
+                "studio/reference": true,
+                "bench/spare": false
+              },
+              "open": [
+                "studio/reference"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "bench": 1,
+                "studio": 2
+              },
+              "volumes": {
+                "bench/spare": 3,
+                "studio/notes": 4,
+                "studio/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "example": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/studioa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "studio"
+              },
+              "/dev/bencha": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "bench"
+              }
+            },
+            "groups": {
+              "studio": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "notes": {
+                    "extents": [
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "studio/notes: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/studioa",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "studio/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "bench": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bencha",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "studio/notes": true,
+                "studio/reference": true,
+                "bench/spare": false
+              },
+              "open": [
+                "studio/reference"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "bench": 1,
+                "studio": 2
+              },
+              "volumes": {
+                "bench/spare": 3,
+                "studio/notes": 4,
+                "studio/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/teama": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "team"
+              },
+              "/dev/reservea": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "reserve"
+              }
+            },
+            "groups": {
+              "team": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "draft": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "team/draft: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/teama",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/teama",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "team/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "reserve": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/reservea",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "team/draft": true,
+                "team/reference": true,
+                "reserve/spare": false
+              },
+              "open": [
+                "team/reference"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "reserve": 1,
+                "team": 2
+              },
+              "volumes": {
+                "reserve/spare": 3,
+                "team/draft": 4,
+                "team/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "targets": [],
+          "renaming": {
+            "groups": [],
+            "volumes": [
+              {
+                "source": "team/draft",
+                "name": "reports"
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "First complete LVM availability. You should be able to read the VG/LV columns, distinguish allocation from filesystem capacity, and recognize Active, Inactive and Marked open. This lesson introduces names without changing any of those properties.",
+            "concepts": [
+              {
+                "title": "Names identify a route to existing storage",
+                "text": "A volume group (VG) is a pool of storage; a logical volume (LV) is an allocation inside that pool. A path such as studio/notes names one LV. Renaming changes that route, not its size, data or filesystem. Inspect vgs and lvs first so you can name the intended original object."
+              },
+              {
+                "title": "Rename rather than remove and recreate",
+                "text": "lvrename studio notes journal changes the existing LV name. lvrename studio/notes journal and lvrename /dev/studio/notes journal are equivalent supported forms. Afterward, studio/journal is the current path and studio/notes no longer resolves. Removing and creating another allocation is a different operation: a matching name does not recover the original data."
+              },
+              {
+                "title": "A collision is a useful refusal",
+                "text": "A destination name must be unused in its group. An existing neighbor is not overwritten or merged. Read the error, inspect current names and retry the intended rename. Avoid force options: they are outside this supported subset."
+              },
+              {
+                "title": "Verify more than the spelling",
+                "text": "Use lvs to check the current path, capacity and ModelActive state. Open Inspect retained files and exact byte capacities to compare original data through the simulated application reader. Preserve inactive allocations and supplied open consumers; renaming does not require rebuilding them. Real application, mount and boot references can still need separate updates; this exercise does not edit those references."
+              }
+            ],
+            "description": "The studio team wants studio/notes renamed to studio/journal. Keep its original record, studio/reference and inactive bench/spare exactly as supplied. The worked commands use different storage from your assignment.",
+            "fixture": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/studioa": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "group": "studio"
+                },
+                "/dev/bencha": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "bench"
+                }
+              },
+              "groups": {
+                "studio": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "notes": {
+                      "extents": [
+                        {
+                          "pv": "/dev/studioa",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/studioa",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "studio/notes: retain this original record.\n"
+                          }
+                        }
+                      }
+                    },
+                    "reference": {
+                      "extents": [
+                        {
+                          "pv": "/dev/studioa",
+                          "index": 2
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "studio/reference: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "bench": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "spare": {
+                      "extents": [
+                        {
+                          "pv": "/dev/bencha",
+                          "index": 0
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              },
+              "activation": {
+                "active": {
+                  "studio/notes": true,
+                  "studio/reference": true,
+                  "bench/spare": false
+                },
+                "open": [
+                  "studio/reference"
+                ]
+              },
+              "identity": {
+                "groups": {
+                  "bench": 1,
+                  "studio": 2
+                },
+                "volumes": {
+                  "bench/spare": 3,
+                  "studio/notes": 4,
+                  "studio/reference": 5
+                },
+                "next": 6
+              }
+            },
+            "targets": [],
+            "renaming": {
+              "groups": [],
+              "volumes": [
+                {
+                  "source": "studio/notes",
+                  "name": "journal"
+                }
+              ]
+            },
+            "worked": [
+              {
+                "text": "lvs",
+                "explanation": "Inspect notes and reference before choosing a destination. ModelActive describes simulator availability."
+              },
+              {
+                "text": "lvrename studio notes journal",
+                "explanation": "Rename the original notes LV within studio; its extents, file and availability stay the same."
+              },
+              {
+                "text": "lvs",
+                "explanation": "Observe journal at the same byte capacity. Inspect its retained file; the record still describes the original notes object."
+              }
+            ],
+            "try_change": "Run the worked commands one at a time. Open Experiment commands, type lvrename studio/journal draft in the command field, and use Run simulated command, then Check separate example: the data survives, but the required journal name is now missing. Read the named feedback, then type the shown repair command, run it and check again.",
+            "experiment": "lvrename studio/journal draft",
+            "repair": "lvrename /dev/studio/draft journal"
+          }
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect original names and data",
+        "Rename the intended existing LV",
+        "Verify path, data and protected neighbors"
+      ],
+      "hints": [
+        "Find draft\u2019s group in lvs. A VG name is separate from an LV name; preserve reference.",
+        "The task changes one existing LV\u2019s name. The supported lvrename forms take its current path or VG and old LV name, followed by the new simple LV name.",
+        "After a wrong temporary name, inspect lvs and rename that same original object again. A replacement allocation cannot stand in for it."
+      ],
+      "explanation": "The original allocation moved from team/draft to team/reports with the same extents, filesystem capacity, record and active state. Its peer and reserve were not changed. Rename changes a name, not the underlying data; matching spelling alone is insufficient.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/lvrename.8.html"
+      ],
+      "simplifications": "Bounded virtual LVM metadata over supplied devices only. Renaming retains stable internal object identity, allocations, files, availability and supplied open-consumer facts; these internal identities are not real LVM UUIDs. lvrename VG OLD NEW, VG/OLD NEW and /dev/VG/OLD NEW; vgrename OLD NEW. No flags, UUID-source lookup, duplicate-name discovery, historical LVs, mapper escaping, real udev/kernel/boot/mount/application-reference updates. Existing linear growth/creation, raw retirement and named-group y/n availability retain their disclosed limits. Reports have explicit simulator byte columns and ModelActive. Application reader is a simulator facility, not Linux mount or raw-device file reading. No host I/O or shell execution. A refused command publishes no change in this simulator; do not infer real LVM rollback guarantees.",
+      "solution": [
+        "lvs",
+        "lvrename /dev/team/draft reports",
+        "lvs"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-availability-handover"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-rename-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM names and data identity",
+      "unit": "lvm-storage-names",
+      "title": "Hand over a renamed pool without changing its data",
+      "summary": "Rename a group and its existing data LV while preserving mixed availability and a live neighbor.",
+      "objective": "Rename the existing depot group to warehouse, and rename its original depot/archive LV to catalog. The final data path must be warehouse/catalog; the original buffer must be warehouse/buffer and remain inactive. Preserve all original allocations, filesystem capacities, files and PV membership. Keep the original archive object active and marked open at its new path, and keep live/ledger active and marked open. Do not recreate, remove, resize, activate, format or mount storage.",
+      "retry_guidance": "Inspect the current group and LV names after each change. Use those current names for the next command. A right group name with an old LV name is partial work; keep it and repair the remaining name. Preserve the inactive buffer and unrelated live application.",
+      "difficulty": "Advanced",
+      "minutes": 28,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/depota": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "depot"
+              },
+              "/dev/livea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "live"
+              }
+            },
+            "groups": {
+              "depot": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "archive": {
+                    "extents": [
+                      {
+                        "pv": "/dev/depota",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/depota",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "depot/archive: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "buffer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/depota",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              },
+              "live": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/livea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/livea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "live/ledger: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "depot/archive": true,
+                "depot/buffer": false,
+                "live/ledger": true
+              },
+              "open": [
+                "depot/archive",
+                "live/ledger"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "depot": 1,
+                "live": 2
+              },
+              "volumes": {
+                "depot/archive": 3,
+                "depot/buffer": 4,
+                "live/ledger": 5
+              },
+              "next": 6
+            }
+          },
+          "current": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/depota": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "depot"
+              },
+              "/dev/livea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "live"
+              }
+            },
+            "groups": {
+              "depot": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "archive": {
+                    "extents": [
+                      {
+                        "pv": "/dev/depota",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/depota",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "depot/archive: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "buffer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/depota",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              },
+              "live": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/livea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/livea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "live/ledger: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "depot/archive": true,
+                "depot/buffer": false,
+                "live/ledger": true
+              },
+              "open": [
+                "depot/archive",
+                "live/ledger"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "depot": 1,
+                "live": 2
+              },
+              "volumes": {
+                "depot/archive": 3,
+                "depot/buffer": 4,
+                "live/ledger": 5
+              },
+              "next": 6
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/workshopa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "workshop"
+              },
+              "/dev/librarya": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "library"
+              }
+            },
+            "groups": {
+              "workshop": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "notes": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "workshop/notes: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "buffer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              },
+              "library": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "catalog": {
+                    "extents": [
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "library/catalog: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "workshop/notes": true,
+                "workshop/buffer": false,
+                "library/catalog": true
+              },
+              "open": [
+                "workshop/notes",
+                "library/catalog"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "library": 1,
+                "workshop": 2
+              },
+              "volumes": {
+                "library/catalog": 3,
+                "workshop/buffer": 4,
+                "workshop/notes": 5
+              },
+              "next": 6
+            }
+          },
+          "example": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/workshopa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "workshop"
+              },
+              "/dev/librarya": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "library"
+              }
+            },
+            "groups": {
+              "workshop": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "notes": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "workshop/notes: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "buffer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              },
+              "library": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "catalog": {
+                    "extents": [
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "library/catalog: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "workshop/notes": true,
+                "workshop/buffer": false,
+                "library/catalog": true
+              },
+              "open": [
+                "workshop/notes",
+                "library/catalog"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "library": 1,
+                "workshop": 2
+              },
+              "volumes": {
+                "library/catalog": 3,
+                "workshop/buffer": 4,
+                "workshop/notes": 5
+              },
+              "next": 6
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/depota": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "depot"
+              },
+              "/dev/livea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "live"
+              }
+            },
+            "groups": {
+              "depot": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "archive": {
+                    "extents": [
+                      {
+                        "pv": "/dev/depota",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/depota",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "depot/archive: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "buffer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/depota",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              },
+              "live": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/livea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/livea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "live/ledger: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "depot/archive": true,
+                "depot/buffer": false,
+                "live/ledger": true
+              },
+              "open": [
+                "depot/archive",
+                "live/ledger"
+              ]
+            },
+            "identity": {
+              "groups": {
+                "depot": 1,
+                "live": 2
+              },
+              "volumes": {
+                "depot/archive": 3,
+                "depot/buffer": 4,
+                "live/ledger": 5
+              },
+              "next": 6
+            }
+          },
+          "targets": [],
+          "renaming": {
+            "groups": [
+              {
+                "source": "depot",
+                "name": "warehouse"
+              }
+            ],
+            "volumes": [
+              {
+                "source": "depot/archive",
+                "name": "catalog"
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Complete the volume-renaming lesson first. This handover combines a VG rename and an LV rename while preserving a mixed active/inactive pool and an unrelated live application.",
+            "concepts": [
+              {
+                "title": "A group rename changes every member path",
+                "text": "A VG name is the first part of VG/LV. vgrename workshop atelier renames that same group, so workshop/notes becomes atelier/notes and workshop/buffer becomes atelier/buffer. Their PV membership and allocations stay intact; the devices are not copied or relabeled as a different pool."
+              },
+              {
+                "title": "Use the current name for the next command",
+                "text": "After the group rename, lvrename atelier notes journal renames the original notes LV at its new group path. You can instead rename the LV first, then the VG; the final objects and paths are the same. Inspect lvs after each change when recovering a partial handover."
+              },
+              {
+                "title": "Preserve the individual availability states",
+                "text": "A group can contain an active data LV and an inactive raw buffer. Renaming preserves each state. It does not activate the whole pool or stop its open consumer. ModelActive and Marked open are supplied simulation facts; actual kernel, process and device-mapper behavior are outside this exercise."
+              },
+              {
+                "title": "Names, data and references are separate checks",
+                "text": "Use lvs and pvs to verify the new group name, unchanged allocations and PV ownership. In Inspect retained files and exact byte capacities, read the original data at its new path. Its text need not change to match the new name. Real name-based application, mount or boot settings may need independent edits; successful metadata renaming alone does not prove those settings correct."
+              }
+            ],
+            "description": "Rename workshop to atelier and the original workshop/notes LV to journal. The final data path is atelier/journal, while its buffer remains inactive and library/catalog remains active with its open consumer.",
+            "fixture": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/workshopa": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "group": "workshop"
+                },
+                "/dev/librarya": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "group": "library"
+                }
+              },
+              "groups": {
+                "workshop": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "notes": {
+                      "extents": [
+                        {
+                          "pv": "/dev/workshopa",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/workshopa",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "workshop/notes: retain this original record.\n"
+                          }
+                        }
+                      }
+                    },
+                    "buffer": {
+                      "extents": [
+                        {
+                          "pv": "/dev/workshopa",
+                          "index": 2
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                },
+                "library": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "catalog": {
+                      "extents": [
+                        {
+                          "pv": "/dev/librarya",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/librarya",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "library/catalog: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "activation": {
+                "active": {
+                  "workshop/notes": true,
+                  "workshop/buffer": false,
+                  "library/catalog": true
+                },
+                "open": [
+                  "workshop/notes",
+                  "library/catalog"
+                ]
+              },
+              "identity": {
+                "groups": {
+                  "library": 1,
+                  "workshop": 2
+                },
+                "volumes": {
+                  "library/catalog": 3,
+                  "workshop/buffer": 4,
+                  "workshop/notes": 5
+                },
+                "next": 6
+              }
+            },
+            "targets": [],
+            "renaming": {
+              "groups": [
+                {
+                  "source": "workshop",
+                  "name": "atelier"
+                }
+              ],
+              "volumes": [
+                {
+                  "source": "workshop/notes",
+                  "name": "journal"
+                }
+              ]
+            },
+            "worked": [
+              {
+                "text": "lvs",
+                "explanation": "Inspect the original notes, inactive buffer and unrelated library before changing names."
+              },
+              {
+                "text": "vgrename workshop atelier",
+                "explanation": "Rename the same group. Both member LV paths and supplied PV ownership now use atelier."
+              },
+              {
+                "text": "lvrename atelier notes journal",
+                "explanation": "Address the original notes LV using its current group name and rename it to journal."
+              },
+              {
+                "text": "pvs",
+                "explanation": "Observe unchanged device membership under the new group name; inspect lvs and the retained-file reader too."
+              }
+            ],
+            "try_change": "Run the commands individually and inspect atelier/journal\u2019s original record. Open Experiment commands, type vgrename atelier temporary in the command field, and use Run simulated command, then Check separate example. Both member paths move together, so the required atelier path fails even though the data survives. Read the current names in feedback, then type the shown repair command, run it and check again.",
+            "experiment": "vgrename atelier temporary",
+            "repair": "vgrename temporary atelier"
+          }
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect group, member paths and mixed availability",
+        "Rename the group and original data LV in either valid order",
+        "Verify data, PV membership and protected live consumers"
+      ],
+      "hints": [
+        "The first component of VG/LV changes for every member when the group is renamed. The data LV\u2019s own name is a separate requirement.",
+        "Either supported order works: rename the LV inside its current group, then the group, or rename the group first and use the new group name for the LV command.",
+        "If one required name is already correct, preserve it. Read lvs and repair only the remaining original object\u2019s name; do not toggle group availability."
+      ],
+      "explanation": "The original depot group is now warehouse, and its original archive object is catalog. The inactive buffer moved with its group without becoming active. The original data and both open-consumer facts remain; unrelated live storage is unchanged. This proves only the disclosed virtual metadata handover, not real mount, boot or application-reference updates.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/lvrename.8.html",
+        "https://man7.org/linux/man-pages/man8/vgrename.8.html"
+      ],
+      "simplifications": "Bounded virtual LVM metadata over supplied devices only. Renaming retains stable internal object identity, allocations, files, availability and supplied open-consumer facts; these internal identities are not real LVM UUIDs. lvrename VG OLD NEW, VG/OLD NEW and /dev/VG/OLD NEW; vgrename OLD NEW. No flags, UUID-source lookup, duplicate-name discovery, historical LVs, mapper escaping, real udev/kernel/boot/mount/application-reference updates. Existing linear growth/creation, raw retirement and named-group y/n availability retain their disclosed limits. Reports have explicit simulator byte columns and ModelActive. Application reader is a simulator facility, not Linux mount or raw-device file reading. No host I/O or shell execution. A refused command publishes no change in this simulator; do not infer real LVM rollback guarantees.",
+      "solution": [
+        "lvs",
+        "vgrename depot warehouse",
+        "lvrename warehouse archive catalog",
+        "pvs",
+        "lvs"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-rename-volume"
+      ]
+    }
+  ]
+}

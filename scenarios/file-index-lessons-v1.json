@@ -1,0 +1,1046 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-file-index-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-indexed-file-discovery",
+      "topic": "Private indexed file discovery",
+      "title": "Repair a stale file index and prepare a current handover",
+      "summary": "Compare saved filename searches with live files, repair exclusions, rebuild a private index and copy the current document.",
+      "objective": "The support index names an old runbook, and a recent configuration edit also hides the current branch. Repair the private index and prepare /work/handover.txt from the current runbook. Save exclusions that omit only /srv/intake/archive; keep current, archives and source searchable. Explicitly rebuild /indexes/intake.db from /srv/intake using /work/index.conf, so its saved names match the live files. Copy the current runbook to /work/handover.txt, retaining normal supplied file permissions and ownership. Preserve every other file, folder, permission and supplied setting.",
+      "retry_guidance": "Compare the feedback for saved exclusions, index freshness and handover contents; each can be correct while another still needs repair.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Investigate the saved names and exclusions",
+        "Refresh and verify the handover"
+      ],
+      "guide": [],
+      "explanation": "Compare locate -d /indexes/intake.db runbook with find /srv/intake -name \"runbook*.txt\". Read both current and archive documents. In /work/index.conf, keep only /srv/intake/archive in PRUNEPATHS, then Save configuration. Run updatedb -l 0 -o /indexes/intake.db -U /srv/intake --config-file /work/index.conf. Repeat locate, copy /srv/intake/current/runbook.txt to /work/handover.txt and inspect it. Saving configuration alone does not rebuild the index; locate -e only checks existence.",
+      "hints": [
+        "Compare locate with live find. Which returned name no longer exists, and where does the current runbook actually live?",
+        "The saved PRUNEPATHS list must keep archive excluded while allowing current. The separate archives folder must remain searchable.",
+        "Save configuration, explicitly rebuild with the supplied private paths, then compare the current file and handover contents. A correct copy alone does not prove the index was repaired."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/ (LPIC-1 5.0, 104.7; checked 2026-11-05)",
+        "https://plocate.sesse.net/plocate.1.html (locate -d/-e; checked 2026-11-05)",
+        "https://plocate.sesse.net/updatedb.8.html (private -l 0, -U, -o, --config-file; checked 2026-11-05)",
+        "https://plocate.sesse.net/download/plocate-1.1.25.tar.gz (read-only behavior reference; installed1.1.25 manuals and fixed comparison are recorded in docs/FILE_INDEX_SUBSET.md; no upstream code imported)"
+      ],
+      "simplifications": "One bounded private -l 0 index over supplied readable/searchable ordinary directories; literal case-sensitive substring queries only. The opaque typed database is shown separately, not as real plocate binary bytes. No global database, privileged visibility rules, incomplete scan publication, timers, mounts, links, arbitrary flags, shell expansion, host filesystem or utility execution. find/cat/cp/rm/chmod operate only on the virtual tree, with a narrow preservation policy. No claim that final-state grading proves a particular investigation command was used.",
+      "initial": {
+        "kind": "FileIndex",
+        "simulation": {
+          "version": 1,
+          "source_id": "lpic1-file-index-handover",
+          "source_version": 1,
+          "assignment": {
+            "context": {
+              "version": 1,
+              "source_id": "lpic1-file-index-handover-assignment",
+              "root": "/srv/intake",
+              "database": "/indexes/intake.db",
+              "config": "/work/index.conf"
+            },
+            "tree": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/work": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/indexes": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/current": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/archive": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/archives": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/source": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/index.conf": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/current/runbook.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/archive/runbook.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/archives/keep.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/source/runbook.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/notes.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/work/index.conf": "PRUNEPATHS = \"/srv/intake/archive /srv/intake/current\"\n",
+                "/srv/intake/current/runbook.txt": "Release: North\nState: current\n",
+                "/srv/intake/archive/runbook.txt": "Release: retired\nState: archive\n",
+                "/srv/intake/archives/keep.txt": "Near-prefix folder stays indexed.\n",
+                "/srv/intake/source/runbook.txt": "Release: North\nState: current\n",
+                "/work/notes.txt": "Keep this note unchanged.\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/work",
+              "cwd": "/work",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "index": {
+              "version": 1,
+              "context": {
+                "version": 1,
+                "source_id": "lpic1-file-index-handover-assignment",
+                "root": "/srv/intake",
+                "database": "/indexes/intake.db",
+                "config": "/work/index.conf"
+              },
+              "pruned": [
+                "/srv/intake/archive"
+              ],
+              "entries": [
+                "/srv/intake/archive",
+                "/srv/intake/archives",
+                "/srv/intake/current",
+                "/srv/intake/source",
+                "/srv/intake/archives/keep.txt",
+                "/srv/intake/current/runbook-old.txt",
+                "/srv/intake/source/runbook.txt"
+              ]
+            },
+            "config_draft": "PRUNEPATHS = \"/srv/intake/archive /srv/intake/current\"\n",
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "example": {
+            "context": {
+              "version": 1,
+              "source_id": "lpic1-file-index-handover-example",
+              "root": "/gallery",
+              "database": "/indexes/demo.db",
+              "config": "/practice/index.conf"
+            },
+            "tree": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/practice": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/indexes": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/current": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/archive": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/archives": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/source": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/index.conf": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/current/guide.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/archive/guide.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/archives/keep.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/source/guide.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/notes.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/practice/index.conf": "PRUNEPATHS = \"/gallery/archive /gallery/current\"\n",
+                "/gallery/current/guide.txt": "Release: Lakeside\nState: current\n",
+                "/gallery/archive/guide.txt": "Release: retired\nState: archive\n",
+                "/gallery/archives/keep.txt": "Near-prefix folder stays indexed.\n",
+                "/gallery/source/guide.txt": "Release: Lakeside\nState: current\n",
+                "/practice/notes.txt": "Keep this note unchanged.\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/practice",
+              "cwd": "/practice",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "index": {
+              "version": 1,
+              "context": {
+                "version": 1,
+                "source_id": "lpic1-file-index-handover-example",
+                "root": "/gallery",
+                "database": "/indexes/demo.db",
+                "config": "/practice/index.conf"
+              },
+              "pruned": [
+                "/gallery/archive"
+              ],
+              "entries": [
+                "/gallery/archive",
+                "/gallery/archives",
+                "/gallery/current",
+                "/gallery/source",
+                "/gallery/archives/keep.txt",
+                "/gallery/current/guide-old.txt",
+                "/gallery/source/guide.txt"
+              ]
+            },
+            "config_draft": "PRUNEPATHS = \"/gallery/archive /gallery/current\"\n",
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "view": "introduction",
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "FileIndex",
+        "definition": {
+          "id": "lpic1-file-index-handover",
+          "version": 1,
+          "assignment": {
+            "initial": {
+              "context": {
+                "version": 1,
+                "source_id": "lpic1-file-index-handover-assignment",
+                "root": "/srv/intake",
+                "database": "/indexes/intake.db",
+                "config": "/work/index.conf"
+              },
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/work": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/indexes": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/srv/intake": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/srv/intake/current": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/srv/intake/archive": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/srv/intake/archives": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/srv/intake/source": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/srv": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/work/index.conf": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/srv/intake/current/runbook.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/srv/intake/archive/runbook.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/srv/intake/archives/keep.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/srv/intake/source/runbook.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/work/notes.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/work/index.conf": "PRUNEPATHS = \"/srv/intake/archive /srv/intake/current\"\n",
+                  "/srv/intake/current/runbook.txt": "Release: North\nState: current\n",
+                  "/srv/intake/archive/runbook.txt": "Release: retired\nState: archive\n",
+                  "/srv/intake/archives/keep.txt": "Near-prefix folder stays indexed.\n",
+                  "/srv/intake/source/runbook.txt": "Release: North\nState: current\n",
+                  "/work/notes.txt": "Keep this note unchanged.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "alex": [
+                    "staff"
+                  ]
+                },
+                "user": "alex",
+                "home": "/work",
+                "cwd": "/work",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "index": {
+                "version": 1,
+                "context": {
+                  "version": 1,
+                  "source_id": "lpic1-file-index-handover-assignment",
+                  "root": "/srv/intake",
+                  "database": "/indexes/intake.db",
+                  "config": "/work/index.conf"
+                },
+                "pruned": [
+                  "/srv/intake/archive"
+                ],
+                "entries": [
+                  "/srv/intake/archive",
+                  "/srv/intake/archives",
+                  "/srv/intake/current",
+                  "/srv/intake/source",
+                  "/srv/intake/archives/keep.txt",
+                  "/srv/intake/current/runbook-old.txt",
+                  "/srv/intake/source/runbook.txt"
+                ]
+              }
+            },
+            "expected_tree": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/work": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/indexes": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/current": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/archive": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/archives": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/source": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/index.conf": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/current/runbook.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/archive/runbook.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/archives/keep.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/srv/intake/source/runbook.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/notes.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/handover.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/work/index.conf": "PRUNEPATHS = \"/srv/intake/archive\"\n",
+                "/srv/intake/current/runbook.txt": "Release: North\nState: current\n",
+                "/srv/intake/archive/runbook.txt": "Release: retired\nState: archive\n",
+                "/srv/intake/archives/keep.txt": "Near-prefix folder stays indexed.\n",
+                "/srv/intake/source/runbook.txt": "Release: North\nState: current\n",
+                "/work/notes.txt": "Keep this note unchanged.\n",
+                "/work/handover.txt": "Release: North\nState: current\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/work",
+              "cwd": "/work",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "handover": "/work/handover.txt",
+            "extra_paths": [],
+            "reference": [
+              {
+                "kind": "SaveConfig",
+                "text": "PRUNEPATHS = \"/srv/intake/archive\"\n"
+              },
+              {
+                "kind": "Command",
+                "input": "updatedb -l 0 -o /indexes/intake.db -U /srv/intake --config-file /work/index.conf"
+              },
+              {
+                "kind": "Command",
+                "input": "cp /srv/intake/current/runbook.txt /work/handover.txt"
+              }
+            ]
+          },
+          "example": {
+            "initial": {
+              "context": {
+                "version": 1,
+                "source_id": "lpic1-file-index-handover-example",
+                "root": "/gallery",
+                "database": "/indexes/demo.db",
+                "config": "/practice/index.conf"
+              },
+              "tree": {
+                "nodes": {
+                  "/": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "root",
+                    "group": "root"
+                  },
+                  "/practice": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/indexes": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/current": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/archive": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/archives": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/source": {
+                    "directory": true,
+                    "mode": 493,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/practice/index.conf": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/current/guide.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/archive/guide.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/archives/keep.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/gallery/source/guide.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  },
+                  "/practice/notes.txt": {
+                    "directory": false,
+                    "mode": 420,
+                    "owner": "alex",
+                    "group": "staff"
+                  }
+                },
+                "files": {
+                  "/practice/index.conf": "PRUNEPATHS = \"/gallery/archive /gallery/current\"\n",
+                  "/gallery/current/guide.txt": "Release: Lakeside\nState: current\n",
+                  "/gallery/archive/guide.txt": "Release: retired\nState: archive\n",
+                  "/gallery/archives/keep.txt": "Near-prefix folder stays indexed.\n",
+                  "/gallery/source/guide.txt": "Release: Lakeside\nState: current\n",
+                  "/practice/notes.txt": "Keep this note unchanged.\n"
+                },
+                "users": {
+                  "root": [
+                    "root"
+                  ],
+                  "alex": [
+                    "staff"
+                  ]
+                },
+                "user": "alex",
+                "home": "/practice",
+                "cwd": "/practice",
+                "previous": null,
+                "umask": 18,
+                "clock": 0,
+                "modified": {}
+              },
+              "index": {
+                "version": 1,
+                "context": {
+                  "version": 1,
+                  "source_id": "lpic1-file-index-handover-example",
+                  "root": "/gallery",
+                  "database": "/indexes/demo.db",
+                  "config": "/practice/index.conf"
+                },
+                "pruned": [
+                  "/gallery/archive"
+                ],
+                "entries": [
+                  "/gallery/archive",
+                  "/gallery/archives",
+                  "/gallery/current",
+                  "/gallery/source",
+                  "/gallery/archives/keep.txt",
+                  "/gallery/current/guide-old.txt",
+                  "/gallery/source/guide.txt"
+                ]
+              }
+            },
+            "expected_tree": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/practice": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/indexes": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/current": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/archive": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/archives": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/source": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/index.conf": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/current/guide.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/archive/guide.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/archives/keep.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/gallery/source/guide.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/notes.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/handover.txt": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/practice/index.conf": "PRUNEPATHS = \"/gallery/archive\"\n",
+                "/gallery/current/guide.txt": "Release: Lakeside\nState: current\n",
+                "/gallery/archive/guide.txt": "Release: retired\nState: archive\n",
+                "/gallery/archives/keep.txt": "Near-prefix folder stays indexed.\n",
+                "/gallery/source/guide.txt": "Release: Lakeside\nState: current\n",
+                "/practice/notes.txt": "Keep this note unchanged.\n",
+                "/practice/handover.txt": "Release: Lakeside\nState: current\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/practice",
+              "cwd": "/practice",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "handover": "/practice/handover.txt",
+            "extra_paths": [
+              "/gallery/current/guide.txt"
+            ],
+            "reference": [
+              {
+                "kind": "SaveConfig",
+                "text": "PRUNEPATHS = \"/gallery/archive\"\n"
+              },
+              {
+                "kind": "Command",
+                "input": "updatedb -l 0 -o /indexes/demo.db -U /gallery --config-file /practice/index.conf"
+              },
+              {
+                "kind": "Command",
+                "input": "cp /gallery/current/guide.txt /practice/handover.txt"
+              }
+            ]
+          },
+          "teaching": {
+            "prerequisite_note": "Before starting: use find to search live folders, cat to read text and cp to copy a file. You can revisit those earlier lessons. Here you will learn why a saved filename search can disagree with the files that exist now.",
+            "concepts": [
+              {
+                "title": "A fast search can use yesterday\u2019s names",
+                "text": "find walks the supplied virtual folders now. locate searches a separate saved list of names. A deleted or renamed file can still appear in that list, and a new file can be missing. Reading a returned path with cat checks the file\u2019s actual contents."
+              },
+              {
+                "title": "Exclusions affect the next rebuild",
+                "text": "The native editor changes the PRUNEPATHS setting: quoted absolute folders whose contents should be skipped. A folder\u2019s own name may remain listed; its descendants are excluded. An exact archive exclusion does not hide the separate archives folder. Save configuration applies the text; it does not update the saved list. Real system defaults commonly use /etc/updatedb.conf. Here you edit the supplied private file, so this exercise affects only its private index."
+              },
+              {
+                "title": "Rebuild explicitly, then verify",
+                "text": "updatedb -l 0 -o DATABASE -U ROOT --config-file CONFIG builds this activity\u2019s private index. Each path is supplied by the lesson. A successful rebuild prints nothing. locate -e -d DATABASE TEXT filters saved names by current existence; it does not add missing names or refresh the index."
+              },
+              {
+                "title": "A filename is not proof of the right document",
+                "text": "Use cat PATH to read a file and cp SOURCE DEST to copy it. Read the current and archive files before copying. The assignment checks the saved exclusions, a fresh index and the actual handover contents, while preserving everything else. All commands and files stay inside the simulator; this private-index exercise does not reproduce system-wide access or visibility rules."
+              }
+            ],
+            "description": "Separate worked example: the /gallery index still names guide-old.txt, and its saved configuration wrongly excludes current. Repair the configuration, rebuild, and hand over the current guide. The three stages below explain what each action changes.",
+            "worked": [
+              {
+                "title": "Save the intended exclusions",
+                "explanation": "Keep archive excluded; remove current from PRUNEPATHS. Save applies this text but does not rebuild saved names.",
+                "step": {
+                  "kind": "SaveConfig",
+                  "text": "PRUNEPATHS = \"/gallery/archive\"\n"
+                }
+              },
+              {
+                "title": "Refresh the private saved names",
+                "explanation": "Run updatedb with the supplied private output, root and configuration. A successful rebuild is quiet; locate will now use the refreshed names.",
+                "step": {
+                  "kind": "Command",
+                  "input": "updatedb -l 0 -o /indexes/demo.db -U /gallery --config-file /practice/index.conf"
+                }
+              },
+              {
+                "title": "Copy the current document",
+                "explanation": "Read the current file, then copy it to the handover. The archived file has the same name but different contents.",
+                "step": {
+                  "kind": "Command",
+                  "input": "cp /gallery/current/guide.txt /practice/handover.txt"
+                }
+              }
+            ],
+            "try_steps": [
+              {
+                "title": "Compare saved names with live files",
+                "explanation": "Insert and run this query. Before your first rebuild, the saved index lists guide-old.txt. Then type find /gallery -name \"guide*.txt\" to compare with live files. After rebuilding, repeat the query to observe the change.",
+                "step": {
+                  "kind": "Command",
+                  "input": "locate -d /indexes/demo.db guide"
+                }
+              },
+              {
+                "title": "Save the narrower exclusion",
+                "explanation": "Fill this practice configuration, then choose Save configuration. Repeat locate: saving alone does not change the saved names.",
+                "step": {
+                  "kind": "SaveConfig",
+                  "text": "PRUNEPATHS = \"/gallery/archive\"\n"
+                }
+              },
+              {
+                "title": "Rebuild, then compare",
+                "explanation": "With archive-only exclusions saved, run the explicit rebuild and repeat locate. Expected after rebuilding: guide.txt replaces guide-old.txt, while /gallery/archive/guide.txt remains excluded.",
+                "step": {
+                  "kind": "Command",
+                  "input": "updatedb -l 0 -o /indexes/demo.db -U /gallery --config-file /practice/index.conf"
+                }
+              },
+              {
+                "title": "Prepare and check the handover",
+                "explanation": "Copy the current file, then choose Check practice. Compare cat /practice/handover.txt with cat /gallery/current/guide.txt.",
+                "step": {
+                  "kind": "Command",
+                  "input": "cp /gallery/current/guide.txt /practice/handover.txt"
+                }
+              },
+              {
+                "title": "Make one stale-name experiment",
+                "explanation": "Remove only this declared practice file. Repeat locate -d /indexes/demo.db guide; its saved name remains until a rebuild.",
+                "step": {
+                  "kind": "Command",
+                  "input": "rm /gallery/current/guide.txt"
+                }
+              },
+              {
+                "title": "Check existence without rebuilding",
+                "explanation": "This checks each saved name against the live tree. The removed current file disappears from this result, but the private index itself is unchanged.",
+                "step": {
+                  "kind": "Command",
+                  "input": "locate -e -d /indexes/demo.db guide"
+                }
+              },
+              {
+                "title": "Restore the practice source",
+                "explanation": "Copy the preserved source back to its original name. Its contents and permissions match the original; then rebuild and check practice again.",
+                "step": {
+                  "kind": "Command",
+                  "input": "cp /gallery/source/guide.txt /gallery/current/guide.txt"
+                }
+              },
+              {
+                "title": "Finish the experiment",
+                "explanation": "Rebuild explicitly and choose Check practice. Assignment drafts and credit have not changed.",
+                "step": {
+                  "kind": "Command",
+                  "input": "updatedb -l 0 -o /indexes/demo.db -U /gallery --config-file /practice/index.conf"
+                }
+              }
+            ],
+            "repair": []
+          }
+        }
+      },
+      "solution": [
+        "file-index {\"action\":\"save_configuration\",\"text\":\"PRUNEPATHS = \\\"/srv/intake/archive\\\"\\n\"}",
+        "updatedb -l 0 -o /indexes/intake.db -U /srv/intake --config-file /work/index.conf",
+        "cp /srv/intake/current/runbook.txt /work/handover.txt"
+      ],
+      "prerequisites": [
+        "lpic1-fhs-locate-active-files",
+        "lpic1-search-incomplete-intake"
+      ]
+    }
+  ]
+}

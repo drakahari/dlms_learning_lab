@@ -1,0 +1,581 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-raid1-assembly-policy",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "RAID1 assembly and identity",
+      "unit": "raid1-assembly-policy",
+      "title": "Recover a clean mirror and its saved assembly policy",
+      "summary": "Identify existing RAID1 members, repair scan policy and restore the right dataset without disturbing a neighboring mirror.",
+      "objective": "Restore /dev/md10 using the original reporting members /dev/vda1 and /dev/vdb1; determine their array UUID from their existing metadata. Repair and save /etc/mdadm.conf so a new targeted assembly of /dev/md10 selects both original reporting members. Keep /dev/md11 active on its original audit members /dev/vdc1 and /dev/vdd1, with correct saved assembly policy. Both active arrays must expose their original /records.txt sample data through the simulator inspection view; preserve all component data and metadata. Save or revert the editor draft, inspect the active arrays, then choose Check work.",
+      "retry_guidance": "Compare saved-policy and active-identity checks separately. A manual assembly can work while saved configuration remains wrong; a saved edit does not replace a running array.",
+      "difficulty": "Intermediate",
+      "minutes": 32,
+      "steps": [
+        "Identify the existing member pairs",
+        "Repair saved assembly policy",
+        "Assemble and inspect both active identities",
+        "Verify retained data and check work"
+      ],
+      "guide": [],
+      "hints": [
+        "Run mdadm --examine on both reporting members. Compare every group of Array UUID, and verify their distinct Device Roles.",
+        "DEVICE lists scan candidates; the ARRAY row selects an identity for a target. A correct UUID with an omitted member is not a complete clean pair here.",
+        "Use the supported targeted scan form after Save file. Compare /proc/mdstat and mdadm --detail; inspect original data as well as the presence of an array."
+      ],
+      "explanation": "Assembly reconnects existing matching component metadata to an active MD target; it does not create new replicas. The saved policy and active binding are independent, so both are graded. The original UUID and actual sample content distinguish reporting from audit even when both arrays look healthy.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/mdadm.8.html",
+        "https://man7.org/linux/man-pages/man5/mdadm.conf.5.html",
+        "https://docs.kernel.org/admin-guide/md.html"
+      ],
+      "simplifications": "Clean, synchronized two-member RAID1 with supplied abstract version-1.2 metadata and actual bounded sample replicas only. No real kernel, devices, mounted filesystem, subprocesses or host files. Literal DEVICE and UUID-based ARRAY rows; unsupported policy/commands fail clearly. Targeted scan only: real mdadm can discover arrays without ARRAY rows, but that fallback, HOMEHOST, initramfs and boot policy are outside this activity. No dirty/degraded assembly, force/create/reshape, event counters or full exam-objective coverage. The native sample-data view is simulator inspection, not a Linux command. Sources checked2026-11-08.",
+      "initial": {
+        "kind": "RaidAssembly",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic2-raid1-assembly-policy",
+          "view": "introduction",
+          "example_step": 0,
+          "assignment": {
+            "runtime": {
+              "version": 1,
+              "saved": "DEVICE /dev/vda1 /dev/vdc1 /dev/vdd1\nARRAY /dev/md10 UUID=99990000:11112222:33334444:55556666\nARRAY /dev/md11 UUID=84553322:1100ffee:ddccbbaa:99887766\n",
+              "live": [
+                {
+                  "target": "/dev/md11",
+                  "uuid": "845533221100ffeeddccbbaa99887766"
+                }
+              ]
+            },
+            "draft": "DEVICE /dev/vda1 /dev/vdc1 /dev/vdd1\nARRAY /dev/md10 UUID=99990000:11112222:33334444:55556666\nARRAY /dev/md11 UUID=84553322:1100ffee:ddccbbaa:99887766\n",
+            "history": [],
+            "transcript": [],
+            "command": "",
+            "checked": false
+          },
+          "practice": {
+            "runtime": {
+              "version": 1,
+              "saved": "DEVICE /dev/vde1 /dev/vdg1 /dev/vdh1\nARRAY /dev/md20 UUID=99990000:11112222:33334444:55556666\nARRAY /dev/md21 UUID=abcd2000:12340000:56780000:00000002\n",
+              "live": [
+                {
+                  "target": "/dev/md21",
+                  "uuid": "abcd2000123400005678000000000002"
+                }
+              ]
+            },
+            "draft": "DEVICE /dev/vde1 /dev/vdg1 /dev/vdh1\nARRAY /dev/md20 UUID=99990000:11112222:33334444:55556666\nARRAY /dev/md21 UUID=abcd2000:12340000:56780000:00000002\n",
+            "history": [],
+            "transcript": [],
+            "command": "",
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "RaidAssembly",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic2-raid1-assembly-policy",
+          "assignment": {
+            "context": {
+              "replicas": {
+                "version": 1,
+                "devices": {
+                  "/dev/vda1": {
+                    "raw_sectors": 16384,
+                    "usable_sectors": 8192,
+                    "available": true,
+                    "read_only": false,
+                    "protected": false,
+                    "media": {
+                      "md": {
+                        "array": "/dev/md10"
+                      }
+                    },
+                    "content": [
+                      {
+                        "file": "/records.txt",
+                        "index": 0,
+                        "text": "Operations reporting dataset\n"
+                      },
+                      {
+                        "file": "/records.txt",
+                        "index": 1,
+                        "text": "Original retained records; preserve both sample segments.\n"
+                      }
+                    ]
+                  },
+                  "/dev/vdb1": {
+                    "raw_sectors": 16384,
+                    "usable_sectors": 8192,
+                    "available": true,
+                    "read_only": false,
+                    "protected": false,
+                    "media": {
+                      "md": {
+                        "array": "/dev/md10"
+                      }
+                    },
+                    "content": [
+                      {
+                        "file": "/records.txt",
+                        "index": 0,
+                        "text": "Operations reporting dataset\n"
+                      },
+                      {
+                        "file": "/records.txt",
+                        "index": 1,
+                        "text": "Original retained records; preserve both sample segments.\n"
+                      }
+                    ]
+                  },
+                  "/dev/vdc1": {
+                    "raw_sectors": 16384,
+                    "usable_sectors": 8192,
+                    "available": true,
+                    "read_only": false,
+                    "protected": true,
+                    "media": {
+                      "md": {
+                        "array": "/dev/md11"
+                      }
+                    },
+                    "content": [
+                      {
+                        "file": "/records.txt",
+                        "index": 0,
+                        "text": "Operations audit dataset\n"
+                      },
+                      {
+                        "file": "/records.txt",
+                        "index": 1,
+                        "text": "Original retained records; preserve both sample segments.\n"
+                      }
+                    ]
+                  },
+                  "/dev/vdd1": {
+                    "raw_sectors": 16384,
+                    "usable_sectors": 8192,
+                    "available": true,
+                    "read_only": false,
+                    "protected": true,
+                    "media": {
+                      "md": {
+                        "array": "/dev/md11"
+                      }
+                    },
+                    "content": [
+                      {
+                        "file": "/records.txt",
+                        "index": 0,
+                        "text": "Operations audit dataset\n"
+                      },
+                      {
+                        "file": "/records.txt",
+                        "index": 1,
+                        "text": "Original retained records; preserve both sample segments.\n"
+                      }
+                    ]
+                  }
+                },
+                "arrays": {
+                  "/dev/md10": {
+                    "component_sectors": 8192,
+                    "members": [
+                      {
+                        "device": "/dev/vda1",
+                        "slot": 0,
+                        "role": "synced"
+                      },
+                      {
+                        "device": "/dev/vdb1",
+                        "slot": 1,
+                        "role": "synced"
+                      }
+                    ]
+                  },
+                  "/dev/md11": {
+                    "component_sectors": 8192,
+                    "members": [
+                      {
+                        "device": "/dev/vdc1",
+                        "slot": 0,
+                        "role": "synced"
+                      },
+                      {
+                        "device": "/dev/vdd1",
+                        "slot": 1,
+                        "role": "synced"
+                      }
+                    ]
+                  }
+                }
+              },
+              "identities": [
+                {
+                  "array": "/dev/md10",
+                  "uuid": "7311222233445566778899aabbccddee"
+                },
+                {
+                  "array": "/dev/md11",
+                  "uuid": "845533221100ffeeddccbbaa99887766"
+                }
+              ]
+            },
+            "initial": {
+              "version": 1,
+              "saved": "DEVICE /dev/vda1 /dev/vdc1 /dev/vdd1\nARRAY /dev/md10 UUID=99990000:11112222:33334444:55556666\nARRAY /dev/md11 UUID=84553322:1100ffee:ddccbbaa:99887766\n",
+              "live": [
+                {
+                  "target": "/dev/md11",
+                  "uuid": "845533221100ffeeddccbbaa99887766"
+                }
+              ]
+            },
+            "requirements": [
+              {
+                "target": "/dev/md10",
+                "uuid": "7311222233445566778899aabbccddee",
+                "file": "/records.txt"
+              },
+              {
+                "target": "/dev/md11",
+                "uuid": "845533221100ffeeddccbbaa99887766",
+                "file": "/records.txt"
+              }
+            ]
+          },
+          "example": {
+            "context": {
+              "replicas": {
+                "version": 1,
+                "devices": {
+                  "/dev/vde1": {
+                    "raw_sectors": 16384,
+                    "usable_sectors": 8192,
+                    "available": true,
+                    "read_only": false,
+                    "protected": false,
+                    "media": {
+                      "md": {
+                        "array": "/dev/md20"
+                      }
+                    },
+                    "content": [
+                      {
+                        "file": "/records.txt",
+                        "index": 0,
+                        "text": "Practice reporting dataset\n"
+                      },
+                      {
+                        "file": "/records.txt",
+                        "index": 1,
+                        "text": "Example retained records; preserve both sample segments.\n"
+                      }
+                    ]
+                  },
+                  "/dev/vdf1": {
+                    "raw_sectors": 16384,
+                    "usable_sectors": 8192,
+                    "available": true,
+                    "read_only": false,
+                    "protected": false,
+                    "media": {
+                      "md": {
+                        "array": "/dev/md20"
+                      }
+                    },
+                    "content": [
+                      {
+                        "file": "/records.txt",
+                        "index": 0,
+                        "text": "Practice reporting dataset\n"
+                      },
+                      {
+                        "file": "/records.txt",
+                        "index": 1,
+                        "text": "Example retained records; preserve both sample segments.\n"
+                      }
+                    ]
+                  },
+                  "/dev/vdg1": {
+                    "raw_sectors": 16384,
+                    "usable_sectors": 8192,
+                    "available": true,
+                    "read_only": false,
+                    "protected": true,
+                    "media": {
+                      "md": {
+                        "array": "/dev/md21"
+                      }
+                    },
+                    "content": [
+                      {
+                        "file": "/records.txt",
+                        "index": 0,
+                        "text": "Practice audit dataset\n"
+                      },
+                      {
+                        "file": "/records.txt",
+                        "index": 1,
+                        "text": "Example retained records; preserve both sample segments.\n"
+                      }
+                    ]
+                  },
+                  "/dev/vdh1": {
+                    "raw_sectors": 16384,
+                    "usable_sectors": 8192,
+                    "available": true,
+                    "read_only": false,
+                    "protected": true,
+                    "media": {
+                      "md": {
+                        "array": "/dev/md21"
+                      }
+                    },
+                    "content": [
+                      {
+                        "file": "/records.txt",
+                        "index": 0,
+                        "text": "Practice audit dataset\n"
+                      },
+                      {
+                        "file": "/records.txt",
+                        "index": 1,
+                        "text": "Example retained records; preserve both sample segments.\n"
+                      }
+                    ]
+                  }
+                },
+                "arrays": {
+                  "/dev/md20": {
+                    "component_sectors": 8192,
+                    "members": [
+                      {
+                        "device": "/dev/vde1",
+                        "slot": 0,
+                        "role": "synced"
+                      },
+                      {
+                        "device": "/dev/vdf1",
+                        "slot": 1,
+                        "role": "synced"
+                      }
+                    ]
+                  },
+                  "/dev/md21": {
+                    "component_sectors": 8192,
+                    "members": [
+                      {
+                        "device": "/dev/vdg1",
+                        "slot": 0,
+                        "role": "synced"
+                      },
+                      {
+                        "device": "/dev/vdh1",
+                        "slot": 1,
+                        "role": "synced"
+                      }
+                    ]
+                  }
+                }
+              },
+              "identities": [
+                {
+                  "array": "/dev/md20",
+                  "uuid": "abcd1000123400005678000000000001"
+                },
+                {
+                  "array": "/dev/md21",
+                  "uuid": "abcd2000123400005678000000000002"
+                }
+              ]
+            },
+            "initial": {
+              "version": 1,
+              "saved": "DEVICE /dev/vde1 /dev/vdg1 /dev/vdh1\nARRAY /dev/md20 UUID=99990000:11112222:33334444:55556666\nARRAY /dev/md21 UUID=abcd2000:12340000:56780000:00000002\n",
+              "live": [
+                {
+                  "target": "/dev/md21",
+                  "uuid": "abcd2000123400005678000000000002"
+                }
+              ]
+            },
+            "requirements": [
+              {
+                "target": "/dev/md20",
+                "uuid": "abcd1000123400005678000000000001",
+                "file": "/records.txt"
+              },
+              {
+                "target": "/dev/md21",
+                "uuid": "abcd2000123400005678000000000002",
+                "file": "/records.txt"
+              }
+            ]
+          },
+          "reference": [
+            {
+              "operation": {
+                "kind": "command",
+                "text": "mdadm --examine /dev/vda1"
+              },
+              "explanation": "Read the existing reporting member identity; this does not change metadata.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "mdadm --examine /dev/vdb1"
+              },
+              "explanation": "Confirm that the second member has the same complete UUID and the other active role.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "mdadm --assemble --scan /dev/md10"
+              },
+              "explanation": "Observe the broken saved policy before repairing it. Command failure is useful evidence.",
+              "status": 1
+            },
+            {
+              "operation": {
+                "kind": "save",
+                "text": "DEVICE /dev/vda1 /dev/vdb1 /dev/vdc1 /dev/vdd1\nARRAY /dev/md10 UUID=73112222:33445566:778899aa:bbccddee\nARRAY /dev/md11 UUID=84553322:1100ffee:ddccbbaa:99887766\n"
+              },
+              "explanation": "Keep the audit row and all four supplied component paths. Bind the reporting target to the UUID actually read from its two members.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "mdadm --assemble --scan /dev/md10"
+              },
+              "explanation": "Assemble the existing complete pair from the saved row; this creates no new data or metadata.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /proc/mdstat"
+              },
+              "explanation": "Both arrays should be active with two in-sync members, shown as [2/2] [UU].",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "mdadm --detail /dev/md10"
+              },
+              "explanation": "Confirm the reporting UUID at the intended active target; success status alone is insufficient.",
+              "status": 0
+            }
+          ],
+          "example_steps": [
+            {
+              "operation": {
+                "kind": "command",
+                "text": "mdadm --examine /dev/vde1"
+              },
+              "explanation": "Read Array UUID and Device Role. This is existing metadata, not an instruction to create a new array.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "mdadm --examine /dev/vdf1"
+              },
+              "explanation": "Compare the complete UUID with the first member. The two active roles are 0 and 1.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /etc/mdadm.conf"
+              },
+              "explanation": "Compare saved DEVICE candidates and the ARRAY target with the inspected metadata.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "mdadm --assemble --scan /dev/md20"
+              },
+              "explanation": "This attempt intentionally fails: the saved UUID is unknown. No array is created or erased.",
+              "status": 1
+            },
+            {
+              "operation": {
+                "kind": "save",
+                "text": "DEVICE /dev/vde1 /dev/vdf1 /dev/vdg1 /dev/vdh1\nARRAY /dev/md20 UUID=abcd1000:12340000:56780000:00000001\nARRAY /dev/md21 UUID=abcd2000:12340000:56780000:00000002\n"
+              },
+              "explanation": "The reporting ARRAY row must select the inspected UUID, and DEVICE must include both original members. Preserve the audit row and devices.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "mdadm --assemble --scan /dev/md20"
+              },
+              "explanation": "Start the original clean pair. Saving alone did not activate it.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "cat /proc/mdstat"
+              },
+              "explanation": "Actual output now lists md20 and md21. [2/2] means two of two members are active; [UU] marks both in sync.",
+              "status": 0
+            },
+            {
+              "operation": {
+                "kind": "command",
+                "text": "mdadm --detail /dev/md20"
+              },
+              "explanation": "Confirm this active target has the reporting UUID. Expand Original sample data to inspect its retained dataset.",
+              "status": 0
+            }
+          ],
+          "experiment": {
+            "operation": {
+              "kind": "save",
+              "text": "DEVICE /dev/vde1 /dev/vdf1 /dev/vdg1 /dev/vdh1\nARRAY /dev/md20 UUID=99990000:11112222:33334444:55556666\nARRAY /dev/md21 UUID=abcd2000:12340000:56780000:00000002\n"
+            },
+            "explanation": "Introduce a wrong future UUID, Save file and Check example. The current array still reads correctly, but the saved-policy check must fail.",
+            "status": 0
+          },
+          "repair": [
+            {
+              "operation": {
+                "kind": "save",
+                "text": "DEVICE /dev/vde1 /dev/vdf1 /dev/vdg1 /dev/vdh1\nARRAY /dev/md20 UUID=abcd1000:12340000:56780000:00000001\nARRAY /dev/md21 UUID=abcd2000:12340000:56780000:00000002\n"
+              },
+              "explanation": "Restore the inspected UUID and Save file, then Check example again. No stop or reassembly is needed because only saved policy was wrong.",
+              "status": 0
+            }
+          ]
+        }
+      },
+      "solution": [
+        "mdadm --examine /dev/vda1",
+        "mdadm --examine /dev/vdb1",
+        "mdadm --assemble --scan /dev/md10",
+        "Save /etc/mdadm.conf",
+        "mdadm --assemble --scan /dev/md10",
+        "cat /proc/mdstat",
+        "mdadm --detail /dev/md10",
+        "Check work"
+      ],
+      "prerequisites": [
+        "lpic2-raid1-handover"
+      ]
+    }
+  ]
+}

@@ -488,6 +488,9 @@ fn terminal_actions(
                 draft.apply(state).unwrap();
                 continue;
             }
+            EditAction::Startup { .. } => {
+                panic!("The retained terminal fixtures do not use native startup controls")
+            }
             EditAction::Manager {
                 action: Action::AdvancePrograms {},
             } => continue,

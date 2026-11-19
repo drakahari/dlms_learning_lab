@@ -1,0 +1,2081 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-aaa-method-recovery",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "AAA decisions",
+      "unit": "aaa-decisions",
+      "title": "Restore central authentication and a working local fallback",
+      "summary": "Repair method order so a responding identity service controls authentication and only an unavailable service leads to local recovery.",
+      "objective": "Keep only NetAdmin, ReadOnly and RecoveryTech as local profiles, with NetAdmin and RecoveryTech at level 15 and ReadOnly at level 1. For the supplied healthy OfficeIdentity trials, authenticate NetAdmin with Lab-Net-Admin-72 and ReadOnly with Lab-Read-83 through that service. Use local EXEC authorization for their resulting access. When OfficeIdentity is unavailable, RecoveryTech must authenticate locally with Lab-Recover-64. When it responds, an unknown account or wrong word must stop authentication without trying a later method. The authenticated CentralVisitor has no permitted local profile and must be denied local EXEC access. Retain every supplied incoming SSH version 2, Telnet, legacy-version and source-policy requirement on VTY lines 0\u201315.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Edit the complete document, inspect the supplied stage traces and check every required outcome."
+      ],
+      "guide": [],
+      "explanation": "A responding OfficeIdentity service checks its own records first. A successful identity proceeds to local EXEC authorization, which needs the matching local profile and intended level. An explicit refusal ends authentication. When the supplied service is unavailable, local-case can authenticate RecoveryTech with its local training word. CentralVisitor has a valid central identity but no permitted local EXEC profile. These are different expected outcomes; retaining incoming restrictions and checking all supplied cases prevents a broad bypass from passing.",
+      "hints": [
+        "Inspect the actual method trace before changing a correct word. A returned rejection stops the list; unavailability may try the next method.",
+        "Compare the authenticated account name with its required local EXEC profile and level. The directory and local words belong to different stores.",
+        "Retain group OfficeIdentity before local-case, explicit local EXEC authorization and all incoming restrictions. Repair only the required profiles/recovery values, then check every case."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_authentication.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_authorization.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_local_authentication_and_authorization.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_accounting.html"
+      ],
+      "simplifications": "Checked2026-11-09 against CCNA200-301v1.1/5.8 and Catalyst9300 IOS XE Dublin17.12 guides updated2023-07-28. Bounded training-service metadata, ordered group/local-case methods and explicit local EXEC lookup at levels1/15; not RADIUS/TACACS+/LDAP wire behavior, real server/timeout observation, password hashing, crypto, SSH/EXEC sessions, command authorization or accounting. Availability is an explicit supplied trial condition; directory names/words are case-sensitive within this declared fixture. Complete-document editor only, with actual virtual incoming IPv4/source/protocol policy. Source-held inventory and method/identity/level cases are checked on all16supplied VTY lines. Unknown/unsupported settings and wrong upstream layers cannot satisfy a credential refusal. Local profile placeholders are lesson text; only declared fallback words are authentication requirements. Separate sample addresses/directory/names/words/three-line practice; drafts stay separate, observations transient. Limits:4methods/services,16identities per service,12identity cases,64KiBdocument/2MiBsession. No host processes, files, accounts, services or network.",
+      "initial": {
+        "kind": "AaaAccess",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-aaa-method-recovery",
+          "view": "introduction",
+          "assignment": {
+            "draft": "aaa new-model\naaa authentication login default local-case group OfficeIdentity\naaa authorization exec default local\nusername NetAdmin privilege 15 secret Local-Profile-11\nusername ReadOnly privilege 1 secret Local-Profile-29\nusername RecoveryTech privilege 15 secret Lab-Recover-64\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n",
+            "applied": "aaa new-model\naaa authentication login default local-case group OfficeIdentity\naaa authorization exec default local\nusername NetAdmin privilege 15 secret Local-Profile-11\nusername ReadOnly privilege 1 secret Local-Profile-29\nusername RecoveryTech privilege 15 secret Lab-Recover-64\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n",
+            "checked": false,
+            "selected_case": 0,
+            "selected_line": 0
+          },
+          "practice": {
+            "draft": "aaa new-model\naaa authentication login default local-case group SampleDirectory\naaa authorization exec default local\nusername SampleAdmin privilege 15 secret Sample-Profile-11\nusername SampleReader privilege 1 secret Sample-Profile-29\nusername SampleRecovery privilege 15 secret Sample-Recover-48\nip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n",
+            "applied": "aaa new-model\naaa authentication login default local-case group SampleDirectory\naaa authorization exec default local\nusername SampleAdmin privilege 15 secret Sample-Profile-11\nusername SampleReader privilege 1 secret Sample-Profile-29\nusername SampleRecovery privilege 15 secret Sample-Recover-48\nip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n",
+            "checked": false,
+            "selected_case": 0,
+            "selected_line": 0
+          }
+        }
+      },
+      "goal": {
+        "kind": "AaaAccess",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "network": {
+              "version": 1,
+              "management": {
+                "device": "Branch",
+                "interface": "transit"
+              },
+              "clients": [
+                {
+                  "id": "admin",
+                  "binding": {
+                    "device": "Admin",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "operator",
+                  "binding": {
+                    "device": "Operator",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "guest",
+                  "binding": {
+                    "device": "Guest",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "nearby",
+                  "binding": {
+                    "device": "Nearby",
+                    "interface": "lan"
+                  }
+                }
+              ],
+              "topology": {
+                "devices": {
+                  "Admin": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Operator": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.11",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Guest": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.130",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Nearby": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.12",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Edge": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.1",
+                          "prefix": 24
+                        }
+                      },
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.1",
+                          "prefix": 30
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Branch": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.2",
+                          "prefix": 30
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "192.0.2.0",
+                          "length": 24
+                        },
+                        "interface": "transit",
+                        "via": "10.0.0.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "supplied": {
+              "version": 1,
+              "host_identity": "supplied-branch-identity",
+              "versions": "version2_only",
+              "lines": [
+                {
+                  "number": 0,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 1,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 2,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 3,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 4,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 5,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 6,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 7,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 8,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 9,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 10,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 11,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 12,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 13,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 14,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 15,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                }
+              ]
+            },
+            "entry_cases": [
+              {
+                "label": "Administrator uses SSH version 2",
+                "client": "admin",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Operator uses SSH version 2",
+                "client": "operator",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Telnet is unavailable",
+                "client": "admin",
+                "protocol": "telnet",
+                "expected": "protocol_denied"
+              },
+              {
+                "label": "Legacy SSH is unavailable",
+                "client": "admin",
+                "protocol": "ssh1",
+                "expected": "legacy_version_denied"
+              },
+              {
+                "label": "Guest is rejected by source policy",
+                "client": "guest",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              },
+              {
+                "label": "Nearby workstation is rejected by source policy",
+                "client": "nearby",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              }
+            ],
+            "id": "ccna-aaa-method-recovery",
+            "instructions": "Keep only NetAdmin, ReadOnly and RecoveryTech as local profiles, with NetAdmin and RecoveryTech at level 15 and ReadOnly at level 1. For the supplied healthy OfficeIdentity trials, authenticate NetAdmin with Lab-Net-Admin-72 and ReadOnly with Lab-Read-83 through that service. Use local EXEC authorization for their resulting access. When OfficeIdentity is unavailable, RecoveryTech must authenticate locally with Lab-Recover-64. When it responds, an unknown account or wrong word must stop authentication without trying a later method. The authenticated CentralVisitor has no permitted local profile and must be denied local EXEC access. Retain every supplied incoming SSH version 2, Telnet, legacy-version and source-policy requirement on VTY lines 0\u201315.",
+            "services": {
+              "version": 1,
+              "named": {
+                "OfficeIdentity": {
+                  "available": true,
+                  "identities": [
+                    {
+                      "name": "NetAdmin",
+                      "training_token": "Lab-Net-Admin-72"
+                    },
+                    {
+                      "name": "ReadOnly",
+                      "training_token": "Lab-Read-83"
+                    },
+                    {
+                      "name": "CentralVisitor",
+                      "training_token": "Lab-Visit-91"
+                    }
+                  ]
+                }
+              }
+            },
+            "permitted_users": [
+              "NetAdmin",
+              "ReadOnly",
+              "RecoveryTech"
+            ],
+            "cases": [
+              {
+                "label": "Central administrator identity and local privilege",
+                "client": "admin",
+                "username": "NetAdmin",
+                "training_token": "Lab-Net-Admin-72",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "NetAdmin",
+                  "privilege": "administrator",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              },
+              {
+                "label": "Central reader identity and restricted local privilege",
+                "client": "operator",
+                "username": "ReadOnly",
+                "training_token": "Lab-Read-83",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "ReadOnly",
+                  "privilege": "user",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              },
+              {
+                "label": "Unavailable service permits local recovery",
+                "client": "admin",
+                "username": "RecoveryTech",
+                "training_token": "Lab-Recover-64",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": false
+                  }
+                ],
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "RecoveryTech",
+                  "privilege": "administrator",
+                  "via": {
+                    "kind": "local_case"
+                  }
+                }
+              },
+              {
+                "label": "Responding service rejects the unknown recovery name",
+                "client": "admin",
+                "username": "RecoveryTech",
+                "training_token": "Lab-Recover-64",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              },
+              {
+                "label": "A returned wrong-word denial must stop authentication",
+                "client": "admin",
+                "username": "NetAdmin",
+                "training_token": "Local-Profile-11",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              },
+              {
+                "label": "Unknown name is rejected by the responding service",
+                "client": "operator",
+                "username": "UnknownPerson",
+                "training_token": "Unknown-Training-91",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              },
+              {
+                "label": "Supplied directory keeps account letter case significant",
+                "client": "operator",
+                "username": "netadmin",
+                "training_token": "Lab-Net-Admin-72",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              },
+              {
+                "label": "Central match cannot supply a missing local EXEC profile",
+                "client": "admin",
+                "username": "CentralVisitor",
+                "training_token": "Lab-Visit-91",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authorization_denied",
+                  "user": "CentralVisitor",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              }
+            ],
+            "starter": "aaa new-model\naaa authentication login default local-case group OfficeIdentity\naaa authorization exec default local\nusername NetAdmin privilege 15 secret Local-Profile-11\nusername ReadOnly privilege 1 secret Local-Profile-29\nusername RecoveryTech privilege 15 secret Lab-Recover-64\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n",
+            "reference": "aaa new-model\naaa authentication login default group OfficeIdentity local-case\naaa authorization exec default local\nusername NetAdmin privilege 15 secret Local-Profile-11\nusername ReadOnly privilege 1 secret Local-Profile-29\nusername RecoveryTech privilege 15 secret Lab-Recover-64\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n"
+          },
+          "example": {
+            "version": 1,
+            "network": {
+              "version": 1,
+              "management": {
+                "device": "Branch",
+                "interface": "transit"
+              },
+              "clients": [
+                {
+                  "id": "admin",
+                  "binding": {
+                    "device": "Admin",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "operator",
+                  "binding": {
+                    "device": "Operator",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "guest",
+                  "binding": {
+                    "device": "Guest",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "nearby",
+                  "binding": {
+                    "device": "Nearby",
+                    "interface": "lan"
+                  }
+                }
+              ],
+              "topology": {
+                "devices": {
+                  "Admin": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Operator": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.11",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Guest": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.130",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Nearby": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.12",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Edge": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.1",
+                          "prefix": 24
+                        }
+                      },
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.1",
+                          "prefix": 30
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Branch": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.2",
+                          "prefix": 30
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "172.18.40.0",
+                          "length": 24
+                        },
+                        "interface": "transit",
+                        "via": "10.0.0.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "supplied": {
+              "version": 1,
+              "host_identity": "supplied-practice-identity",
+              "versions": "version2_only",
+              "lines": [
+                {
+                  "number": 0,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 1,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 2,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                }
+              ]
+            },
+            "entry_cases": [
+              {
+                "label": "Administrator uses SSH version 2",
+                "client": "admin",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Operator uses SSH version 2",
+                "client": "operator",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Telnet is unavailable",
+                "client": "admin",
+                "protocol": "telnet",
+                "expected": "protocol_denied"
+              },
+              {
+                "label": "Legacy SSH is unavailable",
+                "client": "admin",
+                "protocol": "ssh1",
+                "expected": "legacy_version_denied"
+              },
+              {
+                "label": "Guest is rejected by source policy",
+                "client": "guest",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              },
+              {
+                "label": "Nearby workstation is rejected by source policy",
+                "client": "nearby",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              }
+            ],
+            "id": "ccna-aaa-method-recovery-example",
+            "instructions": "On the separate sample network, repair the SampleDirectory method list and local profiles: SampleAdmin at level 15, SampleReader at level 1 and SampleRecovery at level 15. Inspect healthy service, unavailable service, returned refusal and missing local profile trials. Keep the supplied incoming policy on VTY lines 0\u20132.",
+            "services": {
+              "version": 1,
+              "named": {
+                "SampleDirectory": {
+                  "available": true,
+                  "identities": [
+                    {
+                      "name": "SampleAdmin",
+                      "training_token": "Sample-Admin-37"
+                    },
+                    {
+                      "name": "SampleReader",
+                      "training_token": "Sample-Reader-62"
+                    },
+                    {
+                      "name": "SampleVisitor",
+                      "training_token": "Sample-Visitor-91"
+                    }
+                  ]
+                }
+              }
+            },
+            "permitted_users": [
+              "SampleAdmin",
+              "SampleReader",
+              "SampleRecovery"
+            ],
+            "cases": [
+              {
+                "label": "Central administrator identity and local privilege",
+                "client": "admin",
+                "username": "SampleAdmin",
+                "training_token": "Sample-Admin-37",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "SampleAdmin",
+                  "privilege": "administrator",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              },
+              {
+                "label": "Central reader identity and restricted local privilege",
+                "client": "operator",
+                "username": "SampleReader",
+                "training_token": "Sample-Reader-62",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "SampleReader",
+                  "privilege": "user",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              },
+              {
+                "label": "Unavailable service permits local recovery",
+                "client": "admin",
+                "username": "SampleRecovery",
+                "training_token": "Sample-Recover-48",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": false
+                  }
+                ],
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "SampleRecovery",
+                  "privilege": "administrator",
+                  "via": {
+                    "kind": "local_case"
+                  }
+                }
+              },
+              {
+                "label": "Responding service rejects the unknown recovery name",
+                "client": "admin",
+                "username": "SampleRecovery",
+                "training_token": "Sample-Recover-48",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              },
+              {
+                "label": "A returned wrong-word denial must stop authentication",
+                "client": "admin",
+                "username": "SampleAdmin",
+                "training_token": "Sample-Profile-11",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              },
+              {
+                "label": "Unknown name is rejected by the responding service",
+                "client": "operator",
+                "username": "UnknownPerson",
+                "training_token": "Unknown-Training-91",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              },
+              {
+                "label": "Supplied directory keeps account letter case significant",
+                "client": "operator",
+                "username": "sampleadmin",
+                "training_token": "Sample-Admin-37",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              },
+              {
+                "label": "Central match cannot supply a missing local EXEC profile",
+                "client": "admin",
+                "username": "SampleVisitor",
+                "training_token": "Sample-Visitor-91",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authorization_denied",
+                  "user": "SampleVisitor",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              }
+            ],
+            "starter": "aaa new-model\naaa authentication login default local-case group SampleDirectory\naaa authorization exec default local\nusername SampleAdmin privilege 15 secret Sample-Profile-11\nusername SampleReader privilege 1 secret Sample-Profile-29\nusername SampleRecovery privilege 15 secret Sample-Recover-48\nip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n",
+            "reference": "aaa new-model\naaa authentication login default group SampleDirectory local-case\naaa authorization exec default local\nusername SampleAdmin privilege 15 secret Sample-Profile-11\nusername SampleReader privilege 1 secret Sample-Profile-29\nusername SampleRecovery privilege 15 secret Sample-Recover-48\nip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n"
+          }
+        }
+      },
+      "solution": [
+        "AAA ACCESS DOCUMENT\naaa new-model\naaa authentication login default group OfficeIdentity local-case\naaa authorization exec default local\nusername NetAdmin privilege 15 secret Local-Profile-11\nusername ReadOnly privilege 1 secret Local-Profile-29\nusername RecoveryTech privilege 15 secret Lab-Recover-64\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n"
+      ],
+      "prerequisites": [
+        "ccna-local-account-handover"
+      ]
+    },
+    {
+      "id": "ccna-aaa-authorization-recovery",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "AAA decisions",
+      "unit": "aaa-decisions",
+      "title": "Repair authorization after a successful central login",
+      "summary": "Restore the required local access profiles after central authentication, while keeping recovery and incoming restrictions working.",
+      "objective": "Restore the missing NetAdmin local profile at level 15 and restrict ReadOnly to level 1; keep RecoveryTech at level 15 with local recovery word Lab-Recover-64. Only these three local profiles may remain. Retain healthy OfficeIdentity authentication for NetAdmin (Lab-Net-Admin-72) and ReadOnly (Lab-Read-83), followed by local EXEC authorization. A central identity match alone must not grant an absent or excessive local profile. Keep local recovery working when OfficeIdentity is unavailable. Preserve the supplied wrong-word, unknown-name, case-sensitive-name and missing-local-profile outcomes; do not replace a returned refusal with fallback. Retain all supplied incoming-access requirements on VTY lines 0\u201315 and the explicit authentication/authorization settings.",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "steps": [
+        "Edit the complete document, inspect the supplied stage traces and check every required outcome."
+      ],
+      "guide": [],
+      "explanation": "A responding OfficeIdentity service checks its own records first. A successful identity proceeds to local EXEC authorization, which needs the matching local profile and intended level. An explicit refusal ends authentication. When the supplied service is unavailable, local-case can authenticate RecoveryTech with its local training word. CentralVisitor has a valid central identity but no permitted local EXEC profile. These are different expected outcomes; retaining incoming restrictions and checking all supplied cases prevents a broad bypass from passing.",
+      "hints": [
+        "Inspect the actual method trace before changing a correct word. A returned rejection stops the list; unavailability may try the next method.",
+        "Compare the authenticated account name with its required local EXEC profile and level. The directory and local words belong to different stores.",
+        "Retain group OfficeIdentity before local-case, explicit local EXEC authorization and all incoming restrictions. Repair only the required profiles/recovery values, then check every case."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_authentication.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_authorization.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_local_authentication_and_authorization.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/sec/b_1712_sec_9300_cg/configuring_accounting.html"
+      ],
+      "simplifications": "Checked2026-11-09 against CCNA200-301v1.1/5.8 and Catalyst9300 IOS XE Dublin17.12 guides updated2023-07-28. Bounded training-service metadata, ordered group/local-case methods and explicit local EXEC lookup at levels1/15; not RADIUS/TACACS+/LDAP wire behavior, real server/timeout observation, password hashing, crypto, SSH/EXEC sessions, command authorization or accounting. Availability is an explicit supplied trial condition; directory names/words are case-sensitive within this declared fixture. Complete-document editor only, with actual virtual incoming IPv4/source/protocol policy. Source-held inventory and method/identity/level cases are checked on all16supplied VTY lines. Unknown/unsupported settings and wrong upstream layers cannot satisfy a credential refusal. Local profile placeholders are lesson text; only declared fallback words are authentication requirements. Separate sample addresses/directory/names/words/three-line practice; drafts stay separate, observations transient. Limits:4methods/services,16identities per service,12identity cases,64KiBdocument/2MiBsession. No host processes, files, accounts, services or network.",
+      "initial": {
+        "kind": "AaaAccess",
+        "simulation": {
+          "version": 1,
+          "origin": "ccna-aaa-authorization-recovery",
+          "view": "introduction",
+          "assignment": {
+            "draft": "aaa new-model\naaa authentication login default group OfficeIdentity local-case\naaa authorization exec default local\nusername ReadOnly privilege 15 secret Local-Profile-29\nusername RecoveryTech privilege 15 secret Lab-Recover-64\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n",
+            "applied": "aaa new-model\naaa authentication login default group OfficeIdentity local-case\naaa authorization exec default local\nusername ReadOnly privilege 15 secret Local-Profile-29\nusername RecoveryTech privilege 15 secret Lab-Recover-64\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n",
+            "checked": false,
+            "selected_case": 0,
+            "selected_line": 0
+          },
+          "practice": {
+            "draft": "aaa new-model\naaa authentication login default group SampleDirectory local-case\naaa authorization exec default local\nusername SampleReader privilege 15 secret Sample-Profile-29\nusername SampleRecovery privilege 15 secret Sample-Recover-48\nip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n",
+            "applied": "aaa new-model\naaa authentication login default group SampleDirectory local-case\naaa authorization exec default local\nusername SampleReader privilege 15 secret Sample-Profile-29\nusername SampleRecovery privilege 15 secret Sample-Recover-48\nip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n",
+            "checked": false,
+            "selected_case": 0,
+            "selected_line": 0
+          }
+        }
+      },
+      "goal": {
+        "kind": "AaaAccess",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "network": {
+              "version": 1,
+              "management": {
+                "device": "Branch",
+                "interface": "transit"
+              },
+              "clients": [
+                {
+                  "id": "admin",
+                  "binding": {
+                    "device": "Admin",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "operator",
+                  "binding": {
+                    "device": "Operator",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "guest",
+                  "binding": {
+                    "device": "Guest",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "nearby",
+                  "binding": {
+                    "device": "Nearby",
+                    "interface": "lan"
+                  }
+                }
+              ],
+              "topology": {
+                "devices": {
+                  "Admin": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Operator": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.11",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Guest": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.130",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Nearby": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.12",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "192.0.2.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Edge": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "192.0.2.1",
+                          "prefix": 24
+                        }
+                      },
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.1",
+                          "prefix": 30
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Branch": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.2",
+                          "prefix": 30
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "192.0.2.0",
+                          "length": 24
+                        },
+                        "interface": "transit",
+                        "via": "10.0.0.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "supplied": {
+              "version": 1,
+              "host_identity": "supplied-branch-identity",
+              "versions": "version2_only",
+              "lines": [
+                {
+                  "number": 0,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 1,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 2,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 3,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 4,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 5,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 6,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 7,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 8,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 9,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 10,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 11,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 12,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 13,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 14,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 15,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                }
+              ]
+            },
+            "entry_cases": [
+              {
+                "label": "Administrator uses SSH version 2",
+                "client": "admin",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Operator uses SSH version 2",
+                "client": "operator",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Telnet is unavailable",
+                "client": "admin",
+                "protocol": "telnet",
+                "expected": "protocol_denied"
+              },
+              {
+                "label": "Legacy SSH is unavailable",
+                "client": "admin",
+                "protocol": "ssh1",
+                "expected": "legacy_version_denied"
+              },
+              {
+                "label": "Guest is rejected by source policy",
+                "client": "guest",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              },
+              {
+                "label": "Nearby workstation is rejected by source policy",
+                "client": "nearby",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              }
+            ],
+            "id": "ccna-aaa-authorization-recovery",
+            "instructions": "Restore the missing NetAdmin local profile at level 15 and restrict ReadOnly to level 1; keep RecoveryTech at level 15 with local recovery word Lab-Recover-64. Only these three local profiles may remain. Retain healthy OfficeIdentity authentication for NetAdmin (Lab-Net-Admin-72) and ReadOnly (Lab-Read-83), followed by local EXEC authorization. A central identity match alone must not grant an absent or excessive local profile. Keep local recovery working when OfficeIdentity is unavailable. Preserve the supplied wrong-word, unknown-name, case-sensitive-name and missing-local-profile outcomes; do not replace a returned refusal with fallback. Retain all supplied incoming-access requirements on VTY lines 0\u201315 and the explicit authentication/authorization settings.",
+            "services": {
+              "version": 1,
+              "named": {
+                "OfficeIdentity": {
+                  "available": true,
+                  "identities": [
+                    {
+                      "name": "NetAdmin",
+                      "training_token": "Lab-Net-Admin-72"
+                    },
+                    {
+                      "name": "ReadOnly",
+                      "training_token": "Lab-Read-83"
+                    },
+                    {
+                      "name": "CentralVisitor",
+                      "training_token": "Lab-Visit-91"
+                    }
+                  ]
+                }
+              }
+            },
+            "permitted_users": [
+              "NetAdmin",
+              "ReadOnly",
+              "RecoveryTech"
+            ],
+            "cases": [
+              {
+                "label": "Central administrator identity and local privilege",
+                "client": "admin",
+                "username": "NetAdmin",
+                "training_token": "Lab-Net-Admin-72",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "NetAdmin",
+                  "privilege": "administrator",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              },
+              {
+                "label": "Central reader identity and restricted local privilege",
+                "client": "operator",
+                "username": "ReadOnly",
+                "training_token": "Lab-Read-83",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "ReadOnly",
+                  "privilege": "user",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              },
+              {
+                "label": "Unavailable service permits local recovery",
+                "client": "admin",
+                "username": "RecoveryTech",
+                "training_token": "Lab-Recover-64",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": false
+                  }
+                ],
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "RecoveryTech",
+                  "privilege": "administrator",
+                  "via": {
+                    "kind": "local_case"
+                  }
+                }
+              },
+              {
+                "label": "Responding service rejects the unknown recovery name",
+                "client": "admin",
+                "username": "RecoveryTech",
+                "training_token": "Lab-Recover-64",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              },
+              {
+                "label": "A returned wrong-word denial must stop authentication",
+                "client": "admin",
+                "username": "NetAdmin",
+                "training_token": "Local-Profile-11",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              },
+              {
+                "label": "Unknown name is rejected by the responding service",
+                "client": "operator",
+                "username": "UnknownPerson",
+                "training_token": "Unknown-Training-91",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              },
+              {
+                "label": "Supplied directory keeps account letter case significant",
+                "client": "operator",
+                "username": "netadmin",
+                "training_token": "Lab-Net-Admin-72",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              },
+              {
+                "label": "Central match cannot supply a missing local EXEC profile",
+                "client": "admin",
+                "username": "CentralVisitor",
+                "training_token": "Lab-Visit-91",
+                "service_states": [
+                  {
+                    "service": "OfficeIdentity",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authorization_denied",
+                  "user": "CentralVisitor",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "OfficeIdentity"
+                  }
+                }
+              }
+            ],
+            "starter": "aaa new-model\naaa authentication login default group OfficeIdentity local-case\naaa authorization exec default local\nusername ReadOnly privilege 15 secret Local-Profile-29\nusername RecoveryTech privilege 15 secret Lab-Recover-64\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n",
+            "reference": "aaa new-model\naaa authentication login default group OfficeIdentity local-case\naaa authorization exec default local\nusername NetAdmin privilege 15 secret Local-Profile-11\nusername ReadOnly privilege 1 secret Local-Profile-29\nusername RecoveryTech privilege 15 secret Lab-Recover-64\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n"
+          },
+          "example": {
+            "version": 1,
+            "network": {
+              "version": 1,
+              "management": {
+                "device": "Branch",
+                "interface": "transit"
+              },
+              "clients": [
+                {
+                  "id": "admin",
+                  "binding": {
+                    "device": "Admin",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "operator",
+                  "binding": {
+                    "device": "Operator",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "guest",
+                  "binding": {
+                    "device": "Guest",
+                    "interface": "lan"
+                  }
+                },
+                {
+                  "id": "nearby",
+                  "binding": {
+                    "device": "Nearby",
+                    "interface": "lan"
+                  }
+                }
+              ],
+              "topology": {
+                "devices": {
+                  "Admin": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.10",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Operator": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.11",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Guest": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.130",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Nearby": {
+                    "forwarding": false,
+                    "interfaces": {
+                      "lan": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.12",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "0.0.0.0",
+                          "length": 0
+                        },
+                        "interface": "lan",
+                        "via": "172.18.40.1",
+                        "distance": 1
+                      }
+                    ]
+                  },
+                  "Edge": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "office": {
+                        "link": "office",
+                        "up": true,
+                        "address": {
+                          "address": "172.18.40.1",
+                          "prefix": 24
+                        }
+                      },
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.1",
+                          "prefix": 30
+                        }
+                      }
+                    },
+                    "routes": []
+                  },
+                  "Branch": {
+                    "forwarding": true,
+                    "interfaces": {
+                      "transit": {
+                        "link": "backbone",
+                        "up": true,
+                        "address": {
+                          "address": "10.0.0.2",
+                          "prefix": 30
+                        }
+                      },
+                      "branch": {
+                        "link": "branch",
+                        "up": true,
+                        "address": {
+                          "address": "198.51.100.1",
+                          "prefix": 24
+                        }
+                      }
+                    },
+                    "routes": [
+                      {
+                        "destination": {
+                          "address": "172.18.40.0",
+                          "length": 24
+                        },
+                        "interface": "transit",
+                        "via": "10.0.0.1",
+                        "distance": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "supplied": {
+              "version": 1,
+              "host_identity": "supplied-practice-identity",
+              "versions": "version2_only",
+              "lines": [
+                {
+                  "number": 0,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 1,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                },
+                {
+                  "number": 2,
+                  "ssh": true,
+                  "telnet": false,
+                  "source_list": null
+                }
+              ]
+            },
+            "entry_cases": [
+              {
+                "label": "Administrator uses SSH version 2",
+                "client": "admin",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Operator uses SSH version 2",
+                "client": "operator",
+                "protocol": "ssh2",
+                "expected": "ready_for_authentication"
+              },
+              {
+                "label": "Telnet is unavailable",
+                "client": "admin",
+                "protocol": "telnet",
+                "expected": "protocol_denied"
+              },
+              {
+                "label": "Legacy SSH is unavailable",
+                "client": "admin",
+                "protocol": "ssh1",
+                "expected": "legacy_version_denied"
+              },
+              {
+                "label": "Guest is rejected by source policy",
+                "client": "guest",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              },
+              {
+                "label": "Nearby workstation is rejected by source policy",
+                "client": "nearby",
+                "protocol": "ssh2",
+                "expected": "source_denied"
+              }
+            ],
+            "id": "ccna-aaa-authorization-recovery-example",
+            "instructions": "On the separate sample network, repair the SampleDirectory method list and local profiles: SampleAdmin at level 15, SampleReader at level 1 and SampleRecovery at level 15. Inspect healthy service, unavailable service, returned refusal and missing local profile trials. Keep the supplied incoming policy on VTY lines 0\u20132.",
+            "services": {
+              "version": 1,
+              "named": {
+                "SampleDirectory": {
+                  "available": true,
+                  "identities": [
+                    {
+                      "name": "SampleAdmin",
+                      "training_token": "Sample-Admin-37"
+                    },
+                    {
+                      "name": "SampleReader",
+                      "training_token": "Sample-Reader-62"
+                    },
+                    {
+                      "name": "SampleVisitor",
+                      "training_token": "Sample-Visitor-91"
+                    }
+                  ]
+                }
+              }
+            },
+            "permitted_users": [
+              "SampleAdmin",
+              "SampleReader",
+              "SampleRecovery"
+            ],
+            "cases": [
+              {
+                "label": "Central administrator identity and local privilege",
+                "client": "admin",
+                "username": "SampleAdmin",
+                "training_token": "Sample-Admin-37",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "SampleAdmin",
+                  "privilege": "administrator",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              },
+              {
+                "label": "Central reader identity and restricted local privilege",
+                "client": "operator",
+                "username": "SampleReader",
+                "training_token": "Sample-Reader-62",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "SampleReader",
+                  "privilege": "user",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              },
+              {
+                "label": "Unavailable service permits local recovery",
+                "client": "admin",
+                "username": "SampleRecovery",
+                "training_token": "Sample-Recover-48",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": false
+                  }
+                ],
+                "expected": {
+                  "kind": "authenticated",
+                  "user": "SampleRecovery",
+                  "privilege": "administrator",
+                  "via": {
+                    "kind": "local_case"
+                  }
+                }
+              },
+              {
+                "label": "Responding service rejects the unknown recovery name",
+                "client": "admin",
+                "username": "SampleRecovery",
+                "training_token": "Sample-Recover-48",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              },
+              {
+                "label": "A returned wrong-word denial must stop authentication",
+                "client": "admin",
+                "username": "SampleAdmin",
+                "training_token": "Sample-Profile-11",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              },
+              {
+                "label": "Unknown name is rejected by the responding service",
+                "client": "operator",
+                "username": "UnknownPerson",
+                "training_token": "Unknown-Training-91",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              },
+              {
+                "label": "Supplied directory keeps account letter case significant",
+                "client": "operator",
+                "username": "sampleadmin",
+                "training_token": "Sample-Admin-37",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authentication_rejected",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              },
+              {
+                "label": "Central match cannot supply a missing local EXEC profile",
+                "client": "admin",
+                "username": "SampleVisitor",
+                "training_token": "Sample-Visitor-91",
+                "service_states": [
+                  {
+                    "service": "SampleDirectory",
+                    "available": true
+                  }
+                ],
+                "expected": {
+                  "kind": "authorization_denied",
+                  "user": "SampleVisitor",
+                  "via": {
+                    "kind": "training_service",
+                    "name": "SampleDirectory"
+                  }
+                }
+              }
+            ],
+            "starter": "aaa new-model\naaa authentication login default group SampleDirectory local-case\naaa authorization exec default local\nusername SampleReader privilege 15 secret Sample-Profile-29\nusername SampleRecovery privilege 15 secret Sample-Recover-48\nip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n",
+            "reference": "aaa new-model\naaa authentication login default group SampleDirectory local-case\naaa authorization exec default local\nusername SampleAdmin privilege 15 secret Sample-Profile-11\nusername SampleReader privilege 1 secret Sample-Profile-29\nusername SampleRecovery privilege 15 secret Sample-Recover-48\nip ssh version 2\nline vty 0 2\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 172.18.40.10\n permit host 172.18.40.11\nexit\n"
+          }
+        }
+      },
+      "solution": [
+        "AAA ACCESS DOCUMENT\naaa new-model\naaa authentication login default group OfficeIdentity local-case\naaa authorization exec default local\nusername NetAdmin privilege 15 secret Local-Profile-11\nusername ReadOnly privilege 1 secret Local-Profile-29\nusername RecoveryTech privilege 15 secret Lab-Recover-64\nip ssh version 2\nline vty 0 15\n transport input ssh\n access-class 10 in\nexit\nip access-list standard 10\n permit host 192.0.2.10\n permit host 192.0.2.11\nexit\n"
+      ],
+      "prerequisites": [
+        "ccna-aaa-method-recovery"
+      ]
+    }
+  ]
+}

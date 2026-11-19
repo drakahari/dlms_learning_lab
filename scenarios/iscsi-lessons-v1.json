@@ -1,0 +1,608 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-iscsi-target-identity",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-iscsi-initiator",
+      "topic": "Network storage: iSCSI",
+      "title": "Connect to the iSCSI target that exposes the intended disk",
+      "summary": "Discover the virtual storage and connect to the export named in the inventory ticket.",
+      "objective": "Save a node record for the supplied target and portal. Connect to that export and verify the supplied LUN and disk WWN. Leave unintended sessions disconnected.",
+      "retry_guidance": "Read the failed requirement. Compare the saved record with the active session, and inspect the device identity or startup preview before checking again.",
+      "difficulty": "Intermediate",
+      "minutes": 17,
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "The target name identifies a storage service. The portal is the address and port for connecting to it. The SendTargets request returns the advertised pairs. A portal may host several targets, and a target may be reachable through more than one portal. Use both parts of the pair shown in your ticket.",
+          "action": "Read the stored configuration and active-session examples.",
+          "commands": []
+        },
+        {
+          "title": "Investigate with separate inputs",
+          "why": "A directory result and a saved record do not prove a working connection.",
+          "action": "Use the guided console commands and compare output to the inventory ticket.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "Check the current session and any requested saved policy separately.",
+          "action": "Select Check configuration after investigating and making your changes.",
+          "commands": []
+        }
+      ],
+      "explanation": "The saved record describes the target and portal. The active session exposes the required LUN, and its disk's WWN matches the inventory ticket. A shared portal or LUN number alone would not pick the correct disk.",
+      "hints": [
+        "Start with the discovery address in the task details. Compare the full target and portal in the returned rows.",
+        "The comma and number after the portal in the listing identify a portal group. For -p, enter only the address and port.",
+        "If the expected LUN number appears on a different export, compare the WWN and check which session owns that disk."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc7143.html",
+        "https://github.com/open-iscsi/open-iscsi/blob/master/README",
+        "https://github.com/open-iscsi/open-iscsi/blob/master/etc/iscsid.conf",
+        "https://man7.org/linux/man-pages/man8/lsblk.8.html"
+      ],
+      "simplifications": "Supplied IPv4 SendTargets responses, saved records, one interface, current sessions, manual/automatic startup and read-only virtual disk facts. No network I/O, daemon/service control, block operations, real boots, CHAP, device probing, multipath, other storage protocols or ordinary shell syntax.",
+      "prerequisites": [
+        "lpic2-mount-identity"
+      ],
+      "initial": {
+        "kind": "Iscsi",
+        "simulation": {
+          "assignment": {
+            "source": "{\"inventory\":{\"exports\":[{\"key\":{\"target\":\"iqn.2025-03.example.storage:archive-test\",\"portal\":{\"address\":\"203.0.113.19\",\"port\":3261}},\"discovery\":{\"address\":\"203.0.113.17\",\"port\":3260},\"group\":1,\"login_available\":true,\"devices\":[{\"lun\":0,\"name\":\"sdb\",\"wwn\":\"0x5000000000000533\"}]},{\"key\":{\"target\":\"iqn.2025-03.example.storage:archive\",\"portal\":{\"address\":\"203.0.113.19\",\"port\":3261}},\"discovery\":{\"address\":\"203.0.113.17\",\"port\":3260},\"group\":2,\"login_available\":true,\"devices\":[{\"lun\":0,\"name\":\"sdc\",\"wwn\":\"0x5000000000000531\"}]}]},\"initial\":{\"nodes\":[],\"active\":[],\"next_id\":1},\"goal\":{\"target\":{\"target\":\"iqn.2025-03.example.storage:archive\",\"portal\":{\"address\":\"203.0.113.19\",\"port\":3261}},\"lun\":0,\"wwn\":\"0x5000000000000531\",\"automatic_at_startup\":false}}",
+            "work": {
+              "checked": false,
+              "history": [],
+              "initiator": {
+                "active": [],
+                "next_id": 1,
+                "nodes": []
+              },
+              "input": ""
+            }
+          },
+          "example": {
+            "source": "{\"inventory\":{\"exports\":[{\"key\":{\"target\":\"iqn.2024-04.example.training:media-test\",\"portal\":{\"address\":\"198.51.100.43\",\"port\":3261}},\"discovery\":{\"address\":\"198.51.100.41\",\"port\":3260},\"group\":1,\"login_available\":true,\"devices\":[{\"lun\":0,\"name\":\"sdb\",\"wwn\":\"0x5000000000000233\"}]},{\"key\":{\"target\":\"iqn.2024-04.example.training:media\",\"portal\":{\"address\":\"198.51.100.43\",\"port\":3261}},\"discovery\":{\"address\":\"198.51.100.41\",\"port\":3260},\"group\":2,\"login_available\":true,\"devices\":[{\"lun\":0,\"name\":\"sdc\",\"wwn\":\"0x5000000000000231\"}]}]},\"initial\":{\"nodes\":[],\"active\":[],\"next_id\":1},\"goal\":{\"target\":{\"target\":\"iqn.2024-04.example.training:media\",\"portal\":{\"address\":\"198.51.100.43\",\"port\":3261}},\"lun\":0,\"wwn\":\"0x5000000000000231\",\"automatic_at_startup\":false}}",
+            "work": {
+              "checked": false,
+              "history": [],
+              "initiator": {
+                "active": [],
+                "next_id": 1,
+                "nodes": []
+              },
+              "input": ""
+            }
+          },
+          "source_id": "lpic2-iscsi-target-identity",
+          "version": 1,
+          "view": "introduction"
+        }
+      },
+      "goal": {
+        "kind": "Iscsi",
+        "definition": {
+          "assignment": {
+            "goal": {
+              "automatic_at_startup": false,
+              "lun": 0,
+              "target": {
+                "portal": {
+                  "address": "203.0.113.19",
+                  "port": 3261
+                },
+                "target": "iqn.2025-03.example.storage:archive"
+              },
+              "wwn": "0x5000000000000531"
+            },
+            "initial": {
+              "active": [],
+              "next_id": 1,
+              "nodes": []
+            },
+            "inventory": {
+              "exports": [
+                {
+                  "devices": [
+                    {
+                      "lun": 0,
+                      "name": "sdb",
+                      "wwn": "0x5000000000000533"
+                    }
+                  ],
+                  "discovery": {
+                    "address": "203.0.113.17",
+                    "port": 3260
+                  },
+                  "group": 1,
+                  "key": {
+                    "portal": {
+                      "address": "203.0.113.19",
+                      "port": 3261
+                    },
+                    "target": "iqn.2025-03.example.storage:archive-test"
+                  },
+                  "login_available": true
+                },
+                {
+                  "devices": [
+                    {
+                      "lun": 0,
+                      "name": "sdc",
+                      "wwn": "0x5000000000000531"
+                    }
+                  ],
+                  "discovery": {
+                    "address": "203.0.113.17",
+                    "port": 3260
+                  },
+                  "group": 2,
+                  "key": {
+                    "portal": {
+                      "address": "203.0.113.19",
+                      "port": 3261
+                    },
+                    "target": "iqn.2025-03.example.storage:archive"
+                  },
+                  "login_available": true
+                }
+              ]
+            }
+          },
+          "example": {
+            "goal": {
+              "automatic_at_startup": false,
+              "lun": 0,
+              "target": {
+                "portal": {
+                  "address": "198.51.100.43",
+                  "port": 3261
+                },
+                "target": "iqn.2024-04.example.training:media"
+              },
+              "wwn": "0x5000000000000231"
+            },
+            "initial": {
+              "active": [],
+              "next_id": 1,
+              "nodes": []
+            },
+            "inventory": {
+              "exports": [
+                {
+                  "devices": [
+                    {
+                      "lun": 0,
+                      "name": "sdb",
+                      "wwn": "0x5000000000000233"
+                    }
+                  ],
+                  "discovery": {
+                    "address": "198.51.100.41",
+                    "port": 3260
+                  },
+                  "group": 1,
+                  "key": {
+                    "portal": {
+                      "address": "198.51.100.43",
+                      "port": 3261
+                    },
+                    "target": "iqn.2024-04.example.training:media-test"
+                  },
+                  "login_available": true
+                },
+                {
+                  "devices": [
+                    {
+                      "lun": 0,
+                      "name": "sdc",
+                      "wwn": "0x5000000000000231"
+                    }
+                  ],
+                  "discovery": {
+                    "address": "198.51.100.41",
+                    "port": 3260
+                  },
+                  "group": 2,
+                  "key": {
+                    "portal": {
+                      "address": "198.51.100.43",
+                      "port": 3261
+                    },
+                    "target": "iqn.2024-04.example.training:media"
+                  },
+                  "login_available": true
+                }
+              ]
+            }
+          },
+          "source_id": "lpic2-iscsi-target-identity",
+          "version": 1
+        }
+      },
+      "solution": [
+        "iscsiadm -m discoverydb -t sendtargets -p 203.0.113.17:3260 --discover",
+        "iscsiadm -m node",
+        "iscsiadm -m node -T iqn.2025-03.example.storage:archive -p 203.0.113.19:3261 --login",
+        "iscsiadm -m session -P 3",
+        "lsblk -o NAME,WWN",
+        "iscsi-workspace check"
+      ]
+    },
+    {
+      "id": "lpic2-iscsi-startup-policy",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-iscsi-initiator",
+      "topic": "Network storage: iSCSI",
+      "title": "Set one iSCSI export to reconnect automatically",
+      "summary": "Connect the required disk now and arrange its automatic login later while keeping the existing auxiliary session running.",
+      "objective": "Keep the original auxiliary session running without interruption and leave its startup policy manual. Connect to the required target and verify the supplied LUN and disk WWN. Save automatic startup for only the required export and confirm the startup preview selects it.",
+      "retry_guidance": "Read the failed requirement. Compare the saved record with the active session, and inspect the device identity or startup preview before checking again.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "The node record stores node.startup separately from any active session. Use --op show with the target and portal to see that value. The --op option selects an operation on the record. A manual node can be connected right now and still be absent from the automatic startup plan.",
+          "action": "Read the stored configuration and active-session examples.",
+          "commands": []
+        },
+        {
+          "title": "Investigate with separate inputs",
+          "why": "A directory result and a saved record do not prove a working connection.",
+          "action": "Use the guided console commands and compare output to the inventory ticket.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "Check the current session and any requested saved policy separately.",
+          "action": "Select Check configuration after investigating and making your changes.",
+          "commands": []
+        }
+      ],
+      "explanation": "The required disk is attached through the intended active session, and the saved policy also selects its export for future automatic login. The auxiliary session kept its original connection and manual startup policy.",
+      "hints": [
+        "The node list shows saved pairs. The session list shows what is running now. Use --op show on the required pair to inspect its own policy.",
+        "Changing node.startup does not log in. A targeted --login or --loginall=automatic can connect the required record after the saved policy is correct.",
+        "Preview automatic logins compares saved policies without closing anything. Only the required target should appear there."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc7143.html",
+        "https://github.com/open-iscsi/open-iscsi/blob/master/README",
+        "https://github.com/open-iscsi/open-iscsi/blob/master/etc/iscsid.conf",
+        "https://man7.org/linux/man-pages/man8/lsblk.8.html"
+      ],
+      "simplifications": "Supplied IPv4 SendTargets responses, saved records, one interface, current sessions, manual/automatic startup and read-only virtual disk facts. No network I/O, daemon/service control, block operations, real boots, CHAP, device probing, multipath, other storage protocols or ordinary shell syntax.",
+      "prerequisites": [
+        "lpic2-iscsi-target-identity"
+      ],
+      "initial": {
+        "kind": "Iscsi",
+        "simulation": {
+          "assignment": {
+            "source": "{\"inventory\":{\"exports\":[{\"key\":{\"target\":\"iqn.2025-03.example.storage:index\",\"portal\":{\"address\":\"203.0.113.82\",\"port\":3260}},\"discovery\":{\"address\":\"203.0.113.81\",\"port\":3260},\"group\":2,\"login_available\":true,\"devices\":[{\"lun\":4,\"name\":\"sdd\",\"wwn\":\"0x5000000000000a43\"}]},{\"key\":{\"target\":\"iqn.2025-03.example.storage:audit\",\"portal\":{\"address\":\"203.0.113.89\",\"port\":3260}},\"discovery\":{\"address\":\"203.0.113.89\",\"port\":3260},\"group\":3,\"login_available\":true,\"devices\":[{\"lun\":1,\"name\":\"sdb\",\"wwn\":\"0x5000000000000524\"}]}]},\"initial\":{\"nodes\":[{\"key\":{\"target\":\"iqn.2025-03.example.storage:index\",\"portal\":{\"address\":\"203.0.113.82\",\"port\":3260}},\"startup\":\"manual\"},{\"key\":{\"target\":\"iqn.2025-03.example.storage:audit\",\"portal\":{\"address\":\"203.0.113.89\",\"port\":3260}},\"startup\":\"manual\"}],\"active\":[{\"key\":{\"target\":\"iqn.2025-03.example.storage:audit\",\"portal\":{\"address\":\"203.0.113.89\",\"port\":3260}},\"id\":1}],\"next_id\":2},\"goal\":{\"target\":{\"target\":\"iqn.2025-03.example.storage:index\",\"portal\":{\"address\":\"203.0.113.82\",\"port\":3260}},\"lun\":4,\"wwn\":\"0x5000000000000a43\",\"automatic_at_startup\":true}}",
+            "work": {
+              "checked": false,
+              "history": [],
+              "initiator": {
+                "active": [
+                  {
+                    "id": 1,
+                    "key": {
+                      "portal": {
+                        "address": "203.0.113.89",
+                        "port": 3260
+                      },
+                      "target": "iqn.2025-03.example.storage:audit"
+                    }
+                  }
+                ],
+                "next_id": 2,
+                "nodes": [
+                  {
+                    "key": {
+                      "portal": {
+                        "address": "203.0.113.82",
+                        "port": 3260
+                      },
+                      "target": "iqn.2025-03.example.storage:index"
+                    },
+                    "startup": "manual"
+                  },
+                  {
+                    "key": {
+                      "portal": {
+                        "address": "203.0.113.89",
+                        "port": 3260
+                      },
+                      "target": "iqn.2025-03.example.storage:audit"
+                    },
+                    "startup": "manual"
+                  }
+                ]
+              },
+              "input": ""
+            }
+          },
+          "example": {
+            "source": "{\"inventory\":{\"exports\":[{\"key\":{\"target\":\"iqn.2024-04.example.training:reports\",\"portal\":{\"address\":\"198.51.100.63\",\"port\":3260}},\"discovery\":{\"address\":\"198.51.100.62\",\"port\":3260},\"group\":2,\"login_available\":true,\"devices\":[{\"lun\":2,\"name\":\"sdd\",\"wwn\":\"0x5000000000000773\"}]},{\"key\":{\"target\":\"iqn.2024-04.example.training:scratch\",\"portal\":{\"address\":\"198.51.100.69\",\"port\":3260}},\"discovery\":{\"address\":\"198.51.100.69\",\"port\":3260},\"group\":3,\"login_available\":true,\"devices\":[{\"lun\":1,\"name\":\"sdb\",\"wwn\":\"0x5000000000000123\"}]}]},\"initial\":{\"nodes\":[{\"key\":{\"target\":\"iqn.2024-04.example.training:reports\",\"portal\":{\"address\":\"198.51.100.63\",\"port\":3260}},\"startup\":\"manual\"},{\"key\":{\"target\":\"iqn.2024-04.example.training:scratch\",\"portal\":{\"address\":\"198.51.100.69\",\"port\":3260}},\"startup\":\"manual\"}],\"active\":[{\"key\":{\"target\":\"iqn.2024-04.example.training:scratch\",\"portal\":{\"address\":\"198.51.100.69\",\"port\":3260}},\"id\":1}],\"next_id\":2},\"goal\":{\"target\":{\"target\":\"iqn.2024-04.example.training:reports\",\"portal\":{\"address\":\"198.51.100.63\",\"port\":3260}},\"lun\":2,\"wwn\":\"0x5000000000000773\",\"automatic_at_startup\":true}}",
+            "work": {
+              "checked": false,
+              "history": [],
+              "initiator": {
+                "active": [
+                  {
+                    "id": 1,
+                    "key": {
+                      "portal": {
+                        "address": "198.51.100.69",
+                        "port": 3260
+                      },
+                      "target": "iqn.2024-04.example.training:scratch"
+                    }
+                  }
+                ],
+                "next_id": 2,
+                "nodes": [
+                  {
+                    "key": {
+                      "portal": {
+                        "address": "198.51.100.63",
+                        "port": 3260
+                      },
+                      "target": "iqn.2024-04.example.training:reports"
+                    },
+                    "startup": "manual"
+                  },
+                  {
+                    "key": {
+                      "portal": {
+                        "address": "198.51.100.69",
+                        "port": 3260
+                      },
+                      "target": "iqn.2024-04.example.training:scratch"
+                    },
+                    "startup": "manual"
+                  }
+                ]
+              },
+              "input": ""
+            }
+          },
+          "source_id": "lpic2-iscsi-startup-policy",
+          "version": 1,
+          "view": "introduction"
+        }
+      },
+      "goal": {
+        "kind": "Iscsi",
+        "definition": {
+          "assignment": {
+            "goal": {
+              "automatic_at_startup": true,
+              "lun": 4,
+              "target": {
+                "portal": {
+                  "address": "203.0.113.82",
+                  "port": 3260
+                },
+                "target": "iqn.2025-03.example.storage:index"
+              },
+              "wwn": "0x5000000000000a43"
+            },
+            "initial": {
+              "active": [
+                {
+                  "id": 1,
+                  "key": {
+                    "portal": {
+                      "address": "203.0.113.89",
+                      "port": 3260
+                    },
+                    "target": "iqn.2025-03.example.storage:audit"
+                  }
+                }
+              ],
+              "next_id": 2,
+              "nodes": [
+                {
+                  "key": {
+                    "portal": {
+                      "address": "203.0.113.82",
+                      "port": 3260
+                    },
+                    "target": "iqn.2025-03.example.storage:index"
+                  },
+                  "startup": "manual"
+                },
+                {
+                  "key": {
+                    "portal": {
+                      "address": "203.0.113.89",
+                      "port": 3260
+                    },
+                    "target": "iqn.2025-03.example.storage:audit"
+                  },
+                  "startup": "manual"
+                }
+              ]
+            },
+            "inventory": {
+              "exports": [
+                {
+                  "devices": [
+                    {
+                      "lun": 4,
+                      "name": "sdd",
+                      "wwn": "0x5000000000000a43"
+                    }
+                  ],
+                  "discovery": {
+                    "address": "203.0.113.81",
+                    "port": 3260
+                  },
+                  "group": 2,
+                  "key": {
+                    "portal": {
+                      "address": "203.0.113.82",
+                      "port": 3260
+                    },
+                    "target": "iqn.2025-03.example.storage:index"
+                  },
+                  "login_available": true
+                },
+                {
+                  "devices": [
+                    {
+                      "lun": 1,
+                      "name": "sdb",
+                      "wwn": "0x5000000000000524"
+                    }
+                  ],
+                  "discovery": {
+                    "address": "203.0.113.89",
+                    "port": 3260
+                  },
+                  "group": 3,
+                  "key": {
+                    "portal": {
+                      "address": "203.0.113.89",
+                      "port": 3260
+                    },
+                    "target": "iqn.2025-03.example.storage:audit"
+                  },
+                  "login_available": true
+                }
+              ]
+            }
+          },
+          "example": {
+            "goal": {
+              "automatic_at_startup": true,
+              "lun": 2,
+              "target": {
+                "portal": {
+                  "address": "198.51.100.63",
+                  "port": 3260
+                },
+                "target": "iqn.2024-04.example.training:reports"
+              },
+              "wwn": "0x5000000000000773"
+            },
+            "initial": {
+              "active": [
+                {
+                  "id": 1,
+                  "key": {
+                    "portal": {
+                      "address": "198.51.100.69",
+                      "port": 3260
+                    },
+                    "target": "iqn.2024-04.example.training:scratch"
+                  }
+                }
+              ],
+              "next_id": 2,
+              "nodes": [
+                {
+                  "key": {
+                    "portal": {
+                      "address": "198.51.100.63",
+                      "port": 3260
+                    },
+                    "target": "iqn.2024-04.example.training:reports"
+                  },
+                  "startup": "manual"
+                },
+                {
+                  "key": {
+                    "portal": {
+                      "address": "198.51.100.69",
+                      "port": 3260
+                    },
+                    "target": "iqn.2024-04.example.training:scratch"
+                  },
+                  "startup": "manual"
+                }
+              ]
+            },
+            "inventory": {
+              "exports": [
+                {
+                  "devices": [
+                    {
+                      "lun": 2,
+                      "name": "sdd",
+                      "wwn": "0x5000000000000773"
+                    }
+                  ],
+                  "discovery": {
+                    "address": "198.51.100.62",
+                    "port": 3260
+                  },
+                  "group": 2,
+                  "key": {
+                    "portal": {
+                      "address": "198.51.100.63",
+                      "port": 3260
+                    },
+                    "target": "iqn.2024-04.example.training:reports"
+                  },
+                  "login_available": true
+                },
+                {
+                  "devices": [
+                    {
+                      "lun": 1,
+                      "name": "sdb",
+                      "wwn": "0x5000000000000123"
+                    }
+                  ],
+                  "discovery": {
+                    "address": "198.51.100.69",
+                    "port": 3260
+                  },
+                  "group": 3,
+                  "key": {
+                    "portal": {
+                      "address": "198.51.100.69",
+                      "port": 3260
+                    },
+                    "target": "iqn.2024-04.example.training:scratch"
+                  },
+                  "login_available": true
+                }
+              ]
+            }
+          },
+          "source_id": "lpic2-iscsi-startup-policy",
+          "version": 1
+        }
+      },
+      "solution": [
+        "iscsiadm -m node -T iqn.2025-03.example.storage:index -p 203.0.113.82:3260 --op update -n node.startup -v automatic",
+        "iscsiadm -m node --loginall=automatic",
+        "iscsiadm -m session -P 3",
+        "lsblk -o NAME,WWN",
+        "iscsi-workspace check"
+      ]
+    }
+  ]
+}

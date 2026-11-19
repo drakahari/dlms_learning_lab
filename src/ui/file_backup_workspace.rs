@@ -230,6 +230,7 @@ pub(in crate::ui) fn foreign(w: &model::WorkspaceData) -> bool {
         terminal_learning,
         process_learning,
         accounts_learning,
+        accounts_template_drafts,
         discovery_draft,
         discovery_learning,
         storage_draft,
@@ -299,6 +300,7 @@ pub(in crate::ui) fn foreign(w: &model::WorkspaceData) -> bool {
         || terminal_learning.is_some()
         || process_learning.is_some()
         || accounts_learning.is_some()
+        || accounts_template_drafts.is_some()
         || discovery_draft.is_some()
         || discovery_learning.is_some()
         || storage_draft.is_some()
@@ -1020,6 +1022,7 @@ pub(super) struct BackupMetrics {
     pub terminal: TerminalMetrics,
     pub rows: Vec<(usize, bool, egui::Rect)>,
     pub complete: bool,
+    pub success: Option<egui::Rect>,
 }
 fn action(ui: &mut egui::Ui, m: &mut BackupMetrics, key: &str, text: &str, main: bool) -> bool {
     let r = ui.add(if main {
@@ -1121,11 +1124,18 @@ fn page_inner(
     }
     let mut dirty = false;
     if current == teaching::View::Introduction {
-        ui.add(egui::Label::new(&lesson.prerequisite_note).wrap());
-        for c in &lesson.concepts {
-            ui.label(RichText::new(&c.title).strong());
-            ui.add(egui::Label::new(&c.text).wrap());
-        }
+        lesson_presentation::concepts(
+            ui,
+            s,
+            &lesson.prerequisite_note,
+            lesson
+                .concepts
+                .iter()
+                .map(|c| (c.title.clone(), c.text.clone())),
+        );
+        lesson_presentation::worked(ui, &lesson.example_description);
+        lesson_presentation::worked_rows(ui, s);
+
         ui.add_enabled_ui(active && !pending, |ui| {
             ui.horizontal_wrapped(|ui| {
                 if action(ui, m, "try-example", "Try the example", true) {
@@ -1138,20 +1148,15 @@ fn page_inner(
         });
     } else {
         let practice = current == teaching::View::Example;
-        let goal = ui.add(
-            egui::Label::new(if practice {
-                &lesson.example_description
-            } else {
-                &s.objective
-            })
-            .wrap(),
-        );
+        let goal = if practice {
+            lesson_presentation::practice_step(ui, s, 0);
+            lesson_presentation::prose(ui, &lesson.example_description)
+        } else {
+            lesson_presentation::assignment(ui, s)
+        };
         m.goal = Some((goal.rect, ui.text_style_height(&egui::TextStyle::Body)));
         if practice {
-            ui.label(
-                RichText::new("Practice only · Your assignment files and draft remain separate.")
-                    .small(),
-            );
+            lesson_presentation::practice_step(ui, s, 1);
         }
         let owner = egui::Id::new(("backup-command", &s.id, a.scenario_version, practice));
         let saved = a.workspace.as_ref().unwrap();
@@ -1180,22 +1185,70 @@ fn page_inner(
             }
         }
         let mut insert = None;
+        let mut selected_example = learning.example_command;
+        let mut select_example = None;
         if practice {
-            controls::collapsing_header(ui, "Worked example commands")
-                .default_open(true)
-                .show(ui, |ui| {
-                    for (n, command) in lesson.example_commands.iter().enumerate() {
-                        ui.add(
-                            egui::Label::new(RichText::new(&command.command).monospace()).wrap(),
-                        );
-                        ui.add(egui::Label::new(&command.explanation).wrap());
-                        let r = ui.add_enabled(active && !pending, button("Insert command"));
-                        m.inserts.push((n, r.rect));
-                        if r.clicked() {
-                            insert = Some(command.command.as_str());
-                        }
+            if lesson_presentation::entry(s).is_some_and(|e| e.command_picker) {
+                ui.add_enabled_ui(active && !pending, |ui| {
+                    ui.label("Worked command");
+                    let picker = egui::ComboBox::from_id_salt(("backup-worked-picker", &s.id))
+                        .width(ui.available_width().min(620.))
+                        .truncate()
+                        .selected_text(format!(
+                            "{}. {}",
+                            selected_example + 1,
+                            lesson.example_commands[selected_example].command
+                        ))
+                        .show_ui(ui, |ui| {
+                            for (n, command) in lesson.example_commands.iter().enumerate() {
+                                let choice = ui.selectable_value(
+                                    &mut selected_example,
+                                    n,
+                                    format!("{}. {}", n + 1, command.command),
+                                );
+                                m.controls.push((format!("example:{n}"), choice.rect));
+                            }
+                        });
+                    name_control(
+                        &picker.response,
+                        "Worked command to inspect and optionally insert",
+                    );
+                    m.controls
+                        .push(("example-picker".into(), picker.response.rect));
+                    if selected_example != learning.example_command {
+                        select_example = Some(selected_example);
+                    }
+                    let command = &lesson.example_commands[selected_example];
+                    egui::ScrollArea::horizontal()
+                        .id_salt(("backup-worked-line", &s.id))
+                        .show(ui, |ui| {
+                            lesson_presentation::monospace(ui, &command.command, false);
+                        });
+                    lesson_presentation::prose(ui, &command.explanation);
+                    let r = ui.add(button("Insert command"));
+                    m.inserts.push((selected_example, r.rect));
+                    if r.clicked() {
+                        insert = Some(command.command.as_str());
                     }
                 });
+            } else {
+                controls::collapsing_header(ui, "Worked example commands")
+                    .default_open(true)
+                    .show(ui, |ui| {
+                        for (n, command) in lesson.example_commands.iter().enumerate() {
+                            ui.add(
+                                egui::Label::new(RichText::new(&command.command).monospace())
+                                    .wrap(),
+                            );
+                            ui.add(egui::Label::new(&command.explanation).wrap());
+                            let r = ui.add_enabled(active && !pending, button("Insert command"));
+                            m.inserts.push((n, r.rect));
+                            if r.clicked() {
+                                insert = Some(command.command.as_str());
+                            }
+                        }
+                    });
+            }
         }
         let (cwd, transcript) = if practice {
             (learning.state.cwd.as_str(), learning.transcript.as_slice())
@@ -1254,6 +1307,20 @@ fn page_inner(
             }
         }
         if active && !edit_rejected {
+            if let Some(n) = select_example {
+                match present(
+                    a,
+                    s,
+                    true,
+                    Edit {
+                        example_command: Some(n),
+                        ..Default::default()
+                    },
+                ) {
+                    Ok(()) => dirty = true,
+                    Err(e) => p.notice = Some(e),
+                }
+            }
             if let Some(input) = run {
                 // Release checker snapshots before the bounded whole-attempt transaction.
                 p.memo.job = None;
@@ -1361,18 +1428,21 @@ fn page_inner(
         if checked {
             if let Some(rows) = p.memo.rows(a, s, practice) {
                 let passed = !rows.is_empty() && rows.iter().all(|r| r.0);
-                ui.label(
+                let summary = ui.label(
                     RichText::new(if passed {
                         if practice {
-                            "Example verified · Assignment credit is separate"
+                            "Pass · Example verified · Assignment credit is separate"
                         } else {
-                            "Assignment complete"
+                            "Pass · Assignment complete"
                         }
                     } else {
                         "Some requirements still need attention"
                     })
                     .strong(),
                 );
+                if passed && !practice {
+                    m.success = Some(summary.rect);
+                }
                 for (n, (ok, text)) in rows.iter().enumerate() {
                     let r = ui.add(
                         egui::Label::new(format!(
@@ -1385,7 +1455,9 @@ fn page_inner(
                 }
                 m.complete = !practice && passed;
             } else if !practice && p.memo.passed(a, s) == Some(true) {
-                ui.strong("Assignment complete · This exact saved work remains verified");
+                let summary = ui
+                    .strong("Pass · Assignment complete · This exact saved work remains verified");
+                m.success = Some(summary.rect);
                 m.complete = true;
                 if p.memo.job.is_some() {
                     ui.label("Refreshing objective details…");
@@ -1395,9 +1467,24 @@ fn page_inner(
             }
         }
         if practice {
-            ui.add(
-                egui::Label::new(format!("Try a change: {}", lesson.try_change.description)).wrap(),
-            );
+            lesson_presentation::practice_step(ui, s, 2);
+            if lesson_presentation::entry(s).is_some_and(|e| e.command_picker) {
+                for (n, command) in lesson
+                    .try_change
+                    .commands
+                    .iter()
+                    .chain(&lesson.repair)
+                    .enumerate()
+                {
+                    lesson_presentation::code_value(
+                        ui,
+                        ("backup-experiment", &s.id, n),
+                        &command.command,
+                        ui.available_width(),
+                    );
+                    lesson_presentation::prose(ui, &command.explanation);
+                }
+            }
         }
         controls::collapsing_header(ui, "Help and command reference").show(ui, |ui| {
             ui.add(egui::Label::new(dlms_learning_lab::file_backup_terminal::HELP).wrap());
@@ -1669,6 +1756,13 @@ impl LabApp {
         if before != view(a) {
             self.lesson_scroll_reset = true;
         }
+        self.metrics.check = self
+            .metrics
+            .backup
+            .controls
+            .iter()
+            .find(|r| r.0 == "check")
+            .map(|r| r.1);
         self.metrics.completion = self.metrics.backup.complete;
         if self.metrics.completion {
             self.next_unit_lab(ui, i);
@@ -1984,3 +2078,6 @@ mod physical_guard_tests {
         }
     }
 }
+
+#[cfg(test)]
+mod selection_tests;

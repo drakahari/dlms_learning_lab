@@ -1,0 +1,235 @@
+[
+  {
+    "id": "lpic2-dns-dualstack",
+    "goal": "Add a new host without losing the existing zone.",
+    "requirements": [
+      "Add files.workshop.test. with A 192.0.2.40 and AAAA 2001:db8::40.",
+      "Publish the records on the primary.",
+      "Keep web.workshop.test. at 192.0.2.20, db.workshop.test. at 192.0.2.30 and the existing nameserver records."
+    ],
+    "practice": [
+      {
+        "title": "Distinguish a missing name from a missing type",
+        "action": "Before changing the example (or after Reset example only), under Inspect a served answer, choose Use lookup commands. Enter host -r -t AAAA web.dual-practice.test. 192.0.2.53 and Look up. Change web to files and Look up again.",
+        "observe": "Before the worked repair: web exists without AAAA: NOERROR and a has no AAAA record line. files is not yet published: NXDOMAIN. Actual results appear below the input; the zone has not changed."
+      },
+      {
+        "title": "Publish both address families and verify",
+        "action": "Fill worked example populates only the record editor. Save zone, then Reload primary. Run dig @192.0.2.53 files.dual-practice.test. A +norecurse +short, then change A to AAAA and Look up. Select Check example.",
+        "observe": "The published A answer is 192.0.2.140 and AAAA is 2001:db8::140. Saved-only text cannot satisfy the served checks; preserve the existing web, db and nameserver records."
+      },
+      {
+        "title": "Change one served value",
+        "action": "Change only the practice IPv4 record, save and compare the A lookup before and after Reload primary.",
+        "observe": "The old served address persists until reload; Check example also evaluates preservation."
+      }
+    ],
+    "status": "updated",
+    "review": {
+      "introduction": "Reviewed Add a service with IPv4 and IPv6: Give a name an address, Write one complete record per line, Saved is different from served. Essential concepts retained; objective/numbered sections and literal separate worked rows added. Full annotated sequence is optional where lengthy. Source/render-path review, not an independent novice study. Visible concepts were individually shortened to essentials; complete original explanations remain expandable, including disclosed simulation differences. Source-owned optional lookup command extension reviewed: explicit published endpoints, absolute names and nonrecursive type queries; meaningful editor/publication assignment and all original requirements preserved. Native controls remain the default and a valid alternative; command work never awards credit by itself. Teaches NXDOMAIN for the initially missing files name versus NOERROR/missing AAAA on existing web before the two-address publication. Expected-before/after labels refer to defined example states, actual response stays dynamic. Existing baseline preserved. Focused actual-widget checks and the final three-lesson native workflow validate this view; representative original PNGs inspected. Developer content/control review only, not independent novice comprehension.",
+      "example": "Reviewed separate practice fixture and its real controls: Choose Fill worked example and inspect the files.dual-practice.test. A and AAAA lines. Guided edit/execute/observe steps are placed by the picker/editor/check; original action and stale-result logic retained. Native sampling is tracked separately. Source-owned optional lookup command extension reviewed: explicit published endpoints, absolute names and nonrecursive type queries; meaningful editor/publication assignment and all original requirements preserved. Native controls remain the default and a valid alternative; command work never awards credit by itself. Teaches NXDOMAIN for the initially missing files name versus NOERROR/missing AAAA on existing web before the two-address publication. Expected-before/after labels refer to defined example states, actual response stays dynamic. Existing baseline preserved. Focused actual-widget checks and the final three-lesson native workflow validate this view; representative original PNGs inspected. Developer content/control review only, not independent novice comprehension.",
+      "assignment": "Reviewed all original requirements for lpic2-dns-dualstack; preserved the complete supplied objective as 3 checklist rows, intentional initial state, alternate supported outcomes and existing grade. Worked rows are displayed only on Introduction. No progress/schema change. Source-owned optional lookup command extension reviewed: explicit published endpoints, absolute names and nonrecursive type queries; meaningful editor/publication assignment and all original requirements preserved. Native controls remain the default and a valid alternative; command work never awards credit by itself. Teaches NXDOMAIN for the initially missing files name versus NOERROR/missing AAAA on existing web before the two-address publication. Expected-before/after labels refer to defined example states, actual response stays dynamic. Existing baseline preserved. Focused actual-widget checks and the final three-lesson native workflow validate this view; representative original PNGs inspected. Developer content/control review only, not independent novice comprehension."
+    },
+    "source": "scenarios/dns-forward-v2.json",
+    "worked": [
+      {
+        "label": "IPv4 record",
+        "value": "files.dual-practice.test. 300 IN A 192.0.2.140",
+        "explanation": "A supplies IPv4 data at the practice name."
+      },
+      {
+        "label": "IPv6 record",
+        "value": "files.dual-practice.test. 300 IN AAAA 2001:db8::140",
+        "explanation": "AAAA is a separate record at the same name."
+      },
+      {
+        "label": "Publish",
+        "value": "Save zone → Reload primary",
+        "explanation": "Saving alone does not change lookups."
+      },
+      {
+        "label": "Compare name and record type",
+        "value": "host -r -t AAAA web.dual-practice.test. 192.0.2.53",
+        "explanation": "Expected: NOERROR with no AAAA record; web exists with A. Query files.dual-practice.test. before publication instead and the zone returns NXDOMAIN. A missing type and a missing name are different; command status alone does not grade the task."
+      }
+    ],
+    "concepts": [
+      {
+        "title": "One name can have two address families",
+        "text": "A holds IPv4 and AAAA holds IPv6. Keep both at the same name. For example, files.dual-practice.test. 300 IN A 192.0.2.140 and a separate AAAA line for 2001:db8::140. NS names the zone’s nameserver; keep its existing address record too."
+      },
+      {
+        "title": "A complete record has separate fields",
+        "text": "A record line reads OWNER. TTL IN TYPE DATA. The final dot makes a name complete. TTL is a cache lifetime in seconds; IN is the Internet class. This model serves only its supplied authoritative zone, not real network traffic."
+      },
+      {
+        "title": "Saved records are not yet serving",
+        "text": "Save zone stores the editor text. Reload primary validates and publishes that saved text. Look up reads the selected serving copy. Increase the SOA serial when publishing a change; updating a secondary is a separate action."
+      },
+      {
+        "title": "Read an actual served response",
+        "text": "Under Inspect a served answer, choose Use lookup commands. dig asks the numeric server after @; +norecurse keeps the question at that server and +short shows the answer data. host -r -t TYPE NAME. SERVER asks the same nonrecursive question with a different layout. Use the supplied endpoints and a full name ending in a dot. These lookups read the published copy, not unsaved or merely saved edits. NXDOMAIN means this lookup reaches a name absent from the selected zone; NOERROR with no requested record means the name exists but lacks that type. A successful command status alone does not prove that both address families are published."
+      }
+    ],
+    "context": "No DNS or shell-command knowledge is assumed; address values are supplied.",
+    "prerequisite_sources": [
+      "https://bind9.readthedocs.io/en/stable/manpages.html"
+    ]
+  },
+  {
+    "id": "lpic2-dns-aliases",
+    "goal": "Trace and repair an alias path while keeping canonical addresses.",
+    "requirements": [
+      "Restore portal.studio.test. and status.studio.test. as working CNAME paths to app.studio.test.",
+      "Keep app at A 192.0.2.60 and AAAA 2001:db8::60, legacy.studio.test. at 192.0.2.50 and the nameserver records.",
+      "Publish on the primary.",
+      "Either alias may point through the other, but both must reach app."
+    ],
+    "practice": [
+      {
+        "title": "Inspect a link and the complete lookup",
+        "action": "Before changing the example (or after Reset example only), under Inspect a served answer choose Use lookup commands. Look up host -r -t CNAME portal.alias-practice.test. 192.0.2.53, then change CNAME to A and Look up again.",
+        "observe": "Before the worked repair: An individual alias record can exist while following the chain fails with SERVFAIL. Inspect both portal and status targets in the editor to locate the loop; the underlying app address should stay unchanged."
+      },
+      {
+        "title": "Repair the path without replacing the application",
+        "action": "Fill worked example, Save zone and Reload primary. Look up dig @192.0.2.53 portal.alias-practice.test. A +norecurse +short and repeat for status. Select Check example.",
+        "observe": "Both alias paths now reach the supplied app address 192.0.2.160. Trying portal directly to app is a valid alternative if status also reaches app and protected records remain."
+      },
+      {
+        "title": "Create and diagnose a loop",
+        "action": "Point status to itself, save/reload, then query A and Check example. Restore its valid path.",
+        "observe": "A loop reports failure even though app itself still has the correct address."
+      }
+    ],
+    "status": "updated",
+    "review": {
+      "introduction": "Reviewed Repair a looping service alias: A second name for one host, Follow the path, not just the number, Repair one link and verify both names. Essential concepts retained; objective/numbered sections and literal separate worked rows added. Full annotated sequence is optional where lengthy. Source/render-path review, not an independent novice study. Visible concepts were individually shortened to essentials; complete original explanations remain expandable, including disclosed simulation differences. Source-owned optional lookup command extension reviewed: explicit published endpoints, absolute names and nonrecursive type queries; meaningful editor/publication assignment and all original requirements preserved. Native controls remain the default and a valid alternative; command work never awards credit by itself. Compares a valid individual portal CNAME record with a failing A chain, then verifies both repaired aliases reach the existing app without replacing protected addresses. Existing baseline preserved. Focused actual-widget checks and the final three-lesson native workflow validate this view; representative original PNGs inspected. Developer content/control review only, not independent novice comprehension.",
+      "example": "Reviewed separate practice fixture and its real controls: Inspect portal and status in alias-practice.test.; choose CNAME and Look up, then A. Guided edit/execute/observe steps are placed by the picker/editor/check; original action and stale-result logic retained. Native sampling is tracked separately. Source-owned optional lookup command extension reviewed: explicit published endpoints, absolute names and nonrecursive type queries; meaningful editor/publication assignment and all original requirements preserved. Native controls remain the default and a valid alternative; command work never awards credit by itself. Compares a valid individual portal CNAME record with a failing A chain, then verifies both repaired aliases reach the existing app without replacing protected addresses. Existing baseline preserved. Focused actual-widget checks and the final three-lesson native workflow validate this view; representative original PNGs inspected. Developer content/control review only, not independent novice comprehension.",
+      "assignment": "Reviewed all original requirements for lpic2-dns-aliases; preserved the complete supplied objective as 4 checklist rows, intentional initial state, alternate supported outcomes and existing grade. Worked rows are displayed only on Introduction. No progress/schema change. Source-owned optional lookup command extension reviewed: explicit published endpoints, absolute names and nonrecursive type queries; meaningful editor/publication assignment and all original requirements preserved. Native controls remain the default and a valid alternative; command work never awards credit by itself. Compares a valid individual portal CNAME record with a failing A chain, then verifies both repaired aliases reach the existing app without replacing protected addresses. Existing baseline preserved. Focused actual-widget checks and the final three-lesson native workflow validate this view; representative original PNGs inspected. Developer content/control review only, not independent novice comprehension."
+    },
+    "source": "scenarios/dns-forward-v2.json",
+    "worked": [
+      {
+        "label": "Alias path",
+        "value": "portal.alias-practice.test. → app.alias-practice.test.",
+        "explanation": "CNAME points to a host name, not an address."
+      },
+      {
+        "label": "Second alias",
+        "value": "status.alias-practice.test. → app.alias-practice.test.",
+        "explanation": "Both paths must reach app without looping."
+      },
+      {
+        "label": "Canonical data",
+        "value": "A 192.0.2.160; AAAA 2001:db8::160",
+        "explanation": "Keep these records on app; publish and query both aliases."
+      },
+      {
+        "label": "Ask for an address through an alias",
+        "value": "dig @192.0.2.53 portal.alias-practice.test. A +norecurse +short",
+        "explanation": "Before repair the alias loop produces SERVFAIL; a direct CNAME query can still show an individual link. After the worked repair, the A response includes the alias path and 192.0.2.160. A lookup does not edit or publish records."
+      }
+    ],
+    "concepts": [
+      {
+        "title": "An alias points to a name",
+        "text": "CNAME redirects one name to another name, not an IP address. For example, portal.alias-practice.test. 300 IN CNAME app.alias-practice.test. The final host owns A/AAAA records. A CNAME owner cannot also hold ordinary address data."
+      },
+      {
+        "title": "Follow the path to its destination",
+        "text": "Look up CNAME to inspect one link; Look up A follows the supported in-zone path. If aliases point back to each other, no final address is reached. Repair the relationship rather than copying an A record onto the alias."
+      },
+      {
+        "title": "Saved records are not yet serving",
+        "text": "Save zone stores the editor text. Reload primary validates and publishes that saved text. Look up reads the selected serving copy. Increase the SOA serial when publishing a change; updating a secondary is a separate action."
+      },
+      {
+        "title": "Read an actual served response",
+        "text": "Under Inspect a served answer, choose Use lookup commands. dig asks the numeric server after @; +norecurse keeps the question at that server and +short shows the answer data. host -r -t TYPE NAME. SERVER asks the same nonrecursive question with a different layout. Use the supplied endpoints and a full name ending in a dot. These lookups read the published copy, not unsaved or merely saved edits. A CNAME link can exist while following the chain fails. SERVFAIL here identifies a lookup that the alias loop prevents; inspect links separately from final address answers."
+      }
+    ],
+    "context": "Builds on earlier DNS record editing and save/reload practice.",
+    "prerequisite_sources": [
+      "https://bind9.readthedocs.io/en/stable/manpages.html"
+    ]
+  },
+  {
+    "id": "lpic2-dns-secondary",
+    "goal": "Compare served copies and repair revision-controlled publication.",
+    "requirements": [
+      "The primary already serves web.branch.test. at 203.0.113.80, but the secondary still returns 203.0.113.8.",
+      "Make both serve the new address and the same current saved zone.",
+      "Keep api.branch.test. at 203.0.113.20 and the nameserver records.",
+      "Choose a newer SOA serial, publish and update without reverting the primary to the old address."
+    ],
+    "practice": [
+      {
+        "title": "Compare both supplied endpoints",
+        "action": "Before changing the example (or after Reset example only), under Inspect a served answer choose Use lookup commands. Look up dig @192.0.2.53 web.secondary-practice.test. A +norecurse +short. Change .53 to .54 and Look up again.",
+        "observe": "Before the worked repair: Compare actual answers and the primary/secondary serial labels. The copies can disagree even though they belong to the same zone. These endpoints are supplied facts; selecting one never changes the records."
+      },
+      {
+        "title": "Publish a newer revision, then update",
+        "action": "Fill worked example, Save zone, Reload primary, then Update secondary. Repeat the two endpoint queries and Select Check example. Try Update secondary again without a newer primary serial.",
+        "observe": "After these actions, expect both to serve 203.0.113.180. An equal serial leaves the secondary unchanged; it is not proof that a newer edit was transferred. Keep api and the nameserver records intact."
+      },
+      {
+        "title": "Verify both answers and peers",
+        "action": "Query both copies and Check example. Compare an equal-serial update with the newer revision.",
+        "observe": "Both copies must agree with the saved zone without reverting the primary or changing api/ns."
+      }
+    ],
+    "status": "updated",
+    "review": {
+      "introduction": "Reviewed Bring a stale secondary up to date: Two servers can hold different copies, A revision number controls the update, Verify the new value and the peers. Essential concepts retained; objective/numbered sections and literal separate worked rows added. Full annotated sequence is optional where lengthy. Source/render-path review, not an independent novice study. Visible concepts were individually shortened to essentials; complete original explanations remain expandable, including disclosed simulation differences. Source-owned optional lookup command extension reviewed: explicit published endpoints, absolute names and nonrecursive type queries; meaningful editor/publication assignment and all original requirements preserved. Native controls remain the default and a valid alternative; command work never awards credit by itself. Compares supplied primary/secondary endpoints, saved versus published records and the equal/newer serial decision, then verifies both current published answers. Existing baseline preserved. Focused actual-widget checks and the final three-lesson native workflow validate this view; representative original PNGs inspected. Developer content/control review only, not independent novice comprehension.",
+      "example": "Reviewed separate practice fixture and its real controls: Select Primary then Secondary and Look up web.secondary-practice.test. Guided edit/execute/observe steps are placed by the picker/editor/check; original action and stale-result logic retained. Native sampling is tracked separately. Source-owned optional lookup command extension reviewed: explicit published endpoints, absolute names and nonrecursive type queries; meaningful editor/publication assignment and all original requirements preserved. Native controls remain the default and a valid alternative; command work never awards credit by itself. Compares supplied primary/secondary endpoints, saved versus published records and the equal/newer serial decision, then verifies both current published answers. Existing baseline preserved. Focused actual-widget checks and the final three-lesson native workflow validate this view; representative original PNGs inspected. Developer content/control review only, not independent novice comprehension.",
+      "assignment": "Reviewed all original requirements for lpic2-dns-secondary; preserved the complete supplied objective as 4 checklist rows, intentional initial state, alternate supported outcomes and existing grade. Worked rows are displayed only on Introduction. No progress/schema change. Source-owned optional lookup command extension reviewed: explicit published endpoints, absolute names and nonrecursive type queries; meaningful editor/publication assignment and all original requirements preserved. Native controls remain the default and a valid alternative; command work never awards credit by itself. Compares supplied primary/secondary endpoints, saved versus published records and the equal/newer serial decision, then verifies both current published answers. Existing baseline preserved. Focused actual-widget checks and the final three-lesson native workflow validate this view; representative original PNGs inspected. Developer content/control review only, not independent novice comprehension."
+    },
+    "source": "scenarios/dns-forward-v2.json",
+    "worked": [
+      {
+        "label": "Primary/secondary before",
+        "value": "203.0.113.180 /203.0.113.18",
+        "explanation": "Equal serials can hide different answers."
+      },
+      {
+        "label": "Repair sequence",
+        "value": "Newer serial → Save zone → Reload primary → Update secondary",
+        "explanation": "The secondary needs to see a newer revision."
+      },
+      {
+        "label": "After publication",
+        "value": "Both copies return 203.0.113.180",
+        "explanation": "Preserve api and ns in both copies."
+      },
+      {
+        "label": "Ask the other published copy",
+        "value": "dig @192.0.2.54 web.secondary-practice.test. A +norecurse +short",
+        "explanation": "The provided .54 endpoint reads the secondary copy; .53 reads the primary. Before the worked update they differ. Save and Reload primary alone do not update the secondary; its serial decision is a separate operation."
+      }
+    ],
+    "concepts": [
+      {
+        "title": "Two copies can serve different data",
+        "text": "Select Primary and Secondary before looking up the same name. Equal serial numbers alone do not prove equal contents. Here the primary has the new address while the secondary retains an older one."
+      },
+      {
+        "title": "Give the secondary a newer revision",
+        "text": "Increase the SOA serial, Save zone, Reload primary, then Update secondary. An equal serial can leave the old secondary unchanged. Verify both copies and preserve peer records; any supported newer serial is valid."
+      },
+      {
+        "title": "Know what this test models",
+        "text": "Update secondary models the revision decision and copying zone data. It does not send transfer packets or model refresh timers. Ordinary newer serials are enough for this lesson; wraparound detail is optional."
+      },
+      {
+        "title": "Read an actual served response",
+        "text": "Under Inspect a served answer, choose Use lookup commands. dig asks the numeric server after @; +norecurse keeps the question at that server and +short shows the answer data. host -r -t TYPE NAME. SERVER asks the same nonrecursive question with a different layout. Use the supplied endpoints and a full name ending in a dot. These lookups read the published copy, not unsaved or merely saved edits. A stale answer can be a successful query to an older published copy. Compare both endpoints; saved text alone does not prove either copy is current."
+      }
+    ],
+    "context": "Builds on earlier DNS record editing and save/reload practice.",
+    "prerequisite_sources": [
+      "https://bind9.readthedocs.io/en/stable/manpages.html"
+    ]
+  }
+]

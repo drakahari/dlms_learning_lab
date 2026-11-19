@@ -1,0 +1,132 @@
+[
+  {
+    "id": "ccna-review-ai-operations-claim",
+    "goal": "Check a generated diagnosis and a traffic forecast against independent observations before making a network change.",
+    "context": "Builds on reading controller intent and actual forwarding. The supplied reports are fictional examples that you can compare against this virtual network.",
+    "concepts": [
+      {
+        "title": "Separate suggestions from evidence",
+        "text": "A generative system can propose an explanation in everyday language. A precise-looking explanation can still be wrong. Use a fresh observation that could prove it wrong, such as a probe of the claimed carrier failure."
+      },
+      {
+        "title": "Check predictions against later observations",
+        "text": "A predictive system estimates a later value from previous observations and other inputs. Machine learning can learn patterns in earlier traffic, for example to recognize unusual usage. Compare the forecast and later reading to the same alert threshold. One correct comparison says little about accuracy on other traffic."
+      },
+      {
+        "title": "Make the smallest supported change",
+        "text": "If the carrier works and the installed policy lacks a required rule, verify the desired rule before publishing. Check that the intended exchange works and that an excluded service remains excluded. A high load estimate alone cannot justify changing a route."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Verify a generated cause",
+        "value": "Claim · carrier disconnected\nIndependent carrier probe · returned",
+        "explanation": "The probe contradicts that specific claim. Inspect the installed rule for another cause."
+      },
+      {
+        "label": "Compare forecast and actual",
+        "value": "Threshold · 75%\nForecast · 81%\nLater actual · 67%",
+        "explanation": "The forecast and the observed reading fall on different sides of the threshold. The predicted alert was not observed in this interval."
+      },
+      {
+        "label": "Read an approved repair",
+        "value": "Desired · Allow\nInstalled · Exclude\nCarrier · returned",
+        "explanation": "Publishing the verified wanted rule addresses this observed gap. Check the actual forwarding afterward."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Test the proposed cause",
+        "action": "Select Run incident probe. Compare Desired, Installed and Carrier. Set Diagnosis assessment to Supported if the generated statement matches these observations.",
+        "observe": "The carrier responds. The generated practice statement identifies the missing installed rule."
+      },
+      {
+        "title": "Wait for independent evidence",
+        "action": "Read the earlier usage values and forecast. Select Collect next reading. Compare both percentages to the stated alert threshold.",
+        "observe": "The practice observation falls on the same side of the threshold as the forecast."
+      },
+      {
+        "title": "Repair and verify",
+        "action": "Choose Publish approved rules and apply that response. Select Check workspace and compare the unaffected and excluded exchanges.",
+        "observe": "Only the approved exchange is restored by this change. Both control cases keep their earlier outcomes."
+      }
+    ],
+    "requirements": [
+      "Run an independent incident probe and review the generated cause against the observed carrier and policy.",
+      "Collect the supplied later reading and evaluate the forecast against the alert threshold.",
+      "Apply the repair supported by the evidence and verify that the other exchanges keep their required outcomes."
+    ],
+    "source": "scenarios/network-evidence-review-lessons-v1.json",
+    "status": "updated",
+    "review": {
+      "introduction": "Shows the difference between a plausible proposed result and an independently verified outcome.",
+      "example": "Uses distinct practice observations with the actual native controls.",
+      "assignment": "Grades independently checked evidence, current virtual state and control cases."
+    }
+  },
+  {
+    "id": "ccna-review-declarative-change",
+    "goal": "Repair a desired configuration plan so it changes only the approved resources, then confirm that a second preview is empty.",
+    "context": "Builds on structured network inventories and checking the impact of a controller rollout. The practice uses a small in-app JSON format for profiles and bindings.",
+    "concepts": [
+      {
+        "title": "Describe a desired result",
+        "text": "A desired configuration describes how resources should look. A plan compares it with the current state and proposes changes. Review what would be created, updated or removed before applying."
+      },
+      {
+        "title": "Learn what common tools can show",
+        "text": "Terraform plans tell you what resource changes are proposed. Ansible check mode can show what supported tasks expect to change, and diff mode can show before and after values. Some modules have limited check support. This lab uses an offline comparison over its own supplied document."
+      },
+      {
+        "title": "Preserve unrelated work and verify the result",
+        "text": "A valid document can propose deletion of a valuable resource. Compare the removal with the work order and restore missing records. After applying the approved changes, preview again. An empty plan for the same document indicates that the two states match in this lab."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Review the preview",
+        "value": "Update · approved bench binding\nRemove · spare recovery profile",
+        "explanation": "The work order allows the binding update. The recovery profile is still needed, even though no ports currently use it."
+      },
+      {
+        "label": "Repair the desired document",
+        "value": "Keep recovery profile\nRetire unused trial profile",
+        "explanation": "Restore the missing recovery record from the actual configuration. Leave only the approved retirement in the plan."
+      },
+      {
+        "label": "Apply and compare again",
+        "value": "First preview · approved changes\nSecond preview · no remaining changes",
+        "explanation": "Verify the actual paths after applying. An empty preview cannot prove the configuration meets the work order by itself."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Read the actual profile",
+        "action": "Open the supplied recovery record and select Preview plan. Look for every removal in the result.",
+        "observe": "This practice needs spare-lab-service. The starter would remove it as well as the obsolete record."
+      },
+      {
+        "title": "Edit the proposed document",
+        "action": "Restore the spare-lab-service entry inside profiles using the supplied record. Keep the intended binding changes. Preview the repaired document and select Apply plan.",
+        "observe": "The spare profile stays. Only the retired trial profile is scheduled for removal."
+      },
+      {
+        "title": "Verify the actual configuration",
+        "action": "Select Preview plan again, then Check workspace. Compare both permitted exchanges and the reserved or separate paths.",
+        "observe": "The preview has no pending changes. The approved peers can communicate and the excluded work stays separate."
+      }
+    ],
+    "requirements": [
+      "Restore the declared recovery profile to the desired document. Retire only the supplied obsolete profile.",
+      "Apply the approved plan while keeping the unrelated port’s binding and the excluded paths.",
+      "Confirm both permitted paths and preview again so the current document has no unapplied changes."
+    ],
+    "source": "scenarios/network-evidence-review-lessons-v1.json",
+    "status": "updated",
+    "review": {
+      "introduction": "Shows the difference between a plausible proposed result and an independently verified outcome.",
+      "example": "Uses distinct practice observations with the actual native controls.",
+      "assignment": "Grades independently checked evidence, current virtual state and control cases."
+    }
+  }
+]

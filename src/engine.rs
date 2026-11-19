@@ -26,11 +26,187 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    LinuxRouter { simulation: Box<crate::linux_router_workspace::Session> },
+    LinuxV6 { simulation: Box<crate::linux_v6_workspace::Session> },
+    LinuxServiceRouter { simulation: Box<crate::linux_service_router::Session> },
+    LinuxV6Administration { simulation: Box<crate::linux_v6_admin_workspace::Session> },
+    LinuxV6Startup { simulation: Box<crate::linux_v6_startup_workspace::Session> },
+    IdsRule { simulation: Box<crate::ids_rule_workspace::Session> },
+    AuthFilter { simulation: Box<crate::auth_filter_workspace::Session> },
+    VpnPoint { simulation: Box<crate::vpn_point_workspace::Session> },
+    Poe { simulation: Box<crate::poe_workspace::Session> },
+    KernelBuild { simulation: Box<crate::kernel_workspace::Session> },
+    Dkms { simulation: Box<crate::dkms_workspace::Session> },
+    Initramfs { simulation: Box<crate::initramfs_workspace::Session> },
+    Pxe { simulation: Box<crate::pxe::session::Session> },
+    Iscsi { simulation: Box<crate::iscsi::session::Session> },
+    AtaSmart { simulation: Box<crate::ata_smart::session::Session> },
+    ApacheHttps { simulation: Box<crate::apache_https::session::Session> },
+    Desktop { simulation: Box<crate::desktop::session::Session> },
+    SecurityInvestigation { simulation: Box<crate::security_investigation::session::Session> },
+    AutomationWorkshop { simulation: Box<crate::automation_workshop::session::Session> },
+    ServiceExposure { simulation: Box<crate::service_exposure_workspace::Session> },
+    FtpIdentity { simulation: Box<crate::ftp_identity_workspace::Session> },
+    LinuxFlow { simulation: Box<crate::linux_flow_workspace::Session> },
+    SieveFiltering { simulation: Box<crate::sieve_workspace::Session> },
+    MailboxAccess { simulation: Box<crate::mailbox_workspace::Session> },
+    MailboxAdministration { simulation: Box<crate::mailbox_workspace::Session> },
+    SmtpRouting { simulation: Box<crate::smtp_workspace::Session> },
+    VirtualIsolation { simulation: Box<crate::virtual_isolation_workspace::Session> },
+    GuestDrivers { simulation: Box<crate::guest_driver_workspace::Session> },
+    SambaShare { simulation: Box<crate::samba_share_workspace::Session> },
+    CampusArchitecture { simulation: Box<crate::network_architecture_workspace::Session> },
+    NetworkTransfer { simulation: Box<crate::network_transfer_workspace::Session> },
+    EditorHandover { simulation: Box<crate::editor_handover::Session> },
+    ModalEditing { simulation: Box<crate::modal_workspace::Session> },
+    SshAccess { simulation: Box<crate::ssh_workspace::Session> },
+    MaintenanceNotice { simulation: Box<crate::maintenance_notice_workspace::Session> },
+    DnsAccess { simulation: Box<crate::dns_access_workspace::Session> },
+    PrintQueues { simulation: Box<crate::print_queue_workspace::Session> },
+    Localization { simulation: Box<crate::localization_workspace::Session> },
+    WirelessChannels { simulation: Box<crate::wireless_channel_workspace::Session> },
+    WlanProfiles { simulation: Box<crate::wlan_workspace::Session> },
+    HttpCache { simulation: Box<crate::http_cache_workspace::Session> },
+    ServiceClients { simulation: Box<crate::service_workspace::Session> },
+    ReverseProxy { simulation: Box<crate::reverse_proxy_workspace::Session> },
+    ProxyPolicy { simulation: Box<crate::proxy_workspace::Session> },
+    SnmpMonitor { simulation: Box<crate::snmp_workspace::Session> },
+    WlanPaths { simulation: Box<crate::wlan_paths_workspace::Session> },
+    Timezone { simulation: Box<crate::timezone_workspace::Session> },
+    SourceInstall { simulation: Box<crate::source_install_workspace::Session> },
+    CapacityPlanning { simulation: Box<crate::capacity_planning_workspace::Session> },
+    ResourceObservations { simulation: Box<crate::resource_observation_workspace::Session> },
+    CopiedJournal { simulation: Box<crate::journal_archive_workspace::Session> },
+    JsonInventory { simulation: Box<crate::json_inventory_workspace::Session> },
+    RestController { simulation: Box<crate::rest_workspace::Session> },
+    DevicePath { simulation: Box<crate::device_path_workspace::Session> },
+    LocalMail { simulation: Box<crate::local_mail_workspace::Session> },
+    Chrony { simulation: Box<crate::chrony_workspace::Session> },
+    GrubOnce { simulation: Box<crate::grub_once_workspace::Session> },
+    EfiLoader { simulation: Box<crate::efi_loader_workspace::Session> },
+    BiosLoader { simulation: Box<crate::bios_loader_workspace::Session> },
+    BootEntry { simulation: Box<crate::boot_entry_workspace::Session> },
+    RaidAssembly { simulation: Box<crate::raid_assembly_workspace::Session> },
+    Autofs { simulation: Box<crate::autofs_workspace::Session> },
+    KernelModules {
+        simulation: Box<crate::kernel_module_workspace::Session>,
+    },
+    RecursiveTree {
+        simulation: Box<crate::recursive_tree_workspace::Session>,
+    },
+    Transport {
+        simulation: Box<crate::transport_workspace::Session>,
+    },
+    FileIndex {
+        simulation: Box<crate::file_index_workspace::Session>,
+    },
+    Raid1 {
+        simulation: Box<crate::raid1_workspace::Session>,
+    },
+    SharedLibraries {
+        simulation: Box<crate::shared_libraries_workspace::Session>,
+    },
+    StartupFiles {
+        simulation: Box<crate::startup_workspace::Session>,
+    },
+    FsIntegrity {
+        simulation: Box<crate::fs_integrity_workspace::Session>,
+    },
+    UserMounts {
+        simulation: Box<crate::user_mounts_workspace::Session>,
+    },
+    Environment {
+        simulation: Box<crate::environment_workspace::Session>,
+    },
+    DebianSources {
+        simulation: Box<crate::debian_sources_workspace::Session>,
+    },
+    ClientNames {
+        simulation: Box<crate::client_names_workspace::Session>,
+    },
+    RemovableMounts {
+        simulation: Box<crate::removable_workspace::Session>,
+    },
+    NmProfiles {
+        simulation: Box<crate::nm_workspace::Session>,
+    },
+    PamStack {
+        simulation: Box<crate::pam_workspace::Session>,
+    },
+    Aging {
+        simulation: Box<crate::aging_workspace::Session>,
+    },
+    PortSecurity {
+        simulation: Box<crate::port_security_workspace::Session>,
+    },
+    DhcpSnooping {
+        simulation: Box<crate::dhcp_snooping_workspace::Session>,
+    },
+    ArpInspection {
+        simulation: Box<crate::arp_inspection_workspace::Session>,
+    },
+    ManagementPolicy {
+        simulation: Box<crate::management_workspace::Session>,
+    },
+    LocalAccess {
+        simulation: Box<crate::local_access_workspace::Session>,
+    },
+    AaaAccess {
+        simulation: Box<crate::aaa_workspace::Session>,
+    },
+    LdapClient {
+        simulation: Box<crate::ldap_workspace::Session>,
+    },
+    LdapAccess {
+        simulation: Box<crate::ldap_access_workspace::Session>,
+    },
+    LdapSchema {
+        simulation: Box<crate::ldap_schema_workspace::Session>,
+    },
+    LdapSchemaQuery {
+        simulation: Box<crate::ldap_schema_query_workspace::Session>,
+    },
+    LdapPassword {
+        simulation: Box<crate::ldap_password_workspace::Session>,
+    },
+    LdapChanges {
+        simulation: Box<crate::ldap_change_workspace::Session>,
+    },
+    DhcpConfig {
+        simulation: Box<crate::dhcp_server_workspace::Session>,
+    },
+    Qos {
+        simulation: Box<crate::qos_workspace::Session>,
+    },
+    LinuxLogging {
+        simulation: Box<crate::linux_logging_workspace::Session>,
+    },
+    HostNetwork {
+        simulation: Box<crate::host_workspace::Session>,
+    },
+    Repositories {
+        simulation: Box<crate::repository_workspace::Session>,
+    },
+    Capacity {
+        simulation: Box<crate::capacity_workspace::Session>,
+    },
+    DirectoryPolicy {
+        simulation: Box<crate::directory_policy_workspace::Session>,
+    },
+    Links {
+        simulation: Box<crate::links_workspace::Session>,
+    },
+    MagicSubnet {
+        session: Box<crate::magic_subnet::Session>,
+    },
     PartitionFs {
         simulation: Box<crate::partition_fs_workspace::Session>,
     },
     Hsrp {
         simulation: Box<crate::hsrp_workspace::Session>,
+    },
+    Syslog {
+        simulation: Box<crate::syslog_workspace::Session>,
     },
     Ntp {
         simulation: Box<crate::ntp_workspace::Session>,
@@ -175,11 +351,188 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    LinuxRouter { definition: Box<crate::linux_router_workspace::Definition> },
+    LinuxV6 { definition: Box<crate::linux_v6_workspace::Definition> },
+    LinuxServiceRouter { definition: Box<crate::linux_service_router::Definition> },
+    LinuxV6Administration { definition: Box<crate::linux_v6_admin_workspace::Definition> },
+    LinuxV6Startup { definition: Box<crate::linux_v6_startup_workspace::Definition> },
+    IdsRule { definition: Box<crate::ids_rule_workspace::Definition> },
+    AuthFilter { definition: Box<crate::auth_filter_workspace::Definition> },
+    VpnPoint { definition: Box<crate::vpn_point_workspace::Definition> },
+    Poe { definition: Box<crate::poe_workspace::Definition> },
+    KernelBuild { definition: Box<crate::kernel_workspace::Definition> },
+    Dkms { definition: Box<crate::dkms_workspace::Definition> },
+    Initramfs { definition: Box<crate::initramfs_workspace::Definition> },
+    Pxe { definition: Box<crate::pxe::session::Definition> },
+    Iscsi { definition: Box<crate::iscsi::session::Definition> },
+    AtaSmart { definition: Box<crate::ata_smart::session::Definition> },
+    ApacheHttps { definition: Box<crate::apache_https::session::Definition> },
+    Desktop { definition: Box<crate::desktop::session::Definition> },
+    SecurityInvestigation { definition: Box<crate::security_investigation::session::Definition> },
+    AutomationWorkshop { definition: Box<crate::automation_workshop::session::Definition> },
+    ServiceExposure { definition: Box<crate::service_exposure_workspace::Definition> },
+    FtpIdentity { definition: Box<crate::ftp_identity_workspace::Definition> },
+    LinuxFlow { definition: Box<crate::linux_flow_workspace::Definition> },
+    SieveFiltering { definition: Box<crate::sieve_workspace::Definition> },
+    MailboxAccess { definition: Box<crate::mailbox_workspace::Definition> },
+    MailboxAdministration { definition: Box<crate::mailbox_workspace::Definition> },
+    SmtpRouting { definition: Box<crate::smtp_workspace::Definition> },
+    VirtualIsolation { definition: Box<crate::virtual_isolation_workspace::Definition> },
+    GuestDrivers { definition: Box<crate::guest_driver_workspace::Definition> },
+    SambaShare { definition: Box<crate::samba_share_workspace::Definition> },
+    CampusArchitecture { definition: Box<crate::network_architecture_workspace::Definition> },
+    NetworkTransfer { definition: Box<crate::network_transfer_workspace::Definition> },
+    EditorHandover { definition: Box<crate::editor_handover::Definition> },
+    ModalEditing { definition: Box<crate::modal_workspace::Definition> },
+    SshAccess { definition: Box<crate::ssh_workspace::Definition> },
+    MaintenanceNotice { definition: Box<crate::maintenance_notice_workspace::Definition> },
+    DnsAccess { definition: Box<crate::dns_access_workspace::Definition> },
+    PrintQueues { definition: Box<crate::print_queue_workspace::Definition> },
+    Localization { definition: Box<crate::localization_workspace::Definition> },
+    WirelessChannels { definition: Box<crate::wireless_channel_workspace::Definition> },
+    WlanProfiles { definition: Box<crate::wlan_workspace::Definition> },
+    HttpCache { definition: Box<crate::http_cache_workspace::Definition> },
+    ServiceClients { definition: Box<crate::service_workspace::Definition> },
+    ReverseProxy { definition: Box<crate::reverse_proxy_workspace::Definition> },
+    ProxyPolicy { definition: Box<crate::proxy_workspace::Definition> },
+    SnmpMonitor { definition: Box<crate::snmp_workspace::Definition> },
+    WlanPaths { definition: Box<crate::wlan_paths_workspace::Definition> },
+    Timezone { definition: Box<crate::timezone_workspace::Definition> },
+    SourceInstall { definition: Box<crate::source_install_workspace::Definition> },
+    CapacityPlanning { definition: Box<crate::capacity_planning_workspace::Definition> },
+    ResourceObservations { definition: Box<crate::resource_observation_workspace::Definition> },
+    CopiedJournal { definition: Box<crate::journal_archive_workspace::Definition> },
+    JsonInventory { definition: Box<crate::json_inventory_workspace::Definition> },
+    RestController { definition: Box<crate::rest_workspace::Definition> },
+    DevicePath { definition: Box<crate::device_path_workspace::Definition> },
+    LocalMail { definition: Box<crate::local_mail_workspace::Definition> },
+    Chrony { definition: Box<crate::chrony_workspace::Definition> },
+    GrubOnce { definition: Box<crate::grub_once_workspace::Definition> },
+    EfiLoader { definition: Box<crate::efi_loader_workspace::Definition> },
+    BiosLoader { definition: Box<crate::bios_loader_workspace::Definition> },
+    BootEntry { definition: Box<crate::boot_entry_workspace::Definition> },
+    RaidAssembly { definition: Box<crate::raid_assembly_workspace::Definition> },
+    Autofs { definition: Box<crate::autofs_workspace::Definition> },
+    KernelModules {
+        definition: Box<crate::kernel_module_workspace::Definition>,
+    },
+    RecursiveTree {
+        definition: Box<crate::recursive_tree_workspace::Definition>,
+    },
+    Transport {
+        definition: Box<crate::transport_workspace::Definition>,
+    },
+    FileIndex {
+        definition: Box<crate::file_index_workspace::Definition>,
+    },
+    Raid1 {
+        definition: Box<crate::raid1_workspace::Definition>,
+    },
+    SharedLibraries {
+        definition: Box<crate::shared_libraries_workspace::Definition>,
+    },
+    StartupFiles {
+        definition: Box<crate::startup_workspace::Definition>,
+    },
+    FsIntegrity {
+        definition: Box<crate::fs_integrity_workspace::Definition>,
+    },
+    UserMounts {
+        definition: Box<crate::user_mounts_workspace::Definition>,
+    },
+    Environment {
+        definition: Box<crate::environment_workspace::Definition>,
+    },
+    DebianSources {
+        definition: Box<crate::debian_sources_workspace::Definition>,
+    },
+    ClientNames {
+        definition: Box<crate::client_names_workspace::Definition>,
+    },
+    RemovableMounts {
+        definition: Box<crate::removable_workspace::Definition>,
+    },
+    NmProfiles {
+        definition: Box<crate::nm_workspace::Definition>,
+    },
+    PamStack {
+        definition: Box<crate::pam_workspace::Definition>,
+    },
+    Aging {
+        definition: Box<crate::aging_workspace::Definition>,
+    },
+    PortSecurity {
+        definition: Box<crate::port_security_workspace::Definition>,
+    },
+    DhcpSnooping {
+        definition: Box<crate::dhcp_snooping_workspace::Definition>,
+    },
+    ArpInspection {
+        definition: Box<crate::arp_inspection_workspace::Definition>,
+    },
+    ManagementPolicy {
+        definition: Box<crate::management_workspace::Definition>,
+    },
+    LocalAccess {
+        definition: Box<crate::local_access_workspace::Definition>,
+    },
+    AaaAccess {
+        definition: Box<crate::aaa_workspace::Definition>,
+    },
+    LdapClient {
+        definition: Box<crate::ldap_workspace::Definition>,
+    },
+    LdapAccess {
+        definition: Box<crate::ldap_access_workspace::Definition>,
+    },
+    LdapSchema {
+        definition: Box<crate::ldap_schema_workspace::Definition>,
+    },
+    LdapSchemaQuery {
+        definition: Box<crate::ldap_schema_query_workspace::Definition>,
+    },
+    LdapPassword {
+        definition: Box<crate::ldap_password_workspace::Definition>,
+    },
+    LdapChanges {
+        definition: Box<crate::ldap_change_workspace::Definition>,
+    },
+    DhcpConfig {
+        definition: Box<crate::dhcp_server_workspace::Definition>,
+    },
+    Qos {
+        definition: Box<crate::qos_workspace::Definition>,
+    },
+    LinuxLogging {
+        definition: Box<crate::linux_logging_workspace::Definition>,
+    },
+    HostNetwork {
+        definition: Box<crate::host_workspace::Definition>,
+    },
+    Repositories {
+        definition: Box<crate::repository_workspace::Definition>,
+    },
+    Capacity {
+        definition: Box<crate::capacity_workspace::Definition>,
+    },
+    DirectoryPolicy {
+        definition: Box<crate::directory_policy_workspace::Definition>,
+    },
+    Links {
+        definition: Box<crate::links_workspace::Definition>,
+    },
+    MagicSubnet {
+        problem: crate::magic_subnet::Problem,
+        stage: crate::magic_subnet::Stage,
+    },
     PartitionFs {
         definition: Box<crate::partition_fs_workspace::Definition>,
     },
     Hsrp {
         definition: Box<crate::hsrp_workspace::Definition>,
+    },
+    Syslog {
+        definition: Box<crate::syslog_workspace::Definition>,
     },
     Ntp {
         definition: Box<crate::ntp_workspace::Definition>,
@@ -371,12 +724,204 @@ pub fn access(
         .is_some_and(|n| bits(n, user, groups) & mask == mask)
 }
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
+    if let (State::MagicSubnet { session }, Goal::MagicSubnet { problem, stage }) = (s, g) {
+        if session.validate().is_err() || session.problem != *problem || session.stage != *stage {
+            return vec![(
+                false,
+                "The supplied subnet problem must remain unchanged".into(),
+            )];
+        }
+        return crate::magic_subnet::checks(*stage, *problem, &session.answers);
+    }
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::FileIndex { simulation }, Goal::FileIndex { definition }) => {
+            crate::file_index_source::checks(simulation, definition)
+        }
+        (State::StartupFiles { simulation }, Goal::StartupFiles { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::Raid1 { simulation }, Goal::Raid1 { definition }) => definition.checks(simulation),
+        (State::SharedLibraries { simulation }, Goal::SharedLibraries { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::FsIntegrity { simulation }, Goal::FsIntegrity { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::UserMounts { simulation }, Goal::UserMounts { definition }) => {
+            if simulation.definition != **definition || simulation.validate(definition).is_err() {
+                vec![(
+                    false,
+                    "Saved caller-aware mount work does not match this assignment.".into(),
+                )]
+            } else {
+                crate::user_mounts_workspace::checks(&definition.assignment, &simulation.assignment)
+            }
+        }
+        (State::Environment { simulation }, Goal::Environment { definition }) => {
+            if simulation.definition != **definition || simulation.validate(definition).is_err() {
+                vec![(
+                    false,
+                    "Saved environment work does not match this assignment.".into(),
+                )]
+            } else {
+                crate::environment_workspace::checks(&definition.assignment, &simulation.assignment)
+            }
+        }
+        (State::DebianSources { simulation }, Goal::DebianSources { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::ClientNames { simulation }, Goal::ClientNames { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::RemovableMounts { simulation }, Goal::RemovableMounts { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::NmProfiles { simulation }, Goal::NmProfiles { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::PamStack { simulation }, Goal::PamStack { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::Aging { simulation }, Goal::Aging { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::PortSecurity { simulation }, Goal::PortSecurity { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::DhcpSnooping { simulation }, Goal::DhcpSnooping { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::ArpInspection { simulation }, Goal::ArpInspection { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::ManagementPolicy { simulation }, Goal::ManagementPolicy { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::LocalAccess { simulation }, Goal::LocalAccess { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::AaaAccess { simulation }, Goal::AaaAccess { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::LdapClient { simulation }, Goal::LdapClient { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::LdapAccess { simulation }, Goal::LdapAccess { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::LdapSchema { simulation }, Goal::LdapSchema { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::CopiedJournal { simulation }, Goal::CopiedJournal { definition }) => definition.checks(simulation),
+        (State::JsonInventory { simulation }, Goal::JsonInventory { definition }) => definition.checks(simulation),
+        (State::RestController { simulation }, Goal::RestController { definition }) => definition.checks(simulation),
+        (State::DevicePath { simulation }, Goal::DevicePath { definition }) => definition.checks(simulation),
+        (State::LocalMail { simulation }, Goal::LocalMail { definition }) => definition.checks(simulation),
+        (State::Chrony { simulation }, Goal::Chrony { definition }) => definition.checks(simulation),
+        (State::GrubOnce { simulation }, Goal::GrubOnce { definition }) => definition.checks(simulation),
+        (State::EfiLoader { simulation }, Goal::EfiLoader { definition }) => definition.checks(simulation),
+        (State::BiosLoader { simulation }, Goal::BiosLoader { definition }) => definition.checks(simulation),
+        (State::BootEntry { simulation }, Goal::BootEntry { definition }) => definition.checks(simulation),
+        (State::LdapSchemaQuery { simulation }, Goal::LdapSchemaQuery { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::LdapPassword { simulation }, Goal::LdapPassword { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::LdapChanges { simulation }, Goal::LdapChanges { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::DhcpConfig { simulation }, Goal::DhcpConfig { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::Qos { simulation }, Goal::Qos { definition }) => definition.checks(simulation),
+        (State::LinuxLogging { simulation }, Goal::LinuxLogging { definition }) => {
+            definition.checks(simulation, false)
+        }
+        (State::VirtualIsolation { simulation }, Goal::VirtualIsolation { definition }) => simulation.checks(definition,false),
+        (State::SieveFiltering { simulation }, Goal::SieveFiltering { definition }) => definition.checks(simulation).into_iter().map(|r|(r.passed,format!("{}: {}",r.label,r.detail))).collect(),
+        (State::LinuxRouter { simulation }, Goal::LinuxRouter { definition }) => crate::linux_router_source::checks(simulation,definition),
+        (State::LinuxV6 { simulation }, Goal::LinuxV6 { definition }) => crate::linux_v6_source::checks(simulation,definition),
+        (State::LinuxServiceRouter { simulation }, Goal::LinuxServiceRouter { definition }) => crate::linux_service_router_source::checks(simulation,definition),
+        (State::LinuxV6Administration { simulation }, Goal::LinuxV6Administration { definition }) => crate::linux_v6_admin_source::checks(simulation,definition),
+        (State::LinuxV6Startup { simulation }, Goal::LinuxV6Startup { definition }) => crate::linux_v6_startup_source::checks(simulation,definition),
+        (State::IdsRule { simulation }, Goal::IdsRule { definition }) => crate::ids_rule_source::checks(simulation,definition),
+        (State::AuthFilter { simulation }, Goal::AuthFilter { definition }) => crate::auth_filter_source::checks(simulation,definition),
+        (State::VpnPoint { simulation }, Goal::VpnPoint { definition }) => crate::vpn_point_source::checks(simulation,definition),
+        (State::Poe { simulation }, Goal::Poe { definition }) => crate::poe_source::checks(simulation,definition),
+        (State::KernelBuild { simulation }, Goal::KernelBuild { definition }) => crate::kernel_source::checks(simulation,definition),
+        (State::Dkms { simulation }, Goal::Dkms { definition }) => crate::dkms_source::checks(simulation,definition),
+        (State::Initramfs { simulation }, Goal::Initramfs { definition }) => crate::initramfs_source::checks(simulation,definition),
+        (State::Pxe { simulation }, Goal::Pxe { definition }) => crate::pxe::source::checks(simulation,definition),
+        (State::Iscsi { simulation }, Goal::Iscsi { definition }) => crate::iscsi::source::checks(simulation,definition),
+        (State::AtaSmart { simulation }, Goal::AtaSmart { definition }) => crate::ata_smart::source::checks(simulation,definition),
+        (State::ApacheHttps { simulation }, Goal::ApacheHttps { definition }) => crate::apache_https::source::checks(simulation,definition),
+        (State::Desktop { simulation }, Goal::Desktop { definition }) => crate::desktop::source::checks(simulation,definition),
+        (State::SecurityInvestigation { simulation }, Goal::SecurityInvestigation { definition }) => crate::security_investigation::source::checks(simulation,definition),
+        (State::AutomationWorkshop { simulation }, Goal::AutomationWorkshop { definition }) => crate::automation_workshop::source::checks(simulation,definition),
+        (State::ServiceExposure { simulation }, Goal::ServiceExposure { definition }) => crate::service_exposure_source::checks(simulation,definition),
+        (State::FtpIdentity { simulation }, Goal::FtpIdentity { definition }) => crate::ftp_identity_source::checks(simulation,definition),
+        (State::LinuxFlow { simulation }, Goal::LinuxFlow { definition }) => crate::linux_flow_source::checks(simulation,definition),
+        (State::MailboxAdministration { simulation }, Goal::MailboxAdministration { definition }) |
+        (State::MailboxAccess { simulation }, Goal::MailboxAccess { definition }) => definition.checks(simulation).into_iter().map(|r|(r.passed,format!("{}: {}",r.label,r.detail))).collect(),
+        (State::SmtpRouting { simulation }, Goal::SmtpRouting { definition }) => definition.checks(simulation),
+        (State::GuestDrivers { simulation }, Goal::GuestDrivers { definition }) => definition.checks(simulation),
+        (State::SambaShare { simulation }, Goal::SambaShare { definition }) => simulation.checks(definition,false),
+        (State::CampusArchitecture { simulation }, Goal::CampusArchitecture { definition }) => simulation.checks(definition,false),
+        (State::NetworkTransfer { simulation }, Goal::NetworkTransfer { definition }) => simulation.checks(definition,false),
+        (State::EditorHandover { simulation }, Goal::EditorHandover { definition }) => simulation.checks(definition,false),
+        (State::ModalEditing { simulation }, Goal::ModalEditing { definition }) => definition.checks(simulation,false),
+        (State::SshAccess { simulation }, Goal::SshAccess { definition }) => definition.checks(simulation,false),
+        (State::HostNetwork { simulation }, Goal::HostNetwork { definition }) => {
+            definition.checks(simulation, false)
+        }
+        (State::Repositories { simulation }, Goal::Repositories { definition }) => {
+            definition.checks(simulation, false)
+        }
+        (State::MaintenanceNotice { simulation }, Goal::MaintenanceNotice { definition }) => definition.checks(simulation,false),
+        (State::DnsAccess { simulation }, Goal::DnsAccess { definition }) => definition.checks(simulation,false),
+        (State::PrintQueues { simulation }, Goal::PrintQueues { definition }) => definition.checks(simulation,false),
+        (State::Localization { simulation }, Goal::Localization { definition }) => definition.checks(simulation,false),
+        (State::WirelessChannels { simulation }, Goal::WirelessChannels { definition }) => definition.checks(simulation,false),
+        (State::WlanProfiles { simulation }, Goal::WlanProfiles { definition }) => definition.checks(simulation,false),
+        (State::HttpCache { simulation }, Goal::HttpCache { definition }) => definition.checks(simulation),
+        (State::ServiceClients { simulation }, Goal::ServiceClients { definition }) => definition.checks(simulation,false),
+        (State::ReverseProxy { simulation }, Goal::ReverseProxy { definition }) => definition.checks(simulation,false),
+        (State::ProxyPolicy { simulation }, Goal::ProxyPolicy { definition }) => definition.checks(simulation,false),
+        (State::SnmpMonitor { simulation }, Goal::SnmpMonitor { definition }) => definition.checks(simulation,false),
+        (State::WlanPaths { simulation }, Goal::WlanPaths { definition }) => definition.checks(simulation,false),
+        (State::Timezone { simulation }, Goal::Timezone { definition }) => definition.checks(simulation,false),
+        (State::SourceInstall { simulation }, Goal::SourceInstall { definition }) => definition.checks(simulation,false),
+        (State::CapacityPlanning { simulation }, Goal::CapacityPlanning { definition }) => definition.checks(simulation,false),
+        (State::ResourceObservations { simulation }, Goal::ResourceObservations { definition }) => definition.checks(simulation,false),
+        (State::Capacity { simulation }, Goal::Capacity { definition }) => {
+            definition.checks(simulation, false)
+        }
+        (State::RaidAssembly { simulation }, Goal::RaidAssembly { definition }) => definition.checks(simulation),
+        (State::Autofs { simulation }, Goal::Autofs { definition }) => definition.checks(simulation),
+        (State::KernelModules { simulation }, Goal::KernelModules { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::RecursiveTree { simulation }, Goal::RecursiveTree { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::Transport { simulation }, Goal::Transport { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::DirectoryPolicy { simulation }, Goal::DirectoryPolicy { definition }) => {
+            definition.checks(simulation, false)
+        }
+        (State::Links { simulation }, Goal::Links { definition }) => {
+            definition.checks(simulation, false)
+        }
         (State::PartitionFs { simulation }, Goal::PartitionFs { definition }) => {
             definition.checks(simulation)
         }
         (State::Hsrp { simulation }, Goal::Hsrp { definition }) => definition.checks(simulation),
+        (State::Syslog { simulation }, Goal::Syslog { definition }) => {
+            definition.checks(simulation)
+        }
         (State::Ntp { simulation }, Goal::Ntp { definition }) => definition.checks(simulation),
         (State::Lvm { simulation }, Goal::Lvm { definition }) => definition.checks(simulation),
         (State::PhysicalLink { simulation }, Goal::PhysicalLink { definition }) => {
@@ -491,6 +1036,10 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
             requirements.iter().map(|r| r.check(topology)).collect()
         }
         (State::Filesystem { tree }, Goal::Filesystem { requirements }) => {
+            if let Err(error) = crate::filesystem::discovery_policy::for_current(requirements, tree)
+            {
+                return vec![(false, error)];
+            }
             requirements.iter().map(|r| r.check(tree)).collect()
         }
         (State::Script { source, run }, Goal::Script { cases }) => {
@@ -716,10 +1265,124 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::Filesystem { tree } if tree.command_location.is_some() => {
+            "Command-location activity: which NAME (first eligible supplied path); type -a -p NAME (all eligible supplied paths); ls -l PATH (permissions/owner); chmod MODE PATH (only supplied caller-owned command files); cat PATH (inert text); pwd/cd (navigation). PATH and all other files stay fixed. help/show are simulator helpers. No found file executes. Plain type, aliases, hashing, whereis, composition and arbitrary shell syntax are unsupported. Other filesystem commands remain limited by this activity’s preservation policy."
+        }
+        State::StartupFiles { .. } => crate::startup_workspace::HELP,
+        State::Raid1 { .. } => crate::raid1::HELP,
+        State::FileIndex { .. } => crate::file_index_workspace::HELP,
+        State::SharedLibraries { .. } => crate::shared_libraries_workspace::HELP,
+        State::FsIntegrity { .. } => crate::fs_integrity_terminal::HELP,
+        State::UserMounts { .. } => {
+            "Use the simulated configuration editor and caller selector. Save policy, mount or unmount as a supplied caller, and check both actual state and prospective cases. No host filesystem or account is accessed."
+        }
+        State::Environment { .. } => {
+            "Edit the setup script, Run setup + child, and inspect actual parent values, export flags and the supplied child report. Everything runs in the bounded in-process simulator. No host environment, process or file is changed."
+        }
+        State::DebianSources { .. } => crate::debian_sources_workspace::HELP,
+        State::ClientNames { simulation } => crate::client_names_workspace::help(
+            if simulation.assignment.diagnostic.is_some() {
+                crate::client_names_workspace::Mode::SourcesWithSearch
+            } else if simulation.assignment.draft.contains_key("resolv.conf") {
+                crate::client_names_workspace::Mode::Search
+            } else {
+                crate::client_names_workspace::Mode::Sources
+            },
+        ),
+        State::RemovableMounts { .. } => crate::removable_workspace::HELP,
+        State::NmProfiles { .. } => crate::nm_workspace::HELP,
+        State::PamStack { .. } => crate::pam_workspace::HELP,
+        State::Aging { .. } => crate::aging::HELP,
+        State::PortSecurity { .. } => crate::port_security_workspace::HELP,
+        State::DhcpSnooping { .. } => crate::dhcp_snooping_workspace::HELP,
+        State::ArpInspection { .. } => crate::arp_inspection_workspace::HELP,
+        State::ManagementPolicy { .. } => crate::management_workspace::HELP,
+        State::LocalAccess { .. } => crate::local_access_workspace::HELP,
+        State::AaaAccess { .. } => crate::aaa_workspace::HELP,
+        State::LdapClient { .. } => crate::ldap_workspace::HELP,
+        State::LdapAccess { .. } => crate::ldap_access_workspace::HELP,
+        State::LdapSchema { .. } => crate::ldap_schema_workspace::HELP,
+        State::CopiedJournal { .. } => crate::journal_archive_workspace::HELP,
+        State::JsonInventory { .. } => crate::json_inventory_workspace::HELP,
+        State::RestController { .. } => crate::rest_workspace::HELP,
+        State::DevicePath { .. } => crate::device_path_workspace::HELP,
+        State::LocalMail { .. } => crate::local_mail_workspace::HELP,
+        State::Chrony { .. } => crate::chrony::HELP,
+        State::GrubOnce { .. } => crate::grub_once_workspace::HELP,
+        State::EfiLoader { .. } => crate::efi_loader::HELP,
+        State::BiosLoader { .. } => crate::bios_loader::HELP,
+        State::BootEntry { .. } => crate::boot_entry::HELP,
+        State::LdapSchemaQuery { .. } => crate::ldap_schema_query_workspace::HELP,
+        State::LdapPassword { .. } => crate::ldap_password_workspace::HELP,
+        State::LdapChanges { .. } => crate::ldap_change_workspace::HELP,
+        State::DhcpConfig { .. } => crate::dhcp_server_workspace::HELP,
+        State::Qos { .. } => crate::qos::HELP,
+        State::LinuxLogging { .. } => crate::linux_logging::HELP,
+        State::VirtualIsolation { .. } => crate::virtual_isolation_source::HELP,
+        State::SieveFiltering { .. } => crate::sieve_source::HELP,
+        State::MailboxAccess { .. } => crate::mailbox_source::HELP,
+        State::MailboxAdministration { .. } => crate::mailbox_source::ADMIN_HELP,
+        State::LinuxRouter { .. } => crate::linux_router_source::HELP,
+        State::LinuxV6 { .. } => crate::linux_v6_source::HELP,
+        State::LinuxServiceRouter { .. } => crate::linux_service_router_source::HELP,
+        State::LinuxV6Administration { .. } => crate::linux_v6_admin_source::HELP,
+        State::LinuxV6Startup { .. } => crate::linux_v6_startup_source::HELP,
+        State::IdsRule { .. } => crate::ids_rule_source::HELP,
+        State::AuthFilter { .. } => crate::auth_filter_source::HELP,
+        State::VpnPoint { .. } => crate::vpn_point_source::HELP,
+        State::Poe { .. } => crate::poe_source::HELP,
+        State::KernelBuild { .. } => crate::kernel_source::HELP,
+        State::Dkms { .. } => crate::dkms_source::HELP,
+        State::Initramfs { .. } => crate::initramfs_source::HELP,
+        State::Pxe { .. } => crate::pxe::source::HELP,
+        State::Iscsi { .. } => crate::iscsi::source::HELP,
+        State::AtaSmart { .. } => crate::ata_smart::source::HELP,
+        State::ApacheHttps { .. } => crate::apache_https::source::HELP,
+        State::Desktop { .. } => crate::desktop::source::HELP,
+        State::SecurityInvestigation { .. } => crate::security_investigation::source::HELP,
+        State::AutomationWorkshop { .. } => crate::automation_workshop::source::HELP,
+        State::ServiceExposure { .. } => crate::service_exposure_source::HELP,
+        State::FtpIdentity { .. } => crate::ftp_identity_source::HELP,
+        State::LinuxFlow { .. } => crate::linux_flow_source::HELP,
+        State::SmtpRouting { .. } => crate::smtp_console::HELP,
+        State::GuestDrivers { .. } => crate::guest_driver::HELP,
+        State::SambaShare { .. } => crate::samba_share_source::HELP,
+        State::CampusArchitecture { .. } => crate::network_architecture_source::HELP,
+        State::NetworkTransfer { .. } => crate::network_transfer_source::HELP,
+        State::EditorHandover { .. } => crate::editor_handover::HELP,
+        State::ModalEditing { .. } => crate::modal_source::HELP,
+        State::SshAccess { .. } => crate::ssh_workspace::HELP,
+        State::HostNetwork { simulation } => simulation.assignment.world.command_help(),
+        State::Repositories { .. } => crate::repository_workspace::HELP,
+        State::MaintenanceNotice { .. } => crate::maintenance_notice_workspace::HELP,
+        State::DnsAccess { .. } => crate::dns_access_workspace::HELP,
+        State::PrintQueues { .. } => crate::print_queue_workspace::HELP,
+        State::Localization { .. } => crate::localization_workspace::HELP,
+        State::WirelessChannels { .. } => crate::wireless_channel_workspace::HELP,
+        State::WlanProfiles { .. } => crate::wlan_workspace::HELP,
+        State::HttpCache { .. } => crate::http_cache_workspace::HELP,
+        State::ServiceClients { .. } => crate::service_workspace::HELP,
+        State::ReverseProxy { .. } => crate::reverse_proxy_workspace::HELP,
+        State::ProxyPolicy { .. } => crate::proxy_workspace::HELP,
+        State::SnmpMonitor { .. } => crate::snmp_workspace::HELP,
+        State::WlanPaths { .. } => crate::wlan_paths_workspace::HELP,
+        State::Timezone { .. } => crate::timezone_workspace::HELP,
+        State::SourceInstall { .. } => crate::source_install_workspace::HELP,
+        State::CapacityPlanning { .. } => crate::capacity_planning_workspace::HELP,
+        State::ResourceObservations { .. } => crate::resource_observation_workspace::HELP,
+        State::Capacity { .. } => crate::capacity_workspace::HELP,
+        State::RaidAssembly { .. } => crate::raid_assembly_workspace::HELP,
+        State::Autofs { .. } => crate::autofs_workspace::HELP,
+        State::KernelModules { .. } => crate::kernel_modules::HELP,
+        State::RecursiveTree { .. } => crate::filesystem::recursive::HELP,
+        State::Transport { .. } => crate::transport_workspace::HELP,
+        State::DirectoryPolicy { .. } => crate::filesystem::directory_policy::HELP,
+        State::Links { .. } => crate::links_workspace::HELP,
         State::PartitionFs { .. } => crate::partition_fs_workspace::HELP,
         State::Hsrp { .. } => crate::hsrp::HELP,
+        State::Syslog { .. } => crate::syslog_workspace::HELP,
         State::Ntp { .. } => crate::ntp::HELP,
-        State::Lvm { .. } => crate::lvm::HELP,
+        State::Lvm { simulation } => simulation.current.command_help(),
         State::PhysicalLink { .. } => crate::physical_link_workspace::HELP,
         State::FileBackup { .. } => crate::file_backup_terminal::HELP,
         State::EtherChannel { .. } => crate::etherchannel_workspace::HELP,
@@ -737,6 +1400,9 @@ pub fn help(s: &State) -> &'static str {
         State::Ipv4Acl { .. } => crate::acl_workspace::HELP,
         State::Ospf { .. } => crate::ospf_workspace::HELP,
         State::Accounts { .. } => crate::accounts_teaching::HELP,
+        State::PersistentMounts { storage } if storage.inventory().swap().is_some() => {
+            crate::storage_workspace::HELP_WITH_SWAP
+        }
         State::PersistentMounts { .. } => crate::storage_workspace::HELP,
         State::Discovery { .. } => {
             "Use the native discovery settings and explicit Send advertisement / Advance time controls. These model LLDP events, not router commands or real packets. Timers are manual; no CDP or automatic scheduling is simulated."
@@ -757,6 +1423,9 @@ pub fn help(s: &State) -> &'static str {
         State::Filesystem { .. } => crate::filesystem::HELP,
         State::Script { .. } => {
             "Use the script editor and Run script. Only the documented in-process shell subset is supported."
+        }
+        State::MagicSubnet { .. } => {
+            "Use the native subnet worksheet. No terminal commands run in this lesson."
         }
         State::Subnet { .. } => {
             "Use the native address fields and Check configuration. This activity has no terminal."
@@ -787,6 +1456,567 @@ pub fn help(s: &State) -> &'static str {
 /// Preserve the exact legacy path for other kinds. Account mutations must retain
 /// compatibility with the immutable authored initial state before publication.
 pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<String, String> {
+    if let State::LinuxRouter{simulation}=s {let Goal::LinuxRouter{definition}=goal else{return Err("Router work requires its authored task.".into());};return simulation.execute_router_reference(definition,input);}
+    if let State::LinuxV6{simulation}=s {let Goal::LinuxV6{definition}=goal else{return Err("Router work requires its authored task.".into());};return simulation.execute_v6_reference(definition,input);}
+    if let State::LinuxServiceRouter{simulation}=s {let Goal::LinuxServiceRouter{definition}=goal else{return Err("Router work requires its authored task.".into());};return simulation.execute_service_router_reference(definition,input);}
+    if let State::LinuxV6Administration{simulation}=s {let Goal::LinuxV6Administration{definition}=goal else{return Err("Router work requires its authored task.".into());};return simulation.execute_v6_admin_reference(definition,input);}
+    if let State::LinuxV6Startup{simulation}=s {let Goal::LinuxV6Startup{definition}=goal else{return Err("Router work requires its authored task.".into());};return simulation.execute_v6_startup_reference(definition,input);}
+    if let State::IdsRule{simulation}=s {let Goal::IdsRule{definition}=goal else{return Err("Rule work requires its authored task.".into());};return crate::ids_rule_source::execute(simulation,definition,input);}
+    if let State::AuthFilter{simulation}=s {let Goal::AuthFilter{definition}=goal else{return Err("Filter work requires its authored task.".into());};return crate::auth_filter_source::execute(simulation,definition,input);}
+    if let State::VpnPoint{simulation}=s {let Goal::VpnPoint{definition}=goal else{return Err("VPN work requires its authored task.".into());};return crate::vpn_point_source::execute(simulation,definition,input);}
+    if let State::Poe{simulation}=s {let Goal::Poe{definition}=goal else{return Err("Power work requires its authored task.".into());};return crate::poe_source::execute(simulation,definition,input);}
+    if let State::KernelBuild{simulation}=s {let Goal::KernelBuild{definition}=goal else{return Err("Kernel work requires its authored task.".into());};return crate::kernel_source::execute(simulation,definition,input);}
+    if let State::Dkms{simulation}=s {let Goal::Dkms{definition}=goal else{return Err("DKMS work requires its authored task.".into());};return crate::dkms_source::execute(simulation,definition,input);}
+    if let State::Initramfs{simulation}=s {let Goal::Initramfs{definition}=goal else{return Err("Early-userspace work requires its authored task.".into());};return crate::initramfs_source::execute(simulation,definition,input);}
+    if let State::Pxe{simulation}=s {let Goal::Pxe{definition}=goal else{return Err("network boot work requires its authored task.".into());};return crate::pxe::source::execute(simulation,definition,input);}
+    if let State::Iscsi{simulation}=s {let Goal::Iscsi{definition}=goal else{return Err("iSCSI work requires its authored task.".into());};return crate::iscsi::source::execute(simulation,definition,input);}
+    if let State::AtaSmart{simulation}=s {let Goal::AtaSmart{definition}=goal else{return Err("ATA SMART work requires its authored task.".into());};return crate::ata_smart::source::execute(simulation,definition,input);}
+    if let State::ApacheHttps{simulation}=s {let Goal::ApacheHttps{definition}=goal else{return Err("Apache HTTPS work requires its authored task.".into());};return crate::apache_https::source::execute(simulation,definition,input);}
+    if let State::Desktop{simulation}=s {let Goal::Desktop{definition}=goal else{return Err("virtual desktop work requires its authored task.".into());};return crate::desktop::source::execute(simulation,definition,input);}
+    if let State::SecurityInvestigation{simulation}=s {let Goal::SecurityInvestigation{definition}=goal else{return Err("virtual security investigation work requires its authored task.".into());};return crate::security_investigation::source::execute(simulation,definition,input);}
+    if let State::AutomationWorkshop{simulation}=s {let Goal::AutomationWorkshop{definition}=goal else{return Err("virtual staged network changes work requires its authored task.".into());};return crate::automation_workshop::source::execute(simulation,definition,input);}
+    if let State::ServiceExposure{simulation}=s {let Goal::ServiceExposure{definition}=goal else{return Err("Exposure work requires its authored task.".into());};return crate::service_exposure_source::execute(simulation,definition,input);}
+    if let State::FtpIdentity{simulation}=s {let Goal::FtpIdentity{definition}=goal else{return Err("FTP work requires its authored task.".into());};return simulation.reference(definition,input);}
+    if let State::LinuxFlow{simulation}=s {let Goal::LinuxFlow{definition}=goal else{return Err("Router work requires its authored task.".into());};return simulation.execute_flow_reference(definition,input);}
+    if let State::VirtualIsolation{simulation}=s {let Goal::VirtualIsolation{definition}=goal else{return Err("Represented-network work requires its supplied task.".into());};return simulation.execute_reference(definition,input);}
+    if let State::SieveFiltering{simulation}=s {let Goal::SieveFiltering{definition}=goal else{return Err("Filter work requires its supplied task.".into());};return simulation.execute_reference(definition,input);}
+    if let State::MailboxAdministration{simulation}=s {let Goal::MailboxAdministration{definition}=goal else{return Err("Mail administration requires its supplied task.".into());};return simulation.execute_admin_reference(definition,input);}
+    if let State::MailboxAccess{simulation}=s {let Goal::MailboxAccess{definition}=goal else{return Err("Mail-access work requires its supplied task.".into());};return simulation.execute_reference(definition,input);}
+    if let State::SmtpRouting{simulation}=s {let Goal::SmtpRouting{definition}=goal else{return Err("Mail work requires its supplied task.".into());};return simulation.execute_reference(definition,input);}
+    if let State::GuestDrivers{simulation}=s {let Goal::GuestDrivers{definition}=goal else{return Err("Guest-image work requires its supplied task.".into());};return simulation.execute_reference(definition,input);}
+    if let State::SambaShare{simulation}=s {let Goal::SambaShare{definition}=goal else{return Err("Sharing requires its supplied task.".into());};return simulation.execute_reference(definition,input);}
+    if let State::CampusArchitecture{simulation}=s {let Goal::CampusArchitecture{definition}=goal else{return Err("Campus layout requires its supplied task.".into());};return simulation.execute_reference(definition,input);}
+    if let State::NetworkTransfer{simulation}=s {let Goal::NetworkTransfer{definition}=goal else{return Err("File transfer requires its supplied task.".into());};return simulation.execute_reference(definition,input);}
+    if let State::EditorHandover{simulation}=s {let Goal::EditorHandover{definition}=goal else{return Err("Editor handover requires its supplied task.".into());};return simulation.execute_reference(definition,input);}
+    if let State::ModalEditing{simulation}=s {let Goal::ModalEditing{definition}=goal else{return Err("Editing actions require the supplied task.".into());};return simulation.execute_reference(definition,input);}
+    if let State::SshAccess { simulation }=s {let Goal::SshAccess{definition}=goal else{return Err("SSH actions require the supplied task.".into())};return simulation.execute_reference(definition,input);}
+    if matches!(s, State::RaidAssembly { .. }) || matches!(goal, Goal::RaidAssembly { .. }) {
+        let (State::RaidAssembly { simulation }, Goal::RaidAssembly { definition }) = (s, goal) else { return Err("RAID assembly work requires its supplied task; previous work retained".into()); };
+        return simulation.run(definition, input, false);
+    }
+
+    if matches!(s, State::Autofs { .. }) || matches!(goal, Goal::Autofs { .. }) {
+        let (State::Autofs { simulation }, Goal::Autofs { definition }) = (s, goal) else { return Err("AutoFS work requires its supplied task; previous work retained".into()); };
+        return simulation.run(definition, input, false);
+    }
+
+    if matches!(s, State::KernelModules { .. }) || matches!(goal, Goal::KernelModules { .. }) {
+        let (State::KernelModules { simulation }, Goal::KernelModules { definition }) = (s, goal)
+        else {
+            return Err(
+                "Module work requires its matching supplied task; original retained.".into(),
+            );
+        };
+        return simulation.action(definition, input, false);
+    }
+    if matches!(s, State::RecursiveTree { .. }) || matches!(goal, Goal::RecursiveTree { .. }) {
+        let (State::RecursiveTree { simulation }, Goal::RecursiveTree { definition }) = (s, goal)
+        else {
+            return Err(
+                "Recursive file work requires its matching supplied task; original retained."
+                    .into(),
+            );
+        };
+        return crate::recursive_tree_source::execute(simulation, definition, input);
+    }
+    if matches!(s, State::Transport { .. }) || matches!(goal, Goal::Transport { .. }) {
+        let (State::Transport { simulation }, Goal::Transport { definition }) = (s, goal) else {
+            return Err(
+                "Transport work requires its matching supplied task; original retained.".into(),
+            );
+        };
+        return simulation.execute(definition, input);
+    }
+    if matches!(s, State::DirectoryPolicy { .. }) || matches!(goal, Goal::DirectoryPolicy { .. }) {
+        let (State::DirectoryPolicy { simulation }, Goal::DirectoryPolicy { definition }) =
+            (s, goal)
+        else {
+            return Err("Directory-policy work requires its matching supplied task; previous work retained.".into());
+        };
+        return simulation.run(definition, input, false);
+    }
+    // Refuse either wrong-family direction before generic help/show dispatch.
+    if matches!(s, State::FileIndex { .. }) || matches!(goal, Goal::FileIndex { .. }) {
+        let (State::FileIndex { simulation }, Goal::FileIndex { definition }) = (s, goal) else {
+            return Err(
+                "Private-index work requires its supplied task; previous work retained".into(),
+            );
+        };
+        return crate::file_index_source::execute(simulation, definition, input);
+    }
+    if matches!(goal,Goal::Filesystem {requirements} if crate::filesystem::discovery_policy::has_reference(requirements))
+        && !matches!(s, State::Filesystem { .. })
+    {
+        return Err("Command-location objectives require their supplied filesystem activity; previous work retained".into());
+    }
+    if let State::Filesystem { tree } = s {
+        if let Goal::Filesystem { requirements } = goal {
+            if let Some(definition) =
+                crate::filesystem::discovery_policy::for_current(requirements, tree)?
+            {
+                return definition.execute(tree, input);
+            }
+        } else if tree.command_location.is_some() {
+            return Err("Command-location work needs its supplied filesystem task".into());
+        }
+    }
+    if let State::SharedLibraries { simulation } = s {
+        let Goal::SharedLibraries { definition } = goal else {
+            return Err("Library work requires its authored task; no host utility ran".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+
+    if let State::Raid1 { simulation } = s {
+        let Goal::Raid1 { definition } = goal else {
+            return Err("Mirror work requires its supplied assignment".into());
+        };
+        let result = if let Some(raw) = input.strip_prefix(crate::raid1_workspace::PREFIX) {
+            if raw.len() > 2048 {
+                return Err("Mirror action exceeds its encoded bound".into());
+            }
+            let action = serde_json::from_str(raw)
+                .map_err(|e| format!("Invalid native mirror action: {e}"))?;
+            simulation.action(definition, &action, false)?
+        } else {
+            simulation.execute(definition, input, false)?
+        };
+        if result.status != 0 {
+            return Err(result.output);
+        }
+        return Ok(result.output);
+    }
+
+    if let State::StartupFiles { simulation } = s {
+        let Goal::StartupFiles { definition } = goal else {
+            return Err("Startup files require their authored task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::FsIntegrity { simulation } = s {
+        let Goal::FsIntegrity { definition } = goal else {
+            return Err("Integrity work requires its supplied assignment".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::UserMounts { simulation } = s {
+        let Goal::UserMounts { definition } = goal else {
+            return Err("Caller-aware mounts require their supplied assignment".into());
+        };
+        simulation.validate(definition)?;
+        let raw = input
+            .strip_prefix(crate::user_mounts_workspace::PREFIX)
+            .ok_or("Use the native mount workspace or its declared action codec")?;
+        if raw.len() > 65_536 {
+            return Err("Mount action exceeds its encoded JSON bound".into());
+        }
+        let action = serde_json::from_str(raw)
+            .map_err(|e| format!("Invalid simulated mount action: {e}"))?;
+        return simulation
+            .assignment
+            .apply(&definition.assignment, action)
+            .map(|effect| effect.explanation().into());
+    }
+    if let State::Environment { simulation } = s {
+        let Goal::Environment { definition } = goal else {
+            return Err("Setup scripts require their supplied environment task".into());
+        };
+        simulation.validate(definition)?;
+        simulation.assignment.edit(input.into())?;
+        return Ok("Setup saved; Run setup + child checks the actual inherited settings.".into());
+    }
+
+    if let State::DebianSources { simulation } = s {
+        let Goal::DebianSources { definition } = goal else {
+            return Err("Source editing needs its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+
+    if let State::ClientNames { simulation } = s {
+        let Goal::ClientNames { definition } = goal else {
+            return Err("Configuration testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::RemovableMounts { simulation } = s {
+        let Goal::RemovableMounts { definition } = goal else {
+            return Err("Configuration testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::NmProfiles { simulation } = s {
+        let Goal::NmProfiles { definition } = goal else {
+            return Err("Configuration testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::PamStack { simulation } = s {
+        let Goal::PamStack { definition } = goal else {
+            return Err("Configuration testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::Aging { simulation } = s {
+        let Goal::Aging { definition } = goal else {
+            return Err("Aging testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::PortSecurity { simulation } = s {
+        let Goal::PortSecurity { definition } = goal else {
+            return Err("PortSecurity testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::DhcpSnooping { simulation } = s {
+        let Goal::DhcpSnooping { definition } = goal else {
+            return Err("DhcpSnooping testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::ArpInspection { simulation } = s {
+        let Goal::ArpInspection { definition } = goal else {
+            return Err("ArpInspection testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::ManagementPolicy { simulation } = s {
+        let Goal::ManagementPolicy { definition } = goal else {
+            return Err("ManagementPolicy testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::LocalAccess { simulation } = s {
+        let Goal::LocalAccess { definition } = goal else {
+            return Err("LocalAccess testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::AaaAccess { simulation } = s {
+        let Goal::AaaAccess { definition } = goal else {
+            return Err("AaaAccess testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::LdapClient { simulation } = s {
+        let Goal::LdapClient { definition } = goal else {
+            return Err("LdapClient testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::LdapAccess { simulation } = s {
+        let Goal::LdapAccess { definition } = goal else {
+            return Err("LdapAccess testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::LdapSchema { simulation } = s {
+        let Goal::LdapSchema { definition } = goal else {
+            return Err("LdapSchema testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::CopiedJournal { simulation } = s {
+        let Goal::CopiedJournal { definition } = goal else {
+            return Err("Copied-journal checks need the supplied task.".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::JsonInventory { simulation } = s {
+        let Goal::JsonInventory { definition } = goal else { return Err("JSON inventory checks need the supplied task.".into()); };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::RestController { simulation } = s {
+        let Goal::RestController { definition } = goal else { return Err("REST controller checks need the supplied task.".into()); };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::DevicePath { simulation } = s {
+        let Goal::DevicePath { definition } = goal else { return Err("Device-path checks need the supplied task.".into()); };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::LocalMail { simulation } = s {
+        let Goal::LocalMail { definition } = goal else {
+            return Err("Local-mail checks need the supplied task.".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::Chrony { simulation } = s {
+        let Goal::Chrony { definition } = goal else {
+            return Err("Time-source checks need the supplied task.".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::GrubOnce { simulation } = s {
+        let Goal::GrubOnce { definition } = goal else {
+            return Err("Temporary GRUB tests need the supplied task.".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::EfiLoader { simulation } = s {
+        let Goal::EfiLoader { definition } = goal else {
+            return Err("EFI installation tests need the supplied task.".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::BiosLoader { simulation } = s {
+        let Goal::BiosLoader { definition } = goal else { return Err("BIOS installation tests need the supplied task.".into()); };
+        return simulation.execute(definition,input);
+    }
+    if let State::BootEntry { simulation } = s {
+        let Goal::BootEntry { definition } = goal else { return Err("Boot-entry tests need the supplied task.".into()); };
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::LdapSchemaQuery { simulation } = s {
+        let Goal::LdapSchemaQuery { definition } = goal else {
+            return Err("LdapSchemaQuery testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::LdapPassword { simulation } = s {
+        let Goal::LdapPassword { definition } = goal else {
+            return Err("LdapPassword testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::LdapChanges { simulation } = s {
+        let Goal::LdapChanges { definition } = goal else {
+            return Err("LdapChanges testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::DhcpConfig { simulation } = s {
+        let Goal::DhcpConfig { definition } = goal else {
+            return Err("Configuration testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::Qos { simulation } = s {
+        let Goal::Qos { definition } = goal else {
+            return Err("Traffic policy testing requires its supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::LinuxLogging { simulation } = s {
+        let Goal::LinuxLogging { definition } = goal else {
+            return Err("Selector testing requires the supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::HostNetwork { simulation } = s {
+        let Goal::HostNetwork { definition } = goal else {
+            return Err("Host commands require the supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::Repositories { simulation } = s {
+        let Goal::Repositories { definition } = goal else {
+            return Err("Repository operations require the supplied task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::DnsAccess { simulation } = s {
+        let Goal::DnsAccess { definition } = goal else {return Err("DNS-policy operations require the authored task".into())};
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::PrintQueues { simulation } = s {
+        let Goal::PrintQueues { definition } = goal else {return Err("Print-queue operations require the authored task".into())};
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::Localization { simulation } = s {
+        let Goal::Localization { definition } = goal else {return Err("Locale/encoding operations require the authored task".into())};
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::WirelessChannels { simulation } = s {
+        let Goal::WirelessChannels { definition } = goal else { return Err("Channel planning requires its authored task".into()) };
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::WlanProfiles { simulation } = s {
+        let Goal::WlanProfiles { definition } = goal else { return Err("WLAN configuration requires its authored task".into()) };
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::HttpCache { simulation } = s {
+        let Goal::HttpCache { definition } = goal else {return Err("Cache replay requires its authored task".into())};
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::ServiceClients { simulation } = s {
+        let Goal::ServiceClients { definition } = goal else {return Err("Service clients require their authored task".into())};
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::ReverseProxy { simulation } = s {
+        let Goal::ReverseProxy { definition } = goal else {return Err("Reverse-proxy routing requires its authored task".into())};
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::ProxyPolicy { simulation } = s {
+        let Goal::ProxyPolicy { definition } = goal else {return Err("Proxy policy requires its authored task".into())};
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::SnmpMonitor { simulation } = s {
+        let Goal::SnmpMonitor { definition } = goal else {return Err("Monitoring configuration requires its authored task".into())};
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::WlanPaths { simulation } = s {
+        let Goal::WlanPaths { definition } = goal else { return Err("AP-path configuration requires its authored task".into()) };
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::Timezone { simulation } = s {
+        let Goal::Timezone { definition } = goal else {return Err("Time-zone operations require the authored task".into())};
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::SourceInstall { simulation } = s {
+        let Goal::SourceInstall { definition } = goal else {return Err("Source-install operations require the authored task".into())};
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::MaintenanceNotice { simulation } = s {
+        let Goal::MaintenanceNotice { definition } = goal else {return Err("Notice operations require the authored task".into())};
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::CapacityPlanning { simulation } = s {
+        let Goal::CapacityPlanning { definition } = goal else {return Err("Planning operations require the authored task".into())};
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::ResourceObservations { simulation } = s {
+        let Goal::ResourceObservations { definition } = goal else {return Err("Observation operations require the authored task".into())};
+        return simulation.execute_reference(definition,input);
+    }
+    if let State::Capacity { simulation } = s {
+        let Goal::Capacity { definition } = goal else {
+            return Err("Capacity operations require their authored task".into());
+        };
+        return simulation.execute_reference(definition, input);
+    }
+    if let State::Links { simulation } = s {
+        let Goal::Links { definition } = goal else {
+            return Err("Link commands require the authored task".into());
+        };
+        return simulation.run(definition, input, false);
+    }
+    if matches!(s, State::DebianSources { .. }) {
+        return match input {
+            "help" => Ok(help(s).into()),
+            "show" => Ok(describe(s)),
+            _ => Err("Use the native simulated source editor; no host APT or command runs".into()),
+        };
+    }
+    if matches!(s, State::ClientNames { .. }) {
+        return match input {
+            "help" => Ok(help(s).into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Use the native simulated name-source editor; no host daemon or command runs"
+                    .into(),
+            ),
+        };
+    }
+    if matches!(s, State::RemovableMounts { .. }) {
+        return match input {
+            "help" => Ok(crate::removable_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Use the native simulated mount-policy editor; no host daemon or command runs"
+                    .into(),
+            ),
+        };
+    }
+    if matches!(s, State::NmProfiles { .. }) {
+        return match input {
+            "help" => Ok(crate::nm_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Use the native simulated network profile editor; no host daemon or command runs"
+                    .into(),
+            ),
+        };
+    }
+    if matches!(s, State::DhcpConfig { .. }) {
+        return match input{"help"=>Ok(crate::dhcp_server_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Use the native simulated DHCP configuration editor; no host daemon or command runs".into())};
+    }
+    if matches!(s, State::Qos { .. }) {
+        return match input {
+            "help" => Ok(crate::qos::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Use the native traffic policy controls; no host networking or IOS command runs"
+                    .into(),
+            ),
+        };
+    }
+    if matches!(s, State::LinuxLogging { .. }) {
+        return match input {
+            "help" => Ok(crate::linux_logging::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => {
+                Err("Use the native simulated selector editor; no host logging commands run".into())
+            }
+        };
+    }
+    if matches!(s, State::HostNetwork { .. }) {
+        return match input {
+            "help" => Ok(help(s).into()),
+            "show" => Ok(describe(s)),
+            _ => Err("Use this task’s simulated terminal and virtual resolver editor".into()),
+        };
+    }
+    if matches!(s, State::Repositories { .. }) {
+        return match input{"help"=>Ok(crate::repository_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Use the native simulated repository editor/query controls; no host package command runs".into())};
+    }
+    if matches!(s, State::MaintenanceNotice { .. }) {
+        return match input {"help"=>Ok(crate::maintenance_notice_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Notice commands require their authored source; no host command runs".into())};
+    }
+    if matches!(s, State::DnsAccess { .. }) {
+        return match input {"help"=>Ok(crate::dns_access_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("DNS-policy commands require their authored source; no host command runs".into())};
+    }
+    if matches!(s, State::PrintQueues { .. }) {
+        return match input {"help"=>Ok(crate::print_queue_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Print-queue commands require their authored source; no host command runs".into())};
+    }
+    if matches!(s, State::Localization { .. }) {
+        return match input {"help"=>Ok(crate::localization_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Locale/encoding commands require their authored source; no host command runs".into())};
+    }
+    if matches!(s, State::WirelessChannels { .. }) {
+        return match input {"help"=>Ok(crate::wireless_channel_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Channel planning requires native controls and its authored task; no host command runs".into())};
+    }
+    if matches!(s, State::WlanProfiles { .. }) {
+        return match input {"help"=>Ok(crate::wlan_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("WLAN configuration requires native controls and its authored task; no host command runs".into())};
+    }
+    if matches!(s, State::HttpCache { .. }) {
+        return match input {"help"=>Ok(crate::http_cache_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Cache policy requires its native workspace and authored task; no host command or network request runs".into())};
+    }
+    if matches!(s, State::ServiceClients { .. }) {
+        return match input {"help"=>Ok(crate::service_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Use the supplied service workspace; no host command runs".into())};
+    }
+    if matches!(s, State::ReverseProxy { .. }) {
+        return match input {"help"=>Ok(crate::reverse_proxy_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Reverse-proxy routing requires its native workspace and authored task; no host command or network request runs".into())};
+    }
+    if matches!(s, State::ProxyPolicy { .. }) {
+        return match input {"help"=>Ok(crate::proxy_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Proxy configuration requires its native workspace and authored task; no host command or network request runs".into())};
+    }
+    if matches!(s, State::SnmpMonitor { .. }) {
+        return match input {"help"=>Ok(crate::snmp_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Monitoring requires its native workspace and authored task; no host command or network request runs".into())};
+    }
+    if matches!(s, State::WlanPaths { .. }) {
+        return match input {"help"=>Ok(crate::wlan_paths_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("AP-path configuration requires native controls and its authored task; no host command runs".into())};
+    }
+    if matches!(s, State::Timezone { .. }) {
+        return match input {"help"=>Ok(crate::timezone_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Time-zone commands require their authored source; no host command runs".into())};
+    }
+    if matches!(s, State::SourceInstall { .. }) {
+        return match input {"help"=>Ok(crate::source_install_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Source-install commands require their authored source; no host command runs".into())};
+    }
+    if matches!(s, State::CapacityPlanning { .. }) {
+        return match input {"help"=>Ok(crate::capacity_planning_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Use the native capacity-planning controls; all operations are simulated".into())};
+    }
+    if matches!(s, State::ResourceObservations { .. }) {
+        return match input {"help"=>Ok(crate::resource_observation_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Use the recorded-host terminal and report controls; no host command runs".into())};
+    }
+    if matches!(s, State::Capacity { .. }) {
+        return match input {
+            "help" => Ok(crate::capacity_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Use the native virtual file table and editor; no host commands run here".into(),
+            ),
+        };
+    }
     if matches!(s, State::PartitionFs { .. }) {
         let (State::PartitionFs { simulation }, Goal::PartitionFs { definition }) = (&*s, goal)
         else {
@@ -800,6 +2030,12 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
             return Err("HSRP changes require the authored task".into());
         };
         return simulation.execute(definition, input, false);
+    }
+    if let State::Syslog { simulation } = s {
+        let Goal::Syslog { definition } = goal else {
+            return Err("Syslog actions require their authored Goal".into());
+        };
+        return crate::syslog_workspace::execute_authored(simulation, definition, input);
     }
     if let State::Ntp { simulation } = s {
         let Goal::Ntp { definition } = goal else {
@@ -1034,6 +2270,271 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if matches!(s,State::LinuxRouter{..}){return Err("Use the source-bound native router workspace; no host command is executed.".into());}
+    if matches!(s,State::LinuxV6{..}){return Err("Use the source-bound native router workspace; no host command is executed.".into());}
+    if matches!(s,State::LinuxServiceRouter{..}){return Err("Use the source-bound native router workspace; no host command is executed.".into());}
+    if matches!(s,State::LinuxV6Administration{..}){return Err("Use the source-bound native router workspace; no host command is executed.".into());}
+    if matches!(s,State::LinuxV6Startup{..}){return Err("Use the source-bound native router workspace; no host command is executed.".into());}
+    if matches!(s,State::IdsRule{..}){return Err("Use the source-bound native rule workspace; no host command is executed.".into());}
+    if matches!(s,State::AuthFilter{..}){return Err("Use the source-bound native filter workspace; no host command is executed.".into());}
+    if matches!(s,State::VpnPoint{..}){return Err("Use the source-bound native peer workspace; no host command is executed.".into());}
+    if matches!(s,State::Poe{..}){return Err("Use the source-bound native power workspace; no host command is executed.".into());}
+    if matches!(s,State::KernelBuild{..}){return Err("Use the source-bound native kernel workspace; no host command is executed.".into());}
+    if matches!(s,State::Dkms{..}){return Err("Use the source-bound native DKMS workspace; no host command is executed.".into());}
+    if matches!(s,State::Initramfs{..}){return Err("Use the source-bound native Early-userspace workspace; no host command is executed.".into());}
+    if matches!(s,State::Pxe{..}){return Err("Use the source-bound native network boot workspace; no host command is executed.".into());}
+    if matches!(s,State::Iscsi{..}){return Err("Use the source-bound native iSCSI workspace; no host command is executed.".into());}
+    if matches!(s,State::AtaSmart{..}){return Err("Use the source-bound native ATA SMART workspace; no host command is executed.".into());}
+    if matches!(s,State::ApacheHttps{..}){return Err("Use the source-bound native Apache HTTPS workspace; no host command is executed.".into());}
+    if matches!(s,State::Desktop{..}){return Err("Use the source-bound native virtual desktop workspace; no host command is executed.".into());}
+    if matches!(s,State::SecurityInvestigation{..}){return Err("Use the source-bound native virtual security investigation workspace; no host command is executed.".into());}
+    if matches!(s,State::AutomationWorkshop{..}){return Err("Use the source-bound native virtual staged network changes workspace; no host command is executed.".into());}
+    if matches!(s,State::ServiceExposure{..}){return Err("Use the source-bound native exposure workspace; no host command is executed.".into());}
+    if matches!(s,State::FtpIdentity{..}){return Err("Use the source-bound native FTP workspace; no host command is executed.".into());}
+    if matches!(s,State::LinuxFlow{..}){return Err("Use the source-bound native router workspace; no host command is executed.".into());}
+    if matches!(s,State::VirtualIsolation{..}){return Err("Use the native represented-network controls; no host command is executed.".into());}
+    if matches!(s,State::SieveFiltering{..}){return Err("Use the source-bound native filter workspace; no host command is executed.".into());}
+    if matches!(s,State::MailboxAdministration{..}){return Err("Use the source-bound native administration workspace; no host command is executed.".into());}
+    if matches!(s,State::MailboxAccess{..}){return Err("Use the source-bound native mail-access workspace; no host command is executed.".into());}
+    if matches!(s,State::SmtpRouting{..}){return Err("Mail actions require their supplied task; no host command is executed.".into());}
+    if matches!(s,State::GuestDrivers{..}){return Err("Guest-image actions require their supplied task; no host command is executed.".into());}
+    if matches!(s,State::SambaShare{..}){return Err("Sharing uses its source-bound virtual files and native controls.".into());}
+    if matches!(s,State::CampusArchitecture{..}){return Err("Campus layout uses its source-bound virtual files and native controls.".into());}
+    if matches!(s,State::NetworkTransfer{..}){return Err("File transfer uses its source-bound virtual files and native controls.".into());}
+    if matches!(s,State::EditorHandover{..}){return Err("Editor handover uses its source-bound setup and native editor.".into());}
+    if matches!(s,State::ModalEditing{..}){return Err("Modal editing uses its source-bound native editor.".into());}
+    if matches!(s,State::SshAccess{..}){return Err("SSH configuration uses its source-bound native workspace.".into());}
+    if matches!(s, State::FileIndex { .. }) {
+        return Err("Private-index work requires its supplied task; no host utility ran".into());
+    }
+    if matches!(s, State::SharedLibraries { .. }) {
+        return Err("Library operations require their authored task; no host utility ran".into());
+    }
+    if matches!(s, State::Raid1 { .. }) {
+        return Err(
+            "Mirror operations require their authored assignment; no host command ran".into(),
+        );
+    }
+
+    if matches!(s, State::StartupFiles { .. }) {
+        return Err(
+            "Use the native startup-file editor and its authored task; no host command was run"
+                .into(),
+        );
+    }
+    if let State::FsIntegrity { simulation } = s {
+        let definition = simulation.definition.clone();
+        return simulation.execute_reference(&definition, input);
+    }
+    if let State::UserMounts { simulation } = s {
+        let raw = input
+            .strip_prefix(crate::user_mounts_workspace::PREFIX)
+            .ok_or("Use the native mount workspace or its declared action codec")?;
+        if raw.len() > 65_536 {
+            return Err("Mount action exceeds its encoded JSON bound".into());
+        }
+        let action = serde_json::from_str(raw)
+            .map_err(|e| format!("Invalid simulated mount action: {e}"))?;
+        return simulation
+            .assignment
+            .apply(&simulation.definition.assignment, action)
+            .map(|effect| effect.explanation().into());
+    }
+    if let State::Environment { simulation } = s {
+        simulation.assignment.edit(input.into())?;
+        return Ok("Setup saved; use the native Run setup + child action.".into());
+    }
+
+    if matches!(s, State::RaidAssembly { .. }) {
+        return match input.trim() { "help"=>Ok(help(s).into()), "show"=>Ok(describe(s)), _=>Err("RAID assembly commands need their supplied task; use the native workspace".into()) };
+    }
+    if matches!(s, State::Autofs { .. }) {
+        return match input.trim() { "help"=>Ok(help(s).into()), "show"=>Ok(describe(s)), _=>Err("AutoFS commands need their supplied task; use the native workspace".into()) };
+    }
+    if matches!(s, State::KernelModules { .. }) {
+        return match input.trim() {
+            "help" => Ok(help(s).into()),
+            "show" => Ok(describe(s)),
+            _ => {
+                Err("Module operations need their supplied task; use the native workspace.".into())
+            }
+        };
+    }
+    if matches!(s, State::RecursiveTree { .. }) {
+        return match input.trim() {
+            "help" => Ok(help(s).into()),
+            "show" => Ok(describe(s)),
+            _ => Err("Recursive file work needs its supplied task; original retained.".into()),
+        };
+    }
+    if matches!(s, State::Transport { .. }) {
+        return match input.trim() {
+            "help" => Ok(help(s).into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Transport settings require their supplied task; use the native workspace.".into(),
+            ),
+        };
+    }
+    if matches!(s, State::DirectoryPolicy { .. }) {
+        return match input.trim() {
+            "help" => Ok(help(s).into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Directory operations require the supplied task; use the simulated terminal."
+                    .into(),
+            ),
+        };
+    }
+    if matches!(s, State::Links { .. }) {
+        return match input.trim() {
+            "help" => Ok(crate::links_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err("Link commands require the supplied goal; use the simulated terminal".into()),
+        };
+    }
+    if let State::MagicSubnet { session } = s {
+        // Declarative pack reachability adapter; the learner uses native fields.
+        let words: Vec<_> = input.split_whitespace().collect();
+        if let ["set", index, value] = words.as_slice() {
+            let i = index
+                .parse::<usize>()
+                .map_err(|_| "Invalid worksheet field")?;
+            if i >= session.stage.fields(session.problem)?.len() || value.len() > 64 {
+                return Err("Invalid worksheet field/value".into());
+            }
+            session.answers[i] = value.to_string();
+            return Ok("Worksheet value updated".into());
+        }
+        return Err("Use the native worksheet fields; no shell runs here".into());
+    }
+
+    if matches!(s, State::DebianSources { .. }) {
+        return match input {
+            "help" => Ok(help(s).into()),
+            "show" => Ok(describe(s)),
+            _ => Err("Use the native simulated source editor; no host APT or command runs".into()),
+        };
+    }
+    if matches!(s, State::ClientNames { .. }) {
+        return match input {
+            "help" => Ok(help(s).into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Use the native simulated name-source editor; no host daemon or command runs"
+                    .into(),
+            ),
+        };
+    }
+    if matches!(s, State::RemovableMounts { .. }) {
+        return match input {
+            "help" => Ok(crate::removable_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Use the native simulated mount-policy editor; no host daemon or command runs"
+                    .into(),
+            ),
+        };
+    }
+    if matches!(s, State::NmProfiles { .. }) {
+        return match input {
+            "help" => Ok(crate::nm_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Use the native simulated network profile editor; no host daemon or command runs"
+                    .into(),
+            ),
+        };
+    }
+    if matches!(s, State::DhcpConfig { .. }) {
+        return match input{"help"=>Ok(crate::dhcp_server_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Use the native simulated DHCP configuration editor; no host daemon or command runs".into())};
+    }
+    if matches!(s, State::Qos { .. }) {
+        return match input {
+            "help" => Ok(crate::qos::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Use the native traffic policy controls; no host networking or IOS command runs"
+                    .into(),
+            ),
+        };
+    }
+    if matches!(s, State::LinuxLogging { .. }) {
+        return match input {
+            "help" => Ok(crate::linux_logging::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => {
+                Err("Use the native simulated selector editor; no host logging commands run".into())
+            }
+        };
+    }
+    if matches!(s, State::HostNetwork { .. }) {
+        return match input {
+            "help" => Ok(help(s).into()),
+            "show" => Ok(describe(s)),
+            _ => Err("Use this task’s simulated terminal and virtual resolver editor".into()),
+        };
+    }
+    if matches!(s, State::Repositories { .. }) {
+        return match input{"help"=>Ok(crate::repository_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Use the native simulated repository editor/query controls; no host package command runs".into())};
+    }
+    if matches!(s, State::MaintenanceNotice { .. }) {
+        return match input {"help"=>Ok(crate::maintenance_notice_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Notice commands require their authored source; no host command runs".into())};
+    }
+    if matches!(s, State::DnsAccess { .. }) {
+        return match input {"help"=>Ok(crate::dns_access_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("DNS-policy commands require their authored source; no host command runs".into())};
+    }
+    if matches!(s, State::PrintQueues { .. }) {
+        return match input {"help"=>Ok(crate::print_queue_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Print-queue commands require their authored source; no host command runs".into())};
+    }
+    if matches!(s, State::Localization { .. }) {
+        return match input {"help"=>Ok(crate::localization_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Locale/encoding commands require their authored source; no host command runs".into())};
+    }
+    if matches!(s, State::WirelessChannels { .. }) {
+        return match input {"help"=>Ok(crate::wireless_channel_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Channel planning requires native controls and its authored task; no host command runs".into())};
+    }
+    if matches!(s, State::WlanProfiles { .. }) {
+        return match input {"help"=>Ok(crate::wlan_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("WLAN configuration requires native controls and its authored task; no host command runs".into())};
+    }
+    if matches!(s, State::HttpCache { .. }) {
+        return match input {"help"=>Ok(crate::http_cache_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Cache policy requires its native workspace and authored task; no host command or network request runs".into())};
+    }
+    if matches!(s, State::ServiceClients { .. }) {
+        return match input {"help"=>Ok(crate::service_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Use the supplied service workspace; no host command runs".into())};
+    }
+    if matches!(s, State::ReverseProxy { .. }) {
+        return match input {"help"=>Ok(crate::reverse_proxy_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Reverse-proxy routing requires its native workspace and authored task; no host command or network request runs".into())};
+    }
+    if matches!(s, State::ProxyPolicy { .. }) {
+        return match input {"help"=>Ok(crate::proxy_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Proxy configuration requires its native workspace and authored task; no host command or network request runs".into())};
+    }
+    if matches!(s, State::SnmpMonitor { .. }) {
+        return match input {"help"=>Ok(crate::snmp_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Monitoring requires its native workspace and authored task; no host command or network request runs".into())};
+    }
+    if matches!(s, State::WlanPaths { .. }) {
+        return match input {"help"=>Ok(crate::wlan_paths_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("AP-path configuration requires native controls and its authored task; no host command runs".into())};
+    }
+    if matches!(s, State::Timezone { .. }) {
+        return match input {"help"=>Ok(crate::timezone_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Time-zone commands require their authored source; no host command runs".into())};
+    }
+    if matches!(s, State::SourceInstall { .. }) {
+        return match input {"help"=>Ok(crate::source_install_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Source-install commands require their authored source; no host command runs".into())};
+    }
+    if matches!(s, State::CapacityPlanning { .. }) {
+        return match input {"help"=>Ok(crate::capacity_planning_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Use the native capacity-planning controls; all operations are simulated".into())};
+    }
+    if matches!(s, State::ResourceObservations { .. }) {
+        return match input {"help"=>Ok(crate::resource_observation_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Use the recorded-host terminal and report controls; no host command runs".into())};
+    }
+    if matches!(s, State::Capacity { .. }) {
+        return match input {
+            "help" => Ok(crate::capacity_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Use the native virtual file table and editor; no host commands run here".into(),
+            ),
+        };
+    }
     if matches!(s, State::PartitionFs { .. }) {
         return match input { "help" => Ok(crate::partition_fs_workspace::HELP.into()), "show" => Ok(describe(s)), _ => Err("Use the virtual disk table and explicit configuration actions; this workspace does not run parted, mkfs, mount or host disk commands".into()) };
     }
@@ -1046,6 +2547,13 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
             ),
         };
     }
+    if matches!(s, State::Syslog { .. }) {
+        return match input {
+            "help" => Ok(crate::syslog_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err("Use this activity's native settings and event controls".into()),
+        };
+    }
     if matches!(s, State::Ntp { .. }) {
         return match input {
             "help" => Ok(crate::ntp::HELP.into()),
@@ -1053,9 +2561,9 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
             _ => Err("NTP changes require their authored Goal".into()),
         };
     }
-    if matches!(s, State::Lvm { .. }) {
+    if let State::Lvm { simulation } = s {
         return match input {
-            "help" => Ok(crate::lvm::HELP.into()),
+            "help" => Ok(simulation.current.command_help().into()),
             "show" => Ok(describe(s)),
             _ => Err("LVM changes require the supplied task context".into()),
         };
@@ -1257,6 +2765,12 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return crate::ipv4_routing_workspace::adapter(topology, input);
     }
     if let State::Filesystem { tree } = s {
+        if tree.command_location.is_some() {
+            return Err(
+                "Command-location work needs its supplied task before commands or help can run"
+                    .into(),
+            );
+        }
         if input.len() > 4096 {
             return Err("Command exceeds 4,096 bytes".into());
         }
@@ -1297,9 +2811,108 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::PartitionFs { .. }
+        State::CopiedJournal { .. }
+        | State::JsonInventory { .. }
+        | State::RestController { .. }
+        | State::DevicePath { .. }
+        | State::LocalMail { .. }
+        | State::Chrony { .. }
+        | State::GrubOnce { .. }
+        | State::EfiLoader { .. }
+        | State::BiosLoader { .. }
+        | State::BootEntry { .. }
+        | State::FileIndex { .. }
+        | State::SharedLibraries { .. }
+        | State::Raid1 { .. }
+        | State::StartupFiles { .. }
+        | State::FsIntegrity { .. }
+        | State::UserMounts { .. }
+        | State::Environment { .. }
+        | State::DebianSources { .. }
+        | State::ClientNames { .. }
+        | State::RemovableMounts { .. }
+        | State::NmProfiles { .. }
+        | State::PamStack { .. }
+        | State::Aging { .. }
+        | State::PortSecurity { .. }
+        | State::DhcpSnooping { .. }
+        | State::ArpInspection { .. }
+        | State::ManagementPolicy { .. }
+        | State::LocalAccess { .. }
+        | State::AaaAccess { .. }
+        | State::LdapClient { .. }
+        | State::LdapAccess { .. }
+        | State::LdapSchema { .. }
+        | State::LdapSchemaQuery { .. }
+        | State::LdapPassword { .. }
+        | State::LdapChanges { .. }
+        | State::DhcpConfig { .. }
+        | State::Qos { .. }
+        | State::LinuxLogging { .. }
+        | State::VirtualIsolation { .. }
+        | State::SieveFiltering { .. }
+        | State::MailboxAccess { .. }
+        | State::LinuxRouter { .. }
+        | State::LinuxV6 { .. }
+        | State::LinuxServiceRouter { .. }
+        | State::LinuxV6Administration { .. }
+        | State::LinuxV6Startup { .. }
+        | State::IdsRule { .. }
+        | State::AuthFilter { .. }
+        | State::VpnPoint { .. }
+        | State::Poe { .. }
+        | State::KernelBuild { .. }
+        | State::Dkms { .. }
+        | State::Initramfs { .. }
+        | State::Pxe { .. }
+        | State::Iscsi { .. }
+        | State::AtaSmart { .. }
+        | State::ApacheHttps { .. }
+        | State::Desktop { .. }
+        | State::SecurityInvestigation { .. }
+        | State::AutomationWorkshop { .. }
+        | State::ServiceExposure { .. }
+        | State::FtpIdentity { .. }
+        | State::LinuxFlow { .. }
+        | State::MailboxAdministration { .. }
+        | State::SmtpRouting { .. }
+        | State::GuestDrivers { .. }
+        | State::SambaShare { .. }
+        | State::CampusArchitecture { .. }
+        | State::NetworkTransfer { .. }
+        | State::EditorHandover { .. }
+        | State::ModalEditing { .. }
+        | State::SshAccess { .. }
+        | State::HostNetwork { .. }
+        | State::Repositories { .. }
+        | State::Capacity { .. }
+        | State::DnsAccess { .. }
+        | State::PrintQueues { .. }
+        | State::Localization { .. }
+        | State::WirelessChannels { .. }
+        | State::WlanProfiles { .. }
+        | State::HttpCache { .. }
+        | State::ServiceClients { .. }
+        | State::ReverseProxy { .. }
+        | State::ProxyPolicy { .. }
+        | State::SnmpMonitor { .. }
+        | State::WlanPaths { .. }
+        | State::Timezone { .. }
+        | State::SourceInstall { .. }
+        | State::MaintenanceNotice { .. }
+        | State::CapacityPlanning { .. }
+        | State::ResourceObservations { .. }
+        | State::RaidAssembly { .. }
+        | State::Autofs { .. }
+        | State::KernelModules { .. }
+        | State::RecursiveTree { .. }
+        | State::Transport { .. }
+        | State::DirectoryPolicy { .. }
+        | State::Links { .. }
+        | State::PartitionFs { .. }
         | State::Hsrp { .. }
         | State::Ntp { .. }
+        | State::Syslog { .. }
         | State::Lvm { .. }
         | State::PhysicalLink { .. }
         | State::OneOff { .. }
@@ -1327,6 +2940,7 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         | State::Ipv4Routing { .. }
         | State::Filesystem { .. }
         | State::Script { .. } => unreachable!(),
+        State::MagicSubnet { .. } => unreachable!(),
         State::Subnet {
             answers, second, ..
         } => match v.as_slice() {
@@ -1754,6 +3368,105 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::StartupFiles {..} => "Simulated Bash startup files: bounded in-process settings and new-program verification; no host Bash or profiles".into(),
+        State::FileIndex {..} => "Saved private index, virtual configuration and files; use the native editor and simulated terminal".into(),
+        State::SharedLibraries {..} => "Supplied library dependency metadata, simulated search settings and virtual cache; no real ELF or utility execution".into(),
+        State::Raid1 {..} => "Simulated two-member RAID1: supplied devices, retained data and explicit bounded recovery; no host devices".into(),
+        State::FsIntegrity {..} => "Simulated filesystem consistency: supplied volumes, derived metadata findings and retained data; no host filesystem access".into(),
+        State::UserMounts {..} => "Simulated mount policy, supplied callers and replayed mount actions; no host mounts".into(),
+        State::Environment {..} => "Simulated parent variables and a supplied child report; no host environment or processes".into(),
+        State::DebianSources {..} => "Saved virtual source selection and supplied cached binary-index snapshots; no host files, APT or transport".into(),
+        State::ClientNames { .. } => "Virtual local names and supplied DNS snapshots; no host resolver or commands".into(),
+        State::RemovableMounts { .. } => "Virtual mount policy and supplied media requests; no host commands or actual boot".into(),
+        State::NmProfiles{..}=>"Virtual saved Ethernet profiles and bounded startup projections; no host daemon or files".into(),
+        State::PamStack{..}=>"Virtual PAM auth rules and supplied synthetic module results; no host authentication or credentials".into(),
+        State::Aging{..}=>"Virtual non-secret aging records and supplied UTC policy observations; no host accounts or authentication".into(),
+        State::PortSecurity{..}=>"Virtual secure access ports and actual bounded metadata forwarding; no host interfaces, packets or IOS process".into(),
+        State::DhcpSnooping{..}=>"Virtual DHCP admission, observed initial exchanges and expiring lease records; no host packets, services or IOS process".into(),
+        State::ArpInspection{..}=>"Virtual ARP admission, DHCP address records and exact address-list policies; no host packets, ARP caches or IOS process".into(),
+        State::ManagementPolicy{..}=>"Virtual router-local IPv4 paths and VTY policy before authentication; no real SSH, crypto, host commands or network".into(),
+        State::LocalAccess{..}=>"Virtual management paths, incoming policy and local-case training records/EXEC levels; no host authentication, SSH process or crypto".into(),
+        State::AaaAccess{..}=>"Virtual incoming paths, ordered training identity methods and explicit local EXEC profiles; no real AAA protocol, service, host login or crypto".into(),
+        State::LdapClient{..}=>"Virtual directory entries, client defaults and bounded in-process search; no host files, processes, real directory connection or authentication".into(),
+        State::LdapAccess{..}=>"Virtual ordered ACLs and actual modeled contact changes; no host server, command, files or network".into(),
+        State::LdapSchema{..}=>"Virtual schema registration and actual typed directory entries; no host files, commands, server or network".into(),
+        State::CopiedJournal { .. } => "Immutable copied journal and current simulated incident query".into(),
+        State::JsonInventory { .. } => "Edited JSON inventory and applied simulated access-port behavior".into(),
+        State::RestController { .. } => "Edited REST controller and applied simulated access-port behavior".into(),
+        State::DevicePath { .. } => "Virtual cable endpoints, Ethernet domains and routed request/reply paths".into(),
+        State::LocalMail { .. } => "Saved virtual mail files, separate alias lookup and sample delivery outcomes".into(),
+        State::Chrony { .. } => "Saved chrony configuration and supplied simulated source observations".into(),
+        State::GrubOnce { .. } => "Temporary GRUB linux line, compared with ordinary startup from the saved menu".into(),
+        State::EfiLoader { .. } => "Supplied EFI partition, loader files, firmware order and hypothetical Linux handoff".into(),
+        State::BiosLoader { .. } => "Supplied BIOS disk, virtual loader installation and hypothetical boot chain; no firmware, host disks or subprocesses".into(),
+        State::BootEntry { .. } => "Supplied boot-entry text and hypothetical early-root handoff; no reboot, host commands or firmware execution".into(),
+        State::LdapSchemaQuery{..}=>"Virtual schema, actual entries and bounded filters; no full search, host commands, server or network".into(),
+        State::LdapPassword{..}=>"Virtual protected authentication, client settings and fictional credential changes; no actual TLS, password store, host command or network".into(),
+        State::LdapChanges{..}=>"Virtual directory entries and bounded LDIF editing with supplied delegated rights; no real bind, host files, subprocesses or network".into(),
+        State::DhcpConfig{..}=>"Virtual DHCP configuration and bounded client cases; no daemon, network or host files".into(),
+        State::Qos{..}=>"Virtual traffic labels, finite waiting queues and supplied packet replay; no real packets or network".into(),
+        State::LinuxLogging{..}=>"Virtual classic logging selector fragment and sample replay; no daemon, host files or network".into(),
+        State::VirtualIsolation{..}=>crate::virtual_isolation_source::HELP.into(),
+        State::SieveFiltering{..}=>crate::sieve_source::HELP.into(),
+        State::MailboxAccess{..}=>crate::mailbox_source::HELP.into(),
+        State::MailboxAdministration{..}=>crate::mailbox_source::ADMIN_HELP.into(),
+        State::LinuxRouter{..}=>crate::linux_router_source::HELP.into(),
+        State::LinuxV6{..}=>crate::linux_v6_source::HELP.into(),
+        State::LinuxServiceRouter{..}=>crate::linux_service_router_source::HELP.into(),
+        State::LinuxV6Administration{..}=>crate::linux_v6_admin_source::HELP.into(),
+        State::LinuxV6Startup{..}=>crate::linux_v6_startup_source::HELP.into(),
+        State::IdsRule{..}=>crate::ids_rule_source::HELP.into(),
+        State::AuthFilter{..}=>crate::auth_filter_source::HELP.into(),
+        State::VpnPoint{..}=>crate::vpn_point_source::HELP.into(),
+        State::Poe{..}=>crate::poe_source::HELP.into(),
+        State::KernelBuild{..}=>crate::kernel_source::HELP.into(),
+        State::Dkms{..}=>crate::dkms_source::HELP.into(),
+        State::Initramfs{..}=>crate::initramfs_source::HELP.into(),
+        State::Pxe{..}=>crate::pxe::source::HELP.into(),
+        State::Iscsi{..}=>crate::iscsi::source::HELP.into(),
+        State::AtaSmart{..}=>crate::ata_smart::source::HELP.into(),
+        State::ApacheHttps{..}=>crate::apache_https::source::HELP.into(),
+        State::Desktop{..}=>crate::desktop::source::HELP.into(),
+        State::SecurityInvestigation{..}=>crate::security_investigation::source::HELP.into(),
+        State::AutomationWorkshop{..}=>crate::automation_workshop::source::HELP.into(),
+        State::ServiceExposure{..}=>crate::service_exposure_source::HELP.into(),
+        State::FtpIdentity{..}=>crate::ftp_identity_source::HELP.into(),
+        State::LinuxFlow{..}=>crate::linux_flow_source::HELP.into(),
+        State::SmtpRouting{..}=>"Simulated mail configuration, relay policy and sample queue".into(),
+        State::GuestDrivers{..}=>"Simulated guest-image files and loaded driver state".into(),
+        State::SambaShare{..}=>crate::samba_share_source::HELP.into(),
+        State::CampusArchitecture{..}=>crate::network_architecture::HELP.into(),
+        State::NetworkTransfer{..}=>"Bounded virtual file transfers over simulated routes and ACLs; TFTP octet and passive FTP only, no host client or real target".into(),
+        State::EditorHandover{..}=>"Bounded simulated environment setup and inherited editor selection, followed by virtual-file editing; no host program or environment change".into(),
+        State::ModalEditing{..}=>"Supplied virtual text files and bounded modal buffer; no host editor, files, shell or external commands".into(),
+        State::SshAccess{..}=>"Supplied SSH public identities, virtual key files and supported policy/trust checks; no actual SSH, private keys, crypto verification or host access".into(),
+        State::HostNetwork{simulation}=>if simulation.assignment.world.profile.ipv6.is_some(){"Virtual Linux dual-stack interfaces and separate IPv4/IPv6 main-table routes; no real packets, host networking or files".into()}else{"Virtual Linux IPv4 interfaces, main-table routes and resolver inputs; no host networking or files".into()},
+        State::Repositories{..}=>"Supplied virtual repositories, cached snapshots and exact-name candidate queries; no real transport or installation".into(),
+        State::MaintenanceNotice {..}=>"Local maintenance notices · supplied sessions and simulated timing".into(),
+        State::DnsAccess {..}=>"Simulated DNS client policies · saved/live configuration, cache and zone copies".into(),
+        State::PrintQueues {..}=>"Supplied print queues · virtual printer and request state".into(),
+        State::Localization {..}=>"Supplied locale settings and virtual byte documents".into(),
+        State::WirelessChannels {..}=>"Supplied radio channels and finite survey relationships".into(),
+        State::WlanProfiles {..}=>"Supplied WLAN and client configuration compatibility · no radio or encryption operation".into(),
+        State::HttpCache {..}=>"Virtual shared HTTP cache · supplied request traces, no host or network operation".into(),
+        State::ServiceClients {..}=>"Virtual service names and clients · supplied files/listeners, no host lookup or network operation".into(),
+        State::ReverseProxy {..}=>"Virtual reverse-proxy routing · supplied paths, no host listener or network operation".into(),
+        State::ProxyPolicy {..}=>"Virtual proxy access policy · supplied requests, no host or network operation".into(),
+        State::SnmpMonitor {..}=>"Virtual MIB monitoring · supplied snapshots only, no host or network operation".into(),
+        State::WlanPaths {..}=>"AP/controller VLAN forwarding paths · no controller join, radio or host operation".into(),
+        State::Timezone {..}=>"Supplied time zones and immutable virtual UTC instants".into(),
+        State::SourceInstall {..}=>"Supplied source project · virtual build and staging state".into(),
+        State::CapacityPlanning {..}=>"Capacity planning · supplied observations, projections and workload tests".into(),
+        State::ResourceObservations {..}=>"Recorded-host resource investigation · supplied counters and verified reports; no host reads".into(),
+        State::Capacity {..}=>"Virtual filesystem capacity · blocks, inodes and ordinary availability; no host disk operations".into(),
+        State::RaidAssembly { .. } => "Supplied clean RAID1 member metadata, saved assembly policy and active original data; no host files, devices or processes".into(),
+        State::Autofs { .. } => "Simulated local-file AutoFS maps, demand mounts and nonbusy idle checks; no host daemon, files or commands".into(),
+        State::KernelModules { .. } => "Simulated supplied loadable modules, saved options and effective state; no host kernel or commands".into(),
+        State::RecursiveTree { .. } => "Simulated ordinary directory transfer and retirement; no host files or commands".into(),
+        State::Transport { .. } => "Simulated TCP/UDP endpoints, routed packet traces and ACL configuration; no host sockets or commands".into(),
+        State::DirectoryPolicy { .. } => "Simulated shared folders, ordinary participants and restricted deletion; no host accounts or files".into(),
+        State::Links { .. } => "Simulated file names, inodes and symbolic links; fixed virtual directories, no host filesystem access".into(),
+        State::MagicSubnet { session } => format!("IPv4 subnet worksheet · {}/{}",session.problem.ip,session.problem.prefix),
         State::PartitionFs { simulation } => format!(
             "Virtual GPT/ext4/swap preparation · {} supplied disks · applied state and separate unapplied drafts; no real devices",
             simulation.current.disks.len()
@@ -1763,6 +3476,14 @@ pub fn describe(s: &State) -> String {
             simulation.current.active(),
             simulation.current.standby(),
             simulation.current.virtual_ip()
+        ),
+        State::Syslog { simulation } => format!(
+            "Native virtual syslog policy: {}. Use the settings and event controls; historical logs are not current-policy proof.",
+            if simulation.validate().is_ok() {
+                "bounded supplied workspace"
+            } else {
+                "invalid retained workspace"
+            }
         ),
         State::Ntp { simulation } => format!(
             "Virtual single-upstream NTP · {} supplied nodes · read-only reference/delivery facts; no host clock or packets",

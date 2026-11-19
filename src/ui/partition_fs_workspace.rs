@@ -4,6 +4,7 @@ use dlms_learning_lab::{
     engine::State, partition_fs as core, partition_fs_workspace as work, script_teaching::View,
 };
 use work::binding;
+mod mbr;
 #[derive(Default)]
 pub(super) struct Metrics {
     pub controls: Vec<(String, egui::Rect, egui::Rect)>,
@@ -12,10 +13,12 @@ pub(super) struct Metrics {
     pub rows: Vec<(bool, egui::Rect)>,
     pub table: Option<egui::Rect>,
     pub goal: Option<egui::Rect>,
+    pub introduction: Option<(egui::Rect, egui::Rect)>,
     pub notice: Option<egui::Rect>,
     pub field_text: Vec<(String, egui::Rect, egui::Rect)>,
     pub help_bodies: Vec<(String, egui::Rect, egui::Rect)>,
     pub text_rects: Vec<(String, egui::Rect, egui::Rect)>,
+    pub files_viewport: Option<egui::Rect>,
     capture_text: bool,
     #[cfg(test)]
     pub painted_text: Vec<String>,
@@ -235,6 +238,7 @@ fn signature(p: &core::Partition) -> String {
         core::Content::Foreign { description } => format!("Protected signature: {description}"),
         core::Content::Ext4 { label, .. } => format!("ext4 · label {label}"),
         core::Content::Swap { label, .. } => format!("swap · label {label}"),
+        core::Content::Fat32 { volume } => format!("FAT32 · label {}", volume.label),
     }
 }
 fn table(ui: &mut egui::Ui, m: &mut Metrics, path: &str, d: &core::Disk) {
@@ -347,20 +351,49 @@ impl LabApp {
             "Virtual disks only · configuration changes never touch your computer.",
         );
         if view == View::Introduction {
-            line(
+            let intro = lesson_presentation::concepts(
                 ui,
-                &mut self.metrics.partition_fs,
+                &source,
                 &d.lesson.prerequisite_note,
+                d.lesson
+                    .concepts
+                    .iter()
+                    .map(|c| (c.title.clone(), c.text.clone())),
             );
-            for c in &d.lesson.concepts {
-                ui.strong(&c.title);
-                line(ui, &mut self.metrics.partition_fs, &c.text);
+            self.metrics.partition_fs.introduction = Some((intro.objective.rect, ui.clip_rect()));
+            if self.metrics.partition_fs.capture_text {
+                let entry = lesson_presentation::entry(&source);
+                self.metrics.partition_fs.text_rects.push((
+                    entry
+                        .map_or(source.summary.as_str(), |e| e.goal.as_str())
+                        .into(),
+                    intro.objective.rect,
+                    ui.clip_rect(),
+                ));
+                self.metrics.partition_fs.text_rects.push((
+                    entry
+                        .filter(|e| !e.context.is_empty())
+                        .map_or(d.lesson.prerequisite_note.as_str(), |e| e.context.as_str())
+                        .into(),
+                    intro.context.rect,
+                    ui.clip_rect(),
+                ));
             }
-            line(
-                ui,
-                &mut self.metrics.partition_fs,
-                "Protect the supplied data before adding anything. The model cannot delete, resize or overwrite. In practice, a valid unwanted allocation is repaired by Reset practice and manual replay; reset never affects the assignment.",
-            );
+            lesson_presentation::worked(ui, &d.lesson.description);
+            if d.lesson.fixture.mbr_profile.is_some() {
+                for step in &d.lesson.worked {
+                    lesson_presentation::command(
+                        ui,
+                        &step.operation.description(),
+                        &step.explanation,
+                    );
+                }
+            } else {
+                lesson_presentation::worked_rows(ui, &source);
+                if d.plan.layout.is_some() {
+                    self.metrics.partition_fs.controls.push(("worked-end".into(),egui::Rect::from_min_size(ui.cursor().min,egui::vec2(1.,1.)),ui.clip_rect()));
+                }
+            }
         } else {
             let editor = if practice {
                 &w.example_editor
@@ -368,20 +401,33 @@ impl LabApp {
                 &w.assignment_editor
             };
             let world = if practice { &w.example } else { &w.current };
+            let is_mbr = world.mbr_profile.is_some();
 
             let checked = if practice {
                 w.example_checked
             } else {
                 w.checked
             };
-            let goal = ui.label(if practice {
-                &d.lesson.description
-            } else {
-                &source.objective
-            });
-            self.metrics.partition_fs.goal = Some(goal.rect);
             let plan = if practice { &d.lesson.plan } else { &d.plan };
-            for target in &plan.targets {
+            let layout_lesson =
+                plan.layout.is_some() && lesson_presentation::entry(&source).is_some();
+            let goal = if practice {
+                let step = if !layout_lesson || w.example == d.lesson.fixture {
+                    0
+                } else if d.practice_checks(w).iter().all(|check| check.0) {
+                    2
+                } else {
+                    1
+                };
+                lesson_presentation::practice_step(ui, &source, step);
+                lesson_presentation::prose(ui, &d.lesson.description)
+            } else {
+                lesson_presentation::assignment(ui, &source)
+            };
+            self.metrics.partition_fs.goal = Some(goal.rect);
+            // Reviewed layout checklists already contain every typed target and
+            // relationship. Preserve the old preparation screens verbatim.
+            for target in plan.targets.iter().filter(|_| !layout_lesson) {
                 let content = match &target.content {
                     work::DesiredContent::Blank => "unformatted content".into(),
                     work::DesiredContent::Ext4 { label } => format!(
@@ -418,12 +464,29 @@ impl LabApp {
                     ),
                 );
             }
+            if let Some(policy) = &plan.layout
+                && !layout_lesson
+            {
+                for rule in &policy.rules {
+                    let text = match rule {
+                        work::layout::Rule::AdjacentFree {
+                            target,
+                            minimum_bytes,
+                        } => format!(
+                            "{target}: keep at least {} unused directly after its end.",
+                            capacity(*minimum_bytes)
+                        ),
+                        work::layout::Rule::SeparateDisks { first, second } => {
+                            format!("Place {first} and {second} on different supplied disks.")
+                        }
+                    };
+                    line(ui, &mut self.metrics.partition_fs, text);
+                }
+            }
             if practice {
-                line(
-                    ui,
-                    &mut self.metrics.partition_fs,
-                    "Independent practice. Fill a worked step, then choose its explicit action. Filling never applies it. Reset practice restores only this example; replay the steps yourself.",
-                );
+                if !layout_lesson {
+                    lesson_presentation::practice_step(ui, &source, 1);
+                }
                 ui.add_enabled_ui(actions, |ui| {
                     let pick = controls::dropdown(
                         ui,
@@ -477,15 +540,37 @@ impl LabApp {
                     &mut self.metrics.partition_fs,
                     &d.lesson.worked[w.selected_example].explanation,
                 );
-                line(ui, &mut self.metrics.partition_fs, &d.lesson.try_change);
-                line(
-                    ui,
-                    &mut self.metrics.partition_fs,
-                    format!(
-                        "Practice experiment: {}. Use its explicit native action; Reset practice then replay the worked steps to repair.",
-                        d.lesson.experiment.description()
-                    ),
-                );
+                if is_mbr || layout_lesson {
+                    let extra = ui
+                        .add_enabled_ui(actions, |ui| {
+                            controls::collapsing_header(ui, "Explore after the worked example")
+                                .show(ui, |ui| {
+                                    line(ui, &mut self.metrics.partition_fs, &d.lesson.try_change);
+                                    line(
+                                        ui,
+                                        &mut self.metrics.partition_fs,
+                                        d.lesson.experiment.description(),
+                                    );
+                                })
+                        })
+                        .inner;
+                    guidance |= guidance_intent(ui, &extra.header_response);
+                    self.metrics.partition_fs.controls.push((
+                        "experiment".into(),
+                        extra.header_response.rect,
+                        ui.clip_rect(),
+                    ));
+                } else {
+                    line(ui, &mut self.metrics.partition_fs, &d.lesson.try_change);
+                    line(
+                        ui,
+                        &mut self.metrics.partition_fs,
+                        format!(
+                            "Practice experiment: {}. Use its explicit native action; Reset practice then replay the worked steps to repair.",
+                            d.lesson.experiment.description()
+                        ),
+                    );
+                }
             }
             ui.add_enabled_ui(actions, |ui| {
                 let picker = controls::dropdown(
@@ -514,12 +599,21 @@ impl LabApp {
                     ui.clip_rect(),
                 ));
             });
-            table(
-                ui,
-                &mut self.metrics.partition_fs,
-                &editor.selected,
-                &world.disks[&editor.selected],
-            );
+            if is_mbr {
+                mbr::table(
+                    ui,
+                    &mut self.metrics.partition_fs,
+                    &editor.selected,
+                    &world.disks[&editor.selected],
+                );
+            } else {
+                table(
+                    ui,
+                    &mut self.metrics.partition_fs,
+                    &editor.selected,
+                    &world.disks[&editor.selected],
+                );
+            }
             let old_draft = &editor.drafts[&editor.selected];
             let mut draft = old_draft.clone();
             line(
@@ -541,14 +635,18 @@ impl LabApp {
                 self.partition_fs_presentation.generation[usize::from(practice)],
             ));
             let m = &mut self.metrics.partition_fs;
-            field(
-                ui,
-                m,
-                ("name", "Partition name (36 bytes)", 36, salt.with("name")),
-                &mut draft.name,
-                active,
-                &mut edits,
-            );
+            if is_mbr {
+                mbr::role(ui, m, salt, &mut draft, actions);
+            } else {
+                field(
+                    ui,
+                    m,
+                    ("name", "Partition name (36 bytes)", 36, salt.with("name")),
+                    &mut draft.name,
+                    active,
+                    &mut edits,
+                );
+            }
             field(
                 ui,
                 m,
@@ -565,12 +663,17 @@ impl LabApp {
                 active,
                 &mut edits,
             );
-            ui.add_enabled_ui(actions, |ui| {
+            let container_role = draft.mbr_role == Some(core::mbr::Kind::Extended);
+            ui.add_enabled_ui(actions && !container_role, |ui| {
                 let pick = controls::dropdown(ui, salt.with("hint"), ui.available_width())
-                    .selected_text(format!(
-                        "Partition type hint: {}",
-                        work::type_hint_name(draft.type_hint)
-                    ))
+                    .selected_text(if container_role {
+                        "Container · no filesystem type hint".into()
+                    } else {
+                        format!(
+                            "Partition type hint: {}",
+                            work::type_hint_name(draft.type_hint)
+                        )
+                    })
                     .show_ui(ui, |ui| {
                         controls::fit_popup_contents(ui);
                         for value in [core::TypeHint::LinuxData, core::TypeHint::LinuxSwap] {
@@ -586,11 +689,29 @@ impl LabApp {
                 m.controls
                     .push(("hint".into(), pick.response.rect, ui.clip_rect()));
             });
+            let selected_disk = &world.disks[&editor.selected];
+            let mbr_editable = selected_disk.writable
+                && !selected_disk.in_use
+                && !selected_disk.occupied_without_table;
+            let mbr_create =
+                mbr_editable && selected_disk.table.is_none() && selected_disk.mbr.is_none();
+            let mbr_add = mbr_editable && selected_disk.mbr.is_some();
             ui.horizontal_wrapped(|ui| {
-                if control(ui, m, "create-gpt", "Create GPT on blank disk", actions) {
+                let (key, label) = if is_mbr {
+                    ("create-mbr", "Create MBR on blank disk")
+                } else {
+                    ("create-gpt", "Create GPT on blank disk")
+                };
+                if control(ui, m, key, label, actions && (!is_mbr || mbr_create)) {
                     action = Some(Action::Create);
                 }
-                if control(ui, m, "add", "Add partition using draft", actions) {
+                if control(
+                    ui,
+                    m,
+                    "add",
+                    "Add partition using draft",
+                    actions && (!is_mbr || mbr_add),
+                ) {
                     action = Some(Action::Add);
                 }
             });
@@ -604,19 +725,33 @@ impl LabApp {
                     )
                     .show_ui(ui, |ui| {
                         controls::fit_popup_contents(ui);
-                        if let Some(t) = &world.disks[&editor.selected].table {
-                            for part in &t.partitions {
-                                let r = ui.selectable_value(
-                                    &mut draft.selected_partition,
-                                    Some(part.number),
-                                    format!("{}{} · {}", editor.selected, part.number, part.name),
-                                );
-                                m.choices.push((
-                                    format!("partition-{}", part.number),
-                                    r.rect,
-                                    ui.clip_rect(),
-                                ));
-                            }
+                        let disk = &world.disks[&editor.selected];
+                        for part in disk.partitions() {
+                            let r = ui.selectable_value(
+                                &mut draft.selected_partition,
+                                Some(part.number),
+                                format!(
+                                    "{}{} · {}",
+                                    editor.selected,
+                                    part.number,
+                                    if let Some(t) = &disk.mbr {
+                                        work::mbr::role_name(
+                                            t.entries
+                                                .iter()
+                                                .find(|e| e.partition.number == part.number)
+                                                .unwrap()
+                                                .kind,
+                                        )
+                                    } else {
+                                        part.name.as_str()
+                                    }
+                                ),
+                            );
+                            m.choices.push((
+                                format!("partition-{}", part.number),
+                                r.rect,
+                                ui.clip_rect(),
+                            ));
                         }
                     });
                 m.controls
@@ -662,13 +797,44 @@ impl LabApp {
                 active,
                 &mut edits,
             );
+            if practice && !layout_lesson {
+                lesson_presentation::practice_step(ui, &source, 2);
+            }
+            let container_selected = world.disks[&editor.selected].mbr.as_ref().is_some_and(|t| {
+                t.entries.iter().any(|e| {
+                    Some(e.partition.number) == draft.selected_partition
+                        && e.kind == core::mbr::Kind::Extended
+                })
+            });
+            if container_selected {
+                line(
+                    ui,
+                    m,
+                    "The selected entry is an extended container. Choose a primary or logical payload to initialize; the container cannot hold a filesystem or swap signature.",
+                );
+            }
+            let selected_payload = selected_disk
+                .partitions()
+                .find(|p| Some(p.number) == draft.selected_partition);
+            let mbr_initialize =
+                mbr_editable && selected_payload.is_some_and(|p| p.content == core::Content::Blank);
+            if is_mbr
+                && !container_selected
+                && selected_payload.is_some_and(|p| p.content != core::Content::Blank)
+            {
+                line(
+                    ui,
+                    m,
+                    "The selected payload already contains a signature or supplied data. This exercise cannot overwrite it; choose the intended blank payload.",
+                );
+            }
             ui.horizontal_wrapped(|ui| {
                 if control(
                     ui,
                     m,
                     "format",
                     "Initialize selected blank partition",
-                    actions,
+                    actions && !container_selected && (!is_mbr || mbr_initialize),
                 ) {
                     action = Some(Action::Format);
                 }
@@ -688,7 +854,47 @@ impl LabApp {
             } else {
                 d.checks(w)
             };
-            if checked {
+            if checked && layout_lesson {
+                let passed = rows.iter().filter(|check| check.0).count();
+                let summary = lesson_presentation::prose(
+                    ui,
+                    &format!(
+                        "{} · {passed}/{} requirements passed",
+                        if passed == rows.len() {
+                            "Passed"
+                        } else {
+                            "Needs attention"
+                        },
+                        rows.len()
+                    ),
+                );
+                m.controls
+                    .push(("results".into(), summary.rect, ui.clip_rect()));
+                for (ok, text) in rows.iter().filter(|check| !check.0) {
+                    let r = lesson_presentation::prose(ui, &format!("Needs attention · {text}"));
+                    m.rows.push((*ok, r.rect));
+                }
+                let all = controls::collapsing_header(ui, "All configuration results · optional")
+                    .id_salt(salt.with("all-results"))
+                    .show(ui, |ui| {
+                        for (ok, text) in &rows {
+                            let r = lesson_presentation::prose(
+                                ui,
+                                &format!(
+                                    "{} · {text}",
+                                    if *ok { "Passed" } else { "Needs attention" }
+                                ),
+                            );
+                            m.rows.push((*ok, r.rect));
+                        }
+                    });
+                guidance |= guidance_intent(ui, &all.header_response);
+                m.controls.push((
+                    "all-results".into(),
+                    all.header_response.rect,
+                    ui.clip_rect(),
+                ));
+            } else if checked {
                 let failures = rows.iter().filter(|r| !r.0).count();
                 if failures > 0 {
                     line(
@@ -720,28 +926,25 @@ impl LabApp {
                         .id_salt(salt.with("detail"))
                         .show(ui, |ui| {
                             let h = ui.text_style_height(&egui::TextStyle::Body) * 6.;
-                            egui::ScrollArea::vertical()
+                            let reader = egui::ScrollArea::vertical()
                                 .id_salt(salt.with("files"))
                                 .min_scrolled_height(h)
                                 .max_height(h)
                                 .auto_shrink([false, false])
                                 .show(ui, |ui| {
                                     for (path, disk) in &world.disks {
-                                        if let Some(t) = &disk.table {
-                                            for part in &t.partitions {
-                                                if let core::Content::Ext4 { files, .. } =
-                                                    &part.content
-                                                {
-                                                    for (name, file) in files {
-                                                        line(
-                                                            ui,
-                                                            m,
-                                                            format!(
-                                                                "{path}{} · {name}: {}",
-                                                                part.number, file.text
-                                                            ),
-                                                        );
-                                                    }
+                                        for part in disk.partitions() {
+                                            if let core::Content::Ext4 { files, .. } = &part.content
+                                            {
+                                                for (name, file) in files {
+                                                    line(
+                                                        ui,
+                                                        m,
+                                                        format!(
+                                                            "{path}{} · {name}: {}",
+                                                            part.number, file.text
+                                                        ),
+                                                    );
                                                 }
                                             }
                                         }
@@ -755,6 +958,7 @@ impl LabApp {
                                         line(ui, m, format!("{}\n{}", row.input, row.output));
                                     }
                                 });
+                            m.files_viewport = Some(reader.inner_rect);
                         })
                 })
                 .inner;
@@ -810,8 +1014,13 @@ impl LabApp {
                 line(ui,&mut self.metrics.partition_fs,&source.explanation);
             });guidance |= guidance_intent(ui, &worked.header_response);self.metrics.partition_fs.controls.push(("worked".into(),worked.header_response.rect,ui.clip_rect()));
             let refs=controls::collapsing_header(ui,"Tool names, primary references and simulation limits").id_salt(scope.with("refs")).show(ui,|ui|{
-                line(ui,&mut self.metrics.partition_fs,work::HELP);
-                line(ui,&mut self.metrics.partition_fs,"Native configuration actions teach modeled outcomes. They do not establish coverage of parted, mkfs.ext4 or mkswap command syntax. The pure subset has no deletion, resize, MBR/logical partitions, mount or swap activation.");
+                if d.initial.mbr_profile.is_some() {
+                    line(ui,&mut self.metrics.partition_fs,core::mbr::HELP);
+                    line(ui,&mut self.metrics.partition_fs,"Native configuration actions teach modeled outcomes, not complete parted, mkfs.ext4 or mkswap command practice. Primary and logical payloads are supported in this profile; raw EBR chains, deletion, resize, boot code, mounts and swap activation are not.");
+                } else {
+                    line(ui,&mut self.metrics.partition_fs,work::HELP);
+                    line(ui,&mut self.metrics.partition_fs,"Native configuration actions teach modeled outcomes. They do not establish coverage of parted, mkfs.ext4 or mkswap command syntax. The pure subset has no deletion, resize, MBR/logical partitions, mount or swap activation.");
+                }
                 for text in &source.sources {ui.hyperlink(text);}
                 line(ui,&mut self.metrics.partition_fs,&source.simplifications);
             });guidance |= guidance_intent(ui, &refs.header_response);self.metrics.partition_fs.controls.push(("references".into(),refs.header_response.rect,ui.clip_rect()));
@@ -936,9 +1145,19 @@ impl LabApp {
                         &simulation.assignment_editor
                     };
                     let operation = match &next {
-                        Action::Create => Ok(work::Operation::CreateGpt {
-                            disk: e.selected.clone(),
-                        }),
+                        Action::Create => Ok(
+                            if simulation.selected_model(practice).mbr_profile.is_some() {
+                                work::Operation::Mbr {
+                                    operation: core::mbr::Action::Create {
+                                        disk: e.selected.clone(),
+                                    },
+                                }
+                            } else {
+                                work::Operation::CreateGpt {
+                                    disk: e.selected.clone(),
+                                }
+                            },
+                        ),
                         Action::Add => e.drafts[&e.selected].add_operation(&e.selected),
                         _ => e.drafts[&e.selected].format_operation(&e.selected),
                     };
@@ -962,6 +1181,9 @@ impl LabApp {
         }
         self.metrics.completion =
             progress::current_solved(&self.progress.attempts[&source.id], &source);
+        if d.plan.layout.is_some() && view == View::Assignment && self.metrics.completion {
+            lesson_presentation::prose(ui, &source.explanation);
+        }
         if view == View::Assignment
             && self.metrics.completion
             && self.selected == Some(i)

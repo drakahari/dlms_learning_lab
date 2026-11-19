@@ -1,0 +1,1111 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-stage-report",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-file-lifecycle",
+      "topic": "Careful file publication and cleanup",
+      "title": "Publish an exact report without losing its source",
+      "summary": "Repair a report publisher that validates inputs and preserves source and unrelated files.",
+      "objective": "Accept exactly SOURCE TARGET, two nonempty flat relative filenames. Otherwise print Usage: publish SOURCE TARGET on standard error and finish with status2. Reject identical names with Choose different files on standard error/status2. Reject a missing SOURCE with Missing source on standard error/status2. Perform checks in this order; on error print no standard output and leave all files unchanged. On success, copy SOURCE bytes exactly into TARGET, replacing an existing target or creating it. An empty source is valid; do not add or remove newlines. Print Published: TARGET followed by a newline on standard output, no standard error, status0. Preserve SOURCE, all other files and no new temporary leftovers.",
+      "difficulty": "Advanced",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Edit and investigate the script",
+        "Verify the resulting files"
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "Script",
+        "source": "source=$1\ntarget=$2\nprintf '' > \"$target\"\ncat < \"$source\" >> \"$target\"\nprintf 'Published: %s\\n' \"$target\"\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Replace report",
+            "args": [
+              "draft",
+              "report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/draft": "Approved: North\n",
+              "/work/report.000000": "An unrelated collision.\n",
+              "/work/report": "old\n"
+            },
+            "stdout": "Published: report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/draft": "Approved: North\n",
+              "/work/report.000000": "An unrelated collision.\n",
+              "/work/report": "Approved: North\n"
+            }
+          },
+          {
+            "name": "New destination",
+            "args": [
+              "snapshot",
+              "fresh"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/snapshot": "no final newline",
+              "/work/report.000000": "An unrelated collision.\n"
+            },
+            "stdout": "Published: fresh\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/snapshot": "no final newline",
+              "/work/report.000000": "An unrelated collision.\n",
+              "/work/fresh": "no final newline"
+            }
+          },
+          {
+            "name": "Empty source is still a file",
+            "args": [
+              "empty",
+              "out"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/empty": "",
+              "/work/report.000000": "An unrelated collision.\n",
+              "/work/out": "prior"
+            },
+            "stdout": "Published: out\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/empty": "",
+              "/work/report.000000": "An unrelated collision.\n",
+              "/work/out": ""
+            }
+          },
+          {
+            "name": "Literal names",
+            "args": [
+              "-draft",
+              "report *"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/-draft": "  space\\value\n",
+              "/work/report.000000": "An unrelated collision.\n",
+              "/work/report *": "preserve until publication"
+            },
+            "stdout": "Published: report *\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/-draft": "  space\\value\n",
+              "/work/report.000000": "An unrelated collision.\n",
+              "/work/report *": "  space\\value\n"
+            }
+          },
+          {
+            "name": "End-option name",
+            "args": [
+              "--",
+              "-report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/--": "Ready\n",
+              "/work/report.000000": "An unrelated collision.\n"
+            },
+            "stdout": "Published: -report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/--": "Ready\n",
+              "/work/report.000000": "An unrelated collision.\n",
+              "/work/-report": "Ready\n"
+            }
+          },
+          {
+            "name": "No arguments",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: publish SOURCE TARGET\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n"
+            }
+          },
+          {
+            "name": "Extra argument",
+            "args": [
+              "a",
+              "b",
+              "c"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/a": "keep",
+              "/work/b": "old"
+            },
+            "stdout": "",
+            "stderr": "Usage: publish SOURCE TARGET\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/a": "keep",
+              "/work/b": "old"
+            }
+          },
+          {
+            "name": "Empty source",
+            "args": [
+              "",
+              "b"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/b": "old"
+            },
+            "stdout": "",
+            "stderr": "Usage: publish SOURCE TARGET\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/b": "old"
+            }
+          },
+          {
+            "name": "Empty target",
+            "args": [
+              "a",
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/a": "keep"
+            },
+            "stdout": "",
+            "stderr": "Usage: publish SOURCE TARGET\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/a": "keep"
+            }
+          },
+          {
+            "name": "Same filename",
+            "args": [
+              "a",
+              "a"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/a": "retain"
+            },
+            "stdout": "",
+            "stderr": "Choose different files\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/a": "retain"
+            }
+          },
+          {
+            "name": "Missing source",
+            "args": [
+              "missing",
+              "report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/report": "old"
+            },
+            "stdout": "",
+            "stderr": "Missing source\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/report": "old"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if test \"$#\" -ne 2; then printf 'Usage: publish SOURCE TARGET\\n' >&2; exit 2; fi\nsource=$1\ntarget=$2\nif test -z \"$source\" || test -z \"$target\"; then printf 'Usage: publish SOURCE TARGET\\n' >&2; exit 2; fi\nif test \"$source\" = \"$target\"; then printf 'Choose different files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 2; fi\nstaged=$(mktemp report.XXXXXX)\ncat < \"$source\" > \"$staged\"\nif test \"$staged\" = \"$target\"; then :; else mv -- \"$staged\" \"$target\"; fi\nprintf 'Published: %s\\n' \"$target\"\n"
+      ],
+      "prerequisites": [
+        "shell-conditional-rollout"
+      ],
+      "explanation": "Validate the complete request before changing files. Quote names, inspect the actual result and preserve protected data. Temporary staging is a taught strategy; grading accepts any supported solution with the required behavior and complete final file map.",
+      "hints": [
+        "Compare the first failing input set with its expected output, status and files.",
+        "Validate every argument before printing a success message or changing any file.",
+        "Use quoted filenames and -- for mv/rm; capture mktemp output instead of guessing its name."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Redirections.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/mktemp-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/mv-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/rm-invocation.html"
+      ],
+      "simplifications": "Evaluator18, in-process flat UTF-8 virtual files only. Explicit mktemp TEMPLATE ending in six X characters, single-file mv/rm with optional --. No directories, recursive/force flags, traps, secure randomness, races, locks, permissions, crash durability or Stop/limit rollback. All paths supplied by this lab are flat relative filenames. Final-state grading does not prove an internal staging strategy or real atomic publication.",
+      "retry_guidance": "Inspect expected versus actual standard output, standard error, status and final simulated files for the first failing case. A correct message alone cannot compensate for lost input, an unexpected leftover or changed protected data. Retry after editing.",
+      "teaching": {
+        "prerequisite_note": "Builds on exact snapshots, quoted arguments, file tests and conditional shell decisions. The lab supplies arguments and sample files; source, target and staged are variable names your script creates.",
+        "concepts": [
+          {
+            "title": "Ask before changing a file",
+            "text": "Check argument count and empty names before using a redirection: > truncates an existing target immediately. test -f distinguishes a missing source from an existing empty file."
+          },
+          {
+            "title": "Build a separate candidate",
+            "text": "staged=$(mktemp notice.XXXXXX) creates a new temporary virtual file and saves its returned name. The six X characters are a template, not the final name. Always use the returned name in double quotes; never guess it."
+          },
+          {
+            "title": "Publish and inspect",
+            "text": "cat < \"$input\" > \"$staged\" copies exact bytes; mv -- \"$staged\" \"$final\" moves that file to its final name and replaces an existing ordinary file. -- ends options, so a dash-leading name stays a filename. The source remains. In this model temporary names are deterministic; real security randomness and crash safety are not simulated."
+          }
+        ],
+        "example": "input='workshop draft'\nfinal='notice.txt'\nstaged=$(mktemp notice.XXXXXX)\ncat < \"$input\" > \"$staged\"\nmv -- \"$staged\" \"$final\"\nprintf 'Notice: %s\\n' \"$final\"\n",
+        "inputs": "The separate workshop supplies workshop draft and an older notice.txt. Expected output names the final notice; inspect actual files to confirm exact new content and no staging leftover.",
+        "try_change": "Change final to board.txt and Run example; notice.txt should keep its previous content while board.txt receives the draft.",
+        "fixture": {
+          "name": "Separate workshop publication",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/notes.txt": "Keep this unrelated note.\n",
+            "/work/workshop draft": "Workshop opens at nine.\n",
+            "/work/notice.txt": "Previous notice.\n"
+          },
+          "stdout": "Notice: notice.txt\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/notes.txt": "Keep this unrelated note.\n",
+            "/work/workshop draft": "Workshop opens at nine.\n",
+            "/work/notice.txt": "Workshop opens at nine.\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "shell-cleanup-preview",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-file-lifecycle",
+      "topic": "Careful file publication and cleanup",
+      "title": "Preview a cleanup before applying it",
+      "summary": "Repair a cleanup tool so previews are harmless and unsafe requests cannot partly remove files.",
+      "objective": "Accept MODE followed by at least one filename; MODE is preview or apply. Otherwise print Usage: cleanup preview-or-apply FILE... on standard error and return status2. Only cache-old, cache spare and -cache are allowed filenames. Validate every requested name before printing reports or changing files. Any other name, including empty or a path, produces Unsafe cleanup request on standard error/status2, no standard output and no file changes. Process allowed requests in their supplied order. For an existing file, preview prints Would remove: FILE without changes; apply removes it and prints Removed: FILE. For a missing file print Absent: FILE in either mode. Each report ends with a newline. Successful requests finish with status0 and no standard error. Repeated requests are allowed: an applied file is absent on the next request. Preserve all unselected files and create no new files.",
+      "difficulty": "Advanced",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Edit and investigate the script",
+        "Verify the resulting files"
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "Script",
+        "source": "mode=$1\nshift\nfor file in \"$@\"; do\n rm -- \"$file\"\n printf 'Removed: %s\\n' \"$file\"\ndone\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Preview all",
+            "args": [
+              "preview",
+              "cache-old",
+              "cache spare",
+              "-cache"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            },
+            "stdout": "Would remove: cache-old\nWould remove: cache spare\nWould remove: -cache\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            }
+          },
+          {
+            "name": "Apply all",
+            "args": [
+              "apply",
+              "cache-old",
+              "cache spare",
+              "-cache"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            },
+            "stdout": "Removed: cache-old\nRemoved: cache spare\nRemoved: -cache\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/report.txt": "Protected report\n"
+            }
+          },
+          {
+            "name": "Absent file",
+            "args": [
+              "apply",
+              "cache-old",
+              "cache spare"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache spare": "only cache",
+              "/work/report.txt": "retain"
+            },
+            "stdout": "Absent: cache-old\nRemoved: cache spare\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/report.txt": "retain"
+            }
+          },
+          {
+            "name": "Repeat request",
+            "args": [
+              "apply",
+              "cache-old",
+              "cache-old"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            },
+            "stdout": "Removed: cache-old\nAbsent: cache-old\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            }
+          },
+          {
+            "name": "Repeat preview",
+            "args": [
+              "preview",
+              "cache-old",
+              "cache-old"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            },
+            "stdout": "Would remove: cache-old\nWould remove: cache-old\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            }
+          },
+          {
+            "name": "Already clean",
+            "args": [
+              "apply",
+              "cache-old",
+              "-cache"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/report.txt": "keep"
+            },
+            "stdout": "Absent: cache-old\nAbsent: -cache\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/report.txt": "keep"
+            }
+          },
+          {
+            "name": "Select only one",
+            "args": [
+              "apply",
+              "cache spare"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            },
+            "stdout": "Removed: cache spare\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            }
+          },
+          {
+            "name": "No mode",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: cleanup preview-or-apply FILE...\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            }
+          },
+          {
+            "name": "No filenames",
+            "args": [
+              "apply"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: cleanup preview-or-apply FILE...\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            }
+          },
+          {
+            "name": "Unknown mode",
+            "args": [
+              "erase",
+              "cache-old"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: cleanup preview-or-apply FILE...\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            }
+          },
+          {
+            "name": "Late protected request",
+            "args": [
+              "apply",
+              "cache-old",
+              "report.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            },
+            "stdout": "",
+            "stderr": "Unsafe cleanup request\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            }
+          },
+          {
+            "name": "Preview validates too",
+            "args": [
+              "preview",
+              "cache-old",
+              "notes.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            },
+            "stdout": "",
+            "stderr": "Unsafe cleanup request\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/cache-old": "old cache\n",
+              "/work/cache spare": "spare\n",
+              "/work/-cache": "dash cache\n",
+              "/work/report.txt": "Protected report\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if test \"$#\" -lt 2; then printf 'Usage: cleanup preview-or-apply FILE...\\n' >&2; exit 2; fi\nmode=$1\nshift\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: cleanup preview-or-apply FILE...\\n' >&2; exit 2 ;; esac\nfor file in \"$@\"; do\n case \"$file\" in cache-old|'cache spare'|-cache) : ;; *) printf 'Unsafe cleanup request\\n' >&2; exit 2 ;; esac\ndone\nfor file in \"$@\"; do\n if test -f \"$file\"; then\n  if test \"$mode\" = preview; then printf 'Would remove: %s\\n' \"$file\"; else rm -- \"$file\"; printf 'Removed: %s\\n' \"$file\"; fi\n else printf 'Absent: %s\\n' \"$file\"; fi\ndone\n"
+      ],
+      "prerequisites": [
+        "shell-stage-report"
+      ],
+      "explanation": "Validate the complete request before changing files. Quote names, inspect the actual result and preserve protected data. Temporary staging is a taught strategy; grading accepts any supported solution with the required behavior and complete final file map.",
+      "hints": [
+        "Compare the first failing input set with its expected output, status and files.",
+        "Validate every argument before printing a success message or changing any file.",
+        "Use quoted filenames and -- for mv/rm; capture mktemp output instead of guessing its name."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Redirections.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/mktemp-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/mv-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/rm-invocation.html"
+      ],
+      "simplifications": "Evaluator18, in-process flat UTF-8 virtual files only. Explicit mktemp TEMPLATE ending in six X characters, single-file mv/rm with optional --. No directories, recursive/force flags, traps, secure randomness, races, locks, permissions, crash durability or Stop/limit rollback. All paths supplied by this lab are flat relative filenames. Final-state grading does not prove an internal staging strategy or real atomic publication.",
+      "retry_guidance": "Inspect expected versus actual standard output, standard error, status and final simulated files for the first failing case. A correct message alone cannot compensate for lost input, an unexpected leftover or changed protected data. Retry after editing.",
+      "teaching": {
+        "prerequisite_note": "Builds on exact snapshots, quoted arguments, file tests and conditional shell decisions. The lab supplies arguments and sample files; mode and file are variable names your script creates.",
+        "concepts": [
+          {
+            "title": "A preview is a promise of no changes",
+            "text": "The workshop starts with mode=preview. Its first branch prints what would be removed; only the apply branch calls rm. A printed preview is not a preview if the file was already deleted."
+          },
+          {
+            "title": "Validate the whole request first",
+            "text": "The assignment supplies mode and filenames. shift removes the mode from \"$@\"; for file in \"$@\" keeps each remaining filename together. Use one pass to reject names outside the stated allowlist, then a second pass to act. A bad final name must not cause a partial cleanup."
+          },
+          {
+            "title": "Handle absence deliberately",
+            "text": "test -f checks whether the named ordinary virtual file exists. An absent cache can be reported without calling rm or emitting an error. rm -- \"$file\" removes one existing file; the -- protects a name beginning with -. There is no recursive or force removal in this simulator."
+          }
+        ],
+        "example": "mode=preview\nfor file in 'demo-cache' '-demo-cache'; do\n if test -f \"$file\"; then\n  if test \"$mode\" = preview; then\n   printf 'Would remove: %s\\n' \"$file\"\n  else\n   rm -- \"$file\"\n   printf 'Removed: %s\\n' \"$file\"\n  fi\n else\n  printf 'Absent: %s\\n' \"$file\"\n fi\ndone\n",
+        "inputs": "The workshop uses demo-cache and -demo-cache, not the assignment allowlist. Expected preview reports both without removing them.",
+        "try_change": "Change mode=preview to mode=apply and Run example; inspect files as well as the messages.",
+        "fixture": {
+          "name": "Separate cleanup preview",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/notes.txt": "Keep this unrelated note.\n",
+            "/work/demo-cache": "throw away",
+            "/work/-demo-cache": "second cache"
+          },
+          "stdout": "Would remove: demo-cache\nWould remove: -demo-cache\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/notes.txt": "Keep this unrelated note.\n",
+            "/work/demo-cache": "throw away",
+            "/work/-demo-cache": "second cache"
+          }
+        }
+      }
+    },
+    {
+      "id": "shell-recover-publication",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-file-lifecycle",
+      "topic": "Careful file publication and cleanup",
+      "title": "Repair deployment and recovery together",
+      "summary": "Complete a deployment tool that protects the previous report and can restore it without consuming the backup.",
+      "objective": "Accept exactly ACTION CANDIDATE CURRENT BACKUP. ACTION is deploy or restore; otherwise print Usage: rollout deploy-or-restore CANDIDATE CURRENT BACKUP on standard error/status2. After action/count validation, require three nonempty pairwise different filename strings. Otherwise print Choose three different files on standard error/status2. The lab supplies flat relative names; spaces, wildcard characters and leading dashes are literal. For deploy: require CANDIDATE, then require its first line to equal approved exactly, then require CURRENT. On failure print Missing candidate, Candidate not approved or Missing current report respectively on standard error/status2. A final line without a newline still counts as a line. A valid deploy replaces BACKUP with the previous CURRENT bytes and CURRENT with the full CANDIDATE bytes. Preserve CANDIDATE. Print Deployed: CURRENT and newline, status0, no standard error. For restore: require BACKUP or print Missing backup on standard error/status2. Copy its exact bytes to CURRENT, creating or replacing CURRENT. Preserve BACKUP and CANDIDATE; CANDIDATE need not exist. Print Restored: CURRENT and newline, status0, no standard error. Every validation error must leave all files unchanged and print no standard output. Preserve unrelated files and leave no new temporary files. Empty current/backup files are valid. This exercise does not model interruption rollback or crash recovery.",
+      "difficulty": "Advanced",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Edit and investigate the script",
+        "Verify the resulting files"
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "Script",
+        "source": "mode=$1\ncandidate=$2\ncurrent=$3\nbackup=$4\nif test \"$mode\" = restore; then\n mv -- \"$backup\" \"$current\"\n printf 'Restored: %s\\n' \"$current\"\nelse\n cat < \"$candidate\" > \"$current\"\n cat < \"$current\" > \"$backup\"\n printf 'Deployed: %s\\n' \"$current\"\nfi\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Deploy approved content",
+            "args": [
+              "deploy",
+              "candidate",
+              "current",
+              "backup"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew report\n",
+              "/work/current": "old report\n",
+              "/work/backup": "older\n"
+            },
+            "stdout": "Deployed: current\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew report\n",
+              "/work/current": "approved\nnew report\n",
+              "/work/backup": "old report\n"
+            }
+          },
+          {
+            "name": "Literal spaced names",
+            "args": [
+              "deploy",
+              "new draft",
+              "live *",
+              "-backup"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/new draft": "approved\nraw\\value",
+              "/work/live *": "previous without newline",
+              "/work/-backup": "old backup"
+            },
+            "stdout": "Deployed: live *\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/new draft": "approved\nraw\\value",
+              "/work/live *": "approved\nraw\\value",
+              "/work/-backup": "previous without newline"
+            }
+          },
+          {
+            "name": "Empty current and approved header without final newline",
+            "args": [
+              "deploy",
+              "candidate",
+              "current",
+              "backup"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved",
+              "/work/current": ""
+            },
+            "stdout": "Deployed: current\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved",
+              "/work/current": "approved",
+              "/work/backup": ""
+            }
+          },
+          {
+            "name": "Restore preserves backup",
+            "args": [
+              "restore",
+              "candidate",
+              "current",
+              "backup"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "bad candidate",
+              "/work/current": "broken\n",
+              "/work/backup": "known good\n"
+            },
+            "stdout": "Restored: current\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "bad candidate",
+              "/work/current": "known good\n",
+              "/work/backup": "known good\n"
+            }
+          },
+          {
+            "name": "Restore an empty backup into an absent current",
+            "args": [
+              "restore",
+              "missing",
+              "current",
+              "backup"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/backup": ""
+            },
+            "stdout": "Restored: current\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/backup": "",
+              "/work/current": ""
+            }
+          },
+          {
+            "name": "No arguments",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: rollout deploy-or-restore CANDIDATE CURRENT BACKUP\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            }
+          },
+          {
+            "name": "Unknown action",
+            "args": [
+              "wipe",
+              "candidate",
+              "current",
+              "backup"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: rollout deploy-or-restore CANDIDATE CURRENT BACKUP\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            }
+          },
+          {
+            "name": "Same current and backup",
+            "args": [
+              "deploy",
+              "candidate",
+              "current",
+              "current"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            },
+            "stdout": "",
+            "stderr": "Choose three different files\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            }
+          },
+          {
+            "name": "Missing candidate",
+            "args": [
+              "deploy",
+              "missing",
+              "current",
+              "backup"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            },
+            "stdout": "",
+            "stderr": "Missing candidate\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            }
+          },
+          {
+            "name": "Unapproved first line",
+            "args": [
+              "deploy",
+              "candidate",
+              "current",
+              "backup"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "rejected\napproved\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            },
+            "stdout": "",
+            "stderr": "Candidate not approved\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "rejected\napproved\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            }
+          },
+          {
+            "name": "Missing current",
+            "args": [
+              "deploy",
+              "candidate",
+              "missing",
+              "backup"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            },
+            "stdout": "",
+            "stderr": "Missing current report\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            }
+          },
+          {
+            "name": "Missing backup",
+            "args": [
+              "restore",
+              "candidate",
+              "current",
+              "missing"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            },
+            "stdout": "",
+            "stderr": "Missing backup\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "Keep this unrelated note.\n",
+              "/work/candidate": "approved\nnew\n",
+              "/work/current": "old\n",
+              "/work/backup": "older\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if test \"$#\" -ne 4; then printf 'Usage: rollout deploy-or-restore CANDIDATE CURRENT BACKUP\\n' >&2; exit 2; fi\nmode=$1\ncandidate=$2\ncurrent=$3\nbackup=$4\ncase \"$mode\" in deploy|restore) : ;; *) printf 'Usage: rollout deploy-or-restore CANDIDATE CURRENT BACKUP\\n' >&2; exit 2 ;; esac\nif test -z \"$candidate\" || test -z \"$current\" || test -z \"$backup\" || test \"$candidate\" = \"$current\" || test \"$candidate\" = \"$backup\" || test \"$current\" = \"$backup\"; then printf 'Choose three different files\\n' >&2; exit 2; fi\nif test \"$mode\" = restore; then\n if test -f \"$backup\"; then :; else printf 'Missing backup\\n' >&2; exit 2; fi\n staged=$(mktemp recovery.XXXXXX)\n cat < \"$backup\" > \"$staged\"\n if test \"$staged\" = \"$current\"; then :; else mv -- \"$staged\" \"$current\"; fi\n printf 'Restored: %s\\n' \"$current\"\nelse\n if test -f \"$candidate\"; then :; else printf 'Missing candidate\\n' >&2; exit 2; fi\n IFS= read -r header < \"$candidate\"\n if test \"$header\" = approved; then :; else printf 'Candidate not approved\\n' >&2; exit 2; fi\n if test -f \"$current\"; then :; else printf 'Missing current report\\n' >&2; exit 2; fi\n saved=$(mktemp snapshot.XXXXXX)\n cat < \"$current\" > \"$saved\"\n if test \"$saved\" = \"$backup\"; then :; else mv -- \"$saved\" \"$backup\"; fi\n staged=$(mktemp rollout.XXXXXX)\n cat < \"$candidate\" > \"$staged\"\n if test \"$staged\" = \"$current\"; then :; else mv -- \"$staged\" \"$current\"; fi\n printf 'Deployed: %s\\n' \"$current\"\nfi\n"
+      ],
+      "prerequisites": [
+        "shell-cleanup-preview",
+        "shell-trace-fallback"
+      ],
+      "explanation": "Validate the complete request before changing files. Quote names, inspect the actual result and preserve protected data. Temporary staging is a taught strategy; grading accepts any supported solution with the required behavior and complete final file map.",
+      "hints": [
+        "Compare the first failing input set with its expected output, status and files.",
+        "Validate every argument before printing a success message or changing any file.",
+        "Use quoted filenames and -- for mv/rm; capture mktemp output instead of guessing its name."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Redirections.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/mktemp-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/mv-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/rm-invocation.html"
+      ],
+      "simplifications": "Evaluator18, in-process flat UTF-8 virtual files only. Explicit mktemp TEMPLATE ending in six X characters, single-file mv/rm with optional --. No directories, recursive/force flags, traps, secure randomness, races, locks, permissions, crash durability or Stop/limit rollback. All paths supplied by this lab are flat relative filenames. Final-state grading does not prove an internal staging strategy or real atomic publication.",
+      "retry_guidance": "Inspect expected versus actual standard output, standard error, status and final simulated files for the first failing case. A correct message alone cannot compensate for lost input, an unexpected leftover or changed protected data. Retry after editing.",
+      "teaching": {
+        "prerequisite_note": "Builds on exact snapshots, quoted arguments, file tests and conditional shell decisions. The lab supplies arguments and sample files; mode, candidate, current, backup and staged are variable names your script creates.",
+        "concepts": [
+          {
+            "title": "A recovery copy is the old content",
+            "text": "The workshop snapshots workshop-live before replacing it. Copying the live file into a backup after deployment saves the new content, which cannot restore the previous report. Inspect both actual files."
+          },
+          {
+            "title": "Recovery should not consume its source",
+            "text": "mv moves a file; cat < \"$backup\" > \"$staged\" copies it. Restoring from a copied staging file leaves the backup available. The independent task also accepts an existing empty backup."
+          },
+          {
+            "title": "Preflight before mutation",
+            "text": "Validate count, action and distinct names before selecting a branch. In deploy, read the first line into a variable and compare it with approved before writing anything. IFS= read -r preserves spaces and backslashes; read may return nonzero on a last line without a newline even though it assigned that line. Check the value, not only read status."
+          },
+          {
+            "title": "Bounded recovery is not a filesystem guarantee",
+            "text": "This capstone grades complete final files and error paths. It does not prove crash-safe atomicity, locks, traps, adversarial-user safety or automatic cleanup on Stop. Those are explicit limits, not hidden successful behaviors."
+          }
+        ],
+        "example": "staged=$(mktemp workshop.XXXXXX)\ncat < 'workshop-live' > \"$staged\"\nmv -- \"$staged\" 'workshop-backup'\ncat < 'workshop-next' > 'workshop-live'\nprintf 'Workshop deployed\\n'\n",
+        "inputs": "The workshop has different filenames and no approved-header rule. Its expected files distinguish the previous live content from both the older backup and next content.",
+        "try_change": "Move the backup-copy lines after the live-copy line, then Run example and compare the actual backup. Restore the original order.",
+        "fixture": {
+          "name": "Separate recovery snapshot",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/notes.txt": "Keep this unrelated note.\n",
+            "/work/workshop-next": "new workshop\n",
+            "/work/workshop-live": "previous workshop\n",
+            "/work/workshop-backup": "older workshop\n"
+          },
+          "stdout": "Workshop deployed\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/notes.txt": "Keep this unrelated note.\n",
+            "/work/workshop-next": "new workshop\n",
+            "/work/workshop-live": "new workshop\n",
+            "/work/workshop-backup": "previous workshop\n"
+          }
+        }
+      }
+    }
+  ]
+}

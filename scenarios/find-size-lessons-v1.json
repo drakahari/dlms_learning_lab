@@ -1,0 +1,1290 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-find-sized-incident",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-size-evidence",
+      "topic": "File sizes and rounded search units",
+      "title": "Collect only oversized incident records",
+      "summary": "Find oversized records by bytes, then collect only the requested private evidence.",
+      "objective": "Collect exactly the regular files from /work/incident-records whose byte lengths are strictly greater than 120 into /work/incident-evidence, retaining their relative paths and only needed parent folders. Preserve every selected file’s exact content and source owner permission bits on the copy; remove group and other access. Copies belong to alex, primary group staff. Set the simulated session’s creation mask for future owner-only files and folders. Repair or remove any nonmatching supplied evidence copies. Keep the entire original source, its permissions, and every unrelated supplied entry unchanged. Leave no extra scratch copies.",
+      "retry_guidance": "Inspect the actual find results and the failing membership or access check. Repair the evidence files and check again; changing the command alone does not change the collection.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Understand the task",
+        "Investigate and collect",
+        "Verify the complete evidence set"
+      ],
+      "guide": [
+        {
+          "title": "Read bytes, not letters",
+          "why": "The file-size column in ls -l measures bytes. A non-ASCII character can use more than one byte: é uses two UTF-8 bytes. Directory metadata sizes are not modeled here, so use -type f when searching by size.",
+          "action": "Run the worked find command and compare its output with ls -l on the source folder and its nested folder.",
+          "commands": [
+            {
+              "command": "find /practice/messages -type f -size +20c",
+              "explanation": "Inspect the actual file-path selection.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Use an exact size rule",
+          "why": "find START -type f -size +20c selects files strictly larger than 20 bytes. c means bytes; + means greater than, - means less than, and no sign means exactly that size. A file of exactly 20 bytes is excluded by +20c.",
+          "action": "Insert and run the explained private-default and copy/repair commands. Keep the existing destination folder; create only the required parent folder.",
+          "commands": [
+            {
+              "command": "umask 077",
+              "explanation": "Set private defaults for new entries; existing permissions do not change.",
+              "simulator_only": false
+            },
+            {
+              "command": "mkdir /practice/evidence/remote",
+              "explanation": "Create the parent needed by a selected nested file.",
+              "simulator_only": false
+            },
+            {
+              "command": "cp /practice/messages/remote/error.log /practice/evidence/remote/error.log",
+              "explanation": "Copy this selected practice file, preserving its exact content.",
+              "simulator_only": false
+            },
+            {
+              "command": "cp /practice/messages/multibyte.log /practice/evidence/multibyte.log",
+              "explanation": "Copy this selected practice file, preserving its exact content.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Collect a precise evidence set",
+          "why": "Inspect the matching paths, set private creation defaults with umask 077 and copy only those files into the supplied evidence folder. Create a needed parent directory with mkdir before copying a nested file. Keep each file’s contents and source owner permission bits; preserve the entire original source.",
+          "action": "Check the example. Copy a nonmatching file into the evidence folder, check again, read the feedback, then remove that extra copy and retry.",
+          "commands": [
+            {
+              "command": "ls -la /practice/evidence",
+              "explanation": "Inspect copied names, modes and ownership.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The file-size column in ls -l measures bytes. A non-ASCII character can use more than one byte: é uses two UTF-8 bytes. Directory metadata sizes are not modeled here, so use -type f when searching by size. find START -type f -size +20c selects files strictly larger than 20 bytes. c means bytes; + means greater than, - means less than, and no sign means exactly that size. A file of exactly 20 bytes is excluded by +20c. Inspect the matching paths, set private creation defaults with umask 077 and copy only those files into the supplied evidence folder. Create a needed parent directory with mkdir before copying a nested file. Keep each file’s contents and source owner permission bits; preserve the entire original source.",
+      "hints": [
+        "Compare ls -l file byte lengths and find results. Inspect nested folders as well as visible top-level files.",
+        "The c suffix measures individual bytes; k rounds up in groups of 1024 before comparing. + excludes equality, - means strictly less.",
+        "Use the supplied evidence directory. Create needed parent folders, copy only matches and inspect modes; a later umask change does not fix existing permissions."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/#rdp-we-103.3_Perform_basic_file_management (LPIC-1 v5.0; checked 2026-11-06)",
+        "https://www.gnu.org/software/findutils/manual/html_node/find_html/Size.html (installed GNU Findutils 4.10.0 Info Size node inspected; live page unavailable 2026-11-06;31fixed comparisons match)"
+      ],
+      "simplifications": "Bounded ordinary virtual files only. Size uses stored UTF-8 byte length, not allocated disk blocks, sparse-file storage or directory metadata. Require -type f for -size. Disclosed units b/c/w/k/M/G and strict signed comparisons share existing name/type/depth search limits and honest partial-search diagnostics. No time predicates, -exec/-delete, general expressions, links/devices, shell expansion, scripts or host access. Other operations use the documented single-source recursive-tree subset; refused mutations are atomic here, unlike possible real partial effects.",
+      "initial": {
+        "kind": "RecursiveTree",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-find-sized-incident",
+          "view": "introduction",
+          "example_command": 0,
+          "assignment": {
+            "role": "assignment",
+            "tree": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-evidence": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/remote": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/remote/error.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/multibyte.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/exact-boundary.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/empty.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/tiny.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/work/keep.txt": "Retain this unrelated note\n",
+                "/work/incident-records/remote/error.log": "INFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO sim",
+                "/work/incident-records/multibyte.log": "ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+                "/work/incident-records/exact-boundary.log": "INFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simul",
+                "/work/incident-records/empty.log": "",
+                "/work/incident-records/tiny.log": "ok\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/work",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "practice": {
+            "role": "practice",
+            "tree": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/evidence": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/remote": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/remote/error.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/multibyte.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/exact-boundary.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/empty.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/tiny.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/practice/keep.txt": "Retain this unrelated note\n",
+                "/practice/messages/remote/error.log": "INFO simulated record\nINFO",
+                "/practice/messages/multibyte.log": "ééééééééééé",
+                "/practice/messages/exact-boundary.log": "INFO simulated recor",
+                "/practice/messages/empty.log": "",
+                "/practice/messages/tiny.log": "ok\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/practice",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "command": "",
+            "transcript": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "RecursiveTree",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic1-find-sized-incident",
+          "assignment": {
+            "root": "/work",
+            "initial": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-evidence": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/remote": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/remote/error.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/multibyte.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/exact-boundary.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/empty.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/incident-records/tiny.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/work/keep.txt": "Retain this unrelated note\n",
+                "/work/incident-records/remote/error.log": "INFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO sim",
+                "/work/incident-records/multibyte.log": "ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+                "/work/incident-records/exact-boundary.log": "INFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simul",
+                "/work/incident-records/empty.log": "",
+                "/work/incident-records/tiny.log": "ok\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/work",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "task": {
+              "kind": "collect",
+              "source": "/work/incident-records",
+              "destination": "/work/incident-evidence",
+              "criterion": {
+                "compare": "greater",
+                "quantity": 120,
+                "unit": "bytes"
+              },
+              "private_defaults": true
+            }
+          },
+          "example": {
+            "root": "/practice",
+            "initial": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/evidence": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/remote": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/remote/error.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/multibyte.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/exact-boundary.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/empty.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/messages/tiny.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/practice/keep.txt": "Retain this unrelated note\n",
+                "/practice/messages/remote/error.log": "INFO simulated record\nINFO",
+                "/practice/messages/multibyte.log": "ééééééééééé",
+                "/practice/messages/exact-boundary.log": "INFO simulated recor",
+                "/practice/messages/empty.log": "",
+                "/practice/messages/tiny.log": "ok\n"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/practice",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "task": {
+              "kind": "collect",
+              "source": "/practice/messages",
+              "destination": "/practice/evidence",
+              "criterion": {
+                "compare": "greater",
+                "quantity": 20,
+                "unit": "bytes"
+              },
+              "private_defaults": true
+            }
+          },
+          "reference": [
+            "umask 077",
+            "mkdir /work/incident-evidence/remote",
+            "cp /work/incident-records/remote/error.log /work/incident-evidence/remote/error.log",
+            "cp /work/incident-records/multibyte.log /work/incident-evidence/multibyte.log"
+          ],
+          "example_commands": [
+            "find /practice/messages -type f -size +20c",
+            "umask 077",
+            "mkdir /practice/evidence/remote",
+            "cp /practice/messages/remote/error.log /practice/evidence/remote/error.log",
+            "cp /practice/messages/multibyte.log /practice/evidence/multibyte.log",
+            "ls -la /practice/evidence"
+          ]
+        }
+      },
+      "solution": [
+        "umask 077",
+        "mkdir /work/incident-evidence/remote",
+        "cp /work/incident-records/remote/error.log /work/incident-evidence/remote/error.log",
+        "cp /work/incident-records/multibyte.log /work/incident-evidence/multibyte.log",
+        "@tree-check"
+      ],
+      "prerequisites": [
+        "lpic1-tree-private-stage",
+        "lpic1-search-private-handover"
+      ]
+    },
+    {
+      "id": "lpic1-find-rounded-evidence",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-size-evidence",
+      "topic": "File sizes and rounded search units",
+      "title": "Repair an empty-file evidence selection",
+      "summary": "Diagnose a rounded-unit mistake and repair the complete private evidence set.",
+      "objective": "Repair /work/empty-evidence to contain exactly the files from /work/staged-reports matching -size -1k (fewer than one rounded 1024-byte unit), with only the parent folders they need. Preserve every selected file’s exact content and source owner permission bits on the copy; remove group and other access. Copies belong to alex, primary group staff. Set the simulated session’s creation mask for future owner-only files and folders. Repair or remove any nonmatching supplied evidence copies. Keep the entire original source, its permissions, and every unrelated supplied entry unchanged. Leave no extra scratch copies.",
+      "retry_guidance": "Inspect the actual find results and the failing membership or access check. Repair the evidence files and check again; changing the command alone does not change the collection.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Investigate and collect",
+        "Verify the complete evidence set"
+      ],
+      "guide": [
+        {
+          "title": "Round before comparing",
+          "why": "k means 1024-byte units, not a decimal count of characters. find rounds each file’s byte length up before comparing: 0 bytes uses 0 units, 1 through 1024 bytes use 1 unit, and 1025 bytes uses 2 units.",
+          "action": "Run the worked find command and compare its output with ls -l on the source folder and its nested folder.",
+          "commands": [
+            {
+              "command": "find /practice/review-candidates -type f -size -1k",
+              "explanation": "Inspect the actual file-path selection.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Fewer than one unit differs from under 1024 bytes",
+          "why": "-size -1k asks for fewer than one rounded 1024-byte unit, so it selects empty regular files. -size -1024c instead selects byte lengths from 0 through 1023, including many nonempty files. Keep -type f because directory sizes are not modeled.",
+          "action": "Insert and run the explained private-default and copy/repair commands. Keep the existing destination folder; create only the required parent folder.",
+          "commands": [
+            {
+              "command": "umask 077",
+              "explanation": "Set private defaults for new entries; existing permissions do not change.",
+              "simulator_only": false
+            },
+            {
+              "command": "rm /practice/empty-notes/tiny.log",
+              "explanation": "Remove only a nonmatching practice evidence copy; preserve the source.",
+              "simulator_only": false
+            },
+            {
+              "command": "rm /practice/empty-notes/exact-block.log",
+              "explanation": "Remove only a nonmatching practice evidence copy; preserve the source.",
+              "simulator_only": false
+            },
+            {
+              "command": "mkdir /practice/empty-notes/nested",
+              "explanation": "Create the parent needed by a selected nested file.",
+              "simulator_only": false
+            },
+            {
+              "command": "cp /practice/review-candidates/.empty-note /practice/empty-notes/.empty-note",
+              "explanation": "Copy this selected practice file, preserving its exact content.",
+              "simulator_only": false
+            },
+            {
+              "command": "cp /practice/review-candidates/nested/blank.txt /practice/empty-notes/nested/blank.txt",
+              "explanation": "Copy this selected practice file, preserving its exact content.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Repair the selection, not the source",
+          "why": "The supplied evidence folder contains files selected using the wrong rule. Compare the real search results and listing, remove nonmatching copies, then add the requested empty files and needed parent folders. Keep source content, permissions and unrelated files unchanged; use private defaults for the new copies.",
+          "action": "Check the example. Copy a nonmatching file into the evidence folder, check again, read the feedback, then remove that extra copy and retry.",
+          "commands": [
+            {
+              "command": "ls -la /practice/empty-notes",
+              "explanation": "Inspect copied names, modes and ownership.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "k means 1024-byte units, not a decimal count of characters. find rounds each file’s byte length up before comparing: 0 bytes uses 0 units, 1 through 1024 bytes use 1 unit, and 1025 bytes uses 2 units. -size -1k asks for fewer than one rounded 1024-byte unit, so it selects empty regular files. -size -1024c instead selects byte lengths from 0 through 1023, including many nonempty files. Keep -type f because directory sizes are not modeled. The supplied evidence folder contains files selected using the wrong rule. Compare the real search results and listing, remove nonmatching copies, then add the requested empty files and needed parent folders. Keep source content, permissions and unrelated files unchanged; use private defaults for the new copies.",
+      "hints": [
+        "Compare ls -l file byte lengths and find results. Inspect nested folders as well as visible top-level files.",
+        "The c suffix measures individual bytes; k rounds up in groups of 1024 before comparing. + excludes equality, - means strictly less.",
+        "Use the supplied evidence directory. Create needed parent folders, copy only matches and inspect modes; a later umask change does not fix existing permissions."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/#rdp-we-103.3_Perform_basic_file_management (LPIC-1 v5.0; checked 2026-11-06)",
+        "https://www.gnu.org/software/findutils/manual/html_node/find_html/Size.html (installed GNU Findutils 4.10.0 Info Size node inspected; live page unavailable 2026-11-06;31fixed comparisons match)"
+      ],
+      "simplifications": "Bounded ordinary virtual files only. Size uses stored UTF-8 byte length, not allocated disk blocks, sparse-file storage or directory metadata. Require -type f for -size. Disclosed units b/c/w/k/M/G and strict signed comparisons share existing name/type/depth search limits and honest partial-search diagnostics. No time predicates, -exec/-delete, general expressions, links/devices, shell expansion, scripts or host access. Other operations use the documented single-source recursive-tree subset; refused mutations are atomic here, unlike possible real partial effects.",
+      "initial": {
+        "kind": "RecursiveTree",
+        "simulation": {
+          "version": 1,
+          "origin": "lpic1-find-rounded-evidence",
+          "view": "introduction",
+          "example_command": 0,
+          "assignment": {
+            "role": "assignment",
+            "tree": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/empty-evidence": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/.unfinished": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/nested": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/nested/empty.log": {
+                  "directory": false,
+                  "mode": 292,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/tiny.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/exact-block.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/unicode.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/empty-evidence/tiny.log": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/empty-evidence/exact-block.log": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/work/keep.txt": "Retain this unrelated note\n",
+                "/work/staged-reports/.unfinished": "",
+                "/work/staged-reports/nested/empty.log": "",
+                "/work/staged-reports/tiny.log": "I",
+                "/work/staged-reports/exact-block.log": "INFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulat",
+                "/work/staged-reports/unicode.log": "é",
+                "/work/empty-evidence/tiny.log": "I",
+                "/work/empty-evidence/exact-block.log": "INFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulat"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/work",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "command": "",
+            "transcript": [],
+            "checked": false
+          },
+          "practice": {
+            "role": "practice",
+            "tree": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/empty-notes": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/.empty-note": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/nested": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/nested/blank.txt": {
+                  "directory": false,
+                  "mode": 292,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/tiny.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/exact-block.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/unicode.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/empty-notes/tiny.log": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/empty-notes/exact-block.log": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/practice/keep.txt": "Retain this unrelated note\n",
+                "/practice/review-candidates/.empty-note": "",
+                "/practice/review-candidates/nested/blank.txt": "",
+                "/practice/review-candidates/tiny.log": "INF",
+                "/practice/review-candidates/exact-block.log": "INFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulat",
+                "/practice/review-candidates/unicode.log": "é",
+                "/practice/empty-notes/tiny.log": "INF",
+                "/practice/empty-notes/exact-block.log": "INFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulat"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/practice",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "command": "",
+            "transcript": [],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "RecursiveTree",
+        "definition": {
+          "version": 1,
+          "source_id": "lpic1-find-rounded-evidence",
+          "assignment": {
+            "root": "/work",
+            "initial": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/empty-evidence": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/.unfinished": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/nested": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/nested/empty.log": {
+                  "directory": false,
+                  "mode": 292,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/tiny.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/exact-block.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/staged-reports/unicode.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/empty-evidence/tiny.log": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/work/empty-evidence/exact-block.log": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/work/keep.txt": "Retain this unrelated note\n",
+                "/work/staged-reports/.unfinished": "",
+                "/work/staged-reports/nested/empty.log": "",
+                "/work/staged-reports/tiny.log": "I",
+                "/work/staged-reports/exact-block.log": "INFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulat",
+                "/work/staged-reports/unicode.log": "é",
+                "/work/empty-evidence/tiny.log": "I",
+                "/work/empty-evidence/exact-block.log": "INFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulat"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/work",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "task": {
+              "kind": "collect",
+              "source": "/work/staged-reports",
+              "destination": "/work/empty-evidence",
+              "criterion": {
+                "compare": "less",
+                "quantity": 1,
+                "unit": "kibibytes"
+              },
+              "private_defaults": true
+            }
+          },
+          "example": {
+            "root": "/practice",
+            "initial": {
+              "nodes": {
+                "/": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "root",
+                  "group": "root"
+                },
+                "/home/alex": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/empty-notes": {
+                  "directory": true,
+                  "mode": 448,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/keep.txt": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/empty-cache": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/.empty-note": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/nested": {
+                  "directory": true,
+                  "mode": 493,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/nested/blank.txt": {
+                  "directory": false,
+                  "mode": 292,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/tiny.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/exact-block.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/review-candidates/unicode.log": {
+                  "directory": false,
+                  "mode": 420,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/empty-notes/tiny.log": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                },
+                "/practice/empty-notes/exact-block.log": {
+                  "directory": false,
+                  "mode": 384,
+                  "owner": "alex",
+                  "group": "staff"
+                }
+              },
+              "files": {
+                "/practice/keep.txt": "Retain this unrelated note\n",
+                "/practice/review-candidates/.empty-note": "",
+                "/practice/review-candidates/nested/blank.txt": "",
+                "/practice/review-candidates/tiny.log": "INF",
+                "/practice/review-candidates/exact-block.log": "INFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulat",
+                "/practice/review-candidates/unicode.log": "é",
+                "/practice/empty-notes/tiny.log": "INF",
+                "/practice/empty-notes/exact-block.log": "INFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulated record\nINFO simulat"
+              },
+              "users": {
+                "root": [
+                  "root"
+                ],
+                "alex": [
+                  "staff"
+                ]
+              },
+              "user": "alex",
+              "home": "/home/alex",
+              "cwd": "/practice",
+              "previous": null,
+              "umask": 18,
+              "clock": 0,
+              "modified": {}
+            },
+            "task": {
+              "kind": "collect",
+              "source": "/practice/review-candidates",
+              "destination": "/practice/empty-notes",
+              "criterion": {
+                "compare": "less",
+                "quantity": 1,
+                "unit": "kibibytes"
+              },
+              "private_defaults": true
+            }
+          },
+          "reference": [
+            "umask 077",
+            "rm /work/empty-evidence/tiny.log",
+            "rm /work/empty-evidence/exact-block.log",
+            "mkdir /work/empty-evidence/nested",
+            "cp /work/staged-reports/.unfinished /work/empty-evidence/.unfinished",
+            "cp /work/staged-reports/nested/empty.log /work/empty-evidence/nested/empty.log"
+          ],
+          "example_commands": [
+            "find /practice/review-candidates -type f -size -1k",
+            "umask 077",
+            "rm /practice/empty-notes/tiny.log",
+            "rm /practice/empty-notes/exact-block.log",
+            "mkdir /practice/empty-notes/nested",
+            "cp /practice/review-candidates/.empty-note /practice/empty-notes/.empty-note",
+            "cp /practice/review-candidates/nested/blank.txt /practice/empty-notes/nested/blank.txt",
+            "ls -la /practice/empty-notes"
+          ]
+        }
+      },
+      "solution": [
+        "umask 077",
+        "rm /work/empty-evidence/tiny.log",
+        "rm /work/empty-evidence/exact-block.log",
+        "mkdir /work/empty-evidence/nested",
+        "cp /work/staged-reports/.unfinished /work/empty-evidence/.unfinished",
+        "cp /work/staged-reports/nested/empty.log /work/empty-evidence/nested/empty.log",
+        "@tree-check"
+      ],
+      "prerequisites": [
+        "lpic1-find-sized-incident"
+      ]
+    }
+  ]
+}

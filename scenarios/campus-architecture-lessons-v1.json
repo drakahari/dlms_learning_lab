@@ -1,0 +1,2131 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-collapsed-campus-uplinks",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-campus-architectures",
+      "topic": "Campus architecture",
+      "title": "Restore independent uplinks in a two-tier campus",
+      "summary": "Restore independent campus uplinks and prove the stated structural outage paths.",
+      "objective": "Connect each access device to two different combined distribution/core devices. Two cables to the same device are not two independent uplinks. Complete every supplied cable; use each physical port at most once and keep the two protected cables unchanged. Keep a hierarchy path between North access and South access with all devices available, with West combined unavailable, and with East combined unavailable.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Understand the campus roles",
+        "Repair separate practice cables",
+        "Apply the full campus requirements"
+      ],
+      "hints": [
+        "Compare each cable’s device role and building, not just whether it has two ends.",
+        "Count different upstream devices. A second cable to the same device shares that device’s failure.",
+        "Check every stated case; the first working normal path is not the whole task."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco-campus-lan-wlan-design-guide.html"
+      ],
+      "simplifications": "Source check 2026-11-13: current CCNA v1.1 objectives 1.2a/b and Cisco Campus LAN/WLAN design guide (2020). Bounded structural routed-adjacency model only: no packets, IP configuration, STP, convergence, bandwidth, routing policy or actual hardware. Building-local access and non-transit access roles are explicit exercise requirements, not universal claims for every campus. Other architecture subtopics remain separate.",
+      "explanation": "The access switches need independent connections to both combined devices. A normal path through West alone can work while the design still fails when West is lost. Count distinct parent devices, not cables. The cable identities are fixed, but any compatible unused ports that satisfy every role and failure check are accepted.",
+      "initial": {
+        "kind": "CampusArchitecture",
+        "simulation": {
+          "schema_version": 1,
+          "version": 1,
+          "id": "ccna-collapsed-campus-uplinks",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "connections": [
+                {
+                  "wire": "nw",
+                  "a": {
+                    "node": "north",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "ne",
+                  "a": {
+                    "node": "north",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "sw",
+                  "a": {
+                    "node": "south",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "se",
+                  "a": {
+                    "node": "south",
+                    "port": "p2"
+                  },
+                  "b": null
+                }
+              ]
+            },
+            "checked": false
+          },
+          "practice": {
+            "draft": {
+              "connections": [
+                {
+                  "wire": "nw",
+                  "a": {
+                    "node": "guide-north",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "ne",
+                  "a": {
+                    "node": "guide-north",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "sw",
+                  "a": {
+                    "node": "guide-south",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "se",
+                  "a": {
+                    "node": "guide-south",
+                    "port": "p2"
+                  },
+                  "b": null
+                }
+              ]
+            },
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "CampusArchitecture",
+        "definition": {
+          "schema_version": 1,
+          "version": 1,
+          "id": "ccna-collapsed-campus-uplinks",
+          "assignment": {
+            "id": "assignment-2",
+            "facts": {
+              "schema_version": 1,
+              "design": "TwoTier",
+              "nodes": [
+                {
+                  "id": "north",
+                  "label": "North access",
+                  "role": "Access",
+                  "block": "north",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "south",
+                  "label": "South access",
+                  "role": "Access",
+                  "block": "south",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "west",
+                  "label": "West combined",
+                  "role": "CollapsedCore",
+                  "block": null,
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "east",
+                  "label": "East combined",
+                  "role": "CollapsedCore",
+                  "block": null,
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "id": "nw",
+                  "label": "nw"
+                },
+                {
+                  "id": "ne",
+                  "label": "ne"
+                },
+                {
+                  "id": "sw",
+                  "label": "sw"
+                },
+                {
+                  "id": "se",
+                  "label": "se"
+                }
+              ]
+            },
+            "initial": {
+              "connections": [
+                {
+                  "wire": "nw",
+                  "a": {
+                    "node": "north",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "ne",
+                  "a": {
+                    "node": "north",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "sw",
+                  "a": {
+                    "node": "south",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "se",
+                  "a": {
+                    "node": "south",
+                    "port": "p2"
+                  },
+                  "b": null
+                }
+              ]
+            },
+            "reference": {
+              "connections": [
+                {
+                  "wire": "nw",
+                  "a": {
+                    "node": "north",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "ne",
+                  "a": {
+                    "node": "north",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "east",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "sw",
+                  "a": {
+                    "node": "south",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "se",
+                  "a": {
+                    "node": "south",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "east",
+                    "port": "p2"
+                  }
+                }
+              ]
+            },
+            "editable": [
+              {
+                "id": "ne"
+              },
+              {
+                "id": "se"
+              }
+            ],
+            "uplinks": [
+              {
+                "node": "north",
+                "minimum": 2
+              },
+              {
+                "node": "south",
+                "minimum": 2
+              }
+            ],
+            "pairs": [
+              {
+                "from": "north",
+                "to": "south"
+              }
+            ],
+            "cases": [
+              {
+                "id": "normal",
+                "label": "All devices available",
+                "experiment": {
+                  "unavailable": []
+                }
+              },
+              {
+                "id": "west-failed",
+                "label": "West combined unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "west"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "east-failed",
+                "label": "East combined unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "east"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "practice-2",
+            "facts": {
+              "schema_version": 1,
+              "design": "TwoTier",
+              "nodes": [
+                {
+                  "id": "guide-north",
+                  "label": "Guide North access",
+                  "role": "Access",
+                  "block": "guide-north",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-south",
+                  "label": "Guide South access",
+                  "role": "Access",
+                  "block": "guide-south",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-west",
+                  "label": "Guide West combined",
+                  "role": "CollapsedCore",
+                  "block": null,
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-east",
+                  "label": "Guide East combined",
+                  "role": "CollapsedCore",
+                  "block": null,
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "id": "nw",
+                  "label": "nw"
+                },
+                {
+                  "id": "ne",
+                  "label": "ne"
+                },
+                {
+                  "id": "sw",
+                  "label": "sw"
+                },
+                {
+                  "id": "se",
+                  "label": "se"
+                }
+              ]
+            },
+            "initial": {
+              "connections": [
+                {
+                  "wire": "nw",
+                  "a": {
+                    "node": "guide-north",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "ne",
+                  "a": {
+                    "node": "guide-north",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "sw",
+                  "a": {
+                    "node": "guide-south",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "se",
+                  "a": {
+                    "node": "guide-south",
+                    "port": "p2"
+                  },
+                  "b": null
+                }
+              ]
+            },
+            "reference": {
+              "connections": [
+                {
+                  "wire": "nw",
+                  "a": {
+                    "node": "guide-north",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "ne",
+                  "a": {
+                    "node": "guide-north",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-east",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "sw",
+                  "a": {
+                    "node": "guide-south",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "se",
+                  "a": {
+                    "node": "guide-south",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-east",
+                    "port": "p2"
+                  }
+                }
+              ]
+            },
+            "editable": [
+              {
+                "id": "ne"
+              },
+              {
+                "id": "se"
+              }
+            ],
+            "uplinks": [
+              {
+                "node": "guide-north",
+                "minimum": 2
+              },
+              {
+                "node": "guide-south",
+                "minimum": 2
+              }
+            ],
+            "pairs": [
+              {
+                "from": "guide-north",
+                "to": "guide-south"
+              }
+            ],
+            "cases": [
+              {
+                "id": "normal",
+                "label": "All devices available",
+                "experiment": {
+                  "unavailable": []
+                }
+              },
+              {
+                "id": "west-failed",
+                "label": "West combined unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "guide-west"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "east-failed",
+                "label": "East combined unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "guide-east"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "campus-layout {\"kind\":\"Edit\",\"draft\":{\"connections\":[{\"wire\":\"nw\",\"a\":{\"node\":\"north\",\"port\":\"p1\"},\"b\":{\"node\":\"west\",\"port\":\"p1\"}},{\"wire\":\"ne\",\"a\":{\"node\":\"north\",\"port\":\"p2\"},\"b\":{\"node\":\"east\",\"port\":\"p1\"}},{\"wire\":\"sw\",\"a\":{\"node\":\"south\",\"port\":\"p1\"},\"b\":{\"node\":\"west\",\"port\":\"p2\"}},{\"wire\":\"se\",\"a\":{\"node\":\"south\",\"port\":\"p2\"},\"b\":{\"node\":\"east\",\"port\":\"p2\"}}]}}",
+        "campus-layout {\"kind\":\"Check\"}"
+      ]
+    },
+    {
+      "id": "ccna-distribution-core-paths",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-campus-architectures",
+      "topic": "Campus architecture",
+      "title": "Repair building and core paths in a three-tier campus",
+      "summary": "Repair a three-tier campus’s building links and redundant core paths.",
+      "objective": "Connect each access device only to distribution devices in its own named building. Keep two different upstream devices for every access and distribution device. Complete all supplied cables without sharing a physical port. Edit only a-dn1, a-ds1, w-dn2 and e-ds2; preserve the other cable endpoints. Keep a hierarchy path from North access to South access with all devices available and after each stated single core or distribution device outage.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the campus roles",
+        "Repair separate practice cables",
+        "Apply the full campus requirements"
+      ],
+      "hints": [
+        "Compare each cable’s device role and building, not just whether it has two ends.",
+        "Count different upstream devices. A second cable to the same device shares that device’s failure.",
+        "Check every stated case; the first working normal path is not the whole task."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco-campus-lan-wlan-design-guide.html"
+      ],
+      "simplifications": "Source check 2026-11-13: current CCNA v1.1 objectives 1.2a/b and Cisco Campus LAN/WLAN design guide (2020). Bounded structural routed-adjacency model only: no packets, IP configuration, STP, convergence, bandwidth, routing policy or actual hardware. Building-local access and non-transit access roles are explicit exercise requirements, not universal claims for every campus. Other architecture subtopics remain separate.",
+      "explanation": "A three-tier path crosses access, the local distribution block, the core, the remote distribution block and the remote access device. A cable to the wrong building can be physically connected and still violate that organization. Fix local access links and missing core uplinks, then test each stated outage; a working normal path is only part of the assignment.",
+      "initial": {
+        "kind": "CampusArchitecture",
+        "simulation": {
+          "schema_version": 1,
+          "version": 1,
+          "id": "ccna-distribution-core-paths",
+          "view": "introduction",
+          "assignment": {
+            "draft": {
+              "connections": [
+                {
+                  "wire": "a-dn1",
+                  "a": {
+                    "node": "north",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "ds1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-dn1",
+                  "a": {
+                    "node": "dn1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "e-dn1",
+                  "a": {
+                    "node": "dn1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "east",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "a-dn2",
+                  "a": {
+                    "node": "north",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "dn2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-dn2",
+                  "a": {
+                    "node": "dn2",
+                    "port": "p2"
+                  },
+                  "b": null
+                },
+                {
+                  "wire": "e-dn2",
+                  "a": {
+                    "node": "dn2",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "east",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "a-ds1",
+                  "a": {
+                    "node": "south",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "dn1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-ds1",
+                  "a": {
+                    "node": "ds1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "e-ds1",
+                  "a": {
+                    "node": "ds1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "east",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "a-ds2",
+                  "a": {
+                    "node": "south",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "ds2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-ds2",
+                  "a": {
+                    "node": "ds2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p4"
+                  }
+                },
+                {
+                  "wire": "e-ds2",
+                  "a": {
+                    "node": "ds2",
+                    "port": "p3"
+                  },
+                  "b": null
+                }
+              ]
+            },
+            "checked": false
+          },
+          "practice": {
+            "draft": {
+              "connections": [
+                {
+                  "wire": "a-dn1",
+                  "a": {
+                    "node": "guide-north",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-ds1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-dn1",
+                  "a": {
+                    "node": "guide-dn1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "e-dn1",
+                  "a": {
+                    "node": "guide-dn1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "guide-east",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "a-dn2",
+                  "a": {
+                    "node": "guide-north",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-dn2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-dn2",
+                  "a": {
+                    "node": "guide-dn2",
+                    "port": "p2"
+                  },
+                  "b": null
+                },
+                {
+                  "wire": "e-dn2",
+                  "a": {
+                    "node": "guide-dn2",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "guide-east",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "a-ds1",
+                  "a": {
+                    "node": "guide-south",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-dn1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-ds1",
+                  "a": {
+                    "node": "guide-ds1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "e-ds1",
+                  "a": {
+                    "node": "guide-ds1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "guide-east",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "a-ds2",
+                  "a": {
+                    "node": "guide-south",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-ds2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-ds2",
+                  "a": {
+                    "node": "guide-ds2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p4"
+                  }
+                },
+                {
+                  "wire": "e-ds2",
+                  "a": {
+                    "node": "guide-ds2",
+                    "port": "p3"
+                  },
+                  "b": null
+                }
+              ]
+            },
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "CampusArchitecture",
+        "definition": {
+          "schema_version": 1,
+          "version": 1,
+          "id": "ccna-distribution-core-paths",
+          "assignment": {
+            "id": "assignment-3",
+            "facts": {
+              "schema_version": 1,
+              "design": "ThreeTier",
+              "nodes": [
+                {
+                  "id": "north",
+                  "label": "North access",
+                  "role": "Access",
+                  "block": "north",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    }
+                  ]
+                },
+                {
+                  "id": "south",
+                  "label": "South access",
+                  "role": "Access",
+                  "block": "south",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    }
+                  ]
+                },
+                {
+                  "id": "west",
+                  "label": "West core",
+                  "role": "Core",
+                  "block": null,
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    },
+                    {
+                      "id": "p4"
+                    }
+                  ]
+                },
+                {
+                  "id": "east",
+                  "label": "East core",
+                  "role": "Core",
+                  "block": null,
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    },
+                    {
+                      "id": "p4"
+                    }
+                  ]
+                },
+                {
+                  "id": "dn1",
+                  "label": "North distribution A",
+                  "role": "Distribution",
+                  "block": "north",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "dn2",
+                  "label": "North distribution B",
+                  "role": "Distribution",
+                  "block": "north",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "ds1",
+                  "label": "South distribution A",
+                  "role": "Distribution",
+                  "block": "south",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "ds2",
+                  "label": "South distribution B",
+                  "role": "Distribution",
+                  "block": "south",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "id": "a-dn1",
+                  "label": "a-dn1"
+                },
+                {
+                  "id": "w-dn1",
+                  "label": "w-dn1"
+                },
+                {
+                  "id": "e-dn1",
+                  "label": "e-dn1"
+                },
+                {
+                  "id": "a-dn2",
+                  "label": "a-dn2"
+                },
+                {
+                  "id": "w-dn2",
+                  "label": "w-dn2"
+                },
+                {
+                  "id": "e-dn2",
+                  "label": "e-dn2"
+                },
+                {
+                  "id": "a-ds1",
+                  "label": "a-ds1"
+                },
+                {
+                  "id": "w-ds1",
+                  "label": "w-ds1"
+                },
+                {
+                  "id": "e-ds1",
+                  "label": "e-ds1"
+                },
+                {
+                  "id": "a-ds2",
+                  "label": "a-ds2"
+                },
+                {
+                  "id": "w-ds2",
+                  "label": "w-ds2"
+                },
+                {
+                  "id": "e-ds2",
+                  "label": "e-ds2"
+                }
+              ]
+            },
+            "initial": {
+              "connections": [
+                {
+                  "wire": "a-dn1",
+                  "a": {
+                    "node": "north",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "ds1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-dn1",
+                  "a": {
+                    "node": "dn1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "e-dn1",
+                  "a": {
+                    "node": "dn1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "east",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "a-dn2",
+                  "a": {
+                    "node": "north",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "dn2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-dn2",
+                  "a": {
+                    "node": "dn2",
+                    "port": "p2"
+                  },
+                  "b": null
+                },
+                {
+                  "wire": "e-dn2",
+                  "a": {
+                    "node": "dn2",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "east",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "a-ds1",
+                  "a": {
+                    "node": "south",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "dn1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-ds1",
+                  "a": {
+                    "node": "ds1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "e-ds1",
+                  "a": {
+                    "node": "ds1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "east",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "a-ds2",
+                  "a": {
+                    "node": "south",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "ds2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-ds2",
+                  "a": {
+                    "node": "ds2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p4"
+                  }
+                },
+                {
+                  "wire": "e-ds2",
+                  "a": {
+                    "node": "ds2",
+                    "port": "p3"
+                  },
+                  "b": null
+                }
+              ]
+            },
+            "reference": {
+              "connections": [
+                {
+                  "wire": "a-dn1",
+                  "a": {
+                    "node": "north",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "dn1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-dn1",
+                  "a": {
+                    "node": "dn1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "e-dn1",
+                  "a": {
+                    "node": "dn1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "east",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "a-dn2",
+                  "a": {
+                    "node": "north",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "dn2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-dn2",
+                  "a": {
+                    "node": "dn2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "e-dn2",
+                  "a": {
+                    "node": "dn2",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "east",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "a-ds1",
+                  "a": {
+                    "node": "south",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "ds1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-ds1",
+                  "a": {
+                    "node": "ds1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "e-ds1",
+                  "a": {
+                    "node": "ds1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "east",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "a-ds2",
+                  "a": {
+                    "node": "south",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "ds2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-ds2",
+                  "a": {
+                    "node": "ds2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "west",
+                    "port": "p4"
+                  }
+                },
+                {
+                  "wire": "e-ds2",
+                  "a": {
+                    "node": "ds2",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "east",
+                    "port": "p4"
+                  }
+                }
+              ]
+            },
+            "editable": [
+              {
+                "id": "a-dn1"
+              },
+              {
+                "id": "a-ds1"
+              },
+              {
+                "id": "w-dn2"
+              },
+              {
+                "id": "e-ds2"
+              }
+            ],
+            "uplinks": [
+              {
+                "node": "north",
+                "minimum": 2
+              },
+              {
+                "node": "south",
+                "minimum": 2
+              },
+              {
+                "node": "dn1",
+                "minimum": 2
+              },
+              {
+                "node": "dn2",
+                "minimum": 2
+              },
+              {
+                "node": "ds1",
+                "minimum": 2
+              },
+              {
+                "node": "ds2",
+                "minimum": 2
+              }
+            ],
+            "pairs": [
+              {
+                "from": "north",
+                "to": "south"
+              }
+            ],
+            "cases": [
+              {
+                "id": "normal",
+                "label": "All devices available",
+                "experiment": {
+                  "unavailable": []
+                }
+              },
+              {
+                "id": "west-failed",
+                "label": "West core unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "west"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "east-failed",
+                "label": "East core unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "east"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "dn1-failed",
+                "label": "North distribution A unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "dn1"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "dn2-failed",
+                "label": "North distribution B unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "dn2"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "ds1-failed",
+                "label": "South distribution A unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "ds1"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "ds2-failed",
+                "label": "South distribution B unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "ds2"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "practice-3",
+            "facts": {
+              "schema_version": 1,
+              "design": "ThreeTier",
+              "nodes": [
+                {
+                  "id": "guide-north",
+                  "label": "Guide North access",
+                  "role": "Access",
+                  "block": "guide-north",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-south",
+                  "label": "Guide South access",
+                  "role": "Access",
+                  "block": "guide-south",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-west",
+                  "label": "Guide West core",
+                  "role": "Core",
+                  "block": null,
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    },
+                    {
+                      "id": "p4"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-east",
+                  "label": "Guide East core",
+                  "role": "Core",
+                  "block": null,
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    },
+                    {
+                      "id": "p4"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-dn1",
+                  "label": "Guide North distribution A",
+                  "role": "Distribution",
+                  "block": "guide-north",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-dn2",
+                  "label": "Guide North distribution B",
+                  "role": "Distribution",
+                  "block": "guide-north",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-ds1",
+                  "label": "Guide South distribution A",
+                  "role": "Distribution",
+                  "block": "guide-south",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                },
+                {
+                  "id": "guide-ds2",
+                  "label": "Guide South distribution B",
+                  "role": "Distribution",
+                  "block": "guide-south",
+                  "ports": [
+                    {
+                      "id": "p1"
+                    },
+                    {
+                      "id": "p2"
+                    },
+                    {
+                      "id": "p3"
+                    }
+                  ]
+                }
+              ],
+              "wires": [
+                {
+                  "id": "a-dn1",
+                  "label": "a-dn1"
+                },
+                {
+                  "id": "w-dn1",
+                  "label": "w-dn1"
+                },
+                {
+                  "id": "e-dn1",
+                  "label": "e-dn1"
+                },
+                {
+                  "id": "a-dn2",
+                  "label": "a-dn2"
+                },
+                {
+                  "id": "w-dn2",
+                  "label": "w-dn2"
+                },
+                {
+                  "id": "e-dn2",
+                  "label": "e-dn2"
+                },
+                {
+                  "id": "a-ds1",
+                  "label": "a-ds1"
+                },
+                {
+                  "id": "w-ds1",
+                  "label": "w-ds1"
+                },
+                {
+                  "id": "e-ds1",
+                  "label": "e-ds1"
+                },
+                {
+                  "id": "a-ds2",
+                  "label": "a-ds2"
+                },
+                {
+                  "id": "w-ds2",
+                  "label": "w-ds2"
+                },
+                {
+                  "id": "e-ds2",
+                  "label": "e-ds2"
+                }
+              ]
+            },
+            "initial": {
+              "connections": [
+                {
+                  "wire": "a-dn1",
+                  "a": {
+                    "node": "guide-north",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-ds1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-dn1",
+                  "a": {
+                    "node": "guide-dn1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "e-dn1",
+                  "a": {
+                    "node": "guide-dn1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "guide-east",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "a-dn2",
+                  "a": {
+                    "node": "guide-north",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-dn2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-dn2",
+                  "a": {
+                    "node": "guide-dn2",
+                    "port": "p2"
+                  },
+                  "b": null
+                },
+                {
+                  "wire": "e-dn2",
+                  "a": {
+                    "node": "guide-dn2",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "guide-east",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "a-ds1",
+                  "a": {
+                    "node": "guide-south",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-dn1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-ds1",
+                  "a": {
+                    "node": "guide-ds1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "e-ds1",
+                  "a": {
+                    "node": "guide-ds1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "guide-east",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "a-ds2",
+                  "a": {
+                    "node": "guide-south",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-ds2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-ds2",
+                  "a": {
+                    "node": "guide-ds2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p4"
+                  }
+                },
+                {
+                  "wire": "e-ds2",
+                  "a": {
+                    "node": "guide-ds2",
+                    "port": "p3"
+                  },
+                  "b": null
+                }
+              ]
+            },
+            "reference": {
+              "connections": [
+                {
+                  "wire": "a-dn1",
+                  "a": {
+                    "node": "guide-north",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-dn1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-dn1",
+                  "a": {
+                    "node": "guide-dn1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "e-dn1",
+                  "a": {
+                    "node": "guide-dn1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "guide-east",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "a-dn2",
+                  "a": {
+                    "node": "guide-north",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-dn2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-dn2",
+                  "a": {
+                    "node": "guide-dn2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "e-dn2",
+                  "a": {
+                    "node": "guide-dn2",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "guide-east",
+                    "port": "p2"
+                  }
+                },
+                {
+                  "wire": "a-ds1",
+                  "a": {
+                    "node": "guide-south",
+                    "port": "p1"
+                  },
+                  "b": {
+                    "node": "guide-ds1",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-ds1",
+                  "a": {
+                    "node": "guide-ds1",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "e-ds1",
+                  "a": {
+                    "node": "guide-ds1",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "guide-east",
+                    "port": "p3"
+                  }
+                },
+                {
+                  "wire": "a-ds2",
+                  "a": {
+                    "node": "guide-south",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-ds2",
+                    "port": "p1"
+                  }
+                },
+                {
+                  "wire": "w-ds2",
+                  "a": {
+                    "node": "guide-ds2",
+                    "port": "p2"
+                  },
+                  "b": {
+                    "node": "guide-west",
+                    "port": "p4"
+                  }
+                },
+                {
+                  "wire": "e-ds2",
+                  "a": {
+                    "node": "guide-ds2",
+                    "port": "p3"
+                  },
+                  "b": {
+                    "node": "guide-east",
+                    "port": "p4"
+                  }
+                }
+              ]
+            },
+            "editable": [
+              {
+                "id": "a-dn1"
+              },
+              {
+                "id": "a-ds1"
+              },
+              {
+                "id": "w-dn2"
+              },
+              {
+                "id": "e-ds2"
+              }
+            ],
+            "uplinks": [
+              {
+                "node": "guide-north",
+                "minimum": 2
+              },
+              {
+                "node": "guide-south",
+                "minimum": 2
+              },
+              {
+                "node": "guide-dn1",
+                "minimum": 2
+              },
+              {
+                "node": "guide-dn2",
+                "minimum": 2
+              },
+              {
+                "node": "guide-ds1",
+                "minimum": 2
+              },
+              {
+                "node": "guide-ds2",
+                "minimum": 2
+              }
+            ],
+            "pairs": [
+              {
+                "from": "guide-north",
+                "to": "guide-south"
+              }
+            ],
+            "cases": [
+              {
+                "id": "normal",
+                "label": "All devices available",
+                "experiment": {
+                  "unavailable": []
+                }
+              },
+              {
+                "id": "west-failed",
+                "label": "West core unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "guide-west"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "east-failed",
+                "label": "East core unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "guide-east"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "dn1-failed",
+                "label": "North distribution A unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "guide-dn1"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "dn2-failed",
+                "label": "North distribution B unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "guide-dn2"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "ds1-failed",
+                "label": "South distribution A unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "guide-ds1"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "ds2-failed",
+                "label": "South distribution B unavailable",
+                "experiment": {
+                  "unavailable": [
+                    {
+                      "kind": "Node",
+                      "id": "guide-ds2"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "campus-layout {\"kind\":\"Edit\",\"draft\":{\"connections\":[{\"wire\":\"a-dn1\",\"a\":{\"node\":\"north\",\"port\":\"p1\"},\"b\":{\"node\":\"dn1\",\"port\":\"p1\"}},{\"wire\":\"w-dn1\",\"a\":{\"node\":\"dn1\",\"port\":\"p2\"},\"b\":{\"node\":\"west\",\"port\":\"p1\"}},{\"wire\":\"e-dn1\",\"a\":{\"node\":\"dn1\",\"port\":\"p3\"},\"b\":{\"node\":\"east\",\"port\":\"p1\"}},{\"wire\":\"a-dn2\",\"a\":{\"node\":\"north\",\"port\":\"p2\"},\"b\":{\"node\":\"dn2\",\"port\":\"p1\"}},{\"wire\":\"w-dn2\",\"a\":{\"node\":\"dn2\",\"port\":\"p2\"},\"b\":{\"node\":\"west\",\"port\":\"p2\"}},{\"wire\":\"e-dn2\",\"a\":{\"node\":\"dn2\",\"port\":\"p3\"},\"b\":{\"node\":\"east\",\"port\":\"p2\"}},{\"wire\":\"a-ds1\",\"a\":{\"node\":\"south\",\"port\":\"p1\"},\"b\":{\"node\":\"ds1\",\"port\":\"p1\"}},{\"wire\":\"w-ds1\",\"a\":{\"node\":\"ds1\",\"port\":\"p2\"},\"b\":{\"node\":\"west\",\"port\":\"p3\"}},{\"wire\":\"e-ds1\",\"a\":{\"node\":\"ds1\",\"port\":\"p3\"},\"b\":{\"node\":\"east\",\"port\":\"p3\"}},{\"wire\":\"a-ds2\",\"a\":{\"node\":\"south\",\"port\":\"p2\"},\"b\":{\"node\":\"ds2\",\"port\":\"p1\"}},{\"wire\":\"w-ds2\",\"a\":{\"node\":\"ds2\",\"port\":\"p2\"},\"b\":{\"node\":\"west\",\"port\":\"p4\"}},{\"wire\":\"e-ds2\",\"a\":{\"node\":\"ds2\",\"port\":\"p3\"},\"b\":{\"node\":\"east\",\"port\":\"p4\"}}]}}",
+        "campus-layout {\"kind\":\"Check\"}"
+      ]
+    }
+  ]
+}

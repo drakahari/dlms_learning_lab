@@ -81,10 +81,10 @@ impl<'de> Deserialize<'de> for Lesson {
 fn prose(s: &str, n: usize) -> bool {
     !s.trim().is_empty() && s.len() <= n && !s.contains('\0')
 }
-fn step(s: &ExampleStep) -> bool {
+fn step(d:&Definition,s: &ExampleStep) -> bool {
     prose(&s.explanation, 2048)
         && s.command.len() <= terminal::MAX_COMMAND
-        && terminal::parse(&s.command).is_ok()
+        && terminal::validate_guidance_for(d,&s.command).is_ok()
 }
 fn run(d: &Definition, s: &mut State, commands: &[ExampleStep]) -> Result<(), String> {
     for c in commands {
@@ -145,7 +145,7 @@ impl Lesson {
                 .iter()
                 .chain(&self.try_change.commands)
                 .chain(&self.repair)
-                .all(step)
+                .all(|s|step(&self.definition,s))
             && self.definition.validate().is_ok()
             && work::within(self, MAX_LESSON)
     }
@@ -154,6 +154,8 @@ impl Lesson {
     }
     pub fn separate_from_definition(&self, assignment: &Definition) -> bool {
         self.separate_from(&assignment.initial)
+            && self.definition.allow_metadata_restore == assignment.allow_metadata_restore
+            && self.definition.patch_policy.is_some() == assignment.patch_policy.is_some()
             && self.definition.archive_paths.keys().all(|p| {
                 !assignment.archive_paths.contains_key(p)
                     && !assignment.initial.catalog().allowed_paths.contains(p)

@@ -1,0 +1,1252 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-lvm-retire-raw",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Raw LVM retirement",
+      "unit": "lvm-raw-retirement",
+      "title": "Return unused raw allocations without disturbing live data",
+      "summary": "Retire only the unused raw records/scratch and records/cache LVs.",
+      "objective": "Retire only the unused raw records/scratch and records/cache LVs. Keep records, ledger, peer and their files unchanged; return the released extents to records. Leave both supplied devices recordspare and recordsforeign unchanged. Do not add a replacement allocation or clear a PV label.",
+      "retry_guidance": "Read which named allocation, group or label is still present. Inspect the reports and change only the intended unused object. Refused commands retain prior work. Reset only this assignment if unrelated allocation changes need a fresh start.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/recordsa": {
+                "bytes": 51380224,
+                "role": "PhysicalVolume",
+                "group": "records"
+              },
+              "/dev/recordspare": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/recordsforeign": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "records": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "records/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "peer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "records/peer: preserve this record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "scratch": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 4
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "cache": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 6
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/recordsa": {
+                "bytes": 51380224,
+                "role": "PhysicalVolume",
+                "group": "records"
+              },
+              "/dev/recordspare": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/recordsforeign": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "records": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "records/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "peer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "records/peer: preserve this record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "scratch": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 4
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "cache": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 6
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/workshopa": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "workshop"
+              },
+              "/dev/workforeign": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "workshop": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "workshop/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "trial": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "buffer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/workshopa": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "workshop"
+              },
+              "/dev/workforeign": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "workshop": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "workshop/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "trial": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "buffer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/workshopa",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/recordsa": {
+                "bytes": 51380224,
+                "role": "PhysicalVolume",
+                "group": "records"
+              },
+              "/dev/recordspare": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              },
+              "/dev/recordsforeign": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "records": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "records/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "peer": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "records/peer: preserve this record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "scratch": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 4
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "cache": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 6
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "targets": [],
+          "retirement": {
+            "retired_volumes": [
+              "records/scratch",
+              "records/cache"
+            ],
+            "retired_groups": [],
+            "cleared_pvs": []
+          },
+          "lesson": {
+            "prerequisite_note": "Builds on linear LVM creation and reports. This lesson teaches deliberate retirement of supplied unused raw allocations. Filesystem-bearing data, real activation/mount checks, force and secure erasure are outside the modeled subset.",
+            "concepts": [
+              {
+                "title": "Remove the intended allocation, preserve the data",
+                "text": "A logical volume reserves pieces of its group. Removing an unused raw LV returns those extents to that same pool; it does not shrink the physical device or increase a neighboring filesystem. This exercise identifies the raw allocations that are no longer needed. The ledger and other data volumes must stay unchanged."
+              },
+              {
+                "title": "Inspect before making a destructive change",
+                "text": "Read lvs and the supplied inventory before choosing a name. Here lvremove -y VG/LV explicitly confirms removal of one raw LV; /dev/VG/LV and --yes are supported alternatives. Real lvremove can destroy data. Our refusal of filesystem-bearing removal is a simulation boundary, not a safety promise about Linux."
+              },
+              {
+                "title": "Verify the current result, not a success message",
+                "text": "Use lvs to confirm the intended names are absent, and vgs to see the returned free extents. Every unrelated LV, group, file and device must remain. Check work evaluates that state; inspection output alone does not complete the task."
+              }
+            ],
+            "description": "Workshop has ten 4 MiB extents. Ledger uses two, trial one, and buffer two; five are free. Retiring trial and buffer returns three extents, so eight become free. Ledger and its files remain exactly as supplied.",
+            "fixture": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/workshopa": {
+                  "bytes": 42991616,
+                  "role": "PhysicalVolume",
+                  "group": "workshop"
+                },
+                "/dev/workforeign": {
+                  "bytes": 17825792,
+                  "role": "Foreign",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "workshop": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "ledger": {
+                      "extents": [
+                        {
+                          "pv": "/dev/workshopa",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/workshopa",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "workshop/ledger: preserve this record.\n"
+                          }
+                        }
+                      }
+                    },
+                    "trial": {
+                      "extents": [
+                        {
+                          "pv": "/dev/workshopa",
+                          "index": 2
+                        }
+                      ],
+                      "filesystem": null
+                    },
+                    "buffer": {
+                      "extents": [
+                        {
+                          "pv": "/dev/workshopa",
+                          "index": 3
+                        },
+                        {
+                          "pv": "/dev/workshopa",
+                          "index": 4
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [],
+            "retirement": {
+              "retired_volumes": [
+                "workshop/trial",
+                "workshop/buffer"
+              ],
+              "retired_groups": [],
+              "cleared_pvs": []
+            },
+            "worked": [
+              {
+                "text": "lvs",
+                "explanation": "Locate trial and buffer, the two declared unused raw allocations; ledger is protected."
+              },
+              {
+                "text": "vgs",
+                "explanation": "Read the five extents currently free in workshop."
+              },
+              {
+                "text": "lvremove -y workshop/trial",
+                "explanation": "Remove only trial; its one extent returns to workshop."
+              },
+              {
+                "text": "lvremove --yes /dev/workshop/buffer",
+                "explanation": "Remove buffer; two more extents return to the same pool."
+              },
+              {
+                "text": "lvs",
+                "explanation": "Only the protected ledger should remain in workshop."
+              },
+              {
+                "text": "vgs",
+                "explanation": "The pool now has eight free extents; the device is the same size."
+              }
+            ],
+            "try_change": "After the example passes, allocate trial again with lvcreate -l 1 -n trial workshop. Check the still-present name and lower free count, then retire it again with lvremove -y workshop/trial and check.",
+            "experiment": "lvcreate -l 1 -n trial workshop",
+            "repair": "lvremove -y workshop/trial"
+          }
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect supplied ownership and protected data",
+        "Retire only the requested unused objects",
+        "Verify returned extents or cleared labels",
+        "Confirm every unrelated object remains unchanged"
+      ],
+      "hints": [
+        "Inspect the existing names in lvs. Raw means no modeled filesystem, not automatically safe to remove on real equipment.",
+        "Remove each named unused raw LV; changing or extending ledger cannot return its neighbors\u2019 extents.",
+        "Use vgs to compare the returned free pool. The group and all unrelated storage must remain."
+      ],
+      "explanation": "Raw LV removal returns physical extents to its pool. Empty-group removal releases ownership but keeps PV labels. PV-label removal is a separate operation; it does not erase every byte or format a filesystem. The complete current plan and protected data determine success.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/lvremove.8.html",
+        "https://man7.org/linux/man-pages/man8/vgremove.8.html",
+        "https://man7.org/linux/man-pages/man8/pvremove.8.html",
+        "https://man7.org/linux/man-pages/man8/pvs.8.html"
+      ],
+      "simplifications": "Source-enabled bounded raw LVM lifecycle on supplied virtual devices only. No host device or command, filesystem-bearing removal, real activation/mount/process-use proof, force, vgreduce, secure erasure, snapshots, thin/RAID, rename, reduction or lvm.conf. Whole extents, fixed 1 MiB data start and fixed byte-column reports. Modeled operations publish one validated candidate; real LVM does not promise multi-device rollback. Empty-group/unowned-PV refusal is a subset boundary, not real-system protection.",
+      "solution": [
+        "lvs",
+        "lvremove -y records/scratch",
+        "lvremove -y records/cache",
+        "vgs",
+        "lvs"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-provision-handover"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-retire-pool",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Raw LVM retirement",
+      "unit": "lvm-raw-retirement",
+      "title": "Retire a raw storage pool and clear only its PV labels",
+      "summary": "Retire the declared unused raw retired/scratch and retired/queue LVs, then the retired group.",
+      "objective": "Retire the declared unused raw retired/scratch and retired/queue LVs, then the retired group. Clear the LVM PV labels on only /dev/retirea and /dev/retireb; retain their device sizes. Preserve records/ledger and its files, the labeled unowned /dev/orphan PV, and /dev/shared carrying other data. Do not add replacement groups or volumes. A retired group with leftover PV labels is only partially complete.",
+      "retry_guidance": "Read which named allocation, group or label is still present. Inspect the reports and change only the intended unused object. Refused commands retain prior work. Reset only this assignment if unrelated allocation changes need a fresh start.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/recordsa": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "records"
+              },
+              "/dev/retirea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "retired"
+              },
+              "/dev/retireb": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "retired"
+              },
+              "/dev/orphan": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": ""
+              },
+              "/dev/shared": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "records": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "records/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "retired": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "scratch": {
+                    "extents": [
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 1
+                      },
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "queue": {
+                    "extents": [
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/recordsa": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "records"
+              },
+              "/dev/retirea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "retired"
+              },
+              "/dev/retireb": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "retired"
+              },
+              "/dev/orphan": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": ""
+              },
+              "/dev/shared": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "records": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "records/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "retired": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "scratch": {
+                    "extents": [
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 1
+                      },
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "queue": {
+                    "extents": [
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/librarya": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "library"
+              },
+              "/dev/practicea": {
+                "bytes": 26214400,
+                "role": "PhysicalVolume",
+                "group": "practice"
+              },
+              "/dev/practiceb": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "practice"
+              },
+              "/dev/libraryorphan": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": ""
+              },
+              "/dev/libraryforeign": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "library": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "catalog": {
+                    "extents": [
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "library/catalog: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "practice": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "trial": {
+                    "extents": [
+                      {
+                        "pv": "/dev/practicea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/practicea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/librarya": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "library"
+              },
+              "/dev/practicea": {
+                "bytes": 26214400,
+                "role": "PhysicalVolume",
+                "group": "practice"
+              },
+              "/dev/practiceb": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "practice"
+              },
+              "/dev/libraryorphan": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": ""
+              },
+              "/dev/libraryforeign": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "library": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "catalog": {
+                    "extents": [
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/librarya",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "library/catalog: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "practice": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "trial": {
+                    "extents": [
+                      {
+                        "pv": "/dev/practicea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/practicea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/recordsa": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "records"
+              },
+              "/dev/retirea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "retired"
+              },
+              "/dev/retireb": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "retired"
+              },
+              "/dev/orphan": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": ""
+              },
+              "/dev/shared": {
+                "bytes": 17825792,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "records": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "ledger": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "records/ledger: preserve this record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "retired": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "scratch": {
+                    "extents": [
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 1
+                      },
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": null
+                  },
+                  "queue": {
+                    "extents": [
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/retirea",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            }
+          },
+          "targets": [],
+          "retirement": {
+            "retired_volumes": [
+              "retired/scratch",
+              "retired/queue"
+            ],
+            "retired_groups": [
+              "retired"
+            ],
+            "cleared_pvs": [
+              "/dev/retirea",
+              "/dev/retireb"
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Builds on linear LVM creation and reports. This lesson teaches deliberate retirement of supplied unused raw allocations. Filesystem-bearing data, real activation/mount checks, force and secure erasure are outside the modeled subset.",
+            "concepts": [
+              {
+                "title": "Retire storage from the inside out",
+                "text": "An LV belongs to a volume group; a PV supplies storage to that group. First remove only the unused raw LVs named in the plan. Then vgremove NAME can remove the empty group in this subset. A nonempty group is refused here; real vgremove can remove contained volumes after confirmation and has broader destructive behavior."
+              },
+              {
+                "title": "An absent group does not mean an absent PV label",
+                "text": "After vgremove, its devices are still labeled physical volumes, now without a group. Read pvs: pvremove /dev/NAME... clears only the specified unowned PV labels. Do not clear an unrelated orphan PV merely because it has no group. No force, vgreduce or filesystem-bearing removal is modeled."
+              },
+              {
+                "title": "No label is not secure erasure",
+                "text": "Clearing an LVM label stops that device being recognized as a PV. Its size does not change, and this does not format a filesystem, wipe every byte or securely erase data. The inventory reports no modeled PV label; it makes no claim about recoverable media contents."
+              },
+              {
+                "title": "Inspect before making a destructive change",
+                "text": "Read lvs and the supplied inventory before choosing a name. Here lvremove -y VG/LV explicitly confirms removal of one raw LV; /dev/VG/LV and --yes are supported alternatives. Real lvremove can destroy data. Our refusal of filesystem-bearing removal is a simulation boundary, not a safety promise about Linux."
+              },
+              {
+                "title": "Verify all three layers",
+                "text": "lvs and vgs confirm retired names are absent. pvs and the supplied device facts confirm the intended labels are gone while unrelated PVs and protected data remain. An empty lvs report by itself is insufficient. This exercise declares the raw allocations unused; real activation, mount and process-use checks are outside this subset."
+              }
+            ],
+            "description": "Practice is an unused ten-extent pool on practicea and practiceb with one two-extent raw trial LV. Remove trial, then the empty practice group. Its two PV labels remain until explicitly cleared. Library/catalog and libraryorphan are unrelated protected storage.",
+            "fixture": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/librarya": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "group": "library"
+                },
+                "/dev/practicea": {
+                  "bytes": 26214400,
+                  "role": "PhysicalVolume",
+                  "group": "practice"
+                },
+                "/dev/practiceb": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "practice"
+                },
+                "/dev/libraryorphan": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": ""
+                },
+                "/dev/libraryforeign": {
+                  "bytes": 17825792,
+                  "role": "Foreign",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "library": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "catalog": {
+                      "extents": [
+                        {
+                          "pv": "/dev/librarya",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/librarya",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "library/catalog: preserve this record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "practice": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "trial": {
+                      "extents": [
+                        {
+                          "pv": "/dev/practicea",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/practicea",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [],
+            "retirement": {
+              "retired_volumes": [
+                "practice/trial"
+              ],
+              "retired_groups": [
+                "practice"
+              ],
+              "cleared_pvs": [
+                "/dev/practicea",
+                "/dev/practiceb"
+              ]
+            },
+            "worked": [
+              {
+                "text": "lvs",
+                "explanation": "Confirm practice/trial is the supplied unused raw allocation and library/catalog is protected."
+              },
+              {
+                "text": "lvremove -y practice/trial",
+                "explanation": "Retire the raw LV so practice becomes empty."
+              },
+              {
+                "text": "vgremove practice",
+                "explanation": "Remove the empty group; the two devices remain labeled PVs."
+              },
+              {
+                "text": "pvs",
+                "explanation": "Both practice devices are now unowned PVs; libraryorphan must keep its label."
+              },
+              {
+                "text": "pvremove /dev/practicea /dev/practiceb",
+                "explanation": "Clear only those two unowned labels, not data from the full devices."
+              },
+              {
+                "text": "pvs",
+                "explanation": "Only the protected library PV and its unrelated orphan label remain."
+              }
+            ],
+            "try_change": "After the example passes, run pvcreate /dev/practicea and check. No group or LV returns, but the unwanted label makes the handover incomplete. Run pvremove /dev/practicea and check again.",
+            "experiment": "pvcreate /dev/practicea",
+            "repair": "pvremove /dev/practicea"
+          }
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect supplied ownership and protected data",
+        "Retire only the requested unused objects",
+        "Verify returned extents or cleared labels",
+        "Confirm every unrelated object remains unchanged"
+      ],
+      "hints": [
+        "Follow the ownership layers: named unused LVs, then their empty group, then only its now-unowned PV labels.",
+        "If vgremove refuses a nonempty group, inspect lvs and retire only the named unused raw allocations; no force is supported.",
+        "After group removal, inspect pvs and the supplied facts. The unrelated orphan PV must keep its label. Clearing a label is not secure erasure."
+      ],
+      "explanation": "Raw LV removal returns physical extents to its pool. Empty-group removal releases ownership but keeps PV labels. PV-label removal is a separate operation; it does not erase every byte or format a filesystem. The complete current plan and protected data determine success.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man8/lvremove.8.html",
+        "https://man7.org/linux/man-pages/man8/vgremove.8.html",
+        "https://man7.org/linux/man-pages/man8/pvremove.8.html",
+        "https://man7.org/linux/man-pages/man8/pvs.8.html"
+      ],
+      "simplifications": "Source-enabled bounded raw LVM lifecycle on supplied virtual devices only. No host device or command, filesystem-bearing removal, real activation/mount/process-use proof, force, vgreduce, secure erasure, snapshots, thin/RAID, rename, reduction or lvm.conf. Whole extents, fixed 1 MiB data start and fixed byte-column reports. Modeled operations publish one validated candidate; real LVM does not promise multi-device rollback. Empty-group/unowned-PV refusal is a subset boundary, not real-system protection.",
+      "solution": [
+        "lvs",
+        "lvremove -y retired/scratch",
+        "lvremove -y retired/queue",
+        "vgremove retired",
+        "pvs",
+        "pvremove /dev/retirea /dev/retireb",
+        "pvs"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-retire-raw"
+      ]
+    }
+  ]
+}

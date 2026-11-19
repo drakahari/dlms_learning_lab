@@ -56,14 +56,28 @@ impl LabApp {
         match view {
             teaching::View::Introduction => {
                 let lesson = s.switching_teaching.as_ref().unwrap();
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for concept in &lesson.concepts {
-                    ui.label(RichText::new(&concept.title).strong());
-                    ui.label(&concept.text);
+                if ccna_presentation::enabled(&s) {
+                    ccna_presentation::concepts(
+                        ui,
+                        &s,
+                        &lesson.prerequisite_note,
+                        lesson
+                            .concepts
+                            .iter()
+                            .map(|c| (c.title.clone(), c.text.clone())),
+                    );
+                } else {
+                    ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
+                    for concept in &lesson.concepts {
+                        ui.label(RichText::new(&concept.title).strong());
+                        ui.label(&concept.text);
+                    }
                 }
-                ui.label(RichText::new("A configuration example to try").strong());
-                ui.label(&lesson.example_description);
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                lesson_presentation::worked(ui, &lesson.example_description);
+                lesson_presentation::worked_rows(ui, &s);
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change));
+                }
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -78,9 +92,14 @@ impl LabApp {
                 });
             }
             teaching::View::Example => {
+                ccna_presentation::example(ui, &s, true);
                 let lesson = s.switching_teaching.as_ref().unwrap();
-                ui.label("Practice example · Not graded; your assignment stays separate.");
-                ui.label(&lesson.example_description);
+                if !ccna_presentation::enabled(&s) {
+                    ui.label("Practice example · Not graded; your assignment stays separate.");
+                }
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(&lesson.example_description);
+                }
                 let mut learning = self.progress.attempts[&s.id]
                     .workspace
                     .as_ref()
@@ -105,7 +124,9 @@ impl LabApp {
                     learning.view = teaching::View::Assignment;
                     self.set_switching_view(i, teaching::View::Assignment);
                 }
-                ui.label(format!("Try a change: {}", lesson.try_change));
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change));
+                }
                 let old = learning.draft.clone();
                 configuration_editor(
                     ui,
@@ -134,12 +155,7 @@ impl LabApp {
                 }
                 let checks = learning.checks(lesson);
                 if !checks.is_empty() {
-                    outcome_feedback(
-                        ui,
-                        checks,
-                        "Example checks pass · Your assignment remains separate.",
-                        (i, true),
-                    );
+                    outcome_feedback(ui, checks, "Example checks pass", (i, true));
                 }
                 inspect_paths(ui, i, true, &learning.fabric, &mut self.metrics);
                 self.progress
@@ -152,7 +168,7 @@ impl LabApp {
                     .switching_learning = Some(learning);
             }
             teaching::View::Assignment => {
-                ui.label(&s.objective);
+                ccna_presentation::assignment(ui, &s);
                 let State::Switching { fabric } = self.progress.attempts[&s.id].state.clone()
                 else {
                     return;
@@ -173,7 +189,7 @@ impl LabApp {
                     &mut draft,
                     &mut self.metrics,
                     &mut self.focus_input,
-                    "Draft changes · Check configuration applies and tests them",
+                    "Draft not verified · Check configuration to apply and test these edits",
                 );
                 if before != draft {
                     self.dirty = true;
@@ -259,7 +275,10 @@ impl LabApp {
         } else {
             false
         };
-        if !pass && (pending || checks.iter().all(|c| c.0)) {
+        if !pass && pending {
+            return;
+        }
+        if !pass && checks.iter().all(|c| c.0) {
             ui.label("Draft not verified · Check configuration to test the current draft.");
             return;
         }

@@ -1,5 +1,16 @@
 //! Bounded linear LVM growth over virtual devices only. No host I/O or subprocesses.
 //! Filesystem capacity is independent of LV capacity. See LVM_SUBSET.md.
+pub mod activation;
+pub mod cow;
+pub mod config_scan;
+pub mod mounts;
+pub mod device_path;
+pub mod device_reference;
+pub mod provision;
+pub mod pv_capacity;
+pub mod rename;
+pub mod retirement;
+pub mod snapshot;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -184,6 +195,8 @@ pub enum DeviceRole {
 pub struct Device {
     pub bytes: u64,
     pub role: DeviceRole,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pv_bytes: Option<u64>,
     // Empty string means ungrouped. Kept bounded even on direct serde decoding.
     #[serde(deserialize_with = "text::<_,32>")]
     pub group: String,
@@ -240,6 +253,16 @@ pub struct VolumeGroup {
 #[serde(deny_unknown_fields)]
 pub struct State {
     pub version: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provisioning: Option<provision::Profile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activation: Option<activation::Model>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub identity: Option<rename::Identity>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pv_capacity: Option<pv_capacity::Profile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub snapshots: Option<snapshot::Model>,
     #[serde(deserialize_with = "map::<_,Device,8>")]
     pub devices: BTreeMap<String, Device>,
     #[serde(deserialize_with = "map::<_,VolumeGroup,4>")]
@@ -263,6 +286,23 @@ fn wire_size<T: Serialize>(value: &T) -> Result<()> {
     serde_json::to_writer(Count(0), value).map_err(|_| limit("LVM snapshot exceeds 2 MiB"))
 }
 impl State {
+    pub fn command_help(&self) -> &'static str {
+        if self.snapshots.is_some() {return snapshot::HELP;}
+        if self.pv_capacity.is_some() {
+            return pv_capacity::HELP;
+        }
+        if self.identity.is_some() {
+            return rename::HELP;
+        }
+        if self.activation.is_some() {
+            return activation::HELP;
+        }
+        match self.provisioning {
+            Some(provision::Profile::Linear) => provision::HELP,
+            Some(provision::Profile::Lifecycle) => retirement::HELP,
+            None => HELP,
+        }
+    }
     pub fn from_json(raw: &[u8]) -> Result<Self> {
         if raw.len() > MAX_STATE_BYTES {
             return Err(limit("LVM snapshot exceeds 2 MiB before decoding"));
@@ -276,6 +316,7 @@ impl State {
         if self.version != 1 || self.devices.len() > MAX_DEVICES || self.groups.len() > MAX_GROUPS {
             return Err(limit("Unsupported LVM version or inventory count"));
         }
+        pv_capacity::validate(self)?;
         for (p, d) in &self.devices {
             if !device_name(p)
                 || d.bytes <= DATA_START
@@ -364,10 +405,17 @@ impl State {
                 }
             }
         }
+        if let Some(availability) = &self.activation {
+            availability.validate(self)?;
+        }
+        if let Some(identity) = &self.identity {
+            identity.validate(self)?;
+        }
+        snapshot::validate(self)?;
         wire_size(self)
     }
     fn pv_extents_for(&self, d: &Device, g: &VolumeGroup) -> Result<u32> {
-        let n = (d.bytes - DATA_START) / g.extent_bytes;
+        let n = (d.pv_bytes.unwrap_or(d.bytes) - DATA_START) / g.extent_bytes;
         if n == 0 || n > MAX_EXTENTS as u64 {
             return Err(limit(
                 "Each grouped PV needs 1..4096 physical extents in this simulator",
@@ -415,6 +463,7 @@ impl State {
             .bytes()
     }
     pub fn read_file(&self, id: &str, path: &str) -> Result<&str> {
+        activation::require_active(self, id)?;
         let fs = self
             .volume(id)?
             .1
@@ -449,7 +498,22 @@ impl State {
     }
     pub fn execute(&mut self, input: &str) -> Result<String> {
         self.validate()?;
-        let action = parse(input)?;
+        if self.snapshots.is_some() {return snapshot::execute(self,input);}
+        let action = parse(input).map_err(|e| {
+            if e.kind == ErrorKind::Unsupported
+                && ((self.provisioning.is_some() && e.message == HELP)
+                    || (self.provisioning != Some(provision::Profile::Lifecycle)
+                        && e.message == retirement::HELP)
+                    || (self.activation.is_some() && e.message == retirement::HELP)
+                    || (self.activation.is_none() && e.message == activation::HELP)
+                    || (self.identity.is_none() && e.message == rename::HELP)
+                    || (self.pv_capacity.is_none() && e.message == pv_capacity::HELP))
+            {
+                error(ErrorKind::Unsupported, self.command_help())
+            } else {
+                e
+            }
+        })?;
         if let Action::Report(kind) = action {
             return self.report(kind);
         }
@@ -457,12 +521,18 @@ impl State {
         // of this teaching transaction is never presented as real LVM rollback.
         let mut next = self.clone();
         let output = next.apply(action)?;
+        rename::reconcile(&mut next)?;
         next.validate()?;
         *self = next;
         Ok(output)
     }
     fn apply(&mut self, action: Action) -> Result<String> {
         match action {
+            Action::Provision(a) => provision::apply(self, a),
+            Action::Retirement(a) => retirement::apply(self, a),
+            Action::Activation(a) => activation::apply(self, a),
+            Action::Rename(a) => rename::apply(self, a),
+            Action::PvResize(a) => pv_capacity::apply(self, a),
             Action::PvCreate(paths) => {
                 for p in paths {
                     let d = self.devices.get_mut(&p).ok_or_else(|| {
@@ -481,6 +551,9 @@ impl State {
                         return Err(limit(
                             "This teaching profile requires at least 1 MiB of PV data after the 1 MiB metadata reservation",
                         ));
+                    }
+                    if d.role == DeviceRole::Blank && self.pv_capacity.is_some() {
+                        d.pv_bytes = Some(d.bytes);
                     }
                     d.role = DeviceRole::PhysicalVolume;
                 }
@@ -510,6 +583,9 @@ impl State {
                         ));
                     }
                     // Real vgextend can initialize a previously blank PV.
+                    if d.role == DeviceRole::Blank && self.pv_capacity.is_some() {
+                        d.pv_bytes = Some(d.bytes);
+                    }
                     d.role = DeviceRole::PhysicalVolume;
                     d.group = vg.clone();
                 }
@@ -590,6 +666,7 @@ impl State {
                 ))
             }
             Action::ResizeFs { id, blocks } => {
+                activation::require_active(self, &id)?;
                 let (vg, lv) = volume_name(&id)?;
                 let (g, v) = self.volume(&id)?;
                 let max = v.extents.len() as u64 * g.extent_bytes / BLOCK_BYTES;
@@ -641,7 +718,10 @@ impl State {
                     .filter(|(_, d)| d.role == DeviceRole::PhysicalVolume)
                 {
                     let (size, free) = if d.group.is_empty() {
-                        (d.bytes - DATA_START, d.bytes - DATA_START)
+                        (
+                            d.pv_bytes.unwrap_or(d.bytes) - DATA_START,
+                            d.pv_bytes.unwrap_or(d.bytes) - DATA_START,
+                        )
                     } else {
                         let g = &self.groups[&d.group];
                         let all = self.pv_extents_for(d, g)? as u64;
@@ -674,13 +754,24 @@ impl State {
                 }
             }
             Report::Lvs => {
-                out.push_str("LV VG LSize(B) #LE Type\n");
+                out.push_str(if self.activation.is_some() {
+                    "LV VG LSize(B) #LE Type ModelActive\n"
+                } else {
+                    "LV VG LSize(B) #LE Type\n"
+                });
                 for (vg, g) in &self.groups {
                     for (lv, v) in &g.volumes {
                         out.push_str(&format!(
-                            "{lv} {vg} {} {} linear\n",
+                            "{lv} {vg} {} {} linear{}\n",
                             v.extents.len() as u64 * g.extent_bytes,
-                            v.extents.len()
+                            v.extents.len(),
+                            self.activation.as_ref().map_or("", |a| {
+                                if a.active[&format!("{vg}/{lv}")] {
+                                    " active"
+                                } else {
+                                    " inactive"
+                                }
+                            })
                         ));
                     }
                 }
@@ -704,6 +795,11 @@ enum Growth {
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum Action {
+    Provision(provision::Action),
+    Retirement(retirement::Action),
+    Activation(activation::Action),
+    Rename(rename::Action),
+    PvResize(pv_capacity::Action),
     Report(Report),
     PvCreate(Vec<String>),
     VgExtend { vg: String, paths: Vec<String> },
@@ -764,9 +860,16 @@ fn parse(input: &str) -> Result<Action> {
     }
     let args = input.split_ascii_whitespace().collect::<Vec<_>>();
     match args.as_slice() {
+        ["vgcreate" | "lvcreate" | "lvremove", ..] => {
+            provision::parse(&args).map(Action::Provision)
+        }
+        ["vgremove" | "pvremove", ..] => retirement::parse(&args).map(Action::Retirement),
+        ["vgchange", ..] => activation::parse(&args).map(Action::Activation),
+        ["vgrename" | "lvrename", ..] => rename::parse(&args).map(Action::Rename),
         ["pvs"] => Ok(Action::Report(Report::Pvs)),
         ["vgs"] => Ok(Action::Report(Report::Vgs)),
         ["lvs"] => Ok(Action::Report(Report::Lvs)),
+        ["pvresize", ..] => pv_capacity::parse(&args).map(Action::PvResize),
         ["pvcreate", tail @ ..] => Ok(Action::PvCreate(paths(tail)?)),
         ["vgextend", vg, tail @ ..] if name(vg) => Ok(Action::VgExtend {
             vg: (*vg).into(),

@@ -1,0 +1,664 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-capacity-trend-plan",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Capacity planning",
+      "unit": "linux-capacity-planning",
+      "title": "Plan capacity for the current growth period",
+      "summary": "Choose a current growth window and an affordable upgrade that keeps space available throughout the planning horizon.",
+      "objective": "Use the report-volume observations from day 7 onward, including the latest day 14. Compare at least 3 days of that operating period when choosing a growth window. Leave at least 10485760 KiB (10 GiB) free on every simulated day through day 34. Order from day 14 onward and stay within 120 fictional credits. Choose a supplied quote and test the complete plan against every listed workload, including its extra arrivals. Preserve the existing data; neither a later upgrade nor a passing individual case excuses an earlier reserve failure.",
+      "retry_guidance": "Inspect the policy result and the first failing workload day. Revise the window, quote, date or reserve, then test the whole plan again.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task and supplied observations.",
+        "Investigate growth, quotes and lead times.",
+        "Test and repair the complete independent plan."
+      ],
+      "hints": [
+        "Use observations from the requested operating period and include the latest sample.",
+        "Reserve is unused space; it must remain available before the upgrade arrives as well as afterward.",
+        "Inspect every workload and the quote budget. A passing selected case alone is insufficient."
+      ],
+      "explanation": "One valid assignment plan uses the day7–14 window, the standard quote, order day14 and10485760KiB reserve. It arrives on day21 and meets all supplied cases. The fast quote and several other order dates/reserves are legitimate alternatives when every policy and workload check still passes.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/"
+      ],
+      "simplifications": "Finite supplied volume-occupancy records and fictional quotes; one expansion at the beginning of its arrival day, constant per-case daily growth and explicit one-off additions. Forecasts are assumptions, not measurements of future reality. No host monitoring, disk resize, real order, data deletion, arbitrary expressions or named monitoring-product emulation.",
+      "initial": {
+        "kind": "CapacityPlanning",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "assignment": {
+            "task_id": "trend-assignment",
+            "inputs": {
+              "first": null,
+              "last": null,
+              "offer": null,
+              "order_day": "",
+              "reserve_kib": ""
+            },
+            "selected_case": 0,
+            "checked": false
+          },
+          "practice": {
+            "task_id": "trend-example",
+            "inputs": {
+              "first": null,
+              "last": null,
+              "offer": null,
+              "order_day": "",
+              "reserve_kib": ""
+            },
+            "selected_case": 0,
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "CapacityPlanning",
+        "definition": {
+          "initial": {
+            "id": "trend-assignment",
+            "series": {
+              "version": 1,
+              "volume": "report-volume",
+              "capacity_kib": 104857600,
+              "samples": [
+                {
+                  "day": 0,
+                  "used_kib": 41943040
+                },
+                {
+                  "day": 7,
+                  "used_kib": 49283072
+                },
+                {
+                  "day": 10,
+                  "used_kib": 55574528
+                },
+                {
+                  "day": 14,
+                  "used_kib": 63963136
+                }
+              ]
+            },
+            "policy": {
+              "minimum_reserve_kib": 10485760,
+              "budget": 120,
+              "horizon_days": 20,
+              "window_not_before_day": 7,
+              "minimum_window_days": 3
+            },
+            "offers": [
+              {
+                "id": "retain",
+                "capacity_kib": 104857600,
+                "lead_days": 0,
+                "cost": 0
+              },
+              {
+                "id": "standard",
+                "capacity_kib": 146800640,
+                "lead_days": 7,
+                "cost": 100
+              },
+              {
+                "id": "fast",
+                "capacity_kib": 157286400,
+                "lead_days": 3,
+                "cost": 120
+              },
+              {
+                "id": "costly",
+                "capacity_kib": 188743680,
+                "lead_days": 1,
+                "cost": 200
+              },
+              {
+                "id": "slow",
+                "capacity_kib": 157286400,
+                "lead_days": 20,
+                "cost": 90
+              }
+            ],
+            "demands": [
+              {
+                "id": "steady",
+                "daily_kib": 2097152,
+                "changes": []
+              },
+              {
+                "id": "busier",
+                "daily_kib": 3145728,
+                "changes": [
+                  {
+                    "day": 22,
+                    "added_kib": 3145728
+                  }
+                ]
+              },
+              {
+                "id": "retention",
+                "daily_kib": 1572864,
+                "changes": [
+                  {
+                    "day": 19,
+                    "added_kib": 4194304
+                  }
+                ]
+              }
+            ],
+            "starter": {
+              "first": null,
+              "last": null,
+              "offer": null,
+              "order_day": "",
+              "reserve_kib": ""
+            }
+          },
+          "example": {
+            "id": "trend-example",
+            "series": {
+              "version": 1,
+              "volume": "worked-reports",
+              "capacity_kib": 83886080,
+              "samples": [
+                {
+                  "day": 0,
+                  "used_kib": 20971520
+                },
+                {
+                  "day": 5,
+                  "used_kib": 26214400
+                },
+                {
+                  "day": 10,
+                  "used_kib": 36700160
+                },
+                {
+                  "day": 12,
+                  "used_kib": 40894464
+                }
+              ]
+            },
+            "policy": {
+              "minimum_reserve_kib": 8388608,
+              "budget": 90,
+              "horizon_days": 12,
+              "window_not_before_day": 5,
+              "minimum_window_days": 2
+            },
+            "offers": [
+              {
+                "id": "retain",
+                "capacity_kib": 83886080,
+                "lead_days": 0,
+                "cost": 0
+              },
+              {
+                "id": "standard",
+                "capacity_kib": 104857600,
+                "lead_days": 4,
+                "cost": 60
+              },
+              {
+                "id": "fast",
+                "capacity_kib": 115343360,
+                "lead_days": 1,
+                "cost": 90
+              },
+              {
+                "id": "costly",
+                "capacity_kib": 209715200,
+                "lead_days": 0,
+                "cost": 100
+              }
+            ],
+            "demands": [
+              {
+                "id": "steady",
+                "daily_kib": 2097152,
+                "changes": []
+              },
+              {
+                "id": "busier",
+                "daily_kib": 3145728,
+                "changes": [
+                  {
+                    "day": 16,
+                    "added_kib": 6291456
+                  }
+                ]
+              },
+              {
+                "id": "daily-import",
+                "daily_kib": 2621440,
+                "changes": [
+                  {
+                    "day": 18,
+                    "added_kib": 8388608
+                  }
+                ]
+              }
+            ],
+            "starter": {
+              "first": null,
+              "last": null,
+              "offer": null,
+              "order_day": "",
+              "reserve_kib": ""
+            }
+          },
+          "reference": [
+            {
+              "kind": "window",
+              "first": 1,
+              "last": 3
+            },
+            {
+              "kind": "offer",
+              "id": "standard"
+            },
+            {
+              "kind": "order_day",
+              "value": "14"
+            },
+            {
+              "kind": "reserve",
+              "value": "10485760"
+            },
+            {
+              "kind": "test"
+            }
+          ],
+          "example_reference": [
+            {
+              "kind": "window",
+              "first": 1,
+              "last": 3
+            },
+            {
+              "kind": "offer",
+              "id": "standard"
+            },
+            {
+              "kind": "order_day",
+              "value": "12"
+            },
+            {
+              "kind": "reserve",
+              "value": "8388608"
+            },
+            {
+              "kind": "test"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "plan-action {\"kind\":\"window\",\"first\":1,\"last\":3}",
+        "plan-action {\"kind\":\"offer\",\"id\":\"standard\"}",
+        "plan-action {\"kind\":\"order_day\",\"value\":\"14\"}",
+        "plan-action {\"kind\":\"reserve\",\"value\":\"10485760\"}",
+        "plan-action {\"kind\":\"test\"}"
+      ],
+      "prerequisites": [
+        "lpic2-resource-restart-handover"
+      ]
+    },
+    {
+      "id": "lpic2-capacity-import-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Capacity planning",
+      "unit": "linux-capacity-planning",
+      "title": "Repair a capacity plan before the import",
+      "summary": "Repair an inherited capacity forecast and deliver a plan that survives known imports before and after the upgrade arrives.",
+      "objective": "Repair the inherited archive-volume plan using post-cleanup observations from day 27 onward. Include the latest day 30 and at least 2 days of that period; a one-off cleanup is not continuing negative growth. Retain at least 12582912 KiB (12 GiB) free on every simulated day through day 44. Orders start on day 30 or later; the total quote must fit 160 fictional credits. Account for every published import case and the quote’s arrival date. Keep current data. Use Test plan after repairs; a valid plan may use any supplied affordable quote and date that satisfies all cases.",
+      "retry_guidance": "Inspect the policy result and the first failing workload day. Revise the window, quote, date or reserve, then test the whole plan again.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the task and supplied observations.",
+        "Investigate growth, quotes and lead times.",
+        "Test and repair the complete independent plan."
+      ],
+      "hints": [
+        "Use observations from the requested operating period and include the latest sample.",
+        "Reserve is unused space; it must remain available before the upgrade arrives as well as afterward.",
+        "Inspect every workload and the quote budget. A passing selected case alone is insufficient."
+      ],
+      "explanation": "One valid repair uses day27–30, rapid-expansion ordered on day30, and12582912KiB reserve. Delivery is on day32 before the day33 import. urgent-expansion is another valid affordable quote. Earlier aggregate decline includes cleanup and is not continuing negative growth; small capacity or late bulk delivery leaves a failure even if another case passes.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/"
+      ],
+      "simplifications": "Finite supplied volume-occupancy records and fictional quotes; one expansion at the beginning of its arrival day, constant per-case daily growth and explicit one-off additions. Forecasts are assumptions, not measurements of future reality. No host monitoring, disk resize, real order, data deletion, arbitrary expressions or named monitoring-product emulation.",
+      "initial": {
+        "kind": "CapacityPlanning",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "assignment": {
+            "task_id": "import-assignment",
+            "inputs": {
+              "first": 0,
+              "last": 4,
+              "offer": "bulk-expansion",
+              "order_day": "30",
+              "reserve_kib": "12582912"
+            },
+            "selected_case": 0,
+            "checked": false
+          },
+          "practice": {
+            "task_id": "import-example",
+            "inputs": {
+              "first": 0,
+              "last": 4,
+              "offer": "bulk-expansion",
+              "order_day": "28",
+              "reserve_kib": "6291456"
+            },
+            "selected_case": 0,
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "CapacityPlanning",
+        "definition": {
+          "initial": {
+            "id": "import-assignment",
+            "series": {
+              "version": 1,
+              "volume": "archive-volume",
+              "capacity_kib": 125829120,
+              "samples": [
+                {
+                  "day": 20,
+                  "used_kib": 100663296
+                },
+                {
+                  "day": 26,
+                  "used_kib": 113246208
+                },
+                {
+                  "day": 27,
+                  "used_kib": 88080384
+                },
+                {
+                  "day": 28,
+                  "used_kib": 90177536
+                },
+                {
+                  "day": 30,
+                  "used_kib": 94371840
+                }
+              ]
+            },
+            "policy": {
+              "minimum_reserve_kib": 12582912,
+              "budget": 160,
+              "horizon_days": 14,
+              "window_not_before_day": 27,
+              "minimum_window_days": 2
+            },
+            "offers": [
+              {
+                "id": "retain",
+                "capacity_kib": 125829120,
+                "lead_days": 0,
+                "cost": 0
+              },
+              {
+                "id": "bulk-expansion",
+                "capacity_kib": 209715200,
+                "lead_days": 10,
+                "cost": 100
+              },
+              {
+                "id": "rapid-expansion",
+                "capacity_kib": 167772160,
+                "lead_days": 2,
+                "cost": 150
+              },
+              {
+                "id": "urgent-expansion",
+                "capacity_kib": 188743680,
+                "lead_days": 1,
+                "cost": 160
+              },
+              {
+                "id": "small-expansion",
+                "capacity_kib": 146800640,
+                "lead_days": 2,
+                "cost": 140
+              },
+              {
+                "id": "over-budget",
+                "capacity_kib": 251658240,
+                "lead_days": 0,
+                "cost": 200
+              }
+            ],
+            "demands": [
+              {
+                "id": "regular",
+                "daily_kib": 1048576,
+                "changes": [
+                  {
+                    "day": 35,
+                    "added_kib": 10485760
+                  }
+                ]
+              },
+              {
+                "id": "busy-import",
+                "daily_kib": 2097152,
+                "changes": [
+                  {
+                    "day": 33,
+                    "added_kib": 20971520
+                  }
+                ]
+              },
+              {
+                "id": "two-deliveries",
+                "daily_kib": 1572864,
+                "changes": [
+                  {
+                    "day": 33,
+                    "added_kib": 18874368
+                  },
+                  {
+                    "day": 39,
+                    "added_kib": 8388608
+                  }
+                ]
+              }
+            ],
+            "starter": {
+              "first": 0,
+              "last": 4,
+              "offer": "bulk-expansion",
+              "order_day": "30",
+              "reserve_kib": "12582912"
+            }
+          },
+          "example": {
+            "id": "import-example",
+            "series": {
+              "version": 1,
+              "volume": "worked-archive",
+              "capacity_kib": 62914560,
+              "samples": [
+                {
+                  "day": 20,
+                  "used_kib": 52428800
+                },
+                {
+                  "day": 24,
+                  "used_kib": 56623104
+                },
+                {
+                  "day": 25,
+                  "used_kib": 37748736
+                },
+                {
+                  "day": 26,
+                  "used_kib": 38797312
+                },
+                {
+                  "day": 28,
+                  "used_kib": 40894464
+                }
+              ]
+            },
+            "policy": {
+              "minimum_reserve_kib": 6291456,
+              "budget": 100,
+              "horizon_days": 10,
+              "window_not_before_day": 25,
+              "minimum_window_days": 2
+            },
+            "offers": [
+              {
+                "id": "retain",
+                "capacity_kib": 62914560,
+                "lead_days": 0,
+                "cost": 0
+              },
+              {
+                "id": "bulk-expansion",
+                "capacity_kib": 104857600,
+                "lead_days": 6,
+                "cost": 60
+              },
+              {
+                "id": "rapid-expansion",
+                "capacity_kib": 83886080,
+                "lead_days": 2,
+                "cost": 90
+              },
+              {
+                "id": "urgent-expansion",
+                "capacity_kib": 94371840,
+                "lead_days": 1,
+                "cost": 100
+              },
+              {
+                "id": "small-expansion",
+                "capacity_kib": 73400320,
+                "lead_days": 2,
+                "cost": 80
+              }
+            ],
+            "demands": [
+              {
+                "id": "regular",
+                "daily_kib": 1048576,
+                "changes": [
+                  {
+                    "day": 32,
+                    "added_kib": 4194304
+                  }
+                ]
+              },
+              {
+                "id": "busy-import",
+                "daily_kib": 1572864,
+                "changes": [
+                  {
+                    "day": 31,
+                    "added_kib": 12582912
+                  }
+                ]
+              },
+              {
+                "id": "two-deliveries",
+                "daily_kib": 1310720,
+                "changes": [
+                  {
+                    "day": 32,
+                    "added_kib": 5242880
+                  },
+                  {
+                    "day": 35,
+                    "added_kib": 6291456
+                  }
+                ]
+              }
+            ],
+            "starter": {
+              "first": 0,
+              "last": 4,
+              "offer": "bulk-expansion",
+              "order_day": "28",
+              "reserve_kib": "6291456"
+            }
+          },
+          "reference": [
+            {
+              "kind": "window",
+              "first": 2,
+              "last": 4
+            },
+            {
+              "kind": "offer",
+              "id": "rapid-expansion"
+            },
+            {
+              "kind": "order_day",
+              "value": "30"
+            },
+            {
+              "kind": "reserve",
+              "value": "12582912"
+            },
+            {
+              "kind": "test"
+            }
+          ],
+          "example_reference": [
+            {
+              "kind": "window",
+              "first": 2,
+              "last": 4
+            },
+            {
+              "kind": "offer",
+              "id": "rapid-expansion"
+            },
+            {
+              "kind": "order_day",
+              "value": "28"
+            },
+            {
+              "kind": "reserve",
+              "value": "6291456"
+            },
+            {
+              "kind": "test"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "plan-action {\"kind\":\"window\",\"first\":2,\"last\":4}",
+        "plan-action {\"kind\":\"offer\",\"id\":\"rapid-expansion\"}",
+        "plan-action {\"kind\":\"order_day\",\"value\":\"30\"}",
+        "plan-action {\"kind\":\"reserve\",\"value\":\"12582912\"}",
+        "plan-action {\"kind\":\"test\"}"
+      ],
+      "prerequisites": [
+        "lpic2-capacity-trend-plan",
+        "lpic2-capacity-handover"
+      ]
+    }
+  ]
+}

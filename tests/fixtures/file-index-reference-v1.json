@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "directories": [
+    "/scan",
+    "/scan/active",
+    "/scan/active/nested",
+    "/scan/active-other",
+    "/scan/archive",
+    "/scan/archives"
+  ],
+  "files": [
+    {
+      "path": "/scan/active/old.txt",
+      "text": "old release\n",
+      "mode": 384
+    },
+    {
+      "path": "/scan/source.txt",
+      "text": "next release\n",
+      "mode": 384
+    },
+    {
+      "path": "/scan/active/unreadable.txt",
+      "text": "unreadable inert text\n",
+      "mode": 0
+    },
+    {
+      "path": "/scan/archive/hidden.txt",
+      "text": "archive retained\n",
+      "mode": 384
+    },
+    {
+      "path": "/scan/archives/public.txt",
+      "text": "near-prefix sibling\n",
+      "mode": 384
+    },
+    {
+      "path": "/scan/active/nested/deep.txt",
+      "text": "deep inert record\n",
+      "mode": 384
+    },
+    {
+      "path": "/scan/active-other/sibling.txt",
+      "text": "sibling inert record\n",
+      "mode": 384
+    }
+  ],
+  "phases": [
+    {
+      "id": "initial",
+      "prunes": [
+        "/scan/archive"
+      ],
+      "mutations": [],
+      "rebuild": true,
+      "queries": [
+        {
+          "id": "all",
+          "literal": "scan",
+          "existing": false
+        },
+        {
+          "id": "archive-self",
+          "literal": "/archive",
+          "existing": false
+        },
+        {
+          "id": "unreadable",
+          "literal": "unreadable.txt",
+          "existing": false
+        },
+        {
+          "id": "case-sensitive",
+          "literal": "UNREADABLE",
+          "existing": false
+        },
+        {
+          "id": "no-match",
+          "literal": "absent-file",
+          "existing": false
+        }
+      ]
+    },
+    {
+      "id": "stale-live",
+      "prunes": [
+        "/scan/archive"
+      ],
+      "mutations": [
+        {
+          "op": "remove",
+          "path": "/scan/active/old.txt"
+        },
+        {
+          "op": "copy",
+          "from": "/scan/source.txt",
+          "path": "/scan/active/new.txt"
+        }
+      ],
+      "rebuild": false,
+      "queries": [
+        {
+          "id": "all",
+          "literal": "scan",
+          "existing": false
+        },
+        {
+          "id": "old-saved",
+          "literal": "old.txt",
+          "existing": false
+        },
+        {
+          "id": "old-existing",
+          "literal": "old.txt",
+          "existing": true
+        },
+        {
+          "id": "new-missing",
+          "literal": "new.txt",
+          "existing": false
+        }
+      ]
+    },
+    {
+      "id": "rebuilt-live",
+      "prunes": [
+        "/scan/archive"
+      ],
+      "mutations": [],
+      "rebuild": true,
+      "queries": [
+        {
+          "id": "all",
+          "literal": "scan",
+          "existing": false
+        },
+        {
+          "id": "old-gone",
+          "literal": "old.txt",
+          "existing": false
+        },
+        {
+          "id": "new-present",
+          "literal": "new.txt",
+          "existing": true
+        }
+      ]
+    },
+    {
+      "id": "config-only",
+      "prunes": [],
+      "mutations": [],
+      "rebuild": false,
+      "queries": [
+        {
+          "id": "archive-still-hidden",
+          "literal": "hidden.txt",
+          "existing": false
+        },
+        {
+          "id": "near-prefix-visible",
+          "literal": "public.txt",
+          "existing": false
+        }
+      ]
+    },
+    {
+      "id": "config-rebuilt",
+      "prunes": [],
+      "mutations": [],
+      "rebuild": true,
+      "queries": [
+        {
+          "id": "all",
+          "literal": "scan",
+          "existing": false
+        },
+        {
+          "id": "archive-now-visible",
+          "literal": "hidden.txt",
+          "existing": false
+        },
+        {
+          "id": "no-match",
+          "literal": "absent-file",
+          "existing": false
+        }
+      ]
+    }
+  ]
+}

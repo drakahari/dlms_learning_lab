@@ -1,0 +1,1833 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-lvm-mount-repair",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM-backed filesystem mounting",
+      "unit": "lvm-filesystem-mounting",
+      "title": "Reconnect reports and audit to their original filesystems",
+      "summary": "Diagnose swapped saved and current mounts, then restore each original data source and access policy.",
+      "objective": "Connect /srv/reports to original ledger/draft with read/write access and /srv/audit to original ledger/reference with read-only access. Save a valid automatic ext4 mount entry for each supplied mountpoint and apply those entries to the current mounts. Verify that each mountpoint's keep.txt reads its own original data; a readable file from the other filesystem is insufficient. Keep every original LV/VG name, allocation and file unchanged, and leave unrelated storage availability unchanged. Save all edits, then Check work.",
+      "retry_guidance": "Compare failed saved-policy, current-mount and original-file checks separately. Saving does not replace a mounted source. Inspect findmnt and blkid, repair only the affected entry or mount, and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 28,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/ledgera": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "ledger"
+              },
+              "/dev/unuseda": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "unused"
+              }
+            },
+            "groups": {
+              "ledger": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "draft": {
+                    "extents": [
+                      {
+                        "pv": "/dev/ledgera",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/ledgera",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "ledger/draft: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/ledgera",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/ledgera",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "ledger/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "unused": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/unuseda",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "ledger/draft": true,
+                "ledger/reference": true,
+                "unused/spare": false
+              },
+              "open": []
+            },
+            "identity": {
+              "groups": {
+                "unused": 1,
+                "ledger": 2
+              },
+              "volumes": {
+                "unused/spare": 3,
+                "ledger/draft": 4,
+                "ledger/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "current": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/ledgera": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "ledger"
+              },
+              "/dev/unuseda": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "unused"
+              }
+            },
+            "groups": {
+              "ledger": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "draft": {
+                    "extents": [
+                      {
+                        "pv": "/dev/ledgera",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/ledgera",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "ledger/draft: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/ledgera",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/ledgera",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "ledger/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "unused": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/unuseda",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "ledger/draft": true,
+                "ledger/reference": true,
+                "unused/spare": false
+              },
+              "open": []
+            },
+            "identity": {
+              "groups": {
+                "unused": 1,
+                "ledger": 2
+              },
+              "volumes": {
+                "unused/spare": 3,
+                "ledger/draft": 4,
+                "ledger/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/demopv": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "demo"
+              },
+              "/dev/demospare": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "demo-unused"
+              }
+            },
+            "groups": {
+              "demo": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "draft": {
+                    "extents": [
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "demo/draft: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "demo/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "demo-unused": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/demospare",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "demo/draft": true,
+                "demo/reference": true,
+                "demo-unused/spare": false
+              },
+              "open": []
+            },
+            "identity": {
+              "groups": {
+                "demo-unused": 1,
+                "demo": 2
+              },
+              "volumes": {
+                "demo-unused/spare": 3,
+                "demo/draft": 4,
+                "demo/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "example": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/demopv": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "demo"
+              },
+              "/dev/demospare": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "demo-unused"
+              }
+            },
+            "groups": {
+              "demo": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "draft": {
+                    "extents": [
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "demo/draft: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "demo/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "demo-unused": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/demospare",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "demo/draft": true,
+                "demo/reference": true,
+                "demo-unused/spare": false
+              },
+              "open": []
+            },
+            "identity": {
+              "groups": {
+                "demo-unused": 1,
+                "demo": 2
+              },
+              "volumes": {
+                "demo-unused/spare": 3,
+                "demo/draft": 4,
+                "demo/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0,
+          "mount_runtime": {
+            "assignment": {
+              "mounted": {
+                "version": 1,
+                "storage": {
+                  "inventory": {
+                    "volumes": {
+                      "lvm-4": {
+                        "uuid": "3bde7830-0000-4000-8000-000000000001",
+                        "filesystem": "ext4"
+                      },
+                      "lvm-5": {
+                        "uuid": "3bde7830-0000-4000-8000-000000000002",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/ledger/draft": "lvm-4",
+                      "/dev/ledger/reference": "lvm-5"
+                    },
+                    "mountpoints": [
+                      "/srv/reports",
+                      "/srv/audit"
+                    ]
+                  },
+                  "configuration": "/dev/ledger/reference /srv/reports ext4 defaults 0 2\n/dev/ledger/draft /srv/audit ext4 ro 0 2\n",
+                  "live": {
+                    "/srv/reports": {
+                      "volume": "lvm-5",
+                      "read_only": false
+                    },
+                    "/srv/audit": {
+                      "volume": "lvm-4",
+                      "read_only": true
+                    }
+                  }
+                }
+              },
+              "draft": "/dev/ledger/reference /srv/reports ext4 defaults 0 2\n/dev/ledger/draft /srv/audit ext4 ro 0 2\n"
+            },
+            "example": {
+              "mounted": {
+                "version": 1,
+                "storage": {
+                  "inventory": {
+                    "volumes": {
+                      "lvm-4": {
+                        "uuid": "654de830-0000-4000-8000-000000000001",
+                        "filesystem": "ext4"
+                      },
+                      "lvm-5": {
+                        "uuid": "654de830-0000-4000-8000-000000000002",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/demo/draft": "lvm-4",
+                      "/dev/demo/reference": "lvm-5"
+                    },
+                    "mountpoints": [
+                      "/srv/practice"
+                    ]
+                  },
+                  "configuration": "/dev/demo/reference /srv/practice ext4 defaults 0 2\n",
+                  "live": {
+                    "/srv/practice": {
+                      "volume": "lvm-5",
+                      "read_only": false
+                    }
+                  }
+                }
+              },
+              "draft": "/dev/demo/reference /srv/practice ext4 defaults 0 2\n"
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/ledgera": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "ledger"
+              },
+              "/dev/unuseda": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "unused"
+              }
+            },
+            "groups": {
+              "ledger": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "draft": {
+                    "extents": [
+                      {
+                        "pv": "/dev/ledgera",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/ledgera",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "ledger/draft: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/ledgera",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/ledgera",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "ledger/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "unused": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/unuseda",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "ledger/draft": true,
+                "ledger/reference": true,
+                "unused/spare": false
+              },
+              "open": []
+            },
+            "identity": {
+              "groups": {
+                "unused": 1,
+                "ledger": 2
+              },
+              "volumes": {
+                "unused/spare": 3,
+                "ledger/draft": 4,
+                "ledger/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "targets": [],
+          "mount_task": {
+            "context": {
+              "inventory": {
+                "filesystems": [
+                  {
+                    "original_volume": 4,
+                    "uuid": "3bde7830-0000-4000-8000-000000000001"
+                  },
+                  {
+                    "original_volume": 5,
+                    "uuid": "3bde7830-0000-4000-8000-000000000002"
+                  }
+                ],
+                "mountpoints": [
+                  "/srv/reports",
+                  "/srv/audit"
+                ]
+              },
+              "initial_policy": "/dev/ledger/reference /srv/reports ext4 defaults 0 2\n/dev/ledger/draft /srv/audit ext4 ro 0 2\n",
+              "initial_live": [
+                {
+                  "target": "/srv/reports",
+                  "original_volume": 5,
+                  "read_only": false
+                },
+                {
+                  "target": "/srv/audit",
+                  "original_volume": 4,
+                  "read_only": true
+                }
+              ],
+              "targets": [
+                {
+                  "target": "/srv/reports",
+                  "original_volume": 4,
+                  "file": "/keep.txt",
+                  "read_only": false,
+                  "automatic": true
+                },
+                {
+                  "target": "/srv/audit",
+                  "original_volume": 5,
+                  "file": "/keep.txt",
+                  "read_only": true,
+                  "automatic": true
+                }
+              ]
+            },
+            "reference": [
+              {
+                "kind": "save_policy",
+                "text": "/dev/ledger/draft /srv/reports ext4 defaults 0 2\n/dev/ledger/reference /srv/audit ext4 ro 0 2\n"
+              },
+              {
+                "kind": "command",
+                "text": "umount /srv/reports"
+              },
+              {
+                "kind": "command",
+                "text": "umount /srv/audit"
+              },
+              {
+                "kind": "command",
+                "text": "mount /srv/reports"
+              },
+              {
+                "kind": "command",
+                "text": "mount /srv/audit"
+              },
+              {
+                "kind": "command",
+                "text": "cat /srv/reports/keep.txt"
+              },
+              {
+                "kind": "command",
+                "text": "cat /srv/audit/keep.txt"
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Build on the previous LVM availability and original-object naming lessons. An LV is storage; its filesystem holds files; a mountpoint is the directory where those files become available. Use the six-column explanation below before editing the separate example.",
+            "concepts": [
+              {
+                "title": "Connect a filesystem to a directory",
+                "text": "LVM makes a logical volume (LV) available as storage. A filesystem organizes files inside that storage. Mounting connects that filesystem to a directory such as /srv/reports, so /srv/reports/keep.txt reads a file from the mounted filesystem. An active LV and a mounted filesystem are different states."
+              },
+              {
+                "title": "Separate saved policy from current mounts",
+                "text": "The simulated /etc/fstab editor describes future mount requests. Each row contains six fields: source, mountpoint, filesystem type, options, dump field and check order. This unit supplies ext4 filesystems. defaults requests ordinary read/write automatic mounting; ro requests read-only access. The final 0 2 fields are supplied dump/check settings, not a command to execute. Save configuration stores the edited policy. It does not change a current mount."
+              },
+              {
+                "title": "Inspect before replacing a mount",
+                "text": "Use blkid to see supplied filesystem UUIDs and current device names. findmnt lists what is actually mounted. cat followed by a mounted file path reads its real simulated contents. If another filesystem is already mounted, this simulator requires umount mountpoint before mount mountpoint. Real Linux has additional mount/remount operations; these supplied filesystems have no modeled open-file processes."
+              },
+              {
+                "title": "Choose the same original filesystem",
+                "text": "A canonical /dev/VG/LV name identifies the LV by its current group and volume names. UUID= identifies supplied filesystem metadata which stays the same through those name changes. An LVM internal object number is not a filesystem UUID. A file can be readable yet belong to the wrong filesystem: verify its purpose and original data, not just the presence of output."
+              }
+            ],
+            "description": "The separate demo initially reads the wrong filesystem at /srv/practice. Inspect its source and actual file, save the intended demo/draft entry, unmount the old source and mount the corrected entry. The worked actions below explain each change.",
+            "fixture": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/demopv": {
+                  "bytes": 42991616,
+                  "role": "PhysicalVolume",
+                  "group": "demo"
+                },
+                "/dev/demospare": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "demo-unused"
+                }
+              },
+              "groups": {
+                "demo": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "draft": {
+                      "extents": [
+                        {
+                          "pv": "/dev/demopv",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/demopv",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "demo/draft: retain this original record.\n"
+                          }
+                        }
+                      }
+                    },
+                    "reference": {
+                      "extents": [
+                        {
+                          "pv": "/dev/demopv",
+                          "index": 2
+                        },
+                        {
+                          "pv": "/dev/demopv",
+                          "index": 3
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "demo/reference: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "demo-unused": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "spare": {
+                      "extents": [
+                        {
+                          "pv": "/dev/demospare",
+                          "index": 0
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              },
+              "activation": {
+                "active": {
+                  "demo/draft": true,
+                  "demo/reference": true,
+                  "demo-unused/spare": false
+                },
+                "open": []
+              },
+              "identity": {
+                "groups": {
+                  "demo-unused": 1,
+                  "demo": 2
+                },
+                "volumes": {
+                  "demo-unused/spare": 3,
+                  "demo/draft": 4,
+                  "demo/reference": 5
+                },
+                "next": 6
+              }
+            },
+            "targets": [],
+            "worked": [],
+            "mount_practice": {
+              "context": {
+                "inventory": {
+                  "filesystems": [
+                    {
+                      "original_volume": 4,
+                      "uuid": "654de830-0000-4000-8000-000000000001"
+                    },
+                    {
+                      "original_volume": 5,
+                      "uuid": "654de830-0000-4000-8000-000000000002"
+                    }
+                  ],
+                  "mountpoints": [
+                    "/srv/practice"
+                  ]
+                },
+                "initial_policy": "/dev/demo/reference /srv/practice ext4 defaults 0 2\n",
+                "initial_live": [
+                  {
+                    "target": "/srv/practice",
+                    "original_volume": 5,
+                    "read_only": false
+                  }
+                ],
+                "targets": [
+                  {
+                    "target": "/srv/practice",
+                    "original_volume": 4,
+                    "file": "/keep.txt",
+                    "read_only": false,
+                    "automatic": true
+                  }
+                ]
+              },
+              "worked": [
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "blkid"
+                  },
+                  "explanation": "Compare the example filesystem UUIDs and device names. These identify which supplied filesystem each saved entry selects."
+                },
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "findmnt"
+                  },
+                  "explanation": "Read the actual current source and access options at the example mountpoint; saved policy alone does not establish this result."
+                },
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "cat /srv/practice/keep.txt"
+                  },
+                  "explanation": "Read the mounted virtual file and compare its original-data label. A different filesystem may contain a file with the same name."
+                },
+                {
+                  "operation": {
+                    "kind": "save_policy",
+                    "text": "/dev/demo/draft /srv/practice ext4 defaults 0 2\n"
+                  },
+                  "explanation": "Read the six columns. Fill selected example copies this policy into the separate example editor only; choose Save configuration to store it. Existing current mounts and the assignment are unchanged."
+                },
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "umount /srv/practice"
+                  },
+                  "explanation": "Detach only the example mount. This makes the supplied mountpoint ready for the corrected filesystem; it does not erase any files."
+                },
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "mount /srv/practice"
+                  },
+                  "explanation": "Attach the active filesystem named by the saved entry. Inspect its source rather than assuming the command made the intended choice."
+                },
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "cat /srv/practice/keep.txt"
+                  },
+                  "explanation": "Read the mounted virtual file and compare its original-data label. A different filesystem may contain a file with the same name."
+                }
+              ],
+              "experiment": {
+                "kind": "command",
+                "text": "umount /srv/practice"
+              },
+              "repair": [
+                {
+                  "kind": "command",
+                  "text": "mount /srv/practice"
+                }
+              ]
+            },
+            "try_change": "Run umount /srv/practice, then Check separate example. The saved policy still resolves, but the current mount and file reader fail. Run mount /srv/practice, read the file and check again.",
+            "experiment": "",
+            "repair": ""
+          }
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect the original filesystems and current mounts",
+        "Edit and save the required mount policy",
+        "Apply and verify the current mount state",
+        "Check requirements and repair any remaining mismatch"
+      ],
+      "hints": [
+        "Use blkid to compare the supplied filesystem sources, then findmnt to inspect actual current associations.",
+        "A saved edit does not change an existing mount. Compare the source and rw/ro options separately.",
+        "For a rename, a filesystem UUID stays with its original filesystem. A new canonical name is also valid here; neither approach changes the original file data."
+      ],
+      "explanation": "The saved entries and current mounts independently selected the other original filesystem. Correcting the editor alone left those live associations untouched. Detaching the old mounts and applying the corrected entries connected each mountpoint to its own original data with the required access options.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/#rdp-we-204.3_Logical_Volume_Manager_(weight:_3)",
+        "https://man7.org/linux/man-pages/man5/fstab.5.html",
+        "https://man7.org/linux/man-pages/man8/mount.8.html",
+        "https://man7.org/linux/man-pages/man8/umount.8.html"
+      ],
+      "simplifications": "Bounded in-process supplied ext4 filesystems, explicit synthetic filesystem UUIDs and canonical /dev/VG/LV aliases. Reuses existing virtual fstab parser and actual LVM data; no host files, devices, mount calls or subprocesses. One live mount per filesystem, distinct non-nested mountpoints and unmount-before-replacement are simulator limits, not universal Linux restrictions. No busy-file processes, remount, overmount, namespaces, boot/systemd reload, permissions or hardware probes. Full objective coverage is not claimed. Sources checked2026-11-07.",
+      "solution": [
+        "Save simulated mount configuration",
+        "umount /srv/reports",
+        "umount /srv/audit",
+        "mount /srv/reports",
+        "mount /srv/audit",
+        "cat /srv/reports/keep.txt",
+        "cat /srv/audit/keep.txt"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-devices-file"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-mounted-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "LVM-backed filesystem mounting",
+      "unit": "lvm-filesystem-mounting",
+      "title": "Keep mounted reports connected through a rename",
+      "summary": "Repair persistent mount policy while preserving a live original filesystem through VG/LV name changes.",
+      "objective": "Rename original group intake to production and its original draft LV to reports. Keep the same original filesystems, allocations and data. Leave /srv/reports mounted read/write from original intake/draft at completion; its original keep.txt must be readable. Repair the saved /srv/reports entry to select that same filesystem by its new canonical name or unchanged filesystem UUID, with automatic read/write mounting. Keep all other original names and unrelated availability unchanged. Save all edits, verify current mounted data, then Check work.",
+      "retry_guidance": "Compare failed saved-policy, current-mount and original-file checks separately. Saving does not replace a mounted source. Inspect findmnt and blkid, repair only the affected entry or mount, and retry.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/intakea": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "intake"
+              },
+              "/dev/unuseda": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "unused"
+              }
+            },
+            "groups": {
+              "intake": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "draft": {
+                    "extents": [
+                      {
+                        "pv": "/dev/intakea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/intakea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "intake/draft: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/intakea",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/intakea",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "intake/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "unused": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/unuseda",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "intake/draft": true,
+                "intake/reference": true,
+                "unused/spare": false
+              },
+              "open": []
+            },
+            "identity": {
+              "groups": {
+                "unused": 1,
+                "intake": 2
+              },
+              "volumes": {
+                "unused/spare": 3,
+                "intake/draft": 4,
+                "intake/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "current": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/intakea": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "intake"
+              },
+              "/dev/unuseda": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "unused"
+              }
+            },
+            "groups": {
+              "intake": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "draft": {
+                    "extents": [
+                      {
+                        "pv": "/dev/intakea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/intakea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "intake/draft: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/intakea",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/intakea",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "intake/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "unused": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/unuseda",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "intake/draft": true,
+                "intake/reference": true,
+                "unused/spare": false
+              },
+              "open": []
+            },
+            "identity": {
+              "groups": {
+                "unused": 1,
+                "intake": 2
+              },
+              "volumes": {
+                "unused/spare": 3,
+                "intake/draft": 4,
+                "intake/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/demopv": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "demo"
+              },
+              "/dev/demospare": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "demo-unused"
+              }
+            },
+            "groups": {
+              "demo": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "draft": {
+                    "extents": [
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "demo/draft: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "demo/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "demo-unused": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/demospare",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "demo/draft": true,
+                "demo/reference": true,
+                "demo-unused/spare": false
+              },
+              "open": []
+            },
+            "identity": {
+              "groups": {
+                "demo-unused": 1,
+                "demo": 2
+              },
+              "volumes": {
+                "demo-unused/spare": 3,
+                "demo/draft": 4,
+                "demo/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "example": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/demopv": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "demo"
+              },
+              "/dev/demospare": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "demo-unused"
+              }
+            },
+            "groups": {
+              "demo": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "draft": {
+                    "extents": [
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "demo/draft: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/demopv",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "demo/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "demo-unused": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/demospare",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "demo/draft": true,
+                "demo/reference": true,
+                "demo-unused/spare": false
+              },
+              "open": []
+            },
+            "identity": {
+              "groups": {
+                "demo-unused": 1,
+                "demo": 2
+              },
+              "volumes": {
+                "demo-unused/spare": 3,
+                "demo/draft": 4,
+                "demo/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0,
+          "mount_runtime": {
+            "assignment": {
+              "mounted": {
+                "version": 1,
+                "storage": {
+                  "inventory": {
+                    "volumes": {
+                      "lvm-4": {
+                        "uuid": "3bde7830-0000-4000-8000-000000000001",
+                        "filesystem": "ext4"
+                      },
+                      "lvm-5": {
+                        "uuid": "3bde7830-0000-4000-8000-000000000002",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/intake/draft": "lvm-4",
+                      "/dev/intake/reference": "lvm-5"
+                    },
+                    "mountpoints": [
+                      "/srv/reports"
+                    ]
+                  },
+                  "configuration": "/dev/intake/draft /srv/reports ext4 defaults 0 2\n",
+                  "live": {
+                    "/srv/reports": {
+                      "volume": "lvm-4",
+                      "read_only": false
+                    }
+                  }
+                }
+              },
+              "draft": "/dev/intake/draft /srv/reports ext4 defaults 0 2\n"
+            },
+            "example": {
+              "mounted": {
+                "version": 1,
+                "storage": {
+                  "inventory": {
+                    "volumes": {
+                      "lvm-4": {
+                        "uuid": "654de830-0000-4000-8000-000000000001",
+                        "filesystem": "ext4"
+                      },
+                      "lvm-5": {
+                        "uuid": "654de830-0000-4000-8000-000000000002",
+                        "filesystem": "ext4"
+                      }
+                    },
+                    "devices": {
+                      "/dev/demo/draft": "lvm-4",
+                      "/dev/demo/reference": "lvm-5"
+                    },
+                    "mountpoints": [
+                      "/srv/practice"
+                    ]
+                  },
+                  "configuration": "/dev/demo/draft /srv/practice ext4 defaults 0 2\n",
+                  "live": {
+                    "/srv/practice": {
+                      "volume": "lvm-4",
+                      "read_only": false
+                    }
+                  }
+                }
+              },
+              "draft": "/dev/demo/draft /srv/practice ext4 defaults 0 2\n"
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "provisioning": "Lifecycle",
+            "devices": {
+              "/dev/intakea": {
+                "bytes": 42991616,
+                "role": "PhysicalVolume",
+                "group": "intake"
+              },
+              "/dev/unuseda": {
+                "bytes": 17825792,
+                "role": "PhysicalVolume",
+                "group": "unused"
+              }
+            },
+            "groups": {
+              "intake": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "draft": {
+                    "extents": [
+                      {
+                        "pv": "/dev/intakea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/intakea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "intake/draft: retain this original record.\n"
+                        }
+                      }
+                    }
+                  },
+                  "reference": {
+                    "extents": [
+                      {
+                        "pv": "/dev/intakea",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/intakea",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/keep.txt": {
+                          "contents": "intake/reference: retain this original record.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "unused": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "spare": {
+                    "extents": [
+                      {
+                        "pv": "/dev/unuseda",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": null
+                  }
+                }
+              }
+            },
+            "activation": {
+              "active": {
+                "intake/draft": true,
+                "intake/reference": true,
+                "unused/spare": false
+              },
+              "open": []
+            },
+            "identity": {
+              "groups": {
+                "unused": 1,
+                "intake": 2
+              },
+              "volumes": {
+                "unused/spare": 3,
+                "intake/draft": 4,
+                "intake/reference": 5
+              },
+              "next": 6
+            }
+          },
+          "targets": [],
+          "mount_task": {
+            "context": {
+              "inventory": {
+                "filesystems": [
+                  {
+                    "original_volume": 4,
+                    "uuid": "3bde7830-0000-4000-8000-000000000001"
+                  },
+                  {
+                    "original_volume": 5,
+                    "uuid": "3bde7830-0000-4000-8000-000000000002"
+                  }
+                ],
+                "mountpoints": [
+                  "/srv/reports"
+                ]
+              },
+              "initial_policy": "/dev/intake/draft /srv/reports ext4 defaults 0 2\n",
+              "initial_live": [
+                {
+                  "target": "/srv/reports",
+                  "original_volume": 4,
+                  "read_only": false
+                }
+              ],
+              "targets": [
+                {
+                  "target": "/srv/reports",
+                  "original_volume": 4,
+                  "file": "/keep.txt",
+                  "read_only": false,
+                  "automatic": true
+                }
+              ],
+              "renaming": {
+                "groups": [
+                  {
+                    "source": "intake",
+                    "name": "production"
+                  }
+                ],
+                "volumes": [
+                  {
+                    "source": "intake/draft",
+                    "name": "reports"
+                  }
+                ]
+              }
+            },
+            "reference": [
+              {
+                "kind": "command",
+                "text": "lvrename intake draft reports"
+              },
+              {
+                "kind": "command",
+                "text": "vgrename intake production"
+              },
+              {
+                "kind": "save_policy",
+                "text": "UUID=3bde7830-0000-4000-8000-000000000001 /srv/reports ext4 defaults 0 2\n"
+              },
+              {
+                "kind": "command",
+                "text": "cat /srv/reports/keep.txt"
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Build on the previous LVM availability and original-object naming lessons. An LV is storage; its filesystem holds files; a mountpoint is the directory where those files become available. Use the six-column explanation below before editing the separate example.",
+            "concepts": [
+              {
+                "title": "Connect a filesystem to a directory",
+                "text": "LVM makes a logical volume (LV) available as storage. A filesystem organizes files inside that storage. Mounting connects that filesystem to a directory such as /srv/reports, so /srv/reports/keep.txt reads a file from the mounted filesystem. An active LV and a mounted filesystem are different states."
+              },
+              {
+                "title": "Separate saved policy from current mounts",
+                "text": "The simulated /etc/fstab editor describes future mount requests. Each row contains six fields: source, mountpoint, filesystem type, options, dump field and check order. This unit supplies ext4 filesystems. defaults requests ordinary read/write automatic mounting; ro requests read-only access. The final 0 2 fields are supplied dump/check settings, not a command to execute. Save configuration stores the edited policy. It does not change a current mount."
+              },
+              {
+                "title": "Inspect before replacing a mount",
+                "text": "Use blkid to see supplied filesystem UUIDs and current device names. findmnt lists what is actually mounted. cat followed by a mounted file path reads its real simulated contents. If another filesystem is already mounted, this simulator requires umount mountpoint before mount mountpoint. Real Linux has additional mount/remount operations; these supplied filesystems have no modeled open-file processes."
+              },
+              {
+                "title": "Choose the same original filesystem",
+                "text": "A canonical /dev/VG/LV name identifies the LV by its current group and volume names. UUID= identifies supplied filesystem metadata which stays the same through those name changes. An LVM internal object number is not a filesystem UUID. A file can be readable yet belong to the wrong filesystem: verify its purpose and original data, not just the presence of output."
+              },
+              {
+                "title": "Keep service data connected through a rename",
+                "text": "Renaming a VG or LV changes its current device path, not the identity of a mounted filesystem. A current reader can keep working while an old saved path is already broken. Repair the saved source using the new canonical name or the supplied unchanged filesystem UUID. Then verify both the saved entry and mounted original data. A working current reader alone is insufficient."
+              }
+            ],
+            "description": "The separate demo starts with the intended filesystem mounted under its old name. Follow the annotated name changes, save a UUID-based entry and read the same mounted file. A working live reader does not prove that the old saved entry is usable.",
+            "fixture": {
+              "version": 1,
+              "provisioning": "Lifecycle",
+              "devices": {
+                "/dev/demopv": {
+                  "bytes": 42991616,
+                  "role": "PhysicalVolume",
+                  "group": "demo"
+                },
+                "/dev/demospare": {
+                  "bytes": 17825792,
+                  "role": "PhysicalVolume",
+                  "group": "demo-unused"
+                }
+              },
+              "groups": {
+                "demo": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "draft": {
+                      "extents": [
+                        {
+                          "pv": "/dev/demopv",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/demopv",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "demo/draft: retain this original record.\n"
+                          }
+                        }
+                      }
+                    },
+                    "reference": {
+                      "extents": [
+                        {
+                          "pv": "/dev/demopv",
+                          "index": 2
+                        },
+                        {
+                          "pv": "/dev/demopv",
+                          "index": 3
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "contents": "demo/reference: retain this original record.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "demo-unused": {
+                  "extent_bytes": 4194304,
+                  "volumes": {
+                    "spare": {
+                      "extents": [
+                        {
+                          "pv": "/dev/demospare",
+                          "index": 0
+                        }
+                      ],
+                      "filesystem": null
+                    }
+                  }
+                }
+              },
+              "activation": {
+                "active": {
+                  "demo/draft": true,
+                  "demo/reference": true,
+                  "demo-unused/spare": false
+                },
+                "open": []
+              },
+              "identity": {
+                "groups": {
+                  "demo-unused": 1,
+                  "demo": 2
+                },
+                "volumes": {
+                  "demo-unused/spare": 3,
+                  "demo/draft": 4,
+                  "demo/reference": 5
+                },
+                "next": 6
+              }
+            },
+            "targets": [],
+            "worked": [],
+            "mount_practice": {
+              "context": {
+                "inventory": {
+                  "filesystems": [
+                    {
+                      "original_volume": 4,
+                      "uuid": "654de830-0000-4000-8000-000000000001"
+                    },
+                    {
+                      "original_volume": 5,
+                      "uuid": "654de830-0000-4000-8000-000000000002"
+                    }
+                  ],
+                  "mountpoints": [
+                    "/srv/practice"
+                  ]
+                },
+                "initial_policy": "/dev/demo/draft /srv/practice ext4 defaults 0 2\n",
+                "initial_live": [
+                  {
+                    "target": "/srv/practice",
+                    "original_volume": 4,
+                    "read_only": false
+                  }
+                ],
+                "targets": [
+                  {
+                    "target": "/srv/practice",
+                    "original_volume": 4,
+                    "file": "/keep.txt",
+                    "read_only": false,
+                    "automatic": true
+                  }
+                ],
+                "renaming": {
+                  "groups": [
+                    {
+                      "source": "demo",
+                      "name": "demo-final"
+                    }
+                  ],
+                  "volumes": [
+                    {
+                      "source": "demo/draft",
+                      "name": "notes"
+                    }
+                  ]
+                }
+              },
+              "worked": [
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "lvrename demo draft notes"
+                  },
+                  "explanation": "Change the name of the same original LV. Its mounted filesystem and contents remain connected; its saved old device name may need repair."
+                },
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "vgrename demo demo-final"
+                  },
+                  "explanation": "Rename the same original group. Its LV paths change; the existing live mount still refers to the original filesystem."
+                },
+                {
+                  "operation": {
+                    "kind": "save_policy",
+                    "text": "UUID=654de830-0000-4000-8000-000000000001 /srv/practice ext4 defaults 0 2\n"
+                  },
+                  "explanation": "Read the six columns. Fill selected example copies this policy into the separate example editor only; choose Save configuration to store it. Existing current mounts and the assignment are unchanged."
+                },
+                {
+                  "operation": {
+                    "kind": "command",
+                    "text": "cat /srv/practice/keep.txt"
+                  },
+                  "explanation": "Read the mounted virtual file and compare its original-data label. A different filesystem may contain a file with the same name."
+                }
+              ],
+              "experiment": {
+                "kind": "command",
+                "text": "umount /srv/practice"
+              },
+              "repair": [
+                {
+                  "kind": "command",
+                  "text": "mount /srv/practice"
+                }
+              ]
+            },
+            "try_change": "Run umount /srv/practice, then Check separate example. The saved policy still resolves, but the current mount and file reader fail. Run mount /srv/practice, read the file and check again.",
+            "experiment": "",
+            "repair": ""
+          }
+        }
+      },
+      "guide": [],
+      "steps": [
+        "Inspect the original filesystems and current mounts",
+        "Edit and save the required mount policy",
+        "Apply and verify the current mount state",
+        "Check requirements and repair any remaining mismatch"
+      ],
+      "hints": [
+        "Use blkid to compare the supplied filesystem sources, then findmnt to inspect actual current associations.",
+        "A saved edit does not change an existing mount. Compare the source and rw/ro options separately.",
+        "For a rename, a filesystem UUID stays with its original filesystem. A new canonical name is also valid here; neither approach changes the original file data."
+      ],
+      "explanation": "A mount retains the original filesystem identity through name changes. An old saved canonical path can fail even while the current file reader works. Saving a current canonical path or the supplied filesystem UUID repairs future requests; both live identity and saved policy must be checked.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/#rdp-we-204.3_Logical_Volume_Manager_(weight:_3)",
+        "https://man7.org/linux/man-pages/man5/fstab.5.html",
+        "https://man7.org/linux/man-pages/man8/mount.8.html",
+        "https://man7.org/linux/man-pages/man8/umount.8.html"
+      ],
+      "simplifications": "Bounded in-process supplied ext4 filesystems, explicit synthetic filesystem UUIDs and canonical /dev/VG/LV aliases. Reuses existing virtual fstab parser and actual LVM data; no host files, devices, mount calls or subprocesses. One live mount per filesystem, distinct non-nested mountpoints and unmount-before-replacement are simulator limits, not universal Linux restrictions. No busy-file processes, remount, overmount, namespaces, boot/systemd reload, permissions or hardware probes. Full objective coverage is not claimed. Sources checked2026-11-07.",
+      "solution": [
+        "lvrename intake draft reports",
+        "vgrename intake production",
+        "Save simulated mount configuration",
+        "cat /srv/reports/keep.txt"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-mount-repair"
+      ]
+    }
+  ]
+}

@@ -7,11 +7,17 @@ use std::collections::BTreeMap;
 fn fixture() -> State {
     State {
         version: 1,
+        provisioning: None,
+        activation: None,
+        identity: None,
+        pv_capacity: None,
+        snapshots: None,
         devices: BTreeMap::from([
             (
                 "/dev/vda".into(),
                 Device {
                     bytes: 17 * MIB,
+                    pv_bytes: None,
                     role: DeviceRole::PhysicalVolume,
                     group: "data".into(),
                 },
@@ -20,6 +26,7 @@ fn fixture() -> State {
                 "/dev/vdb".into(),
                 Device {
                     bytes: 33 * MIB,
+                    pv_bytes: None,
                     role: DeviceRole::Blank,
                     group: String::new(),
                 },
@@ -28,6 +35,7 @@ fn fixture() -> State {
                 "/dev/vdc".into(),
                 Device {
                     bytes: 33 * MIB,
+                    pv_bytes: None,
                     role: DeviceRole::Foreign,
                     group: String::new(),
                 },
@@ -36,6 +44,7 @@ fn fixture() -> State {
                 "/dev/vdd".into(),
                 Device {
                     bytes: 17 * MIB,
+                    pv_bytes: None,
                     role: DeviceRole::PhysicalVolume,
                     group: "peer".into(),
                 },
@@ -530,6 +539,7 @@ fn raw_codec_rejects_duplicates_unknown_fields_excess_collections_and_data() {
 fn streaming_bounds_refuse_poison_excess_before_its_body() {
     let d = serde_json::to_string(&Device {
         bytes: 17 * MIB,
+        pv_bytes: None,
         role: DeviceRole::Blank,
         group: String::new(),
     })

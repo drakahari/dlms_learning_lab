@@ -1,0 +1,718 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-sieve-sender-domain",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-sieve-address-routing",
+      "topic": "Sieve structured sender domains",
+      "title": "File sender domains without matching display names",
+      "summary": "Classify mail by its parsed sender domain without moving look-alike addresses.",
+      "objective": "File in Partners only when an actual mailbox in From has the domain exactly partners.dispatch.test. Ignore ASCII letter case. Accept a matching mailbox in a list or any one matching duplicate From field. Keep every other sample in INBOX only. Display names, comments and Subject mentions do not supply a sender address. Longer or child domains do not equal the required domain; malformed or missing From does not match. Repair the supplied substring filter and run all samples. Avoid extra copies and preserve unmatched mail. Equivalent supported rules are accepted; this is classification, not sender authentication.",
+      "retry_guidance": "Compare the failed sample’s actual mailbox address and field with Expected and Actual destinations. Separate raw mentions, selected address parts and full-address policy; edit and run again.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair the filter",
+        "Verify every sample"
+      ],
+      "guide": [
+        {
+          "title": "Run the separate domain example",
+          "why": "In Gardener <plants@orchard.guide.test>, Gardener is a display name and plants@orchard.guide.test is the mailbox address. The part before @ is the local part; the part after it is the domain. Names and parenthesized comments describe an address but are not the address.",
+          "action": "Select Fill worked example, then Run filter. In Sample message, compare Orchard sender with A display name pointing elsewhere and A different domain ending.",
+          "commands": []
+        },
+        {
+          "title": "Compare structured and raw text matching",
+          "why": "address :domain reads the domain from each actual mailbox in a named field. :is compares the entire selected domain. In contrast, header :contains searches the raw field text, including names and longer domains. The default comparison ignores ASCII letter case. Multiple mailboxes or duplicate fields match when any actual mailbox qualifies.",
+          "action": "In Filter, replace address :domain :is with header :contains, leaving the field and key unchanged. Run again and inspect the display-name and domain-ending samples.",
+          "commands": []
+        },
+        {
+          "title": "Check which field supplies the address",
+          "why": "orchard.guide.test differs from orchard.guide.test.elsewhere.test and team.orchard.guide.test. An exact test excludes both. Missing or malformed address fields do not match; spaces and comments around @ do not change the mailbox. Filing by a visible From field classifies mail; it does not authenticate its sender.",
+          "action": "Fill the worked example again. Change the quoted field From to To, run, and select The same address only in To. Restore From and rerun.",
+          "commands": []
+        }
+      ],
+      "explanation": "The address test separates a mailbox from its display name and comments. Comparing :domain with :is excludes similar endings and child domains while permitting case differences and any matching actual mailbox. A raw header substring test cannot make those distinctions.",
+      "hints": [
+        "Read the selected From field: identify the mailbox inside angle brackets, if present. Separate its domain from any quoted display name.",
+        "Compare the complete domain, not any occurrence of its letters in the field. A child domain is also different under this task’s exact policy.",
+        "Check the field being searched and remove unconditional deliveries that add another mailbox. Preserve INBOX when no actual From domain matches."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc5228.html",
+        "https://www.rfc-editor.org/rfc/rfc5322.html"
+      ],
+      "simplifications": "Address-enabled bounded Sieve subset with represented plain ASCII headers, dot-atom mailboxes, display names, lists and comments. Quoted local parts, groups, domain literals, obsolete routes and dotted internal whitespace are explicitly unsupported. No MIME decoding, SMTP envelope test, redirects, reject/vacation/procmail, host files, shell, processes, network or real mail delivery. Classification does not authenticate a sender. Resource errors never earn credit. See SIEVE_ADDRESS_SUBSET.md and SIEVE_SUBSET.md.",
+      "initial": {
+        "kind": "SieveFiltering",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-sender-domain",
+          "view": "introduction",
+          "assignment": {
+            "draft": "require \"fileinto\";\n# This header substring test moves look-alike senders too.\nif header :contains \"From\" \"partners.dispatch.test\" {\n    fileinto \"Partners\";\n}\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          },
+          "practice": {
+            "draft": "require \"fileinto\";\nkeep;\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SieveFiltering",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-sender-domain",
+          "assignment": {
+            "address_tests": true,
+            "starter": "require \"fileinto\";\n# This header substring test moves look-alike senders too.\nif header :contains \"From\" \"partners.dispatch.test\" {\n    fileinto \"Partners\";\n}\n",
+            "reference": "require \"fileinto\";\nif address :domain :is \"From\" \"partners.dispatch.test\" {\n    fileinto \"Partners\";\n}\n",
+            "cases": [
+              {
+                "id": "plain",
+                "label": "A plain mailbox",
+                "headers": [
+                  [
+                    "From",
+                    "jules@partners.dispatch.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Partners"
+                ]
+              },
+              {
+                "id": "case",
+                "label": "A display name and different letter case",
+                "headers": [
+                  [
+                    "From",
+                    "Jules <STAFF@PARTNERS.DISPATCH.TEST>"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Partners"
+                ]
+              },
+              {
+                "id": "display",
+                "label": "A quoted display name pointing elsewhere",
+                "headers": [
+                  [
+                    "From",
+                    "\"staff@partners.dispatch.test\" <visitor@elsewhere.test>"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "prefix",
+                "label": "A similar domain start",
+                "headers": [
+                  [
+                    "From",
+                    "staff@not-partners.dispatch.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "suffix",
+                "label": "A longer domain ending",
+                "headers": [
+                  [
+                    "From",
+                    "staff@partners.dispatch.test.unrelated.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "child",
+                "label": "A child domain",
+                "headers": [
+                  [
+                    "From",
+                    "staff@team.partners.dispatch.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "missing",
+                "label": "Only a Subject field is supplied",
+                "headers": [
+                  [
+                    "Subject",
+                    "staff@partners.dispatch.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "duplicate",
+                "label": "Two sender fields",
+                "headers": [
+                  [
+                    "From",
+                    "remote@elsewhere.test"
+                  ],
+                  [
+                    "From",
+                    "staff@partners.dispatch.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Partners"
+                ]
+              },
+              {
+                "id": "comments",
+                "label": "Comments around the at sign",
+                "headers": [
+                  [
+                    "From",
+                    "staff (department) @ (mail domain) partners.dispatch.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Partners"
+                ]
+              },
+              {
+                "id": "malformed",
+                "label": "A malformed sender field",
+                "headers": [
+                  [
+                    "From",
+                    "not-an-address"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "list",
+                "label": "Two mailboxes in one field",
+                "headers": [
+                  [
+                    "From",
+                    "Other <other@elsewhere.test>, Partner <staff@partners.dispatch.test>"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Partners"
+                ]
+              }
+            ],
+            "mailboxes": [
+              "INBOX",
+              "Partners"
+            ]
+          },
+          "example": {
+            "address_tests": true,
+            "starter": "require \"fileinto\";\nkeep;\n",
+            "reference": "require \"fileinto\";\nif address :domain :is \"From\" \"orchard.guide.test\" {\n    fileinto \"Orchard\";\n}\n",
+            "cases": [
+              {
+                "id": "orchard",
+                "label": "Orchard sender",
+                "headers": [
+                  [
+                    "From",
+                    "Gardener <plants@orchard.guide.test>"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Orchard"
+                ]
+              },
+              {
+                "id": "display",
+                "label": "A display name pointing elsewhere",
+                "headers": [
+                  [
+                    "From",
+                    "\"plants@orchard.guide.test\" <visitor@elsewhere.test>"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "suffix",
+                "label": "A different domain ending",
+                "headers": [
+                  [
+                    "From",
+                    "plants@orchard.guide.test.elsewhere.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "to-only",
+                "label": "The same address only in To",
+                "headers": [
+                  [
+                    "From",
+                    "visitor@elsewhere.test"
+                  ],
+                  [
+                    "To",
+                    "plants@orchard.guide.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              }
+            ],
+            "mailboxes": [
+              "INBOX",
+              "Orchard"
+            ]
+          }
+        }
+      },
+      "solution": [
+        "sieve-workspace {\"kind\":\"edit\",\"script\":\"require \\\"fileinto\\\";\\nif address :domain :is \\\"From\\\" \\\"partners.dispatch.test\\\" {\\n    fileinto \\\"Partners\\\";\\n}\\n\"}",
+        "sieve-workspace {\"kind\":\"run\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "lpic2-sieve-recipient-recovery",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-sieve-address-routing",
+      "topic": "Sieve full recipient matching",
+      "title": "Repair a filter that mistakes mentions for recipients",
+      "summary": "Recover recipient routing without treating sender names or message mentions as recipients.",
+      "objective": "File in Support only when an actual mailbox in To or Cc is exactly helpdesk@service.dispatch.test. Ignore ASCII letter case in the full address. One matching mailbox in a list or duplicate recipient field is sufficient. Keep every other sample in INBOX only. A mention in From, Subject or a display name is not a recipient. A longer local part, another domain, or matching local/domain parts found in separate mailboxes must not pass. Repair the supplied broad text search, run all samples, and avoid extra mailbox copies. Preserve malformed or missing recipient samples in INBOX. Equivalent supported full-address conditions are accepted.",
+      "retry_guidance": "Compare the failed sample’s actual mailbox address and field with Expected and Actual destinations. Separate raw mentions, selected address parts and full-address policy; edit and run again.",
+      "difficulty": "Intermediate",
+      "minutes": 26,
+      "steps": [
+        "Understand the task",
+        "Investigate and repair the filter",
+        "Verify every sample"
+      ],
+      "guide": [
+        {
+          "title": "Diagnose the supplied example",
+          "why": "From describes a sender; To and Cc describe visible recipients. A Subject line may mention an address without sending the message to it. A display name can contain an address-like phrase while its actual mailbox points elsewhere. These visible fields are not the SMTP delivery envelope.",
+          "action": "Run the supplied example before filling it. In Sample message, select A mention outside recipient fields and A display name with another mailbox. Read their Expected and Actual destinations.",
+          "commands": []
+        },
+        {
+          "title": "Use the separate worked repair",
+          "why": "address :is [\"To\", \"Cc\"] \"visits@clinic.guide.test\" checks actual mailboxes in either field. With no part option, :all is the default: local part and domain stay together as one address. An address split between two different mailboxes is not a match. The default comparison ignores ASCII letter case.",
+          "action": "Select Fill worked example and Run filter. Compare The visits desk in To with The visits desk only in Cc. Then remove Cc from the field list and run again.",
+          "commands": []
+        },
+        {
+          "title": "Compare a whole address with a short word",
+          "why": "A word search for visits or a test of only the local part can match another mailbox or domain. Use the full required mailbox when that is the policy. The matching fileinto cancels the default INBOX copy; leaving other messages alone keeps them in INBOX. Run every sample, not only the selected one.",
+          "action": "In the worked repair, change :is to :contains and shorten the quoted key to visits. Run and inspect A display name with another mailbox; restore the worked repair afterward.",
+          "commands": []
+        }
+      ],
+      "explanation": "The repaired condition examines parsed mailboxes only in To or Cc and compares the full required address. It ignores mentions in unrelated fields and display names, preserves unmatched mail, and avoids combining the local part of one mailbox with the domain of another.",
+      "hints": [
+        "Select a failed sample and check which field contains the address-like text. Is it an actual To/Cc mailbox or merely a mention?",
+        "Keep the local part and domain together. Matching a local part in To and a domain in Cc can describe two different mailboxes.",
+        "A single full-address test can read a field list; equivalent separate To/Cc address tests combined with anyof also work. Do not add an unconditional delivery afterward."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc5228.html",
+        "https://www.rfc-editor.org/rfc/rfc5322.html"
+      ],
+      "simplifications": "Address-enabled bounded Sieve subset with represented plain ASCII headers, dot-atom mailboxes, display names, lists and comments. Quoted local parts, groups, domain literals, obsolete routes and dotted internal whitespace are explicitly unsupported. No MIME decoding, SMTP envelope test, redirects, reject/vacation/procmail, host files, shell, processes, network or real mail delivery. Classification does not authenticate a sender. Resource errors never earn credit. See SIEVE_ADDRESS_SUBSET.md and SIEVE_SUBSET.md.",
+      "initial": {
+        "kind": "SieveFiltering",
+        "simulation": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-recipient-recovery",
+          "view": "introduction",
+          "assignment": {
+            "draft": "require \"fileinto\";\n# This broad text search mistakes mentions for recipients.\nif header :contains [\"From\", \"To\", \"Cc\", \"Subject\"] \"helpdesk\" {\n    fileinto \"Support\";\n}\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          },
+          "practice": {
+            "draft": "require \"fileinto\";\nif header :contains [\"From\", \"To\", \"Cc\", \"Subject\"] \"visits\" {\n    fileinto \"Desk\";\n}\n",
+            "selected": 0,
+            "results": [],
+            "error": null,
+            "checked": false,
+            "running": false,
+            "stopped": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "SieveFiltering",
+        "definition": {
+          "schema": 1,
+          "source_id": "lpic2-sieve-recipient-recovery",
+          "assignment": {
+            "address_tests": true,
+            "starter": "require \"fileinto\";\n# This broad text search mistakes mentions for recipients.\nif header :contains [\"From\", \"To\", \"Cc\", \"Subject\"] \"helpdesk\" {\n    fileinto \"Support\";\n}\n",
+            "reference": "require \"fileinto\";\nif address :is [\"To\", \"Cc\"] \"helpdesk@service.dispatch.test\" {\n    fileinto \"Support\";\n}\n",
+            "cases": [
+              {
+                "id": "to",
+                "label": "The recipient in To",
+                "headers": [
+                  [
+                    "To",
+                    "Service desk <helpdesk@service.dispatch.test>"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Support"
+                ]
+              },
+              {
+                "id": "cc",
+                "label": "The recipient only in Cc",
+                "headers": [
+                  [
+                    "To",
+                    "accounts@elsewhere.test"
+                  ],
+                  [
+                    "Cc",
+                    "helpdesk@service.dispatch.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Support"
+                ]
+              },
+              {
+                "id": "case-list",
+                "label": "A mixed-case mailbox in a list",
+                "headers": [
+                  [
+                    "To",
+                    "Other <accounts@elsewhere.test>, Desk <HELPDESK@SERVICE.DISPATCH.TEST>"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Support"
+                ]
+              },
+              {
+                "id": "display",
+                "label": "A quoted mention in the display name",
+                "headers": [
+                  [
+                    "To",
+                    "\"helpdesk@service.dispatch.test\" <visitor@elsewhere.test>"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "from-only",
+                "label": "The address only in From",
+                "headers": [
+                  [
+                    "From",
+                    "helpdesk@service.dispatch.test"
+                  ],
+                  [
+                    "To",
+                    "visitor@elsewhere.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "subject-only",
+                "label": "The address only in Subject",
+                "headers": [
+                  [
+                    "Subject",
+                    "Question for helpdesk@service.dispatch.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "longer-local",
+                "label": "A longer mailbox name",
+                "headers": [
+                  [
+                    "To",
+                    "helpdesk-extra@service.dispatch.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "wrong-domain",
+                "label": "The mailbox at another domain",
+                "headers": [
+                  [
+                    "To",
+                    "helpdesk@elsewhere.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "split-parts",
+                "label": "Local part and domain in different mailboxes",
+                "headers": [
+                  [
+                    "To",
+                    "helpdesk@elsewhere.test"
+                  ],
+                  [
+                    "Cc",
+                    "accounts@service.dispatch.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "duplicate",
+                "label": "Two Cc fields",
+                "headers": [
+                  [
+                    "Cc",
+                    "accounts@elsewhere.test"
+                  ],
+                  [
+                    "Cc",
+                    "helpdesk@service.dispatch.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Support"
+                ]
+              },
+              {
+                "id": "quoted-only",
+                "label": "Quoted text without a mailbox",
+                "headers": [
+                  [
+                    "To",
+                    "\"helpdesk@service.dispatch.test\""
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "missing",
+                "label": "No recipient fields",
+                "headers": [
+                  [
+                    "From",
+                    "visitor@elsewhere.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              }
+            ],
+            "mailboxes": [
+              "INBOX",
+              "Support"
+            ]
+          },
+          "example": {
+            "address_tests": true,
+            "starter": "require \"fileinto\";\nif header :contains [\"From\", \"To\", \"Cc\", \"Subject\"] \"visits\" {\n    fileinto \"Desk\";\n}\n",
+            "reference": "require \"fileinto\";\nif address :is [\"To\", \"Cc\"] \"visits@clinic.guide.test\" {\n    fileinto \"Desk\";\n}\n",
+            "cases": [
+              {
+                "id": "to",
+                "label": "The visits desk in To",
+                "headers": [
+                  [
+                    "To",
+                    "Visits desk <visits@clinic.guide.test>"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Desk"
+                ]
+              },
+              {
+                "id": "cc",
+                "label": "The visits desk only in Cc",
+                "headers": [
+                  [
+                    "To",
+                    "registrar@clinic.guide.test"
+                  ],
+                  [
+                    "Cc",
+                    "visits@clinic.guide.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "Desk"
+                ]
+              },
+              {
+                "id": "mention",
+                "label": "A mention outside recipient fields",
+                "headers": [
+                  [
+                    "From",
+                    "visits@clinic.guide.test"
+                  ],
+                  [
+                    "Subject",
+                    "visits@clinic.guide.test"
+                  ],
+                  [
+                    "To",
+                    "registrar@elsewhere.test"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              },
+              {
+                "id": "display",
+                "label": "A display name with another mailbox",
+                "headers": [
+                  [
+                    "To",
+                    "\"visits@clinic.guide.test\" <visits@elsewhere.test>"
+                  ]
+                ],
+                "body": "Sample message.\n",
+                "expected": [
+                  "INBOX"
+                ]
+              }
+            ],
+            "mailboxes": [
+              "Desk",
+              "INBOX"
+            ]
+          }
+        }
+      },
+      "solution": [
+        "sieve-workspace {\"kind\":\"edit\",\"script\":\"require \\\"fileinto\\\";\\nif address :is [\\\"To\\\", \\\"Cc\\\"] \\\"helpdesk@service.dispatch.test\\\" {\\n    fileinto \\\"Support\\\";\\n}\\n\"}",
+        "sieve-workspace {\"kind\":\"run\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}",
+        "sieve-workspace {\"kind\":\"tick\"}"
+      ],
+      "prerequisites": []
+    }
+  ]
+}

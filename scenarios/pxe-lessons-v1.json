@@ -1,0 +1,1011 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-pxe-firmware-selection",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-pxe-recovery",
+      "topic": "Network boot: PXE and PXELINUX",
+      "title": "Choose the right network boot program for each client",
+      "summary": "Repair the boot-file policy for BIOS and x64 UEFI clients without sending a boot file to ordinary DHCP clients.",
+      "objective": "Give each PXE client a compatible boot program using the supplied file inventory. Keep ordinary DHCP free of boot-file offers.",
+      "retry_guidance": "Read the failed client result. Trace the saved boot offer or configuration, correct the specific mismatch and check again.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "An ordinary DHCP client can use its address lease immediately. A machine starting from the network also needs the address of a boot server and the name of a program on that server. A valid lease therefore says nothing about whether a boot file exists or can run.",
+          "action": "Read the introduction and worked example.",
+          "commands": []
+        },
+        {
+          "title": "Investigate with separate inputs",
+          "why": "Trace a client to see which saved choice actually affects it.",
+          "action": "Use Inspect a client, the virtual inventory and the appropriate configuration editor.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "Every listed client outcome must agree with the saved configuration.",
+          "action": "Save your edits and select Check configuration.",
+          "commands": []
+        }
+      ],
+      "explanation": "The saved policy now selects a compatible program for each supplied architecture. The stored artifact type determines compatibility. The two clients can keep their leases while using different boot programs, and the ordinary client should never inherit an unconditional file.",
+      "hints": [
+        "Choose each client under Inspect a client before changing the table.",
+        "The server address and relative filename identify a stored program together. Open Inspect boot server files to see its type.",
+        "If both PXE clients pass but the ordinary client still receives a file, inspect the unconditional offer."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://uefi.org/specs/UEFI/2.10_A/24_Network_Protocols_SNP_PXE_BIS.html",
+        "https://www.iana.org/assignments/dhcpv6-parameters#processor-architecture",
+        "https://wiki.syslinux.org/wiki/index.php?title=PXELINUX",
+        "https://wiki.syslinux.org/wiki/index.php?title=Config"
+      ],
+      "simplifications": "Supplied BIOS and x64 UEFI request metadata, literal boot offers and virtual artifact kinds. BIOS PXELINUX 6.x lookup and a single DEFAULT/LABEL/LINUX/INITRD entry. No real DHCP, TFTP, packets, boot binaries, firmware, Secure Boot or host file operations.",
+      "prerequisites": [
+        "lpic2-dhcp-option-scope",
+        "ccna-tftp-recovery-copy"
+      ],
+      "initial": {
+        "kind": "Pxe",
+        "simulation": {
+          "assignment": {
+            "source_task": "{\"id\":\"lpic2-pxe-firmware-selection\",\"instructions\":\"Give each PXE client a compatible boot program using the supplied file inventory. Keep ordinary DHCP free of boot-file offers.\",\"mode\":{\"kind\":\"Policy\"},\"starter_policy\":{\"bios\":{\"server\":\"192.0.2.10\",\"name\":\"rescue/pxelinux.0\"},\"x64_uefi\":{\"server\":\"192.0.2.11\",\"name\":\"rescue/recovery.efi\"},\"unconditional\":{\"server\":\"192.0.2.10\",\"name\":\"rescue/pxelinux.0\"}},\"inventory\":{\"files\":[{\"file\":{\"server\":\"192.0.2.10\",\"name\":\"rescue/pxelinux.0\"},\"artifact\":{\"kind\":\"BiosPxelinux6\"}},{\"file\":{\"server\":\"192.0.2.10\",\"name\":\"rescue/recovery.efi\"},\"artifact\":{\"kind\":\"X64EfiApplication\"}},{\"file\":{\"server\":\"192.0.2.11\",\"name\":\"rescue/recovery.efi\"},\"artifact\":{\"kind\":\"BiosPxelinux6\"}},{\"file\":{\"server\":\"192.0.2.11\",\"name\":\"rescue/candidate.efi\"},\"artifact\":{\"kind\":\"X64EfiApplication\"}}]},\"cases\":[{\"label\":\"Legacy recovery PC\",\"client\":{\"address\":\"192.0.2.37\",\"request\":{\"kind\":\"Pxe\",\"option_93\":0},\"reachable_servers\":[\"192.0.2.10\",\"192.0.2.11\",null,null],\"ethernet_mac\":[2,0,0,0,0,37],\"uuid\":null},\"requirement\":{\"kind\":\"Program\",\"architecture\":\"PcBios\"}},{\"label\":\"x64 UEFI recovery PC\",\"client\":{\"address\":\"192.0.2.38\",\"request\":{\"kind\":\"Pxe\",\"option_93\":7},\"reachable_servers\":[\"192.0.2.10\",\"192.0.2.11\",null,null],\"ethernet_mac\":[2,0,0,0,0,38],\"uuid\":null},\"requirement\":{\"kind\":\"Program\",\"architecture\":\"X64Uefi\"}},{\"label\":\"Ordinary office client\",\"client\":{\"address\":\"192.0.2.39\",\"request\":{\"kind\":\"OrdinaryDhcp\"},\"reachable_servers\":[\"192.0.2.10\",\"192.0.2.11\",null,null],\"ethernet_mac\":[2,0,0,0,0,39],\"uuid\":null},\"requirement\":{\"kind\":\"NoOffer\"}}],\"reference\":[{\"op\":\"EditPolicy\",\"draft\":{\"bios\":{\"enabled\":true,\"server\":\"192.0.2.10\",\"filename\":\"rescue/pxelinux.0\"},\"x64_uefi\":{\"enabled\":true,\"server\":\"192.0.2.10\",\"filename\":\"rescue/recovery.efi\"},\"unconditional\":{\"enabled\":false,\"server\":\"\",\"filename\":\"\"}}},{\"op\":\"SavePolicy\"},{\"op\":\"Check\"}]}",
+            "work": {
+              "checked": false,
+              "entry_draft": null,
+              "policy": {
+                "bios": {
+                  "name": "rescue/pxelinux.0",
+                  "server": "192.0.2.10"
+                },
+                "unconditional": {
+                  "name": "rescue/pxelinux.0",
+                  "server": "192.0.2.10"
+                },
+                "x64_uefi": {
+                  "name": "rescue/recovery.efi",
+                  "server": "192.0.2.11"
+                }
+              },
+              "policy_draft": {
+                "bios": {
+                  "enabled": true,
+                  "filename": "rescue/pxelinux.0",
+                  "server": "192.0.2.10"
+                },
+                "unconditional": {
+                  "enabled": true,
+                  "filename": "rescue/pxelinux.0",
+                  "server": "192.0.2.10"
+                },
+                "x64_uefi": {
+                  "enabled": true,
+                  "filename": "rescue/recovery.efi",
+                  "server": "192.0.2.11"
+                }
+              },
+              "saved_entries": []
+            }
+          },
+          "example": {
+            "source_task": "{\"id\":\"lpic2-pxe-firmware-selection-example\",\"instructions\":\"Give each PXE client a compatible boot program using the supplied file inventory. Keep ordinary DHCP free of boot-file offers.\",\"mode\":{\"kind\":\"Policy\"},\"starter_policy\":{\"bios\":{\"server\":\"198.51.100.10\",\"name\":\"training/pxelinux.0\"},\"x64_uefi\":{\"server\":\"198.51.100.11\",\"name\":\"training/recovery.efi\"},\"unconditional\":{\"server\":\"198.51.100.10\",\"name\":\"training/pxelinux.0\"}},\"inventory\":{\"files\":[{\"file\":{\"server\":\"198.51.100.10\",\"name\":\"training/pxelinux.0\"},\"artifact\":{\"kind\":\"BiosPxelinux6\"}},{\"file\":{\"server\":\"198.51.100.10\",\"name\":\"training/recovery.efi\"},\"artifact\":{\"kind\":\"X64EfiApplication\"}},{\"file\":{\"server\":\"198.51.100.11\",\"name\":\"training/recovery.efi\"},\"artifact\":{\"kind\":\"BiosPxelinux6\"}},{\"file\":{\"server\":\"198.51.100.11\",\"name\":\"training/candidate.efi\"},\"artifact\":{\"kind\":\"X64EfiApplication\"}}]},\"cases\":[{\"label\":\"Legacy recovery PC\",\"client\":{\"address\":\"198.51.100.67\",\"request\":{\"kind\":\"Pxe\",\"option_93\":0},\"reachable_servers\":[\"198.51.100.10\",\"198.51.100.11\",null,null],\"ethernet_mac\":[2,0,0,0,0,67],\"uuid\":null},\"requirement\":{\"kind\":\"Program\",\"architecture\":\"PcBios\"}},{\"label\":\"x64 UEFI recovery PC\",\"client\":{\"address\":\"198.51.100.68\",\"request\":{\"kind\":\"Pxe\",\"option_93\":7},\"reachable_servers\":[\"198.51.100.10\",\"198.51.100.11\",null,null],\"ethernet_mac\":[2,0,0,0,0,68],\"uuid\":null},\"requirement\":{\"kind\":\"Program\",\"architecture\":\"X64Uefi\"}},{\"label\":\"Ordinary office client\",\"client\":{\"address\":\"198.51.100.69\",\"request\":{\"kind\":\"OrdinaryDhcp\"},\"reachable_servers\":[\"198.51.100.10\",\"198.51.100.11\",null,null],\"ethernet_mac\":[2,0,0,0,0,69],\"uuid\":null},\"requirement\":{\"kind\":\"NoOffer\"}}],\"reference\":[{\"op\":\"EditPolicy\",\"draft\":{\"bios\":{\"enabled\":true,\"server\":\"198.51.100.10\",\"filename\":\"training/pxelinux.0\"},\"x64_uefi\":{\"enabled\":true,\"server\":\"198.51.100.10\",\"filename\":\"training/recovery.efi\"},\"unconditional\":{\"enabled\":false,\"server\":\"\",\"filename\":\"\"}}},{\"op\":\"SavePolicy\"},{\"op\":\"Check\"}]}",
+            "work": {
+              "checked": false,
+              "entry_draft": null,
+              "policy": {
+                "bios": {
+                  "name": "training/pxelinux.0",
+                  "server": "198.51.100.10"
+                },
+                "unconditional": {
+                  "name": "training/pxelinux.0",
+                  "server": "198.51.100.10"
+                },
+                "x64_uefi": {
+                  "name": "training/recovery.efi",
+                  "server": "198.51.100.11"
+                }
+              },
+              "policy_draft": {
+                "bios": {
+                  "enabled": true,
+                  "filename": "training/pxelinux.0",
+                  "server": "198.51.100.10"
+                },
+                "unconditional": {
+                  "enabled": true,
+                  "filename": "training/pxelinux.0",
+                  "server": "198.51.100.10"
+                },
+                "x64_uefi": {
+                  "enabled": true,
+                  "filename": "training/recovery.efi",
+                  "server": "198.51.100.11"
+                }
+              },
+              "saved_entries": []
+            }
+          },
+          "source_id": "lpic2-pxe-firmware-selection",
+          "version": 1,
+          "view": "introduction"
+        }
+      },
+      "goal": {
+        "kind": "Pxe",
+        "definition": {
+          "assignment": {
+            "cases": [
+              {
+                "client": {
+                  "address": "192.0.2.37",
+                  "ethernet_mac": [
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    37
+                  ],
+                  "reachable_servers": [
+                    "192.0.2.10",
+                    "192.0.2.11",
+                    null,
+                    null
+                  ],
+                  "request": {
+                    "kind": "Pxe",
+                    "option_93": 0
+                  },
+                  "uuid": null
+                },
+                "label": "Legacy recovery PC",
+                "requirement": {
+                  "architecture": "PcBios",
+                  "kind": "Program"
+                }
+              },
+              {
+                "client": {
+                  "address": "192.0.2.38",
+                  "ethernet_mac": [
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    38
+                  ],
+                  "reachable_servers": [
+                    "192.0.2.10",
+                    "192.0.2.11",
+                    null,
+                    null
+                  ],
+                  "request": {
+                    "kind": "Pxe",
+                    "option_93": 7
+                  },
+                  "uuid": null
+                },
+                "label": "x64 UEFI recovery PC",
+                "requirement": {
+                  "architecture": "X64Uefi",
+                  "kind": "Program"
+                }
+              },
+              {
+                "client": {
+                  "address": "192.0.2.39",
+                  "ethernet_mac": [
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    39
+                  ],
+                  "reachable_servers": [
+                    "192.0.2.10",
+                    "192.0.2.11",
+                    null,
+                    null
+                  ],
+                  "request": {
+                    "kind": "OrdinaryDhcp"
+                  },
+                  "uuid": null
+                },
+                "label": "Ordinary office client",
+                "requirement": {
+                  "kind": "NoOffer"
+                }
+              }
+            ],
+            "id": "lpic2-pxe-firmware-selection",
+            "instructions": "Give each PXE client a compatible boot program using the supplied file inventory. Keep ordinary DHCP free of boot-file offers.",
+            "inventory": {
+              "files": [
+                {
+                  "artifact": {
+                    "kind": "BiosPxelinux6"
+                  },
+                  "file": {
+                    "name": "rescue/pxelinux.0",
+                    "server": "192.0.2.10"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "X64EfiApplication"
+                  },
+                  "file": {
+                    "name": "rescue/recovery.efi",
+                    "server": "192.0.2.10"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "BiosPxelinux6"
+                  },
+                  "file": {
+                    "name": "rescue/recovery.efi",
+                    "server": "192.0.2.11"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "X64EfiApplication"
+                  },
+                  "file": {
+                    "name": "rescue/candidate.efi",
+                    "server": "192.0.2.11"
+                  }
+                }
+              ]
+            },
+            "mode": {
+              "kind": "Policy"
+            },
+            "reference": [
+              {
+                "draft": {
+                  "bios": {
+                    "enabled": true,
+                    "filename": "rescue/pxelinux.0",
+                    "server": "192.0.2.10"
+                  },
+                  "unconditional": {
+                    "enabled": false,
+                    "filename": "",
+                    "server": ""
+                  },
+                  "x64_uefi": {
+                    "enabled": true,
+                    "filename": "rescue/recovery.efi",
+                    "server": "192.0.2.10"
+                  }
+                },
+                "op": "EditPolicy"
+              },
+              {
+                "op": "SavePolicy"
+              },
+              {
+                "op": "Check"
+              }
+            ],
+            "starter_policy": {
+              "bios": {
+                "name": "rescue/pxelinux.0",
+                "server": "192.0.2.10"
+              },
+              "unconditional": {
+                "name": "rescue/pxelinux.0",
+                "server": "192.0.2.10"
+              },
+              "x64_uefi": {
+                "name": "rescue/recovery.efi",
+                "server": "192.0.2.11"
+              }
+            }
+          },
+          "example": {
+            "cases": [
+              {
+                "client": {
+                  "address": "198.51.100.67",
+                  "ethernet_mac": [
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    67
+                  ],
+                  "reachable_servers": [
+                    "198.51.100.10",
+                    "198.51.100.11",
+                    null,
+                    null
+                  ],
+                  "request": {
+                    "kind": "Pxe",
+                    "option_93": 0
+                  },
+                  "uuid": null
+                },
+                "label": "Legacy recovery PC",
+                "requirement": {
+                  "architecture": "PcBios",
+                  "kind": "Program"
+                }
+              },
+              {
+                "client": {
+                  "address": "198.51.100.68",
+                  "ethernet_mac": [
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    68
+                  ],
+                  "reachable_servers": [
+                    "198.51.100.10",
+                    "198.51.100.11",
+                    null,
+                    null
+                  ],
+                  "request": {
+                    "kind": "Pxe",
+                    "option_93": 7
+                  },
+                  "uuid": null
+                },
+                "label": "x64 UEFI recovery PC",
+                "requirement": {
+                  "architecture": "X64Uefi",
+                  "kind": "Program"
+                }
+              },
+              {
+                "client": {
+                  "address": "198.51.100.69",
+                  "ethernet_mac": [
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    69
+                  ],
+                  "reachable_servers": [
+                    "198.51.100.10",
+                    "198.51.100.11",
+                    null,
+                    null
+                  ],
+                  "request": {
+                    "kind": "OrdinaryDhcp"
+                  },
+                  "uuid": null
+                },
+                "label": "Ordinary office client",
+                "requirement": {
+                  "kind": "NoOffer"
+                }
+              }
+            ],
+            "id": "lpic2-pxe-firmware-selection-example",
+            "instructions": "Give each PXE client a compatible boot program using the supplied file inventory. Keep ordinary DHCP free of boot-file offers.",
+            "inventory": {
+              "files": [
+                {
+                  "artifact": {
+                    "kind": "BiosPxelinux6"
+                  },
+                  "file": {
+                    "name": "training/pxelinux.0",
+                    "server": "198.51.100.10"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "X64EfiApplication"
+                  },
+                  "file": {
+                    "name": "training/recovery.efi",
+                    "server": "198.51.100.10"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "BiosPxelinux6"
+                  },
+                  "file": {
+                    "name": "training/recovery.efi",
+                    "server": "198.51.100.11"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "X64EfiApplication"
+                  },
+                  "file": {
+                    "name": "training/candidate.efi",
+                    "server": "198.51.100.11"
+                  }
+                }
+              ]
+            },
+            "mode": {
+              "kind": "Policy"
+            },
+            "reference": [
+              {
+                "draft": {
+                  "bios": {
+                    "enabled": true,
+                    "filename": "training/pxelinux.0",
+                    "server": "198.51.100.10"
+                  },
+                  "unconditional": {
+                    "enabled": false,
+                    "filename": "",
+                    "server": ""
+                  },
+                  "x64_uefi": {
+                    "enabled": true,
+                    "filename": "training/recovery.efi",
+                    "server": "198.51.100.10"
+                  }
+                },
+                "op": "EditPolicy"
+              },
+              {
+                "op": "SavePolicy"
+              },
+              {
+                "op": "Check"
+              }
+            ],
+            "starter_policy": {
+              "bios": {
+                "name": "training/pxelinux.0",
+                "server": "198.51.100.10"
+              },
+              "unconditional": {
+                "name": "training/pxelinux.0",
+                "server": "198.51.100.10"
+              },
+              "x64_uefi": {
+                "name": "training/recovery.efi",
+                "server": "198.51.100.11"
+              }
+            }
+          },
+          "source_id": "lpic2-pxe-firmware-selection",
+          "version": 1
+        }
+      },
+      "solution": [
+        "pxe-workspace {\"practice\":false,\"action\":{\"draft\":{\"bios\":{\"enabled\":true,\"filename\":\"rescue/pxelinux.0\",\"server\":\"192.0.2.10\"},\"unconditional\":{\"enabled\":false,\"filename\":\"\",\"server\":\"\"},\"x64_uefi\":{\"enabled\":true,\"filename\":\"rescue/recovery.efi\",\"server\":\"192.0.2.10\"}},\"op\":\"EditPolicy\"}}",
+        "pxe-workspace {\"practice\":false,\"action\":{\"op\":\"SavePolicy\"}}",
+        "pxe-workspace {\"practice\":false,\"action\":{\"op\":\"Check\"}}"
+      ]
+    },
+    {
+      "id": "lpic2-pxelinux-client-lookup",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-pxe-recovery",
+      "topic": "Network boot: PXE and PXELINUX",
+      "title": "Repair the boot files chosen for one PXELINUX client",
+      "summary": "Find the file that actually controls the maintenance client, repair its early boot pair, and keep the shared fallback working.",
+      "objective": "Repair the client-specific PXELINUX configuration so the maintenance client selects release 6.6.61. Keep the fallback client's original kernel and initramfs.",
+      "retry_guidance": "Read the failed client result. Trace the saved boot offer or configuration, correct the specific mismatch and check again.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "After receiving the BIOS program, the represented PXELINUX 6.x process looks for ldlinux.c32 beside it. The program’s parent directory is also the base for configuration lookup and the relative kernel and initramfs paths.",
+          "action": "Read the introduction and worked example.",
+          "commands": []
+        },
+        {
+          "title": "Investigate with separate inputs",
+          "why": "Trace a client to see which saved choice actually affects it.",
+          "action": "Use Inspect a client, the virtual inventory and the appropriate configuration editor.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "Every listed client outcome must agree with the saved configuration.",
+          "action": "Save your edits and select Check configuration.",
+          "commands": []
+        }
+      ],
+      "explanation": "The repaired configuration selects a matching kernel and initramfs for the maintenance client. The first file found determines the paths relative to the program directory. The fallback client's boot pair remains the same.",
+      "hints": [
+        "Trace the maintenance client first, then expand Configuration paths tried to see which file stops the lookup.",
+        "Use Inspect boot server files to compare kernel and initramfs releases. Relative paths start in the boot program's directory.",
+        "Avoid replacing the shared default for the fallback client. A client-specific file can be repaired in place, or a higher-priority supported file can select the same pair."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://uefi.org/specs/UEFI/2.10_A/24_Network_Protocols_SNP_PXE_BIS.html",
+        "https://www.iana.org/assignments/dhcpv6-parameters#processor-architecture",
+        "https://wiki.syslinux.org/wiki/index.php?title=PXELINUX",
+        "https://wiki.syslinux.org/wiki/index.php?title=Config"
+      ],
+      "simplifications": "Supplied BIOS and x64 UEFI request metadata, literal boot offers and virtual artifact kinds. BIOS PXELINUX 6.x lookup and a single DEFAULT/LABEL/LINUX/INITRD entry. No real DHCP, TFTP, packets, boot binaries, firmware, Secure Boot or host file operations.",
+      "prerequisites": [
+        "lpic2-pxe-firmware-selection",
+        "lpic2-initramfs-root-drivers"
+      ],
+      "initial": {
+        "kind": "Pxe",
+        "simulation": {
+          "assignment": {
+            "source_task": "{\"id\":\"lpic2-pxelinux-client-lookup\",\"instructions\":\"Repair the client-specific PXELINUX configuration so the maintenance client selects release 6.6.61. Keep the fallback client's original kernel and initramfs.\",\"mode\":{\"kind\":\"Configuration\",\"program\":{\"server\":\"192.0.2.20\",\"name\":\"rescue/pxelinux.0\"},\"starter_leaf\":\"01-02-00-00-00-00-25\"},\"starter_policy\":{\"bios\":{\"server\":\"192.0.2.20\",\"name\":\"rescue/pxelinux.0\"},\"x64_uefi\":null,\"unconditional\":null},\"inventory\":{\"files\":[{\"file\":{\"server\":\"192.0.2.20\",\"name\":\"rescue/pxelinux.0\"},\"artifact\":{\"kind\":\"BiosPxelinux6\"}},{\"file\":{\"server\":\"192.0.2.20\",\"name\":\"rescue/ldlinux.c32\"},\"artifact\":{\"kind\":\"PxelinuxCore\"}},{\"file\":{\"server\":\"192.0.2.20\",\"name\":\"rescue/pxelinux.cfg/default\"},\"artifact\":{\"kind\":\"Configuration\",\"source\":\"DEFAULT recovery\\nLABEL recovery\\nLINUX images/vmlinuz-6.6.60\\nINITRD images/initramfs-6.6.60.img\\n\"}},{\"file\":{\"server\":\"192.0.2.20\",\"name\":\"rescue/pxelinux.cfg/01-02-00-00-00-00-25\"},\"artifact\":{\"kind\":\"Configuration\",\"source\":\"DEFAULT recovery\\nLABEL recovery\\nLINUX images/vmlinuz-6.6.61\\nINITRD images/initramfs-6.6.60.img\\n\"}},{\"file\":{\"server\":\"192.0.2.20\",\"name\":\"rescue/images/vmlinuz-6.6.61\"},\"artifact\":{\"kind\":\"Kernel\",\"release\":\"6.6.61\"}},{\"file\":{\"server\":\"192.0.2.20\",\"name\":\"rescue/images/initramfs-6.6.61.img\"},\"artifact\":{\"kind\":\"Initramfs\",\"release\":\"6.6.61\"}},{\"file\":{\"server\":\"192.0.2.20\",\"name\":\"rescue/images/vmlinuz-6.6.60\"},\"artifact\":{\"kind\":\"Kernel\",\"release\":\"6.6.60\"}},{\"file\":{\"server\":\"192.0.2.20\",\"name\":\"rescue/images/initramfs-6.6.60.img\"},\"artifact\":{\"kind\":\"Initramfs\",\"release\":\"6.6.60\"}}]},\"cases\":[{\"label\":\"Maintenance client\",\"client\":{\"address\":\"192.0.2.37\",\"request\":{\"kind\":\"Pxe\",\"option_93\":0},\"reachable_servers\":[\"192.0.2.20\",null,null,null],\"ethernet_mac\":[2,0,0,0,0,37],\"uuid\":\"a1aaaaaa-0000-4000-8000-cccccccccccc\"},\"requirement\":{\"kind\":\"Release\",\"release\":\"6.6.61\"}},{\"label\":\"Protected fallback client\",\"client\":{\"address\":\"192.0.2.38\",\"request\":{\"kind\":\"Pxe\",\"option_93\":0},\"reachable_servers\":[\"192.0.2.20\",null,null,null],\"ethernet_mac\":[2,0,0,0,0,38],\"uuid\":null},\"requirement\":{\"kind\":\"PreservePair\"}}],\"reference\":[{\"op\":\"EditEntry\",\"draft\":{\"leaf\":\"01-02-00-00-00-00-25\",\"source\":\"DEFAULT recovery\\nLABEL recovery\\nLINUX images/vmlinuz-6.6.61\\nINITRD images/initramfs-6.6.61.img\\n\"}},{\"op\":\"SaveEntry\"},{\"op\":\"Check\"}]}",
+            "work": {
+              "checked": false,
+              "entry_draft": {
+                "leaf": "01-02-00-00-00-00-25",
+                "source": "DEFAULT recovery\nLABEL recovery\nLINUX images/vmlinuz-6.6.61\nINITRD images/initramfs-6.6.60.img\n"
+              },
+              "policy": {
+                "bios": {
+                  "name": "rescue/pxelinux.0",
+                  "server": "192.0.2.20"
+                },
+                "unconditional": null,
+                "x64_uefi": null
+              },
+              "policy_draft": {
+                "bios": {
+                  "enabled": true,
+                  "filename": "rescue/pxelinux.0",
+                  "server": "192.0.2.20"
+                },
+                "unconditional": {
+                  "enabled": false,
+                  "filename": "",
+                  "server": ""
+                },
+                "x64_uefi": {
+                  "enabled": false,
+                  "filename": "",
+                  "server": ""
+                }
+              },
+              "saved_entries": []
+            }
+          },
+          "example": {
+            "source_task": "{\"id\":\"lpic2-pxelinux-client-lookup-example\",\"instructions\":\"Repair the client-specific PXELINUX configuration so the maintenance client selects release 6.1.121. Keep the fallback client's original kernel and initramfs.\",\"mode\":{\"kind\":\"Configuration\",\"program\":{\"server\":\"198.51.100.20\",\"name\":\"training/pxelinux.0\"},\"starter_leaf\":\"01-02-00-00-00-00-43\"},\"starter_policy\":{\"bios\":{\"server\":\"198.51.100.20\",\"name\":\"training/pxelinux.0\"},\"x64_uefi\":null,\"unconditional\":null},\"inventory\":{\"files\":[{\"file\":{\"server\":\"198.51.100.20\",\"name\":\"training/pxelinux.0\"},\"artifact\":{\"kind\":\"BiosPxelinux6\"}},{\"file\":{\"server\":\"198.51.100.20\",\"name\":\"training/ldlinux.c32\"},\"artifact\":{\"kind\":\"PxelinuxCore\"}},{\"file\":{\"server\":\"198.51.100.20\",\"name\":\"training/pxelinux.cfg/default\"},\"artifact\":{\"kind\":\"Configuration\",\"source\":\"DEFAULT recovery\\nLABEL recovery\\nLINUX images/vmlinuz-6.1.120\\nINITRD images/initramfs-6.1.120.img\\n\"}},{\"file\":{\"server\":\"198.51.100.20\",\"name\":\"training/pxelinux.cfg/01-02-00-00-00-00-43\"},\"artifact\":{\"kind\":\"Configuration\",\"source\":\"DEFAULT recovery\\nLABEL recovery\\nLINUX images/vmlinuz-6.1.121\\nINITRD images/initramfs-6.1.120.img\\n\"}},{\"file\":{\"server\":\"198.51.100.20\",\"name\":\"training/images/vmlinuz-6.1.121\"},\"artifact\":{\"kind\":\"Kernel\",\"release\":\"6.1.121\"}},{\"file\":{\"server\":\"198.51.100.20\",\"name\":\"training/images/initramfs-6.1.121.img\"},\"artifact\":{\"kind\":\"Initramfs\",\"release\":\"6.1.121\"}},{\"file\":{\"server\":\"198.51.100.20\",\"name\":\"training/images/vmlinuz-6.1.120\"},\"artifact\":{\"kind\":\"Kernel\",\"release\":\"6.1.120\"}},{\"file\":{\"server\":\"198.51.100.20\",\"name\":\"training/images/initramfs-6.1.120.img\"},\"artifact\":{\"kind\":\"Initramfs\",\"release\":\"6.1.120\"}}]},\"cases\":[{\"label\":\"Maintenance client\",\"client\":{\"address\":\"198.51.100.67\",\"request\":{\"kind\":\"Pxe\",\"option_93\":0},\"reachable_servers\":[\"198.51.100.20\",null,null,null],\"ethernet_mac\":[2,0,0,0,0,67],\"uuid\":\"b2bbbbbb-0000-4000-8000-ffffffffffff\"},\"requirement\":{\"kind\":\"Release\",\"release\":\"6.1.121\"}},{\"label\":\"Protected fallback client\",\"client\":{\"address\":\"198.51.100.68\",\"request\":{\"kind\":\"Pxe\",\"option_93\":0},\"reachable_servers\":[\"198.51.100.20\",null,null,null],\"ethernet_mac\":[2,0,0,0,0,68],\"uuid\":null},\"requirement\":{\"kind\":\"PreservePair\"}}],\"reference\":[{\"op\":\"EditEntry\",\"draft\":{\"leaf\":\"01-02-00-00-00-00-43\",\"source\":\"DEFAULT recovery\\nLABEL recovery\\nLINUX images/vmlinuz-6.1.121\\nINITRD images/initramfs-6.1.121.img\\n\"}},{\"op\":\"SaveEntry\"},{\"op\":\"Check\"}]}",
+            "work": {
+              "checked": false,
+              "entry_draft": {
+                "leaf": "01-02-00-00-00-00-43",
+                "source": "DEFAULT recovery\nLABEL recovery\nLINUX images/vmlinuz-6.1.121\nINITRD images/initramfs-6.1.120.img\n"
+              },
+              "policy": {
+                "bios": {
+                  "name": "training/pxelinux.0",
+                  "server": "198.51.100.20"
+                },
+                "unconditional": null,
+                "x64_uefi": null
+              },
+              "policy_draft": {
+                "bios": {
+                  "enabled": true,
+                  "filename": "training/pxelinux.0",
+                  "server": "198.51.100.20"
+                },
+                "unconditional": {
+                  "enabled": false,
+                  "filename": "",
+                  "server": ""
+                },
+                "x64_uefi": {
+                  "enabled": false,
+                  "filename": "",
+                  "server": ""
+                }
+              },
+              "saved_entries": []
+            }
+          },
+          "source_id": "lpic2-pxelinux-client-lookup",
+          "version": 1,
+          "view": "introduction"
+        }
+      },
+      "goal": {
+        "kind": "Pxe",
+        "definition": {
+          "assignment": {
+            "cases": [
+              {
+                "client": {
+                  "address": "192.0.2.37",
+                  "ethernet_mac": [
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    37
+                  ],
+                  "reachable_servers": [
+                    "192.0.2.20",
+                    null,
+                    null,
+                    null
+                  ],
+                  "request": {
+                    "kind": "Pxe",
+                    "option_93": 0
+                  },
+                  "uuid": "a1aaaaaa-0000-4000-8000-cccccccccccc"
+                },
+                "label": "Maintenance client",
+                "requirement": {
+                  "kind": "Release",
+                  "release": "6.6.61"
+                }
+              },
+              {
+                "client": {
+                  "address": "192.0.2.38",
+                  "ethernet_mac": [
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    38
+                  ],
+                  "reachable_servers": [
+                    "192.0.2.20",
+                    null,
+                    null,
+                    null
+                  ],
+                  "request": {
+                    "kind": "Pxe",
+                    "option_93": 0
+                  },
+                  "uuid": null
+                },
+                "label": "Protected fallback client",
+                "requirement": {
+                  "kind": "PreservePair"
+                }
+              }
+            ],
+            "id": "lpic2-pxelinux-client-lookup",
+            "instructions": "Repair the client-specific PXELINUX configuration so the maintenance client selects release 6.6.61. Keep the fallback client's original kernel and initramfs.",
+            "inventory": {
+              "files": [
+                {
+                  "artifact": {
+                    "kind": "BiosPxelinux6"
+                  },
+                  "file": {
+                    "name": "rescue/pxelinux.0",
+                    "server": "192.0.2.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "PxelinuxCore"
+                  },
+                  "file": {
+                    "name": "rescue/ldlinux.c32",
+                    "server": "192.0.2.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "Configuration",
+                    "source": "DEFAULT recovery\nLABEL recovery\nLINUX images/vmlinuz-6.6.60\nINITRD images/initramfs-6.6.60.img\n"
+                  },
+                  "file": {
+                    "name": "rescue/pxelinux.cfg/default",
+                    "server": "192.0.2.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "Configuration",
+                    "source": "DEFAULT recovery\nLABEL recovery\nLINUX images/vmlinuz-6.6.61\nINITRD images/initramfs-6.6.60.img\n"
+                  },
+                  "file": {
+                    "name": "rescue/pxelinux.cfg/01-02-00-00-00-00-25",
+                    "server": "192.0.2.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "Kernel",
+                    "release": "6.6.61"
+                  },
+                  "file": {
+                    "name": "rescue/images/vmlinuz-6.6.61",
+                    "server": "192.0.2.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "Initramfs",
+                    "release": "6.6.61"
+                  },
+                  "file": {
+                    "name": "rescue/images/initramfs-6.6.61.img",
+                    "server": "192.0.2.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "Kernel",
+                    "release": "6.6.60"
+                  },
+                  "file": {
+                    "name": "rescue/images/vmlinuz-6.6.60",
+                    "server": "192.0.2.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "Initramfs",
+                    "release": "6.6.60"
+                  },
+                  "file": {
+                    "name": "rescue/images/initramfs-6.6.60.img",
+                    "server": "192.0.2.20"
+                  }
+                }
+              ]
+            },
+            "mode": {
+              "kind": "Configuration",
+              "program": {
+                "name": "rescue/pxelinux.0",
+                "server": "192.0.2.20"
+              },
+              "starter_leaf": "01-02-00-00-00-00-25"
+            },
+            "reference": [
+              {
+                "draft": {
+                  "leaf": "01-02-00-00-00-00-25",
+                  "source": "DEFAULT recovery\nLABEL recovery\nLINUX images/vmlinuz-6.6.61\nINITRD images/initramfs-6.6.61.img\n"
+                },
+                "op": "EditEntry"
+              },
+              {
+                "op": "SaveEntry"
+              },
+              {
+                "op": "Check"
+              }
+            ],
+            "starter_policy": {
+              "bios": {
+                "name": "rescue/pxelinux.0",
+                "server": "192.0.2.20"
+              },
+              "unconditional": null,
+              "x64_uefi": null
+            }
+          },
+          "example": {
+            "cases": [
+              {
+                "client": {
+                  "address": "198.51.100.67",
+                  "ethernet_mac": [
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    67
+                  ],
+                  "reachable_servers": [
+                    "198.51.100.20",
+                    null,
+                    null,
+                    null
+                  ],
+                  "request": {
+                    "kind": "Pxe",
+                    "option_93": 0
+                  },
+                  "uuid": "b2bbbbbb-0000-4000-8000-ffffffffffff"
+                },
+                "label": "Maintenance client",
+                "requirement": {
+                  "kind": "Release",
+                  "release": "6.1.121"
+                }
+              },
+              {
+                "client": {
+                  "address": "198.51.100.68",
+                  "ethernet_mac": [
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    68
+                  ],
+                  "reachable_servers": [
+                    "198.51.100.20",
+                    null,
+                    null,
+                    null
+                  ],
+                  "request": {
+                    "kind": "Pxe",
+                    "option_93": 0
+                  },
+                  "uuid": null
+                },
+                "label": "Protected fallback client",
+                "requirement": {
+                  "kind": "PreservePair"
+                }
+              }
+            ],
+            "id": "lpic2-pxelinux-client-lookup-example",
+            "instructions": "Repair the client-specific PXELINUX configuration so the maintenance client selects release 6.1.121. Keep the fallback client's original kernel and initramfs.",
+            "inventory": {
+              "files": [
+                {
+                  "artifact": {
+                    "kind": "BiosPxelinux6"
+                  },
+                  "file": {
+                    "name": "training/pxelinux.0",
+                    "server": "198.51.100.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "PxelinuxCore"
+                  },
+                  "file": {
+                    "name": "training/ldlinux.c32",
+                    "server": "198.51.100.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "Configuration",
+                    "source": "DEFAULT recovery\nLABEL recovery\nLINUX images/vmlinuz-6.1.120\nINITRD images/initramfs-6.1.120.img\n"
+                  },
+                  "file": {
+                    "name": "training/pxelinux.cfg/default",
+                    "server": "198.51.100.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "Configuration",
+                    "source": "DEFAULT recovery\nLABEL recovery\nLINUX images/vmlinuz-6.1.121\nINITRD images/initramfs-6.1.120.img\n"
+                  },
+                  "file": {
+                    "name": "training/pxelinux.cfg/01-02-00-00-00-00-43",
+                    "server": "198.51.100.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "Kernel",
+                    "release": "6.1.121"
+                  },
+                  "file": {
+                    "name": "training/images/vmlinuz-6.1.121",
+                    "server": "198.51.100.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "Initramfs",
+                    "release": "6.1.121"
+                  },
+                  "file": {
+                    "name": "training/images/initramfs-6.1.121.img",
+                    "server": "198.51.100.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "Kernel",
+                    "release": "6.1.120"
+                  },
+                  "file": {
+                    "name": "training/images/vmlinuz-6.1.120",
+                    "server": "198.51.100.20"
+                  }
+                },
+                {
+                  "artifact": {
+                    "kind": "Initramfs",
+                    "release": "6.1.120"
+                  },
+                  "file": {
+                    "name": "training/images/initramfs-6.1.120.img",
+                    "server": "198.51.100.20"
+                  }
+                }
+              ]
+            },
+            "mode": {
+              "kind": "Configuration",
+              "program": {
+                "name": "training/pxelinux.0",
+                "server": "198.51.100.20"
+              },
+              "starter_leaf": "01-02-00-00-00-00-43"
+            },
+            "reference": [
+              {
+                "draft": {
+                  "leaf": "01-02-00-00-00-00-43",
+                  "source": "DEFAULT recovery\nLABEL recovery\nLINUX images/vmlinuz-6.1.121\nINITRD images/initramfs-6.1.121.img\n"
+                },
+                "op": "EditEntry"
+              },
+              {
+                "op": "SaveEntry"
+              },
+              {
+                "op": "Check"
+              }
+            ],
+            "starter_policy": {
+              "bios": {
+                "name": "training/pxelinux.0",
+                "server": "198.51.100.20"
+              },
+              "unconditional": null,
+              "x64_uefi": null
+            }
+          },
+          "source_id": "lpic2-pxelinux-client-lookup",
+          "version": 1
+        }
+      },
+      "solution": [
+        "pxe-workspace {\"practice\":false,\"action\":{\"draft\":{\"leaf\":\"01-02-00-00-00-00-25\",\"source\":\"DEFAULT recovery\\nLABEL recovery\\nLINUX images/vmlinuz-6.6.61\\nINITRD images/initramfs-6.6.61.img\\n\"},\"op\":\"EditEntry\"}}",
+        "pxe-workspace {\"practice\":false,\"action\":{\"op\":\"SaveEntry\"}}",
+        "pxe-workspace {\"practice\":false,\"action\":{\"op\":\"Check\"}}"
+      ]
+    }
+  ]
+}

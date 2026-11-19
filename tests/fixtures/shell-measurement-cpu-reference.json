@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "source": "field() {\n    printf '%s\\n' \"$1\" | cut -d , -f \"$2\"\n}\nbefore=$(cat before.csv)\nafter=$(cat after.csv)\ntotal=0\nwork=0\nidle=0\nwait=0\nsteal=0\nfor column in 1 2 3 4 5 6 7 8; do\n    first=$(field \"$before\" \"$column\")\n    last=$(field \"$after\" \"$column\")\n    if test \"$last\" -lt \"$first\"; then\n        printf 'Counter decreased\\n' >&2\n        exit 2\n    fi\n    change=$((last-first))\n    total=$((total+change))\n    case \"$column\" in\n        1|2|3|6|7) work=$((work+change)) ;;\n        4) idle=$change ;;\n        5) wait=$change ;;\n        8) steal=$change ;;\n    esac\ndone\nif test \"$total\" -eq 0; then\n    printf 'CPU counters did not advance\\n' >&2\n    exit 2\nfi\nprintf 'work=%s%% idle=%s%% wait=%s%% steal=%s%%\\n' \"$((100*work/total))\" \"$((100*idle/total))\" \"$((100*wait/total))\" \"$((100*steal/total))\"\n",
+  "alternate": "field() {\n    printf '%s\\n' \"$1\" | cut -d , -f \"$2\"\n}\nbefore=$(cat before.csv)\nafter=$(cat after.csv)\na1=$(field \"$before\" 1)\nb1=$(field \"$after\" 1)\nif test \"$b1\" -lt \"$a1\"; then printf 'Counter decreased\\n' >&2; exit 2; fi\nd1=$((b1-a1))\na2=$(field \"$before\" 2)\nb2=$(field \"$after\" 2)\nif test \"$b2\" -lt \"$a2\"; then printf 'Counter decreased\\n' >&2; exit 2; fi\nd2=$((b2-a2))\na3=$(field \"$before\" 3)\nb3=$(field \"$after\" 3)\nif test \"$b3\" -lt \"$a3\"; then printf 'Counter decreased\\n' >&2; exit 2; fi\nd3=$((b3-a3))\na4=$(field \"$before\" 4)\nb4=$(field \"$after\" 4)\nif test \"$b4\" -lt \"$a4\"; then printf 'Counter decreased\\n' >&2; exit 2; fi\nd4=$((b4-a4))\na5=$(field \"$before\" 5)\nb5=$(field \"$after\" 5)\nif test \"$b5\" -lt \"$a5\"; then printf 'Counter decreased\\n' >&2; exit 2; fi\nd5=$((b5-a5))\na6=$(field \"$before\" 6)\nb6=$(field \"$after\" 6)\nif test \"$b6\" -lt \"$a6\"; then printf 'Counter decreased\\n' >&2; exit 2; fi\nd6=$((b6-a6))\na7=$(field \"$before\" 7)\nb7=$(field \"$after\" 7)\nif test \"$b7\" -lt \"$a7\"; then printf 'Counter decreased\\n' >&2; exit 2; fi\nd7=$((b7-a7))\na8=$(field \"$before\" 8)\nb8=$(field \"$after\" 8)\nif test \"$b8\" -lt \"$a8\"; then printf 'Counter decreased\\n' >&2; exit 2; fi\nd8=$((b8-a8))\ntotal=$((d1+d2+d3+d4+d5+d6+d7+d8))\nwork=$((d1+d2+d3+d6+d7))\nidle=$d4\nwait=$d5\nsteal=$d8\nif test \"$total\" -eq 0; then\n    printf 'CPU counters did not advance\\n' >&2\n    exit 2\nfi\nprintf 'work=%s%% idle=%s%% wait=%s%% steal=%s%%\\n' \"$((100*work/total))\" \"$((100*idle/total))\" \"$((100*wait/total))\" \"$((100*steal/total))\"\n",
+  "cases": [
+    {
+      "name": "Normalize all interval categories",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "100,0,50,300,10,5,5,0\n",
+        "/work/after.csv": "300,0,100,400,30,15,15,10\n",
+        "/work/keep.txt": "Retain supplied note: Normalize all interval categories.\n"
+      },
+      "stdout": "work=67% idle=25% wait=5% steal=2%\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "100,0,50,300,10,5,5,0\n",
+        "/work/after.csv": "300,0,100,400,30,15,15,10\n",
+        "/work/keep.txt": "Retain supplied note: Normalize all interval categories.\n"
+      }
+    },
+    {
+      "name": "Nice execution still counts as work",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "0,0,0,0,0,0,0,0\n",
+        "/work/after.csv": "0,40,10,50,0,0,0,0\n",
+        "/work/keep.txt": "Retain supplied note: Nice execution still counts as work.\n"
+      },
+      "stdout": "work=50% idle=50% wait=0% steal=0%\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "0,0,0,0,0,0,0,0\n",
+        "/work/after.csv": "0,40,10,50,0,0,0,0\n",
+        "/work/keep.txt": "Retain supplied note: Nice execution still counts as work.\n"
+      }
+    },
+    {
+      "name": "IRQ and softirq execute CPU work",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "0,0,0,0,0,0,0,0\n",
+        "/work/after.csv": "10,0,10,50,0,15,15,0\n",
+        "/work/keep.txt": "Retain supplied note: IRQ and softirq execute CPU work.\n"
+      },
+      "stdout": "work=50% idle=50% wait=0% steal=0%\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "0,0,0,0,0,0,0,0\n",
+        "/work/after.csv": "10,0,10,50,0,15,15,0\n",
+        "/work/keep.txt": "Retain supplied note: IRQ and softirq execute CPU work.\n"
+      }
+    },
+    {
+      "name": "Waiting is separate from executing work",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "0,0,0,0,0,0,0,0\n",
+        "/work/after.csv": "10,0,10,10,70,0,0,0\n",
+        "/work/keep.txt": "Retain supplied note: Waiting is separate from executing work.\n"
+      },
+      "stdout": "work=20% idle=10% wait=70% steal=0%\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "0,0,0,0,0,0,0,0\n",
+        "/work/after.csv": "10,0,10,10,70,0,0,0\n",
+        "/work/keep.txt": "Retain supplied note: Waiting is separate from executing work.\n"
+      }
+    },
+    {
+      "name": "Steal is separate from executing work",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "0,0,0,0,0,0,0,0\n",
+        "/work/after.csv": "10,0,10,30,0,0,0,50\n",
+        "/work/keep.txt": "Retain supplied note: Steal is separate from executing work.\n"
+      },
+      "stdout": "work=20% idle=30% wait=0% steal=50%\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "0,0,0,0,0,0,0,0\n",
+        "/work/after.csv": "10,0,10,30,0,0,0,50\n",
+        "/work/keep.txt": "Retain supplied note: Steal is separate from executing work.\n"
+      }
+    },
+    {
+      "name": "Subtract a nonzero cumulative baseline",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "90000,0,40000,10000,0,0,0,0\n",
+        "/work/after.csv": "90010,0,40010,10080,0,0,0,0\n",
+        "/work/keep.txt": "Retain supplied note: Subtract a nonzero cumulative baseline.\n"
+      },
+      "stdout": "work=20% idle=80% wait=0% steal=0%\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "90000,0,40000,10000,0,0,0,0\n",
+        "/work/after.csv": "90010,0,40010,10080,0,0,0,0\n",
+        "/work/keep.txt": "Retain supplied note: Subtract a nonzero cumulative baseline.\n"
+      }
+    },
+    {
+      "name": "Each whole percentage rounds down",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "0,0,0,0,0,0,0,0\n",
+        "/work/after.csv": "1,0,0,2,0,0,0,0\n",
+        "/work/keep.txt": "Retain supplied note: Each whole percentage rounds down.\n"
+      },
+      "stdout": "work=33% idle=66% wait=0% steal=0%\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "0,0,0,0,0,0,0,0\n",
+        "/work/after.csv": "1,0,0,2,0,0,0,0\n",
+        "/work/keep.txt": "Retain supplied note: Each whole percentage rounds down.\n"
+      }
+    },
+    {
+      "name": "All idle is a valid interval",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "0,0,0,0,0,0,0,0\n",
+        "/work/after.csv": "0,0,0,200,0,0,0,0\n",
+        "/work/keep.txt": "Retain supplied note: All idle is a valid interval.\n"
+      },
+      "stdout": "work=0% idle=100% wait=0% steal=0%\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "0,0,0,0,0,0,0,0\n",
+        "/work/after.csv": "0,0,0,200,0,0,0,0\n",
+        "/work/keep.txt": "Retain supplied note: All idle is a valid interval.\n"
+      }
+    },
+    {
+      "name": "No CPU interval must not divide by zero",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "100,0,50,300,10,5,5,0\n",
+        "/work/after.csv": "100,0,50,300,10,5,5,0\n",
+        "/work/keep.txt": "Retain supplied note: No CPU interval must not divide by zero.\n"
+      },
+      "stdout": "",
+      "stderr": "CPU counters did not advance\n",
+      "status": 2,
+      "after": {
+        "/work/before.csv": "100,0,50,300,10,5,5,0\n",
+        "/work/after.csv": "100,0,50,300,10,5,5,0\n",
+        "/work/keep.txt": "Retain supplied note: No CPU interval must not divide by zero.\n"
+      }
+    },
+    {
+      "name": "A decreasing CPU category is rejected",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "100,0,50,300,10,5,5,0\n",
+        "/work/after.csv": "50,0,100,400,10,5,5,0\n",
+        "/work/keep.txt": "Retain supplied note: A decreasing CPU category is rejected.\n"
+      },
+      "stdout": "",
+      "stderr": "Counter decreased\n",
+      "status": 2,
+      "after": {
+        "/work/before.csv": "100,0,50,300,10,5,5,0\n",
+        "/work/after.csv": "50,0,100,400,10,5,5,0\n",
+        "/work/keep.txt": "Retain supplied note: A decreasing CPU category is rejected.\n"
+      }
+    },
+    {
+      "name": "Do not silently clamp a decreasing wait counter",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "100,0,50,300,10,5,5,0\n",
+        "/work/after.csv": "110,0,100,400,5,5,5,0\n",
+        "/work/keep.txt": "Retain supplied note: Do not silently clamp a decreasing wait counter.\n"
+      },
+      "stdout": "",
+      "stderr": "Counter decreased\n",
+      "status": 2,
+      "after": {
+        "/work/before.csv": "100,0,50,300,10,5,5,0\n",
+        "/work/after.csv": "110,0,100,400,5,5,5,0\n",
+        "/work/keep.txt": "Retain supplied note: Do not silently clamp a decreasing wait counter.\n"
+      }
+    },
+    {
+      "name": "Large counters with small interval deltas",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/before.csv": "500000,500000,500000,500000,500000,500000,500000,500000\n",
+        "/work/after.csv": "500100,500000,500100,500200,500000,500000,500000,500000\n",
+        "/work/keep.txt": "Retain supplied note: Large counters with small interval deltas.\n"
+      },
+      "stdout": "work=50% idle=50% wait=0% steal=0%\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/before.csv": "500000,500000,500000,500000,500000,500000,500000,500000\n",
+        "/work/after.csv": "500100,500000,500100,500200,500000,500000,500000,500000\n",
+        "/work/keep.txt": "Retain supplied note: Large counters with small interval deltas.\n"
+      }
+    }
+  ],
+  "example_source": "field() {\n    printf '%s\\n' \"$1\" | cut -d , -f \"$2\"\n}\nbefore=$(cat sample-before.csv)\nafter=$(cat sample-after.csv)\ntotal=0\nwork=0\nidle=0\nwait=0\nsteal=0\nfor column in 1 2 3 4 5 6 7 8; do\n    first=$(field \"$before\" \"$column\")\n    last=$(field \"$after\" \"$column\")\n    if test \"$last\" -lt \"$first\"; then\n        printf 'Counter decreased\\n' >&2\n        exit 2\n    fi\n    change=$((last-first))\n    total=$((total+change))\n    case \"$column\" in\n        1|2|3|6|7) work=$((work+change)) ;;\n        4) idle=$change ;;\n        5) wait=$change ;;\n        8) steal=$change ;;\n    esac\ndone\nif test \"$total\" -eq 0; then\n    printf 'CPU counters did not advance\\n' >&2\n    exit 2\nfi\nprintf 'work=%s%% idle=%s%% wait=%s%% steal=%s%%\\n' \"$((100*work/total))\" \"$((100*idle/total))\" \"$((100*wait/total))\" \"$((100*steal/total))\"\n",
+  "example_case": {
+    "name": "Worked CPU example",
+    "args": [],
+    "stdin": "",
+    "env": {},
+    "files": {
+      "/work/sample-before.csv": "20,0,10,70,0,0,0,0\n",
+      "/work/sample-after.csv": "45,0,20,120,10,0,0,5\n",
+      "/work/keep.txt": "Retain supplied note: Worked CPU example.\n"
+    },
+    "stdout": "work=35% idle=50% wait=10% steal=5%\n",
+    "stderr": "",
+    "status": 0,
+    "after": {
+      "/work/sample-before.csv": "20,0,10,70,0,0,0,0\n",
+      "/work/sample-after.csv": "45,0,20,120,10,0,0,5\n",
+      "/work/keep.txt": "Retain supplied note: Worked CPU example.\n"
+    }
+  }
+}

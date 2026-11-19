@@ -1472,3 +1472,6 @@ fn selected_worked_example_is_saved_only_after_all_help_and_real_later_picker_se
         }
     }
 }
+
+#[path = "gateway_batch.rs"]
+mod gateway_batch;

@@ -1,0 +1,767 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-listener-audit",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-listener-audit",
+      "topic": "Host security",
+      "title": "Retire the obsolete preview listener",
+      "summary": "Investigate endpoint ownership, retire one obsolete listener and preserve a same-name local instance plus approved services.",
+      "objective": "You are Alex in a supplied virtual process and IPv4 endpoint inventory. Investigate numeric TCP/UDP endpoints and their owning processes; a command name alone is not enough to choose the right instance. Retire the obsolete preview listener bound to TCP 0.0.0.0:8081: that endpoint must be closed and its owning process ended. Do not merely pause it or leave a termination request waiting. Keep the separate preview instance bound to TCP 127.0.0.1:8082 unchanged. Keep the approved TCP 192.0.2.10:8443 and UDP 127.0.0.1:5353 endpoints bound as well. Preserve every unrelated process, including init and both sessions: retain its owner, parent, command name, activity/paused state and nice value. The approved endpoint owners must remain unchanged and active; bound alone does not mean a paused application is usable. This is a runtime retirement only. A wildcard bind covers local interfaces, not proof of Internet reachability; no real network, firewall or next-boot service policy is tested. Type commands in the simulated terminal and choose Run. Inspect the resulting endpoints and process states, then choose Check work. Correct partial work and retry; equivalent supported ways of ending only the unwanted instance are accepted.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Understand the endpoint policy",
+        "Investigate the owning instance",
+        "Retire and verify without disturbing other work"
+      ],
+      "guide": [],
+      "initial": {
+        "kind": "Processes",
+        "table": {
+          "user": {
+            "name": "alex",
+            "uid": 1000
+          },
+          "session": 100,
+          "processes": {
+            "1": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "100": {
+              "parent": 1,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 100,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "200": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 200,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "230": {
+              "parent": 100,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 100,
+              "comm": "ticketd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "300": {
+              "parent": 200,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 200,
+              "comm": "cached",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "410": {
+              "parent": 100,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 100,
+              "comm": "previewd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "411": {
+              "parent": 100,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 100,
+              "comm": "previewd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "500": {
+              "parent": 100,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 100,
+              "comm": "indexer",
+              "nice": 5,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            }
+          },
+          "listeners": [
+            {
+              "protocol": "tcp",
+              "address": "0.0.0.0",
+              "port": 8081,
+              "pid": 410,
+              "fd": 3,
+              "backlog": 128
+            },
+            {
+              "protocol": "tcp",
+              "address": "127.0.0.1",
+              "port": 8082,
+              "pid": 411,
+              "fd": 4,
+              "backlog": 64
+            },
+            {
+              "protocol": "tcp",
+              "address": "192.0.2.10",
+              "port": 8443,
+              "pid": 230,
+              "fd": 7,
+              "backlog": 128
+            },
+            {
+              "protocol": "udp",
+              "address": "127.0.0.1",
+              "port": 5353,
+              "pid": 300,
+              "fd": 5,
+              "backlog": 0
+            }
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Processes",
+        "requirements": [
+          {
+            "kind": "Listener",
+            "endpoint": {
+              "protocol": "tcp",
+              "address": "0.0.0.0",
+              "port": 8081,
+              "pid": 410,
+              "fd": 3,
+              "backlog": 128
+            },
+            "present": false
+          },
+          {
+            "kind": "Phase",
+            "pid": 410,
+            "expected": "Exited"
+          },
+          {
+            "kind": "Listener",
+            "endpoint": {
+              "protocol": "tcp",
+              "address": "127.0.0.1",
+              "port": 8082,
+              "pid": 411,
+              "fd": 4,
+              "backlog": 64
+            },
+            "present": true
+          },
+          {
+            "kind": "Listener",
+            "endpoint": {
+              "protocol": "tcp",
+              "address": "192.0.2.10",
+              "port": 8443,
+              "pid": 230,
+              "fd": 7,
+              "backlog": 128
+            },
+            "present": true
+          },
+          {
+            "kind": "Listener",
+            "endpoint": {
+              "protocol": "udp",
+              "address": "127.0.0.1",
+              "port": 5353,
+              "pid": 300,
+              "fd": 5,
+              "backlog": 0
+            },
+            "present": true
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1,
+            "expected": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 100,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 100,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 200,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 200,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 230,
+            "expected": {
+              "parent": 100,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 100,
+              "comm": "ticketd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 300,
+            "expected": {
+              "parent": 200,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 200,
+              "comm": "cached",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 411,
+            "expected": {
+              "parent": 100,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 100,
+              "comm": "previewd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 500,
+            "expected": {
+              "parent": 100,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 100,
+              "comm": "indexer",
+              "nice": 5,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "ss -lntup",
+        "ps -p 410,411 -o pid,user,stat,comm",
+        "kill -TERM 410",
+        "ss -lntup"
+      ],
+      "prerequisites": [
+        "lpic1-process-handover",
+        "lpic1-host-handover"
+      ],
+      "explanation": "A bound endpoint belongs to a specific process instance, not merely its executable name. Use protocol, numeric local address and port to find the intended row, then relate its PID to the process table. In this bounded runtime model, only an ended owner releases its endpoints. STOP and pending TERM remain bound. Preserve all other process snapshots as well as the approved endpoint rows. This does not assess real packet reachability, a network scan, service readiness, automatic restart or boot-disable policy.",
+      "retry_guidance": "Read the failed endpoint and process rows together. If the owner is paused, its socket is still bound; a waiting termination request is not completed retirement. If a required process ended or changed, Reset this attempt to restore it before choosing the intended instance. Inspect numeric addresses and PIDs again rather than treating identical command names as the same job.",
+      "hints": [
+        "Match the policy’s protocol, bound address and port to the numeric ss row. A loopback bind and a wildcard bind are different even when the command name matches.",
+        "Use the PID from that owned endpoint row to inspect the specific process. Other owners’ process details can be hidden while their endpoints remain visible.",
+        "A STOP signal changes the owner’s phase but does not release its sockets. Consult the supported signal help and recheck both ss and ps; keep the other instances unchanged."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man8/ss.8.html",
+        "https://man7.org/linux/man-pages/man1/ps.1.html",
+        "https://man7.org/linux/man-pages/man2/kill.2.html",
+        "https://man7.org/linux/man-pages/man7/signal.7.html"
+      ],
+      "simplifications": "Current LPI 5.0 objectives checked 2026-11-05: direct narrow 109.3 ss practice; 110.1 open-port reasoning and 110.2 runtime retirement are supporting only. The named nmap/netstat tools, real scans and persistent service disabling are not implemented or credited by this lesson.\n\nInstalled upstream iproute2 ss(8) manual options -n/-l/-p/-t/-u were read 2026-11-05; its retained compressed-source identity is documented privately. Existing process signal references/evidence are reused within the already disclosed process subset. No real ss command, socket, network or new host comparison was executed for lesson authoring.\n\nAt most 64 supplied IPv4 TCP LISTEN/UDP UNCONN endpoint rows with one owner PID/FD. Recv-Q is fixed empty, TCP Send-Q is supplied backlog and UDP Send-Q is zero. No dynamic queue/packet behavior, established/connected sockets, shared ownership, reuse sockets, IPv6, namespaces, capabilities or remote reachability. Ordinary users see all endpoint rows but process details only for their own; this is a finite identity policy, not full kernel permissions.\n\nThe existing process model has no spawn, PID reuse, zombies, wait, supervisor restart or app-specific signal handling. Active supplied owners end on TERM/INT; stopped owners can retain a pending termination until CONT. No real signal is delivered. Read-only commands do not earn completion; exact current state and protected process/endpoint outcomes grade. Native/candidate and independent novice acceptance remain separate pending gates.",
+      "process_teaching": {
+        "prerequisite_note": "Builds on PID selection, signals and Linux host addresses. You type one supported command into the simulated terminal and choose Run; command names are not a real shell. Practice uses Morgan and a different endpoint set. The assignment uses Alex; both have their own saved command and transcript.",
+        "concepts": [
+          {
+            "title": "An endpoint identifies where a program accepts traffic",
+            "text": "An endpoint combines a protocol, local address and port number. TCP and UDP are different protocols even when a port number matches. In these supplied IPv4 facts, 127.0.0.1 is loopback-only; 0.0.0.0 means a bind on all local IPv4 interfaces. It does not prove that another computer or the Internet can reach the program. The process ID, or PID, identifies which instance owns the endpoint."
+          },
+          {
+            "title": "Read the numeric socket view",
+            "text": "ss -lntup lists the supplied listening TCP and unconnected UDP endpoints. -l selects these listener/bound rows, -n keeps addresses and ports numeric, -t includes TCP, -u includes UDP and -p requests process details. TCP shows LISTEN; the modeled unconnected UDP endpoint shows UNCONN and is still bound. ss -lntp selects only TCP; ss -lnup only UDP. The lab simulates this supported subset of real ss options entirely in memory."
+          },
+          {
+            "title": "Match the PID, not just the name",
+            "text": "Two instances can have the same command name while serving different addresses or ports. Read the needed endpoint row and relate its PID to ps before choosing an action. Alex can see every supplied endpoint, but -p only shows process details for Alex’s own processes; another owner’s blank process column does not mean the endpoint is absent. The model also permits a simulated root view, but no identity change is needed here."
+          },
+          {
+            "title": "Pausing keeps the socket open",
+            "text": "STOP pauses a process; it does not close its endpoints. CONT lets it continue. In this supplied process model, TERM on an active process ends it; TERM received while paused waits until CONT. KILL ends it immediately. Investigate the right PID first and prefer a normal termination request. A real program can handle signals differently, and this exercise does not model supervisor restarts or graceful shutdown work."
+          },
+          {
+            "title": "Treat queue numbers as supplied facts",
+            "text": "Recv-Q is fixed empty in this exercise’s snapshot. For TCP, Send-Q is the supplied limit for pending connections, often called backlog; for the unconnected UDP row it is zero. These are bounded teaching facts, not measured traffic or a guarantee of a working service. A paused owner may still have a LISTEN row, so preserve the approved owner’s process state as well as its endpoint."
+          },
+          {
+            "title": "Verify the state you meant to change",
+            "text": "An ending command may finish without output. Inspect ss and ps afterward: the unwanted endpoint should disappear, while the local preview and approved service remain. This is current runtime state only; ending a process does not configure what starts at boot. Check work evaluates the resulting state, not whether you copied a particular command sequence."
+          }
+        ],
+        "example": [
+          "ss -lntup",
+          "ps -p 6010,6020 -o pid,user,stat,comm",
+          "kill -STOP 6010",
+          "ss -lntp",
+          "kill -CONT 6010",
+          "kill -TERM 6010",
+          "ss -lntup",
+          "ps -p 6020,6030,6040,6050 -o pid,user,stat,ni,comm"
+        ],
+        "inputs": "Separate example: sampled has an obsolete TCP 0.0.0.0:9090 instance and a protected TCP 127.0.0.1:9091 instance. A dossier application and a foreign-owned UDP endpoint must remain. The worked table predicts the result; the terminal is initially unchecked.",
+        "try_change": "After completing the example, type kill -STOP 6020 and Run, then inspect ss -lntp and ps -p 6020 -o pid,stat,comm. Its loopback endpoint remains bound while the process is paused. Run kill -CONT 6020 to restore the protected instance. To repeat the original investigation, use Reset example only; this does not reset the assignment.",
+        "fixture": {
+          "user": {
+            "name": "morgan",
+            "uid": 1000
+          },
+          "session": 6000,
+          "processes": {
+            "1": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "6000": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "6010": {
+              "parent": 6000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "sampled",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "6020": {
+              "parent": 6000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "sampled",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "6030": {
+              "parent": 6000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "dossier",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "6040": {
+              "parent": 7000,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 7000,
+              "comm": "queryd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "6050": {
+              "parent": 6000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "indexer",
+              "nice": 5,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "7000": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 7000,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          "listeners": [
+            {
+              "protocol": "tcp",
+              "address": "0.0.0.0",
+              "port": 9090,
+              "pid": 6010,
+              "fd": 3,
+              "backlog": 64
+            },
+            {
+              "protocol": "tcp",
+              "address": "127.0.0.1",
+              "port": 9091,
+              "pid": 6020,
+              "fd": 4,
+              "backlog": 32
+            },
+            {
+              "protocol": "tcp",
+              "address": "192.0.2.20",
+              "port": 7443,
+              "pid": 6030,
+              "fd": 7,
+              "backlog": 64
+            },
+            {
+              "protocol": "udp",
+              "address": "127.0.0.1",
+              "port": 5454,
+              "pid": 6040,
+              "fd": 5,
+              "backlog": 0
+            }
+          ]
+        },
+        "outcomes": [
+          {
+            "kind": "Listener",
+            "endpoint": {
+              "protocol": "tcp",
+              "address": "0.0.0.0",
+              "port": 9090,
+              "pid": 6010,
+              "fd": 3,
+              "backlog": 64
+            },
+            "present": false
+          },
+          {
+            "kind": "Phase",
+            "pid": 6010,
+            "expected": "Exited"
+          },
+          {
+            "kind": "Listener",
+            "endpoint": {
+              "protocol": "tcp",
+              "address": "127.0.0.1",
+              "port": 9091,
+              "pid": 6020,
+              "fd": 4,
+              "backlog": 32
+            },
+            "present": true
+          },
+          {
+            "kind": "Listener",
+            "endpoint": {
+              "protocol": "tcp",
+              "address": "192.0.2.20",
+              "port": 7443,
+              "pid": 6030,
+              "fd": 7,
+              "backlog": 64
+            },
+            "present": true
+          },
+          {
+            "kind": "Listener",
+            "endpoint": {
+              "protocol": "udp",
+              "address": "127.0.0.1",
+              "port": 5454,
+              "pid": 6040,
+              "fd": 5,
+              "backlog": 0
+            },
+            "present": true
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1,
+            "expected": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 6000,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 6020,
+            "expected": {
+              "parent": 6000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "sampled",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 6030,
+            "expected": {
+              "parent": 6000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "dossier",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 6040,
+            "expected": {
+              "parent": 7000,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 7000,
+              "comm": "queryd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 6050,
+            "expected": {
+              "parent": 6000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "indexer",
+              "nice": 5,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 7000,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 7000,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

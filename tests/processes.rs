@@ -24,6 +24,7 @@ fn fixture() -> Table {
         phase,
     };
     Table {
+        listeners: Vec::new(),
         user: alex.clone(),
         session: 200,
         processes: BTreeMap::from([

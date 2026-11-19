@@ -55,6 +55,7 @@ fn foreign_empty(w: &crate::workspace::WorkspaceData) -> bool {
         terminal_learning: _,
         process_learning: _,
         accounts_learning: _,
+        accounts_template_drafts: _,
         discovery_draft: _,
         discovery_learning: _,
         storage_draft: _,
@@ -128,6 +129,7 @@ fn foreign_empty(w: &crate::workspace::WorkspaceData) -> bool {
         && w.terminal_learning.is_none()
         && w.process_learning.is_none()
         && w.accounts_learning.is_none()
+        && w.accounts_template_drafts.is_none()
         && w.discovery_draft.is_none()
         && w.discovery_learning.is_none()
         && w.storage_draft.is_none()

@@ -54,7 +54,7 @@ fn admit(all: &[Scenario]) -> Result<Vec<Scenario>, String> {
     pack::load_catalog(&chunks.iter().map(String::as_str).collect::<Vec<_>>())
 }
 fn before() -> Vec<Scenario> {
-    assert_eq!(shell::EVALUATOR_REVISION, 15, "No older evaluator fallback");
+    assert_eq!(shell::EVALUATOR_REVISION, 19, "No older evaluator fallback");
     let current = normal199_predecessor();
     assert_eq!(current.len(), 199);
     let old197 = literal::before_scenarios(&current);
@@ -467,7 +467,7 @@ fn save_resume_and_selected_reset_preserve_the_full_sibling_profile_and_absent_r
     let saved: Value = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
     assert_eq!(
         saved["migration_receipts"],
-        json!({"workspace":true,"shell":[15]})
+        json!({"workspace":true,"shell":[19]})
     );
     let mut warm = progress::load(&path, all).unwrap();
     assert_eq!(
@@ -519,7 +519,7 @@ fn source_guards_and_invalid_pack_mutations_reject_without_vacuous_prefix_or_dup
     let stored: Value = serde_json::from_slice(&saved).unwrap();
     assert_eq!(
         stored["migration_receipts"],
-        json!({"workspace":true,"shell":[15]})
+        json!({"workspace":true,"shell":[19]})
     );
     assert_eq!(
         full(&bad),

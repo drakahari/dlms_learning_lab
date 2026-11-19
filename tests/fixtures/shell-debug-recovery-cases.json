@@ -1,0 +1,878 @@
+{
+  "shell-debug-status": [
+    {
+      "name": "quiet · Findings preserve spaces and wildcard data",
+      "args": [
+        "quiet",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "INFO ready\nERROR  disk * nearly full\nERROR café\\path\n"
+      },
+      "stdout": "Findings:\nERROR  disk * nearly full\nERROR café\\path\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "INFO ready\nERROR  disk * nearly full\nERROR café\\path\n"
+      }
+    },
+    {
+      "name": "quiet · No findings remains status one",
+      "args": [
+        "quiet",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "INFO ready\nWARN warm\n"
+      },
+      "stdout": "No findings\n",
+      "stderr": "",
+      "status": 1,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "INFO ready\nWARN warm\n"
+      }
+    },
+    {
+      "name": "quiet · Empty log is no findings",
+      "args": [
+        "quiet",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": ""
+      },
+      "stdout": "No findings\n",
+      "stderr": "",
+      "status": 1,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": ""
+      }
+    },
+    {
+      "name": "quiet · Last matching line has no LF",
+      "args": [
+        "quiet",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR final"
+      },
+      "stdout": "Findings:\nERROR final\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR final"
+      }
+    },
+    {
+      "name": "quiet · Missing input is status two",
+      "args": [
+        "quiet",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n"
+      },
+      "stdout": "",
+      "stderr": "Missing file: events.log\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n"
+      }
+    },
+    {
+      "name": "trace · Findings preserve spaces and wildcard data",
+      "args": [
+        "trace",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "INFO ready\nERROR  disk * nearly full\nERROR café\\path\n"
+      },
+      "stdout": "Findings:\nERROR  disk * nearly full\nERROR café\\path\n",
+      "stderr": "Trace: reading events.log\nTrace: result 0\n",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "INFO ready\nERROR  disk * nearly full\nERROR café\\path\n"
+      }
+    },
+    {
+      "name": "trace · No findings remains status one",
+      "args": [
+        "trace",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "INFO ready\nWARN warm\n"
+      },
+      "stdout": "No findings\n",
+      "stderr": "Trace: reading events.log\nTrace: result 1\n",
+      "status": 1,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "INFO ready\nWARN warm\n"
+      }
+    },
+    {
+      "name": "trace · Empty log is no findings",
+      "args": [
+        "trace",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": ""
+      },
+      "stdout": "No findings\n",
+      "stderr": "Trace: reading events.log\nTrace: result 1\n",
+      "status": 1,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": ""
+      }
+    },
+    {
+      "name": "trace · Last matching line has no LF",
+      "args": [
+        "trace",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR final"
+      },
+      "stdout": "Findings:\nERROR final\n",
+      "stderr": "Trace: reading events.log\nTrace: result 0\n",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR final"
+      }
+    },
+    {
+      "name": "trace · Missing input is status two",
+      "args": [
+        "trace",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n"
+      },
+      "stdout": "",
+      "stderr": "Trace: reading events.log\nMissing file: events.log\nTrace: result 2\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n"
+      }
+    },
+    {
+      "name": "Missing arguments",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR unseen\n"
+      },
+      "stdout": "",
+      "stderr": "Usage: inspect quiet-or-trace FILE\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR unseen\n"
+      }
+    },
+    {
+      "name": "Extra arguments",
+      "args": [
+        "trace",
+        "events.log",
+        "extra"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR unseen\n"
+      },
+      "stdout": "",
+      "stderr": "Usage: inspect quiet-or-trace FILE\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR unseen\n"
+      }
+    },
+    {
+      "name": "Invalid mode",
+      "args": [
+        "debug",
+        "events.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR unseen\n"
+      },
+      "stdout": "",
+      "stderr": "Usage: inspect quiet-or-trace FILE\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR unseen\n"
+      }
+    },
+    {
+      "name": "Traversal rejected before tracing",
+      "args": [
+        "trace",
+        "../private"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR unseen\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid file\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR unseen\n"
+      }
+    },
+    {
+      "name": "Leading option-looking filename",
+      "args": [
+        "quiet",
+        "-n"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR unseen\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid file\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR unseen\n"
+      }
+    },
+    {
+      "name": "Multiline filename",
+      "args": [
+        "trace",
+        "events.log\nother"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR unseen\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid file\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/events.log": "ERROR unseen\n"
+      }
+    }
+  ],
+  "shell-recovery-ledger": [
+    {
+      "name": "preview · resume a partial checkpoint",
+      "args": [
+        "preview"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "Already: alpha\nPending: beta\nPending: gamma\nAlready count: 1\nPending count: 2\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      }
+    },
+    {
+      "name": "preview · completed reordered checkpoint",
+      "args": [
+        "preview"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "a\nb2\n",
+        "/work/checkpoint.txt": "b2\na\n",
+        "/work/a.done": "Completed: a\n",
+        "/work/b2.done": "Completed: b2\n"
+      },
+      "stdout": "Already: a\nAlready: b2\nAlready count: 2\nPending count: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "a\nb2\n",
+        "/work/checkpoint.txt": "b2\na\n",
+        "/work/a.done": "Completed: a\n",
+        "/work/b2.done": "Completed: b2\n"
+      }
+    },
+    {
+      "name": "preview · empty work set",
+      "args": [
+        "preview"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "",
+        "/work/checkpoint.txt": ""
+      },
+      "stdout": "Already count: 0\nPending count: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "",
+        "/work/checkpoint.txt": ""
+      }
+    },
+    {
+      "name": "preview · final records without LF",
+      "args": [
+        "preview"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "x1\nx2",
+        "/work/checkpoint.txt": "x1",
+        "/work/x1.done": "Completed: x1\n"
+      },
+      "stdout": "Already: x1\nPending: x2\nAlready count: 1\nPending count: 1\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "x1\nx2",
+        "/work/checkpoint.txt": "x1",
+        "/work/x1.done": "Completed: x1\n"
+      }
+    },
+    {
+      "name": "apply · resume a partial checkpoint",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "Already: alpha\nPending: beta\nPending: gamma\nAlready count: 1\nPending count: 2\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\nbeta\ngamma\n",
+        "/work/alpha.done": "Completed: alpha\n",
+        "/work/beta.done": "Completed: beta\n",
+        "/work/gamma.done": "Completed: gamma\n"
+      }
+    },
+    {
+      "name": "apply · completed reordered checkpoint",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "a\nb2\n",
+        "/work/checkpoint.txt": "b2\na\n",
+        "/work/a.done": "Completed: a\n",
+        "/work/b2.done": "Completed: b2\n"
+      },
+      "stdout": "Already: a\nAlready: b2\nAlready count: 2\nPending count: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "a\nb2\n",
+        "/work/checkpoint.txt": "a\nb2\n",
+        "/work/a.done": "Completed: a\n",
+        "/work/b2.done": "Completed: b2\n"
+      }
+    },
+    {
+      "name": "apply · empty work set",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "",
+        "/work/checkpoint.txt": ""
+      },
+      "stdout": "Already count: 0\nPending count: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "",
+        "/work/checkpoint.txt": ""
+      }
+    },
+    {
+      "name": "apply · final records without LF",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "x1\nx2",
+        "/work/checkpoint.txt": "x1",
+        "/work/x1.done": "Completed: x1\n"
+      },
+      "stdout": "Already: x1\nPending: x2\nAlready count: 1\nPending count: 1\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "x1\nx2",
+        "/work/checkpoint.txt": "x1\nx2\n",
+        "/work/x1.done": "Completed: x1\n",
+        "/work/x2.done": "Completed: x2\n"
+      }
+    },
+    {
+      "name": "Malformed late job must prevent earlier writes",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\n../bad\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid jobs\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\n../bad\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      }
+    },
+    {
+      "name": "Duplicate job rejected",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\nbeta\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid jobs\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\nbeta\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      }
+    },
+    {
+      "name": "Unknown checkpoint entry",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\nunknown\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid checkpoint\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\nunknown\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      }
+    },
+    {
+      "name": "Duplicate checkpoint entry",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\nalpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid checkpoint\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\nalpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      }
+    },
+    {
+      "name": "Missing checkpoint artifact",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\ngamma\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "",
+      "stderr": "Checkpoint mismatch: gamma\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\ngamma\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      }
+    },
+    {
+      "name": "Wrong saved output",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: other\n"
+      },
+      "stdout": "",
+      "stderr": "Checkpoint mismatch: alpha\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: other\n"
+      }
+    },
+    {
+      "name": "Missing terminal LF is not an exact checkpoint artifact",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha"
+      },
+      "stdout": "",
+      "stderr": "Checkpoint mismatch: alpha\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha"
+      }
+    },
+    {
+      "name": "Untracked late output must protect all earlier work",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n",
+        "/work/gamma.done": "Unrelated existing text\n"
+      },
+      "stdout": "",
+      "stderr": "Untracked output: gamma\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n",
+        "/work/gamma.done": "Unrelated existing text\n"
+      }
+    },
+    {
+      "name": "Whitespace is not silently trimmed",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\n beta\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid jobs\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\n beta\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      }
+    },
+    {
+      "name": "Eight-job limit",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "a\nb\nc\nd\ne\nf\ng\nh\ni\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "",
+      "stderr": "Invalid jobs\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "a\nb\nc\nd\ne\nf\ng\nh\ni\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      }
+    },
+    {
+      "name": "Missing jobs.txt",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "",
+      "stderr": "Missing file: jobs.txt\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      }
+    },
+    {
+      "name": "Missing checkpoint.txt",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "",
+      "stderr": "Missing file: checkpoint.txt\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      }
+    },
+    {
+      "name": "Invalid interface []",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "",
+      "stderr": "Usage: resume preview-or-apply\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      }
+    },
+    {
+      "name": "Invalid interface ['apply', 'extra']",
+      "args": [
+        "apply",
+        "extra"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "",
+      "stderr": "Usage: resume preview-or-apply\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      }
+    },
+    {
+      "name": "Invalid interface ['run']",
+      "args": [
+        "run"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      },
+      "stdout": "",
+      "stderr": "Usage: resume preview-or-apply\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "alpha\nbeta\ngamma\n",
+        "/work/checkpoint.txt": "alpha\n",
+        "/work/alpha.done": "Completed: alpha\n"
+      }
+    },
+    {
+      "name": "All eight new jobs fit the bounded unit",
+      "args": [
+        "apply"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "a\nb\nc\nd\ne\nf\ng\nh\n",
+        "/work/checkpoint.txt": ""
+      },
+      "stdout": "Pending: a\nPending: b\nPending: c\nPending: d\nPending: e\nPending: f\nPending: g\nPending: h\nAlready count: 0\nPending count: 8\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "Protected unrelated work.\n",
+        "/work/jobs.txt": "a\nb\nc\nd\ne\nf\ng\nh\n",
+        "/work/checkpoint.txt": "a\nb\nc\nd\ne\nf\ng\nh\n",
+        "/work/a.done": "Completed: a\n",
+        "/work/b.done": "Completed: b\n",
+        "/work/c.done": "Completed: c\n",
+        "/work/d.done": "Completed: d\n",
+        "/work/e.done": "Completed: e\n",
+        "/work/f.done": "Completed: f\n",
+        "/work/g.done": "Completed: g\n",
+        "/work/h.done": "Completed: h\n"
+      }
+    }
+  ]
+}

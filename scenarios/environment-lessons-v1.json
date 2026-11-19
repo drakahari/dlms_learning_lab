@@ -1,0 +1,2465 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-env-child-settings",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-shell-environment",
+      "topic": "Shell variables and child environments",
+      "title": "Pass settings to a child report",
+      "summary": "Repair variable values and export choices while preserving settings supplied by the caller.",
+      "objective": "Repair the setup for a supplied child report. Set SITE from the first supplied argument ($1) and MODE from the second supplied argument ($2), preserving each value exactly, including empty values, spaces and literal wildcard text. Export those two settings; preserve TEAM and every other supplied environment setting with its original value and export attribute. Pass no additional names to the child. The setup must print nothing, finish successfully (exit status 0), and leave all simulated files unchanged. The supplied read-only child must receive the required settings and produce its expected report for every input set.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Repair the setup",
+        "Verify parent and child settings"
+      ],
+      "guide": [
+        {
+          "title": "Inspect supplied and created values",
+          "why": "A supplied environment setting may already be exported; a newly created variable is not.",
+          "action": "Read the supplied arguments and environment values beside the Setup editor before changing the script. Keep the read-only child report in view.",
+          "commands": []
+        },
+        {
+          "title": "Repair the setting that crosses the boundary",
+          "why": "The grade checks actual values and export attributes, then runs the child with that resulting environment.",
+          "action": "Use the Introduction and separate Try example to investigate assignment versus export. Repair the assignment draft without printing a replacement report.",
+          "commands": []
+        },
+        {
+          "title": "Check every input set",
+          "why": "Spaces, literal wildcards and empty values reveal assumptions that a single successful report can hide.",
+          "action": "Select Run setup + child. Inspect the first failing case's Parent values and Child output, then edit and retry. Stop cancels unfinished work without awarding completion.",
+          "commands": []
+        }
+      ],
+      "initial": {
+        "kind": "Environment",
+        "simulation": {
+          "definition": {
+            "id": "lpic1-env-child-settings",
+            "assignment": {
+              "id": "lpic1-env-child-settings",
+              "instructions": "Repair the setup for a supplied child report. Set SITE from the first supplied argument ($1) and MODE from the second supplied argument ($2), preserving each value exactly, including empty values, spaces and literal wildcard text. Export those two settings; preserve TEAM and every other supplied environment setting with its original value and export attribute. Pass no additional names to the child. The setup must print nothing, finish successfully (exit status 0), and leave all simulated files unchanged. The supplied read-only child must receive the required settings and produce its expected report for every input set.",
+              "starter": "SITE=$1\nMODE=$2\nTEAM='temporary team'\nexport MODE\n",
+              "child_source": "printf 'Team: %s\\n' \"$TEAM\"\nprintf 'Site: %s\\n' \"$SITE\"\nprintf 'Mode: %s\\n' \"$MODE\"\nprintf 'Region: %s\\n' \"${REGION-<not supplied>}\"\n",
+              "cases": [
+                {
+                  "input": {
+                    "name": "A supplied team and region",
+                    "args": [
+                      "North Hall",
+                      "brief"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "operations",
+                      "REGION": "east"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  },
+                  "parent": {
+                    "TEAM": {
+                      "value": "operations",
+                      "exported": true
+                    },
+                    "REGION": {
+                      "value": "east",
+                      "exported": true
+                    },
+                    "SITE": {
+                      "value": "North Hall",
+                      "exported": true
+                    },
+                    "MODE": {
+                      "value": "brief",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "A supplied team and region",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "operations",
+                      "REGION": "east",
+                      "SITE": "North Hall",
+                      "MODE": "brief"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "Team: operations\nSite: North Hall\nMode: brief\nRegion: east\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Keep repeated spaces",
+                    "args": [
+                      "Bay  Seven",
+                      "wide view"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "night ops",
+                      "REGION": "west"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  },
+                  "parent": {
+                    "TEAM": {
+                      "value": "night ops",
+                      "exported": true
+                    },
+                    "REGION": {
+                      "value": "west",
+                      "exported": true
+                    },
+                    "SITE": {
+                      "value": "Bay  Seven",
+                      "exported": true
+                    },
+                    "MODE": {
+                      "value": "wide view",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Keep repeated spaces",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "night ops",
+                      "REGION": "west",
+                      "SITE": "Bay  Seven",
+                      "MODE": "wide view"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "Team: night ops\nSite: Bay  Seven\nMode: wide view\nRegion: west\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Literal wildcard settings",
+                    "args": [
+                      "*",
+                      "*"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "filter * team",
+                      "REGION": "north"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  },
+                  "parent": {
+                    "TEAM": {
+                      "value": "filter * team",
+                      "exported": true
+                    },
+                    "REGION": {
+                      "value": "north",
+                      "exported": true
+                    },
+                    "SITE": {
+                      "value": "*",
+                      "exported": true
+                    },
+                    "MODE": {
+                      "value": "*",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Literal wildcard settings",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "filter * team",
+                      "REGION": "north",
+                      "SITE": "*",
+                      "MODE": "*"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "Team: filter * team\nSite: *\nMode: *\nRegion: north\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Empty supplied values",
+                    "args": [
+                      "",
+                      ""
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "",
+                      "REGION": ""
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  },
+                  "parent": {
+                    "TEAM": {
+                      "value": "",
+                      "exported": true
+                    },
+                    "REGION": {
+                      "value": "",
+                      "exported": true
+                    },
+                    "SITE": {
+                      "value": "",
+                      "exported": true
+                    },
+                    "MODE": {
+                      "value": "",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Empty supplied values",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "",
+                      "REGION": "",
+                      "SITE": "",
+                      "MODE": ""
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "Team: \nSite: \nMode: \nRegion: \n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Backslash and apostrophe data",
+                    "args": [
+                      "Café\\west",
+                      "O'Brien"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "ops\\two"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  },
+                  "parent": {
+                    "TEAM": {
+                      "value": "ops\\two",
+                      "exported": true
+                    },
+                    "SITE": {
+                      "value": "Café\\west",
+                      "exported": true
+                    },
+                    "MODE": {
+                      "value": "O'Brien",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Backslash and apostrophe data",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "ops\\two",
+                      "SITE": "Café\\west",
+                      "MODE": "O'Brien"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "Team: ops\\two\nSite: Café\\west\nMode: O'Brien\nRegion: <not supplied>\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Preserve an extra inherited setting",
+                    "args": [
+                      "-South",
+                      "release"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "handover",
+                      "REGION": "central",
+                      "AUDIT": "yes"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  },
+                  "parent": {
+                    "TEAM": {
+                      "value": "handover",
+                      "exported": true
+                    },
+                    "REGION": {
+                      "value": "central",
+                      "exported": true
+                    },
+                    "AUDIT": {
+                      "value": "yes",
+                      "exported": true
+                    },
+                    "SITE": {
+                      "value": "-South",
+                      "exported": true
+                    },
+                    "MODE": {
+                      "value": "release",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Preserve an extra inherited setting",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "handover",
+                      "REGION": "central",
+                      "AUDIT": "yes",
+                      "SITE": "-South",
+                      "MODE": "release"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "Team: handover\nSite: -South\nMode: release\nRegion: central\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  }
+                }
+              ]
+            },
+            "example": {
+              "id": "lpic1-env-child-settings-example",
+              "instructions": "Use the two supplied arguments as LOCATION and STYLE, export both, and preserve the supplied HOST. The setup is quiet and leaves files unchanged; the supplied child prints the host, location and style.",
+              "starter": "# HOST is supplied; leave its value unchanged.\nLOCATION=\"$1\"\nSTYLE=\"$2\"\nexport LOCATION STYLE\n",
+              "child_source": "printf 'Host: %s\\n' \"$HOST\"\nprintf 'Location: %s\\n' \"$LOCATION\"\nprintf 'Style: %s\\n' \"$STYLE\"\n",
+              "cases": [
+                {
+                  "input": {
+                    "name": "Gallery preview",
+                    "args": [
+                      "Gallery North",
+                      "short"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "HOST": "visitors"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    }
+                  },
+                  "parent": {
+                    "HOST": {
+                      "value": "visitors",
+                      "exported": true
+                    },
+                    "LOCATION": {
+                      "value": "Gallery North",
+                      "exported": true
+                    },
+                    "STYLE": {
+                      "value": "short",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Gallery preview",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "HOST": "visitors",
+                      "LOCATION": "Gallery North",
+                      "STYLE": "short"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    },
+                    "stdout": "Host: visitors\nLocation: Gallery North\nStyle: short\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Workshop preview",
+                    "args": [
+                      "Tea Room",
+                      "large print"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "HOST": "makers"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    }
+                  },
+                  "parent": {
+                    "HOST": {
+                      "value": "makers",
+                      "exported": true
+                    },
+                    "LOCATION": {
+                      "value": "Tea Room",
+                      "exported": true
+                    },
+                    "STYLE": {
+                      "value": "large print",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Workshop preview",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "HOST": "makers",
+                      "LOCATION": "Tea Room",
+                      "STYLE": "large print"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    },
+                    "stdout": "Host: makers\nLocation: Tea Room\nStyle: large print\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "view": "introduction",
+          "assignment": {
+            "source": "SITE=$1\nMODE=$2\nTEAM='temporary team'\nexport MODE\n",
+            "result": null
+          },
+          "example": {
+            "source": "# HOST is supplied; leave its value unchanged.\nLOCATION=\"$1\"\nSTYLE=\"$2\"\nexport LOCATION STYLE\n",
+            "result": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "Environment",
+        "definition": {
+          "id": "lpic1-env-child-settings",
+          "assignment": {
+            "id": "lpic1-env-child-settings",
+            "instructions": "Repair the setup for a supplied child report. Set SITE from the first supplied argument ($1) and MODE from the second supplied argument ($2), preserving each value exactly, including empty values, spaces and literal wildcard text. Export those two settings; preserve TEAM and every other supplied environment setting with its original value and export attribute. Pass no additional names to the child. The setup must print nothing, finish successfully (exit status 0), and leave all simulated files unchanged. The supplied read-only child must receive the required settings and produce its expected report for every input set.",
+            "starter": "SITE=$1\nMODE=$2\nTEAM='temporary team'\nexport MODE\n",
+            "child_source": "printf 'Team: %s\\n' \"$TEAM\"\nprintf 'Site: %s\\n' \"$SITE\"\nprintf 'Mode: %s\\n' \"$MODE\"\nprintf 'Region: %s\\n' \"${REGION-<not supplied>}\"\n",
+            "cases": [
+              {
+                "input": {
+                  "name": "A supplied team and region",
+                  "args": [
+                    "North Hall",
+                    "brief"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "operations",
+                    "REGION": "east"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                },
+                "parent": {
+                  "TEAM": {
+                    "value": "operations",
+                    "exported": true
+                  },
+                  "REGION": {
+                    "value": "east",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "North Hall",
+                    "exported": true
+                  },
+                  "MODE": {
+                    "value": "brief",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "A supplied team and region",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "operations",
+                    "REGION": "east",
+                    "SITE": "North Hall",
+                    "MODE": "brief"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "Team: operations\nSite: North Hall\nMode: brief\nRegion: east\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Keep repeated spaces",
+                  "args": [
+                    "Bay  Seven",
+                    "wide view"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "night ops",
+                    "REGION": "west"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                },
+                "parent": {
+                  "TEAM": {
+                    "value": "night ops",
+                    "exported": true
+                  },
+                  "REGION": {
+                    "value": "west",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "Bay  Seven",
+                    "exported": true
+                  },
+                  "MODE": {
+                    "value": "wide view",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Keep repeated spaces",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "night ops",
+                    "REGION": "west",
+                    "SITE": "Bay  Seven",
+                    "MODE": "wide view"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "Team: night ops\nSite: Bay  Seven\nMode: wide view\nRegion: west\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Literal wildcard settings",
+                  "args": [
+                    "*",
+                    "*"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "filter * team",
+                    "REGION": "north"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                },
+                "parent": {
+                  "TEAM": {
+                    "value": "filter * team",
+                    "exported": true
+                  },
+                  "REGION": {
+                    "value": "north",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "*",
+                    "exported": true
+                  },
+                  "MODE": {
+                    "value": "*",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Literal wildcard settings",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "filter * team",
+                    "REGION": "north",
+                    "SITE": "*",
+                    "MODE": "*"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "Team: filter * team\nSite: *\nMode: *\nRegion: north\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Empty supplied values",
+                  "args": [
+                    "",
+                    ""
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "",
+                    "REGION": ""
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                },
+                "parent": {
+                  "TEAM": {
+                    "value": "",
+                    "exported": true
+                  },
+                  "REGION": {
+                    "value": "",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "",
+                    "exported": true
+                  },
+                  "MODE": {
+                    "value": "",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Empty supplied values",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "",
+                    "REGION": "",
+                    "SITE": "",
+                    "MODE": ""
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "Team: \nSite: \nMode: \nRegion: \n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Backslash and apostrophe data",
+                  "args": [
+                    "Café\\west",
+                    "O'Brien"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "ops\\two"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                },
+                "parent": {
+                  "TEAM": {
+                    "value": "ops\\two",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "Café\\west",
+                    "exported": true
+                  },
+                  "MODE": {
+                    "value": "O'Brien",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Backslash and apostrophe data",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "ops\\two",
+                    "SITE": "Café\\west",
+                    "MODE": "O'Brien"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "Team: ops\\two\nSite: Café\\west\nMode: O'Brien\nRegion: <not supplied>\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Preserve an extra inherited setting",
+                  "args": [
+                    "-South",
+                    "release"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "handover",
+                    "REGION": "central",
+                    "AUDIT": "yes"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                },
+                "parent": {
+                  "TEAM": {
+                    "value": "handover",
+                    "exported": true
+                  },
+                  "REGION": {
+                    "value": "central",
+                    "exported": true
+                  },
+                  "AUDIT": {
+                    "value": "yes",
+                    "exported": true
+                  },
+                  "SITE": {
+                    "value": "-South",
+                    "exported": true
+                  },
+                  "MODE": {
+                    "value": "release",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Preserve an extra inherited setting",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "handover",
+                    "REGION": "central",
+                    "AUDIT": "yes",
+                    "SITE": "-South",
+                    "MODE": "release"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "Team: handover\nSite: -South\nMode: release\nRegion: central\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic1-env-child-settings-example",
+            "instructions": "Use the two supplied arguments as LOCATION and STYLE, export both, and preserve the supplied HOST. The setup is quiet and leaves files unchanged; the supplied child prints the host, location and style.",
+            "starter": "# HOST is supplied; leave its value unchanged.\nLOCATION=\"$1\"\nSTYLE=\"$2\"\nexport LOCATION STYLE\n",
+            "child_source": "printf 'Host: %s\\n' \"$HOST\"\nprintf 'Location: %s\\n' \"$LOCATION\"\nprintf 'Style: %s\\n' \"$STYLE\"\n",
+            "cases": [
+              {
+                "input": {
+                  "name": "Gallery preview",
+                  "args": [
+                    "Gallery North",
+                    "short"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "HOST": "visitors"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  }
+                },
+                "parent": {
+                  "HOST": {
+                    "value": "visitors",
+                    "exported": true
+                  },
+                  "LOCATION": {
+                    "value": "Gallery North",
+                    "exported": true
+                  },
+                  "STYLE": {
+                    "value": "short",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Gallery preview",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "HOST": "visitors",
+                    "LOCATION": "Gallery North",
+                    "STYLE": "short"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  },
+                  "stdout": "Host: visitors\nLocation: Gallery North\nStyle: short\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Workshop preview",
+                  "args": [
+                    "Tea Room",
+                    "large print"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "HOST": "makers"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  }
+                },
+                "parent": {
+                  "HOST": {
+                    "value": "makers",
+                    "exported": true
+                  },
+                  "LOCATION": {
+                    "value": "Tea Room",
+                    "exported": true
+                  },
+                  "STYLE": {
+                    "value": "large print",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Workshop preview",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "HOST": "makers",
+                    "LOCATION": "Tea Room",
+                    "STYLE": "large print"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  },
+                  "stdout": "Host: makers\nLocation: Tea Room\nStyle: large print\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "SITE=\"$1\"\nMODE=\"$2\"\nexport SITE MODE\n"
+      ],
+      "explanation": "Export controls which current values are copied to a subsequently started child. The required report comes from that child's real simulated environment, while the parent keeps the requested working values and the virtual files stay unchanged.",
+      "hints": [
+        "Which assignment overwrites a supplied value instead of creating one from an argument? Remove the overwrite; do not hard-code a replacement team.",
+        "Compare SITE and MODE in Parent values. A value can exist there while its export attribute is off.",
+        "Pass the two created settings onward without exporting scratch variables. Existing supplied settings should keep their values and attributes."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Environment.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Command-Execution-Environment.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html",
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/"
+      ],
+      "simplifications": "Sources checked 2026-11-04: GNU Bash manual and current LPIC-1 v5.0, objective 103.1 (narrow defining/referencing/exporting slice). In-process evaluator17 runs a bounded parent setup and a separate immutable supplied child; no operating-system process is created. Supported here: global ordinary scalar assignments, literal export NAME / NAME=value, Bash export -n NAME, and documented simple commands/if decisions. C/POSIX behavior is fixed; LANG, LANGUAGE and LC_* environment controls are refused. No startup files, PATH search, temporary command environments, function/pipeline/loop/array/substitution scopes or xtrace in environment activities. At most 128 observed names and 16 KiB of values; each setup is at most 8 KiB, with shared execution/memory/output bounds. This is not complete 103.1 or 105.1 coverage.",
+      "retry_guidance": "First distinguish a script error from a state mismatch. Compare the named variable's parent value and export attribute with the missing or unexpected child setting; do not print a look-alike child report from the setup. Then run every sample again.",
+      "teaching": {
+        "prerequisite_note": "First complete basic file navigation and shell arguments. You should recognize a script, comments, quoted values and printf. This lesson introduces child environments and export; no Linux setup or real command launch is needed.",
+        "concepts": [
+          {
+            "title": "Values in this script and values passed onward",
+            "text": "A shell variable gives a name to a value. The environment is the set of named values passed to a newly started program. Here, your setup is the parent script and the supplied report is the child. Creating a variable in the parent does not automatically pass it to the child."
+          },
+          {
+            "title": "Supplied values are different from names you create",
+            "text": "The example supplies HOST and two arguments. $1 means the first argument; $2 means the second argument. LOCATION=\"$1\" creates LOCATION from the first argument, with no spaces around =. HOST already arrived in the environment, so it is already marked for export: keep its supplied value. In the assignment, TEAM is supplied; SITE and MODE are names you create from the arguments."
+          },
+          {
+            "title": "Select the values the child receives",
+            "text": "export LOCATION STYLE marks both names for later child programs. It does not print them or change their values. Assignment and export may be separate, as shown below, or combined as export LOCATION=\"$1\". Quotes make it clear that spaces and literal * characters belong to one value."
+          },
+          {
+            "title": "Read a missing setting without confusing it with empty text",
+            "text": "The assignment child also prints a Region line. In its read-only script, ${REGION-<not supplied>} uses REGION when it is set and prints <not supplied> when the name is absent. An existing empty REGION stays a blank field. You do not need to write this syntax; use it to understand that report."
+          },
+          {
+            "title": "Run the setup, then inspect the child",
+            "text": "Run example first evaluates the setup, then runs a separate simulated report using the exported values. The read-only child uses printf: %s inserts one text value and backslash-n (\\n) ends the line. The setup stays quiet. The child receives a copy of the selected values. A finished program returns a number called its exit status; 0 means it completed successfully. A successful assignment or export already returns 0, so you do not need to add an exit command."
+          }
+        ],
+        "example": "# HOST is supplied; leave its value unchanged.\nLOCATION=\"$1\"\nSTYLE=\"$2\"\nexport LOCATION STYLE\n",
+        "inputs": "Gallery preview supplies HOST=visitors and arguments Gallery North / short. Workshop preview supplies HOST=makers and Tea Room / large print. The setup has no output; each child prints Host, Location and Style on three lines.",
+        "try_change": "Remove LOCATION from the export line, then Run example. Compare Parent value, Child receives and Child report · actual. Restore LOCATION and run again.",
+        "fixture": {
+          "name": "Gallery preview",
+          "args": [
+            "Gallery North",
+            "short"
+          ],
+          "stdin": "",
+          "env": {
+            "HOST": "visitors"
+          },
+          "files": {
+            "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+          },
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+          }
+        }
+      },
+      "prerequisites": [
+        "lpic1-file-navigation",
+        "shell-arguments"
+      ]
+    },
+    {
+      "id": "lpic1-env-parent-note",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-shell-environment",
+      "topic": "Shell variables and child environments",
+      "title": "Keep a planning note in the parent",
+      "summary": "Preserve a working note while controlling which values reach the child report.",
+      "objective": "Repair the setup so a supplied planning NOTE stays available with its original value in the parent script but is not passed to the child. An empty NOTE is still a supplied value and must remain empty. Set SITE from the first supplied argument ($1) and MODE from the second supplied argument ($2), preserve both values exactly, and export them. Preserve TEAM and all other supplied environment settings; pass no additional names to the child. The setup must print nothing, finish successfully (exit status 0), and leave all simulated files unchanged. The read-only child must report Note: <not passed> for every input set.",
+      "difficulty": "Beginner",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Repair the setup",
+        "Verify parent and child settings"
+      ],
+      "guide": [
+        {
+          "title": "Inspect supplied and created values",
+          "why": "A supplied environment setting may already be exported; a newly created variable is not.",
+          "action": "Read the supplied arguments and environment values beside the Setup editor before changing the script. Keep the read-only child report in view.",
+          "commands": []
+        },
+        {
+          "title": "Repair the setting that crosses the boundary",
+          "why": "The grade checks actual values and export attributes, then runs the child with that resulting environment.",
+          "action": "Use the Introduction and separate Try example to investigate assignment versus export. Repair the assignment draft without printing a replacement report.",
+          "commands": []
+        },
+        {
+          "title": "Check every input set",
+          "why": "Spaces, literal wildcards and empty values reveal assumptions that a single successful report can hide.",
+          "action": "Select Run setup + child. Inspect the first failing case's Parent values and Child output, then edit and retry. Stop cancels unfinished work without awarding completion.",
+          "commands": []
+        }
+      ],
+      "initial": {
+        "kind": "Environment",
+        "simulation": {
+          "definition": {
+            "id": "lpic1-env-parent-note",
+            "assignment": {
+              "id": "lpic1-env-parent-note",
+              "instructions": "Repair the setup so a supplied planning NOTE stays available with its original value in the parent script but is not passed to the child. An empty NOTE is still a supplied value and must remain empty. Set SITE from the first supplied argument ($1) and MODE from the second supplied argument ($2), preserve both values exactly, and export them. Preserve TEAM and all other supplied environment settings; pass no additional names to the child. The setup must print nothing, finish successfully (exit status 0), and leave all simulated files unchanged. The read-only child must report Note: <not passed> for every input set.",
+              "starter": "SITE=$1\nMODE=$2\nNOTE=''\nexport -n TEAM\nexport SITE MODE\n",
+              "child_source": "printf 'Team: %s\\n' \"$TEAM\"\nprintf 'Site: %s\\n' \"$SITE\"\nprintf 'Mode: %s\\n' \"$MODE\"\nprintf 'Note: %s\\n' \"${NOTE-<not passed>}\"\n",
+              "cases": [
+                {
+                  "input": {
+                    "name": "Keep the working note in the parent",
+                    "args": [
+                      "Archive Desk",
+                      "brief"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "records",
+                      "REGION": "east",
+                      "NOTE": "review before sending"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  },
+                  "parent": {
+                    "TEAM": {
+                      "value": "records",
+                      "exported": true
+                    },
+                    "REGION": {
+                      "value": "east",
+                      "exported": true
+                    },
+                    "NOTE": {
+                      "value": "review before sending",
+                      "exported": false
+                    },
+                    "SITE": {
+                      "value": "Archive Desk",
+                      "exported": true
+                    },
+                    "MODE": {
+                      "value": "brief",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Keep the working note in the parent",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "records",
+                      "REGION": "east",
+                      "SITE": "Archive Desk",
+                      "MODE": "brief"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "Team: records\nSite: Archive Desk\nMode: brief\nNote: <not passed>\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "An empty note is not an unset note",
+                    "args": [
+                      "Gallery Floor",
+                      "wide"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "day team",
+                      "NOTE": ""
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  },
+                  "parent": {
+                    "TEAM": {
+                      "value": "day team",
+                      "exported": true
+                    },
+                    "NOTE": {
+                      "value": "",
+                      "exported": false
+                    },
+                    "SITE": {
+                      "value": "Gallery Floor",
+                      "exported": true
+                    },
+                    "MODE": {
+                      "value": "wide",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "An empty note is not an unset note",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "day team",
+                      "SITE": "Gallery Floor",
+                      "MODE": "wide"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "Team: day team\nSite: Gallery Floor\nMode: wide\nNote: <not passed>\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "A note containing spaces and wildcards",
+                    "args": [
+                      "*",
+                      "*"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "filter * team",
+                      "NOTE": "  compare * reports  "
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  },
+                  "parent": {
+                    "TEAM": {
+                      "value": "filter * team",
+                      "exported": true
+                    },
+                    "NOTE": {
+                      "value": "  compare * reports  ",
+                      "exported": false
+                    },
+                    "SITE": {
+                      "value": "*",
+                      "exported": true
+                    },
+                    "MODE": {
+                      "value": "*",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "A note containing spaces and wildcards",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "filter * team",
+                      "SITE": "*",
+                      "MODE": "*"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "Team: filter * team\nSite: *\nMode: *\nNote: <not passed>\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Empty site and mode are valid values",
+                    "args": [
+                      "",
+                      ""
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "",
+                      "REGION": "",
+                      "NOTE": "parent still needs this"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  },
+                  "parent": {
+                    "TEAM": {
+                      "value": "",
+                      "exported": true
+                    },
+                    "REGION": {
+                      "value": "",
+                      "exported": true
+                    },
+                    "NOTE": {
+                      "value": "parent still needs this",
+                      "exported": false
+                    },
+                    "SITE": {
+                      "value": "",
+                      "exported": true
+                    },
+                    "MODE": {
+                      "value": "",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Empty site and mode are valid values",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "",
+                      "REGION": "",
+                      "SITE": "",
+                      "MODE": ""
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "Team: \nSite: \nMode: \nNote: <not passed>\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Keep literal backslashes and apostrophes",
+                    "args": [
+                      "West\\Annex",
+                      "O'Brien"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "ops\\two",
+                      "NOTE": "planner's \\ draft"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  },
+                  "parent": {
+                    "TEAM": {
+                      "value": "ops\\two",
+                      "exported": true
+                    },
+                    "NOTE": {
+                      "value": "planner's \\ draft",
+                      "exported": false
+                    },
+                    "SITE": {
+                      "value": "West\\Annex",
+                      "exported": true
+                    },
+                    "MODE": {
+                      "value": "O'Brien",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Keep literal backslashes and apostrophes",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "ops\\two",
+                      "SITE": "West\\Annex",
+                      "MODE": "O'Brien"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "Team: ops\\two\nSite: West\\Annex\nMode: O'Brien\nNote: <not passed>\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "Preserve other inherited settings",
+                    "args": [
+                      "-South",
+                      "release"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "handover",
+                      "AUDIT": "yes",
+                      "NOTE": "check totals"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  },
+                  "parent": {
+                    "TEAM": {
+                      "value": "handover",
+                      "exported": true
+                    },
+                    "AUDIT": {
+                      "value": "yes",
+                      "exported": true
+                    },
+                    "NOTE": {
+                      "value": "check totals",
+                      "exported": false
+                    },
+                    "SITE": {
+                      "value": "-South",
+                      "exported": true
+                    },
+                    "MODE": {
+                      "value": "release",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "Preserve other inherited settings",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "TEAM": "handover",
+                      "AUDIT": "yes",
+                      "SITE": "-South",
+                      "MODE": "release"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    },
+                    "stdout": "Team: handover\nSite: -South\nMode: release\nNote: <not passed>\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                      "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                      "/work/brief.txt": "A second harmless file.\n"
+                    }
+                  }
+                }
+              ]
+            },
+            "example": {
+              "id": "lpic1-env-parent-note-example",
+              "instructions": "Export LOCATION and STYLE from the two arguments while preserving HOST. Keep the supplied REMINDER unchanged in the parent, but remove its export attribute so the child reports <not passed>. Leave files unchanged and print nothing from the setup.",
+              "starter": "# HOST and REMINDER are supplied by the example.\nLOCATION=\"$1\"\nSTYLE=\"$2\"\nexport LOCATION STYLE\nexport -n REMINDER\n",
+              "child_source": "printf 'Host: %s\\n' \"$HOST\"\nprintf 'Location: %s\\n' \"$LOCATION\"\nprintf 'Style: %s\\n' \"$STYLE\"\nprintf 'Reminder: %s\\n' \"${REMINDER-<not passed>}\"\n",
+              "cases": [
+                {
+                  "input": {
+                    "name": "A reminder stays with the planner",
+                    "args": [
+                      "Museum Lobby",
+                      "poster"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "HOST": "guides",
+                      "REMINDER": "check the caption"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    }
+                  },
+                  "parent": {
+                    "HOST": {
+                      "value": "guides",
+                      "exported": true
+                    },
+                    "REMINDER": {
+                      "value": "check the caption",
+                      "exported": false
+                    },
+                    "LOCATION": {
+                      "value": "Museum Lobby",
+                      "exported": true
+                    },
+                    "STYLE": {
+                      "value": "poster",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "A reminder stays with the planner",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "HOST": "guides",
+                      "LOCATION": "Museum Lobby",
+                      "STYLE": "poster"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    },
+                    "stdout": "Host: guides\nLocation: Museum Lobby\nStyle: poster\nReminder: <not passed>\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    }
+                  }
+                },
+                {
+                  "input": {
+                    "name": "An empty reminder is still present",
+                    "args": [
+                      "Studio East",
+                      "card"
+                    ],
+                    "stdin": "",
+                    "env": {
+                      "HOST": "artists",
+                      "REMINDER": ""
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    },
+                    "stdout": "",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    }
+                  },
+                  "parent": {
+                    "HOST": {
+                      "value": "artists",
+                      "exported": true
+                    },
+                    "REMINDER": {
+                      "value": "",
+                      "exported": false
+                    },
+                    "LOCATION": {
+                      "value": "Studio East",
+                      "exported": true
+                    },
+                    "STYLE": {
+                      "value": "card",
+                      "exported": true
+                    }
+                  },
+                  "child": {
+                    "name": "An empty reminder is still present",
+                    "args": [],
+                    "stdin": "",
+                    "env": {
+                      "HOST": "artists",
+                      "LOCATION": "Studio East",
+                      "STYLE": "card"
+                    },
+                    "files": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    },
+                    "stdout": "Host: artists\nLocation: Studio East\nStyle: card\nReminder: <not passed>\n",
+                    "stderr": "",
+                    "status": 0,
+                    "after": {
+                      "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "view": "introduction",
+          "assignment": {
+            "source": "SITE=$1\nMODE=$2\nNOTE=''\nexport -n TEAM\nexport SITE MODE\n",
+            "result": null
+          },
+          "example": {
+            "source": "# HOST and REMINDER are supplied by the example.\nLOCATION=\"$1\"\nSTYLE=\"$2\"\nexport LOCATION STYLE\nexport -n REMINDER\n",
+            "result": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "Environment",
+        "definition": {
+          "id": "lpic1-env-parent-note",
+          "assignment": {
+            "id": "lpic1-env-parent-note",
+            "instructions": "Repair the setup so a supplied planning NOTE stays available with its original value in the parent script but is not passed to the child. An empty NOTE is still a supplied value and must remain empty. Set SITE from the first supplied argument ($1) and MODE from the second supplied argument ($2), preserve both values exactly, and export them. Preserve TEAM and all other supplied environment settings; pass no additional names to the child. The setup must print nothing, finish successfully (exit status 0), and leave all simulated files unchanged. The read-only child must report Note: <not passed> for every input set.",
+            "starter": "SITE=$1\nMODE=$2\nNOTE=''\nexport -n TEAM\nexport SITE MODE\n",
+            "child_source": "printf 'Team: %s\\n' \"$TEAM\"\nprintf 'Site: %s\\n' \"$SITE\"\nprintf 'Mode: %s\\n' \"$MODE\"\nprintf 'Note: %s\\n' \"${NOTE-<not passed>}\"\n",
+            "cases": [
+              {
+                "input": {
+                  "name": "Keep the working note in the parent",
+                  "args": [
+                    "Archive Desk",
+                    "brief"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "records",
+                    "REGION": "east",
+                    "NOTE": "review before sending"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                },
+                "parent": {
+                  "TEAM": {
+                    "value": "records",
+                    "exported": true
+                  },
+                  "REGION": {
+                    "value": "east",
+                    "exported": true
+                  },
+                  "NOTE": {
+                    "value": "review before sending",
+                    "exported": false
+                  },
+                  "SITE": {
+                    "value": "Archive Desk",
+                    "exported": true
+                  },
+                  "MODE": {
+                    "value": "brief",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Keep the working note in the parent",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "records",
+                    "REGION": "east",
+                    "SITE": "Archive Desk",
+                    "MODE": "brief"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "Team: records\nSite: Archive Desk\nMode: brief\nNote: <not passed>\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "An empty note is not an unset note",
+                  "args": [
+                    "Gallery Floor",
+                    "wide"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "day team",
+                    "NOTE": ""
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                },
+                "parent": {
+                  "TEAM": {
+                    "value": "day team",
+                    "exported": true
+                  },
+                  "NOTE": {
+                    "value": "",
+                    "exported": false
+                  },
+                  "SITE": {
+                    "value": "Gallery Floor",
+                    "exported": true
+                  },
+                  "MODE": {
+                    "value": "wide",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "An empty note is not an unset note",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "day team",
+                    "SITE": "Gallery Floor",
+                    "MODE": "wide"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "Team: day team\nSite: Gallery Floor\nMode: wide\nNote: <not passed>\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "A note containing spaces and wildcards",
+                  "args": [
+                    "*",
+                    "*"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "filter * team",
+                    "NOTE": "  compare * reports  "
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                },
+                "parent": {
+                  "TEAM": {
+                    "value": "filter * team",
+                    "exported": true
+                  },
+                  "NOTE": {
+                    "value": "  compare * reports  ",
+                    "exported": false
+                  },
+                  "SITE": {
+                    "value": "*",
+                    "exported": true
+                  },
+                  "MODE": {
+                    "value": "*",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "A note containing spaces and wildcards",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "filter * team",
+                    "SITE": "*",
+                    "MODE": "*"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "Team: filter * team\nSite: *\nMode: *\nNote: <not passed>\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Empty site and mode are valid values",
+                  "args": [
+                    "",
+                    ""
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "",
+                    "REGION": "",
+                    "NOTE": "parent still needs this"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                },
+                "parent": {
+                  "TEAM": {
+                    "value": "",
+                    "exported": true
+                  },
+                  "REGION": {
+                    "value": "",
+                    "exported": true
+                  },
+                  "NOTE": {
+                    "value": "parent still needs this",
+                    "exported": false
+                  },
+                  "SITE": {
+                    "value": "",
+                    "exported": true
+                  },
+                  "MODE": {
+                    "value": "",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Empty site and mode are valid values",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "",
+                    "REGION": "",
+                    "SITE": "",
+                    "MODE": ""
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "Team: \nSite: \nMode: \nNote: <not passed>\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Keep literal backslashes and apostrophes",
+                  "args": [
+                    "West\\Annex",
+                    "O'Brien"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "ops\\two",
+                    "NOTE": "planner's \\ draft"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                },
+                "parent": {
+                  "TEAM": {
+                    "value": "ops\\two",
+                    "exported": true
+                  },
+                  "NOTE": {
+                    "value": "planner's \\ draft",
+                    "exported": false
+                  },
+                  "SITE": {
+                    "value": "West\\Annex",
+                    "exported": true
+                  },
+                  "MODE": {
+                    "value": "O'Brien",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Keep literal backslashes and apostrophes",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "ops\\two",
+                    "SITE": "West\\Annex",
+                    "MODE": "O'Brien"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "Team: ops\\two\nSite: West\\Annex\nMode: O'Brien\nNote: <not passed>\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "Preserve other inherited settings",
+                  "args": [
+                    "-South",
+                    "release"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "handover",
+                    "AUDIT": "yes",
+                    "NOTE": "check totals"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                },
+                "parent": {
+                  "TEAM": {
+                    "value": "handover",
+                    "exported": true
+                  },
+                  "AUDIT": {
+                    "value": "yes",
+                    "exported": true
+                  },
+                  "NOTE": {
+                    "value": "check totals",
+                    "exported": false
+                  },
+                  "SITE": {
+                    "value": "-South",
+                    "exported": true
+                  },
+                  "MODE": {
+                    "value": "release",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "Preserve other inherited settings",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "TEAM": "handover",
+                    "AUDIT": "yes",
+                    "SITE": "-South",
+                    "MODE": "release"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  },
+                  "stdout": "Team: handover\nSite: -South\nMode: release\nNote: <not passed>\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n",
+                    "/work/SITE=wrong.txt": "A wildcard must stay data, not become this filename.\n",
+                    "/work/brief.txt": "A second harmless file.\n"
+                  }
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "lpic1-env-parent-note-example",
+            "instructions": "Export LOCATION and STYLE from the two arguments while preserving HOST. Keep the supplied REMINDER unchanged in the parent, but remove its export attribute so the child reports <not passed>. Leave files unchanged and print nothing from the setup.",
+            "starter": "# HOST and REMINDER are supplied by the example.\nLOCATION=\"$1\"\nSTYLE=\"$2\"\nexport LOCATION STYLE\nexport -n REMINDER\n",
+            "child_source": "printf 'Host: %s\\n' \"$HOST\"\nprintf 'Location: %s\\n' \"$LOCATION\"\nprintf 'Style: %s\\n' \"$STYLE\"\nprintf 'Reminder: %s\\n' \"${REMINDER-<not passed>}\"\n",
+            "cases": [
+              {
+                "input": {
+                  "name": "A reminder stays with the planner",
+                  "args": [
+                    "Museum Lobby",
+                    "poster"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "HOST": "guides",
+                    "REMINDER": "check the caption"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  }
+                },
+                "parent": {
+                  "HOST": {
+                    "value": "guides",
+                    "exported": true
+                  },
+                  "REMINDER": {
+                    "value": "check the caption",
+                    "exported": false
+                  },
+                  "LOCATION": {
+                    "value": "Museum Lobby",
+                    "exported": true
+                  },
+                  "STYLE": {
+                    "value": "poster",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "A reminder stays with the planner",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "HOST": "guides",
+                    "LOCATION": "Museum Lobby",
+                    "STYLE": "poster"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  },
+                  "stdout": "Host: guides\nLocation: Museum Lobby\nStyle: poster\nReminder: <not passed>\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  }
+                }
+              },
+              {
+                "input": {
+                  "name": "An empty reminder is still present",
+                  "args": [
+                    "Studio East",
+                    "card"
+                  ],
+                  "stdin": "",
+                  "env": {
+                    "HOST": "artists",
+                    "REMINDER": ""
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  },
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  }
+                },
+                "parent": {
+                  "HOST": {
+                    "value": "artists",
+                    "exported": true
+                  },
+                  "REMINDER": {
+                    "value": "",
+                    "exported": false
+                  },
+                  "LOCATION": {
+                    "value": "Studio East",
+                    "exported": true
+                  },
+                  "STYLE": {
+                    "value": "card",
+                    "exported": true
+                  }
+                },
+                "child": {
+                  "name": "An empty reminder is still present",
+                  "args": [],
+                  "stdin": "",
+                  "env": {
+                    "HOST": "artists",
+                    "LOCATION": "Studio East",
+                    "STYLE": "card"
+                  },
+                  "files": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  },
+                  "stdout": "Host: artists\nLocation: Studio East\nStyle: card\nReminder: <not passed>\n",
+                  "stderr": "",
+                  "status": 0,
+                  "after": {
+                    "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "solution": [
+        "SITE=\"$1\"\nMODE=\"$2\"\nexport SITE MODE\nexport -n NOTE\n"
+      ],
+      "explanation": "Export controls which current values are copied to a subsequently started child. The required report comes from that child's real simulated environment, while the parent keeps the requested working values and the virtual files stay unchanged.",
+      "hints": [
+        "An empty assignment changes NOTE's value but does not remove its export attribute. Preserve the supplied note, including when it is already empty.",
+        "Compare NOTE and TEAM in Parent values. They have different child-visibility requirements; unexporting the wrong name breaks the inherited team.",
+        "Bash export -n removes an export attribute without deleting the parent value. The supplied child checks whether NOTE is absent, not whether it prints as empty."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Environment.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Command-Execution-Environment.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html",
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/"
+      ],
+      "simplifications": "Sources checked 2026-11-04: GNU Bash manual and current LPIC-1 v5.0, objective 103.1 (narrow defining/referencing/exporting slice). In-process evaluator17 runs a bounded parent setup and a separate immutable supplied child; no operating-system process is created. Supported here: global ordinary scalar assignments, literal export NAME / NAME=value, Bash export -n NAME, and documented simple commands/if decisions. C/POSIX behavior is fixed; LANG, LANGUAGE and LC_* environment controls are refused. No startup files, PATH search, temporary command environments, function/pipeline/loop/array/substitution scopes or xtrace in environment activities. At most 128 observed names and 16 KiB of values; each setup is at most 8 KiB, with shared execution/memory/output bounds. This is not complete 103.1 or 105.1 coverage.",
+      "retry_guidance": "First distinguish a script error from a state mismatch. Compare the named variable's parent value and export attribute with the missing or unexpected child setting; do not print a look-alike child report from the setup. Then run every sample again.",
+      "teaching": {
+        "prerequisite_note": "Complete Pass settings to a child report first. This lesson reuses assignments, arguments, quoting and export, then adds Bash export -n and the difference between an empty value and an unset name.",
+        "concepts": [
+          {
+            "title": "Keep a value here without passing it on",
+            "text": "This lesson separates a parent working value from child-visible settings. REMINDER is supplied to the example and initially exported. Bash export -n REMINDER removes that export attribute while keeping the exact parent value. An assignment such as REMINDER='' changes the value instead; it does not remove the export attribute."
+          },
+          {
+            "title": "Empty and absent mean different things",
+            "text": "An empty value exists but contains no text. An unset name has no value. In the read-only report, ${REMINDER-<not passed>} substitutes <not passed> only when REMINDER is unset. Without a colon after the name, an existing empty value stays empty. After unexporting REMINDER, the parent still has its supplied value, but the new child has no REMINDER."
+          },
+          {
+            "title": "Preserve the other inherited settings",
+            "text": "HOST still belongs in the child environment. Removing REMINDER's attribute must not remove HOST's or overwrite a supplied value. LOCATION and STYLE are created from the two arguments and exported, just as in the previous lesson. Each input set starts with its own sample values and reset simulated files."
+          },
+          {
+            "title": "Bash-specific control, bounded practice",
+            "text": "export NAME and ordinary assignments are portable shell concepts. The -n option is Bash-specific. It affects subsequently started children; it does not rewrite a child that is already running or change your own desktop environment."
+          }
+        ],
+        "example": "# HOST and REMINDER are supplied by the example.\nLOCATION=\"$1\"\nSTYLE=\"$2\"\nexport LOCATION STYLE\nexport -n REMINDER\n",
+        "inputs": "The first preview supplies REMINDER=check the caption; the second supplies an empty REMINDER. Both supply HOST and two location/style arguments. The expected child reports Reminder: <not passed> for both; the original parent reminders stay different.",
+        "try_change": "Remove export -n REMINDER and Run example. Use Inspect sample inputs to compare the text and empty reminder cases, then restore the line and retry.",
+        "fixture": {
+          "name": "A reminder stays with the planner",
+          "args": [
+            "Museum Lobby",
+            "poster"
+          ],
+          "stdin": "",
+          "env": {
+            "HOST": "guides",
+            "REMINDER": "check the caption"
+          },
+          "files": {
+            "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+          },
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Keep this unrelated simulated file unchanged.\n"
+          }
+        }
+      },
+      "prerequisites": [
+        "lpic1-env-child-settings"
+      ]
+    }
+  ]
+}

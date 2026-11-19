@@ -16,7 +16,7 @@ fn case() -> Case {
 }
 #[test]
 fn actual_full_script_extended_selection_does_not_enter_cron_or_oneoff_execution() {
-    assert_eq!(shell::EVALUATOR_REVISION, 15);
+    assert_eq!(shell::EVALUATOR_REVISION, 19);
     let c = case();
     let source = "grep -E '^WARN$'";
     assert!(c.accepts(&shell::run(source, &c)));

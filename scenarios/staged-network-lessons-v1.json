@@ -1,0 +1,1240 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-controller-pilot-rollout",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-staged-network-changes",
+      "topic": "Change impact and installed network policy",
+      "title": "Stage a controller rollout with a pilot port",
+      "summary": "Restore approved desk access in stages and keep a shared reserve port outside the rollout.",
+      "objective": "Authorize access between both signed-off dispatch desks and the supplied dispatch service. Verify a controller-managed pilot before changing the other desk. Reconcile and check the completed rollout. Preserve the intake scanner’s original settings and its separation from dispatch. Keep the visitor network separate.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "retry_guidance": "Read the exact failed result, inspect the current rationale or path, then try again.",
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A direct device edit changes one port immediately. The controller keeps its desired profile. A later reconciliation in this network restores the settings from that profile.",
+          "action": "Read the worked comparison.",
+          "commands": []
+        },
+        {
+          "title": "Try the separate example",
+          "why": "Every port bound to a changed profile can inherit that change. A preview shows the ports affected, so you can compare them with the approved work order before applying anything.",
+          "action": "Make and inspect the guided change.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "A pilot is one approved device you change and test first. Confirm it reaches the service and that the reserve port remains unchanged. Then roll out the approved profile to the other device and reconcile again.",
+          "action": "Check the independent traffic and policy.",
+          "commands": []
+        }
+      ],
+      "explanation": "A dedicated service binding keeps the approved scope narrow. The pilot confirms one working port before the other moves. Reconciliation confirms that the controller can maintain the desired configuration.",
+      "hints": [
+        "Read the ports listed in the Preview. The intake profile is shared by approved desks and a reserved device.",
+        "A direct edit can look correct until Reconcile. Check which source supplies a profile after reconciliation.",
+        "An approved desk must work while the other approved desk is still in its original state to verify the pilot."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf"
+      ],
+      "simplifications": "Bounded local port settings, shared controller profiles and an explicit reconciliation rule over a supplied Ethernet topology. No actual vendor controller, API transport, rollout service, switch access or network is used.",
+      "prerequisites": [
+        "ccna-rest-profile-handover"
+      ],
+      "initial": {
+        "kind": "AutomationWorkshop",
+        "simulation": {
+          "version": 1,
+          "source_id": "ccna-controller-pilot-rollout",
+          "view": "introduction",
+          "assignment": {
+            "source": "{\"activity\":\"rollout\",\"supplied\":{\"approved\":[{\"host\":\"desk-a\",\"slot\":\"desk-a\"},{\"host\":\"desk-b\",\"slot\":\"desk-b\"}],\"initial\":{\"desired\":{\"bindings\":{\"desk-a\":{\"profile\":\"intake\"},\"desk-b\":{\"profile\":\"intake\"},\"dispatch\":{\"profile\":\"approved-service\"},\"intake-scanner\":{\"profile\":\"intake\"},\"visitor-services\":{\"profile\":\"isolated\"}},\"profiles\":{\"approved-service\":{\"description\":\"Approved service access\",\"up\":true,\"vlan\":30},\"intake\":{\"description\":\"Uncommissioned intake\",\"up\":false,\"vlan\":20},\"isolated\":{\"description\":\"Other workgroup\",\"up\":true,\"vlan\":40}}},\"local\":{}},\"intended_peer\":\"dispatch\",\"isolated_peer\":\"visitor-services\",\"reserved\":{\"host\":\"intake-scanner\",\"slot\":\"intake-scanner\"},\"spec\":{\"inventory\":{\"editable\":{\"dispatch-floor\":[\"port-a\",\"port-b\",\"port-c\"],\"main-office\":[\"port-d\",\"port-e\"]},\"fabric\":{\"cables\":[{\"a\":{\"kind\":\"switch\",\"port\":\"uplink\",\"switch\":\"dispatch-floor\"},\"b\":{\"kind\":\"switch\",\"port\":\"uplink\",\"switch\":\"main-office\"},\"id\":\"backbone\",\"up\":true},{\"a\":{\"host\":\"desk-a\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"port-a\",\"switch\":\"dispatch-floor\"},\"id\":\"edge-1\",\"up\":true},{\"a\":{\"host\":\"desk-b\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"port-b\",\"switch\":\"dispatch-floor\"},\"id\":\"edge-2\",\"up\":true},{\"a\":{\"host\":\"intake-scanner\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"port-c\",\"switch\":\"dispatch-floor\"},\"id\":\"edge-3\",\"up\":true},{\"a\":{\"host\":\"dispatch\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"port-d\",\"switch\":\"main-office\"},\"id\":\"edge-4\",\"up\":true},{\"a\":{\"host\":\"visitor-services\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"port-e\",\"switch\":\"main-office\"},\"id\":\"edge-5\",\"up\":true}],\"hosts\":{\"desk-a\":{\"label\":\"Desk A\",\"up\":true},\"desk-b\":{\"label\":\"Desk B\",\"up\":true},\"dispatch\":{\"label\":\"Dispatch\",\"up\":true},\"intake-scanner\":{\"label\":\"Intake Scanner\",\"up\":true},\"visitor-services\":{\"label\":\"Visitor Services\",\"up\":true}},\"switches\":{\"dispatch-floor\":{\"label\":\"Dispatch Floor\",\"ports\":{\"port-a\":{\"mode\":{\"kind\":\"access\",\"vlan\":20},\"up\":false},\"port-b\":{\"mode\":{\"kind\":\"access\",\"vlan\":20},\"up\":false},\"port-c\":{\"mode\":{\"kind\":\"access\",\"vlan\":20},\"up\":false},\"uplink\":{\"mode\":{\"allowed\":[20,30,40],\"kind\":\"trunk\",\"native\":20},\"up\":true}},\"vlans\":[20,30,40]},\"main-office\":{\"label\":\"Main Office\",\"ports\":{\"port-d\":{\"mode\":{\"kind\":\"access\",\"vlan\":30},\"up\":true},\"port-e\":{\"mode\":{\"kind\":\"access\",\"vlan\":40},\"up\":true},\"uplink\":{\"mode\":{\"allowed\":[20,30,40],\"kind\":\"trunk\",\"native\":20},\"up\":true}},\"vlans\":[20,30,40]}}}},\"ports\":{\"desk-a\":{\"port\":\"port-a\",\"switch\":\"dispatch-floor\"},\"desk-b\":{\"port\":\"port-b\",\"switch\":\"dispatch-floor\"},\"dispatch\":{\"port\":\"port-d\",\"switch\":\"main-office\"},\"intake-scanner\":{\"port\":\"port-c\",\"switch\":\"dispatch-floor\"},\"visitor-services\":{\"port\":\"port-e\",\"switch\":\"main-office\"}}}}}",
+            "work": {
+              "current": {
+                "activity": "rollout",
+                "draft": {
+                  "method": "reconcile"
+                },
+                "records": [],
+                "preview": false
+              },
+              "checked": false
+            }
+          },
+          "example": {
+            "source": "{\"activity\":\"rollout\",\"supplied\":{\"approved\":[{\"host\":\"bench-a\",\"slot\":\"bench-a\"},{\"host\":\"bench-b\",\"slot\":\"bench-b\"}],\"initial\":{\"desired\":{\"bindings\":{\"bench-a\":{\"profile\":\"intake\"},\"bench-b\":{\"profile\":\"intake\"},\"office-lab\":{\"profile\":\"isolated\"},\"reserve-scanner\":{\"profile\":\"intake\"},\"stores\":{\"profile\":\"approved-service\"}},\"profiles\":{\"approved-service\":{\"description\":\"Approved service access\",\"up\":true,\"vlan\":130},\"intake\":{\"description\":\"Uncommissioned intake\",\"up\":false,\"vlan\":120},\"isolated\":{\"description\":\"Other workgroup\",\"up\":true,\"vlan\":140}}},\"local\":{}},\"intended_peer\":\"stores\",\"isolated_peer\":\"office-lab\",\"reserved\":{\"host\":\"reserve-scanner\",\"slot\":\"reserve-scanner\"},\"spec\":{\"inventory\":{\"editable\":{\"loading-floor\":[\"port-a\",\"port-b\",\"port-c\"],\"stores-room\":[\"port-d\",\"port-e\"]},\"fabric\":{\"cables\":[{\"a\":{\"kind\":\"switch\",\"port\":\"uplink\",\"switch\":\"loading-floor\"},\"b\":{\"kind\":\"switch\",\"port\":\"uplink\",\"switch\":\"stores-room\"},\"id\":\"backbone\",\"up\":true},{\"a\":{\"host\":\"bench-a\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"port-a\",\"switch\":\"loading-floor\"},\"id\":\"edge-1\",\"up\":true},{\"a\":{\"host\":\"bench-b\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"port-b\",\"switch\":\"loading-floor\"},\"id\":\"edge-2\",\"up\":true},{\"a\":{\"host\":\"reserve-scanner\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"port-c\",\"switch\":\"loading-floor\"},\"id\":\"edge-3\",\"up\":true},{\"a\":{\"host\":\"stores\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"port-d\",\"switch\":\"stores-room\"},\"id\":\"edge-4\",\"up\":true},{\"a\":{\"host\":\"office-lab\",\"kind\":\"host\"},\"b\":{\"kind\":\"switch\",\"port\":\"port-e\",\"switch\":\"stores-room\"},\"id\":\"edge-5\",\"up\":true}],\"hosts\":{\"bench-a\":{\"label\":\"Bench A\",\"up\":true},\"bench-b\":{\"label\":\"Bench B\",\"up\":true},\"office-lab\":{\"label\":\"Office Lab\",\"up\":true},\"reserve-scanner\":{\"label\":\"Reserve Scanner\",\"up\":true},\"stores\":{\"label\":\"Stores\",\"up\":true}},\"switches\":{\"loading-floor\":{\"label\":\"Loading Floor\",\"ports\":{\"port-a\":{\"mode\":{\"kind\":\"access\",\"vlan\":120},\"up\":false},\"port-b\":{\"mode\":{\"kind\":\"access\",\"vlan\":120},\"up\":false},\"port-c\":{\"mode\":{\"kind\":\"access\",\"vlan\":120},\"up\":false},\"uplink\":{\"mode\":{\"allowed\":[120,130,140],\"kind\":\"trunk\",\"native\":120},\"up\":true}},\"vlans\":[120,130,140]},\"stores-room\":{\"label\":\"Stores Room\",\"ports\":{\"port-d\":{\"mode\":{\"kind\":\"access\",\"vlan\":130},\"up\":true},\"port-e\":{\"mode\":{\"kind\":\"access\",\"vlan\":140},\"up\":true},\"uplink\":{\"mode\":{\"allowed\":[120,130,140],\"kind\":\"trunk\",\"native\":120},\"up\":true}},\"vlans\":[120,130,140]}}}},\"ports\":{\"bench-a\":{\"port\":\"port-a\",\"switch\":\"loading-floor\"},\"bench-b\":{\"port\":\"port-b\",\"switch\":\"loading-floor\"},\"office-lab\":{\"port\":\"port-e\",\"switch\":\"stores-room\"},\"reserve-scanner\":{\"port\":\"port-c\",\"switch\":\"loading-floor\"},\"stores\":{\"port\":\"port-d\",\"switch\":\"stores-room\"}}}}}",
+            "work": {
+              "current": {
+                "activity": "rollout",
+                "draft": {
+                  "method": "reconcile"
+                },
+                "records": [],
+                "preview": false
+              },
+              "checked": false
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "AutomationWorkshop",
+        "definition": {
+          "version": 1,
+          "source_id": "ccna-controller-pilot-rollout",
+          "assignment": {
+            "activity": "rollout",
+            "supplied": {
+              "spec": {
+                "inventory": {
+                  "fabric": {
+                    "switches": {
+                      "dispatch-floor": {
+                        "label": "Dispatch Floor",
+                        "vlans": [
+                          20,
+                          30,
+                          40
+                        ],
+                        "ports": {
+                          "port-a": {
+                            "up": false,
+                            "mode": {
+                              "kind": "access",
+                              "vlan": 20
+                            }
+                          },
+                          "port-b": {
+                            "up": false,
+                            "mode": {
+                              "kind": "access",
+                              "vlan": 20
+                            }
+                          },
+                          "port-c": {
+                            "up": false,
+                            "mode": {
+                              "kind": "access",
+                              "vlan": 20
+                            }
+                          },
+                          "uplink": {
+                            "up": true,
+                            "mode": {
+                              "kind": "trunk",
+                              "native": 20,
+                              "allowed": [
+                                20,
+                                30,
+                                40
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "main-office": {
+                        "label": "Main Office",
+                        "vlans": [
+                          20,
+                          30,
+                          40
+                        ],
+                        "ports": {
+                          "port-d": {
+                            "up": true,
+                            "mode": {
+                              "kind": "access",
+                              "vlan": 30
+                            }
+                          },
+                          "port-e": {
+                            "up": true,
+                            "mode": {
+                              "kind": "access",
+                              "vlan": 40
+                            }
+                          },
+                          "uplink": {
+                            "up": true,
+                            "mode": {
+                              "kind": "trunk",
+                              "native": 20,
+                              "allowed": [
+                                20,
+                                30,
+                                40
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "hosts": {
+                      "desk-a": {
+                        "label": "Desk A",
+                        "up": true
+                      },
+                      "desk-b": {
+                        "label": "Desk B",
+                        "up": true
+                      },
+                      "intake-scanner": {
+                        "label": "Intake Scanner",
+                        "up": true
+                      },
+                      "dispatch": {
+                        "label": "Dispatch",
+                        "up": true
+                      },
+                      "visitor-services": {
+                        "label": "Visitor Services",
+                        "up": true
+                      }
+                    },
+                    "cables": [
+                      {
+                        "id": "backbone",
+                        "a": {
+                          "kind": "switch",
+                          "switch": "dispatch-floor",
+                          "port": "uplink"
+                        },
+                        "b": {
+                          "kind": "switch",
+                          "switch": "main-office",
+                          "port": "uplink"
+                        },
+                        "up": true
+                      },
+                      {
+                        "id": "edge-1",
+                        "a": {
+                          "kind": "host",
+                          "host": "desk-a"
+                        },
+                        "b": {
+                          "kind": "switch",
+                          "switch": "dispatch-floor",
+                          "port": "port-a"
+                        },
+                        "up": true
+                      },
+                      {
+                        "id": "edge-2",
+                        "a": {
+                          "kind": "host",
+                          "host": "desk-b"
+                        },
+                        "b": {
+                          "kind": "switch",
+                          "switch": "dispatch-floor",
+                          "port": "port-b"
+                        },
+                        "up": true
+                      },
+                      {
+                        "id": "edge-3",
+                        "a": {
+                          "kind": "host",
+                          "host": "intake-scanner"
+                        },
+                        "b": {
+                          "kind": "switch",
+                          "switch": "dispatch-floor",
+                          "port": "port-c"
+                        },
+                        "up": true
+                      },
+                      {
+                        "id": "edge-4",
+                        "a": {
+                          "kind": "host",
+                          "host": "dispatch"
+                        },
+                        "b": {
+                          "kind": "switch",
+                          "switch": "main-office",
+                          "port": "port-d"
+                        },
+                        "up": true
+                      },
+                      {
+                        "id": "edge-5",
+                        "a": {
+                          "kind": "host",
+                          "host": "visitor-services"
+                        },
+                        "b": {
+                          "kind": "switch",
+                          "switch": "main-office",
+                          "port": "port-e"
+                        },
+                        "up": true
+                      }
+                    ]
+                  },
+                  "editable": {
+                    "dispatch-floor": [
+                      "port-a",
+                      "port-b",
+                      "port-c"
+                    ],
+                    "main-office": [
+                      "port-d",
+                      "port-e"
+                    ]
+                  }
+                },
+                "ports": {
+                  "desk-a": {
+                    "switch": "dispatch-floor",
+                    "port": "port-a"
+                  },
+                  "desk-b": {
+                    "switch": "dispatch-floor",
+                    "port": "port-b"
+                  },
+                  "intake-scanner": {
+                    "switch": "dispatch-floor",
+                    "port": "port-c"
+                  },
+                  "dispatch": {
+                    "switch": "main-office",
+                    "port": "port-d"
+                  },
+                  "visitor-services": {
+                    "switch": "main-office",
+                    "port": "port-e"
+                  }
+                }
+              },
+              "initial": {
+                "desired": {
+                  "profiles": {
+                    "intake": {
+                      "up": false,
+                      "vlan": 20,
+                      "description": "Uncommissioned intake"
+                    },
+                    "approved-service": {
+                      "up": true,
+                      "vlan": 30,
+                      "description": "Approved service access"
+                    },
+                    "isolated": {
+                      "up": true,
+                      "vlan": 40,
+                      "description": "Other workgroup"
+                    }
+                  },
+                  "bindings": {
+                    "desk-a": {
+                      "profile": "intake"
+                    },
+                    "desk-b": {
+                      "profile": "intake"
+                    },
+                    "intake-scanner": {
+                      "profile": "intake"
+                    },
+                    "dispatch": {
+                      "profile": "approved-service"
+                    },
+                    "visitor-services": {
+                      "profile": "isolated"
+                    }
+                  }
+                },
+                "local": {}
+              },
+              "approved": [
+                {
+                  "slot": "desk-a",
+                  "host": "desk-a"
+                },
+                {
+                  "slot": "desk-b",
+                  "host": "desk-b"
+                }
+              ],
+              "reserved": {
+                "slot": "intake-scanner",
+                "host": "intake-scanner"
+              },
+              "intended_peer": "dispatch",
+              "isolated_peer": "visitor-services"
+            }
+          },
+          "example": {
+            "activity": "rollout",
+            "supplied": {
+              "spec": {
+                "inventory": {
+                  "fabric": {
+                    "switches": {
+                      "loading-floor": {
+                        "label": "Loading Floor",
+                        "vlans": [
+                          120,
+                          130,
+                          140
+                        ],
+                        "ports": {
+                          "port-a": {
+                            "up": false,
+                            "mode": {
+                              "kind": "access",
+                              "vlan": 120
+                            }
+                          },
+                          "port-b": {
+                            "up": false,
+                            "mode": {
+                              "kind": "access",
+                              "vlan": 120
+                            }
+                          },
+                          "port-c": {
+                            "up": false,
+                            "mode": {
+                              "kind": "access",
+                              "vlan": 120
+                            }
+                          },
+                          "uplink": {
+                            "up": true,
+                            "mode": {
+                              "kind": "trunk",
+                              "native": 120,
+                              "allowed": [
+                                120,
+                                130,
+                                140
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "stores-room": {
+                        "label": "Stores Room",
+                        "vlans": [
+                          120,
+                          130,
+                          140
+                        ],
+                        "ports": {
+                          "port-d": {
+                            "up": true,
+                            "mode": {
+                              "kind": "access",
+                              "vlan": 130
+                            }
+                          },
+                          "port-e": {
+                            "up": true,
+                            "mode": {
+                              "kind": "access",
+                              "vlan": 140
+                            }
+                          },
+                          "uplink": {
+                            "up": true,
+                            "mode": {
+                              "kind": "trunk",
+                              "native": 120,
+                              "allowed": [
+                                120,
+                                130,
+                                140
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "hosts": {
+                      "bench-a": {
+                        "label": "Bench A",
+                        "up": true
+                      },
+                      "bench-b": {
+                        "label": "Bench B",
+                        "up": true
+                      },
+                      "reserve-scanner": {
+                        "label": "Reserve Scanner",
+                        "up": true
+                      },
+                      "stores": {
+                        "label": "Stores",
+                        "up": true
+                      },
+                      "office-lab": {
+                        "label": "Office Lab",
+                        "up": true
+                      }
+                    },
+                    "cables": [
+                      {
+                        "id": "backbone",
+                        "a": {
+                          "kind": "switch",
+                          "switch": "loading-floor",
+                          "port": "uplink"
+                        },
+                        "b": {
+                          "kind": "switch",
+                          "switch": "stores-room",
+                          "port": "uplink"
+                        },
+                        "up": true
+                      },
+                      {
+                        "id": "edge-1",
+                        "a": {
+                          "kind": "host",
+                          "host": "bench-a"
+                        },
+                        "b": {
+                          "kind": "switch",
+                          "switch": "loading-floor",
+                          "port": "port-a"
+                        },
+                        "up": true
+                      },
+                      {
+                        "id": "edge-2",
+                        "a": {
+                          "kind": "host",
+                          "host": "bench-b"
+                        },
+                        "b": {
+                          "kind": "switch",
+                          "switch": "loading-floor",
+                          "port": "port-b"
+                        },
+                        "up": true
+                      },
+                      {
+                        "id": "edge-3",
+                        "a": {
+                          "kind": "host",
+                          "host": "reserve-scanner"
+                        },
+                        "b": {
+                          "kind": "switch",
+                          "switch": "loading-floor",
+                          "port": "port-c"
+                        },
+                        "up": true
+                      },
+                      {
+                        "id": "edge-4",
+                        "a": {
+                          "kind": "host",
+                          "host": "stores"
+                        },
+                        "b": {
+                          "kind": "switch",
+                          "switch": "stores-room",
+                          "port": "port-d"
+                        },
+                        "up": true
+                      },
+                      {
+                        "id": "edge-5",
+                        "a": {
+                          "kind": "host",
+                          "host": "office-lab"
+                        },
+                        "b": {
+                          "kind": "switch",
+                          "switch": "stores-room",
+                          "port": "port-e"
+                        },
+                        "up": true
+                      }
+                    ]
+                  },
+                  "editable": {
+                    "loading-floor": [
+                      "port-a",
+                      "port-b",
+                      "port-c"
+                    ],
+                    "stores-room": [
+                      "port-d",
+                      "port-e"
+                    ]
+                  }
+                },
+                "ports": {
+                  "bench-a": {
+                    "switch": "loading-floor",
+                    "port": "port-a"
+                  },
+                  "bench-b": {
+                    "switch": "loading-floor",
+                    "port": "port-b"
+                  },
+                  "reserve-scanner": {
+                    "switch": "loading-floor",
+                    "port": "port-c"
+                  },
+                  "stores": {
+                    "switch": "stores-room",
+                    "port": "port-d"
+                  },
+                  "office-lab": {
+                    "switch": "stores-room",
+                    "port": "port-e"
+                  }
+                }
+              },
+              "initial": {
+                "desired": {
+                  "profiles": {
+                    "intake": {
+                      "up": false,
+                      "vlan": 120,
+                      "description": "Uncommissioned intake"
+                    },
+                    "approved-service": {
+                      "up": true,
+                      "vlan": 130,
+                      "description": "Approved service access"
+                    },
+                    "isolated": {
+                      "up": true,
+                      "vlan": 140,
+                      "description": "Other workgroup"
+                    }
+                  },
+                  "bindings": {
+                    "bench-a": {
+                      "profile": "intake"
+                    },
+                    "bench-b": {
+                      "profile": "intake"
+                    },
+                    "reserve-scanner": {
+                      "profile": "intake"
+                    },
+                    "stores": {
+                      "profile": "approved-service"
+                    },
+                    "office-lab": {
+                      "profile": "isolated"
+                    }
+                  }
+                },
+                "local": {}
+              },
+              "approved": [
+                {
+                  "slot": "bench-a",
+                  "host": "bench-a"
+                },
+                {
+                  "slot": "bench-b",
+                  "host": "bench-b"
+                }
+              ],
+              "reserved": {
+                "slot": "reserve-scanner",
+                "host": "reserve-scanner"
+              },
+              "intended_peer": "stores",
+              "isolated_peer": "office-lab"
+            }
+          }
+        }
+      },
+      "solution": [
+        "automation-workshop {\"op\":\"RolloutDraft\",\"draft\":{\"method\":\"rebind\",\"slot\":\"desk-a\",\"profile\":\"approved-service\"}}",
+        "automation-workshop {\"op\":\"Preview\"}",
+        "automation-workshop {\"op\":\"Apply\"}",
+        "automation-workshop {\"op\":\"VerifyPilot\",\"index\":0}",
+        "automation-workshop {\"op\":\"RolloutDraft\",\"draft\":{\"method\":\"rebind\",\"slot\":\"desk-b\",\"profile\":\"approved-service\"}}",
+        "automation-workshop {\"op\":\"Preview\"}",
+        "automation-workshop {\"op\":\"Apply\"}",
+        "automation-workshop {\"op\":\"RolloutDraft\",\"draft\":{\"method\":\"reconcile\"}}",
+        "automation-workshop {\"op\":\"Preview\"}",
+        "automation-workshop {\"op\":\"Apply\"}",
+        "automation-workshop {\"op\":\"Check\"}"
+      ]
+    },
+    {
+      "id": "ccna-controller-intent-path",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ccna-staged-network-changes",
+      "topic": "Change impact and installed network policy",
+      "title": "Trace intent through installed policy and transport",
+      "summary": "Restore an approved fabric exchange by correcting controller intent, installing it and repairing the transport path.",
+      "objective": "Allow branch-to-office and office-to-branch traffic in the desired and installed policy. Restore the supplied service uplink and verify actual transport in both required directions. Keep the monitor-to-branch exchange working and the monitor-to-office exchange excluded.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "retry_guidance": "Read the exact failed result, inspect the current rationale or path, then try again.",
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "The underlay is the routed network between the supplied edges. The overlay is a logical relationship between edge applications. Two edges need working underlay transport before an allowed overlay exchange can reach its destination.",
+          "action": "Read the worked comparison.",
+          "commands": []
+        },
+        {
+          "title": "Try the separate example",
+          "why": "An application sends a northbound request to the controller. The controller stores its desired policy. A southbound update sends the resulting rule to the devices. An accepted request and an installed rule describe different points in this sequence.",
+          "action": "Make and inspect the guided change.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "The control plane decides which traffic can pass and the data plane applies the installed rules when moving traffic. Check desired intent, installed rule and underlay result separately. Check the needed return direction and leave other exchanges unchanged.",
+          "action": "Check the independent traffic and policy.",
+          "commands": []
+        }
+      ],
+      "explanation": "The controller keeps separate desired and installed rules. The required exchanges need an installed permit and a working underlay in the supplied virtual fabric. Independent monitor trials preserve the established boundary.",
+      "hints": [
+        "An accepted request changes desired policy first. Publish it to change the installed rules.",
+        "Use the path result to separate a blocked overlay exchange from a broken physical-side route.",
+        "Read both monitor rows before applying a broad rule."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc7426.html"
+      ],
+      "simplifications": "A supplied IPv4 transport graph, explicit virtual policy requests and a bounded installed rule table. No real signaling, paths outside the inventory, overlay protocol, encapsulation or underlying switch/controller platform is implemented.",
+      "prerequisites": [
+        "ccna-controller-pilot-rollout"
+      ],
+      "initial": {
+        "kind": "AutomationWorkshop",
+        "simulation": {
+          "version": 1,
+          "source_id": "ccna-controller-intent-path",
+          "view": "introduction",
+          "assignment": {
+            "source": "{\"activity\":\"intent\",\"supplied\":{\"spec\":{\"edges\":[{\"carrier_device\":\"branch-edge\",\"carrier_port\":\"uplink\",\"name\":\"branch-edge\"},{\"carrier_device\":\"office-edge\",\"carrier_port\":\"uplink\",\"name\":\"office-edge\"},{\"carrier_device\":\"monitor-edge\",\"carrier_port\":\"uplink\",\"name\":\"monitor-edge\"}],\"repairable\":{\"device\":\"carrier-core\",\"port\":\"port-2\"},\"transport\":{\"devices\":{\"branch-edge\":{\"forwarding\":false,\"interfaces\":{\"uplink\":{\"address\":{\"address\":\"10.58.1.2\",\"prefix\":30},\"link\":\"carrier-1\",\"up\":true}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"distance\":1,\"interface\":\"uplink\",\"via\":\"10.58.1.1\"}]},\"carrier-core\":{\"forwarding\":true,\"interfaces\":{\"port-1\":{\"address\":{\"address\":\"10.58.1.1\",\"prefix\":30},\"link\":\"carrier-1\",\"up\":true},\"port-2\":{\"address\":{\"address\":\"10.58.2.1\",\"prefix\":30},\"link\":\"carrier-2\",\"up\":true},\"port-3\":{\"address\":{\"address\":\"10.58.3.1\",\"prefix\":30},\"link\":\"carrier-3\",\"up\":true}},\"routes\":[]},\"monitor-edge\":{\"forwarding\":false,\"interfaces\":{\"uplink\":{\"address\":{\"address\":\"10.58.3.2\",\"prefix\":30},\"link\":\"carrier-3\",\"up\":true}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"distance\":1,\"interface\":\"uplink\",\"via\":\"10.58.3.1\"}]},\"office-edge\":{\"forwarding\":false,\"interfaces\":{\"uplink\":{\"address\":{\"address\":\"10.58.2.2\",\"prefix\":30},\"link\":\"carrier-2\",\"up\":true}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"distance\":1,\"interface\":\"uplink\",\"via\":\"10.58.2.1\"}]}}}},\"starter\":{\"controller\":[[false,true,false],[false,false,false],[true,false,false]],\"installed\":[[false,false,false],[false,false,false],[true,false,false]],\"uplink_up\":false},\"trials\":[{\"from\":0,\"to\":1,\"wanted\":true},{\"from\":1,\"to\":0,\"wanted\":true},{\"from\":2,\"to\":0,\"wanted\":true},{\"from\":2,\"to\":1,\"wanted\":false}]}}",
+            "work": {
+              "current": {
+                "activity": "intent",
+                "current": {
+                  "controller": [
+                    [
+                      false,
+                      true,
+                      false
+                    ],
+                    [
+                      false,
+                      false,
+                      false
+                    ],
+                    [
+                      true,
+                      false,
+                      false
+                    ]
+                  ],
+                  "installed": [
+                    [
+                      false,
+                      false,
+                      false
+                    ],
+                    [
+                      false,
+                      false,
+                      false
+                    ],
+                    [
+                      true,
+                      false,
+                      false
+                    ]
+                  ],
+                  "uplink_up": false
+                },
+                "request": {
+                  "from": 0,
+                  "to": 1
+                },
+                "allow": true
+              },
+              "checked": false
+            }
+          },
+          "example": {
+            "source": "{\"activity\":\"intent\",\"supplied\":{\"spec\":{\"edges\":[{\"carrier_device\":\"lab-client\",\"carrier_port\":\"uplink\",\"name\":\"lab-client\"},{\"carrier_device\":\"sample-service\",\"carrier_port\":\"uplink\",\"name\":\"sample-service\"},{\"carrier_device\":\"lab-admin\",\"carrier_port\":\"uplink\",\"name\":\"lab-admin\"}],\"repairable\":{\"device\":\"training-core\",\"port\":\"port-2\"},\"transport\":{\"devices\":{\"lab-admin\":{\"forwarding\":false,\"interfaces\":{\"uplink\":{\"address\":{\"address\":\"10.42.3.2\",\"prefix\":30},\"link\":\"carrier-3\",\"up\":true}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"distance\":1,\"interface\":\"uplink\",\"via\":\"10.42.3.1\"}]},\"lab-client\":{\"forwarding\":false,\"interfaces\":{\"uplink\":{\"address\":{\"address\":\"10.42.1.2\",\"prefix\":30},\"link\":\"carrier-1\",\"up\":true}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"distance\":1,\"interface\":\"uplink\",\"via\":\"10.42.1.1\"}]},\"sample-service\":{\"forwarding\":false,\"interfaces\":{\"uplink\":{\"address\":{\"address\":\"10.42.2.2\",\"prefix\":30},\"link\":\"carrier-2\",\"up\":true}},\"routes\":[{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"distance\":1,\"interface\":\"uplink\",\"via\":\"10.42.2.1\"}]},\"training-core\":{\"forwarding\":true,\"interfaces\":{\"port-1\":{\"address\":{\"address\":\"10.42.1.1\",\"prefix\":30},\"link\":\"carrier-1\",\"up\":true},\"port-2\":{\"address\":{\"address\":\"10.42.2.1\",\"prefix\":30},\"link\":\"carrier-2\",\"up\":true},\"port-3\":{\"address\":{\"address\":\"10.42.3.1\",\"prefix\":30},\"link\":\"carrier-3\",\"up\":true}},\"routes\":[]}}}},\"starter\":{\"controller\":[[false,true,false],[false,false,false],[true,false,false]],\"installed\":[[false,false,false],[false,false,false],[true,false,false]],\"uplink_up\":false},\"trials\":[{\"from\":0,\"to\":1,\"wanted\":true},{\"from\":1,\"to\":0,\"wanted\":true},{\"from\":2,\"to\":0,\"wanted\":true},{\"from\":2,\"to\":1,\"wanted\":false}]}}",
+            "work": {
+              "current": {
+                "activity": "intent",
+                "current": {
+                  "controller": [
+                    [
+                      false,
+                      true,
+                      false
+                    ],
+                    [
+                      false,
+                      false,
+                      false
+                    ],
+                    [
+                      true,
+                      false,
+                      false
+                    ]
+                  ],
+                  "installed": [
+                    [
+                      false,
+                      false,
+                      false
+                    ],
+                    [
+                      false,
+                      false,
+                      false
+                    ],
+                    [
+                      true,
+                      false,
+                      false
+                    ]
+                  ],
+                  "uplink_up": false
+                },
+                "request": {
+                  "from": 0,
+                  "to": 1
+                },
+                "allow": true
+              },
+              "checked": false
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "AutomationWorkshop",
+        "definition": {
+          "version": 1,
+          "source_id": "ccna-controller-intent-path",
+          "assignment": {
+            "activity": "intent",
+            "supplied": {
+              "spec": {
+                "transport": {
+                  "devices": {
+                    "carrier-core": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "port-1": {
+                          "link": "carrier-1",
+                          "up": true,
+                          "address": {
+                            "address": "10.58.1.1",
+                            "prefix": 30
+                          }
+                        },
+                        "port-2": {
+                          "link": "carrier-2",
+                          "up": true,
+                          "address": {
+                            "address": "10.58.2.1",
+                            "prefix": 30
+                          }
+                        },
+                        "port-3": {
+                          "link": "carrier-3",
+                          "up": true,
+                          "address": {
+                            "address": "10.58.3.1",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": []
+                    },
+                    "branch-edge": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "uplink": {
+                          "link": "carrier-1",
+                          "up": true,
+                          "address": {
+                            "address": "10.58.1.2",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "uplink",
+                          "via": "10.58.1.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "office-edge": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "uplink": {
+                          "link": "carrier-2",
+                          "up": true,
+                          "address": {
+                            "address": "10.58.2.2",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "uplink",
+                          "via": "10.58.2.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "monitor-edge": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "uplink": {
+                          "link": "carrier-3",
+                          "up": true,
+                          "address": {
+                            "address": "10.58.3.2",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "uplink",
+                          "via": "10.58.3.1",
+                          "distance": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                "edges": [
+                  {
+                    "name": "branch-edge",
+                    "carrier_device": "branch-edge",
+                    "carrier_port": "uplink"
+                  },
+                  {
+                    "name": "office-edge",
+                    "carrier_device": "office-edge",
+                    "carrier_port": "uplink"
+                  },
+                  {
+                    "name": "monitor-edge",
+                    "carrier_device": "monitor-edge",
+                    "carrier_port": "uplink"
+                  }
+                ],
+                "repairable": {
+                  "device": "carrier-core",
+                  "port": "port-2"
+                }
+              },
+              "starter": {
+                "controller": [
+                  [
+                    false,
+                    true,
+                    false
+                  ],
+                  [
+                    false,
+                    false,
+                    false
+                  ],
+                  [
+                    true,
+                    false,
+                    false
+                  ]
+                ],
+                "installed": [
+                  [
+                    false,
+                    false,
+                    false
+                  ],
+                  [
+                    false,
+                    false,
+                    false
+                  ],
+                  [
+                    true,
+                    false,
+                    false
+                  ]
+                ],
+                "uplink_up": false
+              },
+              "trials": [
+                {
+                  "from": 0,
+                  "to": 1,
+                  "wanted": true
+                },
+                {
+                  "from": 1,
+                  "to": 0,
+                  "wanted": true
+                },
+                {
+                  "from": 2,
+                  "to": 0,
+                  "wanted": true
+                },
+                {
+                  "from": 2,
+                  "to": 1,
+                  "wanted": false
+                }
+              ]
+            }
+          },
+          "example": {
+            "activity": "intent",
+            "supplied": {
+              "spec": {
+                "transport": {
+                  "devices": {
+                    "training-core": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "port-1": {
+                          "link": "carrier-1",
+                          "up": true,
+                          "address": {
+                            "address": "10.42.1.1",
+                            "prefix": 30
+                          }
+                        },
+                        "port-2": {
+                          "link": "carrier-2",
+                          "up": true,
+                          "address": {
+                            "address": "10.42.2.1",
+                            "prefix": 30
+                          }
+                        },
+                        "port-3": {
+                          "link": "carrier-3",
+                          "up": true,
+                          "address": {
+                            "address": "10.42.3.1",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": []
+                    },
+                    "lab-client": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "uplink": {
+                          "link": "carrier-1",
+                          "up": true,
+                          "address": {
+                            "address": "10.42.1.2",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "uplink",
+                          "via": "10.42.1.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "sample-service": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "uplink": {
+                          "link": "carrier-2",
+                          "up": true,
+                          "address": {
+                            "address": "10.42.2.2",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "uplink",
+                          "via": "10.42.2.1",
+                          "distance": 1
+                        }
+                      ]
+                    },
+                    "lab-admin": {
+                      "forwarding": false,
+                      "interfaces": {
+                        "uplink": {
+                          "link": "carrier-3",
+                          "up": true,
+                          "address": {
+                            "address": "10.42.3.2",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": [
+                        {
+                          "destination": {
+                            "address": "0.0.0.0",
+                            "length": 0
+                          },
+                          "interface": "uplink",
+                          "via": "10.42.3.1",
+                          "distance": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                "edges": [
+                  {
+                    "name": "lab-client",
+                    "carrier_device": "lab-client",
+                    "carrier_port": "uplink"
+                  },
+                  {
+                    "name": "sample-service",
+                    "carrier_device": "sample-service",
+                    "carrier_port": "uplink"
+                  },
+                  {
+                    "name": "lab-admin",
+                    "carrier_device": "lab-admin",
+                    "carrier_port": "uplink"
+                  }
+                ],
+                "repairable": {
+                  "device": "training-core",
+                  "port": "port-2"
+                }
+              },
+              "starter": {
+                "controller": [
+                  [
+                    false,
+                    true,
+                    false
+                  ],
+                  [
+                    false,
+                    false,
+                    false
+                  ],
+                  [
+                    true,
+                    false,
+                    false
+                  ]
+                ],
+                "installed": [
+                  [
+                    false,
+                    false,
+                    false
+                  ],
+                  [
+                    false,
+                    false,
+                    false
+                  ],
+                  [
+                    true,
+                    false,
+                    false
+                  ]
+                ],
+                "uplink_up": false
+              },
+              "trials": [
+                {
+                  "from": 0,
+                  "to": 1,
+                  "wanted": true
+                },
+                {
+                  "from": 1,
+                  "to": 0,
+                  "wanted": true
+                },
+                {
+                  "from": 2,
+                  "to": 0,
+                  "wanted": true
+                },
+                {
+                  "from": 2,
+                  "to": 1,
+                  "wanted": false
+                }
+              ]
+            }
+          }
+        }
+      },
+      "solution": [
+        "automation-workshop {\"op\":\"IntentDraft\",\"request\":{\"from\":1,\"to\":0},\"allow\":true}",
+        "automation-workshop {\"op\":\"Submit\"}",
+        "automation-workshop {\"op\":\"Publish\"}",
+        "automation-workshop {\"op\":\"Uplink\",\"up\":true}",
+        "automation-workshop {\"op\":\"Check\"}"
+      ]
+    }
+  ]
+}

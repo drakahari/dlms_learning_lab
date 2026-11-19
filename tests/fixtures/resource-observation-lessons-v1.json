@@ -1,0 +1,2510 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-resource-cpu-intervals",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-resource-observations",
+      "topic": "Resource measurements",
+      "title": "Measure the busy interval, not the boot average",
+      "summary": "Compare actual CPU windows and runnable work before publishing a measured report.",
+      "objective": "Use the boot-a recording to compare every one-second interval wholly inside 3000–5000 ms. Report the highest and lowest executing-work percentages and the largest runnable-process reading from those interval rows. Executing work is the displayed us + sy + gu total. Attach an actual interval row to each claim; do not use the first since-boot row. Enter whole numbers with the units already shown. Run commands against the supplied recording, then choose Check report. Equivalent supported commands and tied eligible intervals are valid.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Investigate the supplied recording, attach measured evidence and check the complete report."
+      ],
+      "guide": [],
+      "explanation": "Choose boot-a at 3.000 s and run vmstat 1 3. Row 2 is 3000–4000 ms: us 50 + sy 30 + gu 0 = 80% executing work, with r 4. Row 3 is 4000–5000 ms: us 10 + sy 10 + gu 0 = 20%. Attach Row 2 to the highest-work and largest-runnable claims and Row 3 to the lowest-work claim; enter 80,4 and 20 in the matching fields and Check report. The first since-boot row is not an eligible interval. Equivalent supported commands pass.",
+      "hints": [
+        "Choose the requested boot and time before running a finite command. Row 1 of vmstat is a boot average, not an interval.",
+        "Use the units beside each report field. Attach a result row, then type the measured value; the fields do not copy solved answers automatically.",
+        "For a peak/trough compare every eligible interval. For MemAvailable use the final virtual meminfo. Check each report row’s evidence caption before checking."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://gitlab.com/procps-ng/procps/-/raw/master/man/vmstat.8",
+        "https://www.kernel.org/doc/html/latest/filesystems/proc.html"
+      ],
+      "simplifications": "Finite replay of supplied synthetic Linux observations, not a live machine. Only disclosed vmstat forms and the eight-field virtual meminfo are supported. No actual time wait, host /proc read, process, swap, service, disk or network operation. Unknown syntax, missing intervals, mixed sources and decreasing counters fail honestly. Rounded displayed percentages can sum slightly above or below 100. This measures recorded facts; it does not identify a hardware bottleneck, prove pressure or implement the wider LPIC-2 monitoring-tool set. Sources checked 2026-11-11; procps/kernel latest URLs are mutable.",
+      "initial": {
+        "kind": "ResourceObservations",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_action": 0,
+          "assignment": {
+            "task_id": "cpu-window-assignment",
+            "cursor": 0,
+            "result_row": 0,
+            "input": "",
+            "history": [],
+            "claims": [
+              {
+                "rule": "peak-work",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "quiet-work",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "runnable",
+                "value": "",
+                "evidence": null
+              }
+            ],
+            "checked": false
+          },
+          "practice": {
+            "task_id": "cpu-window-practice",
+            "cursor": 0,
+            "result_row": 0,
+            "input": "",
+            "history": [],
+            "claims": [
+              {
+                "rule": "peak-work",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "quiet-work",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "runnable",
+                "value": "",
+                "evidence": null
+              }
+            ],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "ResourceObservations",
+        "definition": {
+          "initial": {
+            "id": "cpu-window-assignment",
+            "recording": {
+              "version": 1,
+              "observations": [
+                {
+                  "counters": {
+                    "boot": "boot-a",
+                    "at_ms": 3000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        180,
+                        30,
+                        60,
+                        240,
+                        60,
+                        15,
+                        15,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1048576,
+                      "available_kib": 3145728,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 10,
+                      "write_ops": 20,
+                      "read_sectors": 100,
+                      "write_sectors": 200,
+                      "read_ms": 30,
+                      "write_ms": 40
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 75,
+                  "swap_out_pages": 38,
+                  "block_in_kib": 900,
+                  "block_out_kib": 600,
+                  "interrupts": 1200,
+                  "context_switches": 600
+                },
+                {
+                  "counters": {
+                    "boot": "boot-a",
+                    "at_ms": 4000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        260,
+                        50,
+                        100,
+                        260,
+                        80,
+                        25,
+                        25,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 524288,
+                      "available_kib": 1572864,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 110,
+                      "write_ops": 220,
+                      "read_sectors": 700,
+                      "write_sectors": 1000,
+                      "read_ms": 80,
+                      "write_ms": 140
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 4,
+                  "blocked": 2,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2359296,
+                  "reclaimable_kib": 393216,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 100,
+                  "swap_out_pages": 88,
+                  "block_in_kib": 1200,
+                  "block_out_kib": 1000,
+                  "interrupts": 1700,
+                  "context_switches": 1200
+                },
+                {
+                  "counters": {
+                    "boot": "boot-a",
+                    "at_ms": 5000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        280,
+                        50,
+                        120,
+                        420,
+                        80,
+                        25,
+                        25,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1536000,
+                      "available_kib": 3670016,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 120,
+                      "write_ops": 240,
+                      "read_sectors": 720,
+                      "write_sectors": 1040,
+                      "read_ms": 90,
+                      "write_ms": 150
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 100,
+                  "swap_out_pages": 88,
+                  "block_in_kib": 1210,
+                  "block_out_kib": 1020,
+                  "interrupts": 1800,
+                  "context_switches": 1400
+                }
+              ]
+            },
+            "rules": [
+              {
+                "id": "peak-work",
+                "label": "Highest executing work",
+                "metric": "work_percent",
+                "boot": "boot-a",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 3000,
+                  "to_ms": 5000,
+                  "step_ms": 1000,
+                  "highest": true
+                }
+              },
+              {
+                "id": "quiet-work",
+                "label": "Lowest executing work",
+                "metric": "work_percent",
+                "boot": "boot-a",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 3000,
+                  "to_ms": 5000,
+                  "step_ms": 1000,
+                  "highest": false
+                }
+              },
+              {
+                "id": "runnable",
+                "label": "Largest runnable-process reading",
+                "metric": "runnable",
+                "boot": "boot-a",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 3000,
+                  "to_ms": 5000,
+                  "step_ms": 1000,
+                  "highest": true
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "cpu-window-practice",
+            "recording": {
+              "version": 1,
+              "observations": [
+                {
+                  "counters": {
+                    "boot": "trial-a",
+                    "at_ms": 6000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        360,
+                        60,
+                        120,
+                        480,
+                        120,
+                        30,
+                        30,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 16777216,
+                      "free_kib": 2097152,
+                      "available_kib": 6291456,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 10,
+                      "write_ops": 20,
+                      "read_sectors": 100,
+                      "write_sectors": 200,
+                      "read_ms": 30,
+                      "write_ms": 40
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 1048576,
+                  "cache_kib": 4194304,
+                  "reclaimable_kib": 524288,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 75,
+                  "swap_out_pages": 38,
+                  "block_in_kib": 900,
+                  "block_out_kib": 600,
+                  "interrupts": 1200,
+                  "context_switches": 600
+                },
+                {
+                  "counters": {
+                    "boot": "trial-a",
+                    "at_ms": 7000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        410,
+                        70,
+                        140,
+                        580,
+                        130,
+                        35,
+                        35,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 16777216,
+                      "free_kib": 1048576,
+                      "available_kib": 4194304,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 110,
+                      "write_ops": 220,
+                      "read_sectors": 700,
+                      "write_sectors": 1000,
+                      "read_ms": 80,
+                      "write_ms": 140
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 5,
+                  "blocked": 2,
+                  "buffers_kib": 1048576,
+                  "cache_kib": 4194304,
+                  "reclaimable_kib": 524288,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 100,
+                  "swap_out_pages": 88,
+                  "block_in_kib": 1200,
+                  "block_out_kib": 1000,
+                  "interrupts": 1700,
+                  "context_switches": 1200
+                },
+                {
+                  "counters": {
+                    "boot": "trial-a",
+                    "at_ms": 8000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        420,
+                        70,
+                        150,
+                        760,
+                        130,
+                        35,
+                        35,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 16777216,
+                      "free_kib": 3072000,
+                      "available_kib": 6291456,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 120,
+                      "write_ops": 240,
+                      "read_sectors": 720,
+                      "write_sectors": 1040,
+                      "read_ms": 90,
+                      "write_ms": 150
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 1048576,
+                  "cache_kib": 4194304,
+                  "reclaimable_kib": 524288,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 100,
+                  "swap_out_pages": 88,
+                  "block_in_kib": 1210,
+                  "block_out_kib": 1020,
+                  "interrupts": 1800,
+                  "context_switches": 1400
+                }
+              ]
+            },
+            "rules": [
+              {
+                "id": "peak-work",
+                "label": "Highest executing work",
+                "metric": "work_percent",
+                "boot": "trial-a",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 6000,
+                  "to_ms": 8000,
+                  "step_ms": 1000,
+                  "highest": true
+                }
+              },
+              {
+                "id": "quiet-work",
+                "label": "Lowest executing work",
+                "metric": "work_percent",
+                "boot": "trial-a",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 6000,
+                  "to_ms": 8000,
+                  "step_ms": 1000,
+                  "highest": false
+                }
+              },
+              {
+                "id": "runnable",
+                "label": "Largest runnable-process reading",
+                "metric": "runnable",
+                "boot": "trial-a",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 6000,
+                  "to_ms": 8000,
+                  "step_ms": 1000,
+                  "highest": true
+                }
+              }
+            ]
+          },
+          "reference": [
+            {
+              "kind": "run",
+              "probe": {
+                "start": 0,
+                "command": "vmstat 1 3"
+              }
+            },
+            {
+              "kind": "attach",
+              "rule": "peak-work",
+              "row": 1
+            },
+            {
+              "kind": "value",
+              "rule": "peak-work",
+              "value": "80"
+            },
+            {
+              "kind": "attach",
+              "rule": "quiet-work",
+              "row": 2
+            },
+            {
+              "kind": "value",
+              "rule": "quiet-work",
+              "value": "20"
+            },
+            {
+              "kind": "attach",
+              "rule": "runnable",
+              "row": 1
+            },
+            {
+              "kind": "value",
+              "rule": "runnable",
+              "value": "4"
+            },
+            {
+              "kind": "check"
+            }
+          ],
+          "example_reference": [
+            {
+              "kind": "run",
+              "probe": {
+                "start": 0,
+                "command": "vmstat 1 3"
+              }
+            },
+            {
+              "kind": "attach",
+              "rule": "peak-work",
+              "row": 1
+            },
+            {
+              "kind": "value",
+              "rule": "peak-work",
+              "value": "45"
+            },
+            {
+              "kind": "attach",
+              "rule": "quiet-work",
+              "row": 2
+            },
+            {
+              "kind": "value",
+              "rule": "quiet-work",
+              "value": "10"
+            },
+            {
+              "kind": "attach",
+              "rule": "runnable",
+              "row": 1
+            },
+            {
+              "kind": "value",
+              "rule": "runnable",
+              "value": "5"
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "resource-action {\"kind\":\"run\",\"probe\":{\"start\":0,\"command\":\"vmstat 1 3\"}}",
+        "resource-action {\"kind\":\"attach\",\"rule\":\"peak-work\",\"row\":1}",
+        "resource-action {\"kind\":\"value\",\"rule\":\"peak-work\",\"value\":\"80\"}",
+        "resource-action {\"kind\":\"attach\",\"rule\":\"quiet-work\",\"row\":2}",
+        "resource-action {\"kind\":\"value\",\"rule\":\"quiet-work\",\"value\":\"20\"}",
+        "resource-action {\"kind\":\"attach\",\"rule\":\"runnable\",\"row\":1}",
+        "resource-action {\"kind\":\"value\",\"rule\":\"runnable\",\"value\":\"4\"}",
+        "resource-action {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic1-process-handover"
+      ],
+      "retry_guidance": "Read the specific report-row feedback. Check source boot, whether the row is since boot or an interval, and the labeled units before changing a value."
+    },
+    {
+      "id": "lpic2-resource-swap-activity",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-resource-observations",
+      "topic": "Resource measurements",
+      "title": "Separate allocated swap from current paging",
+      "summary": "Use activity rates and available memory to avoid diagnosing pressure from a footprint alone.",
+      "objective": "Inspect paging-a over 60000–63000 ms. Find the highest and lowest one-second swap-out rates, using actual interval rows as evidence. At 63000 ms, report allocated swap and MemAvailable. Use the final snapshot; allocated swap is SwapTotal minus SwapFree, while MemAvailable is supplied directly. Enter whole KiB/s or KiB as labeled, attach the corresponding evidence and choose Check report. Any tied minimum-rate interval is valid. The task asks for measured facts, not an unsupported diagnosis.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Investigate the supplied recording, attach measured evidence and check the complete report."
+      ],
+      "guide": [],
+      "explanation": "Choose paging-a at 60.000 s and run vmstat 1 4. The first interval so is 1024 KiB/s; the next two are 0. Attach those interval rows to the highest/lowest swap-out claims. At 63.000 s, run cat /proc/meminfo: SwapTotal 4194304 minus SwapFree 1048576 gives 3145728 KiB allocated, while MemAvailable is 2097152 KiB. Attach the snapshot to those two claims and enter the values. Allocated swap has remained present while current transfer activity stopped; this alone is not a complete pressure diagnosis.",
+      "hints": [
+        "Choose the requested boot and time before running a finite command. Row 1 of vmstat is a boot average, not an interval.",
+        "Use the units beside each report field. Attach a result row, then type the measured value; the fields do not copy solved answers automatically.",
+        "For allocated swap subtract SwapFree from SwapTotal. For activity compare interval so, including zero rates; those quantities have different units."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://gitlab.com/procps-ng/procps/-/raw/master/man/vmstat.8",
+        "https://www.kernel.org/doc/html/latest/filesystems/proc.html"
+      ],
+      "simplifications": "Finite replay of supplied synthetic Linux observations, not a live machine. Only disclosed vmstat forms and the eight-field virtual meminfo are supported. No actual time wait, host /proc read, process, swap, service, disk or network operation. Unknown syntax, missing intervals, mixed sources and decreasing counters fail honestly. Rounded displayed percentages can sum slightly above or below 100. This measures recorded facts; it does not identify a hardware bottleneck, prove pressure or implement the wider LPIC-2 monitoring-tool set. Sources checked 2026-11-11; procps/kernel latest URLs are mutable.",
+      "initial": {
+        "kind": "ResourceObservations",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_action": 0,
+          "assignment": {
+            "task_id": "paging-assignment",
+            "cursor": 0,
+            "result_row": 0,
+            "input": "",
+            "history": [],
+            "claims": [
+              {
+                "rule": "peak-out",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "quiet-out",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "allocated",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "available",
+                "value": "",
+                "evidence": null
+              }
+            ],
+            "checked": false
+          },
+          "practice": {
+            "task_id": "paging-practice",
+            "cursor": 0,
+            "result_row": 0,
+            "input": "",
+            "history": [],
+            "claims": [
+              {
+                "rule": "peak-out",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "quiet-out",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "allocated",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "available",
+                "value": "",
+                "evidence": null
+              }
+            ],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "ResourceObservations",
+        "definition": {
+          "initial": {
+            "id": "paging-assignment",
+            "recording": {
+              "version": 1,
+              "observations": [
+                {
+                  "counters": {
+                    "boot": "paging-a",
+                    "at_ms": 60000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        1800,
+                        200,
+                        2000,
+                        7000,
+                        600,
+                        200,
+                        200,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 131072,
+                      "available_kib": 2097152,
+                      "swap_total_kib": 4194304,
+                      "swap_free_kib": 1048576
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 10,
+                      "write_ops": 20,
+                      "read_sectors": 100,
+                      "write_sectors": 200,
+                      "read_ms": 30,
+                      "write_ms": 40
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 65536,
+                  "cache_kib": 2796202,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 100,
+                  "swap_out_pages": 200,
+                  "block_in_kib": 900,
+                  "block_out_kib": 600,
+                  "interrupts": 1200,
+                  "context_switches": 600
+                },
+                {
+                  "counters": {
+                    "boot": "paging-a",
+                    "at_ms": 61000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        1830,
+                        200,
+                        2030,
+                        7030,
+                        700,
+                        205,
+                        205,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 131072,
+                      "available_kib": 262144,
+                      "swap_total_kib": 4194304,
+                      "swap_free_kib": 1048576
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 10,
+                      "write_ops": 20,
+                      "read_sectors": 100,
+                      "write_sectors": 200,
+                      "read_ms": 30,
+                      "write_ms": 40
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 3,
+                  "blocked": 6,
+                  "buffers_kib": 65536,
+                  "cache_kib": 2796202,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 356,
+                  "swap_out_pages": 456,
+                  "block_in_kib": 4996,
+                  "block_out_kib": 4696,
+                  "interrupts": 1400,
+                  "context_switches": 700
+                },
+                {
+                  "counters": {
+                    "boot": "paging-a",
+                    "at_ms": 62000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        1850,
+                        200,
+                        2050,
+                        7180,
+                        700,
+                        210,
+                        210,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 131072,
+                      "available_kib": 2097152,
+                      "swap_total_kib": 4194304,
+                      "swap_free_kib": 1048576
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 10,
+                      "write_ops": 20,
+                      "read_sectors": 100,
+                      "write_sectors": 200,
+                      "read_ms": 30,
+                      "write_ms": 40
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 65536,
+                  "cache_kib": 2796202,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 356,
+                  "swap_out_pages": 456,
+                  "block_in_kib": 5028,
+                  "block_out_kib": 4760,
+                  "interrupts": 1600,
+                  "context_switches": 800
+                },
+                {
+                  "counters": {
+                    "boot": "paging-a",
+                    "at_ms": 63000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        1860,
+                        200,
+                        2070,
+                        7340,
+                        700,
+                        215,
+                        215,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 131072,
+                      "available_kib": 2097152,
+                      "swap_total_kib": 4194304,
+                      "swap_free_kib": 1048576
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 10,
+                      "write_ops": 20,
+                      "read_sectors": 100,
+                      "write_sectors": 200,
+                      "read_ms": 30,
+                      "write_ms": 40
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 65536,
+                  "cache_kib": 2796202,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 356,
+                  "swap_out_pages": 456,
+                  "block_in_kib": 5044,
+                  "block_out_kib": 4792,
+                  "interrupts": 1800,
+                  "context_switches": 900
+                }
+              ]
+            },
+            "rules": [
+              {
+                "id": "peak-out",
+                "label": "Highest current swap-out rate",
+                "metric": "swap_out_kib_per_second",
+                "boot": "paging-a",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 60000,
+                  "to_ms": 63000,
+                  "step_ms": 1000,
+                  "highest": true
+                }
+              },
+              {
+                "id": "quiet-out",
+                "label": "Lowest current swap-out rate",
+                "metric": "swap_out_kib_per_second",
+                "boot": "paging-a",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 60000,
+                  "to_ms": 63000,
+                  "step_ms": 1000,
+                  "highest": false
+                }
+              },
+              {
+                "id": "allocated",
+                "label": "Allocated swap at the final observation",
+                "metric": "swap_used_kib",
+                "boot": "paging-a",
+                "selection": {
+                  "kind": "snapshot",
+                  "from_ms": 63000,
+                  "to_ms": 63000
+                }
+              },
+              {
+                "id": "available",
+                "label": "Available memory at the final observation",
+                "metric": "available_kib",
+                "boot": "paging-a",
+                "selection": {
+                  "kind": "snapshot",
+                  "from_ms": 63000,
+                  "to_ms": 63000
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "paging-practice",
+            "recording": {
+              "version": 1,
+              "observations": [
+                {
+                  "counters": {
+                    "boot": "paging-practice",
+                    "at_ms": 120000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        3600,
+                        400,
+                        4000,
+                        14000,
+                        1200,
+                        400,
+                        400,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 4194304,
+                      "free_kib": 65536,
+                      "available_kib": 786432,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 10,
+                      "write_ops": 20,
+                      "read_sectors": 100,
+                      "write_sectors": 200,
+                      "read_ms": 30,
+                      "write_ms": 40
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 32768,
+                  "cache_kib": 1398101,
+                  "reclaimable_kib": 131072,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 100,
+                  "swap_out_pages": 200,
+                  "block_in_kib": 900,
+                  "block_out_kib": 600,
+                  "interrupts": 1200,
+                  "context_switches": 600
+                },
+                {
+                  "counters": {
+                    "boot": "paging-practice",
+                    "at_ms": 121000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        3630,
+                        400,
+                        4030,
+                        14030,
+                        1300,
+                        405,
+                        405,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 4194304,
+                      "free_kib": 65536,
+                      "available_kib": 98304,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 10,
+                      "write_ops": 20,
+                      "read_sectors": 100,
+                      "write_sectors": 200,
+                      "read_ms": 30,
+                      "write_ms": 40
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 3,
+                  "blocked": 6,
+                  "buffers_kib": 32768,
+                  "cache_kib": 1398101,
+                  "reclaimable_kib": 131072,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 164,
+                  "swap_out_pages": 264,
+                  "block_in_kib": 4996,
+                  "block_out_kib": 4696,
+                  "interrupts": 1400,
+                  "context_switches": 700
+                },
+                {
+                  "counters": {
+                    "boot": "paging-practice",
+                    "at_ms": 122000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        3650,
+                        400,
+                        4050,
+                        14180,
+                        1300,
+                        410,
+                        410,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 4194304,
+                      "free_kib": 65536,
+                      "available_kib": 786432,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 10,
+                      "write_ops": 20,
+                      "read_sectors": 100,
+                      "write_sectors": 200,
+                      "read_ms": 30,
+                      "write_ms": 40
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 32768,
+                  "cache_kib": 1398101,
+                  "reclaimable_kib": 131072,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 164,
+                  "swap_out_pages": 264,
+                  "block_in_kib": 5028,
+                  "block_out_kib": 4760,
+                  "interrupts": 1600,
+                  "context_switches": 800
+                },
+                {
+                  "counters": {
+                    "boot": "paging-practice",
+                    "at_ms": 123000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        3660,
+                        400,
+                        4070,
+                        14340,
+                        1300,
+                        415,
+                        415,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 4194304,
+                      "free_kib": 65536,
+                      "available_kib": 786432,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 10,
+                      "write_ops": 20,
+                      "read_sectors": 100,
+                      "write_sectors": 200,
+                      "read_ms": 30,
+                      "write_ms": 40
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 32768,
+                  "cache_kib": 1398101,
+                  "reclaimable_kib": 131072,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 164,
+                  "swap_out_pages": 264,
+                  "block_in_kib": 5044,
+                  "block_out_kib": 4792,
+                  "interrupts": 1800,
+                  "context_switches": 900
+                }
+              ]
+            },
+            "rules": [
+              {
+                "id": "peak-out",
+                "label": "Highest current swap-out rate",
+                "metric": "swap_out_kib_per_second",
+                "boot": "paging-practice",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 120000,
+                  "to_ms": 123000,
+                  "step_ms": 1000,
+                  "highest": true
+                }
+              },
+              {
+                "id": "quiet-out",
+                "label": "Lowest current swap-out rate",
+                "metric": "swap_out_kib_per_second",
+                "boot": "paging-practice",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 120000,
+                  "to_ms": 123000,
+                  "step_ms": 1000,
+                  "highest": false
+                }
+              },
+              {
+                "id": "allocated",
+                "label": "Allocated swap at the final observation",
+                "metric": "swap_used_kib",
+                "boot": "paging-practice",
+                "selection": {
+                  "kind": "snapshot",
+                  "from_ms": 123000,
+                  "to_ms": 123000
+                }
+              },
+              {
+                "id": "available",
+                "label": "Available memory at the final observation",
+                "metric": "available_kib",
+                "boot": "paging-practice",
+                "selection": {
+                  "kind": "snapshot",
+                  "from_ms": 123000,
+                  "to_ms": 123000
+                }
+              }
+            ]
+          },
+          "reference": [
+            {
+              "kind": "run",
+              "probe": {
+                "start": 0,
+                "command": "vmstat 1 4"
+              }
+            },
+            {
+              "kind": "attach",
+              "rule": "peak-out",
+              "row": 1
+            },
+            {
+              "kind": "value",
+              "rule": "peak-out",
+              "value": "1024"
+            },
+            {
+              "kind": "attach",
+              "rule": "quiet-out",
+              "row": 2
+            },
+            {
+              "kind": "value",
+              "rule": "quiet-out",
+              "value": "0"
+            },
+            {
+              "kind": "run",
+              "probe": {
+                "start": 3,
+                "command": "cat /proc/meminfo"
+              }
+            },
+            {
+              "kind": "attach",
+              "rule": "allocated",
+              "row": 0
+            },
+            {
+              "kind": "value",
+              "rule": "allocated",
+              "value": "3145728"
+            },
+            {
+              "kind": "attach",
+              "rule": "available",
+              "row": 0
+            },
+            {
+              "kind": "value",
+              "rule": "available",
+              "value": "2097152"
+            },
+            {
+              "kind": "check"
+            }
+          ],
+          "example_reference": [
+            {
+              "kind": "run",
+              "probe": {
+                "start": 0,
+                "command": "vmstat 1 4"
+              }
+            },
+            {
+              "kind": "attach",
+              "rule": "peak-out",
+              "row": 1
+            },
+            {
+              "kind": "value",
+              "rule": "peak-out",
+              "value": "256"
+            },
+            {
+              "kind": "attach",
+              "rule": "quiet-out",
+              "row": 3
+            },
+            {
+              "kind": "value",
+              "rule": "quiet-out",
+              "value": "0"
+            },
+            {
+              "kind": "run",
+              "probe": {
+                "start": 3,
+                "command": "cat /proc/meminfo"
+              }
+            },
+            {
+              "kind": "attach",
+              "rule": "allocated",
+              "row": 0
+            },
+            {
+              "kind": "value",
+              "rule": "allocated",
+              "value": "524288"
+            },
+            {
+              "kind": "attach",
+              "rule": "available",
+              "row": 0
+            },
+            {
+              "kind": "value",
+              "rule": "available",
+              "value": "786432"
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "resource-action {\"kind\":\"run\",\"probe\":{\"start\":0,\"command\":\"vmstat 1 4\"}}",
+        "resource-action {\"kind\":\"attach\",\"rule\":\"peak-out\",\"row\":1}",
+        "resource-action {\"kind\":\"value\",\"rule\":\"peak-out\",\"value\":\"1024\"}",
+        "resource-action {\"kind\":\"attach\",\"rule\":\"quiet-out\",\"row\":2}",
+        "resource-action {\"kind\":\"value\",\"rule\":\"quiet-out\",\"value\":\"0\"}",
+        "resource-action {\"kind\":\"run\",\"probe\":{\"start\":3,\"command\":\"cat /proc/meminfo\"}}",
+        "resource-action {\"kind\":\"attach\",\"rule\":\"allocated\",\"row\":0}",
+        "resource-action {\"kind\":\"value\",\"rule\":\"allocated\",\"value\":\"3145728\"}",
+        "resource-action {\"kind\":\"attach\",\"rule\":\"available\",\"row\":0}",
+        "resource-action {\"kind\":\"value\",\"rule\":\"available\",\"value\":\"2097152\"}",
+        "resource-action {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-resource-cpu-intervals"
+      ],
+      "retry_guidance": "Read the specific report-row feedback. Check source boot, whether the row is since boot or an interval, and the labeled units before changing a value."
+    },
+    {
+      "id": "lpic2-resource-restart-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-resource-observations",
+      "topic": "Resource measurements",
+      "title": "Publish a coherent post-restart measurement handover",
+      "summary": "Recover useful observations without joining incompatible boots or reporting the wrong period.",
+      "objective": "Report only handover-new, using all eligible one-second intervals inside 1000–5000 ms. Find the highest executing-work percentage and the highest block-output rate. Report MemAvailable at the final 5000 ms post-restart snapshot. Attach actual measurements for all three claims; do not mix handover-old averages or rows into the report. Use the supported terminal and report controls, then Check report. You may avoid an incompatible request or recover after its diagnostic. A failed command is never usable evidence.",
+      "difficulty": "Advanced",
+      "minutes": 30,
+      "steps": [
+        "Investigate the supplied recording, attach measured evidence and check the complete report."
+      ],
+      "guide": [],
+      "explanation": "Choose handover-new at 1.000 s and run vmstat 1 5. Row 2 describes 1000–2000 ms and has 95% executing work and 2048 KiB/s block output, the highest eligible displayed readings. Attach that interval to both peak claims. At handover-new 5.000 s, run cat /proc/meminfo and attach its snapshot for MemAvailable 1572864 KiB. Check report. Old-boot or since-boot activity rows cannot establish the requested post-restart peaks; other supported finite requests measuring these facts are valid.",
+      "hints": [
+        "Choose the requested boot and time before running a finite command. Row 1 of vmstat is a boot average, not an interval.",
+        "Use the units beside each report field. Attach a result row, then type the measured value; the fields do not copy solved answers automatically.",
+        "Start on handover-new at 1.000 s. The compatible finite request produces one boot-average row and four interval rows; the final snapshot is at 5.000 s."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://gitlab.com/procps-ng/procps/-/raw/master/man/vmstat.8",
+        "https://www.kernel.org/doc/html/latest/filesystems/proc.html"
+      ],
+      "simplifications": "Finite replay of supplied synthetic Linux observations, not a live machine. Only disclosed vmstat forms and the eight-field virtual meminfo are supported. No actual time wait, host /proc read, process, swap, service, disk or network operation. Unknown syntax, missing intervals, mixed sources and decreasing counters fail honestly. Rounded displayed percentages can sum slightly above or below 100. This measures recorded facts; it does not identify a hardware bottleneck, prove pressure or implement the wider LPIC-2 monitoring-tool set. Sources checked 2026-11-11; procps/kernel latest URLs are mutable.",
+      "initial": {
+        "kind": "ResourceObservations",
+        "simulation": {
+          "version": 1,
+          "view": "introduction",
+          "example_action": 0,
+          "assignment": {
+            "task_id": "restart-assignment",
+            "cursor": 0,
+            "result_row": 0,
+            "input": "",
+            "history": [],
+            "claims": [
+              {
+                "rule": "peak-work",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "peak-block-out",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "available",
+                "value": "",
+                "evidence": null
+              }
+            ],
+            "checked": false
+          },
+          "practice": {
+            "task_id": "restart-practice",
+            "cursor": 0,
+            "result_row": 0,
+            "input": "",
+            "history": [],
+            "claims": [
+              {
+                "rule": "peak-work",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "peak-block-out",
+                "value": "",
+                "evidence": null
+              },
+              {
+                "rule": "available",
+                "value": "",
+                "evidence": null
+              }
+            ],
+            "checked": false
+          }
+        }
+      },
+      "goal": {
+        "kind": "ResourceObservations",
+        "definition": {
+          "initial": {
+            "id": "restart-assignment",
+            "recording": {
+              "version": 1,
+              "observations": [
+                {
+                  "counters": {
+                    "boot": "handover-old",
+                    "at_ms": 3000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        180,
+                        30,
+                        60,
+                        240,
+                        60,
+                        15,
+                        15,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1048576,
+                      "available_kib": 3145728,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 10,
+                      "write_ops": 20,
+                      "read_sectors": 100,
+                      "write_sectors": 200,
+                      "read_ms": 30,
+                      "write_ms": 40
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 75,
+                  "swap_out_pages": 38,
+                  "block_in_kib": 900,
+                  "block_out_kib": 600,
+                  "interrupts": 1200,
+                  "context_switches": 600
+                },
+                {
+                  "counters": {
+                    "boot": "handover-old",
+                    "at_ms": 4000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        260,
+                        50,
+                        100,
+                        260,
+                        80,
+                        25,
+                        25,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 524288,
+                      "available_kib": 1572864,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 110,
+                      "write_ops": 220,
+                      "read_sectors": 700,
+                      "write_sectors": 1000,
+                      "read_ms": 80,
+                      "write_ms": 140
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 4,
+                  "blocked": 2,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2359296,
+                  "reclaimable_kib": 393216,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 100,
+                  "swap_out_pages": 88,
+                  "block_in_kib": 1200,
+                  "block_out_kib": 1000,
+                  "interrupts": 1700,
+                  "context_switches": 1200
+                },
+                {
+                  "counters": {
+                    "boot": "handover-new",
+                    "at_ms": 1000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        40,
+                        0,
+                        40,
+                        100,
+                        10,
+                        5,
+                        5,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1048576,
+                      "available_kib": 3145728,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 1,
+                      "write_ops": 2,
+                      "read_sectors": 10,
+                      "write_sectors": 20,
+                      "read_ms": 2,
+                      "write_ms": 3
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 10,
+                      "tx_bytes": 20
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 10,
+                  "swap_out_pages": 10,
+                  "block_in_kib": 20,
+                  "block_out_kib": 20,
+                  "interrupts": 100,
+                  "context_switches": 200
+                },
+                {
+                  "counters": {
+                    "boot": "handover-new",
+                    "at_ms": 2000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        180,
+                        10,
+                        70,
+                        110,
+                        10,
+                        10,
+                        10,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1048576,
+                      "available_kib": 1572864,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 1,
+                      "write_ops": 2,
+                      "read_sectors": 10,
+                      "write_sectors": 20,
+                      "read_ms": 2,
+                      "write_ms": 3
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 10,
+                      "tx_bytes": 20
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 10,
+                  "swap_out_pages": 10,
+                  "block_in_kib": 36,
+                  "block_out_kib": 2068,
+                  "interrupts": 300,
+                  "context_switches": 300
+                },
+                {
+                  "counters": {
+                    "boot": "handover-new",
+                    "at_ms": 3000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        200,
+                        10,
+                        90,
+                        260,
+                        10,
+                        15,
+                        15,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1048576,
+                      "available_kib": 1572864,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 1,
+                      "write_ops": 2,
+                      "read_sectors": 10,
+                      "write_sectors": 20,
+                      "read_ms": 2,
+                      "write_ms": 3
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 10,
+                      "tx_bytes": 20
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 10,
+                  "swap_out_pages": 10,
+                  "block_in_kib": 52,
+                  "block_out_kib": 2100,
+                  "interrupts": 500,
+                  "context_switches": 400
+                },
+                {
+                  "counters": {
+                    "boot": "handover-new",
+                    "at_ms": 4000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        230,
+                        10,
+                        120,
+                        390,
+                        10,
+                        20,
+                        20,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1048576,
+                      "available_kib": 1572864,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 1,
+                      "write_ops": 2,
+                      "read_sectors": 10,
+                      "write_sectors": 20,
+                      "read_ms": 2,
+                      "write_ms": 3
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 10,
+                      "tx_bytes": 20
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 10,
+                  "swap_out_pages": 10,
+                  "block_in_kib": 68,
+                  "block_out_kib": 2164,
+                  "interrupts": 700,
+                  "context_switches": 500
+                },
+                {
+                  "counters": {
+                    "boot": "handover-new",
+                    "at_ms": 5000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        270,
+                        10,
+                        140,
+                        510,
+                        20,
+                        25,
+                        25,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1048576,
+                      "available_kib": 1572864,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 1,
+                      "write_ops": 2,
+                      "read_sectors": 10,
+                      "write_sectors": 20,
+                      "read_ms": 2,
+                      "write_ms": 3
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 10,
+                      "tx_bytes": 20
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 10,
+                  "swap_out_pages": 10,
+                  "block_in_kib": 84,
+                  "block_out_kib": 2180,
+                  "interrupts": 900,
+                  "context_switches": 600
+                }
+              ]
+            },
+            "rules": [
+              {
+                "id": "peak-work",
+                "label": "Highest post-restart executing work",
+                "metric": "work_percent",
+                "boot": "handover-new",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 1000,
+                  "to_ms": 5000,
+                  "step_ms": 1000,
+                  "highest": true
+                }
+              },
+              {
+                "id": "peak-block-out",
+                "label": "Highest post-restart block-output rate",
+                "metric": "block_out_kib_per_second",
+                "boot": "handover-new",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 1000,
+                  "to_ms": 5000,
+                  "step_ms": 1000,
+                  "highest": true
+                }
+              },
+              {
+                "id": "available",
+                "label": "Available memory in the final post-restart snapshot",
+                "metric": "available_kib",
+                "boot": "handover-new",
+                "selection": {
+                  "kind": "snapshot",
+                  "from_ms": 5000,
+                  "to_ms": 5000
+                }
+              }
+            ]
+          },
+          "example": {
+            "id": "restart-practice",
+            "recording": {
+              "version": 1,
+              "observations": [
+                {
+                  "counters": {
+                    "boot": "trial-old",
+                    "at_ms": 3000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        180,
+                        30,
+                        60,
+                        240,
+                        60,
+                        15,
+                        15,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1048576,
+                      "available_kib": 3145728,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 10,
+                      "write_ops": 20,
+                      "read_sectors": 100,
+                      "write_sectors": 200,
+                      "read_ms": 30,
+                      "write_ms": 40
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 75,
+                  "swap_out_pages": 38,
+                  "block_in_kib": 900,
+                  "block_out_kib": 600,
+                  "interrupts": 1200,
+                  "context_switches": 600
+                },
+                {
+                  "counters": {
+                    "boot": "trial-old",
+                    "at_ms": 4000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        260,
+                        50,
+                        100,
+                        260,
+                        80,
+                        25,
+                        25,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 524288,
+                      "available_kib": 1572864,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 110,
+                      "write_ops": 220,
+                      "read_sectors": 700,
+                      "write_sectors": 1000,
+                      "read_ms": 80,
+                      "write_ms": 140
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 100,
+                      "tx_bytes": 200
+                    }
+                  },
+                  "runnable": 4,
+                  "blocked": 2,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2359296,
+                  "reclaimable_kib": 393216,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 100,
+                  "swap_out_pages": 88,
+                  "block_in_kib": 1200,
+                  "block_out_kib": 1000,
+                  "interrupts": 1700,
+                  "context_switches": 1200
+                },
+                {
+                  "counters": {
+                    "boot": "trial-new",
+                    "at_ms": 1000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        40,
+                        0,
+                        40,
+                        100,
+                        10,
+                        5,
+                        5,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1048576,
+                      "available_kib": 3145728,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 1,
+                      "write_ops": 2,
+                      "read_sectors": 10,
+                      "write_sectors": 20,
+                      "read_ms": 2,
+                      "write_ms": 3
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 10,
+                      "tx_bytes": 20
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 10,
+                  "swap_out_pages": 10,
+                  "block_in_kib": 20,
+                  "block_out_kib": 20,
+                  "interrupts": 100,
+                  "context_switches": 200
+                },
+                {
+                  "counters": {
+                    "boot": "trial-new",
+                    "at_ms": 2000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        120,
+                        0,
+                        70,
+                        180,
+                        10,
+                        10,
+                        10,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1048576,
+                      "available_kib": 786432,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 1,
+                      "write_ops": 2,
+                      "read_sectors": 10,
+                      "write_sectors": 20,
+                      "read_ms": 2,
+                      "write_ms": 3
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 10,
+                      "tx_bytes": 20
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 10,
+                  "swap_out_pages": 10,
+                  "block_in_kib": 36,
+                  "block_out_kib": 532,
+                  "interrupts": 300,
+                  "context_switches": 300
+                },
+                {
+                  "counters": {
+                    "boot": "trial-new",
+                    "at_ms": 3000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        140,
+                        0,
+                        90,
+                        330,
+                        10,
+                        15,
+                        15,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1048576,
+                      "available_kib": 786432,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 1,
+                      "write_ops": 2,
+                      "read_sectors": 10,
+                      "write_sectors": 20,
+                      "read_ms": 2,
+                      "write_ms": 3
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 10,
+                      "tx_bytes": 20
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 10,
+                  "swap_out_pages": 10,
+                  "block_in_kib": 52,
+                  "block_out_kib": 564,
+                  "interrupts": 500,
+                  "context_switches": 400
+                },
+                {
+                  "counters": {
+                    "boot": "trial-new",
+                    "at_ms": 4000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        170,
+                        0,
+                        120,
+                        460,
+                        10,
+                        20,
+                        20,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1048576,
+                      "available_kib": 786432,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 1,
+                      "write_ops": 2,
+                      "read_sectors": 10,
+                      "write_sectors": 20,
+                      "read_ms": 2,
+                      "write_ms": 3
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 10,
+                      "tx_bytes": 20
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 10,
+                  "swap_out_pages": 10,
+                  "block_in_kib": 68,
+                  "block_out_kib": 628,
+                  "interrupts": 700,
+                  "context_switches": 500
+                },
+                {
+                  "counters": {
+                    "boot": "trial-new",
+                    "at_ms": 5000,
+                    "cores": 2,
+                    "cpu": {
+                      "ticks": [
+                        210,
+                        0,
+                        140,
+                        580,
+                        20,
+                        25,
+                        25,
+                        0
+                      ]
+                    },
+                    "memory": {
+                      "total_kib": 8388608,
+                      "free_kib": 1048576,
+                      "available_kib": 786432,
+                      "swap_total_kib": 2097152,
+                      "swap_free_kib": 1572864
+                    },
+                    "disk": {
+                      "name": "vda",
+                      "read_ops": 1,
+                      "write_ops": 2,
+                      "read_sectors": 10,
+                      "write_sectors": 20,
+                      "read_ms": 2,
+                      "write_ms": 3
+                    },
+                    "network": {
+                      "name": "eth0",
+                      "rx_bytes": 10,
+                      "tx_bytes": 20
+                    }
+                  },
+                  "runnable": 1,
+                  "blocked": 0,
+                  "buffers_kib": 524288,
+                  "cache_kib": 2097152,
+                  "reclaimable_kib": 262144,
+                  "guest_ticks": [
+                    0,
+                    0
+                  ],
+                  "page_kib": 4,
+                  "swap_in_pages": 10,
+                  "swap_out_pages": 10,
+                  "block_in_kib": 84,
+                  "block_out_kib": 644,
+                  "interrupts": 900,
+                  "context_switches": 600
+                }
+              ]
+            },
+            "rules": [
+              {
+                "id": "peak-work",
+                "label": "Highest post-restart executing work",
+                "metric": "work_percent",
+                "boot": "trial-new",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 1000,
+                  "to_ms": 5000,
+                  "step_ms": 1000,
+                  "highest": true
+                }
+              },
+              {
+                "id": "peak-block-out",
+                "label": "Highest post-restart block-output rate",
+                "metric": "block_out_kib_per_second",
+                "boot": "trial-new",
+                "selection": {
+                  "kind": "extremum",
+                  "from_ms": 1000,
+                  "to_ms": 5000,
+                  "step_ms": 1000,
+                  "highest": true
+                }
+              },
+              {
+                "id": "available",
+                "label": "Available memory in the final post-restart snapshot",
+                "metric": "available_kib",
+                "boot": "trial-new",
+                "selection": {
+                  "kind": "snapshot",
+                  "from_ms": 5000,
+                  "to_ms": 5000
+                }
+              }
+            ]
+          },
+          "reference": [
+            {
+              "kind": "run",
+              "probe": {
+                "start": 2,
+                "command": "vmstat 1 5"
+              }
+            },
+            {
+              "kind": "attach",
+              "rule": "peak-work",
+              "row": 1
+            },
+            {
+              "kind": "value",
+              "rule": "peak-work",
+              "value": "95"
+            },
+            {
+              "kind": "attach",
+              "rule": "peak-block-out",
+              "row": 1
+            },
+            {
+              "kind": "value",
+              "rule": "peak-block-out",
+              "value": "2048"
+            },
+            {
+              "kind": "run",
+              "probe": {
+                "start": 6,
+                "command": "cat /proc/meminfo"
+              }
+            },
+            {
+              "kind": "attach",
+              "rule": "available",
+              "row": 0
+            },
+            {
+              "kind": "value",
+              "rule": "available",
+              "value": "1572864"
+            },
+            {
+              "kind": "check"
+            }
+          ],
+          "example_reference": [
+            {
+              "kind": "run",
+              "probe": {
+                "start": 2,
+                "command": "vmstat 1 5"
+              }
+            },
+            {
+              "kind": "attach",
+              "rule": "peak-work",
+              "row": 1
+            },
+            {
+              "kind": "value",
+              "rule": "peak-work",
+              "value": "60"
+            },
+            {
+              "kind": "attach",
+              "rule": "peak-block-out",
+              "row": 1
+            },
+            {
+              "kind": "value",
+              "rule": "peak-block-out",
+              "value": "512"
+            },
+            {
+              "kind": "run",
+              "probe": {
+                "start": 6,
+                "command": "cat /proc/meminfo"
+              }
+            },
+            {
+              "kind": "attach",
+              "rule": "available",
+              "row": 0
+            },
+            {
+              "kind": "value",
+              "rule": "available",
+              "value": "786432"
+            },
+            {
+              "kind": "check"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "resource-action {\"kind\":\"run\",\"probe\":{\"start\":2,\"command\":\"vmstat 1 5\"}}",
+        "resource-action {\"kind\":\"attach\",\"rule\":\"peak-work\",\"row\":1}",
+        "resource-action {\"kind\":\"value\",\"rule\":\"peak-work\",\"value\":\"95\"}",
+        "resource-action {\"kind\":\"attach\",\"rule\":\"peak-block-out\",\"row\":1}",
+        "resource-action {\"kind\":\"value\",\"rule\":\"peak-block-out\",\"value\":\"2048\"}",
+        "resource-action {\"kind\":\"run\",\"probe\":{\"start\":6,\"command\":\"cat /proc/meminfo\"}}",
+        "resource-action {\"kind\":\"attach\",\"rule\":\"available\",\"row\":0}",
+        "resource-action {\"kind\":\"value\",\"rule\":\"available\",\"value\":\"1572864\"}",
+        "resource-action {\"kind\":\"check\"}"
+      ],
+      "prerequisites": [
+        "lpic2-resource-swap-activity"
+      ],
+      "retry_guidance": "Read the specific report-row feedback. Check source boot, whether the row is since boot or an interval, and the labeled units before changing a value."
+    }
+  ]
+}

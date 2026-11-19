@@ -84,17 +84,31 @@ impl LabApp {
         }
         match self.ospf_view(i) {
             teaching::View::Introduction => {
-                ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
-                for c in &lesson.concepts {
-                    ui.label(RichText::new(&c.title).strong());
-                    ui.label(&c.text);
+                if ccna_presentation::enabled(&s) {
+                    ccna_presentation::concepts(
+                        ui,
+                        &s,
+                        &lesson.prerequisite_note,
+                        lesson
+                            .concepts
+                            .iter()
+                            .map(|c| (c.title.clone(), c.text.clone())),
+                    );
+                } else {
+                    ui.label(RichText::new(&lesson.prerequisite_note).color(palette(ui).muted));
+                    for c in &lesson.concepts {
+                        ui.label(RichText::new(&c.title).strong());
+                        ui.label(&c.text);
+                    }
                 }
-                ui.label(RichText::new("A different example to try").strong());
-                ui.label(&lesson.example_description);
+                lesson_presentation::worked(ui, &lesson.example_description);
+                lesson_presentation::worked_rows(ui, &s);
                 for a in &lesson.example_actions {
                     ui.label(&a.explanation);
                 }
-                ui.label(format!("Try a change: {}", lesson.try_change.description));
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change.description));
+                }
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(primary(ui, "Try this example"));
                     self.metrics.example_action = Some(r.rect);
@@ -109,8 +123,13 @@ impl LabApp {
                 });
             }
             teaching::View::Example => {
-                ui.label("Practice example · Ungraded; your assignment settings and draft stay separate.");
-                ui.label(&lesson.example_description);
+                ccna_presentation::example(ui, &s, true);
+                if !ccna_presentation::enabled(&s) {
+                    ui.label("Practice example · Ungraded; your assignment settings and draft stay separate.");
+                }
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(&lesson.example_description);
+                }
                 let mut l = self.progress.attempts[&s.id]
                     .workspace
                     .as_ref()
@@ -161,17 +180,16 @@ impl LabApp {
                             }
                             let checks = l.checks(lesson);
                             if checks.iter().all(|c| c.0) {
-                                ui.colored_label(
-                                    palette(ui).success,
-                                    "Example checks pass · No assignment credit",
-                                );
+                                ui.colored_label(palette(ui).success, "Example checks pass");
                             }
                             ospf_results(ui, &checks);
                         }
                     });
                     self.metrics.feedback = Some(result.response.rect);
                 });
-                ui.label(format!("Try a change: {}", lesson.try_change.description));
+                if !ccna_presentation::enabled(&s) {
+                    ui.label(format!("Try a change: {}", lesson.try_change.description));
+                }
                 let r = ui.add(button("Open full assignment"));
                 self.metrics.assignment_action = Some(r.rect);
                 if r.clicked() {
@@ -189,7 +207,7 @@ impl LabApp {
                     .ospf_learning = Some(l);
             }
             teaching::View::Assignment => {
-                ui.label(&s.objective);
+                ccna_presentation::assignment(ui, &s);
                 let engine::Goal::Ospf { requirements, .. } = &s.goal else {
                     unreachable!()
                 };

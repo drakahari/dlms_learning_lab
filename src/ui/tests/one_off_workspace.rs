@@ -335,14 +335,69 @@ fn actual_editor_save_queue_inspect_remove_run_and_current_checks_use_real_state
 }
 #[test]
 fn introduction_insert_example_experiment_and_repair_do_not_install_assignment_credit() {
-    let (ctx, mut a, _) = opened();
-    assert!(
+    let (ctx, mut a, i) = opened();
+    let source = &a.scenarios[i];
+    let lesson = source.one_off_teaching.as_ref().unwrap();
+    let entry = lesson_presentation::entry(source);
+    let expected = [
+        entry.map_or(source.summary.as_str(), |e| e.goal.as_str()),
+        entry
+            .filter(|e| !e.context.is_empty())
+            .map_or(lesson.prerequisite_note.as_str(), |e| e.context.as_str()),
+    ];
+    assert_eq!(
         a.metrics
             .one_off
             .labels
             .iter()
-            .any(|(t, _)| t.contains("captur"))
+            .take(2)
+            .map(|(text, _)| text.as_str())
+            .collect::<Vec<_>>(),
+        expected
     );
+    for (_, rect) in a.metrics.one_off.labels.iter().take(2) {
+        assert!(
+            rect.is_positive(),
+            "Actual learning objective/context responses are present"
+        );
+    }
+    let wanted = expected.map(str::to_owned);
+    let out = ctx.run(
+        egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(1200., 850.),
+            )),
+            ..Default::default()
+        },
+        |ctx| a.render(ctx),
+    );
+    fn actual_text(shape: &egui::Shape, wanted: &str, clip: egui::Rect) -> bool {
+        match shape {
+            egui::Shape::Vec(items) => items.iter().any(|s| actual_text(s, wanted, clip)),
+            egui::Shape::Text(text) => {
+                text.galley.text() == wanted
+                    && text.opacity_factor > 0.
+                    && !text.galley.elided
+                    && clip.expand(0.5).contains_rect(text.visual_bounding_rect())
+                    && text.galley.rows.iter().any(|row| {
+                        !row.visuals.mesh.vertices[row.visuals.glyph_vertex_range.clone()]
+                            .is_empty()
+                    })
+            }
+            _ => false,
+        }
+    }
+    for text in wanted {
+        assert!(
+            out.shapes.iter().any(|shape| actual_text(
+                &shape.shape,
+                &text,
+                shape.clip_rect.intersect(ctx.content_rect())
+            )),
+            "Actual synthetic Introduction paints its learning objective and prerequisite context"
+        );
+    }
     let original_state = serde_json::to_value(&state(&a).state).unwrap();
     let original_session = serde_json::to_value(session(&a, false)).unwrap();
     tap(&ctx, &mut a, "try-example");

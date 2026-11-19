@@ -1,0 +1,766 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-route-reading-backup",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ipv4-installed-route-reading",
+      "topic": "IPv4 route-table interpretation",
+      "title": "Restore a learned route while keeping its backup",
+      "summary": "Use the installed IPv4 table to restore the intended OSPF exit and keep a static fallback.",
+      "objective": "Use the OSPF exit toward Harbor for both addresses inside the Records service network. Keep the wider site route for the outside address. Keep the local, connected and default entries working. Keep the supplied static backup usable when the service announcement is withdrawn. Use the dotted-decimal mask to inspect the exact service entry.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Understand the task",
+        "Try the separate example",
+        "Complete the independent assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A routing table lists installed routes. C marks a directly connected network, L a local interface address, S a static route and O an intra-area OSPF route. S* marks the supplied static default. The /length and dotted-decimal mask describe the same size. For example, /26 leaves six zero bits in the mask, so the final mask octet is 192.",
+          "action": "Inspect the route decisions for the supplied addresses.",
+          "commands": []
+        },
+        {
+          "title": "Try the separate example",
+          "why": "For the same exact network and mask, the router prefers the eligible source with the lower administrative distance. The first number in [110/23] is distance. The second is metric. OSPF adds outgoing costs along each path and the destination LAN cost, then offers its best path. Do not compare an OSPF cost directly with a static route's distance.",
+          "action": "Inspect the route decisions for the supplied addresses.",
+          "commands": []
+        },
+        {
+          "title": "Complete the independent assignment",
+          "why": "From the installed rows that contain an address, the longest prefix wins. A /26 can win inside its range while a /24 serves nearby addresses. A higher-distance static route for the same /26 can replace an OSPF row when the announcement is no longer available.",
+          "action": "Inspect the route decisions for the supplied addresses.",
+          "commands": []
+        }
+      ],
+      "retry_guidance": "Inspect the route code and distance, then compare the cheapest OSPF path and matching prefix.",
+      "hints": [
+        "For the same prefix, compare administrative distances before looking at OSPF path cost.",
+        "Change the local outgoing cost toward Harbor while leaving the fixed downstream costs in place.",
+        "Keep the static backup eligible in the withdrawal trial and use the mask to query the exact service row."
+      ],
+      "explanation": "The cheaper requested OSPF path is installed for the more specific network. The static fallback is still eligible for that network when OSPF withdraws it. Wider and local routes continue serving distinct lookups.",
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/support/docs/ip/enhanced-interior-gateway-routing-protocol-eigrp/8651-21.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/border-gateway-routing-protocol-bgp/15986-admin-distance.html",
+        "https://www.rfc-editor.org/rfc/rfc2328"
+      ],
+      "simplifications": "One local IPv4 route table composed from the bounded OSPFv2 P2P and static models. No packet forwarding validation, real IOS, host network or CLI. No redistribution, dynamic timers, DR/BDR, recursive next hops or cross-protocol equal-distance ties.",
+      "prerequisites": [
+        "ccna-ospf-directed-ecmp"
+      ],
+      "initial": {
+        "kind": "AutomationWorkshop",
+        "simulation": {
+          "version": 1,
+          "source_id": "ccna-route-reading-backup",
+          "view": "introduction",
+          "example": {
+            "source": "{\"activity\":\"route_reading\",\"supplied\":{\"advertisement\":{\"interface\":\"service\",\"router\":\"Training\"},\"ingress\":\"Demo-Edge\",\"ospf\":{\"configuration\":{\"routers\":{\"Cedar\":{\"interfaces\":{\"edge\":{\"cost\":12,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false},\"site\":{\"cost\":8,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false}},\"process\":{\"area\":0,\"enabled\":true,\"process_id\":21,\"router_id\":\"192.0.2.31\"}},\"Demo-Edge\":{\"interfaces\":{\"desktop\":{\"cost\":1,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"Broadcast\",\"passive\":true},\"left\":{\"cost\":6,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false},\"right\":{\"cost\":20,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false},\"standby\":{\"cost\":1,\"dead_seconds\":40,\"enabled\":false,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false}},\"process\":{\"area\":0,\"enabled\":true,\"process_id\":20,\"router_id\":\"192.0.2.30\"}},\"Maple\":{\"interfaces\":{\"edge\":{\"cost\":8,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false},\"site\":{\"cost\":7,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false}},\"process\":{\"area\":0,\"enabled\":true,\"process_id\":22,\"router_id\":\"192.0.2.32\"}},\"Reserve\":{\"interfaces\":{\"edge\":{\"cost\":1,\"dead_seconds\":40,\"enabled\":false,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false}},\"process\":{\"area\":0,\"enabled\":false,\"process_id\":24,\"router_id\":\"192.0.2.34\"}},\"Training\":{\"interfaces\":{\"left\":{\"cost\":6,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false},\"right\":{\"cost\":10,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false},\"service\":{\"cost\":5,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"Broadcast\",\"passive\":true}},\"process\":{\"area\":0,\"enabled\":true,\"process_id\":23,\"router_id\":\"192.0.2.33\"}}}},\"schema_version\":1,\"topology\":{\"devices\":{\"Cedar\":{\"forwarding\":true,\"interfaces\":{\"edge\":{\"address\":{\"address\":\"10.91.0.2\",\"prefix\":30},\"link\":\"left-uplink\",\"up\":true},\"site\":{\"address\":{\"address\":\"10.91.0.9\",\"prefix\":30},\"link\":\"left-transit\",\"up\":true}},\"routes\":[]},\"Demo-Edge\":{\"forwarding\":true,\"interfaces\":{\"desktop\":{\"address\":{\"address\":\"192.0.2.1\",\"prefix\":27},\"link\":\"desktop-lan\",\"up\":true},\"left\":{\"address\":{\"address\":\"10.91.0.1\",\"prefix\":30},\"link\":\"left-uplink\",\"up\":true},\"right\":{\"address\":{\"address\":\"10.91.0.5\",\"prefix\":30},\"link\":\"right-uplink\",\"up\":true},\"standby\":{\"address\":{\"address\":\"10.91.0.17\",\"prefix\":30},\"link\":\"standby-uplink\",\"up\":true}},\"routes\":[]},\"Maple\":{\"forwarding\":true,\"interfaces\":{\"edge\":{\"address\":{\"address\":\"10.91.0.6\",\"prefix\":30},\"link\":\"right-uplink\",\"up\":true},\"site\":{\"address\":{\"address\":\"10.91.0.13\",\"prefix\":30},\"link\":\"right-transit\",\"up\":true}},\"routes\":[]},\"Reserve\":{\"forwarding\":true,\"interfaces\":{\"edge\":{\"address\":{\"address\":\"10.91.0.18\",\"prefix\":30},\"link\":\"standby-uplink\",\"up\":true}},\"routes\":[]},\"Training\":{\"forwarding\":true,\"interfaces\":{\"left\":{\"address\":{\"address\":\"10.91.0.10\",\"prefix\":30},\"link\":\"left-transit\",\"up\":true},\"right\":{\"address\":{\"address\":\"10.91.0.14\",\"prefix\":30},\"link\":\"right-transit\",\"up\":true},\"service\":{\"address\":{\"address\":\"198.51.100.65\",\"prefix\":26},\"link\":\"service-lan\",\"up\":true}},\"routes\":[]}}}},\"primary_interface\":\"right\",\"primary_peer\":\"Maple\",\"probes\":[\"198.51.100.66\",\"198.51.100.126\",\"198.51.100.128\",\"192.0.2.1\",\"10.91.0.18\",\"172.16.0.20\"],\"retained_default\":{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"distance\":180,\"interface\":\"standby\",\"via\":\"10.91.0.18\"},\"retained_site\":{\"destination\":{\"address\":\"198.51.100.0\",\"length\":24},\"distance\":1,\"interface\":\"standby\",\"via\":\"10.91.0.18\"},\"static_backup\":{\"destination\":{\"address\":\"198.51.100.64\",\"length\":26},\"distance\":1,\"interface\":\"standby\",\"via\":\"10.91.0.18\"}}}",
+            "work": {
+              "checked": false,
+              "current": {
+                "activity": "route_reading",
+                "draft": {
+                  "cost": "20",
+                  "distance": "1",
+                  "mask_query": ""
+                }
+              }
+            }
+          },
+          "assignment": {
+            "source": "{\"activity\":\"route_reading\",\"supplied\":{\"advertisement\":{\"interface\":\"service\",\"router\":\"Records\"},\"ingress\":\"Branch-Edge\",\"ospf\":{\"configuration\":{\"routers\":{\"Branch-Edge\":{\"interfaces\":{\"desktop\":{\"cost\":1,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"Broadcast\",\"passive\":true},\"left\":{\"cost\":22,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false},\"right\":{\"cost\":7,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false},\"standby\":{\"cost\":1,\"dead_seconds\":40,\"enabled\":false,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false}},\"process\":{\"area\":0,\"enabled\":true,\"process_id\":20,\"router_id\":\"192.0.2.30\"}},\"Harbor\":{\"interfaces\":{\"edge\":{\"cost\":12,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false},\"site\":{\"cost\":9,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false}},\"process\":{\"area\":0,\"enabled\":true,\"process_id\":21,\"router_id\":\"192.0.2.31\"}},\"Records\":{\"interfaces\":{\"left\":{\"cost\":6,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false},\"right\":{\"cost\":10,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false},\"service\":{\"cost\":4,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"Broadcast\",\"passive\":true}},\"process\":{\"area\":0,\"enabled\":true,\"process_id\":23,\"router_id\":\"192.0.2.33\"}},\"Ridge\":{\"interfaces\":{\"edge\":{\"cost\":8,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false},\"site\":{\"cost\":11,\"dead_seconds\":40,\"enabled\":true,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false}},\"process\":{\"area\":0,\"enabled\":true,\"process_id\":22,\"router_id\":\"192.0.2.32\"}},\"Standby\":{\"interfaces\":{\"edge\":{\"cost\":1,\"dead_seconds\":40,\"enabled\":false,\"hello_seconds\":10,\"network_type\":\"PointToPoint\",\"passive\":false}},\"process\":{\"area\":0,\"enabled\":false,\"process_id\":24,\"router_id\":\"192.0.2.34\"}}}},\"schema_version\":1,\"topology\":{\"devices\":{\"Branch-Edge\":{\"forwarding\":true,\"interfaces\":{\"desktop\":{\"address\":{\"address\":\"192.0.2.1\",\"prefix\":27},\"link\":\"desktop-lan\",\"up\":true},\"left\":{\"address\":{\"address\":\"10.93.0.1\",\"prefix\":30},\"link\":\"left-uplink\",\"up\":true},\"right\":{\"address\":{\"address\":\"10.93.0.5\",\"prefix\":30},\"link\":\"right-uplink\",\"up\":true},\"standby\":{\"address\":{\"address\":\"10.93.0.17\",\"prefix\":30},\"link\":\"standby-uplink\",\"up\":true}},\"routes\":[]},\"Harbor\":{\"forwarding\":true,\"interfaces\":{\"edge\":{\"address\":{\"address\":\"10.93.0.2\",\"prefix\":30},\"link\":\"left-uplink\",\"up\":true},\"site\":{\"address\":{\"address\":\"10.93.0.9\",\"prefix\":30},\"link\":\"left-transit\",\"up\":true}},\"routes\":[]},\"Records\":{\"forwarding\":true,\"interfaces\":{\"left\":{\"address\":{\"address\":\"10.93.0.10\",\"prefix\":30},\"link\":\"left-transit\",\"up\":true},\"right\":{\"address\":{\"address\":\"10.93.0.14\",\"prefix\":30},\"link\":\"right-transit\",\"up\":true},\"service\":{\"address\":{\"address\":\"203.0.113.129\",\"prefix\":26},\"link\":\"service-lan\",\"up\":true}},\"routes\":[]},\"Ridge\":{\"forwarding\":true,\"interfaces\":{\"edge\":{\"address\":{\"address\":\"10.93.0.6\",\"prefix\":30},\"link\":\"right-uplink\",\"up\":true},\"site\":{\"address\":{\"address\":\"10.93.0.13\",\"prefix\":30},\"link\":\"right-transit\",\"up\":true}},\"routes\":[]},\"Standby\":{\"forwarding\":true,\"interfaces\":{\"edge\":{\"address\":{\"address\":\"10.93.0.18\",\"prefix\":30},\"link\":\"standby-uplink\",\"up\":true}},\"routes\":[]}}}},\"primary_interface\":\"left\",\"primary_peer\":\"Harbor\",\"probes\":[\"203.0.113.130\",\"203.0.113.190\",\"203.0.113.192\",\"192.0.2.1\",\"10.93.0.18\",\"172.16.0.20\"],\"retained_default\":{\"destination\":{\"address\":\"0.0.0.0\",\"length\":0},\"distance\":180,\"interface\":\"standby\",\"via\":\"10.93.0.18\"},\"retained_site\":{\"destination\":{\"address\":\"203.0.113.0\",\"length\":24},\"distance\":1,\"interface\":\"standby\",\"via\":\"10.93.0.18\"},\"static_backup\":{\"destination\":{\"address\":\"203.0.113.128\",\"length\":26},\"distance\":105,\"interface\":\"standby\",\"via\":\"10.93.0.18\"}}}",
+            "work": {
+              "checked": false,
+              "current": {
+                "activity": "route_reading",
+                "draft": {
+                  "cost": "22",
+                  "distance": "105",
+                  "mask_query": ""
+                }
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "AutomationWorkshop",
+        "definition": {
+          "version": 1,
+          "source_id": "ccna-route-reading-backup",
+          "example": {
+            "activity": "route_reading",
+            "supplied": {
+              "ospf": {
+                "schema_version": 1,
+                "topology": {
+                  "devices": {
+                    "Demo-Edge": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "left": {
+                          "link": "left-uplink",
+                          "up": true,
+                          "address": {
+                            "address": "10.91.0.1",
+                            "prefix": 30
+                          }
+                        },
+                        "right": {
+                          "link": "right-uplink",
+                          "up": true,
+                          "address": {
+                            "address": "10.91.0.5",
+                            "prefix": 30
+                          }
+                        },
+                        "standby": {
+                          "link": "standby-uplink",
+                          "up": true,
+                          "address": {
+                            "address": "10.91.0.17",
+                            "prefix": 30
+                          }
+                        },
+                        "desktop": {
+                          "link": "desktop-lan",
+                          "up": true,
+                          "address": {
+                            "address": "192.0.2.1",
+                            "prefix": 27
+                          }
+                        }
+                      },
+                      "routes": []
+                    },
+                    "Cedar": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "edge": {
+                          "link": "left-uplink",
+                          "up": true,
+                          "address": {
+                            "address": "10.91.0.2",
+                            "prefix": 30
+                          }
+                        },
+                        "site": {
+                          "link": "left-transit",
+                          "up": true,
+                          "address": {
+                            "address": "10.91.0.9",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": []
+                    },
+                    "Maple": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "edge": {
+                          "link": "right-uplink",
+                          "up": true,
+                          "address": {
+                            "address": "10.91.0.6",
+                            "prefix": 30
+                          }
+                        },
+                        "site": {
+                          "link": "right-transit",
+                          "up": true,
+                          "address": {
+                            "address": "10.91.0.13",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": []
+                    },
+                    "Training": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "left": {
+                          "link": "left-transit",
+                          "up": true,
+                          "address": {
+                            "address": "10.91.0.10",
+                            "prefix": 30
+                          }
+                        },
+                        "right": {
+                          "link": "right-transit",
+                          "up": true,
+                          "address": {
+                            "address": "10.91.0.14",
+                            "prefix": 30
+                          }
+                        },
+                        "service": {
+                          "link": "service-lan",
+                          "up": true,
+                          "address": {
+                            "address": "198.51.100.65",
+                            "prefix": 26
+                          }
+                        }
+                      },
+                      "routes": []
+                    },
+                    "Reserve": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "edge": {
+                          "link": "standby-uplink",
+                          "up": true,
+                          "address": {
+                            "address": "10.91.0.18",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": []
+                    }
+                  }
+                },
+                "configuration": {
+                  "routers": {
+                    "Demo-Edge": {
+                      "process": {
+                        "enabled": true,
+                        "process_id": 20,
+                        "router_id": "192.0.2.30",
+                        "area": 0
+                      },
+                      "interfaces": {
+                        "left": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 6,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "right": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 20,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "standby": {
+                          "enabled": false,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 1,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "desktop": {
+                          "enabled": true,
+                          "passive": true,
+                          "network_type": "Broadcast",
+                          "cost": 1,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        }
+                      }
+                    },
+                    "Cedar": {
+                      "process": {
+                        "enabled": true,
+                        "process_id": 21,
+                        "router_id": "192.0.2.31",
+                        "area": 0
+                      },
+                      "interfaces": {
+                        "edge": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 12,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "site": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 8,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        }
+                      }
+                    },
+                    "Maple": {
+                      "process": {
+                        "enabled": true,
+                        "process_id": 22,
+                        "router_id": "192.0.2.32",
+                        "area": 0
+                      },
+                      "interfaces": {
+                        "edge": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 8,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "site": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 7,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        }
+                      }
+                    },
+                    "Training": {
+                      "process": {
+                        "enabled": true,
+                        "process_id": 23,
+                        "router_id": "192.0.2.33",
+                        "area": 0
+                      },
+                      "interfaces": {
+                        "left": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 6,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "right": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 10,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "service": {
+                          "enabled": true,
+                          "passive": true,
+                          "network_type": "Broadcast",
+                          "cost": 5,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        }
+                      }
+                    },
+                    "Reserve": {
+                      "process": {
+                        "enabled": false,
+                        "process_id": 24,
+                        "router_id": "192.0.2.34",
+                        "area": 0
+                      },
+                      "interfaces": {
+                        "edge": {
+                          "enabled": false,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 1,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "ingress": "Demo-Edge",
+              "primary_interface": "right",
+              "primary_peer": "Maple",
+              "static_backup": {
+                "destination": {
+                  "address": "198.51.100.64",
+                  "length": 26
+                },
+                "interface": "standby",
+                "via": "10.91.0.18",
+                "distance": 1
+              },
+              "retained_site": {
+                "destination": {
+                  "address": "198.51.100.0",
+                  "length": 24
+                },
+                "interface": "standby",
+                "via": "10.91.0.18",
+                "distance": 1
+              },
+              "retained_default": {
+                "destination": {
+                  "address": "0.0.0.0",
+                  "length": 0
+                },
+                "interface": "standby",
+                "via": "10.91.0.18",
+                "distance": 180
+              },
+              "probes": [
+                "198.51.100.66",
+                "198.51.100.126",
+                "198.51.100.128",
+                "192.0.2.1",
+                "10.91.0.18",
+                "172.16.0.20"
+              ],
+              "advertisement": {
+                "router": "Training",
+                "interface": "service"
+              }
+            }
+          },
+          "assignment": {
+            "activity": "route_reading",
+            "supplied": {
+              "ospf": {
+                "schema_version": 1,
+                "topology": {
+                  "devices": {
+                    "Branch-Edge": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "left": {
+                          "link": "left-uplink",
+                          "up": true,
+                          "address": {
+                            "address": "10.93.0.1",
+                            "prefix": 30
+                          }
+                        },
+                        "right": {
+                          "link": "right-uplink",
+                          "up": true,
+                          "address": {
+                            "address": "10.93.0.5",
+                            "prefix": 30
+                          }
+                        },
+                        "standby": {
+                          "link": "standby-uplink",
+                          "up": true,
+                          "address": {
+                            "address": "10.93.0.17",
+                            "prefix": 30
+                          }
+                        },
+                        "desktop": {
+                          "link": "desktop-lan",
+                          "up": true,
+                          "address": {
+                            "address": "192.0.2.1",
+                            "prefix": 27
+                          }
+                        }
+                      },
+                      "routes": []
+                    },
+                    "Harbor": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "edge": {
+                          "link": "left-uplink",
+                          "up": true,
+                          "address": {
+                            "address": "10.93.0.2",
+                            "prefix": 30
+                          }
+                        },
+                        "site": {
+                          "link": "left-transit",
+                          "up": true,
+                          "address": {
+                            "address": "10.93.0.9",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": []
+                    },
+                    "Ridge": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "edge": {
+                          "link": "right-uplink",
+                          "up": true,
+                          "address": {
+                            "address": "10.93.0.6",
+                            "prefix": 30
+                          }
+                        },
+                        "site": {
+                          "link": "right-transit",
+                          "up": true,
+                          "address": {
+                            "address": "10.93.0.13",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": []
+                    },
+                    "Records": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "left": {
+                          "link": "left-transit",
+                          "up": true,
+                          "address": {
+                            "address": "10.93.0.10",
+                            "prefix": 30
+                          }
+                        },
+                        "right": {
+                          "link": "right-transit",
+                          "up": true,
+                          "address": {
+                            "address": "10.93.0.14",
+                            "prefix": 30
+                          }
+                        },
+                        "service": {
+                          "link": "service-lan",
+                          "up": true,
+                          "address": {
+                            "address": "203.0.113.129",
+                            "prefix": 26
+                          }
+                        }
+                      },
+                      "routes": []
+                    },
+                    "Standby": {
+                      "forwarding": true,
+                      "interfaces": {
+                        "edge": {
+                          "link": "standby-uplink",
+                          "up": true,
+                          "address": {
+                            "address": "10.93.0.18",
+                            "prefix": 30
+                          }
+                        }
+                      },
+                      "routes": []
+                    }
+                  }
+                },
+                "configuration": {
+                  "routers": {
+                    "Branch-Edge": {
+                      "process": {
+                        "enabled": true,
+                        "process_id": 20,
+                        "router_id": "192.0.2.30",
+                        "area": 0
+                      },
+                      "interfaces": {
+                        "left": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 22,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "right": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 7,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "standby": {
+                          "enabled": false,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 1,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "desktop": {
+                          "enabled": true,
+                          "passive": true,
+                          "network_type": "Broadcast",
+                          "cost": 1,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        }
+                      }
+                    },
+                    "Harbor": {
+                      "process": {
+                        "enabled": true,
+                        "process_id": 21,
+                        "router_id": "192.0.2.31",
+                        "area": 0
+                      },
+                      "interfaces": {
+                        "edge": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 12,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "site": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 9,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        }
+                      }
+                    },
+                    "Ridge": {
+                      "process": {
+                        "enabled": true,
+                        "process_id": 22,
+                        "router_id": "192.0.2.32",
+                        "area": 0
+                      },
+                      "interfaces": {
+                        "edge": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 8,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "site": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 11,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        }
+                      }
+                    },
+                    "Records": {
+                      "process": {
+                        "enabled": true,
+                        "process_id": 23,
+                        "router_id": "192.0.2.33",
+                        "area": 0
+                      },
+                      "interfaces": {
+                        "left": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 6,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "right": {
+                          "enabled": true,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 10,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        },
+                        "service": {
+                          "enabled": true,
+                          "passive": true,
+                          "network_type": "Broadcast",
+                          "cost": 4,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        }
+                      }
+                    },
+                    "Standby": {
+                      "process": {
+                        "enabled": false,
+                        "process_id": 24,
+                        "router_id": "192.0.2.34",
+                        "area": 0
+                      },
+                      "interfaces": {
+                        "edge": {
+                          "enabled": false,
+                          "passive": false,
+                          "network_type": "PointToPoint",
+                          "cost": 1,
+                          "hello_seconds": 10,
+                          "dead_seconds": 40
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "ingress": "Branch-Edge",
+              "primary_interface": "left",
+              "primary_peer": "Harbor",
+              "static_backup": {
+                "destination": {
+                  "address": "203.0.113.128",
+                  "length": 26
+                },
+                "interface": "standby",
+                "via": "10.93.0.18",
+                "distance": 105
+              },
+              "retained_site": {
+                "destination": {
+                  "address": "203.0.113.0",
+                  "length": 24
+                },
+                "interface": "standby",
+                "via": "10.93.0.18",
+                "distance": 1
+              },
+              "retained_default": {
+                "destination": {
+                  "address": "0.0.0.0",
+                  "length": 0
+                },
+                "interface": "standby",
+                "via": "10.93.0.18",
+                "distance": 180
+              },
+              "probes": [
+                "203.0.113.130",
+                "203.0.113.190",
+                "203.0.113.192",
+                "192.0.2.1",
+                "10.93.0.18",
+                "172.16.0.20"
+              ],
+              "advertisement": {
+                "router": "Records",
+                "interface": "service"
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "automation-workshop {\"op\":\"ChangeRouteReading\",\"draft\":{\"cost\":\"5\",\"distance\":\"135\",\"mask_query\":\"255.255.255.192\"}}",
+        "automation-workshop {\"op\":\"Check\"}"
+      ]
+    }
+  ]
+}

@@ -7,7 +7,10 @@ pub(super) struct Metrics {
     pub fields: Vec<(String, egui::Rect, egui::Id, egui::Rect)>,
     pub rows: Vec<(bool, egui::Rect)>,
     pub choices: Vec<(String, egui::Rect, egui::Rect)>,
+    /// Complete task extent, including all requirements.
     pub goal: Option<egui::Rect>,
+    /// Actual lead Label response; scroll anchor, not whole-task coverage.
+    pub goal_anchor: Option<egui::Rect>,
     pub run_id: Option<egui::Id>,
     pub notice: Option<egui::Rect>,
     pub example_choices: Vec<(usize, egui::Rect, egui::Rect)>,
@@ -195,13 +198,25 @@ impl LabApp {
         }
         ui.heading(&source.title);
         if view == View::Introduction {
-            ui.label(&definition.lesson.prerequisite_note);
-            for c in &definition.lesson.concepts {
-                ui.strong(&c.title);
-                ui.label(&c.text);
+            if ccna_presentation::enabled(&source) {
+                ccna_presentation::concepts(
+                    ui,
+                    &source,
+                    &definition.lesson.prerequisite_note,
+                    definition
+                        .lesson
+                        .concepts
+                        .iter()
+                        .map(|c| (c.title.clone(), c.text.clone())),
+                );
+            } else {
+                ui.label(&definition.lesson.prerequisite_note);
+                for c in &definition.lesson.concepts {
+                    ui.strong(&c.title);
+                    ui.label(&c.text);
+                }
             }
-            ui.strong("A different runnable example");
-            ui.label(&definition.lesson.description);
+            lesson_presentation::worked(ui, &definition.lesson.description);
             for c in &definition.lesson.worked {
                 ui.monospace(format!("Select {} · {}", c.device, c.text));
                 let explanation = visible_text(&c.explanation);
@@ -212,14 +227,12 @@ impl LabApp {
                     .push(explanation.to_string());
                 ui.label(explanation);
             }
-            ui.label(&definition.lesson.try_change);
-            ui.label("Open Separate example to insert and run one command at a time. You may go straight to Assignment. No example work is installed in the assignment.");
+
             return;
         }
         let practice = view == View::Example;
         if practice {
-            ui.strong("Separate example · No assignment credit");
-            ui.label(&definition.lesson.description);
+            ccna_presentation::example(ui, &source, true);
             let mut selected = session.selected_example;
             let r = ui
                 .add_enabled_ui(!packet && !blocked, |ui| {
@@ -314,8 +327,9 @@ impl LabApp {
                 definition.lesson.repair.device, definition.lesson.repair.text
             ));
         } else {
-            let r = ui.label(&source.objective);
-            self.metrics.ntp.goal = Some(r.rect);
+            let r = lesson_presentation::assignment_responses(ui, &source);
+            self.metrics.ntp.goal = Some(r.whole.rect);
+            self.metrics.ntp.goal_anchor = Some(r.goal.rect);
         }
         let simulation_label = "Simulated NTP configuration · no real clock, daemon or packets.";
         #[cfg(test)]

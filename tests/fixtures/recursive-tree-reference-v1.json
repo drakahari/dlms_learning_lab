@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "path": "src",
+      "directory": true,
+      "mode": 493
+    },
+    {
+      "path": "src/readme",
+      "directory": false,
+      "mode": 420,
+      "text": "Controlled content\n"
+    },
+    {
+      "path": "src/.hidden",
+      "directory": false,
+      "mode": 420,
+      "text": "hidden without LF"
+    },
+    {
+      "path": "src/sub",
+      "directory": true,
+      "mode": 493
+    },
+    {
+      "path": "src/sub/data",
+      "directory": false,
+      "mode": 292,
+      "text": "café\n\n"
+    },
+    {
+      "path": "src/empty",
+      "directory": true,
+      "mode": 493
+    },
+    {
+      "path": "bucket",
+      "directory": true,
+      "mode": 493
+    },
+    {
+      "path": "keep",
+      "directory": false,
+      "mode": 384,
+      "text": "Keep unrelated content\n"
+    },
+    {
+      "path": "src words",
+      "directory": true,
+      "mode": 493
+    },
+    {
+      "path": "src words/file",
+      "directory": false,
+      "mode": 420,
+      "text": "literal spaced directory\n"
+    }
+  ],
+  "cases": [
+    {
+      "id": "copy-new-022",
+      "mask": 18,
+      "program": "cp",
+      "args": [
+        "-R",
+        "src",
+        "new"
+      ],
+      "modes": {}
+    },
+    {
+      "id": "copy-existing-directory",
+      "mask": 18,
+      "program": "cp",
+      "args": [
+        "-R",
+        "src",
+        "bucket"
+      ],
+      "modes": {}
+    },
+    {
+      "id": "copy-private-077",
+      "mask": 63,
+      "program": "cp",
+      "args": [
+        "-r",
+        "src",
+        "new"
+      ],
+      "modes": {}
+    },
+    {
+      "id": "copy-readonly-directory",
+      "mask": 18,
+      "program": "cp",
+      "args": [
+        "--recursive",
+        "src",
+        "new"
+      ],
+      "modes": {
+        "src": 365
+      }
+    },
+    {
+      "id": "copy-spaced-dash-name",
+      "mask": 18,
+      "program": "cp",
+      "args": [
+        "-R",
+        "--",
+        "src words",
+        "-out"
+      ],
+      "modes": {}
+    },
+    {
+      "id": "remove-nested",
+      "mask": 18,
+      "program": "rm",
+      "args": [
+        "-r",
+        "src"
+      ],
+      "modes": {}
+    },
+    {
+      "id": "remove-readonly-file",
+      "mask": 18,
+      "program": "rm",
+      "args": [
+        "-r",
+        "src"
+      ],
+      "modes": {
+        "src/readme": 256
+      }
+    },
+    {
+      "id": "remove-upper-alias",
+      "mask": 18,
+      "program": "rm",
+      "args": [
+        "-R",
+        "--",
+        "src"
+      ],
+      "modes": {}
+    }
+  ],
+  "excluded": [
+    {
+      "id": "exclude-merge",
+      "command": "cp -R src bucket",
+      "setup": "copy-existing",
+      "reason": "Merging into an existing destination subtree is not implemented."
+    },
+    {
+      "id": "exclude-final-dot",
+      "command": "cp -R src/. new",
+      "setup": "none",
+      "reason": "Final dot components have additional GNU cp naming semantics outside this subset."
+    },
+    {
+      "id": "exclude-partial-access",
+      "command": "cp -R src new",
+      "setup": "unreadable-file",
+      "reason": "Real cp/rm can leave partial effects after access failure; this finite reducer refuses atomically."
+    }
+  ]
+}

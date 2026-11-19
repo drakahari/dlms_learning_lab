@@ -523,6 +523,21 @@ pub(in crate::ui) fn immediate_stop(stage: usize) -> bool {
     matches!(p.get(n), Some(Step::StopActive | Step::StopExact))
         || matches!(p.get(n + 1), Some(Step::StopActive))
 }
+fn goal_proof_key(ctx: &egui::Context, source: &Scenario) -> egui::Id {
+    egui::Id::new((
+        "oneoff-assignment-proof",
+        source.id.as_str(),
+        ctx.zoom_factor().to_bits(),
+        ctx.content_rect().width().to_bits(),
+        ctx.style().visuals.dark_mode,
+    ))
+}
+#[cfg(test)]
+pub(in crate::ui) fn goal_rows_complete(ctx: &egui::Context, source: &Scenario) -> bool {
+    let key = goal_proof_key(ctx, source);
+    ctx.data(|d| d.get_temp::<lesson_presentation::paint::Proof>(key))
+        .is_some_and(|proof| proof.complete())
+}
 impl LabApp {
     pub(in crate::ui) fn one_off_lessons_stage(smoke: bool, name: Option<&str>) -> Option<usize> {
         (smoke && name == Some("one-off-lessons")).then_some(FIRST)
@@ -659,14 +674,17 @@ impl LabApp {
                 return (clip, root);
             }
             Target::Goal(end) => {
-                let r = m.goal.unwrap();
-                let font = egui::TextStyle::Body.resolve(&ctx.style());
-                let h = ctx.fonts_mut(|f| f.row_height(&font)).min(r.height());
-                let top = if *end { r.bottom() - h } else { r.top() };
-                return (
-                    egui::Rect::from_min_size(egui::pos2(r.left(), top), egui::vec2(r.width(), h)),
-                    root,
-                );
+                let (source, _) = self.oo_current();
+                let rows = lesson_presentation::paint::collect(ctx, source, root)
+                    .expect("Actual current-pass goal/requirement label layouts");
+                let proof =
+                    lesson_presentation::paint::observe(ctx, goal_proof_key(ctx, source), &rows);
+                let index = if *end {
+                    proof.first_missing().unwrap_or(rows.rows.len() - 1)
+                } else {
+                    0
+                };
+                return (rows.rows[index], rows.clips[index]);
             }
             _ => {}
         }
@@ -1103,6 +1121,7 @@ impl LabApp {
                 qa.lab = n;
                 let (s, a) = self.oo_current();
                 assert_eq!(s.id, IDS[n]);
+                lesson_presentation::paint::request(ctx, s);
                 assert_eq!(a.state, s.initial);
                 assert!(!a.challenge);
                 assert_eq!(
@@ -1439,6 +1458,18 @@ impl LabApp {
                 }
             }
             Step::Shot(name, target) => {
+                if let Target::Goal(_) = target {
+                    let (source, _) = self.oo_current();
+                    let visible = self
+                        .metrics
+                        .main_viewport
+                        .unwrap()
+                        .intersect(ctx.content_rect());
+                    if lesson_presentation::paint::collect(ctx, source, visible).is_none() {
+                        ctx.request_repaint();
+                        return (false, None);
+                    }
+                }
                 if name.ends_with("-wrong-specific-feedback") {
                     let (source, attempt) = self.oo_current();
                     let rows = self
@@ -1467,6 +1498,33 @@ impl LabApp {
                 }
                 let (r, clip) = self.oo_target(ctx, &target);
                 assert!(smoke_control_visible(r, clip, ctx.pixels_per_point()));
+                if let Target::Goal(last) = target {
+                    let (source, _) = self.oo_current();
+                    let rows = lesson_presentation::paint::collect(
+                        ctx,
+                        source,
+                        self.metrics
+                            .main_viewport
+                            .unwrap()
+                            .intersect(ctx.content_rect()),
+                    )
+                    .unwrap();
+                    let proof = lesson_presentation::paint::observe(
+                        ctx,
+                        goal_proof_key(ctx, source),
+                        &rows,
+                    );
+                    if last && !proof.complete() {
+                        self.started = Instant::now();
+                        ctx.request_repaint();
+                        return (false, None);
+                    }
+                    let index = if last { rows.rows.len() - 1 } else { 0 };
+                    assert!(
+                        rows.witnessed[index],
+                        "Real first/final assignment glyph row must paint in its own clip"
+                    );
+                }
                 for (k, r, _, _, clip) in &self.metrics.one_off.fields {
                     assert!(
                         r.left() >= clip.left() - 1. / ctx.pixels_per_point()

@@ -1104,13 +1104,23 @@ impl LabApp {
         match view {
             teaching::View::Introduction => {
                 let lesson = self.scenarios[i].apache_static_teaching.as_ref().unwrap();
-                ui.label(&lesson.prerequisite_note);
-                for c in &lesson.concepts {
-                    ui.label(RichText::new(&c.title).strong());
-                    ui.label(&c.text);
-                }
-                ui.label(RichText::new("A different virtual site to try").strong());
-                ui.label(&lesson.example_description);
+                let source = &self.scenarios[i];
+                lesson_presentation::concepts(
+                    ui,
+                    source,
+                    &lesson.prerequisite_note,
+                    lesson
+                        .concepts
+                        .iter()
+                        .map(|c| (c.title.clone(), c.text.clone())),
+                );
+                lesson_presentation::worked(ui, &lesson.example_description);
+                lesson_presentation::worked_rows(ui, source);
+                controls::collapsing_header(ui, "Full worked sequence").show(ui, |ui| {
+                    for (n, action) in lesson.example_actions.iter().enumerate() {
+                        lesson_presentation::section(ui, n + 1, &action.title, &action.explanation);
+                    }
+                });
                 let mut go = None;
                 ui.horizontal_wrapped(|ui| {
                     let r = control(
@@ -1156,8 +1166,7 @@ impl LabApp {
                     self.apache_presentation.clear();
                     return;
                 }
-                ui.label("Separate practice · Changes here never complete the assignment.");
-                ui.label(&lesson.example_description);
+                lesson_presentation::practice_step(ui, s, 0);
                 let mut dirty = false;
                 let mut defer_focus = false;
                 ui.push_id(("apache-example-action",&id),|ui|{
@@ -1185,6 +1194,7 @@ impl LabApp {
                     ui.label(RichText::new("Insert fills draft text only. Save configuration or Save file applies it; Start/Reload/Stop are separate labeled controls.").small().color(palette(ui).muted));
                     if !can_insert {ui.label("This step has no text to insert. Use its labeled virtual server control.");}
                 });
+                lesson_presentation::practice_step(ui, s, 1);
                 let mut session = Session::Practice {
                     learning: l,
                     lesson,
@@ -1210,7 +1220,7 @@ impl LabApp {
                 {
                     ui.label(n);
                 }
-                ui.label(format!("Try a change: {}", lesson.try_change.description));
+                lesson_presentation::practice_step(ui, s, 2);
                 self.dirty |= dirty;
                 let r = control(
                     ui,
@@ -1226,8 +1236,7 @@ impl LabApp {
             }
             teaching::View::Assignment => {
                 let s = &self.scenarios[i];
-                ui.label(RichText::new("Full task").strong());
-                ui.label(&s.objective);
+                lesson_presentation::assignment(ui, s);
                 let a = self.progress.attempts.get_mut(&id).unwrap();
                 if !matches!(a.state, engine::State::ApacheStatic { .. })
                     || a.workspace

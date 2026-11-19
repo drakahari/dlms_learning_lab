@@ -18,7 +18,15 @@ pub struct Lesson {
     pub outcomes: Vec<crate::filesystem::Requirement>,
 }
 impl Lesson {
+    pub fn command_source(&self)->Result<Option<crate::filesystem::discovery_policy::Reference<'_>>,String> {
+        let reference=crate::filesystem::discovery_policy::for_current(&self.outcomes,&self.fixture)?;
+        if reference.is_some_and(|r|!r.valid_for(&self.fixture)) {
+            return Err("Practice command-location reference differs from its original fixture".into());
+        }
+        Ok(reference)
+    }
     pub fn validate(&self) -> Result<(), String> {
+        let reference = self.command_source()?;
         if !self.fixture.valid()
             || self.concepts.is_empty()
             || self.concepts.len() > 6
@@ -48,7 +56,7 @@ impl Lesson {
         }
         let mut tree = self.fixture.clone();
         for command in &self.example {
-            tree.execute(command)
+            (match reference {Some(r)=>r.execute(&mut tree,command),None=>tree.execute_in_context(&self.fixture,command)})
                 .map_err(|e| format!("Terminal example cannot run: {e}"))?;
         }
         if self.outcomes.iter().any(|r| !r.check(&tree).0) {
@@ -69,6 +77,26 @@ pub struct Learning {
     pub transcript: Vec<String>,
 }
 impl Learning {
+    /// Source pairing is mandatory only for the opt-in diagnostic workspace.
+    /// Existing None lessons retain their previous validity and execution path.
+    pub fn valid_for_source(&self,lesson:&Lesson)->bool {
+        let Ok(reference)=lesson.command_source()else{return false;};
+        self.valid() && self.example_command<lesson.example.len()
+            && match reference {
+                None=>lesson.fixture.command_location.is_none()&&self.tree.command_location.is_none(),
+                Some(r)=>r.bound(&self.tree).is_ok(),
+            }
+    }
+    pub fn execute_for(&mut self,lesson:&Lesson)->Result<(),String> {
+        if !self.valid_for_source(lesson){return Err("Practice source differs; your draft is retained".into());}
+        let Some(reference)=lesson.command_source()?else{self.execute();return Ok(());};
+        let input=std::mem::take(&mut self.command);
+        if input.trim().is_empty(){return Ok(());}
+        let output=reference.execute(&mut self.tree,&input).unwrap_or_else(|e|e);
+        self.transcript.push(format!("alex $ {input}\n{output}"));
+        if self.transcript.len()>40{self.transcript.remove(0);}
+        Ok(())
+    }
     pub fn new(lesson: &Lesson) -> Self {
         Self {
             version: 1,
@@ -88,6 +116,8 @@ impl Learning {
             && self.transcript.iter().all(|s| s.len() <= 40_000)
     }
     pub fn execute(&mut self) {
+        // A source-free call cannot consume a draft from a source-bound activity.
+        if self.tree.command_location.is_some() { return; }
         let input = std::mem::take(&mut self.command);
         if input.trim().is_empty() {
             return;
@@ -112,6 +142,7 @@ pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
             | crate::engine::State::Lvm { .. }
             | crate::engine::State::Ntp { .. }
             | crate::engine::State::Hsrp { .. }
+            | crate::engine::State::Syslog { .. }
     ) || crate::workspace::is_physical_workspace(attempt)
     {
         return;

@@ -12,6 +12,7 @@ fn disk() -> Disk {
         in_use: false,
         occupied_without_table: false,
         table: None,
+        mbr: None,
     }
 }
 fn fixture() -> State {
@@ -42,6 +43,7 @@ fn fixture() -> State {
     readonly.writable = false;
     State {
         version: 1,
+        mbr_profile: None,
         next_uuid: 1,
         disks: BTreeMap::from([
             ("/dev/vda".into(), disk()),

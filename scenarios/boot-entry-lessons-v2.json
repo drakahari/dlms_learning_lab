@@ -1,0 +1,1067 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-boot-root-identity",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Boot entry recovery",
+      "unit": "linux-boot-entry-recovery",
+      "title": "Recover the intended system root",
+      "summary": "Repair a boot entry whose filesystem identifier points to an archive instead of the operating system.",
+      "objective": "Use the Operations system UUID 31415926-5358-9793-2384-626433832795 with the supplied 7.0 kernel and matching initramfs. Request an initially read-only root and ordinary multi-user startup. Test the edited entry until all requested outcomes match.",
+      "retry_guidance": "Read the first blocked stage, compare it with the supplied image/root facts, edit the relevant line and test again.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Inspect the supplied entry and image/root facts",
+        "Repair the relevant boot configuration",
+        "Test the full requested handoff"
+      ],
+      "guide": [],
+      "explanation": "The entry loads its kernel and initramfs, but the archive has no init program. The right repair changes the root=UUID= argument using the filesystem inventory; a different title cannot redirect the handoff.",
+      "hints": [
+        "linux and initrd name supplied images relative to virtual $BOOT. title/version are descriptions, not path substitutions.",
+        "An existing image can have the wrong release or lack a required early-boot driver.",
+        "A valid handoff must still use the requested root, kernel release, initial mode and target."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://uapi-group.org/specifications/specs/boot_loader_specification/",
+        "https://docs.kernel.org/admin-guide/init.html",
+        "https://docs.kernel.org/admin-guide/kernel-parameters.html"
+      ],
+      "simplifications": "Bounded Type #1 Linux boot-entry editing and hypothetical early-root handoff over supplied facts. Firmware/loader availability are preconditions. No GRUB installation/config generation, BLS discovery/order, Secure Boot, image parsing, initramfs generation, actual kernel/init/service execution, disk or host access. Only the disclosed literal keys and kernel options are supported.",
+      "initial": {
+        "kind": "BootEntry",
+        "simulation": {
+          "version": 1,
+          "context": "lpic1-boot-root-identity",
+          "view": "introduction",
+          "assignment": {
+            "source": "title Operations Linux\nversion 7.0\nlinux /system/7.0/linux\ninitrd /system/7.0/initrd\noptions root=UUID=27182818-2845-9045-2353-602874713526\noptions ro\n",
+            "checked": null
+          },
+          "practice": {
+            "source": "title Operations Linux\nversion 7.0\nlinux /workshop/7.0/linux\ninitrd /workshop/7.0/initrd\noptions root=UUID=99887766-5544-3322-1100-aabbccddeeff\noptions ro\n",
+            "checked": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "BootEntry",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "id": "lpic1-boot-root-identity",
+            "instructions": "Use the Operations system UUID 31415926-5358-9793-2384-626433832795 with the supplied 7.0 kernel and matching initramfs. Request an initially read-only root and ordinary multi-user startup. Test the edited entry until all requested outcomes match.",
+            "inventory": {
+              "kernels": [
+                {
+                  "path": "/system/7.0/linux",
+                  "release": "7.0",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                },
+                {
+                  "path": "/system/7.1/linux",
+                  "release": "7.1",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                }
+              ],
+              "initramfs": [
+                {
+                  "path": "/system/7.0/initrd",
+                  "release": "7.0",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/system/7.1/minimal",
+                  "release": "7.1",
+                  "drivers": [],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/system/7.1/full",
+                  "release": "7.1",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                }
+              ],
+              "roots": [
+                {
+                  "uuid": "31415926-5358-9793-2384-626433832795",
+                  "label": "Operations system",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": true
+                },
+                {
+                  "uuid": "27182818-2845-9045-2353-602874713526",
+                  "label": "Data archive",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": false
+                }
+              ]
+            },
+            "entry_path": "/loader/entries/lpic1-boot-root-identity.conf",
+            "starter": "title Operations Linux\nversion 7.0\nlinux /system/7.0/linux\ninitrd /system/7.0/initrd\noptions root=UUID=27182818-2845-9045-2353-602874713526\noptions ro\n",
+            "reference": "title Operations Linux\nversion 7.0\nlinux /system/7.0/linux\ninitrd /system/7.0/initrd\noptions root=UUID=31415926-5358-9793-2384-626433832795\noptions ro\n",
+            "required_root": "31415926-5358-9793-2384-626433832795",
+            "required_release": "7.0",
+            "require_read_only": true,
+            "required_target": "multi-user.target"
+          },
+          "example": {
+            "id": "workshop-1",
+            "instructions": "Workshop: reach the Operations system at UUID 11223344-5566-7788-99aa-bbccddeeff00, using kernel 7.0, matching early-boot support, an initially read-only root and multi-user.target. Read the image and filesystem inventory beside the editor.",
+            "inventory": {
+              "kernels": [
+                {
+                  "path": "/workshop/7.0/linux",
+                  "release": "7.0",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                },
+                {
+                  "path": "/workshop/7.1/linux",
+                  "release": "7.1",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                }
+              ],
+              "initramfs": [
+                {
+                  "path": "/workshop/7.0/initrd",
+                  "release": "7.0",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/workshop/7.1/minimal",
+                  "release": "7.1",
+                  "drivers": [],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/workshop/7.1/full",
+                  "release": "7.1",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                }
+              ],
+              "roots": [
+                {
+                  "uuid": "11223344-5566-7788-99aa-bbccddeeff00",
+                  "label": "Operations system",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": true
+                },
+                {
+                  "uuid": "99887766-5544-3322-1100-aabbccddeeff",
+                  "label": "Data archive",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": false
+                }
+              ]
+            },
+            "entry_path": "/loader/entries/workshop-1.conf",
+            "starter": "title Operations Linux\nversion 7.0\nlinux /workshop/7.0/linux\ninitrd /workshop/7.0/initrd\noptions root=UUID=99887766-5544-3322-1100-aabbccddeeff\noptions ro\n",
+            "reference": "title Operations Linux\nversion 7.0\nlinux /workshop/7.0/linux\ninitrd /workshop/7.0/initrd\noptions root=UUID=11223344-5566-7788-99aa-bbccddeeff00\noptions ro\n",
+            "required_root": "11223344-5566-7788-99aa-bbccddeeff00",
+            "required_release": "7.0",
+            "require_read_only": true,
+            "required_target": "multi-user.target"
+          }
+        }
+      },
+      "solution": [
+        "BOOT ENTRY WORK\n{\"source\": \"title Operations Linux\\nversion 7.0\\nlinux /system/7.0/linux\\ninitrd /system/7.0/initrd\\noptions root=UUID=31415926-5358-9793-2384-626433832795\\noptions ro\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic1-module-device-driver"
+      ]
+    },
+    {
+      "id": "lpic1-boot-initramfs-match",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Boot entry recovery",
+      "unit": "linux-boot-entry-recovery",
+      "title": "Match early boot support to a new kernel",
+      "summary": "Repair an upgraded-kernel entry that still loads old early-boot modules.",
+      "objective": "Boot the supplied 7.1 kernel into Operations system UUID 31415926-5358-9793-2384-626433832795. Choose matching early-boot images that provide virtio_blk and UUID lookup; retain an initially read-only root and multi-user startup. Test the full handoff.",
+      "retry_guidance": "Read the first blocked stage, compare it with the supplied image/root facts, edit the relevant line and test again.",
+      "difficulty": "Intermediate",
+      "minutes": 12,
+      "steps": [
+        "Inspect the supplied entry and image/root facts",
+        "Repair the relevant boot configuration",
+        "Test the full requested handoff"
+      ],
+      "guide": [],
+      "explanation": "A filename can exist and still be wrong for the selected kernel. The old image contains modules for 7.0; the new kernel needs 7.1 support. The matching minimal image resolves UUIDs but lacks the disk driver. Read both release and driver facts before choosing the full image.",
+      "hints": [
+        "linux and initrd name supplied images relative to virtual $BOOT. title/version are descriptions, not path substitutions.",
+        "An existing image can have the wrong release or lack a required early-boot driver.",
+        "A valid handoff must still use the requested root, kernel release, initial mode and target."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://uapi-group.org/specifications/specs/boot_loader_specification/",
+        "https://docs.kernel.org/admin-guide/init.html",
+        "https://docs.kernel.org/admin-guide/kernel-parameters.html"
+      ],
+      "simplifications": "Bounded Type #1 Linux boot-entry editing and hypothetical early-root handoff over supplied facts. Firmware/loader availability are preconditions. No GRUB installation/config generation, BLS discovery/order, Secure Boot, image parsing, initramfs generation, actual kernel/init/service execution, disk or host access. Only the disclosed literal keys and kernel options are supported.",
+      "initial": {
+        "kind": "BootEntry",
+        "simulation": {
+          "version": 1,
+          "context": "lpic1-boot-initramfs-match",
+          "view": "introduction",
+          "assignment": {
+            "source": "title Operations Linux\nversion 7.1\nlinux /system/7.1/linux\ninitrd /system/7.0/initrd\noptions root=UUID=31415926-5358-9793-2384-626433832795\noptions ro\n",
+            "checked": null
+          },
+          "practice": {
+            "source": "title Operations Linux\nversion 7.1\nlinux /workshop/7.1/linux\ninitrd /workshop/7.0/initrd\noptions root=UUID=11223344-5566-7788-99aa-bbccddeeff00\noptions ro\n",
+            "checked": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "BootEntry",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "id": "lpic1-boot-initramfs-match",
+            "instructions": "Boot the supplied 7.1 kernel into Operations system UUID 31415926-5358-9793-2384-626433832795. Choose matching early-boot images that provide virtio_blk and UUID lookup; retain an initially read-only root and multi-user startup. Test the full handoff.",
+            "inventory": {
+              "kernels": [
+                {
+                  "path": "/system/7.0/linux",
+                  "release": "7.0",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                },
+                {
+                  "path": "/system/7.1/linux",
+                  "release": "7.1",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                }
+              ],
+              "initramfs": [
+                {
+                  "path": "/system/7.0/initrd",
+                  "release": "7.0",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/system/7.1/minimal",
+                  "release": "7.1",
+                  "drivers": [],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/system/7.1/full",
+                  "release": "7.1",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                }
+              ],
+              "roots": [
+                {
+                  "uuid": "31415926-5358-9793-2384-626433832795",
+                  "label": "Operations system",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": true
+                },
+                {
+                  "uuid": "27182818-2845-9045-2353-602874713526",
+                  "label": "Data archive",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": false
+                }
+              ]
+            },
+            "entry_path": "/loader/entries/lpic1-boot-initramfs-match.conf",
+            "starter": "title Operations Linux\nversion 7.1\nlinux /system/7.1/linux\ninitrd /system/7.0/initrd\noptions root=UUID=31415926-5358-9793-2384-626433832795\noptions ro\n",
+            "reference": "title Operations Linux\nversion 7.1\nlinux /system/7.1/linux\ninitrd /system/7.1/full\noptions root=UUID=31415926-5358-9793-2384-626433832795\noptions ro\n",
+            "required_root": "31415926-5358-9793-2384-626433832795",
+            "required_release": "7.1",
+            "require_read_only": true,
+            "required_target": "multi-user.target"
+          },
+          "example": {
+            "id": "workshop-2",
+            "instructions": "Workshop: reach the Operations system at UUID 11223344-5566-7788-99aa-bbccddeeff00, using kernel 7.1, matching early-boot support, an initially read-only root and multi-user.target. Read the image and filesystem inventory beside the editor.",
+            "inventory": {
+              "kernels": [
+                {
+                  "path": "/workshop/7.0/linux",
+                  "release": "7.0",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                },
+                {
+                  "path": "/workshop/7.1/linux",
+                  "release": "7.1",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                }
+              ],
+              "initramfs": [
+                {
+                  "path": "/workshop/7.0/initrd",
+                  "release": "7.0",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/workshop/7.1/minimal",
+                  "release": "7.1",
+                  "drivers": [],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/workshop/7.1/full",
+                  "release": "7.1",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                }
+              ],
+              "roots": [
+                {
+                  "uuid": "11223344-5566-7788-99aa-bbccddeeff00",
+                  "label": "Operations system",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": true
+                },
+                {
+                  "uuid": "99887766-5544-3322-1100-aabbccddeeff",
+                  "label": "Data archive",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": false
+                }
+              ]
+            },
+            "entry_path": "/loader/entries/workshop-2.conf",
+            "starter": "title Operations Linux\nversion 7.1\nlinux /workshop/7.1/linux\ninitrd /workshop/7.0/initrd\noptions root=UUID=11223344-5566-7788-99aa-bbccddeeff00\noptions ro\n",
+            "reference": "title Operations Linux\nversion 7.1\nlinux /workshop/7.1/linux\ninitrd /workshop/7.1/full\noptions root=UUID=11223344-5566-7788-99aa-bbccddeeff00\noptions ro\n",
+            "required_root": "11223344-5566-7788-99aa-bbccddeeff00",
+            "required_release": "7.1",
+            "require_read_only": true,
+            "required_target": "multi-user.target"
+          }
+        }
+      },
+      "solution": [
+        "BOOT ENTRY WORK\n{\"source\": \"title Operations Linux\\nversion 7.1\\nlinux /system/7.1/linux\\ninitrd /system/7.1/full\\noptions root=UUID=31415926-5358-9793-2384-626433832795\\noptions ro\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic1-boot-root-identity"
+      ]
+    },
+    {
+      "id": "lpic1-boot-recovery-handoff",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Boot entry recovery",
+      "unit": "linux-boot-entry-recovery",
+      "title": "Prepare a recovery entry after an upgrade",
+      "summary": "Combine image, filesystem and startup evidence to prepare a safe recovery handoff.",
+      "objective": "Prepare the supplied known-working 7.0 kernel and matching early-boot support for Operations system UUID 31415926-5358-9793-2384-626433832795. Use ro for the initial root and explicitly request systemd.unit=rescue.target. Test the complete entry; a bootable multi-user entry alone is not the requested recovery.",
+      "retry_guidance": "Read the first blocked stage, compare it with the supplied image/root facts, edit the relevant line and test again.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Inspect the supplied entry and image/root facts",
+        "Repair the relevant boot configuration",
+        "Test the full requested handoff"
+      ],
+      "guide": [],
+      "explanation": "Work from the first blocked stage rather than changing unrelated settings. Recovery also has an outcome requirement: a valid kernel and root can reach ordinary startup while still missing the requested rescue target or initial read-only mode. This is a combined configuration task, not a real rollback or reboot.",
+      "hints": [
+        "linux and initrd name supplied images relative to virtual $BOOT. title/version are descriptions, not path substitutions.",
+        "An existing image can have the wrong release or lack a required early-boot driver.",
+        "A valid handoff must still use the requested root, kernel release, initial mode and target."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://uapi-group.org/specifications/specs/boot_loader_specification/",
+        "https://docs.kernel.org/admin-guide/init.html",
+        "https://docs.kernel.org/admin-guide/kernel-parameters.html"
+      ],
+      "simplifications": "Bounded Type #1 Linux boot-entry editing and hypothetical early-root handoff over supplied facts. Firmware/loader availability are preconditions. No GRUB installation/config generation, BLS discovery/order, Secure Boot, image parsing, initramfs generation, actual kernel/init/service execution, disk or host access. Only the disclosed literal keys and kernel options are supported.",
+      "initial": {
+        "kind": "BootEntry",
+        "simulation": {
+          "version": 1,
+          "context": "lpic1-boot-recovery-handoff",
+          "view": "introduction",
+          "assignment": {
+            "source": "title Operations Linux\nversion 7.1\nlinux /system/7.1/linux\ninitrd /system/7.1/minimal\noptions root=UUID=27182818-2845-9045-2353-602874713526\noptions rw\n",
+            "checked": null
+          },
+          "practice": {
+            "source": "title Operations Linux\nversion 7.1\nlinux /workshop/7.1/linux\ninitrd /workshop/7.1/minimal\noptions root=UUID=99887766-5544-3322-1100-aabbccddeeff\noptions rw\n",
+            "checked": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "BootEntry",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "id": "lpic1-boot-recovery-handoff",
+            "instructions": "Prepare the supplied known-working 7.0 kernel and matching early-boot support for Operations system UUID 31415926-5358-9793-2384-626433832795. Use ro for the initial root and explicitly request systemd.unit=rescue.target. Test the complete entry; a bootable multi-user entry alone is not the requested recovery.",
+            "inventory": {
+              "kernels": [
+                {
+                  "path": "/system/7.0/linux",
+                  "release": "7.0",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                },
+                {
+                  "path": "/system/7.1/linux",
+                  "release": "7.1",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                }
+              ],
+              "initramfs": [
+                {
+                  "path": "/system/7.0/initrd",
+                  "release": "7.0",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/system/7.1/minimal",
+                  "release": "7.1",
+                  "drivers": [],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/system/7.1/full",
+                  "release": "7.1",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                }
+              ],
+              "roots": [
+                {
+                  "uuid": "31415926-5358-9793-2384-626433832795",
+                  "label": "Operations system",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": true
+                },
+                {
+                  "uuid": "27182818-2845-9045-2353-602874713526",
+                  "label": "Data archive",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": false
+                }
+              ]
+            },
+            "entry_path": "/loader/entries/lpic1-boot-recovery-handoff.conf",
+            "starter": "title Operations Linux\nversion 7.1\nlinux /system/7.1/linux\ninitrd /system/7.1/minimal\noptions root=UUID=27182818-2845-9045-2353-602874713526\noptions rw\n",
+            "reference": "title Operations Linux\nversion 7.0\nlinux /system/7.0/linux\ninitrd /system/7.0/initrd\noptions root=UUID=31415926-5358-9793-2384-626433832795\noptions ro\noptions systemd.unit=rescue.target\n",
+            "required_root": "31415926-5358-9793-2384-626433832795",
+            "required_release": "7.0",
+            "require_read_only": true,
+            "required_target": "rescue.target"
+          },
+          "example": {
+            "id": "workshop-3",
+            "instructions": "Workshop: reach the Operations system at UUID 11223344-5566-7788-99aa-bbccddeeff00, using kernel 7.0, matching early-boot support, an initially read-only root and rescue.target. Read the image and filesystem inventory beside the editor.",
+            "inventory": {
+              "kernels": [
+                {
+                  "path": "/workshop/7.0/linux",
+                  "release": "7.0",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                },
+                {
+                  "path": "/workshop/7.1/linux",
+                  "release": "7.1",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                }
+              ],
+              "initramfs": [
+                {
+                  "path": "/workshop/7.0/initrd",
+                  "release": "7.0",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/workshop/7.1/minimal",
+                  "release": "7.1",
+                  "drivers": [],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/workshop/7.1/full",
+                  "release": "7.1",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                }
+              ],
+              "roots": [
+                {
+                  "uuid": "11223344-5566-7788-99aa-bbccddeeff00",
+                  "label": "Operations system",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": true
+                },
+                {
+                  "uuid": "99887766-5544-3322-1100-aabbccddeeff",
+                  "label": "Data archive",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": false
+                }
+              ]
+            },
+            "entry_path": "/loader/entries/workshop-3.conf",
+            "starter": "title Operations Linux\nversion 7.1\nlinux /workshop/7.1/linux\ninitrd /workshop/7.1/minimal\noptions root=UUID=99887766-5544-3322-1100-aabbccddeeff\noptions rw\n",
+            "reference": "title Operations Linux\nversion 7.0\nlinux /workshop/7.0/linux\ninitrd /workshop/7.0/initrd\noptions root=UUID=11223344-5566-7788-99aa-bbccddeeff00\noptions ro\noptions systemd.unit=rescue.target\n",
+            "required_root": "11223344-5566-7788-99aa-bbccddeeff00",
+            "required_release": "7.0",
+            "require_read_only": true,
+            "required_target": "rescue.target"
+          }
+        }
+      },
+      "solution": [
+        "BOOT ENTRY WORK\n{\"source\": \"title Operations Linux\\nversion 7.0\\nlinux /system/7.0/linux\\ninitrd /system/7.0/initrd\\noptions root=UUID=31415926-5358-9793-2384-626433832795\\noptions ro\\noptions systemd.unit=rescue.target\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic1-boot-initramfs-match"
+      ]
+    },
+    {
+      "id": "lpic1-grub-default-fallback",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "GRUB menu recovery",
+      "unit": "linux-grub-menu-recovery",
+      "title": "Choose a working fallback from a GRUB menu",
+      "summary": "Diagnose a failed upgrade and select the supplied ordinary fallback without damaging another boot path.",
+      "objective": "Select the supplied known-working 7.0 ordinary entry for system UUID 31415926-5358-9793-2384-626433832795; use an explicit default. Preserve all three supplied entries’ titles, image paths and kernel settings. A recovery target or repaired 7.1 upgrade is not the requested fallback.",
+      "retry_guidance": "Read the first blocked stage, compare it with the supplied image/root facts, edit the relevant line and test again.",
+      "difficulty": "Beginner",
+      "minutes": 14,
+      "steps": [
+        "Inspect the menu choice and supplied image facts",
+        "Edit the relevant GRUB setting or entry",
+        "Test the selected handoff and preserve the other path"
+      ],
+      "guide": [],
+      "explanation": "The upgraded entry lacks an early storage driver. Selecting the intact previous entry reaches ordinary startup with the required 7.0 kernel; the recovery entry is bootable but requests a different target. IDs, positions and titles can express the same supported selection.",
+      "hints": [
+        "Read Actual test result from Menu selection, then the first blocked image or handoff stage.",
+        "Positions start at 0; a short identifier written as --id=... or quoted title can identify the same supplied entry.",
+        "linux chooses an image; root=UUID= and systemd.unit= are kernel arguments. initrd must follow linux and match its release."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/grub/manual/grub/html_node/default.html",
+        "https://www.gnu.org/software/grub/manual/grub/html_node/menuentry.html",
+        "https://www.gnu.org/software/grub/manual/grub/html_node/Shell_002dlike-scripting.html",
+        "https://www.gnu.org/software/grub/manual/grub/html_node/GNU_002fLinux.html",
+        "https://docs.kernel.org/admin-guide/kernel-parameters.html"
+      ],
+      "simplifications": "Bounded hand-authored flat GRUB2 menu subset over supplied virtual boot/image/filesystem facts. No GRUB execution, firmware, installation, generation, distribution templates, saved environment, submenus, device/search commands, expansion, real images or host files. Unknown syntax and missing-default fallback are explicitly unsupported; this is not advice to edit a distribution-generated grub.cfg.",
+      "initial": {
+        "kind": "BootEntry",
+        "simulation": {
+          "version": 1,
+          "context": "lpic1-grub-default-fallback",
+          "view": "introduction",
+          "assignment": {
+            "source": "set default=primary\nmenuentry 'Primary Linux' --id=primary {\n linux /system/7.1/linux \\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\n  ro systemd.unit=multi-user.target\n initrd /system/7.1/minimal\n}\nmenuentry 'Spare Linux' --id=spare {\n linux /system/7.0/linux \\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\n  ro systemd.unit=multi-user.target\n initrd /system/7.0/initrd\n}\nmenuentry 'Maintenance Linux' --id=maintenance {\n linux /system/7.0/linux \\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\n  ro systemd.unit=rescue.target\n initrd /system/7.0/initrd\n}\n",
+            "checked": null
+          },
+          "practice": {
+            "source": "set default=trial\nmenuentry 'Workshop stable' --id=stable {\n linux /workshop/7.0/linux \\\n  root=UUID=11223344-5566-7788-99aa-bbccddeeff00 \\\n  ro systemd.unit=multi-user.target\n initrd /workshop/7.0/initrd\n}\nmenuentry 'Workshop trial' --id=trial {\n linux /workshop/7.1/linux \\\n  root=UUID=11223344-5566-7788-99aa-bbccddeeff00 \\\n  ro systemd.unit=multi-user.target\n initrd /workshop/7.1/minimal\n}\nmenuentry 'Workshop rescue' --id=rescue {\n linux /workshop/7.0/linux \\\n  root=UUID=11223344-5566-7788-99aa-bbccddeeff00 \\\n  ro systemd.unit=rescue.target\n initrd /workshop/7.0/initrd\n}\n",
+            "checked": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "BootEntry",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "id": "lpic1-grub-default-fallback",
+            "instructions": "Select the supplied known-working 7.0 ordinary entry for system UUID 31415926-5358-9793-2384-626433832795; use an explicit default. Preserve all three supplied entries’ titles, image paths and kernel settings. A recovery target or repaired 7.1 upgrade is not the requested fallback.",
+            "inventory": {
+              "kernels": [
+                {
+                  "path": "/system/7.0/linux",
+                  "release": "7.0",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                },
+                {
+                  "path": "/system/7.1/linux",
+                  "release": "7.1",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                }
+              ],
+              "initramfs": [
+                {
+                  "path": "/system/7.0/initrd",
+                  "release": "7.0",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/system/7.1/minimal",
+                  "release": "7.1",
+                  "drivers": [],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/system/7.1/full",
+                  "release": "7.1",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                }
+              ],
+              "roots": [
+                {
+                  "uuid": "31415926-5358-9793-2384-626433832795",
+                  "label": "Operations system",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": true
+                },
+                {
+                  "uuid": "27182818-2845-9045-2353-602874713526",
+                  "label": "Data archive",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": false
+                }
+              ]
+            },
+            "entry_path": "/grub/learning-lpic1-grub-default-fallback.cfg",
+            "starter": "set default=primary\nmenuentry 'Primary Linux' --id=primary {\n linux /system/7.1/linux \\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\n  ro systemd.unit=multi-user.target\n initrd /system/7.1/minimal\n}\nmenuentry 'Spare Linux' --id=spare {\n linux /system/7.0/linux \\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\n  ro systemd.unit=multi-user.target\n initrd /system/7.0/initrd\n}\nmenuentry 'Maintenance Linux' --id=maintenance {\n linux /system/7.0/linux \\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\n  ro systemd.unit=rescue.target\n initrd /system/7.0/initrd\n}\n",
+            "reference": "set default=spare\nmenuentry 'Primary Linux' --id=primary {\n linux /system/7.1/linux \\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\n  ro systemd.unit=multi-user.target\n initrd /system/7.1/minimal\n}\nmenuentry 'Spare Linux' --id=spare {\n linux /system/7.0/linux \\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\n  ro systemd.unit=multi-user.target\n initrd /system/7.0/initrd\n}\nmenuentry 'Maintenance Linux' --id=maintenance {\n linux /system/7.0/linux \\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\n  ro systemd.unit=rescue.target\n initrd /system/7.0/initrd\n}\n",
+            "required_root": "31415926-5358-9793-2384-626433832795",
+            "required_release": "7.0",
+            "require_read_only": true,
+            "required_target": "multi-user.target",
+            "menu": {
+              "preserve": [
+                "primary",
+                "spare",
+                "maintenance"
+              ],
+              "selected_id": ""
+            }
+          },
+          "example": {
+            "id": "workshop-lpic1-grub-default-fallback",
+            "instructions": "Select the supplied working 7.0 ordinary-startup entry for system UUID 11223344-5566-7788-99aa-bbccddeeff00. Keep all three entries' supplied configuration. Use an explicit default and test the whole chosen path; do not repair the failed upgrade or substitute the recovery target.",
+            "inventory": {
+              "kernels": [
+                {
+                  "path": "/workshop/7.0/linux",
+                  "release": "7.0",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                },
+                {
+                  "path": "/workshop/7.1/linux",
+                  "release": "7.1",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                }
+              ],
+              "initramfs": [
+                {
+                  "path": "/workshop/7.0/initrd",
+                  "release": "7.0",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/workshop/7.1/minimal",
+                  "release": "7.1",
+                  "drivers": [],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/workshop/7.1/full",
+                  "release": "7.1",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                }
+              ],
+              "roots": [
+                {
+                  "uuid": "11223344-5566-7788-99aa-bbccddeeff00",
+                  "label": "Operations system",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": true
+                },
+                {
+                  "uuid": "99887766-5544-3322-1100-aabbccddeeff",
+                  "label": "Data archive",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": false
+                }
+              ]
+            },
+            "entry_path": "/grub/learning-workshop-lpic1-grub-default-fallback.cfg",
+            "starter": "set default=trial\nmenuentry 'Workshop stable' --id=stable {\n linux /workshop/7.0/linux \\\n  root=UUID=11223344-5566-7788-99aa-bbccddeeff00 \\\n  ro systemd.unit=multi-user.target\n initrd /workshop/7.0/initrd\n}\nmenuentry 'Workshop trial' --id=trial {\n linux /workshop/7.1/linux \\\n  root=UUID=11223344-5566-7788-99aa-bbccddeeff00 \\\n  ro systemd.unit=multi-user.target\n initrd /workshop/7.1/minimal\n}\nmenuentry 'Workshop rescue' --id=rescue {\n linux /workshop/7.0/linux \\\n  root=UUID=11223344-5566-7788-99aa-bbccddeeff00 \\\n  ro systemd.unit=rescue.target\n initrd /workshop/7.0/initrd\n}\n",
+            "reference": "set default=stable\nmenuentry 'Workshop stable' --id=stable {\n linux /workshop/7.0/linux \\\n  root=UUID=11223344-5566-7788-99aa-bbccddeeff00 \\\n  ro systemd.unit=multi-user.target\n initrd /workshop/7.0/initrd\n}\nmenuentry 'Workshop trial' --id=trial {\n linux /workshop/7.1/linux \\\n  root=UUID=11223344-5566-7788-99aa-bbccddeeff00 \\\n  ro systemd.unit=multi-user.target\n initrd /workshop/7.1/minimal\n}\nmenuentry 'Workshop rescue' --id=rescue {\n linux /workshop/7.0/linux \\\n  root=UUID=11223344-5566-7788-99aa-bbccddeeff00 \\\n  ro systemd.unit=rescue.target\n initrd /workshop/7.0/initrd\n}\n",
+            "required_root": "11223344-5566-7788-99aa-bbccddeeff00",
+            "required_release": "7.0",
+            "require_read_only": true,
+            "required_target": "multi-user.target",
+            "menu": {
+              "preserve": [
+                "stable",
+                "trial",
+                "rescue"
+              ],
+              "selected_id": ""
+            }
+          }
+        }
+      },
+      "solution": [
+        "BOOT ENTRY WORK\n{\"source\": \"set default=spare\\nmenuentry 'Primary Linux' --id=primary {\\n linux /system/7.1/linux \\\\\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\\\\n  ro systemd.unit=multi-user.target\\n initrd /system/7.1/minimal\\n}\\nmenuentry 'Spare Linux' --id=spare {\\n linux /system/7.0/linux \\\\\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\\\\n  ro systemd.unit=multi-user.target\\n initrd /system/7.0/initrd\\n}\\nmenuentry 'Maintenance Linux' --id=maintenance {\\n linux /system/7.0/linux \\\\\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\\\\n  ro systemd.unit=rescue.target\\n initrd /system/7.0/initrd\\n}\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic1-boot-recovery-handoff"
+      ]
+    },
+    {
+      "id": "lpic1-grub-recovery-entry",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "GRUB menu recovery",
+      "unit": "linux-grub-menu-recovery",
+      "title": "Repair a recovery menu entry",
+      "summary": "Repair the selected recovery entry while protecting a known-working normal entry.",
+      "objective": "Select and repair entry ID recovery for kernel 7.1 and system UUID 31415926-5358-9793-2384-626433832795. Use matching complete early-boot support, initial ro mode and systemd.unit=rescue.target. Preserve the supplied normal entry’s title, image paths and kernel settings; changing that entry cannot replace the recovery repair.",
+      "retry_guidance": "Read the first blocked stage, compare it with the supplied image/root facts, edit the relevant line and test again.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Inspect the menu choice and supplied image facts",
+        "Edit the relevant GRUB setting or entry",
+        "Test the selected handoff and preserve the other path"
+      ],
+      "guide": [],
+      "explanation": "The recovery entry uses a mismatched early image and points to data rather than the operating system. Matching complete 7.1 early support plus the correct system UUID, initial ro mode and rescue request reaches the intended recovery handoff. Changing the intact normal entry is unnecessary.",
+      "hints": [
+        "Read Actual test result from Menu selection, then the first blocked image or handoff stage.",
+        "Positions start at 0; a short identifier written as --id=... or quoted title can identify the same supplied entry.",
+        "linux chooses an image; root=UUID= and systemd.unit= are kernel arguments. initrd must follow linux and match its release."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/grub/manual/grub/html_node/default.html",
+        "https://www.gnu.org/software/grub/manual/grub/html_node/menuentry.html",
+        "https://www.gnu.org/software/grub/manual/grub/html_node/Shell_002dlike-scripting.html",
+        "https://www.gnu.org/software/grub/manual/grub/html_node/GNU_002fLinux.html",
+        "https://docs.kernel.org/admin-guide/kernel-parameters.html"
+      ],
+      "simplifications": "Bounded hand-authored flat GRUB2 menu subset over supplied virtual boot/image/filesystem facts. No GRUB execution, firmware, installation, generation, distribution templates, saved environment, submenus, device/search commands, expansion, real images or host files. Unknown syntax and missing-default fallback are explicitly unsupported; this is not advice to edit a distribution-generated grub.cfg.",
+      "initial": {
+        "kind": "BootEntry",
+        "simulation": {
+          "version": 1,
+          "context": "lpic1-grub-recovery-entry",
+          "view": "introduction",
+          "assignment": {
+            "source": "set default=recovery\nmenuentry 'Normal Linux' --id=normal {\n linux /system/7.1/linux \\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\n  ro systemd.unit=multi-user.target\n initrd /system/7.1/full\n}\nmenuentry 'Recovery Linux' --id=recovery {\n linux /system/7.1/linux \\\n  root=UUID=27182818-2845-9045-2353-602874713526 \\\n  rw systemd.unit=multi-user.target\n initrd /system/7.0/initrd\n}\n",
+            "checked": null
+          },
+          "practice": {
+            "source": "set default=workshop-repair\nmenuentry 'Workshop main' --id=workshop-main {\n linux /workshop/7.1/linux \\\n  root=UUID=11223344-5566-7788-99aa-bbccddeeff00 \\\n  ro systemd.unit=multi-user.target\n initrd /workshop/7.1/full\n}\nmenuentry 'Workshop repair' --id=workshop-repair {\n linux /workshop/7.1/linux \\\n  root=UUID=99887766-5544-3322-1100-aabbccddeeff \\\n  rw systemd.unit=multi-user.target\n initrd /workshop/7.0/initrd\n}\n",
+            "checked": null
+          }
+        }
+      },
+      "goal": {
+        "kind": "BootEntry",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "id": "lpic1-grub-recovery-entry",
+            "instructions": "Select and repair entry ID recovery for kernel 7.1 and system UUID 31415926-5358-9793-2384-626433832795. Use matching complete early-boot support, initial ro mode and systemd.unit=rescue.target. Preserve the supplied normal entry’s title, image paths and kernel settings; changing that entry cannot replace the recovery repair.",
+            "inventory": {
+              "kernels": [
+                {
+                  "path": "/system/7.0/linux",
+                  "release": "7.0",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                },
+                {
+                  "path": "/system/7.1/linux",
+                  "release": "7.1",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                }
+              ],
+              "initramfs": [
+                {
+                  "path": "/system/7.0/initrd",
+                  "release": "7.0",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/system/7.1/minimal",
+                  "release": "7.1",
+                  "drivers": [],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/system/7.1/full",
+                  "release": "7.1",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                }
+              ],
+              "roots": [
+                {
+                  "uuid": "31415926-5358-9793-2384-626433832795",
+                  "label": "Operations system",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": true
+                },
+                {
+                  "uuid": "27182818-2845-9045-2353-602874713526",
+                  "label": "Data archive",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": false
+                }
+              ]
+            },
+            "entry_path": "/grub/learning-lpic1-grub-recovery-entry.cfg",
+            "starter": "set default=recovery\nmenuentry 'Normal Linux' --id=normal {\n linux /system/7.1/linux \\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\n  ro systemd.unit=multi-user.target\n initrd /system/7.1/full\n}\nmenuentry 'Recovery Linux' --id=recovery {\n linux /system/7.1/linux \\\n  root=UUID=27182818-2845-9045-2353-602874713526 \\\n  rw systemd.unit=multi-user.target\n initrd /system/7.0/initrd\n}\n",
+            "reference": "set default=recovery\nmenuentry 'Normal Linux' --id=normal {\n linux /system/7.1/linux \\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\n  ro systemd.unit=multi-user.target\n initrd /system/7.1/full\n}\nmenuentry 'Recovery Linux' --id=recovery {\n linux /system/7.1/linux \\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\n  ro systemd.unit=rescue.target\n initrd /system/7.1/full\n}\n",
+            "required_root": "31415926-5358-9793-2384-626433832795",
+            "required_release": "7.1",
+            "require_read_only": true,
+            "required_target": "rescue.target",
+            "menu": {
+              "preserve": [
+                "normal"
+              ],
+              "selected_id": "recovery"
+            }
+          },
+          "example": {
+            "id": "workshop-lpic1-grub-recovery-entry",
+            "instructions": "Repair and select entry ID workshop-repair for the supplied 7.1 kernel and system UUID 11223344-5566-7788-99aa-bbccddeeff00. Request ro and rescue.target through systemd.unit=rescue.target, with matching complete early-boot support. Preserve entry ID workshop-main.",
+            "inventory": {
+              "kernels": [
+                {
+                  "path": "/workshop/7.0/linux",
+                  "release": "7.0",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                },
+                {
+                  "path": "/workshop/7.1/linux",
+                  "release": "7.1",
+                  "builtin_drivers": [
+                    "ext4"
+                  ]
+                }
+              ],
+              "initramfs": [
+                {
+                  "path": "/workshop/7.0/initrd",
+                  "release": "7.0",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/workshop/7.1/minimal",
+                  "release": "7.1",
+                  "drivers": [],
+                  "uuid_lookup": true
+                },
+                {
+                  "path": "/workshop/7.1/full",
+                  "release": "7.1",
+                  "drivers": [
+                    "virtio_blk"
+                  ],
+                  "uuid_lookup": true
+                }
+              ],
+              "roots": [
+                {
+                  "uuid": "11223344-5566-7788-99aa-bbccddeeff00",
+                  "label": "Operations system",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": true
+                },
+                {
+                  "uuid": "99887766-5544-3322-1100-aabbccddeeff",
+                  "label": "Data archive",
+                  "required_drivers": [
+                    "virtio_blk",
+                    "ext4"
+                  ],
+                  "init_present": false
+                }
+              ]
+            },
+            "entry_path": "/grub/learning-workshop-lpic1-grub-recovery-entry.cfg",
+            "starter": "set default=workshop-repair\nmenuentry 'Workshop main' --id=workshop-main {\n linux /workshop/7.1/linux \\\n  root=UUID=11223344-5566-7788-99aa-bbccddeeff00 \\\n  ro systemd.unit=multi-user.target\n initrd /workshop/7.1/full\n}\nmenuentry 'Workshop repair' --id=workshop-repair {\n linux /workshop/7.1/linux \\\n  root=UUID=99887766-5544-3322-1100-aabbccddeeff \\\n  rw systemd.unit=multi-user.target\n initrd /workshop/7.0/initrd\n}\n",
+            "reference": "set default=workshop-repair\nmenuentry 'Workshop main' --id=workshop-main {\n linux /workshop/7.1/linux \\\n  root=UUID=11223344-5566-7788-99aa-bbccddeeff00 \\\n  ro systemd.unit=multi-user.target\n initrd /workshop/7.1/full\n}\nmenuentry 'Workshop repair' --id=workshop-repair {\n linux /workshop/7.1/linux \\\n  root=UUID=11223344-5566-7788-99aa-bbccddeeff00 \\\n  ro systemd.unit=rescue.target\n initrd /workshop/7.1/full\n}\n",
+            "required_root": "11223344-5566-7788-99aa-bbccddeeff00",
+            "required_release": "7.1",
+            "require_read_only": true,
+            "required_target": "rescue.target",
+            "menu": {
+              "preserve": [
+                "workshop-main"
+              ],
+              "selected_id": "workshop-repair"
+            }
+          }
+        }
+      },
+      "solution": [
+        "BOOT ENTRY WORK\n{\"source\": \"set default=recovery\\nmenuentry 'Normal Linux' --id=normal {\\n linux /system/7.1/linux \\\\\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\\\\n  ro systemd.unit=multi-user.target\\n initrd /system/7.1/full\\n}\\nmenuentry 'Recovery Linux' --id=recovery {\\n linux /system/7.1/linux \\\\\\n  root=UUID=31415926-5358-9793-2384-626433832795 \\\\\\n  ro systemd.unit=rescue.target\\n initrd /system/7.1/full\\n}\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic1-grub-default-fallback"
+      ]
+    }
+  ]
+}

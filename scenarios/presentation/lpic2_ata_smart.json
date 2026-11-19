@@ -1,0 +1,132 @@
+[
+  {
+    "id": "lpic2-smart-short-diagnosis",
+    "goal": "Find the disk on the maintenance ticket, run a fresh short test and record what happened.",
+    "context": "Builds on inspecting Linux disk names and stable identifiers. SMART reports what the drive knows about its health. Here the supplied disks report ATA-style SMART data.",
+    "concepts": [
+      {
+        "title": "Match the disk before running a test",
+        "text": "A Linux device path can change when devices are detected in a different order. Use smartctl -i on a listed path and match Serial Number to the ticket before starting any test."
+      },
+      {
+        "title": "Read three different facts",
+        "text": "The overall health result from smartctl -H is a current headline. The self-test log tells what individual tests observed, with the newest stored result first. A drive can report PASSED while its log still contains a read failure."
+      },
+      {
+        "title": "Start a short test and wait for the result",
+        "text": "smartctl -t short starts the device check. smartctl -c shows whether it is still running. Use Advance virtual time in the exercise to let it finish, then use smartctl -l selftest. If the new line reports a read error, its LBA identifies the first logical block where that test failed."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Match the ticket serial",
+        "value": "smartctl -i /dev/sdf\nSerial Number: REF-DATA-47",
+        "explanation": "The ticket says REF-DATA-47, so this is the intended disk."
+      },
+      {
+        "label": "Start and observe the running test",
+        "value": "smartctl -t short /dev/sdf\nsmartctl -c /dev/sdf",
+        "explanation": "An accepted start only begins the test. The virtual clock advances separately."
+      },
+      {
+        "label": "Record the newest result",
+        "value": "smartctl -l selftest /dev/sdf\n# 1  Completed: read failure  LBA 65024",
+        "explanation": "The first line is this example's completed test. Record Read failure and 65024. An older test or a passing overall headline would describe something else."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Find the reported disk",
+        "action": "Run smartctl -i for each Available device paths entry. Match the serial from Actual result to the ticket before the test.",
+        "observe": "The reported drive in this practice is /dev/sdc. The other drive should stay untouched."
+      },
+      {
+        "title": "Compare old data and start the new test",
+        "action": "Inspect the headline and old log before you start.\n$ smartctl -H /dev/sdc\n$ smartctl -l selftest /dev/sdc\nStart the short test, then check whether it is running.\n$ smartctl -t short /dev/sdc\n$ smartctl -c /dev/sdc\nSelect Advance virtual time by 1 minute twice. Then run the log command again.\n$ smartctl -l selftest /dev/sdc",
+        "observe": "The current pass and older read failure can both be true. The latest line now records the completed new test. A nonzero log status can reflect an older test still present."
+      },
+      {
+        "title": "Record the fresh result",
+        "action": "Choose the newest status under Maintenance ticket. If it reports a read failure, add its decimal LBA. Select Check diagnosis. Try choosing the older read failure and check again, then fix the ticket.",
+        "observe": "This practice's new test completed without error. The older failure remains in the log and does not belong in the new ticket."
+      }
+    ],
+    "requirements": [
+      "Identify the supplied disk by its ticket serial and run its short self-test to completion.",
+      "Record the latest self-test status and its first-error LBA if it reports a read failure.",
+      "Keep the other supplied disk's test history untouched."
+    ],
+    "status": "updated",
+    "source": "scenarios/ata-smart-lessons-v1.json",
+    "review": {
+      "introduction": "Teaches the available inspection and test or monitoring operations using a third set of device identities.",
+      "example": "Uses a separate virtual workspace with operation-specific next actions, intermediate observations and an incorrect trial with a retry.",
+      "assignment": "Gives the inventory role and operational goal. The state grader compares actual disk identity, fresh test evidence or saved configuration behavior."
+    }
+  },
+  {
+    "id": "lpic2-smart-monitor-identity",
+    "goal": "Repair saved monitoring rules so they keep watching the intended disks when the Linux path names change.",
+    "context": "Builds on identifying disks by their serial number and reading a short self-test. This exercise supplies two planned Linux device-name layouts.",
+    "concepts": [
+      {
+        "title": "Read one rule per device",
+        "text": "The first field is a device name or path. In this SMART configuration subset, -H enables overall health monitoring and -l selftest asks to watch the self-test log. A # comment is ignored."
+      },
+      {
+        "title": "Separate device names from disk identity",
+        "text": "The same name, such as /dev/sda, can refer to a different disk after maintenance. The supplied /dev/disk/by-id/ paths follow the serials in both layouts. In the preview, compare which serial each rule would monitor."
+      },
+      {
+        "title": "Verify the saved file under both layouts",
+        "text": "Save configuration updates the file used by the virtual preview. Current layout and After maintenance use different name mappings over the same disks. The exercise checks that both devices get the intended monitoring checks in both cases."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Inspect the original name",
+        "value": "/dev/sdg -H -l selftest",
+        "explanation": "The current layout resolves /dev/sdg to REF-PRIMARY-61. The maintenance layout assigns this name to a different disk."
+      },
+      {
+        "label": "Select the primary disk by identity",
+        "value": "/dev/disk/by-id/ata-Workshop_REF-PRIMARY-61 -H -l selftest",
+        "explanation": "The supplied path follows the primary disk in both layouts and preserves both checks."
+      },
+      {
+        "label": "Preserve the other rule",
+        "value": "/dev/disk/by-id/ata-Workshop_REF-SECONDARY-64 -H",
+        "explanation": "Keep the auxiliary disk's health check. Use each preview to verify the actual serial and selected checks."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Identify the two disks",
+        "action": "Expand Supplied device names and stable paths and compare each serial's names before and after maintenance.",
+        "observe": "The practice primary moves from /dev/sdc to /dev/sdf. The auxiliary rule already names a stable path."
+      },
+      {
+        "title": "Change the primary rule",
+        "action": "In Virtual smartd.conf, replace the primary /dev/sdc selector with /dev/disk/by-id/ata-Workshop_TRAIN-PRIMARY-25. Keep both flags and the auxiliary rule. Select Save configuration.",
+        "observe": "The saved rule can now match the primary serial both before and after maintenance."
+      },
+      {
+        "title": "Preview both layouts",
+        "action": "Select Current layout and After maintenance. Compare the serials and checks, then select Check configuration. For comparison, restore /dev/sdc in the first line, save and check again. Reapply the stable path.",
+        "observe": "The short path only fails under the maintenance layout. The auxiliary disk's original monitoring keeps working."
+      }
+    ],
+    "requirements": [
+      "Watch health and the self-test log for the supplied primary disk in both layouts.",
+      "Keep one health-only rule for the supplied auxiliary disk in both layouts.",
+      "Save a readable configuration with just those intended devices and verify both previews."
+    ],
+    "status": "updated",
+    "source": "scenarios/ata-smart-lessons-v1.json",
+    "review": {
+      "introduction": "Teaches the available inspection and test or monitoring operations using a third set of device identities.",
+      "example": "Uses a separate virtual workspace with operation-specific next actions, intermediate observations and an incorrect trial with a retry.",
+      "assignment": "Gives the inventory role and operational goal. The state grader compares actual disk identity, fresh test evidence or saved configuration behavior."
+    }
+  }
+]

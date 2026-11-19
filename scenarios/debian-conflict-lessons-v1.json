@@ -1,0 +1,1378 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-package-conflict-retirement",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Package compatibility",
+      "unit": "debian-package-conflicts",
+      "title": "Replace incompatible software without losing its settings",
+      "summary": "Inspect an explicit package incompatibility, retire the old program and retain its local settings.",
+      "objective": "Install ops-delivery with intact ordinary files and no incompatible installed package pair. Retire ops-legacy to configuration-only state, retaining its original version record and the supplied local text in /etc/ops/relay.conf. Preserve the installed ops-monitor and ops-lib records and their files. Preserve /work/ops-notes.txt. Keep all installed dependencies satisfied. Use only the supplied package snapshot.",
+      "retry_guidance": "Read the first unmet requirement. Compare cached metadata with installed versions, and check that the chosen repair preserves the stated software and local settings.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "prerequisites": [
+        "lpic1-package-handover"
+      ],
+      "steps": [
+        "Inspect package metadata and installed versions",
+        "Apply the appropriate explicit repair",
+        "Verify the full outcome and protected work"
+      ],
+      "guide": [
+        {
+          "title": "Inspect package metadata and installed versions",
+          "why": "apt-cache show gallery-delivery displays the one cached candidate in this simulator. Package names identify the software; Version identifies its release; Conflicts names what cannot coexist. dpkg-query -W shows installed records. A newer cached candidate is not an installed upgrade. These read-only commands do not change any package or complete the task.",
+          "action": "Inspect the one cached candidate and the installed records.",
+          "commands": []
+        },
+        {
+          "title": "Apply the appropriate explicit repair",
+          "why": "Conflicts: gallery-legacy without a version condition applies to every installed version of that package. dpkg --remove gallery-legacy removes its ordinary program files but retains its configuration file and a configuration-only record. A configuration-only leftover does not cause this conflict. Purge also removes settings, so it would violate this task’s retention requirement.",
+          "action": "Use the supported package commands to change installed state.",
+          "commands": []
+        },
+        {
+          "title": "Verify the full outcome and protected work",
+          "why": "The monitor and library are separate working software. Removing the incompatible sender does not mean deleting shared dependencies or purging all old configuration. After the explicit retirement, install the requested replacement and check that the protected software and local settings remain. Real APT can propose more complex removals and ordering. This script-free simulator requires explicit choices and does not implement the full APT resolver, unpacking or maintainer scripts.",
+          "action": "Choose Check work and inspect any unmet requirement.",
+          "commands": []
+        }
+      ],
+      "explanation": "The replacement’s unversioned Conflicts relationship prevents coexistence with installed ops-legacy; their ordinary file paths do not overlap. Explicit remove retains the old configuration-only record and local settings, which do not trigger this conflict. Installing ops-delivery afterward meets the requested positive outcome. Purging the old package or deleting protected working software would violate other requirements.",
+      "hints": [
+        "A cached candidate and an installed record can show different versions. Query both before choosing a repair.",
+        "Read whether Conflicts has a version condition. A remaining configuration-only record is different from an installed program.",
+        "Use the first unmet requirement to distinguish compatibility, missing software, damaged payload and lost settings."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.debian.org/doc/debian-policy/ch-relationships.html#conflicting-binary-packages-conflicts",
+        "https://manpages.debian.org/trixie/apt/apt-cache.8.en.html"
+      ],
+      "simplifications": "Checked2026-11-04: LPIC-1 v5.0 102.4 partial; Debian Policy4.7.4.1 §§7.1/7.4 and Debian trixie apt-cache manual. Fictional script-free final-state packages and regular text payloads only. Up to8 named Conflicts relations use the existing Debian version subset; either direction applies, ConfigFiles leftovers do not conflict, own real-name references are ignored. No Provides/virtual relationships, Breaks, Replaces, Essential/deselection policy, multiarch, automatic removal/SAT/pinning, unpack/configure ordering, maintainer scripts, real archives, host package tools or actual rollback. apt-cache show displays only one cached candidate and its identity/Depends/Conflicts fields. The model’s atomic publication is not a claim about real dpkg transactions.",
+      "initial": {
+        "kind": "DebianPackages",
+        "simulation": {
+          "catalog": {
+            "architecture": "amd64",
+            "repository_reachable": true,
+            "published": "ops-current",
+            "archives": {
+              "ops-lib-1": {
+                "name": "ops-lib",
+                "version": "1.0",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/lib/ops/base.txt": {
+                    "contents": "shared library\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "ops-monitor-1": {
+                "name": "ops-monitor",
+                "version": "1.0",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "ops-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/ops-monitor": {
+                    "contents": "monitor payload\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "ops-old-1": {
+                "name": "ops-legacy",
+                "version": "1.0",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "ops-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/ops-legacy": {
+                    "contents": "relay payload 1.0\n",
+                    "conffile": false
+                  },
+                  "/etc/ops/relay.conf": {
+                    "contents": "mode=steady\n",
+                    "conffile": true
+                  }
+                }
+              },
+              "ops-new-1": {
+                "name": "ops-delivery",
+                "version": "1.0",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "ops-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/ops-delivery": {
+                    "contents": "requested application payload\n",
+                    "conffile": false
+                  }
+                },
+                "conflicts": [
+                  {
+                    "name": "ops-legacy",
+                    "constraint": null
+                  }
+                ]
+              }
+            },
+            "publications": {
+              "ops-current": {
+                "candidates": {
+                  "ops-lib": "ops-lib-1",
+                  "ops-monitor": "ops-monitor-1",
+                  "ops-legacy": "ops-old-1",
+                  "ops-delivery": "ops-new-1"
+                }
+              }
+            },
+            "extra_paths": [
+              "/work/ops-notes.txt"
+            ]
+          },
+          "runtime": {
+            "cached": "ops-current",
+            "local_archives": [
+              "ops-lib-1",
+              "ops-monitor-1",
+              "ops-old-1"
+            ],
+            "records": {
+              "ops-lib": {
+                "archive": "ops-lib-1",
+                "status": "Installed"
+              },
+              "ops-monitor": {
+                "archive": "ops-monitor-1",
+                "status": "Installed"
+              },
+              "ops-legacy": {
+                "archive": "ops-old-1",
+                "status": "Installed"
+              }
+            },
+            "files": {
+              "/usr/lib/ops/base.txt": "shared library\n",
+              "/usr/bin/ops-monitor": "monitor payload\n",
+              "/usr/bin/ops-legacy": "relay payload 1.0\n",
+              "/etc/ops/relay.conf": "mode=site-custom\n",
+              "/work/ops-notes.txt": "Keep the local rollout notes.\n"
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "DebianPackages",
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "ops-current",
+              "archives": {
+                "ops-lib-1": {
+                  "name": "ops-lib",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/ops/base.txt": {
+                      "contents": "shared library\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "ops-monitor-1": {
+                  "name": "ops-monitor",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "ops-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/ops-monitor": {
+                      "contents": "monitor payload\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "ops-old-1": {
+                  "name": "ops-legacy",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "ops-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/ops-legacy": {
+                      "contents": "relay payload 1.0\n",
+                      "conffile": false
+                    },
+                    "/etc/ops/relay.conf": {
+                      "contents": "mode=steady\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "ops-new-1": {
+                  "name": "ops-delivery",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "ops-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/ops-delivery": {
+                      "contents": "requested application payload\n",
+                      "conffile": false
+                    }
+                  },
+                  "conflicts": [
+                    {
+                      "name": "ops-legacy",
+                      "constraint": null
+                    }
+                  ]
+                }
+              },
+              "publications": {
+                "ops-current": {
+                  "candidates": {
+                    "ops-lib": "ops-lib-1",
+                    "ops-monitor": "ops-monitor-1",
+                    "ops-legacy": "ops-old-1",
+                    "ops-delivery": "ops-new-1"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/work/ops-notes.txt"
+              ]
+            },
+            "runtime": {
+              "cached": "ops-current",
+              "local_archives": [
+                "ops-lib-1",
+                "ops-monitor-1",
+                "ops-old-1"
+              ],
+              "records": {
+                "ops-lib": {
+                  "archive": "ops-lib-1",
+                  "status": "Installed"
+                },
+                "ops-monitor": {
+                  "archive": "ops-monitor-1",
+                  "status": "Installed"
+                },
+                "ops-legacy": {
+                  "archive": "ops-old-1",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/usr/lib/ops/base.txt": "shared library\n",
+                "/usr/bin/ops-monitor": "monitor payload\n",
+                "/usr/bin/ops-legacy": "relay payload 1.0\n",
+                "/etc/ops/relay.conf": "mode=site-custom\n",
+                "/work/ops-notes.txt": "Keep the local rollout notes.\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": "ops-delivery",
+              "constraint": null
+            },
+            {
+              "kind": "RetainedConfig",
+              "package": "ops-legacy",
+              "version": "1.0"
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "ops-delivery"
+            },
+            {
+              "kind": "ConflictsSatisfied"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "ops-monitor"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "ops-lib"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/ops-monitor"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/lib/ops/base.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/etc/ops/relay.conf"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/work/ops-notes.txt"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "dpkg --remove ops-legacy",
+        "apt-get -y install ops-delivery"
+      ],
+      "debian_packages_teaching": {
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "gallery-current",
+              "archives": {
+                "gallery-lib-1": {
+                  "name": "gallery-lib",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/gallery/base.txt": {
+                      "contents": "shared library\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "gallery-monitor-1": {
+                  "name": "gallery-monitor",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "gallery-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/gallery-monitor": {
+                      "contents": "monitor payload\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "gallery-old-1": {
+                  "name": "gallery-legacy",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "gallery-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/gallery-legacy": {
+                      "contents": "relay payload 1.0\n",
+                      "conffile": false
+                    },
+                    "/etc/gallery/relay.conf": {
+                      "contents": "mode=steady\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "gallery-new-1": {
+                  "name": "gallery-delivery",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "gallery-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/gallery-delivery": {
+                      "contents": "requested application payload\n",
+                      "conffile": false
+                    }
+                  },
+                  "conflicts": [
+                    {
+                      "name": "gallery-legacy",
+                      "constraint": null
+                    }
+                  ]
+                }
+              },
+              "publications": {
+                "gallery-current": {
+                  "candidates": {
+                    "gallery-lib": "gallery-lib-1",
+                    "gallery-monitor": "gallery-monitor-1",
+                    "gallery-legacy": "gallery-old-1",
+                    "gallery-delivery": "gallery-new-1"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/work/gallery-notes.txt"
+              ]
+            },
+            "runtime": {
+              "cached": "gallery-current",
+              "local_archives": [
+                "gallery-lib-1",
+                "gallery-monitor-1",
+                "gallery-old-1"
+              ],
+              "records": {
+                "gallery-lib": {
+                  "archive": "gallery-lib-1",
+                  "status": "Installed"
+                },
+                "gallery-monitor": {
+                  "archive": "gallery-monitor-1",
+                  "status": "Installed"
+                },
+                "gallery-legacy": {
+                  "archive": "gallery-old-1",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/usr/lib/gallery/base.txt": "shared library\n",
+                "/usr/bin/gallery-monitor": "monitor payload\n",
+                "/usr/bin/gallery-legacy": "relay payload 1.0\n",
+                "/etc/gallery/relay.conf": "mode=site-custom\n",
+                "/work/gallery-notes.txt": "Keep the local rollout notes.\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": "gallery-delivery",
+              "constraint": null
+            },
+            {
+              "kind": "RetainedConfig",
+              "package": "gallery-legacy",
+              "version": "1.0"
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "gallery-delivery"
+            },
+            {
+              "kind": "ConflictsSatisfied"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "gallery-monitor"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "gallery-lib"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/gallery-monitor"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/lib/gallery/base.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/etc/gallery/relay.conf"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/work/gallery-notes.txt"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            }
+          ]
+        },
+        "prerequisite_note": "Complete Debian package administration first: installed records, cached metadata, dependencies and remove versus purge. This lesson adds explicit incompatibility metadata.",
+        "concepts": [
+          {
+            "title": "An incompatibility can exist even when files have different names",
+            "text": "A package is a named bundle of program files and metadata. Conflicts is metadata saying that two named packages must not be installed together. It is different from a file collision, where two packages claim the same path. These examples use separate file paths: inspect the relationship rather than deleting arbitrary files."
+          },
+          {
+            "title": "Read available metadata and installed state separately",
+            "text": "apt-cache show gallery-delivery displays the one cached candidate in this simulator. Package names identify the software; Version identifies its release; Conflicts names what cannot coexist. dpkg-query -W lists database records and their versions. A record can remain after its program files have been removed, so a listed version alone does not prove the program is installed. Check work also verifies the required installed or configuration-only state. A newer cached candidate is not an installed upgrade. These read-only commands do not change any package or complete the task."
+          },
+          {
+            "title": "Remove program files while retaining local settings",
+            "text": "Conflicts: gallery-legacy without a version condition applies to every installed version of that package. dpkg --remove gallery-legacy removes its ordinary program files but retains its configuration file and a configuration-only record. A configuration-only leftover does not cause this conflict. Purge also removes settings, so it would violate this task’s retention requirement."
+          },
+          {
+            "title": "Choose an explicit repair in this bounded simulator",
+            "text": "The monitor and library are separate working software. Removing the incompatible sender does not mean deleting shared dependencies or purging all old configuration. After the explicit retirement, install the requested replacement and check that the protected software and local settings remain. Real APT can propose more complex removals and ordering. This script-free simulator requires explicit choices and does not implement the full APT resolver, unpacking or maintainer scripts."
+          }
+        ],
+        "example_description": "The gallery workstation has gallery-legacy version 1.0 installed, a customized /etc/gallery/relay.conf, and working gallery-monitor/gallery-lib. Investigate why gallery-delivery cannot yet be installed. The table shows the worked reasoning; Try example starts from the unfinished sample so you can investigate and apply it yourself.",
+        "example_actions": [
+          {
+            "action": {
+              "kind": "Remove",
+              "name": "gallery-legacy"
+            },
+            "command": "dpkg --remove gallery-legacy",
+            "explanation": "Remove ordinary sender files while retaining its configuration-only record and local settings."
+          },
+          {
+            "action": {
+              "kind": "Install",
+              "packages": [
+                {
+                  "name": "gallery-delivery",
+                  "version": null
+                }
+              ]
+            },
+            "command": "apt-get -y install gallery-delivery",
+            "explanation": "Install the requested application after resolving its incompatible installed counterpart."
+          }
+        ],
+        "try_change": {
+          "description": "After the worked repair, remove gallery-delivery and check: preserved settings alone cannot stand in for the requested installed replacement. Install it again.",
+          "actions": [
+            {
+              "kind": "Remove",
+              "name": "gallery-delivery"
+            }
+          ],
+          "expected": [
+            false,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Install",
+            "packages": [
+              {
+                "name": "gallery-delivery",
+                "version": null
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-package-conflict-upgrade",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Package compatibility",
+      "unit": "debian-package-conflicts",
+      "title": "Resolve a version conflict while keeping required software",
+      "summary": "Use a version constraint to repair coexistence while preserving both required programs and local configuration.",
+      "objective": "Install branch-dashboard with intact ordinary files while keeping branch-relay installed at version 2.0 or later with intact ordinary files. Keep the supplied local text in /etc/branch/relay.conf; upgrading software must not discard that customization. Preserve the installed branch-monitor and branch-lib records and their files, and preserve /work/branch-notes.txt. Keep all installed dependencies satisfied and leave no incompatible installed package pair. Use only the supplied package snapshot.",
+      "retry_guidance": "Read the first unmet requirement. Compare cached metadata with installed versions, and check that the chosen repair preserves the stated software and local settings.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "prerequisites": [
+        "lpic1-package-conflict-retirement"
+      ],
+      "steps": [
+        "Inspect package metadata and installed versions",
+        "Apply the appropriate explicit repair",
+        "Verify the full outcome and protected work"
+      ],
+      "guide": [
+        {
+          "title": "Inspect package metadata and installed versions",
+          "why": "apt-cache show studio-dashboard displays the one cached candidate in this simulator. Package names identify the software; Version identifies its release; Conflicts names what cannot coexist. dpkg-query -W shows installed records. A newer cached candidate is not an installed upgrade. These read-only commands do not change any package or complete the task.",
+          "action": "Inspect the one cached candidate and the installed records.",
+          "commands": []
+        },
+        {
+          "title": "Apply the appropriate explicit repair",
+          "why": "In the workshop, studio-dashboard declares Conflicts: studio-relay (<< 3.0). The << means strictly earlier than 3.0. The installed studio-relay version 2.0 is in that incompatible range, while the cached 3.0 version is outside it. Upgrade the relay first, then install the dashboard. Both must remain installed.",
+          "action": "Use the supported package commands to change installed state.",
+          "commands": []
+        },
+        {
+          "title": "Verify the full outcome and protected work",
+          "why": "The supported install command selects the cached candidate and its required dependencies. It can upgrade the relay without replacing a locally customized configuration when the supplied upstream configuration is unchanged, as it is here. Check versions, ordinary files and retained settings afterward. Real APT can propose more complex removals and ordering. This script-free simulator requires explicit choices and does not implement the full APT resolver, unpacking or maintainer scripts.",
+          "action": "Choose Check work and inspect any unmet requirement.",
+          "commands": []
+        }
+      ],
+      "explanation": "branch-dashboard conflicts only with branch-relay versions earlier than 2.0. Upgrading the relay to the cached compatible version and installing the dashboard leaves both required programs intact. A supported joint install reaches the same final state. The unchanged upstream configuration lets the model retain the supplied local customization. Removing the relay would miss the positive installed-version requirement.",
+      "hints": [
+        "A cached candidate and an installed record can show different versions. Query both before choosing a repair.",
+        "Read whether Conflicts has a version condition. A remaining configuration-only record is different from an installed program.",
+        "Use the first unmet requirement to distinguish compatibility, missing software, damaged payload and lost settings."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.debian.org/doc/debian-policy/ch-relationships.html#conflicting-binary-packages-conflicts",
+        "https://manpages.debian.org/trixie/apt/apt-cache.8.en.html"
+      ],
+      "simplifications": "Checked2026-11-04: LPIC-1 v5.0 102.4 partial; Debian Policy4.7.4.1 §§7.1/7.4 and Debian trixie apt-cache manual. Fictional script-free final-state packages and regular text payloads only. Up to8 named Conflicts relations use the existing Debian version subset; either direction applies, ConfigFiles leftovers do not conflict, own real-name references are ignored. No Provides/virtual relationships, Breaks, Replaces, Essential/deselection policy, multiarch, automatic removal/SAT/pinning, unpack/configure ordering, maintainer scripts, real archives, host package tools or actual rollback. apt-cache show displays only one cached candidate and its identity/Depends/Conflicts fields. The model’s atomic publication is not a claim about real dpkg transactions.",
+      "initial": {
+        "kind": "DebianPackages",
+        "simulation": {
+          "catalog": {
+            "architecture": "amd64",
+            "repository_reachable": true,
+            "published": "branch-current",
+            "archives": {
+              "branch-lib-1": {
+                "name": "branch-lib",
+                "version": "1.0",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/lib/branch/base.txt": {
+                    "contents": "shared library\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "branch-monitor-1": {
+                "name": "branch-monitor",
+                "version": "1.0",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "branch-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/branch-monitor": {
+                    "contents": "monitor payload\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "branch-old-1": {
+                "name": "branch-relay",
+                "version": "1.0",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "branch-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/branch-relay": {
+                    "contents": "relay payload 1.0\n",
+                    "conffile": false
+                  },
+                  "/etc/branch/relay.conf": {
+                    "contents": "mode=steady\n",
+                    "conffile": true
+                  }
+                }
+              },
+              "branch-old-2": {
+                "name": "branch-relay",
+                "version": "2.0",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "branch-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/branch-relay": {
+                    "contents": "relay payload 2.0\n",
+                    "conffile": false
+                  },
+                  "/etc/branch/relay.conf": {
+                    "contents": "mode=steady\n",
+                    "conffile": true
+                  }
+                }
+              },
+              "branch-new-1": {
+                "name": "branch-dashboard",
+                "version": "1.0",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "branch-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/branch-dashboard": {
+                    "contents": "requested application payload\n",
+                    "conffile": false
+                  }
+                },
+                "conflicts": [
+                  {
+                    "name": "branch-relay",
+                    "constraint": {
+                      "relation": "Lt",
+                      "version": "2.0"
+                    }
+                  }
+                ]
+              }
+            },
+            "publications": {
+              "branch-current": {
+                "candidates": {
+                  "branch-lib": "branch-lib-1",
+                  "branch-monitor": "branch-monitor-1",
+                  "branch-relay": "branch-old-2",
+                  "branch-dashboard": "branch-new-1"
+                }
+              }
+            },
+            "extra_paths": [
+              "/work/branch-notes.txt"
+            ]
+          },
+          "runtime": {
+            "cached": "branch-current",
+            "local_archives": [
+              "branch-lib-1",
+              "branch-monitor-1",
+              "branch-old-1"
+            ],
+            "records": {
+              "branch-lib": {
+                "archive": "branch-lib-1",
+                "status": "Installed"
+              },
+              "branch-monitor": {
+                "archive": "branch-monitor-1",
+                "status": "Installed"
+              },
+              "branch-relay": {
+                "archive": "branch-old-1",
+                "status": "Installed"
+              }
+            },
+            "files": {
+              "/usr/lib/branch/base.txt": "shared library\n",
+              "/usr/bin/branch-monitor": "monitor payload\n",
+              "/usr/bin/branch-relay": "relay payload 1.0\n",
+              "/etc/branch/relay.conf": "mode=site-custom\n",
+              "/work/branch-notes.txt": "Keep the local rollout notes.\n"
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "DebianPackages",
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "branch-current",
+              "archives": {
+                "branch-lib-1": {
+                  "name": "branch-lib",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/branch/base.txt": {
+                      "contents": "shared library\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "branch-monitor-1": {
+                  "name": "branch-monitor",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "branch-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/branch-monitor": {
+                      "contents": "monitor payload\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "branch-old-1": {
+                  "name": "branch-relay",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "branch-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/branch-relay": {
+                      "contents": "relay payload 1.0\n",
+                      "conffile": false
+                    },
+                    "/etc/branch/relay.conf": {
+                      "contents": "mode=steady\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "branch-old-2": {
+                  "name": "branch-relay",
+                  "version": "2.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "branch-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/branch-relay": {
+                      "contents": "relay payload 2.0\n",
+                      "conffile": false
+                    },
+                    "/etc/branch/relay.conf": {
+                      "contents": "mode=steady\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "branch-new-1": {
+                  "name": "branch-dashboard",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "branch-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/branch-dashboard": {
+                      "contents": "requested application payload\n",
+                      "conffile": false
+                    }
+                  },
+                  "conflicts": [
+                    {
+                      "name": "branch-relay",
+                      "constraint": {
+                        "relation": "Lt",
+                        "version": "2.0"
+                      }
+                    }
+                  ]
+                }
+              },
+              "publications": {
+                "branch-current": {
+                  "candidates": {
+                    "branch-lib": "branch-lib-1",
+                    "branch-monitor": "branch-monitor-1",
+                    "branch-relay": "branch-old-2",
+                    "branch-dashboard": "branch-new-1"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/work/branch-notes.txt"
+              ]
+            },
+            "runtime": {
+              "cached": "branch-current",
+              "local_archives": [
+                "branch-lib-1",
+                "branch-monitor-1",
+                "branch-old-1"
+              ],
+              "records": {
+                "branch-lib": {
+                  "archive": "branch-lib-1",
+                  "status": "Installed"
+                },
+                "branch-monitor": {
+                  "archive": "branch-monitor-1",
+                  "status": "Installed"
+                },
+                "branch-relay": {
+                  "archive": "branch-old-1",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/usr/lib/branch/base.txt": "shared library\n",
+                "/usr/bin/branch-monitor": "monitor payload\n",
+                "/usr/bin/branch-relay": "relay payload 1.0\n",
+                "/etc/branch/relay.conf": "mode=site-custom\n",
+                "/work/branch-notes.txt": "Keep the local rollout notes.\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": "branch-dashboard",
+              "constraint": null
+            },
+            {
+              "kind": "Installed",
+              "package": "branch-relay",
+              "constraint": {
+                "relation": "Ge",
+                "version": "2.0"
+              }
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "branch-dashboard"
+            },
+            {
+              "kind": "ConflictsSatisfied"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "branch-monitor"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "branch-lib"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/branch-monitor"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/lib/branch/base.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/etc/branch/relay.conf"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/work/branch-notes.txt"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "branch-relay"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "apt-get -y install branch-relay",
+        "apt-get -y install branch-dashboard"
+      ],
+      "debian_packages_teaching": {
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "studio-current",
+              "archives": {
+                "studio-lib-1": {
+                  "name": "studio-lib",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/studio/base.txt": {
+                      "contents": "shared library\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "studio-monitor-1": {
+                  "name": "studio-monitor",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "studio-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/studio-monitor": {
+                      "contents": "monitor payload\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "studio-old-1": {
+                  "name": "studio-relay",
+                  "version": "2.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "studio-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/studio-relay": {
+                      "contents": "relay payload 2.0\n",
+                      "conffile": false
+                    },
+                    "/etc/studio/relay.conf": {
+                      "contents": "mode=steady\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "studio-old-2": {
+                  "name": "studio-relay",
+                  "version": "3.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "studio-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/studio-relay": {
+                      "contents": "relay payload 3.0\n",
+                      "conffile": false
+                    },
+                    "/etc/studio/relay.conf": {
+                      "contents": "mode=steady\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "studio-new-1": {
+                  "name": "studio-dashboard",
+                  "version": "1.0",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "studio-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/studio-dashboard": {
+                      "contents": "requested application payload\n",
+                      "conffile": false
+                    }
+                  },
+                  "conflicts": [
+                    {
+                      "name": "studio-relay",
+                      "constraint": {
+                        "relation": "Lt",
+                        "version": "3.0"
+                      }
+                    }
+                  ]
+                }
+              },
+              "publications": {
+                "studio-current": {
+                  "candidates": {
+                    "studio-lib": "studio-lib-1",
+                    "studio-monitor": "studio-monitor-1",
+                    "studio-relay": "studio-old-2",
+                    "studio-dashboard": "studio-new-1"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/work/studio-notes.txt"
+              ]
+            },
+            "runtime": {
+              "cached": "studio-current",
+              "local_archives": [
+                "studio-lib-1",
+                "studio-monitor-1",
+                "studio-old-1"
+              ],
+              "records": {
+                "studio-lib": {
+                  "archive": "studio-lib-1",
+                  "status": "Installed"
+                },
+                "studio-monitor": {
+                  "archive": "studio-monitor-1",
+                  "status": "Installed"
+                },
+                "studio-relay": {
+                  "archive": "studio-old-1",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/usr/lib/studio/base.txt": "shared library\n",
+                "/usr/bin/studio-monitor": "monitor payload\n",
+                "/usr/bin/studio-relay": "relay payload 2.0\n",
+                "/etc/studio/relay.conf": "mode=site-custom\n",
+                "/work/studio-notes.txt": "Keep the local rollout notes.\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": "studio-dashboard",
+              "constraint": null
+            },
+            {
+              "kind": "Installed",
+              "package": "studio-relay",
+              "constraint": {
+                "relation": "Ge",
+                "version": "3.0"
+              }
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "studio-dashboard"
+            },
+            {
+              "kind": "ConflictsSatisfied"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "studio-monitor"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "studio-lib"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/studio-monitor"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/lib/studio/base.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/etc/studio/relay.conf"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/work/studio-notes.txt"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "studio-relay"
+            }
+          ]
+        },
+        "prerequisite_note": "Complete Debian package administration first: installed records, cached metadata, dependencies and remove versus purge. This lesson adds explicit incompatibility metadata.",
+        "concepts": [
+          {
+            "title": "An incompatibility can exist even when files have different names",
+            "text": "A package is a named bundle of program files and metadata. Conflicts is metadata saying that two named packages must not be installed together. It is different from a file collision, where two packages claim the same path. These examples use separate file paths: inspect the relationship rather than deleting arbitrary files."
+          },
+          {
+            "title": "Read available metadata and installed state separately",
+            "text": "apt-cache show studio-dashboard displays the one cached candidate in this simulator. Package names identify the software; Version identifies its release; Conflicts names what cannot coexist. dpkg-query -W lists database records and their versions. A record can remain after its program files have been removed, so a listed version alone does not prove the program is installed. Check work also verifies the required installed or configuration-only state. A newer cached candidate is not an installed upgrade. These read-only commands do not change any package or complete the task."
+          },
+          {
+            "title": "Understand which versions are incompatible",
+            "text": "In the workshop, studio-dashboard declares Conflicts: studio-relay (<< 3.0). The << means strictly earlier than 3.0. The installed studio-relay version 2.0 is in that incompatible range, while the cached 3.0 version is outside it. Upgrade the relay first, then install the dashboard. Both must remain installed."
+          },
+          {
+            "title": "Choose an explicit repair in this bounded simulator",
+            "text": "The supported install command selects the cached candidate and its required dependencies. It can upgrade the relay without replacing a locally customized configuration when the supplied upstream configuration is unchanged, as it is here. Check versions, ordinary files and retained settings afterward. Real APT can propose more complex removals and ordering. This script-free simulator requires explicit choices and does not implement the full APT resolver, unpacking or maintainer scripts."
+          }
+        ],
+        "example_description": "The studio workstation has studio-relay version 2.0 installed, a customized /etc/studio/relay.conf, and working studio-monitor/studio-lib. Investigate why studio-dashboard cannot yet be installed. The table shows the worked reasoning; Try example starts from the unfinished sample so you can investigate and apply it yourself.",
+        "example_actions": [
+          {
+            "action": {
+              "kind": "Install",
+              "packages": [
+                {
+                  "name": "studio-relay",
+                  "version": null
+                }
+              ]
+            },
+            "command": "apt-get -y install studio-relay",
+            "explanation": "Select the compatible cached relay release; unchanged upstream configuration preserves the local customization."
+          },
+          {
+            "action": {
+              "kind": "Install",
+              "packages": [
+                {
+                  "name": "studio-dashboard",
+                  "version": null
+                }
+              ]
+            },
+            "command": "apt-get -y install studio-dashboard",
+            "explanation": "Install the requested application after resolving its incompatible installed counterpart."
+          }
+        ],
+        "try_change": {
+          "description": "After the worked repair, remove studio-relay and check: no conflict remains, but the task still requires that relay installed. Restore it from cached metadata.",
+          "actions": [
+            {
+              "kind": "Remove",
+              "name": "studio-relay"
+            }
+          ],
+          "expected": [
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Install",
+            "packages": [
+              {
+                "name": "studio-relay",
+                "version": null
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

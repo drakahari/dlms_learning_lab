@@ -1,0 +1,132 @@
+[
+  {
+    "id": "lpic1-retire-socket-activation",
+    "context": "Builds on identifying the owner of a listening endpoint. Here an active socket can start a service even after it has been stopped.",
+    "concepts": [
+      {
+        "title": "Read what is running now",
+        "text": "The service does the work. A socket unit waits for a request and can ask the service manager to start it. Use systemctl status on each supplied unit to distinguish a running service from a listening socket."
+      },
+      {
+        "title": "Distinguish stop from disable",
+        "text": "Stop ends current operation. Disable removes the instruction to start later. Use disable --now to do both for one supplied unit, or issue disable and stop separately."
+      },
+      {
+        "title": "Verify requests and preserve other work",
+        "text": "Test the obsolete listener before and after a simulated startup. Test the required status service separately, so a broad shutdown cannot satisfy the work order."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Stop the workshop relay",
+        "value": "systemctl stop boot-relay.service\nsystemctl is-active boot-relay.socket",
+        "explanation": "The relay stops. Its listening socket can still activate it."
+      },
+      {
+        "label": "Test the workshop relay again",
+        "value": "Test obsolete now → Socket started service",
+        "explanation": "The request proves why stopping the service alone is incomplete."
+      },
+      {
+        "label": "Retire both paths",
+        "value": "systemctl disable --now boot-relay.socket\nsystemctl disable --now boot-relay.service",
+        "explanation": "Both should be inactive now and disabled for a later startup. Confirm the status desk still responds."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Inspect the two units",
+        "action": "Type systemctl status boot-relay.service and then systemctl status boot-relay.socket. Run each command.",
+        "observe": "The service is running and the socket is listening. Their startup settings are given separately."
+      },
+      {
+        "title": "Expose and repair the restart path",
+        "action": "Run systemctl stop boot-relay.service. In the Obsolete service row, select Test now. Then disable and stop both units using disable --now on each.",
+        "observe": "The first request starts the relay from its socket. Subsequent requests should receive no response."
+      },
+      {
+        "title": "Check the next startup",
+        "action": "Test both endpoints in the current session and after simulated startup; then select Check workspace.",
+        "observe": "The retired listener stays closed. The required status desk continues to answer."
+      }
+    ],
+    "requirements": [
+      "Stop the obsolete import service and its activating socket.",
+      "Disable the service and socket for future startup. Confirm the obsolete endpoint cannot answer now or after simulated startup.",
+      "Keep the inventory-status service available now and after startup."
+    ],
+    "goal": "Close an unused listener and its startup routes while keeping the required status service available.",
+    "source": "scenarios/host-and-dns-security-lessons-v1.json",
+    "status": "updated",
+    "review": {
+      "introduction": "Explains the scope and a worked verification sequence.",
+      "example": "Uses distinct live practice observations and real native workspace operations.",
+      "assignment": "Grades current independent results, preserved work and expected negative cases."
+    }
+  },
+  {
+    "id": "lpic2-authenticated-zone-handover",
+    "context": "Builds on authoritative DNS lookups and secondary copies. A transfer copies zone data rather than returning just one lookup result.",
+    "concepts": [
+      {
+        "title": "Control who can copy a zone",
+        "text": "An address rule recognizes a source address. It does not establish that the sender and receiver share the intended credential. A DNS transaction signature (TSIG) lets the two servers authenticate their messages using a shared key."
+      },
+      {
+        "title": "Distinguish a name from a current key",
+        "text": "The two hosts must trust the same key identity. An obsolete key with the same name fails the supplied authentication check. Use key references already provided in the exercise. Do not enter key material."
+      },
+      {
+        "title": "Keep transfer and lookup policy separate",
+        "text": "A successful transfer refreshes the older secondary. Read the new serial and address. Verify unsigned or outdated requests receive no copy, and ordinary authoritative lookups still work."
+      }
+    ],
+    "worked": [
+      {
+        "label": "Read the inherited policy",
+        "value": "allow-transfer { 192.0.2.54; };",
+        "explanation": "The supplied unsigned client at the allowed address can receive zone data under this rule."
+      },
+      {
+        "label": "Authorize one verified reference",
+        "value": "allow-transfer { key workshop-transfer.example.; };",
+        "explanation": "Configure the secondary to use the matching current supplied key. A stale reference with the same name still fails authentication."
+      },
+      {
+        "label": "Compare real virtual observations",
+        "value": "Secondary serial 11 → 12\nUnsigned case · refused\nProtected zone · refused",
+        "explanation": "After the refresh, check that the published record reaches the intended secondary and the other rule still denies transfers."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Compare admission with authentication",
+        "action": "Select the unsigned request and outdated proof trials before editing.",
+        "observe": "The address-only rule can still disclose a copy to the unsigned requester. The supplied stale signed request fails authentication first."
+      },
+      {
+        "title": "Edit and apply the workshop policy",
+        "action": "Use allow-transfer with key workshop-transfer.example. in the served zone rule. Select the current version of that provisioned key for the secondary. Leave the protected zone alone and select Apply policy.",
+        "observe": "The currently applied policy now requires the verified key and the secondary uses the matching reference."
+      },
+      {
+        "title": "Refresh and verify both types of request",
+        "action": "Refresh the secondary and select Lookup secondary. Repeat the unsigned, outdated proof and protected-zone tests, then select Public lookup and Check workspace.",
+        "observe": "The secondary moves to serial 12. The rejected requests expose no copy and the public lookup still works."
+      }
+    ],
+    "requirements": [
+      "Apply a policy requiring an approved verified key for the served zone. Choose the matching current reference on the secondary.",
+      "Refresh the secondary to its current serial and record. Reject unsigned and outdated proof requests without revealing a copy.",
+      "Keep the unrelated zone closed for transfers and preserve ordinary authoritative lookup."
+    ],
+    "goal": "Update a secondary zone copy using a verified key while keeping unsigned copies and an unrelated zone protected.",
+    "source": "scenarios/host-and-dns-security-lessons-v1.json",
+    "status": "updated",
+    "review": {
+      "introduction": "Explains the scope and a worked verification sequence.",
+      "example": "Uses distinct live practice observations and real native workspace operations.",
+      "assignment": "Grades current independent results, preserved work and expected negative cases."
+    }
+  }
+]

@@ -259,6 +259,10 @@ impl LabApp {
                     match result {
                         Ok(safety) => {
                             self.invalidate_apache_presentation();
+                            self.environment_run = None;
+                            self.environment_suppressed.clear();
+                            self.editor_handover_run = None;
+                            self.editor_handover_suppressed.clear();
                             self.progress = candidate.progress;
                             self.completion_index.clear();
                             self.physical_presentation.reset_all();

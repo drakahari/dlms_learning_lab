@@ -28,6 +28,7 @@ enum Target {
     Scale,
     HeaderChoice(String),
     Goal,
+    GoalAnchor,
     Feedback,
     Notice,
     Files,
@@ -660,6 +661,7 @@ impl LabApp {
                 root,
             ),
             Target::Goal => (m.lvm.goal.unwrap(), root),
+            Target::GoalAnchor => (m.lvm.goal_anchor.expect("Actual lead Label response"), root),
             Target::Notice => (m.lvm.notice.expect("Actual command-error notice"), root),
             Target::Feedback => {
                 let r = m
@@ -1017,7 +1019,7 @@ impl LabApp {
             }
             Step::Geometry => {
                 let targets = [
-                    Target::Goal,
+                    Target::GoalAnchor,
                     Target::Field,
                     Target::Control("run"),
                     Target::Control("check"),
