@@ -2,6 +2,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import shutil
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -65,6 +66,63 @@ class Notices(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'empty notice output'):
                 notices.collect({'packages': []}, root)
             self.assertEqual(sentinel.read_text(), 'retain')
+
+
+class BackportNotices(unittest.TestCase):
+    def make_fixture(self, root):
+        shutil.copytree(ROOT / 'vendor', root / 'vendor')
+        (root / 'Cargo.lock').write_text('[[package]]\nname="objc2-foundation"\nversion="0.2.2"\n')
+        return {'name': 'objc2-foundation', 'version': '0.2.2', 'source': None, 'license': 'MIT',
+                'repository': 'https://github.com/madsmtm/objc2',
+                'manifest_path': str(root / 'vendor/objc2-foundation/Cargo.toml')}
+
+    def test_exact_backport_delivers_upstream_notice_original_patch_and_patched_source(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            package = self.make_fixture(root)
+            with patch.object(notices, 'ROOT', root), patch.object(notices, 'CACHE', root / 'cache'):
+                result = notices.collect({'packages': [package]}, root / 'out')
+            self.assertEqual(result['unresolved'], [])
+            self.assertNotIn(temporary, json.dumps(result))
+            record, = result['packages']
+            sources = [record['source_archive'], record['backport']['patch'], *record['notices'],
+                       *record['backport']['resulting_sources']]
+            for source in sources:
+                self.assertEqual(notices.digest(root / 'out' / source['file']), source['sha256'])
+            self.assertIn('vendored-sources/objc2-foundation-0.2.2/crate/src/thread.rs',
+                          [source['file'] for source in sources])
+
+    def test_tampering_is_rejected_even_outside_selected_target(self):
+        for name in ('objc2-foundation-0.2.2.crate', 'dispatch2.patch',
+                     'objc2-foundation/LICENSE.upstream.txt', 'objc2-foundation/PROVENANCE.json',
+                     'objc2-foundation/src/thread.rs', 'objc2-foundation/README.md',
+                     'objc2-foundation/unexpected'):
+            with self.subTest(path=name), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                package = self.make_fixture(root)
+                (root / 'vendor' / name).write_text('{"tampered": true}')
+                with patch.object(notices, 'ROOT', root), patch.object(notices, 'CACHE', root / 'cache'):
+                    with self.assertRaisesRegex(ValueError, 'Backport|Unexpected backport'):
+                        notices.collect({'packages': [package]}, root / 'out', dependencies=set())
+                self.assertEqual(list((root / 'out').iterdir()), [])
+
+    def test_symlink_and_unreviewed_local_dependency_rejected(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            package = self.make_fixture(root)
+            source = root / 'vendor/objc2-foundation/README.md'
+            outside = root / 'same-contents'
+            source.rename(outside)
+            with patch.object(notices, 'ROOT', root), patch.object(notices, 'CACHE', root / 'cache'):
+                with self.assertRaisesRegex(ValueError, 'Unreviewed local dependency'):
+                    notices.collect({'packages': [{**package, 'name': 'other'}]}, root / 'out',
+                                    dependencies=set())
+                try:
+                    source.symlink_to(outside)
+                except OSError as exc:
+                    self.skipTest(f'Host does not allow symlinks: {exc}')
+                with self.assertRaisesRegex(ValueError, 'Unexpected backport'):
+                    notices.collect({'packages': [package]}, root / 'out')
 
 
 if __name__ == '__main__':

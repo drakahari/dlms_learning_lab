@@ -1,0 +1,21 @@
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -91 +91,2 @@
+-version = "0.2.0"
++package = "dispatch2"
++version = "=0.3.1"
+@@ -92,0 +94,2 @@
++default-features = false
++features = ["std"]
+--- a/src/thread.rs
++++ b/src/thread.rs
+@@ -115 +115,2 @@
+-        dispatch::Queue::main().exec_sync(|| {
++        let mut ret = None;
++        dispatch::DispatchQueue::main().exec_sync(|| {
+@@ -119,2 +120,3 @@
+-            f(unsafe { MainThreadMarker::new_unchecked() })
+-        })
++            ret = Some(f(unsafe { MainThreadMarker::new_unchecked() }));
++        });
++        ret.expect("synchronous main queue must execute the closure")
