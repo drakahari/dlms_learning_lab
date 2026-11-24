@@ -1,7 +1,7 @@
 # DLMS Learning Lab
 
 A native, offline Rust desktop application for networking, Linux administration
-and scripting. The frozen source contains **543 authored labs in 224 units**.
+and scripting. Preview 1 contains **543 authored labs in 224 units**.
 The tracks include 129 CCNA, 158 LPIC-1, 176 LPIC-2 and 80 Bash/Shell labs.
 
 Labs use native workspaces and bounded simulation. Learners can read an
@@ -10,14 +10,15 @@ assignment. The catalog provides scoped practice across the four tracks.
 Certification coverage, novice and accessibility acceptance, and native
 platform verification have separate evidence.
 
-[543-lab source and packaging status](docs/RELEASE_SOURCE_543.md) ·
-[Learner guide](docs/LEARNER_GUIDE.md) · [Installation guide](docs/INSTALLATION.md)
+[Download Preview 1](https://github.com/drakahari/dlms_learning_lab/releases/tag/v0.1.0-preview.1) ·
+[Learner guide](docs/LEARNER_GUIDE.md) · [Historical build and installation notes](docs/INSTALLATION.md)
 
-## Open a candidate
+## Download Preview 1
 
-Use the candidate for your operating system and architecture once it has
-passed its native checks. The source preparation did not build a 543-lab
-package. The verified local Fedora review remains the 541-lab build.
+Get the package for Linux x86-64, Windows x64, or Apple Silicon Mac from the
+[Preview 1 release](https://github.com/drakahari/dlms_learning_lab/releases/tag/v0.1.0-preview.1).
+The release page lists checksums, startup instructions and test limits. Do not
+disable your operating system’s protections to open a preview package.
 
 The executable embeds its scenario pack and fonts; it can run outside this directory. No browser, web server, VM, container, account, profile path or infrastructure setup is required. A working graphical desktop and OpenGL driver are needed.
 
@@ -57,8 +58,8 @@ flows, three reliable-text flows,72 original IPv4/VLAN alignment captures and th
 focused feedback/alignment sweeps. All five supported text sizes (100/115/125/150/
 200%) are checked on actual wide/narrow light/dark NFS screens. Installer lifecycle,
 11 Wayland starts and original script/DHCP cold reopening pass separately.
-Full curriculum, Windows/macOS runtime, novice comprehension and physical-device/
-screen-reader acceptance remain open. No release is published.
+At that milestone, full curriculum, Windows/macOS runtime, novice comprehension and
+physical-device/screen-reader acceptance were still open. It was not a public release.
 
 The source now includes four [static-web configuration assignments](docs/STATIC_WEB_LESSONS.md)
 and three [reliable-text scripting assignments](docs/SHELL_SAFE_AUTOMATION_LESSONS.md).
@@ -159,9 +160,9 @@ See [architecture and authoring](docs/ARCHITECTURE.md), [content sources and sim
 
 ## Status and license
 
-Native Fedora development prototype. Windows and macOS use the same native Rust stack but have **not** been runtime accepted. No releases or distribution packages have been published. Local development installation candidates are prepared separately; see [installation and platform gates](docs/INSTALLATION.md).
+Preview 1 packages share the exact [tagged release source](https://github.com/drakahari/dlms_learning_lab/tree/v0.1.0-preview.1). The Linux package was built on Ubuntu 24.04 and tested in its userland and on Fedora Wayland. The Windows x64 and Apple Silicon packages passed scoped native launch and lab checks. See the release notes for persistence coverage, tested platforms, and signing limits.
 
-Original code and authored curriculum are licensed under [MIT](LICENSE), approved by the owner on 2026-10-22. Third-party licenses and attribution remain in [NOTICE](NOTICE) and the palette notices. Candidates include target-specific dependency/font/standard-library notices and original source archives. macOS notice provenance and actual cross-platform installation/runtime acceptance remain explicit gates.
+Original code and authored curriculum are licensed under [MIT](LICENSE), approved by the owner on 2026-10-22. Third-party licenses and attribution remain in [NOTICE](NOTICE) and the palette notices. Preview packages include target-specific dependency, font and standard-library notices and original source archives. The [543-lab preparation record](docs/RELEASE_SOURCE_543.md) records historical packaging gates; consult the release notes for current test scope.
 
 Four [counter and totals assignments](docs/SHELL_COUNTS.md) add sequential virtual-file input, stable record numbering, whole-cent costs, guarded division/remainder and a preflight multi-file count capstone. Small valid integer inputs and read-only active-source limitations are explicit; no arbitrary numeric validation or floating-point behavior is claimed.
 
